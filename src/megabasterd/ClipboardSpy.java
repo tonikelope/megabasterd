@@ -15,9 +15,9 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
     
     private static final int SLEEP = 50;
     
-    private final Clipboard _sysClip = getDefaultToolkit().getSystemClipboard();
+    private final Clipboard _sysClip;
 
-    private boolean _notified=false;
+    private boolean _notified;
     
     private final ConcurrentLinkedQueue<ClipboardChangeObserver> _observers;
     
@@ -28,6 +28,8 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
     
 
     public ClipboardSpy() {
+        _sysClip = getDefaultToolkit().getSystemClipboard();
+        _notified = false;
         _contents = null;
         _secure_notify_lock = new Object();
         _observers = new ConcurrentLinkedQueue<>();

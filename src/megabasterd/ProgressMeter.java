@@ -9,10 +9,11 @@ public final class ProgressMeter implements Runnable, SecureNotifiable
     private final Transference _transference;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
-    private boolean _notified=false;
+    private boolean _notified;
 
     ProgressMeter(Transference transference)
     {
+        _notified = false;
         _secure_notify_lock = new Object();
         _transference = transference;
         _exit = false;

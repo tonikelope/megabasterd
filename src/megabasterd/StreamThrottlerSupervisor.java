@@ -22,8 +22,10 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
     
     private final Object _secure_notify_lock;
     
-    private boolean _notified=false;
+    private boolean _notified;
+    
     public StreamThrottlerSupervisor(int maxBytesPerSecInput, int maxBytesPerSecOutput, int slice_size) {
+        _notified = false;
         
         _secure_notify_lock = new Object();
         

@@ -30,10 +30,11 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
     private final Upload _upload;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
-    private boolean _notified=false;
+    private boolean _notified;
 
     public ChunkUploader(int id, Upload upload)
     {
+        _notified = false;
         _secure_notify_lock = new Object();
         _id = id;
         _upload = upload;
