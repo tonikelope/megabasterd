@@ -42,7 +42,6 @@ import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.createAndRegisterFont;
 import static megabasterd.MiscTools.setNimbusLookAndFeel;
 import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.Transference.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 import static megabasterd.Transference.MAX_SIM_TRANSFERENCES;
@@ -488,9 +487,9 @@ public final class MainPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         
-        swingReflectionInvokeAndWait("setExtendedState", myframe, javax.swing.JFrame.NORMAL);
+        swingReflectionInvoke("setExtendedState", myframe, javax.swing.JFrame.NORMAL);
  
-        swingReflectionInvokeAndWait("setVisible", myframe, true);
+        swingReflectionInvoke("setVisible", myframe, true);
         
 
       }
@@ -518,9 +517,9 @@ public final class MainPanel {
     
         if(!(boolean)swingReflectionInvokeAndWaitForReturn("isVisible", myframe))
         {   
-            swingReflectionInvokeAndWait("setExtendedState", myframe, javax.swing.JFrame.NORMAL);
+            swingReflectionInvoke("setExtendedState", myframe, javax.swing.JFrame.NORMAL);
             
-            swingReflectionInvokeAndWait("setVisible", myframe, true);
+            swingReflectionInvoke("setVisible", myframe, true);
         } 
         else
         {
