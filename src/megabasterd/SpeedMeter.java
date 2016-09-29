@@ -14,11 +14,12 @@ public final class SpeedMeter implements Runnable, SecureNotifiable
     private volatile long _lastSpeed;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
-    private boolean _notified=false;
+    private boolean _notified;
     
   
     SpeedMeter(Transference transference, GlobalSpeedMeter gspeed)
     {
+        this._notified = false;
         _secure_notify_lock = new Object();
         _transference = transference;
         _progress = transference.getProgress();

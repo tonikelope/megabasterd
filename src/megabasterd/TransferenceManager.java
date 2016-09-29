@@ -22,9 +22,10 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     private final javax.swing.JPanel _scroll_panel;
     private final MainPanel _main_panel;
     private final Object _secure_notify_lock;
-    private boolean _notified=false;
+    private boolean _notified;
 
     public TransferenceManager(MainPanel main_panel, javax.swing.JPanel scroll_panel) {
+        this._notified = false;
         
         _main_panel = main_panel;
         _scroll_panel = scroll_panel;
