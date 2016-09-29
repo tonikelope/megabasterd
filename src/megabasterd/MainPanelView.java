@@ -62,7 +62,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         return close_all_finished_down_button;
     }
 
-    public JButton getClose_all_finished_up() {
+    public JButton getClose_all_finished_up_button() {
         return close_all_finished_up_button;
     }
 
@@ -118,6 +118,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public MainPanelView(MainPanel main_panel) {
         
+        System.out.println("Main panel view constructor!! ");
+        
         initComponents();
         
         _main_panel = main_panel;
@@ -154,7 +156,9 @@ public final class MainPanelView extends javax.swing.JFrame {
         swingReflectionInvoke("setForeground", global_speed_down_label, getMain_panel().isLimit_download_speed()?new Color(255,0,0):new Color(0,128,255));
         swingReflectionInvoke("setForeground", global_speed_up_label, getMain_panel().isLimit_upload_speed()?new Color(255,0,0):new Color(0,128,255));
         swingReflectionInvoke("setVisible", close_all_finished_down_button, false);
+        swingReflectionInvoke("setVisible", close_all_finished_up_button, false);
         swingReflectionInvoke("setVisible", pause_all_down_button, false);
+        swingReflectionInvoke("setVisible", pause_all_up_button, false);
         swingReflectionInvoke("setEnabled", clean_all_down_menu, false);
         swingReflectionInvoke("setEnabled", clean_all_up_menu, false);
         
@@ -647,13 +651,11 @@ public final class MainPanelView extends javax.swing.JFrame {
     }//GEN-LAST:event_settings_menuActionPerformed
 
     private void hide_tray_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hide_tray_menuActionPerformed
-        
-        
+  
         dispatchEvent(new WindowEvent(this, WINDOW_CLOSING));
     }//GEN-LAST:event_hide_tray_menuActionPerformed
 
     private void about_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_about_menuActionPerformed
-        
         
         AboutDialog dialog = new AboutDialog(this, true);
        
@@ -883,8 +885,8 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JLabel global_speed_up_label;
     private javax.swing.JMenu help_menu;
     private javax.swing.JMenuItem hide_tray_menu;
-    protected javax.swing.JPanel jPanel_scroll_down;
-    protected javax.swing.JPanel jPanel_scroll_up;
+    private javax.swing.JPanel jPanel_scroll_down;
+    private javax.swing.JPanel jPanel_scroll_up;
     private javax.swing.JScrollPane jScrollPane_down;
     private javax.swing.JScrollPane jScrollPane_up;
     private javax.swing.JPopupMenu.Separator jSeparator1;
@@ -895,7 +897,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JPopupMenu.Separator jSeparator6;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JLabel kiss_server_status;
-    protected javax.swing.JLabel logo_label;
+    private javax.swing.JLabel logo_label;
     private javax.swing.JMenuBar main_menubar;
     private javax.swing.JMenuItem new_download_menu;
     private javax.swing.JMenuItem new_stream_menu;

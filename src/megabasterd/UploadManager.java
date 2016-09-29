@@ -19,7 +19,7 @@ public final class UploadManager extends TransferenceManager {
     
     public UploadManager(MainPanel main_panel) {
         
-        super(main_panel, main_panel.getView().jPanel_scroll_up);
+        super(main_panel, main_panel.getView().getjPanel_scroll_up());
     }
     
     public void provision(Upload upload) 
@@ -157,7 +157,7 @@ public final class UploadManager extends TransferenceManager {
                 }
             }
             
-            checkButtonsAndMenus(getMain_panel().getView().getClose_all_finished_up(), getMain_panel().getView().getPause_all_up(), getMain_panel().getView().getNew_upload_menu(), getMain_panel().getView().getClean_all_up_menu());
+            checkButtonsAndMenus(getMain_panel().getView().getClose_all_finished_up_button(), getMain_panel().getView().getPause_all_up(), getMain_panel().getView().getNew_upload_menu(), getMain_panel().getView().getClean_all_up_menu());
 
             secureWait();
         }

@@ -80,7 +80,13 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     private final String _folder_link;
     private final boolean _use_slots;
     private final boolean _restart;
+    
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean use_slots, int slots, boolean restart) {
+        
+        _view = null; //Lazy init (getter!)
+        _speed_meter = null; //Lazy init (getter!)
+        _progress_meter = null; //Lazy init (getter!)
+        
         _saved_file_mac = new int[]{0, 0, 0, 0};
         _notified = false;
         _provision_ok = true;
@@ -101,9 +107,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         _partialProgressQueue = new ConcurrentLinkedQueue();
         _rejectedChunkIds = new ConcurrentLinkedQueue();
         _thread_pool = Executors.newCachedThreadPool();
-        _view = null; //Lazy init (getter!)
-        _speed_meter = null; //Lazy init (getter!)
-        _progress_meter = null; //Lazy init (getter!)
+        
     }
     
     public String getDir_name() {
@@ -473,7 +477,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
             getView().pause();
         }
         
-        _main_panel.getUpload_manager().secureNotify();
+        getMain_panel().getUpload_manager().secureNotify();
     }
 
     @Override
@@ -491,9 +495,9 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     @Override
     public void close() {
         
-        _main_panel.getUpload_manager().getTransference_remove_queue().add(this);
+        getMain_panel().getUpload_manager().getTransference_remove_queue().add(this);
        
-        _main_panel.getUpload_manager().secureNotify();
+        getMain_panel().getUpload_manager().secureNotify();
     }
 
     @Override
@@ -842,9 +846,9 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         
             getMain_panel().getUpload_manager().getTransference_finished_queue().add(this);
 
-            getMain_panel().getView().jPanel_scroll_up.remove(getView());
+            getMain_panel().getUpload_manager().getScroll_panel().remove(getView());
 
-            getMain_panel().getView().jPanel_scroll_up.add(getView());
+            getMain_panel().getUpload_manager().getScroll_panel().add(getView());
 
             getMain_panel().getUpload_manager().secureNotify();
         }
@@ -930,9 +934,9 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         
             getMain_panel().getUpload_manager().getTransference_finished_queue().add(this);
 
-            _main_panel.getView().jPanel_scroll_up.remove(getView());
+            getMain_panel().getUpload_manager().getScroll_panel().remove(getView());
 
-            _main_panel.getView().jPanel_scroll_up.add(getView());
+            getMain_panel().getUpload_manager().getScroll_panel().add(getView());
 
             getMain_panel().getUpload_manager().secureNotify();
      

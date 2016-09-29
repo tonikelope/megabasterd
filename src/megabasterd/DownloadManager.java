@@ -14,7 +14,7 @@ public final class DownloadManager extends TransferenceManager {
 
     public DownloadManager(MainPanel main_panel) {
         
-        super(main_panel, main_panel.getView().jPanel_scroll_down);
+        super(main_panel, main_panel.getView().getjPanel_scroll_down());
     }
 
     public void remove(Download download) {

@@ -4,7 +4,6 @@ import java.awt.AWTException;
 import static java.awt.EventQueue.invokeLater;
 import java.awt.Font;
 import static java.awt.Font.BOLD;
-import static java.awt.Frame.NORMAL;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -17,7 +16,6 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
 import java.io.IOException;
 import static java.lang.Integer.parseInt;
@@ -57,13 +55,14 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.0";
+    public static final String VERSION="1.1";
     public static final String LOCK_FILE="megabasterd.lock";
     public static final String USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:48.0) Gecko/20100101 Firefox/48.0";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
     public static final Font FONT_DEFAULT = createAndRegisterFont("Gochi.ttf");
+    
     public static void main(String args[]) {
         
         setNimbusLookAndFeel();
@@ -73,7 +72,6 @@ public final class MainPanel {
         invokeLater(new Runnable() {
             @Override
             public void run() {
-                
                 main_panel.getView().setVisible(true);
             }
         });
@@ -92,7 +90,10 @@ public final class MainPanel {
     private TrayIcon _trayicon;
     private final ClipboardSpy _clipboardspy;
     private KissVideoStreamServer _streamserver;
+    
     public MainPanel() {
+        
+        _view = null; //Lazy init (getter!)
         
         checkAppIsRunning();
         
@@ -111,8 +112,6 @@ public final class MainPanel {
         } catch (SQLException ex) {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
-        
-        _view = null; //Lazy init (getter!)
         
         loadUserSettings();
         
@@ -144,6 +143,7 @@ public final class MainPanel {
     }
     
     public MainPanelView getView() {
+        
         return _view == null?(_view = new MainPanelView(this)):_view;
     }
 
@@ -479,7 +479,7 @@ public final class MainPanel {
 
     menu.setFont(FONT_DEFAULT.deriveFont(BOLD, 18));
         
-    final javax.swing.JFrame myframe = getView();
+    final MainPanelView myframe = getView();
 
     MenuItem messageItem = new MenuItem("Restore window");
     
@@ -488,9 +488,10 @@ public final class MainPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         
-        swingReflectionInvokeAndWait("setExtendedState", myframe, NORMAL);
+        swingReflectionInvokeAndWait("setExtendedState", myframe, javax.swing.JFrame.NORMAL);
+ 
+        swingReflectionInvokeAndWait("setVisible", myframe, true);
         
-        swingReflectionInvoke("setVisible", myframe, true);
 
       }
     });
@@ -517,13 +518,13 @@ public final class MainPanel {
     
         if(!(boolean)swingReflectionInvokeAndWaitForReturn("isVisible", myframe))
         {   
-            swingReflectionInvokeAndWait("setExtendedState", myframe, NORMAL);
+            swingReflectionInvokeAndWait("setExtendedState", myframe, javax.swing.JFrame.NORMAL);
             
-            swingReflectionInvoke("setVisible", myframe, true);
+            swingReflectionInvokeAndWait("setVisible", myframe, true);
         } 
         else
         {
-            swingReflectionInvoke("dispatchEvent", myframe, new WindowEvent(myframe, WINDOW_CLOSING));
+            swingReflectionInvoke("dispatchEvent", myframe, new WindowEvent(myframe, WindowEvent.WINDOW_CLOSING));
             
         }
         

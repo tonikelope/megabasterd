@@ -97,6 +97,11 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     private long _last_chunk_id_dispatched;
     
     public Download(MainPanel main_panel, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
+        
+        _view = null; //Lazy init (getter!)
+        _speed_meter = null; //Lazy init (getter!)
+        _progress_meter = null; //Lazy init (getter!)
+        
         _paused_workers = 0;
         _last_chunk_id_dispatched = 0L;
         _status_error = false;
@@ -126,10 +131,6 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         _partialProgressQueue = new ConcurrentLinkedQueue();
         _rejectedChunkIds = new ConcurrentLinkedQueue();
         _thread_pool = newCachedThreadPool();
-        _view = null; //Lazy init (getter!)
-        _speed_meter = null; //Lazy init (getter!)
-        _progress_meter = null; //Lazy init (getter!)
-        
     }
 
     
