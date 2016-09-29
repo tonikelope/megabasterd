@@ -1,0 +1,969 @@
+package megabasterd;
+
+import java.awt.Color;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MiscTools.BASE642Bin;
+import static megabasterd.MiscTools.Bin2BASE64;
+import static megabasterd.MiscTools.HashString;
+import static megabasterd.MiscTools.bin2i32a;
+import static megabasterd.MiscTools.formatBytes;
+import static megabasterd.MiscTools.i32a2bin;
+import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
+import static megabasterd.MiscTools.truncateText;
+
+/**
+ *
+ * @author tonikelope
+ */
+public final class Upload implements Transference, Runnable, SecureNotifiable {
+
+    public static final boolean USE_SLOTS_DEFAULT=true;
+    public static final int WORKERS_DEFAULT = 2;
+    
+    private final MainPanel _main_panel;
+    private UploadView _view;
+    private String _exit_message;
+    private String _dir_name;
+    private volatile boolean _exit;
+    private final int _slots;
+    private final Object _secure_notify_lock;
+    private byte[] _byte_file_key;
+    private String _fatal_error;
+    private volatile long _progress;
+    private byte[] _byte_file_iv;
+    private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
+    private long _last_chunk_id_dispatched;
+    protected final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
+    private final ExecutorService _thread_pool;
+    private volatile int[] _file_meta_mac;
+    private  boolean _finishing_upload;
+    private String _fid;
+    private SpeedMeter _speed_meter;
+    private ProgressMeter _progress_meter;
+    private boolean _notified;
+    private String _completion_handle;
+    private int _paused_workers;
+    private Double _progress_bar_rate;
+    private volatile boolean _pause;
+    protected final ArrayList<ChunkUploader> _chunkworkers;
+    private long _file_size;
+    private UploadMACGenerator _mac_generator;
+    private boolean _create_dir;
+    private boolean _provision_ok;
+    private boolean _status_error;
+    private String _file_link;
+    private int[] _saved_file_mac;
+    private final MegaAPI _ma;
+    private final String _file_name;
+    private final String _parent_node;
+    private int[] _ul_key;
+    private String _ul_url;
+    private final String _root_node;
+    private final byte[] _share_key;
+    private final String _folder_link;
+    private final boolean _use_slots;
+    private final boolean _restart;
+    public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean use_slots, int slots, boolean restart) {
+        _saved_file_mac = new int[]{0, 0, 0, 0};
+        _notified = false;
+        _provision_ok = true;
+        _main_panel = main_panel;
+        _ma = ma;
+        _file_name = filename;
+        _parent_node = parent_node;
+        _ul_key = ul_key;
+        _ul_url = ul_url;
+        _root_node = root_node;
+        _share_key = share_key;
+        _folder_link = folder_link;
+        _use_slots = use_slots;
+        _slots = slots;
+        _restart = restart;
+        _secure_notify_lock = new Object();
+        _chunkworkers = new ArrayList();
+        _partialProgressQueue = new ConcurrentLinkedQueue();
+        _rejectedChunkIds = new ConcurrentLinkedQueue();
+        _thread_pool = Executors.newCachedThreadPool();
+        _view = null; //Lazy init (getter!)
+        _speed_meter = null; //Lazy init (getter!)
+        _progress_meter = null; //Lazy init (getter!)
+    }
+    
+    public String getDir_name() {
+        return _dir_name;
+    }
+
+    public boolean isExit() {
+        return _exit;
+    }
+
+    public int getSlots() {
+        return _slots;
+    }
+
+    public Object getSecure_notify_lock() {
+        return _secure_notify_lock;
+    }
+
+    public byte[] getByte_file_key() {
+        return _byte_file_key;
+    }
+
+    public String getFatal_error() {
+        return _fatal_error;
+    }
+
+    @Override
+    public long getProgress() {
+        return _progress;
+    }
+
+    public byte[] getByte_file_iv() {
+        return _byte_file_iv;
+    }
+
+    public ConcurrentLinkedQueue<Long> getRejectedChunkIds() {
+        return _rejectedChunkIds;
+    }
+
+    public long getLast_chunk_id_dispatched() {
+        return _last_chunk_id_dispatched;
+    }
+
+    public ConcurrentLinkedQueue<Integer> getPartialProgressQueue() {
+        return _partialProgressQueue;
+    }
+
+    public ExecutorService getThread_pool() {
+        return _thread_pool;
+    }
+
+    public int[] getFile_meta_mac() {
+        return _file_meta_mac;
+    }
+
+    public boolean isFinishing_upload() {
+        return _finishing_upload;
+    }
+
+    public String getFid() {
+        return _fid;
+    }
+
+    public boolean isNotified() {
+        return _notified;
+    }
+
+    public String getCompletion_handle() {
+        return _completion_handle;
+    }
+
+    public int getPaused_workers() {
+        return _paused_workers;
+    }
+
+    public Double getProgress_bar_rate() {
+        return _progress_bar_rate;
+    }
+
+    public boolean isPause() {
+        return _pause;
+    }
+
+    public ArrayList<ChunkUploader> getChunkworkers() {
+        return _chunkworkers;
+    }
+
+    @Override
+    public long getFile_size() {
+        return _file_size;
+    }
+
+    public UploadMACGenerator getMac_generator() {
+        return _mac_generator;
+    }
+
+    public boolean isCreate_dir() {
+        return _create_dir;
+    }
+
+    public boolean isProvision_ok() {
+        return _provision_ok;
+    }
+
+    public boolean isStatus_error() {
+        return _status_error;
+    }
+
+    public String getFile_link() {
+        return _file_link;
+    }
+
+    public int[] getSaved_file_mac() {
+        return _saved_file_mac;
+    }
+
+    public MegaAPI getMa() {
+        return _ma;
+    }
+
+    @Override
+    public String getFile_name() {
+        return _file_name;
+    }
+
+    public String getParent_node() {
+        return _parent_node;
+    }
+
+    public int[] getUl_key() {
+        return _ul_key;
+    }
+
+    public String getUl_url() {
+        return _ul_url;
+    }
+
+    public String getRoot_node() {
+        return _root_node;
+    }
+
+    public byte[] getShare_key() {
+        return _share_key;
+    }
+
+    public String getFolder_link() {
+        return _folder_link;
+    }
+
+    public boolean isUse_slots() {
+        return _use_slots;
+    }
+
+    public boolean isRestart() {
+        return _restart;
+    }
+
+    public void setCompletion_handle(String completion_handle) {
+        _completion_handle = completion_handle;
+    }
+
+    public void setFinishing_upload(boolean finishing_upload) {
+        _finishing_upload = finishing_upload;
+    }
+
+    public void setFile_meta_mac(int[] file_meta_mac) {
+        _file_meta_mac = file_meta_mac;
+    }
+
+    public void setPaused_workers(int paused_workers) {
+        _paused_workers = paused_workers;
+    }
+    
+    @Override
+    public ProgressMeter getProgress_meter() {
+        return _progress_meter == null?(_progress_meter = new ProgressMeter(this)):_progress_meter;
+    }
+    
+
+    @Override
+    public SpeedMeter getSpeed_meter() {
+        return _speed_meter == null?(_speed_meter = new SpeedMeter(this, getMain_panel().getGlobal_up_speed())):_speed_meter;
+    }
+    
+    @Override
+    public UploadView getView() {
+        return _view == null?(_view = new UploadView(this)):_view;
+    }
+
+    @Override
+    public void secureNotify()
+    {
+        synchronized(_secure_notify_lock) {
+      
+            _notified = true;
+            
+            _secure_notify_lock.notify();
+        }
+    }
+    
+    @Override
+    public void secureWait() {
+        
+        synchronized(_secure_notify_lock)
+        {
+            while(!_notified) {
+
+                try {
+                    _secure_notify_lock.wait();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            
+            _notified = false;
+        }
+    }
+    
+    @Override
+    public void secureNotifyAll() {
+        
+        synchronized(_secure_notify_lock) {
+            
+            _notified = true;
+      
+            _secure_notify_lock.notifyAll();
+        }
+    }
+    
+    
+     public void provisionIt() {
+        
+        printStatus("Provisioning upload, please wait...");
+        
+        String exit_msg=null;
+
+        File the_file = new File(_file_name);
+        
+        if(!the_file.exists()) {
+            
+            _provision_ok=false;
+
+            exit_msg = "ERROR: FILE NOT FOUND -> "+_file_name;
+
+        } else {
+            
+            try {
+                _file_size = the_file.length();
+                
+                File temp_file;
+
+                temp_file = new File("."+HashString("SHA-1", _file_name));
+     
+                if(_ul_key!=null && temp_file.exists() && temp_file.length()>0) {
+                    
+                    FileInputStream fis = new FileInputStream(temp_file);
+
+                    byte[] data = new byte[(int)temp_file.length()];
+
+                    fis.read(data);
+
+                    String[] fdata = new String(data).split("\\|");
+
+                    _last_chunk_id_dispatched = Long.parseLong(fdata[0]);
+
+                    _progress = Long.parseLong(fdata[1]);
+
+                    _saved_file_mac = bin2i32a(BASE642Bin(fdata[2])); 
+                    
+                } else if(temp_file.exists()) {
+                    
+                    temp_file.delete();
+                }
+                
+                if(_ul_key == null || _restart) {
+                    
+                    try {
+                        
+                        _ul_key = _ma.genUploadKey();
+                        
+                        DBTools.insertUpload(_file_name, _ma.getEmail(), _parent_node, Bin2BASE64(i32a2bin(_ul_key)), _root_node, Bin2BASE64(_share_key), _folder_link);
+                        
+                    } catch (IOException | SQLException ex) {
+                        
+                        _provision_ok=false;
+                        
+                        exit_msg = ex.getMessage();
+                    }
+                }   
+            
+            } catch (Exception ex) {
+                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        if(!_provision_ok) {
+            
+            getView().hideAllExceptStatus();
+            
+            if(_fatal_error != null) {
+                
+                printStatusError(_fatal_error);
+                
+            }else if(exit_msg!=null) {
+                
+                printStatusError(exit_msg);
+            }
+            
+            swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
+
+        } else {
+
+            printStatus("Waiting to start...");
+            
+            swingReflectionInvoke("setVisible", getView().getFile_name_label(), true);
+            
+            swingReflectionInvoke("setText", getView().getFile_name_label(), _file_name);
+            
+            swingReflectionInvoke("setText", getView().getFile_name_label(), truncateText(_file_name, 100));
+            
+            swingReflectionInvoke("setToolTipText", getView().getFile_name_label(), _file_name);
+           
+            swingReflectionInvoke("setVisible", getView().getFile_size_label(), true);
+            
+            swingReflectionInvoke("setText", getView().getFile_size_label(), formatBytes(_file_size));
+        }
+        
+        swingReflectionInvoke("setVisible", getView().getClose_button(), true);
+    }
+
+
+    @Override
+    public void start() {
+ 
+        THREAD_POOL.execute(this);
+    }
+
+    @Override
+    public void stop() {
+        if(!isExit()) {
+            stopUploader();
+        }
+    }
+
+    @Override
+    public void pause() {
+        
+        if(isPaused()) {
+
+            setPause(false);
+            
+            getSpeed_meter().secureNotify();
+
+            for(ChunkUploader uploader:getChunkworkers()) {
+                
+                uploader.secureNotify();
+            }
+
+            setPaused_workers(0);
+            
+            getView().resume();
+
+        } else {
+
+            setPause(true);
+            
+            getView().pause();
+        }
+        
+        _main_panel.getUpload_manager().secureNotify();
+    }
+
+    @Override
+    public void restart() {
+        
+        Upload new_upload = new Upload(getMain_panel(), getMa(), getFile_name(), getParent_node(), getUl_key(), getUl_url(), getRoot_node(), getShare_key(), getFolder_link(), getMain_panel().isUse_slots_up(), getMain_panel().getDefault_slots_up(), true);
+     
+        getMain_panel().getUpload_manager().getTransference_remove_queue().add(this);
+        
+        getMain_panel().getUpload_manager().getTransference_provision_queue().add(new_upload);
+        
+        getMain_panel().getUpload_manager().secureNotify();
+    }
+
+    @Override
+    public void close() {
+        
+        _main_panel.getUpload_manager().getTransference_remove_queue().add(this);
+       
+        _main_panel.getUpload_manager().secureNotify();
+    }
+
+    @Override
+    public boolean isPaused() {
+        return isPause();
+    }
+
+    @Override
+    public boolean isStopped() {
+       return isExit();
+    }
+
+    @Override
+    public void checkSlotsAndWorkers() {
+        if(!isExit()) {
+
+            int sl = (int)swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner());
+
+            int cworkers = getChunkworkers().size();
+
+            if(sl != cworkers) {
+
+                if(sl > cworkers) {
+
+                    startSlot();
+
+                } else {
+
+                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+
+                    swingReflectionInvoke("setText", getView().getSlot_status_label(), "Removing slot...");
+
+                    stopLastStartedSlot();
+                }
+            }
+        }
+    }
+
+    @Override
+    public ConcurrentLinkedQueue<Integer> getPartialProgress() {
+        return getPartialProgressQueue();
+    }
+
+    @Override
+    public void updateProgress(int reads)
+    {
+        _progress+=reads;
+        
+        getView().updateProgressBar(_progress, _progress_bar_rate);
+    }
+
+    @Override
+    public MainPanel getMain_panel() {
+        return _main_panel;
+    }
+
+    public synchronized void startSlot()
+    {
+        int chunkthiser_id = _chunkworkers.size()+1;
+
+        ChunkUploader c = new ChunkUploader(chunkthiser_id, this);
+
+        _chunkworkers.add(c);
+
+        try {
+            
+            _thread_pool.execute(c);
+            
+        }catch(java.util.concurrent.RejectedExecutionException e){System.out.println(e.getMessage());}
+    }
+
+    public void setPause(boolean pause) {
+        _pause = pause;
+    }
+    
+    public synchronized void stopLastStartedSlot()
+    {
+        if(!_chunkworkers.isEmpty()) {
+            
+            ChunkUploader chunkuploader = _chunkworkers.remove(_chunkworkers.size()-1);
+            chunkuploader.setExit(true);
+        }
+    }
+    
+    public void rejectChunkId(long chunk_id)
+    {
+        _rejectedChunkIds.add(chunk_id);
+    }
+    
+    @Override
+    public void run() {
+        
+        System.out.println("Uploader hello!");
+
+        swingReflectionInvoke("setVisible", getView().getClose_button(), false);
+        
+        printStatus("Starting upload, please wait...");
+        
+        if(!_exit)       
+        {
+            if(_ul_url == null) {
+                
+                _ul_url = _ma.initUploadFile(_file_name);
+
+                try {
+                
+                    DBTools.updateUploadUrl(_file_name, _ma.getEmail(), _ul_url);
+                }
+                catch (SQLException ex) {
+                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+     
+            int[] file_iv = {_ul_key[4], _ul_key[5], 0, 0};
+
+            _byte_file_key = i32a2bin(Arrays.copyOfRange(_ul_key, 0, 4));
+
+            _byte_file_iv = i32a2bin(file_iv);
+
+            if(!_exit)
+            {
+
+                swingReflectionInvoke("setMinimum", getView().getProgress_pbar(), 0);
+                swingReflectionInvoke("setMaximum", getView().getProgress_pbar(), Integer.MAX_VALUE);
+                swingReflectionInvoke("setStringPainted", getView().getProgress_pbar(), true);
+                
+                if(_file_size > 0) {
+                    
+                    _progress_bar_rate = Integer.MAX_VALUE/(double)_file_size;
+
+                    swingReflectionInvoke("setValue", getView().getProgress_pbar(), 0);
+                    
+                } else {
+                    
+                    swingReflectionInvoke("setValue", getView().getProgress_pbar(), Integer.MAX_VALUE);
+                }
+
+                _thread_pool.execute(getProgress_meter());
+                
+                _thread_pool.execute(getSpeed_meter());
+                
+                getMain_panel().getGlobal_up_speed().attachSpeedMeter(getSpeed_meter());
+                
+                getMain_panel().getGlobal_up_speed().secureNotify();
+                
+                _mac_generator = new UploadMACGenerator(this);
+                    
+                _thread_pool.execute(_mac_generator);
+                    
+                if(_use_slots) {
+                    
+                    for(int t=1; t <= _slots; t++)
+                    {
+                        ChunkUploader c = new ChunkUploader(t, this);
+                        
+                        _chunkworkers.add(c);
+                        
+                        _thread_pool.execute(c);
+                    }
+                   
+                    swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
+                    
+                    swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
+                    
+                } else {
+                    
+                    ChunkUploader c = new ChunkUploader(1, this);
+
+                    _chunkworkers.add(c);
+                    
+                    _thread_pool.execute(c);
+                    
+                    swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
+                    
+                    swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+                }
+                
+                printStatus("Uploading file to mega ("+_ma.getEmail()+") ...");
+                
+                getMain_panel().getUpload_manager().secureNotify();
+                
+                swingReflectionInvoke("setVisible", getView().getPause_button(), true);
+                
+                swingReflectionInvoke("setVisible", getView().getProgress_pbar(), true);
+                
+                secureWait();
+                
+                System.out.println("Chunkuploaders finished!");
+                
+                getSpeed_meter().setExit(true);
+            
+                getSpeed_meter().secureNotify();
+            
+                getProgress_meter().setExit(true);
+            
+                getProgress_meter().secureNotify();
+            
+                _thread_pool.shutdown();
+            
+                while(!_thread_pool.isTerminated())
+                {
+                    try {
+                        
+                        _thread_pool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
+                        
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+                
+                System.out.println("Uploader thread pool finished!");
+
+                getMain_panel().getGlobal_up_speed().detachSpeedMeter(getSpeed_meter());
+                
+                getMain_panel().getGlobal_up_speed().secureNotify();
+                
+                swingReflectionInvoke("setVisible", getView().getSpeed_label(), false);
+                swingReflectionInvoke("setVisible", getView().getRemtime_label(), false);
+                
+                swingReflectionInvoke("setVisible", getView().getPause_button(), false);
+                swingReflectionInvoke("setVisible", getView().getStop_button(), false);
+                
+                swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
+                swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+                
+                getMain_panel().getUpload_manager().secureNotify();
+                
+                if(!_exit) {
+                    
+                    if(_completion_handle != null) {
+                        
+                        File f = new File(_file_name);
+                     
+                        HashMap<String, Object> upload_res=null;
+                        
+                        int[] ul_key = _ul_key;
+                        
+                        int[] node_key = {ul_key[0] ^ ul_key[4], ul_key[1] ^ ul_key[5], ul_key[2] ^ _file_meta_mac[0], ul_key[3] ^ _file_meta_mac[1], ul_key[4], ul_key[5], _file_meta_mac[0], _file_meta_mac[1]};
+                        
+                        upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handle, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
+                    
+                        System.out.println(upload_res);
+                        
+                        List files = (List)upload_res.get("f");
+                        
+                        _fid = (String)((Map<String,Object>)files.get(0)).get("h");
+                        
+                        _exit_message = "File successfully uploaded! ("+_ma.getEmail()+")";
+                        
+                        try {
+                            
+                            _file_link = _ma.getPublicFileLink(_fid, i32a2bin(node_key));
+                            
+                            swingReflectionInvoke("setEnabled", getView().getFile_link_button(), true);
+                            
+                        } catch (Exception ex) {
+                            Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        
+                        printStatusOK(_exit_message);
+
+                    } else {
+                        
+                        getView().hideAllExceptStatus();
+                            
+                        _exit_message = "Upload failed!";
+
+                        printStatusError(_exit_message);
+
+                        _status_error = true;
+                    }
+
+                } else if(_fatal_error != null) {
+                    
+                    getView().hideAllExceptStatus();
+
+                    printStatusError(_fatal_error);
+
+                    _status_error = true;
+                    
+                } else {
+                    
+                    getView().hideAllExceptStatus();
+                            
+                    _exit_message = "Upload CANCELED!";
+
+                    printStatusError(_exit_message);
+
+                    _status_error = true;
+                }
+
+            }
+            else if(_fatal_error != null)
+            {
+                getView().hideAllExceptStatus();
+                     
+                printStatusError(_fatal_error);
+                            
+                _status_error = true;
+            }
+            else
+            {
+                getView().hideAllExceptStatus();
+                
+                _exit_message = "Upload CANCELED!";
+                
+                printStatusError(_exit_message);
+                
+                _status_error = true;
+
+                
+            }
+               
+        }
+        else if(_fatal_error != null)
+        {
+            getView().hideAllExceptStatus();
+            
+            _exit_message = _fatal_error;
+            
+            printStatusError(_fatal_error);
+            
+            _status_error = true;
+        }
+        else
+        {
+            getView().hideAllExceptStatus();
+            
+            _exit_message = "Upload CANCELED!";
+            
+            printStatusError(_exit_message);
+            
+            _status_error = true;
+            
+        }
+        
+        if(!_exit) {
+            
+            try {
+                DBTools.deleteUpload(_file_name, _ma.getEmail());
+            } catch (SQLException ex) {
+                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            getMain_panel().getUpload_manager().getTransference_running_list().remove(this);
+        
+            getMain_panel().getUpload_manager().getTransference_finished_queue().add(this);
+
+            getMain_panel().getView().jPanel_scroll_up.remove(getView());
+
+            getMain_panel().getView().jPanel_scroll_up.add(getView());
+
+            getMain_panel().getUpload_manager().secureNotify();
+        }
+ 
+        swingReflectionInvoke("setVisible", getView().getClose_button(), true);
+        
+        if(_status_error) {
+            swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
+        }
+        
+        System.out.println("Uploader BYE BYE");
+    }
+    
+    public synchronized boolean chunkUploadersRunning()
+    {
+        return !_chunkworkers.isEmpty();
+    }
+    
+    public synchronized void pause_worker() {
+        
+        if(++_paused_workers >= _chunkworkers.size() && !_exit) {
+            
+            printStatus("Upload paused!");
+            swingReflectionInvoke("setText", getView().getPause_button(), "RESUME UPLOAD");
+            swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
+        }
+    }
+    
+    public synchronized void stopThisSlot(ChunkUploader chunkuploader)
+    {
+        if(_chunkworkers.remove(chunkuploader))
+        {
+            swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int)swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner())-1);
+            
+            if(!_exit && _pause && _paused_workers == _chunkworkers.size()) {
+                
+                printStatus("Upload paused!");
+                swingReflectionInvoke("setText", getView().getPause_button(), "RESUME UPLOAD");
+                swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
+            } 
+        }
+    }
+    
+    public synchronized void emergencyStopUploader(String reason)
+    {
+        if(_fatal_error == null)
+        {
+            _fatal_error = reason!=null?reason:"FATAL ERROR!";
+            
+            stopUploader();
+        }
+    }
+    
+    public synchronized long nextChunkId()
+    {
+        Long next_id;
+        
+        if((next_id=_rejectedChunkIds.poll()) != null) {
+            return next_id;
+        }
+        else {
+            return ++_last_chunk_id_dispatched;
+        }
+    }
+
+    public void setExit(boolean exit) {
+        _exit = exit;
+    }
+    
+    public synchronized void stopUploader()
+    {
+        if(!_exit)
+        {
+            setExit(true);
+            
+            try {
+                DBTools.deleteUpload(_file_name, _ma.getEmail());
+            } catch (SQLException ex) {
+                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            getMain_panel().getUpload_manager().getTransference_running_list().remove(this);
+        
+            getMain_panel().getUpload_manager().getTransference_finished_queue().add(this);
+
+            _main_panel.getView().jPanel_scroll_up.remove(getView());
+
+            _main_panel.getView().jPanel_scroll_up.add(getView());
+
+            getMain_panel().getUpload_manager().secureNotify();
+     
+            getView().stop();
+            
+            for(ChunkUploader uploader:_chunkworkers) {
+                
+                uploader.secureNotify();
+            }
+        }
+    }
+    
+    
+    protected void printStatusError(String message)
+    {
+        swingReflectionInvoke("setForeground", getView().getStatus_label(), Color.red);
+        swingReflectionInvoke("setText", getView().getStatus_label(), message);
+    }
+    
+    protected void printStatusOK(String message)
+    {        
+        swingReflectionInvoke("setForeground", getView().getStatus_label(), new Color(0,128,0));
+        swingReflectionInvoke("setText", getView().getStatus_label(), message);
+    }
+    
+    protected void printStatus(String message)
+    {
+        swingReflectionInvoke("setForeground", getView().getStatus_label(), Color.BLACK);
+        swingReflectionInvoke("setText", getView().getStatus_label(), message);
+    }
+
+   
+    
+}
