@@ -19,7 +19,7 @@ public final class SpeedMeter implements Runnable, SecureNotifiable
   
     SpeedMeter(Transference transference, GlobalSpeedMeter gspeed)
     {
-        this._notified = false;
+        _notified = false;
         _secure_notify_lock = new Object();
         _transference = transference;
         _progress = transference.getProgress();

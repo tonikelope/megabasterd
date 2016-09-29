@@ -42,16 +42,16 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
         return _maxBytesPerSecInput;
     }
 
-    public void setMaxBytesPerSecInput(int _maxBytesPerSecInput) {
-        this._maxBytesPerSecInput = _maxBytesPerSecInput;
+    public void setMaxBytesPerSecInput(int maxBytesPerSecInput) {
+        _maxBytesPerSecInput = maxBytesPerSecInput;
     }
 
     public int getMaxBytesPerSecOutput() {
         return _maxBytesPerSecOutput;
     }
 
-    public void setMaxBytesPerSecOutput(int _maxBytesPerSecOutput) {
-        this._maxBytesPerSecOutput = _maxBytesPerSecOutput;
+    public void setMaxBytesPerSecOutput(int maxBytesPerSecOutput) {
+        _maxBytesPerSecOutput = maxBytesPerSecOutput;
     }
 
     public ConcurrentLinkedQueue<Integer> getInput_slice_queue() {

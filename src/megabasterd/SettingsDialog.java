@@ -125,8 +125,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
             } 
             
             
-            this.max_downloads_spinner.setModel(new SpinnerNumberModel(max_dl, 1, Download.MAX_SIM_TRANSFERENCES, 1));
-            ((JSpinner.DefaultEditor)this.max_downloads_spinner.getEditor()).getTextField().setEditable(false);
+            max_downloads_spinner.setModel(new SpinnerNumberModel(max_dl, 1, Download.MAX_SIM_TRANSFERENCES, 1));
+            ((JSpinner.DefaultEditor)max_downloads_spinner.getEditor()).getTextField().setEditable(false);
             
             
             String max_up = DBTools.selectSettingValueFromDB("max_uploads");
@@ -138,8 +138,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
             } 
             
             
-            this.max_uploads_spinner.setModel(new SpinnerNumberModel(max_ul, 1, Upload.MAX_SIM_TRANSFERENCES, 1));
-            ((JSpinner.DefaultEditor)this.max_uploads_spinner.getEditor()).getTextField().setEditable(false);
+            max_uploads_spinner.setModel(new SpinnerNumberModel(max_ul, 1, Upload.MAX_SIM_TRANSFERENCES, 1));
+            ((JSpinner.DefaultEditor)max_uploads_spinner.getEditor()).getTextField().setEditable(false);
             
             
             
