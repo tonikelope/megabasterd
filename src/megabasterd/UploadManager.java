@@ -189,7 +189,7 @@ public final class UploadManager extends TransferenceManager {
             
             checkButtonsAndMenus(getMain_panel().getView().getClose_all_finished_up_button(), getMain_panel().getView().getPause_all_up(), getMain_panel().getView().getClean_all_up_menu());
             
-            if(!this.getMain_panel().getView().isPre_processing_uploads()) {
+            if(!getMain_panel().getView().isPre_processing_uploads()) {
                 swingReflectionInvoke("setText", getMain_panel().getView().getStatus_up_label(), getStatus());
             }
         }

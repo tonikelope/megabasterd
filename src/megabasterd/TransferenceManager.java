@@ -16,7 +16,7 @@ import static java.util.logging.Logger.getLogger;
 abstract public class TransferenceManager implements Runnable, SecureNotifiable {
     
     private final ConcurrentLinkedQueue<Transference> _transference_provision_queue;
-    private final ConcurrentLinkedQueue<Transference> _transference_start_queue;
+    private final ConcurrentLinkedQueue<Transference> _transference_waitstart_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_remove_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_finished_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_running_list;
@@ -60,7 +60,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         _main_panel = main_panel;
         _scroll_panel = scroll_panel;
         _secure_notify_lock = new Object();
-        _transference_start_queue = new ConcurrentLinkedQueue();
+        _transference_waitstart_queue = new ConcurrentLinkedQueue();
         _transference_provision_queue = new ConcurrentLinkedQueue();
         _transference_remove_queue = new ConcurrentLinkedQueue();
         _transference_finished_queue = new ConcurrentLinkedQueue();
@@ -116,7 +116,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     }
 
     public ConcurrentLinkedQueue<Transference> getTransference_start_queue() {
-        return _transference_start_queue;
+        return _transference_waitstart_queue;
     }
 
     public ConcurrentLinkedQueue<Transference> getTransference_remove_queue() {
@@ -146,9 +146,9 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     
     public void closeAllWaiting() 
     {   
-        _transference_remove_queue.addAll(new ArrayList(_transference_start_queue));
+        _transference_remove_queue.addAll(new ArrayList(_transference_waitstart_queue));
         
-        _transference_start_queue.clear();
+        _transference_waitstart_queue.clear();
         
         secureNotify();
     }
@@ -177,7 +177,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     
     public void sortTransferenceStartQueue() 
     {
-        ArrayList<Transference> trans_list = new ArrayList(_transference_start_queue);
+        ArrayList<Transference> trans_list = new ArrayList(_transference_waitstart_queue);
 
         trans_list.sort(new Comparator<Transference> () {
 
@@ -188,9 +188,9 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         }
         });
         
-        _transference_start_queue.clear();
+        _transference_waitstart_queue.clear();
         
-        _transference_start_queue.addAll(trans_list);
+        _transference_waitstart_queue.addAll(trans_list);
     }
     
     public void checkButtonsAndMenus(javax.swing.JButton close_all_finished_button, javax.swing.JButton pause_all_button, 
@@ -216,7 +216,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         }
         
           
-        swingReflectionInvoke("setEnabled", clean_all_waiting_trans_menu, !_transference_start_queue.isEmpty());
+        swingReflectionInvoke("setEnabled", clean_all_waiting_trans_menu, !_transference_waitstart_queue.isEmpty());
  
         if(!_transference_finished_queue.isEmpty()) {
 
@@ -232,7 +232,17 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     
     public String getStatus() {
         
-        return "Prov("+_transference_provision_queue.size()+") / Rem("+_transference_remove_queue.size()+") / Wait("+_transference_start_queue.size()+") / Run("+_transference_running_list.size()+") / Finish("+_transference_finished_queue.size()+")";
+        int prov = _transference_provision_queue.size();
+        
+        int rem = _transference_remove_queue.size();
+        
+        int wait = _transference_waitstart_queue.size();
+        
+        int run = _transference_running_list.size();
+        
+        int finish = _transference_finished_queue.size();
+
+        return (prov+rem+wait+run+finish > 0)?"Prov("+prov+") / Rem("+rem+") / Wait("+wait+") / Run("+run+") / Finish("+finish+")":"";
     }
     
 }
