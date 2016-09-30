@@ -4,6 +4,7 @@ import java.awt.AWTException;
 import static java.awt.EventQueue.invokeLater;
 import java.awt.Font;
 import static java.awt.Font.BOLD;
+import static java.awt.Frame.NORMAL;
 import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -16,15 +17,19 @@ import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
-import java.io.File;
+import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.IOException;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.exit;
+import java.net.InetAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
+import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
@@ -36,7 +41,6 @@ import static megabasterd.DBTools.selectMegaAccounts;
 import static megabasterd.DBTools.selectSettingValueFromDB;
 import static megabasterd.DBTools.selectUploads;
 import static megabasterd.DBTools.setupSqliteTables;
-import static megabasterd.KissVideoStreamServer.DEFAULT_PORT;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.createAndRegisterFont;
@@ -54,11 +58,12 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.1";
-    public static final String LOCK_FILE="megabasterd.lock";
+    public static final String VERSION="1.2";
     public static final String USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:48.0) Gecko/20100101 Firefox/48.0";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
+    public static final int STREAMER_PORT = 1337;
+    public static final int WATCHDOG_PORT = 1338;
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
     public static final Font FONT_DEFAULT = createAndRegisterFont("Gochi.ttf");
     
@@ -76,7 +81,7 @@ public final class MainPanel {
         });
     }
 
-    private MainPanelView _view;
+    private MainPanelView _view=null; //lazy init
     private final GlobalSpeedMeter _global_dl_speed, _global_up_speed;
     private final DownloadManager _download_manager;
     private final UploadManager _upload_manager;
@@ -91,10 +96,11 @@ public final class MainPanel {
     private KissVideoStreamServer _streamserver;
     
     public MainPanel() {
-        
-        _view = null; //Lazy init (getter!)
-        
-        checkAppIsRunning();
+                
+        if(checkAppIsRunning()) {
+            
+            System.exit(0);
+        }
         
         try {
             
@@ -135,7 +141,7 @@ public final class MainPanel {
         _streamserver = new KissVideoStreamServer(getView());
         
         try {
-            _streamserver.start(DEFAULT_PORT, "/video");
+            _streamserver.start(STREAMER_PORT, "/video");
         } catch (IOException ex) {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
@@ -377,44 +383,60 @@ public final class MainPanel {
         }
     }
     
-    private void checkAppIsRunning()
+    private boolean checkAppIsRunning()
     {
-        File lock = new File(LOCK_FILE);
-        
-        if(lock.exists()) {
-            
-            Object[] options = {"Yes, load it anyway",
-                            "No"};
-        
-            int n = showOptionDialog(getView(),
-            "It seems MegaBasterd is already running. Do you want to continue?",
-            "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
-            null,
-            options,
-            options[1]);
-        
-            if(n==1) {
-                exit(0);
-            }
-        }
+        boolean app_is_running = false;
         
         try {
             
-            lock.createNewFile();
+            final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
+
+            THREAD_POOL.execute(new Runnable(){
             
-            lock.deleteOnExit();
-            
+                @Override
+                public void run() {
+                    
+                    final ServerSocket socket = serverSocket;
+                    
+                    while(true) {
+                        
+                        try {
+                            socket.accept();
+                            
+                            swingReflectionInvoke("setExtendedState", getView(), NORMAL);
+                            
+                            swingReflectionInvoke("setVisible", getView(), true);
+                            
+                        } catch (IOException ex) {
+                            getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+
+                    }});
+
         } catch (IOException ex) {
-            getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+            
+            app_is_running = true;
+            
+            try {
+                
+                Socket clientSocket = new Socket(InetAddress.getLoopbackAddress(), WATCHDOG_PORT);
+                
+                clientSocket.close();
+
+            } catch (IOException ex1) {
+                
+                getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex1);
+            }
         }
+        
+        return app_is_running;
     }
     
     private void resumeDownloads() {
         
         swingReflectionInvoke("setText", getView().getStatus_down_label(), "Resuming previous downloads, please wait...");
-        
-        swingReflectionInvoke("setEnabled", getView().getNew_download_menu(), false);
-        
+
         final MainPanel main =this;
         
         THREAD_POOL.execute(new Runnable(){
@@ -450,9 +472,6 @@ public final class MainPanel {
 
                 main.getView().getjTabbedPane1().setSelectedIndex(0);
 
-            } else {
-
-                swingReflectionInvoke("setEnabled", main.getView().getNew_download_menu(), true);
             }
 
             swingReflectionInvoke("setText", main.getView().getStatus_down_label(), "");
@@ -487,11 +506,10 @@ public final class MainPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         
-        swingReflectionInvoke("setExtendedState", myframe, javax.swing.JFrame.NORMAL);
+        swingReflectionInvoke("setExtendedState", myframe, NORMAL);
  
         swingReflectionInvoke("setVisible", myframe, true);
         
-
       }
     });
     
@@ -517,14 +535,13 @@ public final class MainPanel {
     
         if(!(boolean)swingReflectionInvokeAndWaitForReturn("isVisible", myframe))
         {   
-            swingReflectionInvoke("setExtendedState", myframe, javax.swing.JFrame.NORMAL);
+            swingReflectionInvoke("setExtendedState", myframe, NORMAL);
             
             swingReflectionInvoke("setVisible", myframe, true);
         } 
         else
         {
-            swingReflectionInvoke("dispatchEvent", myframe, new WindowEvent(myframe, WindowEvent.WINDOW_CLOSING));
-            
+            swingReflectionInvoke("dispatchEvent", myframe, new WindowEvent(myframe, WINDOW_CLOSING));
         }
         
     }
@@ -547,8 +564,6 @@ public final class MainPanel {
     private void resumeUploads() {
         
         swingReflectionInvoke("setText", getView().getStatus_up_label(), "Resuming previous uploads, please wait...");
-        
-        swingReflectionInvoke("setEnabled", getView().getNew_upload_menu(), false);
         
         final MainPanel main =this;
         
@@ -611,9 +626,7 @@ public final class MainPanel {
                                                         
                                                         main.getView().getjTabbedPane1().setSelectedIndex(1);
                                                         
-                                                    } else {
-                                                        swingReflectionInvoke("setEnabled", main.getView().getNew_upload_menu(), true);
-                                                    }
+                                                    } 
                                                     
                                                     swingReflectionInvoke("setText", main.getView().getStatus_up_label(), "");
                                                     

@@ -11,7 +11,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import java.util.zip.GZIPInputStream;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
@@ -67,7 +67,7 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             
@@ -267,10 +267,10 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
                         _upload.getProgress_meter().secureNotify();
                     }
 
-                    Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                     
                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | InterruptedException ex) {
-                    Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                     
                } finally {
                     conn.disconnect();
@@ -284,7 +284,7 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
             
             _upload.emergencyStopUploader(ex.getMessage());
             
-            Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         if(!_exit) {

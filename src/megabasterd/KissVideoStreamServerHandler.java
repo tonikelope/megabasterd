@@ -14,10 +14,10 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
-import static megabasterd.KissVideoStreamServer.DEFAULT_PORT;
+import static megabasterd.MainPanel.STREAMER_PORT;
 import static megabasterd.MiscTools.findFirstRegex;
 
 
@@ -96,7 +96,7 @@ public final class KissVideoStreamServerHandler implements HttpHandler {
                     file_info = _httpserver.getMegaFileMetadata(link, _view);
                     
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(KissVideoStreamServerHandler.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(KissVideoStreamServerHandler.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 cache_info = new String[6];
@@ -253,7 +253,7 @@ public final class KissVideoStreamServerHandler implements HttpHandler {
                        cis = new CipherInputStream(is, CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", CryptTools.initMEGALinkKey(_file_key), (header_range!=null && (ranges[0]-sync_bytes)>0)?CryptTools.forwardMEGALinkKeyIV(iv, ranges[0]-sync_bytes):iv));
 
                     } catch (    NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                       Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
+                       getLogger(KissVideoStreamServerHandler.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
                     os = xchg.getResponseBody();
@@ -282,14 +282,14 @@ public final class KissVideoStreamServerHandler implements HttpHandler {
             
             xchg.close();
   
-            _httpserver.printStatusOK("Kissvideostreamer on localhost:"+DEFAULT_PORT+" (Waiting for request...)");
+            _httpserver.printStatusOK("Kissvideostreamer on localhost:"+STREAMER_PORT+" (Waiting for request...)");
             
             _httpserver.getStreaming().remove(Thread.currentThread());
             
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
-                Logger.getLogger(KissVideoStreamServerHandler.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(KissVideoStreamServerHandler.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             if(!_httpserver.isWorking()) {

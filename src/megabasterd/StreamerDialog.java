@@ -4,9 +4,17 @@ import java.awt.Font;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.FONT_DEFAULT;
+import static megabasterd.MiscTools.copyTextToClipboard;
+import static megabasterd.MiscTools.deflateURL;
+import static megabasterd.MiscTools.extractFirstMegaLinkFromString;
+import static megabasterd.MiscTools.extractStringFromClipboardContents;
+import static megabasterd.MiscTools.findFirstRegex;
+import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
+import static megabasterd.MiscTools.updateFont;
 
 /**
  *
@@ -25,10 +33,10 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
         _clipboardspy = clipboardspy;
         
-        MiscTools.updateFont(put_label, FONT_DEFAULT, Font.PLAIN);
-        MiscTools.updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
+        updateFont(put_label, FONT_DEFAULT, Font.PLAIN);
+        updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
         
-        MiscTools.swingReflectionInvoke("setText", original_link_textfield, MiscTools.extractFirstMegaLinkFromString(MiscTools.extractStringFromClipboardContents(clipboardspy.getContents())));
+        swingReflectionInvoke("setText", original_link_textfield, extractFirstMegaLinkFromString(extractStringFromClipboardContents(clipboardspy.getContents())));
     }
 
     /**
@@ -102,13 +110,13 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     private void dance_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dance_buttonActionPerformed
         
         
-        String link=((String)MiscTools.swingReflectionInvokeAndWaitForReturn("getText", original_link_textfield)).trim();
+        String link=((String)swingReflectionInvokeAndWaitForReturn("getText", original_link_textfield)).trim();
 
         if(link.length() == 0) {
             
             JOptionPane.showMessageDialog(this, "Please, paste a mega/megacrypter link!");
             
-            MiscTools.swingReflectionInvoke("setText", original_link_textfield, "");
+            swingReflectionInvoke("setText", original_link_textfield, "");
             
         } else {
             
@@ -117,20 +125,20 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                 link = CryptTools.decryptMegaDownloaderLink(link);
         
             } catch (Exception ex) {
-                Logger.getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             String data;
             
             link=link.replace("/#!N?", "/#N!");
         
-            if( MiscTools.findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null)
+            if( findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null)
             {
-                data=MiscTools.findFirstRegex("/#(N?!.+)", link, 1);
+                data=findFirstRegex("/#(N?!.+)", link, 1);
                 
                 _cookLink("http://localhost:1337/video/mega/"+data);
                 
-            } else if( (data=MiscTools.findFirstRegex("https?://([^/]+/![^!]+![0-9a-fA-F]+)", link, 1)) != null) {
+            } else if( (data=findFirstRegex("https?://([^/]+/![^!]+![0-9a-fA-F]+)", link, 1)) != null) {
 
                 _cookLink("http://localhost:1337/video/"+data);
                 
@@ -138,15 +146,15 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                 
                 JOptionPane.showMessageDialog(this, "Please, paste a mega/megacrypter link!");
                 
-                MiscTools.swingReflectionInvoke("setText", original_link_textfield, "");
+                swingReflectionInvoke("setText", original_link_textfield, "");
             } 
         }
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void _cookLink(final String streamlink)
     {
-        MiscTools.swingReflectionInvoke("setEnabled", dance_button, false);
-        MiscTools.swingReflectionInvoke("setEnabled", original_link_textfield, false);
+        swingReflectionInvoke("setEnabled", dance_button, false);
+        swingReflectionInvoke("setEnabled", original_link_textfield, false);
         
         final StreamerDialog streamer_run = this;
         
@@ -155,9 +163,9 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
             public void run() {
                 
                  try {
-                    MiscTools.copyTextToClipboard(MiscTools.deflateURL(streamlink));
+                    copyTextToClipboard(deflateURL(streamlink));
                 } catch (IOException ex) {
-                    Logger.getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
             JOptionPane.showMessageDialog(streamer_run, "Streaming link was copied to clipboard!\n(Remember to keep MegaBasterd running in background while playing)");
@@ -180,5 +188,12 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     @Override
     public void notifyClipboardChange() {
         
-        MiscTools.swingReflectionInvoke("setText", original_link_textfield, MiscTools.extractFirstMegaLinkFromString(MiscTools.extractStringFromClipboardContents(_clipboardspy.getContents())));    }
+        String link = extractFirstMegaLinkFromString(extractStringFromClipboardContents(_clipboardspy.getContents()));
+        
+        if(!link.contains("/#F!")) {
+            
+            swingReflectionInvoke("setText", original_link_textfield, link);    
+        }
+    }
+    
     }

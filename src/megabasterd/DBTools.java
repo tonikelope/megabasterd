@@ -8,7 +8,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -109,7 +109,7 @@ public final class DBTools {
                 value = res.getString(1);
             }
         } catch (SQLException ex) {
-            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(DBTools.class.getName()).log(Level.SEVERE, null, ex);
         }
        
         return value;

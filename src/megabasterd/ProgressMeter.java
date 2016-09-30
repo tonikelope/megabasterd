@@ -1,6 +1,5 @@
 package megabasterd;
 
-import static java.lang.System.out;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 
@@ -67,7 +66,7 @@ public final class ProgressMeter implements Runnable, SecureNotifiable
     @Override
     public void run()
     {  
-        out.println("ProgressMeter hello!");
+        System.out.println("ProgressMeter hello!");
     
         while(!_exit || !_transference.getPartialProgress().isEmpty())
         {

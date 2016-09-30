@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -30,7 +30,7 @@ public final class SqliteSingleton {
             conn = DriverManager.getConnection("jdbc:sqlite:"+SQLITE_FILE);
             
         }catch(ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(SqliteSingleton.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(SqliteSingleton.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return conn;

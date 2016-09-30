@@ -11,7 +11,7 @@ import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import java.util.zip.GZIPInputStream;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
@@ -112,7 +112,7 @@ public final class MegaCrypterAPI {
                 dl_url = new String(decrypted_url);
                 
             } catch (Exception ex) {
-                Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -280,7 +280,7 @@ public final class MegaCrypterAPI {
                     }
 
                     } catch (Exception ex) {
-                        Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, null, ex);
+                        getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, null, ex);
                     }
         }
         

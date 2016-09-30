@@ -1,7 +1,6 @@
 package megabasterd;
 
 import java.awt.Component;
-import static java.lang.System.out;
 import java.sql.SQLException;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
@@ -35,15 +34,8 @@ public final class DownloadManager extends TransferenceManager {
                 getLogger(DownloadManager.class.getName()).log(SEVERE, null, ex);
             }
         }
-        
-        if(!getTransference_remove_queue().isEmpty()) {
-
-            swingReflectionInvoke("setText", getMain_panel().getView().getStatus_down_label(), "Removing "+getTransference_remove_queue().size()+" downloads, please wait...");
-
-        } else {
-
-            swingReflectionInvoke("setText", getMain_panel().getView().getStatus_down_label(), "");
-        }
+   
+        secureNotify();
     }
     
     public void provision(Download download, boolean retry) throws MegaAPIException, MegaCrypterAPIException 
@@ -53,8 +45,6 @@ public final class DownloadManager extends TransferenceManager {
         download.provisionIt(retry);
 
         if(download.isProvision_ok()) {
-            
-            out.println("Provision OK!");
 
             getTransference_start_queue().add(download);
 
@@ -75,113 +65,131 @@ public final class DownloadManager extends TransferenceManager {
                 }
             } 
         } else {
-            
-            out.println("Provision error!");
-            
+
             getTransference_finished_queue().add(download);
         }
         
-        if(getTransference_provision_queue().isEmpty()) {
         
-            swingReflectionInvoke("setText", getMain_panel().getView().getStatus_down_label(), "");
-
-        } else {
-
-            swingReflectionInvoke("setText", getMain_panel().getView().getStatus_down_label(), getTransference_provision_queue().size() + " downloads waiting for provision...");
-        }
+        secureNotify();
         
-        if(retry) {
-            
-            secureNotify();
-        }
     }
     
     
     @Override
     public void run() {
         
-        out.println("Download manager hello!");
-        
+        final DownloadManager tthis = this;
+
         while(true)
         {
-            if(!getTransference_provision_queue().isEmpty())
+            if(!isProvisioning_transferences() && !getTransference_provision_queue().isEmpty())
             {
-                swingReflectionInvoke("setEnabled", getMain_panel().getView().getNew_download_menu(), false);
+                setProvisioning_transferences(true);
                 
-                swingReflectionInvoke("setText", getMain_panel().getView().getStatus_down_label(), getTransference_provision_queue().size() + " downloads waiting for provision...");
-                
-                while(!getTransference_provision_queue().isEmpty())
-                {
-                    final Download download = (Download)getTransference_provision_queue().poll();
-                    
-                    if(download != null) {
-                        
-                        try{
-                            
-                            provision(download, false);
-                            
-                        }catch (MegaAPIException | MegaCrypterAPIException ex) {
-                            
-                            out.println("Provision failed! Retrying in separated thread...");
-                            
-                            getScroll_panel().remove(download.getView());
-                            
-                            final DownloadManager main = this;
-                            
-                            THREAD_POOL.execute(new Runnable(){
+                THREAD_POOL.execute(new Runnable(){
                                 @Override
                                 public void run(){
+        
                                     
-                                    try {
-                                        
-                                        main.provision(download, true);
-                                        
-                                    } catch (MegaAPIException | MegaCrypterAPIException ex1) {
-                                        
-                                        getLogger(DownloadManager.class.getName()).log(SEVERE, null, ex1);
+                                    while(!getTransference_provision_queue().isEmpty())
+                                    {
+                                        final Download download = (Download)getTransference_provision_queue().poll();
+
+                                        if(download != null) {
+
+                                            try{
+
+                                                provision(download, false);
+
+                                            }catch (MegaAPIException | MegaCrypterAPIException ex) {
+
+                                                System.out.println("Provision failed! Retrying in separated thread...");
+
+                                                getScroll_panel().remove(download.getView());
+
+                                                THREAD_POOL.execute(new Runnable(){
+                                                    @Override
+                                                    public void run(){
+
+                                                        try {
+
+                                                            tthis.provision(download, true);
+
+                                                        } catch (MegaAPIException | MegaCrypterAPIException ex1) {
+
+                                                            getLogger(DownloadManager.class.getName()).log(SEVERE, null, ex1);
+                                                        }
+
+                                                    }});
+                                                }
+                                            }
+                                        }
+                                    
+                                    tthis.setProvisioning_transferences(false);
+                                    
+                                    tthis.secureNotify();
+             
+                                }});
+
+            }
+            
+            if(!isRemoving_transferences() && !getTransference_remove_queue().isEmpty()) {
+                
+                setRemoving_transferences(true);
+                
+                THREAD_POOL.execute(new Runnable(){
+                                @Override
+                                public void run(){
+                                
+                                   
+                                    while(!getTransference_remove_queue().isEmpty()) {
+
+                                        Download download = (Download)getTransference_remove_queue().poll();
+
+                                        if(download != null) {
+                                            remove(download);
+                                        }
                                     }
                                     
+                                    tthis.setRemoving_transferences(false);
+                                    
+                                    tthis.secureNotify();
+                                    
                                 }});
-                        }
-                    }
-                }
             }
             
-            if(!getTransference_remove_queue().isEmpty()) {
+            if(!isStarting_transferences() && !getTransference_start_queue().isEmpty() && getTransference_running_list().size() < getMain_panel().getMax_dl())
+            {
+                setStarting_transferences(true);
                 
-                swingReflectionInvoke("setEnabled", getMain_panel().getView().getNew_download_menu(), false);
+                THREAD_POOL.execute(new Runnable(){
+                                @Override
+                                public void run(){
+                                
+                                while(!getTransference_start_queue().isEmpty() && getTransference_running_list().size() < getMain_panel().getMax_dl()) {
                 
-                swingReflectionInvoke("setText", getMain_panel().getView().getStatus_down_label(), "Removing "+getTransference_remove_queue().size()+" downloads, please wait...");
-                
-                while(!getTransference_remove_queue().isEmpty()) {
-                    
-                    Download download = (Download)getTransference_remove_queue().poll();
-                    
-                    if(download != null) {
-                        
-                        remove(download);
-                        
-                    }
-                }
+                                    Download download = (Download)getTransference_start_queue().poll();
+
+                                    if(download != null) {
+
+                                        start(download);
+                                    }
+                                }
+                                
+                                tthis.setStarting_transferences(false);
+                                    
+                                tthis.secureNotify();
+                                
+                           }});
             }
-            
-            while(!getTransference_start_queue().isEmpty() && getTransference_running_list().size() < getMain_panel().getMax_dl()) {
-                
-                Download download = (Download)getTransference_start_queue().poll();
-                
-                if(download != null) {
-   
-                    start(download);
-                }
-            }
-            
-            checkButtonsAndMenus(getMain_panel().getView().getClose_all_finished_down_button(), getMain_panel().getView().getPause_all_down_button(), getMain_panel().getView().getNew_download_menu(), getMain_panel().getView().getClean_all_down_menu());
-            
-            out.println("Download manager wait");
-            
+
             secureWait();
             
-            out.println("Download manager let's go");
+            checkButtonsAndMenus(getMain_panel().getView().getClose_all_finished_down_button(), getMain_panel().getView().getPause_all_down_button(), getMain_panel().getView().getClean_all_down_menu());
+            
+            if(!this.getMain_panel().getView().isPre_processing_downloads()) {
+                swingReflectionInvoke("setText", getMain_panel().getView().getStatus_down_label(), getStatus());
+            }
         }
         
         }

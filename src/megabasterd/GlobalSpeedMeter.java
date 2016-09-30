@@ -2,7 +2,7 @@ package megabasterd;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.swing.JLabel;
 import static megabasterd.MiscTools.formatBytes;
 import static megabasterd.MiscTools.swingReflectionInvoke;
@@ -44,7 +44,7 @@ public final class GlobalSpeedMeter implements Runnable, SecureNotifiable
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(GlobalSpeedMeter.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(GlobalSpeedMeter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             

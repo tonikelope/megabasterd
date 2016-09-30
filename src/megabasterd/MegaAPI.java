@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import java.util.zip.GZIPInputStream;
 import javax.crypto.Cipher;
 import static megabasterd.MiscTools.Bin2UrlBASE64;
@@ -244,7 +244,7 @@ public final class MegaAPI {
             }
             
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return quota;
@@ -291,7 +291,7 @@ public final class MegaAPI {
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -331,7 +331,7 @@ public final class MegaAPI {
             try {
                 Thread.sleep( getWaitTimeExpBackOff(conta_error));
             } catch (InterruptedException ex) {
-                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             } else {
@@ -366,7 +366,7 @@ public final class MegaAPI {
                         try {
                             Thread.sleep(getWaitTimeExpBackOff(conta_error));
                         } catch (InterruptedException ex) {
-                            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } else {
 
@@ -489,7 +489,7 @@ public final class MegaAPI {
             ret = CryptTools.aes_cbc_encrypt(new_attr_byte, key, CryptTools.AES_ZERO_IV);
             
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return ret;
@@ -515,7 +515,7 @@ public final class MegaAPI {
             
         }
         catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
             
         }
         
@@ -543,7 +543,7 @@ public final class MegaAPI {
             ul_url = (String)res_map[0].get("p");
   
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return ul_url;
@@ -568,7 +568,7 @@ public final class MegaAPI {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         } 
                     
         return res_map[0];
@@ -623,7 +623,7 @@ public final class MegaAPI {
             res_map = objectMapper.readValue(res, HashMap[].class);
             
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return res_map[0];
@@ -656,7 +656,7 @@ public final class MegaAPI {
             res_map = objectMapper.readValue(res, HashMap[].class);
             
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return res_map[0];
@@ -691,7 +691,7 @@ public final class MegaAPI {
             public_link =  "https://mega.nz/#!"+file_id+"!"+Bin2UrlBASE64(node_key);
             
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return public_link;
@@ -724,7 +724,7 @@ public final class MegaAPI {
             public_link =  "https://mega.nz/#F!"+folder_id+"!"+Bin2UrlBASE64(node_key);
             
         }catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return public_link;
@@ -767,7 +767,7 @@ public final class MegaAPI {
             System.out.println(res);
             
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -781,7 +781,7 @@ public final class MegaAPI {
             ch = Bin2UrlBASE64(encryptKey((h+h).getBytes(), i32a2bin(getMaster_key())));
         
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return ch;
@@ -869,7 +869,7 @@ public final class MegaAPI {
             }
             
         } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         return null;

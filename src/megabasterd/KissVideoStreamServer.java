@@ -11,6 +11,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static megabasterd.MainPanel.STREAMER_PORT;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
 import static megabasterd.MiscTools.swingReflectionInvoke;
@@ -19,7 +20,6 @@ import static megabasterd.MiscTools.swingReflectionInvoke;
 public final class KissVideoStreamServer {
     
     public static final int TIMEOUT=30000;
-    public static final int DEFAULT_PORT=1337;
     public static final int EXP_BACKOFF_BASE=2;
     public static final int EXP_BACKOFF_SECS_RETRY=1;
     public static final int EXP_BACKOFF_MAX_WAIT_TIME=128;
@@ -65,7 +65,7 @@ public final class KissVideoStreamServer {
     public void start(int port, String context) throws IOException
     {
         _httpserver = HttpServer.create(new InetSocketAddress(port), 0);
-        printStatusOK("Kissvideostreamer on localhost:"+DEFAULT_PORT+" (Waiting for request...)");
+        printStatusOK("Kissvideostreamer on localhost:"+STREAMER_PORT+" (Waiting for request...)");
         _httpserver.createContext(context, (_http_handler = new KissVideoStreamServerHandler(this, _main_panel)));
         _httpserver.setExecutor(Executors.newCachedThreadPool());
         _httpserver.start();

@@ -2,7 +2,7 @@ package megabasterd;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -86,7 +86,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             
@@ -149,7 +149,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException ex) {
-                Logger.getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }

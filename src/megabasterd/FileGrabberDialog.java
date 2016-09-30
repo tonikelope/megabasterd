@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
@@ -457,7 +457,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             } catch (Exception ex) {
 
-                Logger.getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
             
        } else {

@@ -5,7 +5,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
 import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
@@ -71,7 +71,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             
@@ -211,11 +211,10 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                         _download.getProgress_meter().secureNotify();
                     }
 
-                    
-                    Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
      
                } catch (InterruptedException ex) {
-                    Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     conn.disconnect();
                 }
@@ -225,7 +224,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
         
         }catch (IOException ex) {
             _download.emergencyStopDownloader(ex.getMessage());
-            Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         if(!_exit) {

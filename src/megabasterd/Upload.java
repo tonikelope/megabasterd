@@ -15,7 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2BASE64;
@@ -38,7 +38,9 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     public static final int WORKERS_DEFAULT = 2;
     
     private final MainPanel _main_panel;
-    private UploadView _view;
+    private UploadView _view=null; //lazy init
+    private SpeedMeter _speed_meter=null; //lazy init
+    private ProgressMeter _progress_meter=null; //lazy init
     private String _exit_message;
     private String _dir_name;
     private volatile boolean _exit;
@@ -55,8 +57,6 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     private volatile int[] _file_meta_mac;
     private  boolean _finishing_upload;
     private String _fid;
-    private SpeedMeter _speed_meter;
-    private ProgressMeter _progress_meter;
     private boolean _notified;
     private String _completion_handle;
     private int _paused_workers;
@@ -82,10 +82,6 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     private final boolean _restart;
     
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean use_slots, int slots, boolean restart) {
-        
-        _view = null; //Lazy init (getter!)
-        _speed_meter = null; //Lazy init (getter!)
-        _progress_meter = null; //Lazy init (getter!)
         
         _saved_file_mac = new int[]{0, 0, 0, 0};
         _notified = false;
@@ -318,7 +314,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             
@@ -399,7 +395,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                 }   
             
             } catch (Exception ex) {
-                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -607,7 +603,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                     DBTools.updateUploadUrl(_file_name, _ma.getEmail(), _ul_url);
                 }
                 catch (SQLException ex) {
-                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
      
@@ -704,7 +700,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                         _thread_pool.awaitTermination(Long.MAX_VALUE, TimeUnit.DAYS);
                         
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                        getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 
@@ -754,7 +750,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                             swingReflectionInvoke("setEnabled", getView().getFile_link_button(), true);
                             
                         } catch (Exception ex) {
-                            Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                            getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                         }
                         
                         printStatusOK(_exit_message);
@@ -839,7 +835,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
             try {
                 DBTools.deleteUpload(_file_name, _ma.getEmail());
             } catch (SQLException ex) {
-                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             getMain_panel().getUpload_manager().getTransference_running_list().remove(this);
@@ -927,7 +923,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
             try {
                 DBTools.deleteUpload(_file_name, _ma.getEmail());
             } catch (SQLException ex) {
-                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
             }
             
             getMain_panel().getUpload_manager().getTransference_running_list().remove(this);

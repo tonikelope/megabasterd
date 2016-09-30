@@ -11,7 +11,6 @@ import java.io.OutputStream;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.valueOf;
 import static java.lang.Math.ceil;
-import static java.lang.System.out;
 import static java.lang.Thread.sleep;
 import java.net.URL;
 import java.net.URLConnection;
@@ -60,7 +59,9 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     public static final Object CBC_LOCK=new Object();
     
     private final MainPanel _main_panel;
-    private DownloadView _view;
+    private DownloadView _view=null; //lazy init
+    private ProgressMeter _progress_meter=null; //lazy init
+    private SpeedMeter _speed_meter=null; //lazy init
     private final Object _secure_notify_lock;
     private boolean _notified;
     private final String _url;
@@ -80,8 +81,6 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     private final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
     private volatile long _progress;
     private ChunkWriter _chunkwriter;
-    private ProgressMeter _progress_meter;
-    private SpeedMeter _speed_meter;
     private String _last_download_url;
     private boolean _provision_ok;
     private boolean _finishing_download;
@@ -97,10 +96,6 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     private long _last_chunk_id_dispatched;
     
     public Download(MainPanel main_panel, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
-        
-        _view = null; //Lazy init (getter!)
-        _speed_meter = null; //Lazy init (getter!)
-        _progress_meter = null; //Lazy init (getter!)
         
         _paused_workers = 0;
         _last_chunk_id_dispatched = 0L;
@@ -235,15 +230,12 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     public boolean isProvision_ok() {
         return _provision_ok;
     }
-    
-
 
     @Override
     public ProgressMeter getProgress_meter() {
         return _progress_meter == null?(_progress_meter = new ProgressMeter(this)):_progress_meter;
     }
     
-
     @Override
     public SpeedMeter getSpeed_meter() {
         return _speed_meter == null?(_speed_meter = new SpeedMeter(this, getMain_panel().getGlobal_dl_speed())):_speed_meter;
@@ -486,7 +478,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                         secureWait();
                         
-                        out.println("Chunkdownloaders finished!");
+                        System.out.println("Chunkdownloaders finished!");
                 
                         getSpeed_meter().setExit(true);
 
@@ -509,7 +501,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                             }
                         }
                         
-                        out.println("Downloader thread pool finished!");
+                        System.out.println("Downloader thread pool finished!");
                         
                         getMain_panel().getGlobal_dl_speed().detachSpeedMeter(getSpeed_meter());
                         
@@ -706,10 +698,10 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             
             _status_error = true;
        
-            out.println(ex.getMessage());
+            System.out.println(ex.getMessage());
             
         } catch (Exception ex) {
-            out.println(ex.getMessage());
+            System.out.println(ex.getMessage());
         }    
         
         if(!_exit) {
@@ -737,7 +729,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
         }
         
-        out.println(_file_name+" Downloader: bye bye");
+        System.out.println(_file_name+" Downloader: bye bye");
     }
     
     public void provisionIt(boolean retry) throws MegaAPIException, MegaCrypterAPIException {
@@ -950,7 +942,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             
             _thread_pool.execute(c);
             
-        }catch(java.util.concurrent.RejectedExecutionException e){out.println(e.getMessage());}
+        }catch(java.util.concurrent.RejectedExecutionException e){System.out.println(e.getMessage());}
     }
     
     public synchronized void stopLastStartedSlot()

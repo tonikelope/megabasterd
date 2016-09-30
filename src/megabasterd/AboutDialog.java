@@ -3,7 +3,7 @@ package megabasterd;
 import java.awt.Font;
 import java.util.HashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
@@ -58,7 +58,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         setResizable(false);
 
         title_label.setFont(new java.awt.Font("Dialog", 1, 48)); // NOI18N
-        title_label.setText("MegaBasterd 1.8.1");
+        title_label.setText("MegaBasterd X.X");
         title_label.setDoubleBuffered(true);
 
         made_in_spain_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/made_in_spain.jpg"))); // NOI18N
@@ -200,7 +200,7 @@ public final class AboutDialog extends javax.swing.JDialog {
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
                 swingReflectionInvoke("setEnabled", main.check_version_button, true);

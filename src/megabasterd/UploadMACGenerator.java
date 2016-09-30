@@ -9,7 +9,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -63,7 +63,7 @@ public final class UploadMACGenerator implements Runnable, SecureNotifiable {
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             
@@ -163,7 +163,7 @@ public final class UploadMACGenerator implements Runnable, SecureNotifiable {
                         _bytes_read+=chunk.getSize();
                         
                     }   catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        Logger.getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
+                        getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
                     }
                     
                     _chunk_queue.remove(chunk.getId());
@@ -208,7 +208,7 @@ public final class UploadMACGenerator implements Runnable, SecureNotifiable {
             System.out.println("MAC GENERATOR BYE BYE...");
             
         } catch (Exception ex) {
-            Logger.getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
         }
   
     }

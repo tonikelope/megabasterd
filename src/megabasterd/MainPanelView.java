@@ -7,7 +7,6 @@ import static java.awt.Font.PLAIN;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
-import static java.lang.System.out;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -40,12 +38,23 @@ import static megabasterd.MiscTools.i32a2bin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.updateFont;
+import static java.util.logging.Logger.getLogger;
 
 
 public final class MainPanelView extends javax.swing.JFrame {
 
     private final MainPanel _main_panel;
+    private volatile boolean _pre_processing_downloads;
+    private volatile boolean _pre_processing_uploads;
 
+    public boolean isPre_processing_downloads() {
+        return _pre_processing_downloads;
+    }
+
+    public boolean isPre_processing_uploads() {
+        return _pre_processing_uploads;
+    }
+ 
     public JLabel getKiss_server_status() {
         return kiss_server_status;
     }
@@ -117,13 +126,11 @@ public final class MainPanelView extends javax.swing.JFrame {
     
 
     public MainPanelView(MainPanel main_panel) {
-        
-        System.out.println("Main panel view constructor!! ");
-        
-        initComponents();
-        
+
         _main_panel = main_panel;
-        
+         
+        initComponents();
+ 
         setTitle("MegaBasterd " + VERSION);
         
         setIconImage(new ImageIcon(getClass().getResource("pica_roja.png")).getImage());
@@ -486,7 +493,8 @@ public final class MainPanelView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void new_download_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_download_menuActionPerformed
-        
+ 
+        _pre_processing_downloads = true;
         
         swingReflectionInvoke("setEnabled", new_download_menu, false);
         
@@ -511,7 +519,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             THREAD_POOL.execute(new Runnable(){
                     @Override
                     public void run() {
-                        
+                     
                     swingReflectionInvoke("setText", main.status_down_label, "Pre-processing downloads, please wait...");
 
                     Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", dialog.getLinks_textarea().getText(), 0));
@@ -586,25 +594,19 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             main.getMain_panel().getDownload_manager().secureNotify();
 
-                        } else {
-
-                            swingReflectionInvoke("setEnabled", main.new_download_menu, true);
                         }
-       
-                } else {
+                } 
 
-                    swingReflectionInvoke("setEnabled", main.new_download_menu, true);
-                }
-            
                 swingReflectionInvoke("setText", main.status_down_label, "");
 
                     }});
-        } else {
+        } 
             
-            swingReflectionInvoke("setEnabled", new_download_menu, true);
-        }
-
+        swingReflectionInvoke("setEnabled", new_download_menu, true);
+       
         dialog.dispose();
+        
+        _pre_processing_downloads = false;
 
     }//GEN-LAST:event_new_download_menuActionPerformed
 
@@ -714,6 +716,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void new_upload_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_upload_menuActionPerformed
         
+        _pre_processing_uploads = true;
         
         swingReflectionInvoke("setEnabled", new_upload_menu, false);
 
@@ -767,7 +770,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 String parent_node = (String)((Map)((List)res.get("f")).get(0)).get("h");
 
-                                out.println("Dir "+ parent_node+" created");
+                                System.out.println("Dir "+ parent_node+" created");
                                 
                                 ma.shareFolder(parent_node, parent_key, share_key);
                                 
@@ -785,7 +788,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                         String[] dirs = file_path.split("/");
 
-                                        out.println(file_path);
+                                        System.out.println(file_path);
 
                                         MegaDirNode current_node = file_paths;
 
@@ -825,7 +828,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     main.getMain_panel().getUpload_manager().secureNotify();
                           
                             } catch (Exception ex) {
-                                swingReflectionInvoke("setEnabled", main.new_upload_menu, true);
+                                
                                 getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
                             }
                     }
@@ -835,11 +838,13 @@ public final class MainPanelView extends javax.swing.JFrame {
             } catch (Exception ex) {
                 getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
             }
-        } else {
-            swingReflectionInvoke("setEnabled", new_upload_menu, true);
-        }
+        } 
+            
+        swingReflectionInvoke("setEnabled", new_upload_menu, true);
         
         dialog.dispose();
+        
+        _pre_processing_uploads = false;
     }//GEN-LAST:event_new_upload_menuActionPerformed
 
     private void close_all_finished_up_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_all_finished_up_buttonActionPerformed

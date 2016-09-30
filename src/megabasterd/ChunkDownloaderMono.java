@@ -6,7 +6,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
 import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
@@ -143,10 +143,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             getDownload().getProgress_meter().secureNotify();
                         }
                         
-                        Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+                        getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
 
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+                        getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
@@ -155,11 +155,11 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         
         }catch (MalformedURLException ex) {
             
-            Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
         
         } catch (IOException ex) {
             
-            Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
             
             getDownload().emergencyStopDownloader(ex.getMessage());
             

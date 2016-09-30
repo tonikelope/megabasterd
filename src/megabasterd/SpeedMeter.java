@@ -2,7 +2,7 @@ package megabasterd;
 
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import static megabasterd.MiscTools.formatBytes;
 
 public final class SpeedMeter implements Runnable, SecureNotifiable
@@ -49,7 +49,7 @@ public final class SpeedMeter implements Runnable, SecureNotifiable
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(SpeedMeter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
             

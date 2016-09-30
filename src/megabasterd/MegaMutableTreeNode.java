@@ -2,6 +2,7 @@ package megabasterd;
 
 import java.util.HashMap;
 import javax.swing.tree.DefaultMutableTreeNode;
+import static megabasterd.MiscTools.formatBytes;
 
 /**
  *
@@ -24,7 +25,7 @@ public final class MegaMutableTreeNode extends DefaultMutableTreeNode {
             
             HashMap<String,Object> user_object = (HashMap<String,Object>)userObject;
         
-            return user_object.get("name") + ((isLeaf() && user_object.get("size")!=null)?" ["+MiscTools.formatBytes((long)user_object.get("size"))+"]":"");
+            return user_object.get("name") + ((isLeaf() && user_object.get("size")!=null)?" ["+formatBytes((long)user_object.get("size"))+"]":"");
         
         } else if(userObject instanceof Object) {
             

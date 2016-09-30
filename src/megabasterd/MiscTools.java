@@ -38,7 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
@@ -87,7 +87,7 @@ public final class MiscTools {
             ge.registerFont(font);
         
         } catch (FontFormatException | IOException ex) {
-            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
        
         return font;
@@ -103,7 +103,7 @@ public final class MiscTools {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MainPanelView.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MiscTools.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
     }
     
@@ -370,7 +370,7 @@ public final class MiscTools {
                     
                 } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
                     
-                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                     
                     System.out.println("REFLECTION METHOD NOT FOUND -> "+method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length));
                 }
@@ -435,7 +435,7 @@ public final class MiscTools {
                     }       
                     
                 } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
-                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
                 return ret;
@@ -461,7 +461,7 @@ public final class MiscTools {
                     SwingUtilities.invokeAndWait(r);
             
                 } catch (InterruptedException | InvocationTargetException ex) {
-                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                    getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
    
@@ -480,7 +480,7 @@ public final class MiscTools {
             try {
                 ret = c.call();
             } catch (Exception ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
             
         } else {
@@ -492,7 +492,7 @@ public final class MiscTools {
             try {
                 ret = futureTask.get();
             } catch (InterruptedException | ExecutionException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
         
@@ -545,7 +545,7 @@ public final class MiscTools {
             
         String response = new String(byte_res.toByteArray()).trim();
         
-        return MiscTools.findFirstRegex("http", response, 0)!=null?response:link;
+        return findFirstRegex("http", response, 0)!=null?response:link;
     }
     
     public static String formatBytes(Long bytes) {
@@ -661,7 +661,7 @@ public final class MiscTools {
                 ((MutableTreeNode)new_root).setUserObject( ((DefaultMutableTreeNode)tree.getModel().getRoot()).getUserObject() );
                 
             } catch (InstantiationException | IllegalAccessException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             for (TreePath path : paths) {
@@ -689,7 +689,7 @@ public final class MiscTools {
                                     ((MutableTreeNode)node).setUserObject( ((DefaultMutableTreeNode)path_element).getUserObject() );
 
                                 } catch (InstantiationException | IllegalAccessException ex) {
-                                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                                    getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
      
@@ -710,7 +710,7 @@ public final class MiscTools {
                 }
             }
             
-            tree.setModel(new DefaultTreeModel(MiscTools.sortTree((DefaultMutableTreeNode)new_root)));
+            tree.setModel(new DefaultTreeModel(sortTree((DefaultMutableTreeNode)new_root)));
             
             return true;
         }
@@ -781,9 +781,9 @@ public final class MiscTools {
         
         if(data != null) {
             
-            ArrayList<String> links = MiscTools.findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", data, 0);
+            ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", data, 0);
             
-            links.addAll(MiscTools.findAllRegex("mega://enc.*?[^\r\n]+", data, 0));
+            links.addAll(findAllRegex("mega://enc.*?[^\r\n]+", data, 0));
 
             for(String s:links) {
 
@@ -800,9 +800,9 @@ public final class MiscTools {
         
         if(data != null) {
             
-            ArrayList<String> links = MiscTools.findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", data, 0);
+            ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", data, 0);
             
-            links.addAll(MiscTools.findAllRegex("mega://enc.*?[^\r\n]+", data, 0));
+            links.addAll(findAllRegex("mega://enc.*?[^\r\n]+", data, 0));
 
             if(links.size()>0) {
                 

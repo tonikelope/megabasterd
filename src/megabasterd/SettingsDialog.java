@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
-import java.util.logging.Logger;
+import static java.util.logging.Logger.getLogger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JSpinner;
@@ -373,7 +373,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         default_slots_down_label.setDoubleBuffered(true);
 
         multi_slot_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        multi_slot_down_checkbox.setText("Use multi slot download mode (NOT recommended. Download restart needed.)");
+        multi_slot_down_checkbox.setText("Use multi slot download mode (NOT recommended; download restart needed)");
         multi_slot_down_checkbox.setDoubleBuffered(true);
         multi_slot_down_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -514,7 +514,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_uploads_spinner.setDoubleBuffered(true);
 
         multi_slot_up_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        multi_slot_up_checkbox.setText("Use multi slot upload mode (Recommended. Upload restart needed.)");
+        multi_slot_up_checkbox.setText("Use multi slot upload mode (RECOMMENDED; Upload restart needed)");
         multi_slot_up_checkbox.setDoubleBuffered(true);
         multi_slot_up_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -734,7 +734,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 } catch(Exception ex) {
                                     
                                     email_error.add(email);
-                                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                                    getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                                 
                             } else {
@@ -755,7 +755,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                     } catch (Exception ex) {
                                         
                                         email_error.add(email);
-                                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                                        getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
                                         
                                     }
                                 }
@@ -793,7 +793,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 }
             });
         } catch (SQLException ex) {
-            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_ok_buttonActionPerformed
 

@@ -259,7 +259,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="20" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Use multi slot download mode (NOT recommended. Download restart needed.)"/>
+                <Property name="text" type="java.lang.String" value="Use multi slot download mode (NOT recommended; download restart needed)"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
               <Events>
@@ -493,7 +493,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="20" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Use multi slot upload mode (Recommended. Upload restart needed.)"/>
+                <Property name="text" type="java.lang.String" value="Use multi slot upload mode (RECOMMENDED; Upload restart needed)"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
               <Events>

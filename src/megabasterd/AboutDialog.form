@@ -94,7 +94,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="48" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="MegaBasterd 1.8.1"/>
+        <Property name="text" type="java.lang.String" value="MegaBasterd X.X"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>

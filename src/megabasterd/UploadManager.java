@@ -6,6 +6,7 @@ import java.sql.SQLException;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 import static megabasterd.DBTools.deleteUpload;
+import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.HashString;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 
@@ -52,16 +53,8 @@ public final class UploadManager extends TransferenceManager {
             
             getTransference_finished_queue().add(upload);
         }
-        
-        if(getTransference_provision_queue().isEmpty()) {
-        
-            swingReflectionInvoke("setText", getMain_panel().getView().getStatus_up_label(), "");
 
-        } else {
-
-            swingReflectionInvoke("setText", getMain_panel().getView().getStatus_up_label(), getTransference_provision_queue().size() + " uploads waiting for provision...");
-        }
-        
+        secureNotify();
     }
     
     
@@ -97,69 +90,108 @@ public final class UploadManager extends TransferenceManager {
             }
         }
 
-        if(!getTransference_remove_queue().isEmpty()) {
-
-            swingReflectionInvoke("setText", upload.getMain_panel().getView().getStatus_up_label(), "Removing "+getTransference_remove_queue().size()+" uploads, please wait...");
-
-        } else {
-
-            swingReflectionInvoke("setText", upload.getMain_panel().getView().getStatus_up_label(), "");
-        }
+        secureNotify();
     }
     
     
     @Override
     public void run() {
         
+        final UploadManager tthis = this;
+        
         while(true)
         {
-            if(!getTransference_provision_queue().isEmpty())
+            if(!isProvisioning_transferences() && !getTransference_provision_queue().isEmpty())
             {
-                swingReflectionInvoke("setEnabled", getMain_panel().getView().getNew_upload_menu(), false);
+                setProvisioning_transferences(true);
                 
-                swingReflectionInvoke("setText", getMain_panel().getView().getStatus_up_label(), getTransference_provision_queue().size() + " uploads waiting for provision...");
-                
-                while(!getTransference_provision_queue().isEmpty())
-                {
-                    Upload upload = (Upload)getTransference_provision_queue().poll();
-                    
-                    if(upload != null) {
-                        
-                        provision(upload);
-                    }
-                }
-            }
-            
-            if(!getTransference_remove_queue().isEmpty()){
-                
-                swingReflectionInvoke("setEnabled", getMain_panel().getView().getNew_upload_menu(), false);
-                
-                swingReflectionInvoke("setText", getMain_panel().getView().getStatus_up_label(), "Removing "+getTransference_remove_queue().size()+" uploads, please wait...");
-                
-                while(!getTransference_remove_queue().isEmpty()) {
-                    
-                    Upload upload = (Upload)getTransference_remove_queue().poll();
-                    
-                    if(upload != null) {
-                        
-                        remove(upload);
-                    }
-                }
-            }
-            
-            while(!getTransference_start_queue().isEmpty() && getTransference_running_list().size() < getMain_panel().getMax_ul()) {
-                
-                Upload upload = (Upload)getTransference_start_queue().poll();
-                
-                if(upload != null) {
-                    
-                    start(upload);
-                }
-            }
-            
-            checkButtonsAndMenus(getMain_panel().getView().getClose_all_finished_up_button(), getMain_panel().getView().getPause_all_up(), getMain_panel().getView().getNew_upload_menu(), getMain_panel().getView().getClean_all_up_menu());
+                THREAD_POOL.execute(new Runnable(){
+                                @Override
+                                public void run(){
+        
+                                while(!getTransference_provision_queue().isEmpty())
+                                {
+                                    Upload upload = (Upload)getTransference_provision_queue().poll();
 
+                                    if(upload != null) {
+
+                                        provision(upload);
+                                    }
+                                }
+                                
+                                tthis.setProvisioning_transferences(false);
+                                    
+                                tthis.secureNotify();
+                                
+                                
+                                }});
+                
+                
+                
+            }
+            
+            if(!isRemoving_transferences() && !getTransference_remove_queue().isEmpty()){
+                
+                setRemoving_transferences(true);
+                
+                THREAD_POOL.execute(new Runnable(){
+                                @Override
+                                public void run(){
+
+                            while(!getTransference_remove_queue().isEmpty()) {
+
+                                Upload upload = (Upload)getTransference_remove_queue().poll();
+
+                                if(upload != null) {
+
+                                    remove(upload);
+                                }
+                            }
+                            
+                            tthis.setRemoving_transferences(false);
+                                    
+                            tthis.secureNotify();
+                
+                 }});
+            }
+            
+            
+            if(!isStarting_transferences() && !getTransference_start_queue().isEmpty() && getTransference_running_list().size() < getMain_panel().getMax_ul())
+            {
+                setStarting_transferences(true);
+                
+                THREAD_POOL.execute(new Runnable(){
+                                @Override
+                                public void run(){
+                                
+                                    while(!getTransference_start_queue().isEmpty() && getTransference_running_list().size() < getMain_panel().getMax_ul()) {
+                                    
+                                        Upload upload = (Upload)getTransference_start_queue().poll();
+                
+                                        if(upload != null) {
+
+                                            start(upload);
+                                        }
+                                        
+                                    }
+                                    
+                                    tthis.setStarting_transferences(false);
+                                    
+                                    tthis.secureNotify();
+                                }
+                                
+                             });
+                
+                
+            }
+  
             secureWait();
+            
+            checkButtonsAndMenus(getMain_panel().getView().getClose_all_finished_up_button(), getMain_panel().getView().getPause_all_up(), getMain_panel().getView().getClean_all_up_menu());
+            
+            if(!this.getMain_panel().getView().isPre_processing_uploads()) {
+                swingReflectionInvoke("setText", getMain_panel().getView().getStatus_up_label(), getStatus());
+            }
         }
         
         }
