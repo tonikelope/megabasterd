@@ -58,7 +58,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.2";
+    public static final String VERSION="1.3";
     public static final String USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:48.0) Gecko/20100101 Firefox/48.0";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;

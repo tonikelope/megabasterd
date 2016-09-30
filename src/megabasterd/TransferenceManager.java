@@ -48,8 +48,8 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         return _starting_transferences;
     }
 
-    public void setStarting_transferences(boolean starting_transferences) {
-        _starting_transferences = starting_transferences;
+    public void setStarting_transferences(boolean starting) {
+        _starting_transferences = starting;
     }
  
     public TransferenceManager(MainPanel main_panel, javax.swing.JPanel scroll_panel) {
