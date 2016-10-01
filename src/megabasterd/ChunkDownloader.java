@@ -180,7 +180,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                             
                             conta_error++;
 
-                            Thread.sleep(getWaitTimeExpBackOff(conta_error)*1000);
+                            Thread.sleep(getWaitTimeExpBackOff(conta_error)*1_000);
 
                         } else if(!error) {
                             

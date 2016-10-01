@@ -8,9 +8,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Integer.parseInt;
 import static java.lang.Long.valueOf;
 import static java.lang.Math.ceil;
+import static java.lang.System.out;
 import static java.lang.Thread.sleep;
 import java.net.URL;
 import java.net.URLConnection;
@@ -397,10 +399,10 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                         _retrying_request = false;
                         
                         swingReflectionInvoke("setMinimum", getView().getProgress_pbar(), 0);
-                        swingReflectionInvoke("setMaximum", getView().getProgress_pbar(), Integer.MAX_VALUE);
+                        swingReflectionInvoke("setMaximum", getView().getProgress_pbar(), MAX_VALUE);
                         swingReflectionInvoke("setStringPainted", getView().getProgress_pbar(), true);
 
-                        _progress_bar_rate = Integer.MAX_VALUE/(double)_file_size;
+                        _progress_bar_rate = MAX_VALUE/(double)_file_size;
 
                         filename = _download_path+"/"+_file_name;
 
@@ -478,7 +480,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                         secureWait();
                         
-                        System.out.println("Chunkdownloaders finished!");
+                        out.println("Chunkdownloaders finished!");
                 
                         getSpeed_meter().setExit(true);
 
@@ -494,14 +496,14 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                         {
                             try {
                                 
-                                _thread_pool.awaitTermination(Integer.MAX_VALUE, DAYS);
+                                _thread_pool.awaitTermination(MAX_VALUE, DAYS);
 
                             } catch (InterruptedException ex) {
                                 getLogger(Download.class.getName()).log(SEVERE, null, ex);
                             }
                         }
                         
-                        System.out.println("Downloader thread pool finished!");
+                        out.println("Downloader thread pool finished!");
                         
                         getMain_panel().getGlobal_dl_speed().detachSpeedMeter(getSpeed_meter());
                         
@@ -525,7 +527,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                                 throw new IOException("El tamaño del fichero es incorrecto!");
                             }
                             
-                            swingReflectionInvoke("setValue", getView().getProgress_pbar(), Integer.MAX_VALUE);
+                            swingReflectionInvoke("setValue", getView().getProgress_pbar(), MAX_VALUE);
 
                             _file.renameTo(new File(filename));
                             
@@ -579,7 +581,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                                     swingReflectionInvoke("setVisible", getView().getStop_button(), false);
 
-                                    swingReflectionInvoke("setValue", getView().getProgress_pbar(), Integer.MAX_VALUE);
+                                    swingReflectionInvoke("setValue", getView().getProgress_pbar(), MAX_VALUE);
                                 
                                 }
                             }
@@ -698,10 +700,10 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             
             _status_error = true;
        
-            System.out.println(ex.getMessage());
+            out.println(ex.getMessage());
             
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            out.println(ex.getMessage());
         }    
         
         if(!_exit) {
@@ -729,7 +731,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
         }
         
-        System.out.println(_file_name+" Downloader: bye bye");
+        out.println(_file_name+" Downloader: bye bye");
     }
     
     public void provisionIt(boolean retry) throws MegaAPIException, MegaCrypterAPIException {
@@ -919,7 +921,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                 for(long i=getWaitTimeExpBackOff(api_error_retry++); i>0 && !_exit; i--)
                 {
                     try {
-                        sleep(1000);
+                        sleep(1_000);
                     } catch (InterruptedException ex) {}
                 }
             }
@@ -942,7 +944,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             
             _thread_pool.execute(c);
             
-        }catch(java.util.concurrent.RejectedExecutionException e){System.out.println(e.getMessage());}
+        }catch(java.util.concurrent.RejectedExecutionException e){out.println(e.getMessage());}
     }
     
     public synchronized void stopLastStartedSlot()
@@ -1011,7 +1013,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             
             long chunk_id=1;
             long tot=0L;
-            byte[] chunk_buffer = new byte[16*1024];
+            byte[] chunk_buffer = new byte[16*1_024];
             byte[] byte_block = new byte[16];
             int[] int_block;
             int re, reads, to_read;
@@ -1133,9 +1135,9 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     
     public long calculateMaxTempFileSize(long size)
     {
-        if(size > 3584*1024)
+        if(size > 3_584*1_024)
         {
-            long reminder = (size - 3584*1024)%(1024*1024);
+            long reminder = (size - 3_584*1_024)%(1_024*1_024);
             
             return reminder==0?size:(size - reminder);
         }
@@ -1146,10 +1148,10 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             while(tot < size)
             {
                 i++;
-                tot+=i*128*1024;
+                tot+=i*128*1_024;
             }
             
-            return tot==size?size:(tot-i*128*1024);
+            return tot==size?size:(tot-i*128*1_024);
         }
     }
     
@@ -1236,7 +1238,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                             }
 
                             try {
-                                sleep(1000);
+                                sleep(1_000);
                             } catch (InterruptedException ex2) {}
                         }
                 }
@@ -1323,7 +1325,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                             }
 
                             try {
-                                sleep(1000);
+                                sleep(1_000);
                             } catch (InterruptedException ex2) {}
                         }
                 }

@@ -19,7 +19,7 @@ import static megabasterd.MiscTools.swingReflectionInvoke;
 
 public final class KissVideoStreamServer {
     
-    public static final int TIMEOUT=30000;
+    public static final int TIMEOUT=30_000;
     public static final int EXP_BACKOFF_BASE=2;
     public static final int EXP_BACKOFF_SECS_RETRY=1;
     public static final int EXP_BACKOFF_MAX_WAIT_TIME=128;
@@ -168,7 +168,7 @@ public final class KissVideoStreamServer {
                             }
 
                             try {
-                                Thread.sleep(1000);
+                                Thread.sleep(1_000);
                             } catch (InterruptedException ex) {}
                         }
                 }
@@ -230,7 +230,7 @@ public final class KissVideoStreamServer {
                         }
 
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(1_000);
                         } catch (InterruptedException ex) {}
                     }
             }
@@ -264,7 +264,7 @@ public final class KissVideoStreamServer {
                             }
 
                             try {
-                                Thread.sleep(1000);
+                                Thread.sleep(1_000);
                             } catch (InterruptedException ex) {}
                         }
                 }

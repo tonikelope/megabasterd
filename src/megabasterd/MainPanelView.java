@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Logger.getLogger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -38,7 +39,6 @@ import static megabasterd.MiscTools.i32a2bin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.updateFont;
-import static java.util.logging.Logger.getLogger;
 
 
 public final class MainPanelView extends javax.swing.JFrame {
@@ -267,7 +267,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addComponent(global_speed_down_label, javax.swing.GroupLayout.PREFERRED_SIZE, 404, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 338, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 258, Short.MAX_VALUE)
                 .addComponent(pause_all_down_button))
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
@@ -329,7 +329,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addComponent(global_speed_up_label, javax.swing.GroupLayout.PREFERRED_SIZE, 404, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 338, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 258, Short.MAX_VALUE)
                 .addComponent(pause_all_up_button))
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
@@ -470,10 +470,10 @@ public final class MainPanelView extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jTabbedPane1)
+                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 796, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(kiss_server_status, javax.swing.GroupLayout.PREFERRED_SIZE, 440, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(logo_label)))
                 .addContainerGap())
         );
@@ -636,9 +636,9 @@ public final class MainPanelView extends javax.swing.JFrame {
             
             _main_panel.loadUserSettings();
             
-            _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.isLimit_download_speed()?_main_panel.getMax_dl_speed()*1024:0);
+            _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.isLimit_download_speed()?_main_panel.getMax_dl_speed()*1_024:0);
             
-            _main_panel.getStream_supervisor().setMaxBytesPerSecOutput( _main_panel.isLimit_upload_speed()?_main_panel.getMax_up_speed()*1024:0);
+            _main_panel.getStream_supervisor().setMaxBytesPerSecOutput( _main_panel.isLimit_upload_speed()?_main_panel.getMax_up_speed()*1_024:0);
             
             swingReflectionInvoke("setForeground", global_speed_down_label, _main_panel.isLimit_download_speed()?new Color(255,0,0):new Color(0,128,255));
             

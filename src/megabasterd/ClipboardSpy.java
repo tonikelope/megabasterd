@@ -4,6 +4,7 @@ import static java.awt.Toolkit.getDefaultToolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.Transferable;
+import static java.lang.System.out;
 import static java.lang.Thread.sleep;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.util.logging.Level.SEVERE;
@@ -86,7 +87,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
         
         gainOwnership(_contents);
         
-        System.out.println("Spying clipboard...");
+        out.println("Spying clipboard...");
         
         secureWait();
     }

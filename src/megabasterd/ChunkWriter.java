@@ -128,7 +128,7 @@ public final class ChunkWriter implements Runnable, SecureNotifiable {
     {
         Chunk current_chunk;
         CipherInputStream cis;
-        byte[] buffer = new byte[16*1024];
+        byte[] buffer = new byte[16*1_024];
         int reads;
        
             try {
@@ -186,9 +186,9 @@ public final class ChunkWriter implements Runnable, SecureNotifiable {
     
     private long calculateLastWrittenChunk(long temp_file_size)
     {
-        if(temp_file_size > 3584*1024)
+        if(temp_file_size > 3_584*1_024)
         {
-            return 7 + (long)Math.ceil((temp_file_size - 3584*1024)/(1024*1024));
+            return 7 + (long)Math.ceil((temp_file_size - 3_584*1_024)/(1_024*1_024));
         }
         else
         {
@@ -197,7 +197,7 @@ public final class ChunkWriter implements Runnable, SecureNotifiable {
             while(tot < temp_file_size)
             {
                 i++;
-                tot+=i*128*1024;
+                tot+=i*128*1_024;
             }
             
             return i;

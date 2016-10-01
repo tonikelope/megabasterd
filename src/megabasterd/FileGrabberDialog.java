@@ -15,6 +15,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import static megabasterd.MainPanel.FONT_DEFAULT;
+import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
 import static megabasterd.MiscTools.deleteSelectedTreeItems;
 import static megabasterd.MiscTools.formatBytes;
@@ -433,7 +434,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             swingReflectionInvoke("setEnabled", skip_rest_button, false);
             swingReflectionInvoke("setEnabled", warning_label, false);
             
-            MainPanel.THREAD_POOL.execute(new Runnable(){
+            THREAD_POOL.execute(new Runnable(){
                     @Override
                     public void run() {
         

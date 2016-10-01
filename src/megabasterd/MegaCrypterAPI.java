@@ -60,7 +60,7 @@ public final class MegaCrypterAPI {
 
         ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
-        byte[] buffer = new byte[16*1024];
+        byte[] buffer = new byte[16*1_024];
 
         int reads;
 

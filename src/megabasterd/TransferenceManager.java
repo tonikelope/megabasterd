@@ -5,9 +5,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
+import static java.util.logging.Logger.getLogger;
 import javax.swing.JPanel;
 import static megabasterd.MiscTools.swingReflectionInvoke;
-import static java.util.logging.Logger.getLogger;
 
 /**
  *

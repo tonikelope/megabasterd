@@ -16,6 +16,7 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
 import static megabasterd.DBTools.insertSettingValueInDB;
 import static megabasterd.MainPanel.FONT_DEFAULT;
+import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.i32a2bin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
@@ -704,7 +705,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             
             final SettingsDialog dialog = this;
             
-            MainPanel.THREAD_POOL.execute(new Runnable(){
+            THREAD_POOL.execute(new Runnable(){
                 @Override
                 public void run() {
                     
