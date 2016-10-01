@@ -4,6 +4,7 @@ import com.sun.net.httpserver.HttpServer;
 import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
 import java.net.URLConnection;
@@ -64,7 +65,7 @@ public final class KissVideoStreamServer {
     
     public void start(int port, String context) throws IOException
     {
-        _httpserver = HttpServer.create(new InetSocketAddress(port), 0);
+        _httpserver = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
         printStatusOK("Kissvideostreamer on localhost:"+STREAMER_PORT+" (Waiting for request...)");
         _httpserver.createContext(context, (_http_handler = new KissVideoStreamServerHandler(this, _main_panel)));
         _httpserver.setExecutor(Executors.newCachedThreadPool());
