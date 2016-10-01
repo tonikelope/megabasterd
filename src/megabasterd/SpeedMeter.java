@@ -7,7 +7,7 @@ import static megabasterd.MiscTools.formatBytes;
 
 public final class SpeedMeter implements Runnable, SecureNotifiable
 {
-    public static final int SLEEP = 3_000;
+    public static final int SLEEP = 3000;
     private long _progress;
     private final Transference _transference;
     private final GlobalSpeedMeter _gspeed;
@@ -120,7 +120,7 @@ public final class SpeedMeter implements Runnable, SecureNotifiable
 
                         } else if( p > _progress) {
                             
-                            double sleep_time = ((double)SpeedMeter.SLEEP*(no_data_count+1))/1_000 ;
+                            double sleep_time = ((double)SpeedMeter.SLEEP*(no_data_count+1))/1000 ;
                             
                             double current_speed = (p - _progress) / sleep_time;
 

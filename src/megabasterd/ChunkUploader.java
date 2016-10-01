@@ -235,7 +235,7 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
                                 
                                 if(!_exit) {
                                     
-                                    Thread.sleep(getWaitTimeExpBackOff(conta_error)*1_000);
+                                    Thread.sleep(getWaitTimeExpBackOff(conta_error)*1000);
                                 }
 
                             } else if(!error) {

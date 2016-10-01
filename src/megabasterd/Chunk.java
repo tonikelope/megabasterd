@@ -70,7 +70,7 @@ public final class Chunk {
     
     private long calculateSize(long file_size)
     {
-        long chunk_size = (_id>=1 && _id<=7)?_id*128*1_024:1_024*1_024;
+        long chunk_size = (_id>=1 && _id<=7)?_id*128*1024:1024*1024;
         
         if(_offset + chunk_size > file_size) {
             chunk_size = file_size - _offset;
@@ -81,9 +81,9 @@ public final class Chunk {
     
     private long calculateOffset()
     {        
-        long[] offs = {0, 128, 384, 768, 1_280, 1_920, 2_688};
+        long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
         
-        return (_id<=7?offs[(int)_id-1]:(3_584 + (_id-8)*1_024))*1_024;
+        return (_id<=7?offs[(int)_id-1]:(3584 + (_id-8)*1024))*1024;
     }
    
 }

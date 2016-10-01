@@ -534,7 +534,7 @@ public final class MiscTools {
 
         ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
-        byte[] buffer = new byte[16*1_024];
+        byte[] buffer = new byte[16*1024];
 
         int reads;
 
@@ -554,7 +554,7 @@ public final class MiscTools {
         
         bytes = Math.max(bytes, 0L);
         
-        int pow = Math.min((int)((bytes>0L?Math.log(bytes):0) / Math.log(1_024)), units.length - 1);
+        int pow = Math.min((int)((bytes>0L?Math.log(bytes):0) / Math.log(1024)), units.length - 1);
       
         Double bytes_double = (double)bytes/(1 << (10 * pow));
         

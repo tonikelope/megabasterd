@@ -6,9 +6,7 @@ import java.sql.SQLException;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 import static megabasterd.DBTools.deleteUpload;
-import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.HashString;
-import static megabasterd.MiscTools.swingReflectionInvoke;
 
 
 
@@ -20,16 +18,18 @@ public final class UploadManager extends TransferenceManager {
     
     public UploadManager(MainPanel main_panel) {
         
-        super(main_panel, main_panel.getView().getjPanel_scroll_up());
+        super(main_panel, main_panel.getMax_ul(), main_panel.getView().getStatus_up_label(), main_panel.getView().getjPanel_scroll_up(), main_panel.getView().getClose_all_finished_up_button(), main_panel.getView().getPause_all_up_button(), main_panel.getView().getClean_all_up_menu());
+
     }
     
-    public void provision(Upload upload) 
+    @Override
+    public void provision(Transference upload) 
     {      
-        getScroll_panel().add(upload.getView());
+        getScroll_panel().add(((Upload)upload).getView());
 
-        upload.provisionIt();
+        ((Upload)upload).provisionIt();
       
-        if(upload.isProvision_ok()) {
+        if(((Upload)upload).isProvision_ok()) {
 
             getTransference_start_queue().add(upload);
 
@@ -58,9 +58,10 @@ public final class UploadManager extends TransferenceManager {
     }
     
     
-    public void remove(Upload upload) {
+    @Override
+    public void remove(Transference upload) {
         
-        getScroll_panel().remove(upload.getView());
+        getScroll_panel().remove(((Upload)upload).getView());
         
         getTransference_start_queue().remove(upload);
 
@@ -68,10 +69,10 @@ public final class UploadManager extends TransferenceManager {
 
         getTransference_finished_queue().remove(upload);
 
-        if(upload.isProvision_ok()) {
+        if(((Upload)upload).isProvision_ok()) {
 
             try {
-                deleteUpload(upload.getFile_name(), upload.getMa().getEmail());
+                deleteUpload(upload.getFile_name(), ((Upload)upload).getMa().getEmail());
             } catch (SQLException ex) {
                 getLogger(UploadManager.class.getName()).log(SEVERE, null, ex);
             }
@@ -92,109 +93,5 @@ public final class UploadManager extends TransferenceManager {
 
         secureNotify();
     }
-    
-    
-    @Override
-    public void run() {
-        
-        final UploadManager tthis = this;
-        
-        while(true)
-        {
-            if(!isProvisioning_transferences() && !getTransference_provision_queue().isEmpty())
-            {
-                setProvisioning_transferences(true);
-                
-                THREAD_POOL.execute(new Runnable(){
-                                @Override
-                                public void run(){
-        
-                                while(!getTransference_provision_queue().isEmpty())
-                                {
-                                    Upload upload = (Upload)getTransference_provision_queue().poll();
-
-                                    if(upload != null) {
-
-                                        provision(upload);
-                                    }
-                                }
-                                
-                                tthis.setProvisioning_transferences(false);
-                                    
-                                tthis.secureNotify();
-                                
-                                
-                                }});
-                
-                
-                
-            }
-            
-            if(!isRemoving_transferences() && !getTransference_remove_queue().isEmpty()){
-                
-                setRemoving_transferences(true);
-                
-                THREAD_POOL.execute(new Runnable(){
-                                @Override
-                                public void run(){
-
-                            while(!getTransference_remove_queue().isEmpty()) {
-
-                                Upload upload = (Upload)getTransference_remove_queue().poll();
-
-                                if(upload != null) {
-
-                                    remove(upload);
-                                }
-                            }
-                            
-                            tthis.setRemoving_transferences(false);
-                                    
-                            tthis.secureNotify();
-                
-                 }});
-            }
-            
-            
-            if(!isStarting_transferences() && !getTransference_start_queue().isEmpty() && getTransference_running_list().size() < getMain_panel().getMax_ul())
-            {
-                setStarting_transferences(true);
-                
-                THREAD_POOL.execute(new Runnable(){
-                                @Override
-                                public void run(){
-                                
-                                    while(!getTransference_start_queue().isEmpty() && getTransference_running_list().size() < getMain_panel().getMax_ul()) {
-                                    
-                                        Upload upload = (Upload)getTransference_start_queue().poll();
-                
-                                        if(upload != null) {
-
-                                            start(upload);
-                                        }
-                                        
-                                    }
-                                    
-                                    tthis.setStarting_transferences(false);
-                                    
-                                    tthis.secureNotify();
-                                }
-                                
-                             });
-                
-                
-            }
-  
-            secureWait();
-            
-            checkButtonsAndMenus(getMain_panel().getView().getClose_all_finished_up_button(), getMain_panel().getView().getPause_all_up(), getMain_panel().getView().getClean_all_up_menu());
-            
-            if(!getMain_panel().getView().isPre_processing_uploads()) {
-                swingReflectionInvoke("setText", getMain_panel().getView().getStatus_up_label(), getStatus());
-            }
-        }
-        
-        }
-    
     
 }

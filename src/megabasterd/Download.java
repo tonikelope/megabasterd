@@ -921,7 +921,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                 for(long i=getWaitTimeExpBackOff(api_error_retry++); i>0 && !_exit; i--)
                 {
                     try {
-                        sleep(1_000);
+                        sleep(1000);
                     } catch (InterruptedException ex) {}
                 }
             }
@@ -1013,7 +1013,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             
             long chunk_id=1;
             long tot=0L;
-            byte[] chunk_buffer = new byte[16*1_024];
+            byte[] chunk_buffer = new byte[16*1024];
             byte[] byte_block = new byte[16];
             int[] int_block;
             int re, reads, to_read;
@@ -1135,9 +1135,9 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     
     public long calculateMaxTempFileSize(long size)
     {
-        if(size > 3_584*1_024)
+        if(size > 3584*1024)
         {
-            long reminder = (size - 3_584*1_024)%(1_024*1_024);
+            long reminder = (size - 3584*1024)%(1024*1024);
             
             return reminder==0?size:(size - reminder);
         }
@@ -1148,10 +1148,10 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             while(tot < size)
             {
                 i++;
-                tot+=i*128*1_024;
+                tot+=i*128*1024;
             }
             
-            return tot==size?size:(tot-i*128*1_024);
+            return tot==size?size:(tot-i*128*1024);
         }
     }
     
@@ -1238,7 +1238,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                             }
 
                             try {
-                                sleep(1_000);
+                                sleep(1000);
                             } catch (InterruptedException ex2) {}
                         }
                 }
@@ -1325,7 +1325,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                             }
 
                             try {
-                                sleep(1_000);
+                                sleep(1000);
                             } catch (InterruptedException ex2) {}
                         }
                 }

@@ -286,11 +286,11 @@ public final class CryptTools {
     
     public static int[] MEGAPrepareMasterKey(int[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
         
-        int[] pkey = {0x93C4_67E3, 0x7DB0_C7A4, 0xD1BE_3F81, 0x0152_CB56};
+        int[] pkey = {0x93C467E3, 0x7DB0_C7A4, 0xD1BE_3F81, 0x0152_CB56};
         
         int[] iv = {0,0,0,0};
         
-        for(int r=0; r<0x1_0000; r++) {
+        for(int r=0; r<0x10000; r++) {
             
             for(int j=0; j<key.length; j+=4) {
                 

@@ -158,7 +158,7 @@ public final class KissVideoStreamServerHandler implements HttpHandler {
 
                     resheaders.add("Connection", "close");
           
-                    byte[] buffer = new byte[16*1_024];
+                    byte[] buffer = new byte[16*1024];
                
                     int reads;
                
@@ -287,7 +287,7 @@ public final class KissVideoStreamServerHandler implements HttpHandler {
             _httpserver.getStreaming().remove(Thread.currentThread());
             
             try {
-                Thread.sleep(1_000);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 getLogger(KissVideoStreamServerHandler.class.getName()).log(Level.SEVERE, null, ex);
             }

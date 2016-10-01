@@ -147,7 +147,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
             secureNotifyAll();
             
             try {
-                Thread.sleep(1_000);
+                Thread.sleep(1000);
             } catch (InterruptedException ex) {
                 getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
             }

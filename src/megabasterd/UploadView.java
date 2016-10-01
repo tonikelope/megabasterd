@@ -466,7 +466,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         swingReflectionInvoke("setText", pause_button, "PAUSE UPLOAD");
 
-        swingReflectionInvoke("setVisible", _upload.getMain_panel().getView().getPause_all_up(), true);
+        swingReflectionInvoke("setVisible", _upload.getMain_panel().getView().getPause_all_up_button(), true);
     }
 
     @Override

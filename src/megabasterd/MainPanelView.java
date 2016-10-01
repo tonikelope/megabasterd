@@ -28,6 +28,7 @@ import javax.swing.JTabbedPane;
 import static megabasterd.CryptTools.decryptMegaDownloaderLink;
 import static megabasterd.DBTools.deleteMegaAccount;
 import static megabasterd.MainPanel.FONT_DEFAULT;
+import static megabasterd.MainPanel.ICON_FILE;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MainPanel.VERSION;
 import static megabasterd.MiscTools.BASE642Bin;
@@ -43,17 +44,8 @@ import static megabasterd.MiscTools.updateFont;
 
 public final class MainPanelView extends javax.swing.JFrame {
 
+    
     private final MainPanel _main_panel;
-    private volatile boolean _pre_processing_downloads;
-    private volatile boolean _pre_processing_uploads;
-
-    public boolean isPre_processing_downloads() {
-        return _pre_processing_downloads;
-    }
-
-    public boolean isPre_processing_uploads() {
-        return _pre_processing_uploads;
-    }
  
     public JLabel getKiss_server_status() {
         return kiss_server_status;
@@ -103,7 +95,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         return pause_all_down_button;
     }
 
-    public JButton getPause_all_up() {
+    public JButton getPause_all_up_button() {
         return pause_all_up_button;
     }
 
@@ -133,7 +125,7 @@ public final class MainPanelView extends javax.swing.JFrame {
  
         setTitle("MegaBasterd " + VERSION);
         
-        setIconImage(new ImageIcon(getClass().getResource("pica_roja.png")).getImage());
+        setIconImage(new ImageIcon(getClass().getResource(ICON_FILE)).getImage());
 
         updateFont(file_menu, FONT_DEFAULT, PLAIN);
         updateFont(edit_menu, FONT_DEFAULT, PLAIN);
@@ -272,9 +264,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(close_all_finished_down_button)
-                .addGap(6, 6, 6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(close_all_finished_down_button))
             .addComponent(jScrollPane_down)
         );
         downloads_panelLayout.setVerticalGroup(
@@ -334,9 +325,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(close_all_finished_up_button)
-                .addGap(6, 6, 6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(close_all_finished_up_button))
             .addComponent(jScrollPane_up)
         );
         uploads_panelLayout.setVerticalGroup(
@@ -470,7 +460,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 796, Short.MAX_VALUE)
+                    .addComponent(jTabbedPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(18, 18, 18)
@@ -493,9 +483,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void new_download_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_download_menuActionPerformed
- 
-        _pre_processing_downloads = true;
-        
+
         swingReflectionInvoke("setEnabled", new_download_menu, false);
         
         final LinkGrabberDialog dialog = new LinkGrabberDialog(this, true, _main_panel.getDefault_download_path(), _main_panel.getClipboardspy());
@@ -514,13 +502,15 @@ public final class MainPanelView extends javax.swing.JFrame {
         
         if(dialog.isDownload()) { 
             
-            final MainPanelView main = this;
+            getMain_panel().getDownload_manager().setPreprocessing_transferences(true);
+            
+            final MainPanelView tthis = this;
             
             THREAD_POOL.execute(new Runnable(){
                     @Override
                     public void run() {
-                     
-                    swingReflectionInvoke("setText", main.status_down_label, "Pre-processing downloads, please wait...");
+
+                    swingReflectionInvoke("setText", tthis.status_down_label, "Pre-processing downloads, please wait...");
 
                     Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", dialog.getLinks_textarea().getText(), 0));
             
@@ -549,11 +539,11 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             if(findFirstRegex("#F!", url, 0) != null) {
 
-                                FolderLinkDialog fdialog = new FolderLinkDialog(main, true, url);
+                                FolderLinkDialog fdialog = new FolderLinkDialog(tthis, true, url);
   
                                 if(!fdialog.isMega_error()) {
                                     
-                                    swingReflectionInvokeAndWait("setLocationRelativeTo", fdialog, main);
+                                    swingReflectionInvokeAndWait("setLocationRelativeTo", fdialog, tthis);
                                 
                                     swingReflectionInvokeAndWait("setVisible", fdialog, true);
                                     
@@ -565,9 +555,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                         for(HashMap folder_link:folder_links) {
 
-                                            download = new Download(main.getMain_panel(), (String)folder_link.get("url"), dl_path, (String)folder_link.get("filename"), (String)folder_link.get("filekey"), (long)folder_link.get("filesize"), null, null, main.getMain_panel().isUse_slots_down(), main.getMain_panel().getDefault_slots_down(), true);
+                                            download = new Download(tthis.getMain_panel(), (String)folder_link.get("url"), dl_path, (String)folder_link.get("filename"), (String)folder_link.get("filekey"), (long)folder_link.get("filesize"), null, null, tthis.getMain_panel().isUse_slots_down(), tthis.getMain_panel().getDefault_slots_down(), true);
 
-                                            main.getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                            tthis.getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
                                             conta_downloads++;
                                         }
@@ -580,9 +570,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             } else {
                                 
-                                download = new Download(main.getMain_panel(), url, dl_path, null, null, null, null, null, main.getMain_panel().isUse_slots_down(), main.getMain_panel().getDefault_slots_down(), false);
+                                download = new Download(tthis.getMain_panel(), url, dl_path, null, null, null, null, null, tthis.getMain_panel().isUse_slots_down(), tthis.getMain_panel().getDefault_slots_down(), false);
 
-                                main.getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                tthis.getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
                                 conta_downloads++;
                             }
@@ -590,23 +580,27 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         if(conta_downloads > 0) {
                             
-                            swingReflectionInvoke("setText", main.status_down_label, "Starting downloads provisioning, please wait...");
+                            swingReflectionInvoke("setText", tthis.status_down_label, "Starting downloads provisioning, please wait...");
 
-                            main.getMain_panel().getDownload_manager().secureNotify();
+                            tthis.getMain_panel().getDownload_manager().secureNotify();
 
                         }
                 } 
 
-                swingReflectionInvoke("setText", main.status_down_label, "");
+                swingReflectionInvoke("setText", tthis.status_down_label, "");
+                
+                swingReflectionInvoke("setEnabled", new_download_menu, true);
+                
+                tthis.getMain_panel().getDownload_manager().setPreprocessing_transferences(false);
 
                     }});
-        } 
+        } else {
+            swingReflectionInvoke("setEnabled", new_download_menu, true);
+        }
             
-        swingReflectionInvoke("setEnabled", new_download_menu, true);
+        
        
         dialog.dispose();
-        
-        _pre_processing_downloads = false;
 
     }//GEN-LAST:event_new_download_menuActionPerformed
 
@@ -636,9 +630,9 @@ public final class MainPanelView extends javax.swing.JFrame {
             
             _main_panel.loadUserSettings();
             
-            _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.isLimit_download_speed()?_main_panel.getMax_dl_speed()*1_024:0);
+            _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.isLimit_download_speed()?_main_panel.getMax_dl_speed()*1024:0);
             
-            _main_panel.getStream_supervisor().setMaxBytesPerSecOutput( _main_panel.isLimit_upload_speed()?_main_panel.getMax_up_speed()*1_024:0);
+            _main_panel.getStream_supervisor().setMaxBytesPerSecOutput( _main_panel.isLimit_upload_speed()?_main_panel.getMax_up_speed()*1024:0);
             
             swingReflectionInvoke("setForeground", global_speed_down_label, _main_panel.isLimit_download_speed()?new Color(255,0,0):new Color(0,128,255));
             
@@ -716,19 +710,19 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void new_upload_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_upload_menuActionPerformed
         
-        _pre_processing_uploads = true;
-        
-        swingReflectionInvoke("setEnabled", new_upload_menu, false);
-
         final FileGrabberDialog dialog = new FileGrabberDialog(this,true);
         
+        try{
+    
+        swingReflectionInvoke("setEnabled", new_upload_menu, false);
+
         swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, this);
 
         swingReflectionInvokeAndWait("setVisible", dialog, true);
 
         if(dialog.isUpload() && dialog.getFiles().size() > 0) {
         
-            try {
+                getMain_panel().getUpload_manager().setPreprocessing_transferences(true);
                 
                 swingReflectionInvoke("setText", status_up_label, "Pre-processing uploads, please wait...");
                 
@@ -740,8 +734,10 @@ public final class MainPanelView extends javax.swing.JFrame {
                 
                 final String dir_name=dialog.getDir_name_textfield().getText();
 
-                final int[] mega_aes_pass = bin2i32a(BASE642Bin((String)data_account.get("password_aes")));
                 
+                    final int[] mega_aes_pass = bin2i32a(BASE642Bin((String)data_account.get("password_aes")));
+                
+        
                 final String mega_user_hash = (String)data_account.get("user_hash");
                 
                 final ArrayList<File> files = dialog.getFiles();
@@ -831,20 +827,22 @@ public final class MainPanelView extends javax.swing.JFrame {
                                 
                                 getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
                             }
+                            
+                            swingReflectionInvoke("setEnabled", new_upload_menu, true);
+                            
+                            main.getMain_panel().getUpload_manager().setPreprocessing_transferences(false);
                     }
+                    
                 });
-                
-                
-            } catch (Exception ex) {
-                getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
-            }
-        } 
             
-        swingReflectionInvoke("setEnabled", new_upload_menu, true);
+        } else {
+            swingReflectionInvoke("setEnabled", new_upload_menu, true);
+        } 
         
+        }catch(Exception ex) {}
+
         dialog.dispose();
-        
-        _pre_processing_uploads = false;
+
     }//GEN-LAST:event_new_upload_menuActionPerformed
 
     private void close_all_finished_up_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_all_finished_up_buttonActionPerformed
