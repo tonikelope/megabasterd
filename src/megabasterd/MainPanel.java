@@ -48,7 +48,6 @@ import static megabasterd.MiscTools.setNimbusLookAndFeel;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.Transference.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
-import static megabasterd.Transference.MAX_SIM_TRANSFERENCES;
 import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
 
 
@@ -58,7 +57,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.3";
+    public static final String VERSION="1.4";
     public static final String USER_AGENT="Mozilla/5.0 (X11; Linux x86_64; rv:48.0) Gecko/20100101 Firefox/48.0";
     public static final int CONNECTION_TIMEOUT = 30_000;
     public static final int THROTTLE_SLICE_SIZE=16*1_024;
@@ -276,7 +275,7 @@ public final class MainPanel {
         if(max_downloads != null) {
             _max_dl = parseInt(max_downloads);
         } else {
-            _max_dl=MAX_SIM_TRANSFERENCES;
+            _max_dl=Download.SIM_TRANSFERENCES_DEFAULT;
         }
         
         String max_uploads = selectSettingValueFromDB("max_uploads");
@@ -284,7 +283,7 @@ public final class MainPanel {
         if(max_uploads != null) {
             _max_ul = parseInt(max_uploads);
         } else {
-            _max_ul=MAX_SIM_TRANSFERENCES;
+            _max_ul=Upload.SIM_TRANSFERENCES_DEFAULT;
         }
 
         _default_download_path = selectSettingValueFromDB("default_down_dir");
