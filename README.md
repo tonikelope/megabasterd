@@ -1,5 +1,5 @@
 # MegaBasterd
-Yet another multiplatform Mega/Megacrypter down/uploader and video streaming suite.
+Yet another multiplatform Mega/Megacrypter down/uploader and video/audio streaming suite.
 
 https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A
 
