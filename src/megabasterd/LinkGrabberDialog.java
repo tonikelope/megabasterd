@@ -51,7 +51,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         
         swingReflectionInvoke("setText", download_dir_label, truncateText(download_path,80));
         
-        swingReflectionInvoke("setText", links_textarea,extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardpy.getContents())));
+        notifyClipboardChange();
     }
 
     
