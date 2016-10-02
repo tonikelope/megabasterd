@@ -37,9 +37,10 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         _clipboardspy = clipboardspy;
         
         updateFont(put_label, FONT_DEFAULT, Font.PLAIN);
+        
         updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
         
-        swingReflectionInvoke("setText", original_link_textfield, extractFirstMegaLinkFromString(extractStringFromClipboardContents(clipboardspy.getContents())));
+        notifyClipboardChange();
     }
 
     /**
