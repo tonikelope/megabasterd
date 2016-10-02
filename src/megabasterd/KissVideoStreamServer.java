@@ -23,10 +23,8 @@ import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.crypto.CipherInputStream;
-import static megabasterd.MainPanel.MEGA_API_KEY;
 import static megabasterd.MainPanel.STREAMER_PORT;
 import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.checkMegaDownloadUrl;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
@@ -210,7 +208,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
             {
                 if( findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null)
                 {
-                    MegaAPI ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
+                    MegaAPI ma = new MegaAPI();
                     
                     file_info = ma.getMegaFileMetadata(link);
                 }    
@@ -279,7 +277,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
             {
                 if( findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null)
                 {
-                    MegaAPI ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
+                    MegaAPI ma = new MegaAPI();
 
                     dl_url = ma.getMegaFileDownloadUrl(link);
                 }    
@@ -539,7 +537,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                     
                     urlConn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
                     
-                    urlConn.setRequestProperty("User-Agent", MainPanel.USER_AGENT);
+                    urlConn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
                     
                     urlConn.setRequestProperty("Connection", "close");
                     

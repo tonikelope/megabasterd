@@ -8,7 +8,6 @@ import java.net.URL;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
-import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
 
 
@@ -60,7 +59,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
                     conn.setReadTimeout(MainPanel.CONNECTION_TIMEOUT);
-                    conn.setRequestProperty("User-Agent", USER_AGENT);
+                    conn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
                     conn.setRequestProperty("Connection", "close");
                     is = new ThrottledInputStream(conn.getInputStream(), getDownload().getMain_panel().getStream_supervisor());
                     http_status = conn.getResponseCode();

@@ -34,6 +34,8 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 public final class MegaCrypterAPI {
     
+    public static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0";
+    
     private static String _rawRequest(String request, URL url_api) throws IOException, MegaCrypterAPIException {
         
         HttpURLConnection conn = (HttpURLConnection) url_api.openConnection();
@@ -41,7 +43,7 @@ public final class MegaCrypterAPI {
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("User-Agent", MainPanel.USER_AGENT);
+        conn.setRequestProperty("User-Agent", USER_AGENT);
         conn.setRequestProperty("Connection", "close");
         
         OutputStream out;

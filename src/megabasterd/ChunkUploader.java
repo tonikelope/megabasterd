@@ -131,7 +131,7 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
                 conn.setReadTimeout(MainPanel.CONNECTION_TIMEOUT);
                 conn.setDoOutput(true);
                 conn.setRequestMethod("POST");
-                conn.setRequestProperty("User-Agent", MainPanel.USER_AGENT);
+                conn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
                 conn.setRequestProperty("Connection", "close");
                 conn.setFixedLengthStreamingMode(chunk.getSize());
                 

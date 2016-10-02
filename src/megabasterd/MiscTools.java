@@ -51,7 +51,6 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
 import static megabasterd.MainPanel.CONNECTION_TIMEOUT;
-import static megabasterd.MainPanel.USER_AGENT;
 
 public final class MiscTools {
     
@@ -528,7 +527,7 @@ public final class MiscTools {
         
         URLConnection conn = url.openConnection();
         
-        conn.setRequestProperty("User-Agent", MainPanel.USER_AGENT);
+        conn.setRequestProperty("User-Agent", MegaCrypterAPI.USER_AGENT);
 
         String content_encoding = conn.getContentEncoding();
             
@@ -823,7 +822,7 @@ public final class MiscTools {
              URL url = new URL(string_url+"/0-0");
              URLConnection connection = url.openConnection();
              connection.setConnectTimeout(CONNECTION_TIMEOUT);
-             connection.setRequestProperty("User-Agent", USER_AGENT);
+             connection.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
 
             try (InputStream is = connection.getInputStream()) {
                 while(is.read()!=-1);
