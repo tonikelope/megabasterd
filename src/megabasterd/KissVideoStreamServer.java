@@ -187,7 +187,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
             }
         }
         
-        String status="Kissvideostreamer on localhost:"+STREAMER_PORT+" Info: "+conta_info+" / Conn: "+conta_connect+" / Stream: "+conta_stream+" / Retry: "+conta_retry;
+        String status="Kissvideostreamer on localhost:"+STREAMER_PORT+"  Info: "+conta_info+" / Conn: "+conta_connect+" / Stream: "+conta_stream+" / Retry: "+conta_retry;
         
         swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), status);
     }

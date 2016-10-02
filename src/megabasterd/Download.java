@@ -853,7 +853,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     }
     
 
-    /* OJO!! -> ESTO ESTÁ CAMBIADO Y NO COMPROBADO!! */
+    
     public synchronized String getDownloadUrlForWorker() throws IOException
     {
         if(_last_download_url != null && checkMegaDownloadUrl(_last_download_url)) {
@@ -951,12 +951,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         }
     }
    
-    public synchronized boolean chunkDownloadersRunning()
-    {
-        return !getChunkworkers().isEmpty();
-    }
-    
-    
+   
     @Override
     public void updateProgress(int reads)
     {

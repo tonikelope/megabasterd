@@ -123,7 +123,7 @@ public final class UploadMACGenerator implements Runnable, SecureNotifiable {
             String temp_file_data = "";
             boolean new_chunk=false;
 
-            while(!_exit && (!_upload.isStopped() || _upload.chunkUploadersRunning()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1)))
+            while(!_exit && (!_upload.isStopped() || !_upload.getChunkworkers().isEmpty()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1)))
             {
                 while(_chunk_queue.containsKey(_last_chunk_id_read+1))
                 {
@@ -187,7 +187,7 @@ public final class UploadMACGenerator implements Runnable, SecureNotifiable {
                     new_chunk = false;
                 }
 
-                if(!_exit && (!_upload.isStopped() || _upload.chunkUploadersRunning()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1)))
+                if(!_exit && (!_upload.isStopped() || !_upload.getChunkworkers().isEmpty()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1)))
                 {
                     System.out.println("METAMAC wait...");
                     secureWait();

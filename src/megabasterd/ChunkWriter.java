@@ -137,7 +137,7 @@ public final class ChunkWriter implements Runnable, SecureNotifiable {
                 
                 if(_file_size > 0)
                 {
-                    while(!_exit && (!_download.isStopped() || _download.chunkDownloadersRunning()) && _bytes_written < _file_size)
+                    while(!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size)
                     {
                         while(_chunk_queue.containsKey(_last_chunk_id_written+1))
                         {
@@ -160,7 +160,7 @@ public final class ChunkWriter implements Runnable, SecureNotifiable {
 
                         }
 
-                        if(!_exit && (!_download.isStopped() || _download.chunkDownloadersRunning()) && _bytes_written < _file_size)
+                        if(!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size)
                         {
                             
                             System.out.println("Filewriter waiting for chunk ["+(_last_chunk_id_written+1)+"]...");

@@ -858,11 +858,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         System.out.println("Uploader BYE BYE");
     }
     
-    public synchronized boolean chunkUploadersRunning()
-    {
-        return !_chunkworkers.isEmpty();
-    }
-    
+ 
     public synchronized void pause_worker() {
         
         if(++_paused_workers >= _chunkworkers.size() && !_exit) {
