@@ -82,7 +82,7 @@
         <zipgroupfileset dir="dist/lib" includes="*.jar"/>
         <manifest>
             <attribute name="Main-Class" value="${main.class}"/>
-            <attribute name="SplashScreen-Image" value="megabasterd/dot_com.jpg"/>
+            <attribute name="SplashScreen-Image" value="megabasterd/dot_com.png"/>
         </manifest>
     </jar>
     <zip destfile="${store.jar}">

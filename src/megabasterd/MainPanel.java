@@ -63,7 +63,7 @@ public final class MainPanel {
     public static final int THROTTLE_SLICE_SIZE=16*1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
-    public static final String ICON_FILE = "pica_roja.png";
+    public static final String ICON_FILE = "mbasterd_mini.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
     public static final Font FONT_DEFAULT = createAndRegisterFont("Gochi.ttf");
     

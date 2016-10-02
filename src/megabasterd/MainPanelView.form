@@ -207,7 +207,7 @@
     <Component class="javax.swing.JLabel" name="logo_label">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/megabasterd/mbasterd.png"/>
+          <Image iconType="3" name="/megabasterd/mbasterd_logo_nuevo.png"/>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>

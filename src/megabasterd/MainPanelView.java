@@ -214,7 +214,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         setTitle("MegaBasterd");
 
-        logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/mbasterd.png"))); // NOI18N
+        logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/mbasterd_logo_nuevo.png"))); // NOI18N
         logo_label.setDoubleBuffered(true);
 
         kiss_server_status.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
