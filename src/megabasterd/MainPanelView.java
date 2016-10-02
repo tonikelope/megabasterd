@@ -510,7 +510,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     @Override
                     public void run() {
 
-                    swingReflectionInvoke("setText", tthis.status_down_label, "Pre-processing downloads, please wait...");
+                    swingReflectionInvoke("setText", status_down_label, "Pre-processing downloads, please wait...");
 
                     Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", dialog.getLinks_textarea().getText(), 0));
             
@@ -555,9 +555,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                         for(HashMap folder_link:folder_links) {
 
-                                            download = new Download(tthis.getMain_panel(), (String)folder_link.get("url"), dl_path, (String)folder_link.get("filename"), (String)folder_link.get("filekey"), (long)folder_link.get("filesize"), null, null, tthis.getMain_panel().isUse_slots_down(), tthis.getMain_panel().getDefault_slots_down(), true);
+                                            download = new Download(getMain_panel(), (String)folder_link.get("url"), dl_path, (String)folder_link.get("filename"), (String)folder_link.get("filekey"), (long)folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
 
-                                            tthis.getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                            getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
                                             conta_downloads++;
                                         }
@@ -570,9 +570,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             } else {
                                 
-                                download = new Download(tthis.getMain_panel(), url, dl_path, null, null, null, null, null, tthis.getMain_panel().isUse_slots_down(), tthis.getMain_panel().getDefault_slots_down(), false);
+                                download = new Download(getMain_panel(), url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
 
-                                tthis.getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
                                 conta_downloads++;
                             }
@@ -580,18 +580,18 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         if(conta_downloads > 0) {
                             
-                            swingReflectionInvoke("setText", tthis.status_down_label, "Starting downloads provisioning, please wait...");
+                            swingReflectionInvoke("setText", status_down_label, "Starting downloads provisioning, please wait...");
 
-                            tthis.getMain_panel().getDownload_manager().secureNotify();
+                            getMain_panel().getDownload_manager().secureNotify();
 
                         }
                 } 
 
-                swingReflectionInvoke("setText", tthis.status_down_label, "");
+                swingReflectionInvoke("setText", status_down_label, "");
                 
                 swingReflectionInvoke("setEnabled", new_download_menu, true);
                 
-                tthis.getMain_panel().getDownload_manager().setPreprocessing_transferences(false);
+                getMain_panel().getDownload_manager().setPreprocessing_transferences(false);
 
                     }});
         } else {
@@ -742,21 +742,19 @@ public final class MainPanelView extends javax.swing.JFrame {
                 
                 final ArrayList<File> files = dialog.getFiles();
                 
-                final MainPanelView main = this;
-                
                 jTabbedPane1.setSelectedIndex(1);
                 
                 THREAD_POOL.execute(new Runnable(){
                     @Override
                     public void run() {
                         
-                        MegaAPI ma=main.getMain_panel().getMega_active_accounts().get(mega_account)!=null?main.getMain_panel().getMega_active_accounts().get(mega_account):new MegaAPI();
+                        MegaAPI ma=getMain_panel().getMega_active_accounts().get(mega_account)!=null?getMain_panel().getMega_active_accounts().get(mega_account):new MegaAPI();
               
                             try {
                                 
                                 ma.login(mega_account, mega_aes_pass, mega_user_hash);
                                 
-                                main.getMain_panel().getMega_active_accounts().put(mega_account, ma);
+                                getMain_panel().getMega_active_accounts().put(mega_account, ma);
                                 
                                 byte[] parent_key = ma.genFolderKey();
                                 
@@ -778,7 +776,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 for(File f:files) {
 
-                                        swingReflectionInvoke("setText", main.status_up_label, "Pre-processing ("+(conta++)+"/"+files.size()+") uploads, please wait...");
+                                        swingReflectionInvoke("setText", status_up_label, "Pre-processing ("+(conta++)+"/"+files.size()+") uploads, please wait...");
 
                                         String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
 
@@ -813,15 +811,15 @@ public final class MainPanelView extends javax.swing.JFrame {
                                             }
                                         }
 
-                                        Upload upload = new Upload(main.getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, main.getMain_panel().isUse_slots_up(), main.getMain_panel().getDefault_slots_up(), false);
+                                        Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, getMain_panel().isUse_slots_up(), getMain_panel().getDefault_slots_up(), false);
 
-                                        main.getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+                                        getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
                             
                                     }
                         
-                                    swingReflectionInvoke("setText", main.status_up_label, "Starting uploads provisioning, please wait...");
+                                    swingReflectionInvoke("setText", status_up_label, "Starting uploads provisioning, please wait...");
 
-                                    main.getMain_panel().getUpload_manager().secureNotify();
+                                    getMain_panel().getUpload_manager().secureNotify();
                           
                             } catch (Exception ex) {
                                 
@@ -830,7 +828,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                             
                             swingReflectionInvoke("setEnabled", new_upload_menu, true);
                             
-                            main.getMain_panel().getUpload_manager().setPreprocessing_transferences(false);
+                            getMain_panel().getUpload_manager().setPreprocessing_transferences(false);
                     }
                     
                 });

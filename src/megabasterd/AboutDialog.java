@@ -166,7 +166,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         
         swingReflectionInvoke("setEnabled", check_version_button, false);
         
-        final AboutDialog main = this;
+        final AboutDialog tthis = this;
            
         THREAD_POOL.execute(new Runnable(){
             @Override
@@ -186,7 +186,7 @@ public final class AboutDialog extends javax.swing.JDialog {
                         
                          if(((String)current_node.get("name")).contains("_"+VERSION.replaceAll(" *beta *", "")+".")) {
                             
-                            JOptionPane.showMessageDialog(main, "You have the latest version ;)");
+                            JOptionPane.showMessageDialog(tthis, "You have the latest version ;)");
                             
                             new_version = false;
                             
@@ -196,14 +196,14 @@ public final class AboutDialog extends javax.swing.JDialog {
                     
                     if(new_version) {
                         
-                        JOptionPane.showMessageDialog(main, "NEW VERSION IS AVAILABLE!");
+                        JOptionPane.showMessageDialog(tthis, "NEW VERSION IS AVAILABLE!");
                     }
 
                 } catch (Exception ex) {
                     getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
                 
-                swingReflectionInvoke("setEnabled", main.check_version_button, true);
+                swingReflectionInvoke("setEnabled", check_version_button, true);
 
             }});
         

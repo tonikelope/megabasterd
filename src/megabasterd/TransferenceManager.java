@@ -270,8 +270,6 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     
     @Override
     public void run() {
-        
-        final TransferenceManager tthis = this;
 
         while(true)
         {
@@ -283,7 +281,6 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
                                 @Override
                                 public void run(){
         
-                                    
                                     while(!getTransference_provision_queue().isEmpty())
                                     {
                                         final Transference transference = getTransference_provision_queue().poll();
@@ -295,9 +292,9 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
                                             }
                                         }
                                     
-                                    tthis.setProvisioning_transferences(false);
+                                    setProvisioning_transferences(false);
                                     
-                                    tthis.secureNotify();
+                                    secureNotify();
              
                                 }});
 
@@ -321,9 +318,9 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
                                         }
                                     }
                                     
-                                    tthis.setRemoving_transferences(false);
+                                    setRemoving_transferences(false);
                                     
-                                    tthis.secureNotify();
+                                    secureNotify();
                                     
                                 }});
             }
@@ -346,9 +343,9 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
                                     }
                                 }
                                 
-                                tthis.setStarting_transferences(false);
+                                setStarting_transferences(false);
                                     
-                                tthis.secureNotify();
+                                secureNotify();
                                 
                            }});
             }

@@ -269,23 +269,23 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         
         swingReflectionInvoke("setEnabled", file_tree, false);
 
-        final FolderLinkDialog main = this;
+       
          
         THREAD_POOL.execute(new Runnable(){
                     @Override
                     public void run() {
                         
-                    main._loadMegaDirTree();
+                    _loadMegaDirTree();
                     
-                    main._genDownloadLiks();
+                    _genDownloadLiks();
                     
-                    swingReflectionInvoke("setEnabled", main.restore_button, true);
+                    swingReflectionInvoke("setEnabled", restore_button, true);
                     
-                    swingReflectionInvoke("setVisible", main.restore_button, false);
+                    swingReflectionInvoke("setVisible", restore_button, false);
         
-                    swingReflectionInvoke("setEnabled", main.dance_button, true);
+                    swingReflectionInvoke("setEnabled", dance_button, true);
         
-                    swingReflectionInvoke("setEnabled", main.file_tree, true);
+                    swingReflectionInvoke("setEnabled", file_tree, true);
                     
                     }});
     }//GEN-LAST:event_restore_buttonActionPerformed

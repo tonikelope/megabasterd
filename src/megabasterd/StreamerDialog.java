@@ -179,9 +179,9 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                         
                         JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\n(Remember to keep MegaBasterd running in background while playing)");
 
-                        tthis.dispose();
+                        dispose();
                         
-                        tthis.getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
+                        getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
 
                     } catch (IOException ex) {
                         Logger.getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);

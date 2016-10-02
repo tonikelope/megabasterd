@@ -57,7 +57,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.5";
+    public static final String VERSION="1.6";
     public static final String USER_AGENT="Mozilla/5.0 (X11; Linux x8664; rv:48.0) Gecko/20100101 Firefox/48.0";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
@@ -138,7 +138,7 @@ public final class MainPanel {
         
         resumeUploads();
         
-        _streamserver = new KissVideoStreamServer(getView());
+        _streamserver = new KissVideoStreamServer(this);
         
         try {
             _streamserver.start(STREAMER_PORT, "/video");
@@ -341,7 +341,7 @@ public final class MainPanel {
     
     public void _byebye() {
         
-        if(_streamserver.isWorking()) {
+        if(!_streamserver.getWorking_threads().isEmpty()) {
             
             Object[] options = {"No",
                             "Yes"};
@@ -437,7 +437,7 @@ public final class MainPanel {
         
         swingReflectionInvoke("setText", getView().getStatus_down_label(), "Resuming previous downloads, please wait...");
 
-        final MainPanel main =this;
+        final MainPanel tthis =this;
         
         THREAD_POOL.execute(new Runnable(){
             
@@ -452,9 +452,9 @@ public final class MainPanel {
 
                 for(HashMap<String,Object> o:res) {
                     
-                    Download download = new Download(main, (String)o.get("url"), (String)o.get("path"), (String)o.get("filename"), (String)o.get("filekey"), (Long)o.get("filesize"), (String)o.get("filepass"), (String)o.get("filenoexpire"), main._use_slots_down, main._default_slots_down, false);
+                    Download download = new Download(tthis, (String)o.get("url"), (String)o.get("path"), (String)o.get("filename"), (String)o.get("filekey"), (Long)o.get("filesize"), (String)o.get("filepass"), (String)o.get("filenoexpire"), _use_slots_down, _default_slots_down, false);
                     
-                    main.getDownload_manager().getTransference_provision_queue().add(download);
+                    getDownload_manager().getTransference_provision_queue().add(download);
                     
                     conta_downloads++;
                 }
@@ -466,15 +466,15 @@ public final class MainPanel {
  
             if(conta_downloads>0) {
                 
-                swingReflectionInvoke("setText", main.getView().getStatus_down_label(), "Starting downloads provisioning, please wait...");
+                swingReflectionInvoke("setText", getView().getStatus_down_label(), "Starting downloads provisioning, please wait...");
                 
-                main.getDownload_manager().secureNotify();
+                getDownload_manager().secureNotify();
 
-                main.getView().getjTabbedPane1().setSelectedIndex(0);
+                getView().getjTabbedPane1().setSelectedIndex(0);
 
             }
 
-            swingReflectionInvoke("setText", main.getView().getStatus_down_label(), "");
+            swingReflectionInvoke("setText", getView().getStatus_down_label(), "");
                                 
                                 
                                 }});
@@ -517,12 +517,11 @@ public final class MainPanel {
 
     MenuItem closeItem = new MenuItem("EXIT");
     
-    final MainPanel main=this;
     
     closeItem.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        main._byebye();
+        _byebye();
       }
     });
     
@@ -565,7 +564,7 @@ public final class MainPanel {
         
         swingReflectionInvoke("setText", getView().getStatus_up_label(), "Resuming previous uploads, please wait...");
         
-        final MainPanel main =this;
+        final MainPanel tthis =this;
         
         THREAD_POOL.execute(new Runnable(){
                                 @Override
@@ -585,11 +584,11 @@ public final class MainPanel {
                                                             
                                                             MegaAPI ma;
                                                             
-                                                            if(main._mega_accounts.get(email) != null) {
+                                                            if(_mega_accounts.get(email) != null) {
                                                                 
-                                                                final HashMap<String,Object> account_info = (HashMap)main._mega_accounts.get(email);
+                                                                final HashMap<String,Object> account_info = (HashMap)_mega_accounts.get(email);
                                                                 
-                                                                ma = main._mega_active_accounts.get(email);
+                                                                ma = _mega_active_accounts.get(email);
                                                                 
                                                                 if(ma == null) {
                                                                     
@@ -599,16 +598,16 @@ public final class MainPanel {
                                                                         
                                                                         ma.login(email, bin2i32a(BASE642Bin((String)account_info.get("password_aes"))), (String)account_info.get("user_hash"));
                                                                         
-                                                                        main._mega_active_accounts.put(email, ma);
+                                                                        _mega_active_accounts.put(email, ma);
                                                                         
                                                                     } catch (Exception ex) {
                                                                         getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
                                                                     }
                                                                 }
                                                                 
-                                                                Upload upload = new Upload(main, ma, (String)o.get("filename"), (String)o.get("parent_node"), (String)o.get("ul_key")!=null?bin2i32a(BASE642Bin((String)o.get("ul_key"))):null, (String)o.get("url"), (String)o.get("root_node"), BASE642Bin((String)o.get("share_key")), (String)o.get("folder_link"), main._use_slots_up, main._default_slots_up, false);
+                                                                Upload upload = new Upload(tthis, ma, (String)o.get("filename"), (String)o.get("parent_node"), (String)o.get("ul_key")!=null?bin2i32a(BASE642Bin((String)o.get("ul_key"))):null, (String)o.get("url"), (String)o.get("root_node"), BASE642Bin((String)o.get("share_key")), (String)o.get("folder_link"), _use_slots_up, _default_slots_up, false);
                                                                 
-                                                                main.getUpload_manager().getTransference_provision_queue().add(upload);
+                                                                getUpload_manager().getTransference_provision_queue().add(upload);
                                                                 
                                                                 conta_uploads++;
                                                                 
@@ -620,15 +619,15 @@ public final class MainPanel {
                                                         
                                                     if(conta_uploads>0) {
                                                         
-                                                        swingReflectionInvoke("setText", main.getView().getStatus_up_label(), "Starting uploads provisioning, please wait...");
+                                                        swingReflectionInvoke("setText", getView().getStatus_up_label(), "Starting uploads provisioning, please wait...");
                                                         
-                                                        main.getUpload_manager().secureNotify();
+                                                        getUpload_manager().secureNotify();
                                                         
-                                                        main.getView().getjTabbedPane1().setSelectedIndex(1);
+                                                        getView().getjTabbedPane1().setSelectedIndex(1);
                                                         
                                                     } 
                                                     
-                                                    swingReflectionInvoke("setText", main.getView().getStatus_up_label(), "");
+                                                    swingReflectionInvoke("setText", getView().getStatus_up_label(), "");
                                                     
                                                 } catch (Exception ex) {
                                         getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);

@@ -50,6 +50,8 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
+import static megabasterd.MainPanel.CONNECTION_TIMEOUT;
+import static megabasterd.MainPanel.USER_AGENT;
 
 public final class MiscTools {
     
@@ -812,6 +814,29 @@ public final class MiscTools {
 
         return res;
     }
+    
+    public static boolean checkMegaDownloadUrl(String string_url) {
+        
+        boolean url_ok=false;
+               
+        try {
+             URL url = new URL(string_url+"/0-0");
+             URLConnection connection = url.openConnection();
+             connection.setConnectTimeout(CONNECTION_TIMEOUT);
+             connection.setRequestProperty("User-Agent", USER_AGENT);
+
+            try (InputStream is = connection.getInputStream()) {
+                while(is.read()!=-1);
+            }
+
+            url_ok=true;
+
+         }catch (Exception ex) {}        
+
+        return url_ok;
+    }
+    
+    
 
     private MiscTools() {
     }

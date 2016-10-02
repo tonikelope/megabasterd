@@ -14,8 +14,6 @@ import static java.lang.Long.valueOf;
 import static java.lang.Math.ceil;
 import static java.lang.System.out;
 import static java.lang.Thread.sleep;
-import java.net.URL;
-import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -36,11 +34,10 @@ import static megabasterd.CryptTools.genCrypter;
 import static megabasterd.DBTools.deleteDownload;
 import static megabasterd.DBTools.insertDownload;
 import static megabasterd.DBTools.selectSettingValueFromDB;
-import static megabasterd.MainPanel.CONNECTION_TIMEOUT;
 import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.UrlBASE642Bin;
 import static megabasterd.MiscTools.bin2i32a;
+import static megabasterd.MiscTools.checkMegaDownloadUrl;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.formatBytes;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
@@ -855,30 +852,11 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         
     }
     
-    public boolean checkDownloadUrl(String string_url)
-    {
-       try {
-            URL url = new URL(string_url+"/0-0");
-            URLConnection connection = url.openConnection();
-            connection.setConnectTimeout(CONNECTION_TIMEOUT);
-            connection.setRequestProperty("User-Agent", USER_AGENT);
-            
-           try (InputStream is = connection.getInputStream()) {
-               while(is.read()!=-1);
-           }
-             
-            return true;
-            
-        }catch (Exception ex) {
-            
-            return false;
-        }        
-    }
-    
+
     /* OJO!! -> ESTO ESTÁ CAMBIADO Y NO COMPROBADO!! */
     public synchronized String getDownloadUrlForWorker() throws IOException
     {
-        if(_last_download_url != null && checkDownloadUrl(_last_download_url)) {
+        if(_last_download_url != null && checkMegaDownloadUrl(_last_download_url)) {
             
             return _last_download_url;
         }
@@ -905,7 +883,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                         download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire);
                     }
                     
-                    if(checkDownloadUrl(download_url)) {
+                    if(checkMegaDownloadUrl(download_url)) {
                         
                         _last_download_url = download_url;
                         

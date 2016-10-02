@@ -58,12 +58,10 @@ public final class MegaAPI {
     
     private String _root_id;
 
-    
     private String _inbox_id;
     
     private String _email;
 
-    
     private String _trashbin_id;
     
     private String _req_id;

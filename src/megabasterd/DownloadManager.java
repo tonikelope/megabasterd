@@ -45,7 +45,7 @@ public final class DownloadManager extends TransferenceManager {
 
         try {
            
-            this._provision((Download)download, false);
+            _provision((Download)download, false);
             
             secureNotify();
   
@@ -53,15 +53,13 @@ public final class DownloadManager extends TransferenceManager {
             
             System.out.println("Provision failed! Retrying in separated thread...");
  
-            final DownloadManager tthis = this;
-            
             THREAD_POOL.execute(new Runnable(){
                 @Override
                 public void run(){
 
                     try {
 
-                        tthis._provision((Download)download, true);
+                        _provision((Download)download, true);
 
                     } catch (MegaAPIException | MegaCrypterAPIException ex1) {
 
