@@ -181,6 +181,8 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         _scroll_panel.add((Component)transference.getView(), 0);
         
         transference.start();
+        
+        secureNotify();
     }
     
     public void pauseAll()
@@ -349,10 +351,10 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
                                 
                            }});
             }
-
-            secureWait();
             
             updateView();
+
+            secureWait();
         }
         
         }

@@ -39,7 +39,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
     public static final int WORKER_STATUS_RETRY=0x04;
     public static final int WORKER_STATUS_EXIT=0x05;
     
-    private HttpServer _httpserver;
     private final MainPanel _main_panel;
     private final ConcurrentHashMap<String, String[]> _link_cache;
     private final ConcurrentHashMap<Thread, Integer> _working_threads;
@@ -118,13 +117,13 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
         
         swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), "Kissvideostreamer on localhost:"+STREAMER_PORT+" (Waiting for request...)");
         
-        _httpserver = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
+        HttpServer httpserver = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
 
-        _httpserver.createContext(context, this);
+        httpserver.createContext(context, this);
         
-        _httpserver.setExecutor(THREAD_POOL);
+        httpserver.setExecutor(THREAD_POOL);
         
-        _httpserver.start();
+        httpserver.start();
         
         THREAD_POOL.execute(new Runnable() {
             @Override
