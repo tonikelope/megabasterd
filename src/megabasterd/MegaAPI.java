@@ -65,7 +65,11 @@ public final class MegaAPI {
     private String _trashbin_id;
     
     private String _req_id;
-    public MegaAPI()
+    
+    private String _user_agent;
+    
+    
+    public MegaAPI(String api_key, String user_agent)
     {
         _req_id = null;
         _trashbin_id = null;
@@ -76,36 +80,15 @@ public final class MegaAPI {
         _password_aes = null;
         _rsa_priv_key = null;
         _master_key = null;
-        _api_key = null;
+        _api_key = api_key;
+        _user_agent = user_agent;
         _sid = null;
-        
-        Random randomno = new Random();
-            
-        _seqno=randomno.nextInt();
-        
-        _req_id =  genID(REQ_ID_LENGTH);
-    }
-    public MegaAPI(String ak)
-    {
-        _req_id = null;
-        _trashbin_id = null;
-        _email = null;
-        _inbox_id = null;
-        _root_id = null;
-        _user_hash = null;
-        _password_aes = null;
-        _rsa_priv_key = null;
-        _master_key = null;
-        _api_key = null;
-        _sid = null;
-        
-        Random randomno = new Random();
-            
-        _seqno=randomno.nextInt();
-        
-        _api_key=ak;
-        
         _req_id = genID(REQ_ID_LENGTH);
+        
+        Random randomno = new Random();
+            
+        _seqno=randomno.nextInt();
+        
     }
     public String getEmail() {
         return _email;
@@ -312,7 +295,7 @@ public final class MegaAPI {
         conn.setDoOutput(true);
         conn.setRequestMethod("POST");
         conn.setRequestProperty("Content-Type", "application/json");
-        //conn.setRequestProperty("User-Agent", ""); -> Skips 509 error MEGA BUG????
+        conn.setRequestProperty("User-Agent", _user_agent); 
         conn.setRequestProperty("Connection", "close");
         
         OutputStream out;

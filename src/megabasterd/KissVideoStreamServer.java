@@ -23,8 +23,10 @@ import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.crypto.CipherInputStream;
+import static megabasterd.MainPanel.MEGA_API_KEY;
 import static megabasterd.MainPanel.STREAMER_PORT;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.checkMegaDownloadUrl;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
@@ -208,7 +210,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
             {
                 if( findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null)
                 {
-                    MegaAPI ma = new MegaAPI();
+                    MegaAPI ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
                     
                     file_info = ma.getMegaFileMetadata(link);
                 }    
@@ -277,7 +279,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
             {
                 if( findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null)
                 {
-                    MegaAPI ma = new MegaAPI();
+                    MegaAPI ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
 
                     dl_url = ma.getMegaFileDownloadUrl(link);
                 }    

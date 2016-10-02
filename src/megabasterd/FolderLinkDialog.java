@@ -11,7 +11,9 @@ import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 import javax.swing.tree.DefaultTreeModel;
 import static megabasterd.MainPanel.FONT_DEFAULT;
+import static megabasterd.MainPanel.MEGA_API_KEY;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
 import static megabasterd.MiscTools.deleteSelectedTreeItems;
 import static megabasterd.MiscTools.findFirstRegex;
@@ -295,7 +297,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         try {
             HashMap<String,Object> folder_nodes;
             
-            MegaAPI ma = new MegaAPI();
+            MegaAPI ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
             
             String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
             

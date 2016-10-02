@@ -34,7 +34,9 @@ import static megabasterd.CryptTools.genCrypter;
 import static megabasterd.DBTools.deleteDownload;
 import static megabasterd.DBTools.insertDownload;
 import static megabasterd.DBTools.selectSettingValueFromDB;
+import static megabasterd.MainPanel.MEGA_API_KEY;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.UrlBASE642Bin;
 import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.checkMegaDownloadUrl;
@@ -874,7 +876,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             try {
                     if( findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null )
                     {
-                        MegaAPI ma = new MegaAPI();
+                        MegaAPI ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
 
                         download_url = ma.getMegaFileDownloadUrl(_url);
                     }    
@@ -1151,7 +1153,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
  
                 if( findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null)
                 {
-                    MegaAPI ma = new MegaAPI();
+                    MegaAPI ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
 
                     file_info = ma.getMegaFileMetadata(link);
                 }    
@@ -1251,7 +1253,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             {
                 if( findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null)
                 {
-                    MegaAPI ma = new MegaAPI();
+                    MegaAPI ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
 
                     dl_url = ma.getMegaFileDownloadUrl(link);
 

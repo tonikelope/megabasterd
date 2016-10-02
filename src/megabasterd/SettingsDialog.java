@@ -16,7 +16,9 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
 import static megabasterd.DBTools.insertSettingValueInDB;
 import static megabasterd.MainPanel.FONT_DEFAULT;
+import static megabasterd.MainPanel.MEGA_API_KEY;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.i32a2bin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
@@ -723,7 +725,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             
                             if(dialog._main_panel.getMega_accounts().get(email) == null){
                                 
-                                ma = new MegaAPI();
+                                ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
                                 
                                 try {
                                     ma.login(email, pass);
@@ -744,7 +746,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 
                                 if(!mega_account_data.get("password").equals(pass)) {
                                     
-                                    ma = new MegaAPI();
+                                    ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
                                     
                                     try {
                                         ma.login(email, pass);

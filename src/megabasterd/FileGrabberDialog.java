@@ -15,7 +15,9 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import static megabasterd.MainPanel.FONT_DEFAULT;
+import static megabasterd.MainPanel.MEGA_API_KEY;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MainPanel.USER_AGENT;
 import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
 import static megabasterd.MiscTools.deleteSelectedTreeItems;
 import static megabasterd.MiscTools.formatBytes;
@@ -446,7 +448,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         if(ma == null) {
 
-            ma = new MegaAPI();
+            ma = new MegaAPI(MEGA_API_KEY, USER_AGENT);
                         
             try {
 
