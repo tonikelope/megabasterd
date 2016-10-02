@@ -142,6 +142,8 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                     
                     if(_working_threads.isEmpty()) {
                         
+                        swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), "Kissvideostreamer on localhost:"+STREAMER_PORT+" (Waiting for request...)");
+                        
                         swingReflectionInvoke("setExtendedState", _main_panel.getView(), NORMAL);
  
                         swingReflectionInvoke("setVisible", _main_panel.getView(), true);
