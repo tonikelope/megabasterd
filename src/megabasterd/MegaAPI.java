@@ -242,7 +242,7 @@ public final class MegaAPI {
 
             HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
 
-            for(Object o:((Iterable<? extends Object>)res_map[0].get("f"))) {
+            for(Object o:(Iterable<? extends Object>)res_map[0].get("f")) {
                 
                 HashMap element = (HashMap<String,Object>)o;
                 
@@ -644,9 +644,9 @@ public final class MegaAPI {
         
         try {
             
-            String file_id = null;
+            String file_id;
   
-            List res_map=null;
+            List res_map;
             
             String request = "[{\"a\":\"l\", \"n\":\""+node+"\"}]";
  
@@ -677,9 +677,9 @@ public final class MegaAPI {
         
         try {
             
-            String folder_id = null;
+            String folder_id;
   
-            List res_map=null;
+            List res_map;
             
             String request = "[{\"a\":\"l\", \"n\":\""+node+"\", \"i\":\""+_req_id+"\"}]";
  
@@ -764,7 +764,7 @@ public final class MegaAPI {
     
     public HashMap<String,Object> getFolderNodes(String folder_id, String folder_key) throws Exception {
         
-        HashMap<String,Object> folder_nodes = null;
+        HashMap<String,Object> folder_nodes;
 
         String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\"}]";
 
@@ -778,11 +778,9 @@ public final class MegaAPI {
 
         HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
 
-        List nodes = (List)res_map[0].get("f");
-
         folder_nodes = new HashMap<>();
 
-        for(Object o:nodes) {
+        for(Object o:(Iterable<? extends Object>)res_map[0].get("f")) {
 
             HashMap<String,Object> node = (HashMap<String,Object>)o;
 

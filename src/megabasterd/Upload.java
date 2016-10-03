@@ -52,7 +52,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     private byte[] _byte_file_iv;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private long _last_chunk_id_dispatched;
-    protected final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
+    private final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
     private final ExecutorService _thread_pool;
     private volatile int[] _file_meta_mac;
     private  boolean _finishing_upload;
@@ -62,7 +62,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     private int _paused_workers;
     private Double _progress_bar_rate;
     private volatile boolean _pause;
-    protected final ArrayList<ChunkUploader> _chunkworkers;
+    private final ArrayList<ChunkUploader> _chunkworkers;
     private long _file_size;
     private UploadMACGenerator _mac_generator;
     private boolean _create_dir;
@@ -942,19 +942,19 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     }
     
     
-    protected void printStatusError(String message)
+    private void printStatusError(String message)
     {
         swingReflectionInvoke("setForeground", getView().getStatus_label(), Color.red);
         swingReflectionInvoke("setText", getView().getStatus_label(), message);
     }
     
-    protected void printStatusOK(String message)
+    private void printStatusOK(String message)
     {        
         swingReflectionInvoke("setForeground", getView().getStatus_label(), new Color(0,128,0));
         swingReflectionInvoke("setText", getView().getStatus_label(), message);
     }
     
-    protected void printStatus(String message)
+    private void printStatus(String message)
     {
         swingReflectionInvoke("setForeground", getView().getStatus_label(), Color.BLACK);
         swingReflectionInvoke("setText", getView().getStatus_label(), message);

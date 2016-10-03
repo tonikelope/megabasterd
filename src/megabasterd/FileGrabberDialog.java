@@ -62,6 +62,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     
     /**
      * Creates new form FileGrabber
+     * @param modal
      */
     public FileGrabberDialog(java.awt.Frame parent, boolean modal) {
         

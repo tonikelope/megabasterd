@@ -51,6 +51,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
     
     /**
      * Creates new form FolderLink
+     * @param link
      */
     public FolderLinkDialog(java.awt.Frame parent, boolean modal, String link) {
         
@@ -409,7 +410,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
                 download_link.put("filekey", ((Map<String, Object>) node.getUserObject()).get("key"));
 
-                download_link.put("filesize", ((HashMap<String,Object>)node.getUserObject()).get("size"));
+                download_link.put("filesize", ((Map<String,Object>)node.getUserObject()).get("size"));
                 
                 _total_space+=(long)download_link.get("filesize");
 

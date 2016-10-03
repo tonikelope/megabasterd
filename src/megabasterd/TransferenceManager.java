@@ -36,6 +36,28 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     private volatile boolean _starting_transferences;
     private volatile boolean _preprocessing_transferences;
     private volatile int _pre_count;
+    public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
+        _notified = false;
+        _removing_transferences = false;
+        _provisioning_transferences = false;
+        _starting_transferences=false;
+        _preprocessing_transferences=false;
+        _pre_count=0;
+        _main_panel = main_panel;
+        _max_running_trans = max_running_trans;
+        _scroll_panel = scroll_panel;
+        _status = status;
+        _close_all_button = close_all_button;
+        _pause_all_button = pause_all_button;
+        _clean_all_menu = clean_all_menu;
+        _secure_notify_lock = new Object();
+        _transference_waitstart_queue = new ConcurrentLinkedQueue();
+        _transference_provision_queue = new ConcurrentLinkedQueue();
+        _transference_remove_queue = new ConcurrentLinkedQueue();
+        _transference_finished_queue = new ConcurrentLinkedQueue();
+        _transference_running_list = new ConcurrentLinkedQueue();
+        _transference_preprocess_queue = new ConcurrentLinkedQueue();
+    }
 
     abstract public void provision(Transference transference);
     
@@ -77,28 +99,6 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         _pre_count+=pre_count;
     }
  
-    public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
-        _notified = false;
-        _removing_transferences = false;
-        _provisioning_transferences = false;
-        _starting_transferences=false;
-        _preprocessing_transferences=false;
-        _pre_count=0;
-        _main_panel = main_panel;
-        _max_running_trans = max_running_trans;
-        _scroll_panel = scroll_panel;
-        _status = status;
-        _close_all_button = close_all_button;
-        _pause_all_button = pause_all_button;
-        _clean_all_menu = clean_all_menu;
-        _secure_notify_lock = new Object();
-        _transference_waitstart_queue = new ConcurrentLinkedQueue();
-        _transference_provision_queue = new ConcurrentLinkedQueue();
-        _transference_remove_queue = new ConcurrentLinkedQueue();
-        _transference_finished_queue = new ConcurrentLinkedQueue();
-        _transference_running_list = new ConcurrentLinkedQueue();
-        _transference_preprocess_queue = new ConcurrentLinkedQueue();
-    }
     
     @Override
     public void secureNotify()

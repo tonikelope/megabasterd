@@ -29,6 +29,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     
     /**
      * Creates new form Streamer
+     * @param clipboardspy
      */
     public StreamerDialog(java.awt.Frame parent, boolean modal, ClipboardSpy clipboardspy) {
         super(parent, modal);
