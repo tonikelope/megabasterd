@@ -437,6 +437,8 @@ public final class MiscTools {
                     
                 } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
                     getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                    
+                    System.out.println("REFLECTION METHOD NOT FOUND -> "+method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length));
                 }
                 
                 return ret;
