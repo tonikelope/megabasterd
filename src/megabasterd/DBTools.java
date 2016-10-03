@@ -27,6 +27,14 @@ public final class DBTools {
         }
     }
     
+    public static void vaccum() throws SQLException {
+        
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+             
+            stat.execute("VACUUM");
+        }
+    }
+    
     public static void insertDownload(String url, String path, String filename, String filekey, Long size, String filepass, String filenoexpire) throws SQLException {
         
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO downloads (url, path, filename, filekey, filesize, filepass, filenoexpire) VALUES (?,?,?,?,?,?,?)")) {

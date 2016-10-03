@@ -648,8 +648,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     }//GEN-LAST:event_about_menuActionPerformed
 
     private void exit_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exit_menuActionPerformed
-        
-        
+
         _main_panel._byebye();
     }//GEN-LAST:event_exit_menuActionPerformed
 

@@ -31,6 +31,7 @@ import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
@@ -340,6 +341,8 @@ public final class MainPanel {
     
     public void _byebye() {
         
+        boolean exit = true;
+        
         if(!_streamserver.getWorking_threads().isEmpty()) {
             
             Object[] options = {"No",
@@ -352,9 +355,9 @@ public final class MainPanel {
             options,
             options[0]);
             
-            if(n==1) {
+            if(n==0) {
                 
-                exit(0);
+                exit=false;
             }
             
         } else if(!getDownload_manager().getTransference_provision_queue().isEmpty() || !getUpload_manager().getTransference_provision_queue().isEmpty()) {
@@ -369,16 +372,22 @@ public final class MainPanel {
             options,
             options[0]);
             
-            if(n==1) {
+            if(n==0) {
                 
-                exit(0);
+                exit=false;
             }
             
-        } else {
+        }
+        
+        if(exit) {
             
+            try {
+                DBTools.vaccum();
+            } catch (SQLException ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
            
             exit(0);
-            
         }
     }
     
