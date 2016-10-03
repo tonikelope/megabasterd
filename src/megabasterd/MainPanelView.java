@@ -8,7 +8,6 @@ import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -29,7 +28,6 @@ import static megabasterd.CryptTools.decryptMegaDownloaderLink;
 import static megabasterd.DBTools.deleteMegaAccount;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.ICON_FILE;
-import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MainPanel.VERSION;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.bin2i32a;
@@ -502,15 +500,11 @@ public final class MainPanelView extends javax.swing.JFrame {
         
         if(dialog.isDownload()) { 
             
-            getMain_panel().getDownload_manager().setPreprocessing_transferences(true);
-            
             final MainPanelView tthis = this;
             
-            THREAD_POOL.execute(new Runnable(){
+            Runnable run = new Runnable(){
                     @Override
                     public void run() {
-
-                    swingReflectionInvoke("setText", status_down_label, "Pre-processing downloads, please wait...");
 
                     Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", dialog.getLinks_textarea().getText(), 0));
             
@@ -528,8 +522,10 @@ public final class MainPanelView extends javax.swing.JFrame {
                     }
 
                     if(!urls.isEmpty()) {
-
-                        int conta_downloads = 0;
+                        
+                        getMain_panel().getDownload_manager().addPre_count(urls.size());
+                
+                        getMain_panel().getDownload_manager().secureNotify();
 
                         for (String url : urls ) {
 
@@ -558,8 +554,6 @@ public final class MainPanelView extends javax.swing.JFrame {
                                             download = new Download(getMain_panel(), (String)folder_link.get("url"), dl_path, (String)folder_link.get("filename"), (String)folder_link.get("filekey"), (long)folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
 
                                             getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-
-                                            conta_downloads++;
                                         }
                                     }
                                     
@@ -567,39 +561,32 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     
                                 fdialog.dispose();
                                 
-
                             } else {
                                 
                                 download = new Download(getMain_panel(), url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
 
                                 getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-
-                                conta_downloads++;
                             }
-                        }
-
-                        if(conta_downloads > 0) {
                             
-                            swingReflectionInvoke("setText", status_down_label, "Starting downloads provisioning, please wait...");
-
+                            getMain_panel().getDownload_manager().addPre_count(-1);
+                                        
                             getMain_panel().getDownload_manager().secureNotify();
-
+                            
                         }
                 } 
 
-                swingReflectionInvoke("setText", status_down_label, "");
+                }};
+            
+                getMain_panel().getDownload_manager().getTransference_preprocess_queue().add(run);
+                
+                getMain_panel().getDownload_manager().secureNotify();
                 
                 swingReflectionInvoke("setEnabled", new_download_menu, true);
-                
-                getMain_panel().getDownload_manager().setPreprocessing_transferences(false);
-
-                    }});
+            
         } else {
             swingReflectionInvoke("setEnabled", new_download_menu, true);
         }
             
-        
-       
         dialog.dispose();
 
     }//GEN-LAST:event_new_download_menuActionPerformed
@@ -721,10 +708,10 @@ public final class MainPanelView extends javax.swing.JFrame {
         swingReflectionInvokeAndWait("setVisible", dialog, true);
 
         if(dialog.isUpload() && dialog.getFiles().size() > 0) {
-        
-                getMain_panel().getUpload_manager().setPreprocessing_transferences(true);
+            
+                getMain_panel().getUpload_manager().addPre_count(dialog.getFiles().size());
                 
-                swingReflectionInvoke("setText", status_up_label, "Pre-processing uploads, please wait...");
+                getMain_panel().getUpload_manager().secureNotify();
                 
                 final String mega_account = (String)dialog.getAccount_combobox().getSelectedItem();
                 
@@ -733,18 +720,14 @@ public final class MainPanelView extends javax.swing.JFrame {
                 final String base_path = dialog.getBase_path();
                 
                 final String dir_name=dialog.getDir_name_textfield().getText();
-
                 
-                    final int[] mega_aes_pass = bin2i32a(BASE642Bin((String)data_account.get("password_aes")));
+                final int[] mega_aes_pass = bin2i32a(BASE642Bin((String)data_account.get("password_aes")));
                 
-        
                 final String mega_user_hash = (String)data_account.get("user_hash");
-                
-                final ArrayList<File> files = dialog.getFiles();
-                
+
                 jTabbedPane1.setSelectedIndex(1);
                 
-                THREAD_POOL.execute(new Runnable(){
+                Runnable run = new Runnable(){
                     @Override
                     public void run() {
                         
@@ -760,7 +743,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                 
                                 byte[] share_key = ma.genShareKey();
                         
-                                HashMap<String,Object> res = ma.createDir(dir_name!=null?dir_name:files.get(0).getName()+"_"+genID(10), ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
+                                HashMap<String,Object> res = ma.createDir(dir_name!=null?dir_name:dialog.getFiles().get(0).getName()+"_"+genID(10), ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
 
                                 String parent_node = (String)((Map)((List)res.get("f")).get(0)).get("h");
 
@@ -771,12 +754,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                                 String folder_link = ma.getPublicFolderLink(parent_node, share_key);
                                 
                                 MegaDirNode file_paths = new MegaDirNode(parent_node);
-
-                                int conta = 1;
-
-                                for(File f:files) {
-
-                                        swingReflectionInvoke("setText", status_up_label, "Pre-processing ("+(conta++)+"/"+files.size()+") uploads, please wait...");
+                                
+                                for(File f:dialog.getFiles()) {
 
                                         String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
 
@@ -814,24 +793,27 @@ public final class MainPanelView extends javax.swing.JFrame {
                                         Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, getMain_panel().isUse_slots_up(), getMain_panel().getDefault_slots_up(), false);
 
                                         getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+                                        
+                                        getMain_panel().getUpload_manager().addPre_count(-1);
+                                        
+                                        getMain_panel().getUpload_manager().secureNotify();
                             
                                     }
-                        
-                                    swingReflectionInvoke("setText", status_up_label, "Starting uploads provisioning, please wait...");
-
-                                    getMain_panel().getUpload_manager().secureNotify();
                           
                             } catch (Exception ex) {
                                 
                                 getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
                             }
-                            
-                            swingReflectionInvoke("setEnabled", new_upload_menu, true);
-                            
-                            getMain_panel().getUpload_manager().setPreprocessing_transferences(false);
                     }
                     
-                });
+                };
+                
+                getMain_panel().getUpload_manager().getTransference_preprocess_queue().add(run);
+                
+                getMain_panel().getUpload_manager().secureNotify();
+                
+                swingReflectionInvoke("setEnabled", new_upload_menu, true);
+                
             
         } else {
             swingReflectionInvoke("setEnabled", new_upload_menu, true);

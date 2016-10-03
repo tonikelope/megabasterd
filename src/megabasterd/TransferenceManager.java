@@ -21,6 +21,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     private final ConcurrentLinkedQueue<Transference> _transference_remove_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_finished_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_running_list;
+    private final ConcurrentLinkedQueue<Runnable> _transference_preprocess_queue;
     private final javax.swing.JPanel _scroll_panel;
     private final javax.swing.JLabel _status;
     private final javax.swing.JButton _close_all_button;
@@ -34,6 +35,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     private volatile boolean _provisioning_transferences;
     private volatile boolean _starting_transferences;
     private volatile boolean _preprocessing_transferences;
+    private volatile int _pre_count;
 
     abstract public void provision(Transference transference);
     
@@ -66,6 +68,14 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     public void setPreprocessing_transferences(boolean preprocessing) {
         _preprocessing_transferences = preprocessing;
     }
+
+    public ConcurrentLinkedQueue<Runnable> getTransference_preprocess_queue() {
+        return _transference_preprocess_queue;
+    }
+
+    public synchronized void addPre_count(int pre_count) {
+        _pre_count+=pre_count;
+    }
  
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
@@ -73,6 +83,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         _provisioning_transferences = false;
         _starting_transferences=false;
         _preprocessing_transferences=false;
+        _pre_count=0;
         _main_panel = main_panel;
         _max_running_trans = max_running_trans;
         _scroll_panel = scroll_panel;
@@ -86,6 +97,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         _transference_remove_queue = new ConcurrentLinkedQueue();
         _transference_finished_queue = new ConcurrentLinkedQueue();
         _transference_running_list = new ConcurrentLinkedQueue();
+        _transference_preprocess_queue = new ConcurrentLinkedQueue();
     }
     
     @Override
@@ -130,6 +142,10 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
 
     public MainPanel getMain_panel() {
         return _main_panel;
+    }
+
+    public boolean isPreprocessing_transferences() {
+        return _preprocessing_transferences;
     }
     
     public ConcurrentLinkedQueue<Transference> getTransference_provision_queue() {
@@ -249,10 +265,8 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
             
             swingReflectionInvoke("setVisible", _close_all_button, false);
         }
-        
-        if(!_preprocessing_transferences) {
-            swingReflectionInvoke("setText", _status, genStatus());
-        }
+
+        swingReflectionInvoke("setText", _status, genStatus());
     }
     
     private String genStatus() {
@@ -267,7 +281,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         
         int finish = _transference_finished_queue.size();
 
-        return (prov+rem+wait+run+finish > 0)?"Prov: "+prov+" / Rem: "+rem+" / Wait: "+wait+" / Run: "+run+" / Finish: "+finish:"";
+        return (_pre_count+prov+rem+wait+run+finish > 0)?"Pre: "+_pre_count+" / Prov: "+prov+" / Rem: "+rem+" / Wait: "+wait+" / Run: "+run+" / Finish: "+finish:"";
     }
     
     @Override
@@ -275,8 +289,33 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
 
         while(true)
         {
-            if(!isProvisioning_transferences() && !getTransference_provision_queue().isEmpty())
-            {
+            if(!isPreprocessing_transferences() && !getTransference_preprocess_queue().isEmpty()) {
+                
+                this.setPreprocessing_transferences(true);
+                
+                THREAD_POOL.execute(new Runnable(){
+                                @Override
+                                public void run(){
+        
+                                    while(!getTransference_preprocess_queue().isEmpty())
+                                    {
+                                        final Runnable run = getTransference_preprocess_queue().poll();
+
+                                        if(run != null) {
+                                            
+                                            run.run();
+                                        }
+                                    }
+                                    
+                                    setPreprocessing_transferences(false);
+                                    
+                                    secureNotify();
+             
+                   }});
+            }
+
+            if(!isProvisioning_transferences() && !getTransference_provision_queue().isEmpty()) {
+                
                 setProvisioning_transferences(true);
                 
                 THREAD_POOL.execute(new Runnable(){
@@ -327,8 +366,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
                                 }});
             }
             
-            if(!isStarting_transferences() && !getTransference_start_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans)
-            {
+            if(!isStarting_transferences() && !getTransference_start_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
                 setStarting_transferences(true);
                 
                 THREAD_POOL.execute(new Runnable(){
