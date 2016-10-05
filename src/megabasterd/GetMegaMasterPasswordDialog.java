@@ -14,6 +14,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MiscTools.Bin2BASE64;
+import static megabasterd.MiscTools.HashBin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.updateFont;
 
@@ -195,7 +197,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
             public void run() {try {
                 byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), CryptTools.PBKDF2_SALT, CryptTools.PBKDF2_ITERATIONS);
 
-                String pass_hash = MiscTools.Bin2BASE64(MiscTools.HashBin("SHA-1", pass));
+                String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
 
                 if(!pass_hash.equals(_current_pass_hash)) {
 

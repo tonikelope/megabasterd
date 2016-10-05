@@ -27,6 +27,9 @@ import javax.swing.table.DefaultTableModel;
 import static megabasterd.DBTools.insertSettingValueInDB;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MiscTools.BASE642Bin;
+import static megabasterd.MiscTools.Bin2BASE64;
+import static megabasterd.MiscTools.i32a2bin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
@@ -301,7 +304,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     
                     try {
                         
-                        pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                        pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                     
                     } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
                         Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
@@ -833,15 +836,15 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                     
                                     _main_panel.getMega_active_accounts().put(email, ma);
           
-                                    String password=pass, password_aes=MiscTools.Bin2BASE64(MiscTools.i32a2bin(ma.getPassword_aes())), user_hash=ma.getUser_hash();
+                                    String password=pass, password_aes=Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash=ma.getUser_hash();
 
-                                    if(_main_panel.getMega_master_pass() != null) {
+                                    if(_main_panel.getMega_master_pass_hash() != null) {
 
-                                        password = MiscTools.Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                        password =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
 
-                                        password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(MiscTools.i32a2bin(ma.getPassword_aes()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                        password_aes =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
 
-                                        user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(ma.getUser_hash().getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                        user_hash =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(ma.getUser_hash()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                                     }
                                     
                                     DBTools.insertMegaAccount(email, password, password_aes, user_hash);
@@ -864,7 +867,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                     
                                     try {
                                         
-                                        password = new String(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin(password), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                        password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(password), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
            
                                     } catch (Exception ex) {
                                         Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
@@ -882,15 +885,15 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         
                                         password = pass;
                                         
-                                        String password_aes=MiscTools.Bin2BASE64(MiscTools.i32a2bin(ma.getPassword_aes())), user_hash=ma.getUser_hash();
+                                        String password_aes=Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash=ma.getUser_hash();
                                         
                                         if(_main_panel.getMega_master_pass() != null) {
                                             
-                                            password = MiscTools.Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                            password =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                                                     
-                                            password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(MiscTools.i32a2bin(ma.getPassword_aes()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                                             
-                                            user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(ma.getUser_hash().getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(ma.getUser_hash()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                                         }
 
                                         DBTools.insertMegaAccount(email, password, password_aes, user_hash);
@@ -1042,6 +1045,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         
         byte[] old_mega_master_pass = _main_panel.getMega_master_pass();
         
+        String old_mega_master_pass_hash = _main_panel.getMega_master_pass_hash();
+        
         if(dialog.isPass_ok()) {
             
             try {
@@ -1071,13 +1076,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     email = (String)pair.getKey();
 
-                    if(old_mega_master_pass != null) {
+                    if(old_mega_master_pass_hash != null) {
+                        
+                        password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password")) , old_mega_master_pass, CryptTools.AES_ZERO_IV));
 
-                        password = new String(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)data.get("password")) , old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                        password_aes =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password_aes")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
 
-                        password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)data.get("password_aes")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
-
-                        user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)data.get("user_hash")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                        user_hash =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("user_hash")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
 
                     } else {
 
@@ -1090,11 +1095,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     
                     if(_main_panel.getMega_master_pass() != null) {
 
-                        password = MiscTools.Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(password.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                        password =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(password.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                     
-                        password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(MiscTools.BASE642Bin(password_aes), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                        password_aes =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(password_aes), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                     
-                        user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(MiscTools.BASE642Bin(user_hash), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                        user_hash =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(user_hash), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                     }
                     
                     data.put("password", password);
@@ -1154,7 +1159,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             try {
 
-                pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
 
             } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
                 Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
@@ -1212,7 +1217,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 
                 _main_panel.setMega_master_pass_hash(null);
                 
-                insertSettingValueInDB("mega_master_pass_hash", _main_panel.getMega_master_pass_hash());
+                _main_panel.setMega_master_pass(null);
+                
+                insertSettingValueInDB("mega_master_pass_hash", null);
                 
                 encrypt_pass_checkbox.setSelected(false);
                 

@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MiscTools.Bin2BASE64;
+import static megabasterd.MiscTools.HashBin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.updateFont;
 
@@ -219,7 +221,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
 
                     _new_pass = CryptTools.PBKDF2HMACSHA256(new String(new_pass_textfield.getPassword()), CryptTools.PBKDF2_SALT, CryptTools.PBKDF2_ITERATIONS);
 
-                    _new_pass_hash = MiscTools.Bin2BASE64(MiscTools.HashBin("SHA-1", _new_pass));
+                    _new_pass_hash =Bin2BASE64(HashBin("SHA-1", _new_pass));
                 }
 
                 _pass_ok = true;

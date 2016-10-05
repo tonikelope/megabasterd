@@ -17,6 +17,9 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MiscTools.BASE642Bin;
+import static megabasterd.MiscTools.Bin2BASE64;
+import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
 import static megabasterd.MiscTools.deleteSelectedTreeItems;
 import static megabasterd.MiscTools.formatBytes;
@@ -449,7 +452,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         
         Long[] quota = null;
         
-        MegaAPI ma = _main_panel.getMega_active_accounts().get(account_combobox.getSelectedItem());
+        MegaAPI ma = _main_panel.getMega_active_accounts().get((String)account_combobox.getSelectedItem());
 
         if(ma == null) {
 
@@ -479,9 +482,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                             
                             dialog.dispose();
                             
-                            password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("password_aes")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)account_info.get("password_aes")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                             
-                            user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("user_hash")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)account_info.get("user_hash")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                             
                         } else {
                             
@@ -492,9 +495,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                         
                     } else {
                         
-                        password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("password_aes")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)account_info.get("password_aes")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                             
-                        user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("user_hash")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)account_info.get("user_hash")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
                    
                     }
 
@@ -505,7 +508,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                     user_hash = (String)account_info.get("user_hash");
                 }
                 
-                ma.fastLogin(email, MiscTools.bin2i32a(MiscTools.BASE642Bin(password_aes)), user_hash);
+                ma.fastLogin(email,bin2i32a(BASE642Bin(password_aes)), user_hash);
 
                 _main_panel.getMega_active_accounts().put(email, ma);
                 

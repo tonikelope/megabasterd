@@ -43,6 +43,7 @@ import static megabasterd.DBTools.selectSettingValueFromDB;
 import static megabasterd.DBTools.selectUploads;
 import static megabasterd.DBTools.setupSqliteTables;
 import static megabasterd.MiscTools.BASE642Bin;
+import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.createAndRegisterFont;
 import static megabasterd.MiscTools.setNimbusLookAndFeel;
@@ -667,9 +668,9 @@ public final class MainPanel {
 
                                                                                         dialog.dispose();
 
-                                                                                        password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("password_aes")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                                                                        password_aes =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)account_info.get("password_aes")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
 
-                                                                                        user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("user_hash")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                                                                        user_hash =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)account_info.get("user_hash")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
 
                                                                                     } else {
 
@@ -680,9 +681,9 @@ public final class MainPanel {
 
                                                                                 } else {
 
-                                                                                    password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("password_aes")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                                                                    password_aes =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)account_info.get("password_aes")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
 
-                                                                                    user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("user_hash")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                                                                    user_hash =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)account_info.get("user_hash")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
 
                                                                                 }
 
@@ -693,7 +694,7 @@ public final class MainPanel {
                                                                                 user_hash = (String)account_info.get("user_hash");
                                                                             }
 
-                                                                            ma.fastLogin(email, MiscTools.bin2i32a(MiscTools.BASE642Bin(password_aes)), user_hash);
+                                                                            ma.fastLogin(email,bin2i32a(BASE642Bin(password_aes)), user_hash);
 
                                                                             _mega_active_accounts.put(email, ma);
 
