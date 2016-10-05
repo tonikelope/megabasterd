@@ -14,3 +14,5 @@ https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A
 ![Screnshot](/src/megabasterd/screenshot3.png)
 
 ![Screnshot](/src/megabasterd/screenshot2.png)
+
+![Screnshot](/src/megabasterd/screenshot7.png)
