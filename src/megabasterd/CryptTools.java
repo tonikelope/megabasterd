@@ -7,13 +7,16 @@ import java.security.KeyFactory;
 import java.security.NoSuchAlgorithmException;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.KeySpec;
 import java.security.spec.RSAPrivateKeySpec;
 import java.util.Arrays;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import static megabasterd.MiscTools.Bin2UrlBASE64;
 import static megabasterd.MiscTools.UrlBASE642Bin;
@@ -30,7 +33,9 @@ public final class CryptTools {
     
     public static final byte[] AES_ZERO_IV = i32a2bin(AES_ZERO_IV_I32A);
     
+    public static final byte[] PBKDF2_SALT = MiscTools.hex2bin("70acca76a94e9f78");
     
+    public static final int PBKDF2_ITERATIONS = 0x10000;
     
     public static Cipher genDecrypter(String algo, String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
     {
@@ -79,9 +84,23 @@ public final class CryptTools {
         return cryptor.doFinal(data);
     }
     
+    public static byte[] aes_cbc_encrypt_pkcs7(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+        
+        Cipher cryptor = CryptTools.genCrypter("AES", "AES/CBC/PKCS5Padding", key, iv);
+        
+        return cryptor.doFinal(data);
+    }
+    
     public static byte[] aes_cbc_decrypt(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
         
         Cipher decryptor = CryptTools.genDecrypter("AES", "AES/CBC/NoPadding", key, iv);
+        
+        return decryptor.doFinal(data);
+    }
+    
+    public static byte[] aes_cbc_decrypt_pkcs7(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+        
+        Cipher decryptor = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", key, iv);
         
         return decryptor.doFinal(data);
     }
@@ -310,6 +329,16 @@ public final class CryptTools {
         
         return pkey;
     }
+    
+    public static byte[] PBKDF2HMACSHA256(String password, byte[] salt, int iterations) throws NoSuchAlgorithmException, InvalidKeySpecException {
+        
+        SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+        
+        KeySpec ks = new PBEKeySpec(password.toCharArray(), salt, iterations, 256);
+        
+        return f.generateSecret(ks).getEncoded();
+    }
+
 
     private CryptTools() {
     }

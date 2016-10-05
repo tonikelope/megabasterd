@@ -165,7 +165,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                 
                 if(error) {
                     
-                    JOptionPane.showMessageDialog(tthis, "Please, paste a mega/megacrypter link!");
+                    JOptionPane.showMessageDialog(tthis, "Please, paste a mega/megacrypter link!", "Error", JOptionPane.ERROR_MESSAGE);
 
                     swingReflectionInvoke("setText", original_link_textfield, "");
                     

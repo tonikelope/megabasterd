@@ -47,6 +47,7 @@ import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.createAndRegisterFont;
 import static megabasterd.MiscTools.setNimbusLookAndFeel;
 import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.Transference.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
@@ -58,7 +59,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.12";
+    public static final String VERSION="1.13";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
     public static final int STREAMER_PORT = 1337;
@@ -94,7 +95,8 @@ public final class MainPanel {
     private TrayIcon _trayicon;
     private final ClipboardSpy _clipboardspy;
     private KissVideoStreamServer _streamserver;
-    
+    private byte[] _mega_master_pass;
+    private String _mega_master_pass_hash;
     public MainPanel() {
                 
         if(checkAppIsRunning()) {
@@ -145,8 +147,44 @@ public final class MainPanel {
         } catch (IOException ex) {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
+        
+        _mega_master_pass = null;
     }
-    
+
+    public String getMega_master_pass_hash() {
+        return _mega_master_pass_hash;
+    }
+
+    public void setMega_master_pass_hash(String mega_master_pass_hash) {
+        _mega_master_pass_hash = mega_master_pass_hash;
+    }
+
+
+    public byte[] getMega_master_pass() {
+        return _mega_master_pass;
+    }
+
+    public void setMega_master_pass(byte[] pass) {
+        
+        if(_mega_master_pass != null) {
+            
+            for(byte b:_mega_master_pass) {
+                
+                b = 0;
+            }
+        }
+        
+        _mega_master_pass = pass;
+
+        if(pass != null) {
+            
+            for(byte b:pass) {
+            
+                b = 0;
+            }
+        }
+    }
+ 
     public MainPanelView getView() {
         
         return _view == null?(_view = new MainPanelView(this)):_view;
@@ -336,7 +374,8 @@ public final class MainPanel {
         } catch (SQLException ex) {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
-
+        
+        _mega_master_pass_hash = DBTools.selectSettingValueFromDB("mega_master_pass_hash");
     }
     
     public void _byebye() {
@@ -474,8 +513,6 @@ public final class MainPanel {
  
             if(conta_downloads>0) {
                 
-                swingReflectionInvoke("setText", getView().getStatus_down_label(), "Starting downloads provisioning, please wait...");
-                
                 getDownload_manager().secureNotify();
 
                 getView().getjTabbedPane1().setSelectedIndex(0);
@@ -582,11 +619,14 @@ public final class MainPanel {
                                                     
                                                     int conta_uploads = 0;
                                                     
+                                                    boolean remember_pass = true;
+                                                    
                                                     ArrayList<HashMap<String,Object>> res = selectUploads();
      
-                                                    
-                                                        
                                                         for(HashMap<String,Object> o:res) {
+                                                            
+                                                            try{
+                                                            
                                                             
                                                             String email = (String)o.get("email");
                                                             
@@ -600,17 +640,64 @@ public final class MainPanel {
                                                                 
                                                                 if(ma == null) {
                                                                     
-                                                                    try {
-                                                                        
+                                                                    
                                                                         ma = new MegaAPI();
                                                                         
-                                                                        ma.login(email, bin2i32a(BASE642Bin((String)account_info.get("password_aes"))), (String)account_info.get("user_hash"));
+                                                                        String password_aes, user_hash;
                                                                         
-                                                                        _mega_active_accounts.put(email, ma);
-                                                                        
-                                                                    } catch (Exception ex) {
-                                                                        getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
-                                                                    }
+                                                                            if(getMega_master_pass_hash() != null) {
+
+                                                                                if(getMega_master_pass() == null) {
+                                                                                    
+                                                                                    getView().getjTabbedPane1().setSelectedIndex(1);
+                                                                                    
+                                                                                    GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog(getView(), true, getMega_master_pass_hash());
+
+                                                                                    swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, getView());
+
+                                                                                    swingReflectionInvokeAndWait("setVisible", dialog, true);
+
+                                                                                    if(dialog.isPass_ok()) {
+
+                                                                                        setMega_master_pass(dialog.getPass());
+
+                                                                                        dialog.deletePass();
+                                                                                        
+                                                                                        remember_pass = dialog.getRemember_checkbox().isSelected();
+
+                                                                                        dialog.dispose();
+
+                                                                                        password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("password_aes")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+
+                                                                                        user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("user_hash")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+
+                                                                                    } else {
+
+                                                                                        dialog.dispose();
+
+                                                                                        throw new Exception();
+                                                                                    }
+
+                                                                                } else {
+
+                                                                                    password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("password_aes")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+
+                                                                                    user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("user_hash")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+
+                                                                                }
+
+                                                                            } else {
+
+                                                                                password_aes = (String)account_info.get("password_aes");
+
+                                                                                user_hash = (String)account_info.get("user_hash");
+                                                                            }
+
+                                                                            ma.fastLogin(email, MiscTools.bin2i32a(MiscTools.BASE642Bin(password_aes)), user_hash);
+
+                                                                            _mega_active_accounts.put(email, ma);
+
+                                                                            
                                                                 }
                                                                 
                                                                 Upload upload = new Upload(tthis, ma, (String)o.get("filename"), (String)o.get("parent_node"), (String)o.get("ul_key")!=null?bin2i32a(BASE642Bin((String)o.get("ul_key"))):null, (String)o.get("url"), (String)o.get("root_node"), BASE642Bin((String)o.get("share_key")), (String)o.get("folder_link"), _use_slots_up, _default_slots_up, false);
@@ -623,17 +710,24 @@ public final class MainPanel {
                                                                 
                                                                 deleteUpload((String)o.get("filename"), email);
                                                             }
+                                                                
+                                                            } catch (Exception ex) {
+                                                                        getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                                                             }
                                                         }
                                                         
                                                     if(conta_uploads>0) {
-                                                        
-                                                        swingReflectionInvoke("setText", getView().getStatus_up_label(), "Starting uploads provisioning, please wait...");
-                                                        
+
                                                         getUpload_manager().secureNotify();
                                                         
                                                         getView().getjTabbedPane1().setSelectedIndex(1);
                                                         
-                                                    } 
+                                                    }
+                                                    
+                                                    if(!remember_pass) {
+                
+                                                        setMega_master_pass(null);
+                                                    }
                                                     
                                                     swingReflectionInvoke("setText", getView().getStatus_up_label(), "");
                                                     

@@ -58,7 +58,7 @@ public final class MiscTools {
     public static final int EXP_BACKOFF_SECS_RETRY=1;
     public static final int EXP_BACKOFF_MAX_WAIT_TIME=128;
     private static final ConcurrentHashMap<String, Method> REFLECTION_METHOD_CACHE = new ConcurrentHashMap<>();
-    private static final Comparator<DefaultMutableTreeNode> _treeNodeComparator = new Comparator< DefaultMutableTreeNode>() {
+    private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = new Comparator< DefaultMutableTreeNode>() {
         
         @Override public int compare(DefaultMutableTreeNode a, DefaultMutableTreeNode b) {
             
@@ -597,7 +597,7 @@ public final class MiscTools {
             children.add((DefaultMutableTreeNode) parent.getChildAt(i));
         }
         
-        Collections.sort(children, _treeNodeComparator); 
+        Collections.sort(children, TREE_NODE_COMPARATOR); 
         
         parent.removeAllChildren();
         
@@ -838,7 +838,6 @@ public final class MiscTools {
     }
     
     
-
     private MiscTools() {
     }
     

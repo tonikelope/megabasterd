@@ -29,8 +29,6 @@ import static megabasterd.DBTools.deleteMegaAccount;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.ICON_FILE;
 import static megabasterd.MainPanel.VERSION;
-import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.findAllRegex;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.genID;
@@ -629,6 +627,11 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             _main_panel.getUpload_manager().secureNotify();
         }
+        
+        if(!dialog.isRemember_master_pass()) {
+                        
+            _main_panel.setMega_master_pass(null);
+        }
        
         dialog.dispose();
     }//GEN-LAST:event_settings_menuActionPerformed
@@ -714,30 +717,20 @@ public final class MainPanelView extends javax.swing.JFrame {
                 
                 final String mega_account = (String)dialog.getAccount_combobox().getSelectedItem();
                 
-                HashMap<String,Object> data_account = (HashMap)_main_panel.getMega_accounts().get(mega_account);
-                
                 final String base_path = dialog.getBase_path();
                 
                 final String dir_name=dialog.getDir_name_textfield().getText();
                 
-                final int[] mega_aes_pass = bin2i32a(BASE642Bin((String)data_account.get("password_aes")));
-                
-                final String mega_user_hash = (String)data_account.get("user_hash");
-
                 jTabbedPane1.setSelectedIndex(1);
                 
                 Runnable run = new Runnable(){
                     @Override
                     public void run() {
                         
-                        MegaAPI ma=getMain_panel().getMega_active_accounts().get(mega_account)!=null?getMain_panel().getMega_active_accounts().get(mega_account):new MegaAPI();
+                        MegaAPI ma=getMain_panel().getMega_active_accounts().get(mega_account);
               
                             try {
-                                
-                                ma.login(mega_account, mega_aes_pass, mega_user_hash);
-                                
-                                getMain_panel().getMega_active_accounts().put(mega_account, ma);
-                                
+ 
                                 byte[] parent_key = ma.genFolderKey();
                                 
                                 byte[] share_key = ma.genShareKey();
@@ -820,6 +813,11 @@ public final class MainPanelView extends javax.swing.JFrame {
         
         }catch(Exception ex) {}
 
+        if(!dialog.isRemember_master_pass()) {
+            
+            _main_panel.setMega_master_pass(null);
+        }
+        
         dialog.dispose();
 
     }//GEN-LAST:event_new_upload_menuActionPerformed

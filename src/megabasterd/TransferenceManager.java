@@ -291,7 +291,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         {
             if(!isPreprocessing_transferences() && !getTransference_preprocess_queue().isEmpty()) {
                 
-                this.setPreprocessing_transferences(true);
+                setPreprocessing_transferences(true);
                 
                 THREAD_POOL.execute(new Runnable(){
                                 @Override

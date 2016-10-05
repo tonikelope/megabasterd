@@ -2,6 +2,7 @@ package megabasterd;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Frame;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -22,6 +23,7 @@ import static megabasterd.MiscTools.formatBytes;
 import static megabasterd.MiscTools.genID;
 import static megabasterd.MiscTools.sortTree;
 import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.MiscTools.updateFont;
 
@@ -37,6 +39,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private long _total_space;
     private String _last_selected_account;
     private final MainPanel _main_panel;
+    private boolean _remember_master_pass;
 
     public boolean isUpload() {
         return _upload;
@@ -57,9 +60,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     public JTextField getDir_name_textfield() {
         return dir_name_textfield;
     }
+    
+    public boolean isRemember_master_pass() {
+        return _remember_master_pass;
+    }
  
-    
-    
     /**
      * Creates new form FileGrabber
      * @param modal
@@ -72,6 +77,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         _total_space = 0L;
         _base_path = null;
         _upload = false;
+        _remember_master_pass = true;
         
         initComponents();
 
@@ -116,7 +122,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             swingReflectionInvoke("setEnabled", file_tree, false);
             swingReflectionInvoke("setEnabled", dir_name_textfield, false);
         }
-        
         
     }
 
@@ -410,16 +415,17 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
     private void account_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_account_comboboxItemStateChanged
         
-
-        if(!swingReflectionInvokeAndWaitForReturn("getSelectedItem", account_combobox).equals(_last_selected_account)) {
-            
-            _last_selected_account = (String) swingReflectionInvokeAndWaitForReturn("getSelectedItem", account_combobox);
-            
-            final String email = (String)account_combobox.getSelectedItem();
+        String selected_item = (String)swingReflectionInvokeAndWaitForReturn("getSelectedItem", account_combobox);
         
-            final FileGrabberDialog fg = this;
+        if(selected_item != null && !selected_item.equals(_last_selected_account)) {
+            
+            _last_selected_account = selected_item;
+            
+            final String email = selected_item;
+        
+            final FileGrabberDialog tthis = this;
 
-            swingReflectionInvoke("setForeground", fg.used_space_label, Color.black);
+            swingReflectionInvoke("setForeground", used_space_label, Color.black);
 
             swingReflectionInvoke("setText", used_space_label, "Checking account quota, please wait...");
 
@@ -439,21 +445,69 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                     @Override
                     public void run() {
         
-        HashMap<String,Object> account_info = (HashMap)fg._main_panel.getMega_accounts().get(email);
+        HashMap<String,Object> account_info = (HashMap)_main_panel.getMega_accounts().get(email);
         
         Long[] quota = null;
         
-        MegaAPI ma = fg._main_panel.getMega_active_accounts().get(fg.account_combobox.getSelectedItem());
+        MegaAPI ma = _main_panel.getMega_active_accounts().get(account_combobox.getSelectedItem());
 
         if(ma == null) {
 
             ma = new MegaAPI();
-                        
+            
+            String password_aes, user_hash;
+            
             try {
+                
+                if(_main_panel.getMega_master_pass_hash() != null) {
+                    
+                    if(_main_panel.getMega_master_pass() == null) {
+                        
+                        GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog((Frame)getParent(), true, _main_panel.getMega_master_pass_hash());
+        
+                        swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
+        
+                        swingReflectionInvokeAndWait("setVisible", dialog, true);
+                        
+                        if(dialog.isPass_ok()) {
+                            
+                            _main_panel.setMega_master_pass(dialog.getPass());
+                            
+                            dialog.deletePass();
+                            
+                            _remember_master_pass = dialog.getRemember_checkbox().isSelected();
+                            
+                            dialog.dispose();
+                            
+                            password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("password_aes")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                            
+                            user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("user_hash")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                            
+                        } else {
+                            
+                            dialog.dispose();
+                            
+                            throw new Exception();
+                        }
+                        
+                    } else {
+                        
+                        password_aes = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("password_aes")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                            
+                        user_hash = MiscTools.Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(MiscTools.BASE642Bin((String)account_info.get("user_hash")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                   
+                    }
 
-                ma.login(email, (String)account_info.get("password"));
+                } else {
+                    
+                    password_aes = (String)account_info.get("password_aes");
+                    
+                    user_hash = (String)account_info.get("user_hash");
+                }
+                
+                ma.fastLogin(email, MiscTools.bin2i32a(MiscTools.BASE642Bin(password_aes)), user_hash);
 
-                fg._main_panel.getMega_active_accounts().put(email, ma);
+                _main_panel.getMega_active_accounts().put(email, ma);
                 
                 quota = ma.getQuota();
 
@@ -461,6 +515,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                 getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
+
             
        } else {
             
@@ -471,38 +526,42 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
              
             if(quota[0] <= Math.round((double)quota[1]/2)) {
 
-                swingReflectionInvoke("setForeground", fg.used_space_label, new Color(0,128,0));
+                swingReflectionInvoke("setForeground", used_space_label, new Color(0,128,0));
 
             } else if(quota[0] < quota[1]) {
 
-                swingReflectionInvoke("setForeground", fg.used_space_label, new Color(230,115,0));
+                swingReflectionInvoke("setForeground", used_space_label, new Color(230,115,0));
 
             } else {
 
-                swingReflectionInvoke("setForeground", fg.used_space_label, Color.red);
+                swingReflectionInvoke("setForeground", used_space_label, Color.red);
             }
 
-            swingReflectionInvoke("setText", fg.used_space_label, formatBytes(quota[0])+" / "+formatBytes(quota[1]));
+            swingReflectionInvoke("setText", used_space_label, formatBytes(quota[0])+" / "+formatBytes(quota[1]));
+            
+            swingReflectionInvoke("setEnabled", dance_button, true);
+            swingReflectionInvoke("setEnabled", add_files_button, true);
+            swingReflectionInvoke("setEnabled", add_folder_button, true);
+            swingReflectionInvoke("setEnabled", file_tree, true);
+            swingReflectionInvoke("setEnabled", dir_name_textfield, true);
+            swingReflectionInvoke("setEnabled", total_file_size_label, true);
+            swingReflectionInvoke("setEnabled", skip_button, true);
+            swingReflectionInvoke("setEnabled", skip_rest_button, true);
+            swingReflectionInvoke("setEnabled", warning_label, true);
+            swingReflectionInvoke("setEnabled", account_combobox, true);
             
         } else {
             
-            swingReflectionInvoke("setForeground", fg.used_space_label, Color.red);
-
-            swingReflectionInvoke("setText", fg.used_space_label, "ERROR checking account quota! (Retry in few minutes).");
+            swingReflectionInvoke("setEnabled", account_combobox, true);
+            
+            account_combobox.setSelectedIndex(-1);
+            
+            _last_selected_account = null;
+            
+            swingReflectionInvoke("setForeground", used_space_label, Color.red);
+   
+            swingReflectionInvoke("setText", used_space_label, "ERROR checking account quota!");
         }
-       
-        
-        swingReflectionInvoke("setEnabled", fg.dance_button, true);
-        swingReflectionInvoke("setEnabled", fg.add_files_button, true);
-        swingReflectionInvoke("setEnabled", fg.add_folder_button, true);
-        swingReflectionInvoke("setEnabled", fg.file_tree, true);
-        swingReflectionInvoke("setEnabled", fg.dir_name_textfield, true);
-        swingReflectionInvoke("setEnabled", fg.account_combobox, true);
-        swingReflectionInvoke("setEnabled", fg.total_file_size_label, true);
-        swingReflectionInvoke("setEnabled", fg.skip_button, true);
-        swingReflectionInvoke("setEnabled", fg.skip_rest_button, true);
-        swingReflectionInvoke("setEnabled", fg.warning_label, true);
-
         
         }   });
             

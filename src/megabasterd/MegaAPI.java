@@ -171,7 +171,7 @@ public final class MegaAPI {
             _realLogin();
     }
     
-    public void login(String email, int[] password_aes, String user_hash) throws Exception, MegaAPIException {
+    public void fastLogin(String email, int[] password_aes, String user_hash) throws Exception, MegaAPIException {
         
         _email = email;
         

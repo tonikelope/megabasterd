@@ -7,7 +7,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.security.spec.InvalidKeySpecException;
-import java.security.spec.KeySpec;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -16,8 +15,6 @@ import java.util.zip.GZIPInputStream;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import javax.swing.JOptionPane;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2BASE64;
@@ -225,13 +222,9 @@ public final class MegaCrypterAPI {
                         
                         if(password!=null) {
                             
-                            SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
-                            
-                            KeySpec ks = new PBEKeySpec(password.toCharArray(), salt, (int)Math.pow(2, iterations), 256);
-                            
                             try {
                                 
-                                info_key=f.generateSecret(ks).getEncoded();
+                                info_key=CryptTools.PBKDF2HMACSHA256(password, salt, (int)Math.pow(2, iterations));
                                 
                                 decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
