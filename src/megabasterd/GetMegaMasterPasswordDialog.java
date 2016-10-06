@@ -105,6 +105,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
         setResizable(false);
 
         current_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        current_pass_textfield.setDoubleBuffered(true);
         current_pass_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 current_pass_textfieldKeyPressed(evt);
@@ -113,6 +114,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
 
         cancel_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         cancel_button.setText("CANCEL");
+        cancel_button.setDoubleBuffered(true);
         cancel_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancel_buttonActionPerformed(evt);
@@ -121,6 +123,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
 
         ok_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         ok_button.setText("OK");
+        ok_button.setDoubleBuffered(true);
         ok_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ok_buttonActionPerformed(evt);
@@ -128,15 +131,19 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
         });
 
         lock_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/lock_medium.png"))); // NOI18N
+        lock_label.setDoubleBuffered(true);
 
         please_label.setFont(new java.awt.Font("Dialog", 1, 26)); // NOI18N
         please_label.setText("Please, enter your master password");
+        please_label.setDoubleBuffered(true);
 
         status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        status_label.setDoubleBuffered(true);
 
         remember_checkbox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         remember_checkbox.setSelected(true);
         remember_checkbox.setText("Remember for this session");
+        remember_checkbox.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);

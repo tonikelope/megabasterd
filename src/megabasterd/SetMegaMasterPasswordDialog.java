@@ -105,6 +105,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
         setResizable(false);
 
         confirm_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        confirm_pass_textfield.setDoubleBuffered(true);
         confirm_pass_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 confirm_pass_textfieldKeyPressed(evt);
@@ -113,9 +114,11 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
 
         confirm_pass_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         confirm_pass_label.setText("Confirm new:");
+        confirm_pass_label.setDoubleBuffered(true);
 
         cancel_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         cancel_button.setText("CANCEL");
+        cancel_button.setDoubleBuffered(true);
         cancel_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancel_buttonActionPerformed(evt);
@@ -124,6 +127,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
 
         ok_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         ok_button.setText("OK");
+        ok_button.setDoubleBuffered(true);
         ok_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 ok_buttonActionPerformed(evt);
@@ -131,16 +135,21 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
         });
 
         lock_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/lock_medium.png"))); // NOI18N
+        lock_label.setDoubleBuffered(true);
 
         warning_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         warning_label.setText("WARNING: if you forget this password, you will have to insert all your MEGA accounts again.");
+        warning_label.setDoubleBuffered(true);
 
         new_pass_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         new_pass_label.setText("New pass:");
+        new_pass_label.setDoubleBuffered(true);
 
         new_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        new_pass_textfield.setDoubleBuffered(true);
 
         status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        status_label.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
