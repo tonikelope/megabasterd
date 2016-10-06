@@ -60,7 +60,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.14";
+    public static final String VERSION="1.15";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
     public static final int STREAMER_PORT = 1337;
@@ -98,6 +98,8 @@ public final class MainPanel {
     private KissVideoStreamServer _streamserver;
     private byte[] _mega_master_pass;
     private String _mega_master_pass_hash;
+    private String _mega_master_pass_salt;
+    
     public MainPanel() {
                 
         if(checkAppIsRunning()) {
@@ -158,6 +160,10 @@ public final class MainPanel {
 
     public void setMega_master_pass_hash(String mega_master_pass_hash) {
         _mega_master_pass_hash = mega_master_pass_hash;
+    }
+
+    public String getMega_master_pass_salt() {
+        return _mega_master_pass_salt;
     }
 
 
@@ -377,6 +383,21 @@ public final class MainPanel {
         }
         
         _mega_master_pass_hash = DBTools.selectSettingValueFromDB("mega_master_pass_hash");
+        
+        _mega_master_pass_salt = DBTools.selectSettingValueFromDB("mega_master_pass_salt");
+        
+        if(_mega_master_pass_salt == null) {
+            
+            try {
+                
+                _mega_master_pass_salt = MiscTools.Bin2BASE64(MiscTools.genRandomByteArray(CryptTools.PBKDF2_SALT_BYTE_LENGTH));
+                
+                DBTools.insertSettingValueInDB("mega_master_pass_salt", _mega_master_pass_salt);
+                
+            } catch (Exception ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
     }
     
     public void _byebye() {
@@ -652,7 +673,7 @@ public final class MainPanel {
                                                                                     
                                                                                     getView().getjTabbedPane1().setSelectedIndex(1);
                                                                                     
-                                                                                    GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog(getView(), true, getMega_master_pass_hash());
+                                                                                    GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog(getView(), true, getMega_master_pass_hash(), getMega_master_pass_salt());
 
                                                                                     swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, getView());
 

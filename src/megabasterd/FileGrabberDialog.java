@@ -466,7 +466,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                     
                     if(_main_panel.getMega_master_pass() == null) {
                         
-                        GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog((Frame)getParent(), true, _main_panel.getMega_master_pass_hash());
+                        GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog((Frame)getParent(), true, _main_panel.getMega_master_pass_hash(), _main_panel.getMega_master_pass_salt());
         
                         swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
         

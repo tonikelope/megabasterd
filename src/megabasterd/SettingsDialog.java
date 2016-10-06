@@ -1055,7 +1055,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 @Override
                 public void run() {
                 
-                    SetMegaMasterPasswordDialog dialog = new SetMegaMasterPasswordDialog((Frame)getParent(),true);
+                    SetMegaMasterPasswordDialog dialog = new SetMegaMasterPasswordDialog((Frame)getParent(),true, _main_panel.getMega_master_pass_salt());
         
                     swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
 
@@ -1155,7 +1155,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 @Override
                 public void run() {
                 
-                    GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog((Frame)getParent(),true, _main_panel.getMega_master_pass_hash());
+                    GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog((Frame)getParent(),true, _main_panel.getMega_master_pass_hash(), _main_panel.getMega_master_pass_salt());
         
                     swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
 

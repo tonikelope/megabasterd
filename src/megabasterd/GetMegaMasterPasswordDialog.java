@@ -30,6 +30,8 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
     
     private String _current_pass_hash;
     
+    private String _salt;
+    
     private byte[] _pass;
 
     public JPasswordField getNew_pass_textfield() {
@@ -61,7 +63,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
     /**
      * Creates new form MegaPassDialog
      */
-    public GetMegaMasterPasswordDialog(java.awt.Frame parent, boolean modal, String current_pass_hash) {
+    public GetMegaMasterPasswordDialog(java.awt.Frame parent, boolean modal, String current_pass_hash, String salt) {
         super(parent, modal);
         initComponents();
         
@@ -76,6 +78,8 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
         _pass_ok = false;
         
         _pass = null;
+        
+        _salt = salt;
 
     }
 
@@ -195,7 +199,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
             
             @Override
             public void run() {try {
-                byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), CryptTools.PBKDF2_SALT, CryptTools.PBKDF2_ITERATIONS);
+                byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), MiscTools.BASE642Bin(_salt), CryptTools.PBKDF2_ITERATIONS);
 
                 String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
 

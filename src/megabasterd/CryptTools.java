@@ -33,7 +33,7 @@ public final class CryptTools {
     
     public static final byte[] AES_ZERO_IV = i32a2bin(AES_ZERO_IV_I32A);
     
-    public static final byte[] PBKDF2_SALT = MiscTools.hex2bin("70acca76a94e9f78");
+    public static final int PBKDF2_SALT_BYTE_LENGTH = 16;
     
     public static final int PBKDF2_ITERATIONS = 0x10000;
     
