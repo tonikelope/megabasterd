@@ -87,7 +87,7 @@
     </jar>
     <zip destfile="${store.jar}">
         <zipfileset src="${store.dir}/temp_final.jar"
-        excludes="META-INF/*.SF, META-INF/*.DSA, META-INF/*.RSA"/>
+        excludes="META-INF/*.SF, META-INF/*.DSA, META-INF/*.RSA, megabasterd/screenshot*.png"/>
     </zip>
     <delete file="${store.dir}/temp_final.jar"/>
 </target>
