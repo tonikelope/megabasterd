@@ -27,7 +27,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     private final javax.swing.JButton _close_all_button;
     private final javax.swing.JButton _pause_all_button;
     private final javax.swing.MenuElement _clean_all_menu;
-    private final int _max_running_trans;
+    private int _max_running_trans;
     private final MainPanel _main_panel;
     private final Object _secure_notify_lock;
     private boolean _notified;
@@ -98,7 +98,12 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     public synchronized void addPre_count(int pre_count) {
         _pre_count+=pre_count;
     }
- 
+
+    public void setMax_running_trans(int _max_running_trans) {
+        this._max_running_trans = _max_running_trans;
+    }
+    
+    
     
     @Override
     public void secureNotify()

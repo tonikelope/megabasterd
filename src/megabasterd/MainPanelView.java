@@ -623,6 +623,10 @@ public final class MainPanelView extends javax.swing.JFrame {
             
             swingReflectionInvoke("setForeground", global_speed_up_label, _main_panel.isLimit_upload_speed()?new Color(255,0,0):new Color(0,128,255));
             
+            _main_panel.getDownload_manager().setMax_running_trans(_main_panel.getMax_dl());
+            
+            _main_panel.getUpload_manager().setMax_running_trans(_main_panel.getMax_ul());
+            
             _main_panel.getDownload_manager().secureNotify();
 
             _main_panel.getUpload_manager().secureNotify();
