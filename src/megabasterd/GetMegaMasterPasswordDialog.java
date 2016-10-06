@@ -30,7 +30,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
     
     private String _current_pass_hash;
     
-    private String _salt;
+    private final String _salt;
     
     private byte[] _pass;
 

@@ -58,7 +58,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     private  boolean _finishing_upload;
     private String _fid;
     private boolean _notified;
-    private String _completion_handle;
+    private volatile String _completion_handle;
     private int _paused_workers;
     private Double _progress_bar_rate;
     private volatile boolean _pause;
@@ -157,10 +157,6 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
     public int[] getFile_meta_mac() {
         return _file_meta_mac;
-    }
-
-    public boolean isFinishing_upload() {
-        return _finishing_upload;
     }
 
     public String getFid() {
@@ -265,10 +261,6 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         _completion_handle = completion_handle;
     }
 
-    public void setFinishing_upload(boolean finishing_upload) {
-        _finishing_upload = finishing_upload;
-    }
-
     public void setFile_meta_mac(int[] file_meta_mac) {
         _file_meta_mac = file_meta_mac;
     }
@@ -282,7 +274,6 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         return _progress_meter == null?(_progress_meter = new ProgressMeter(this)):_progress_meter;
     }
     
-
     @Override
     public SpeedMeter getSpeed_meter() {
         return _speed_meter == null?(_speed_meter = new SpeedMeter(this, getMain_panel().getGlobal_up_speed())):_speed_meter;
@@ -507,7 +498,8 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     }
 
     @Override
-    public void checkSlotsAndWorkers() {
+    public synchronized void checkSlotsAndWorkers() {
+        
         if(!isExit()) {
 
             int sl = (int)swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner());
@@ -522,11 +514,8 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
                 } else {
 
-                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
-
-                    swingReflectionInvoke("setText", getView().getSlot_status_label(), "Removing slot...");
-
                     stopLastStartedSlot();
+
                 }
             }
         }
@@ -537,14 +526,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         return getPartialProgressQueue();
     }
 
-    @Override
-    public void updateProgress(int reads)
-    {
-        _progress+=reads;
-        
-        getView().updateProgressBar(_progress, _progress_bar_rate);
-    }
-
+    
     @Override
     public MainPanel getMain_panel() {
         return _main_panel;
@@ -573,8 +555,29 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     {
         if(!_chunkworkers.isEmpty()) {
             
-            ChunkUploader chunkuploader = _chunkworkers.remove(_chunkworkers.size()-1);
-            chunkuploader.setExit(true);
+            swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+            
+            int i = _chunkworkers.size()-1;
+            
+            while(i>=0) {
+                
+                ChunkUploader chunkuploader = _chunkworkers.get(i);
+                
+                if(!chunkuploader.isExit()) {
+                    
+                    chunkuploader.setExit(true);
+                    
+                    chunkuploader.secureNotify();
+            
+                    _view.updateSlotsStatus();
+                    
+                    break;
+                    
+                } else {
+                    
+                    i--;
+                }
+            }
         }
     }
     
@@ -684,11 +687,11 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                 System.out.println("Chunkuploaders finished!");
                 
                 getSpeed_meter().setExit(true);
-            
-                getSpeed_meter().secureNotify();
-            
+                
                 getProgress_meter().setExit(true);
             
+                getSpeed_meter().secureNotify();
+                
                 getProgress_meter().secureNotify();
             
                 _thread_pool.shutdown();
@@ -724,6 +727,8 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                 if(!_exit) {
                     
                     if(_completion_handle != null) {
+                        
+                        printStatus("Uploading (finishing) file to mega ("+_ma.getEmail()+") ...");
                         
                         File f = new File(_file_name);
                      
@@ -803,8 +808,6 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                 printStatusError(_exit_message);
                 
                 _status_error = true;
-
-                
             }
                
         }
@@ -873,7 +876,18 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     {
         if(_chunkworkers.remove(chunkuploader))
         {
-            swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int)swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner())-1);
+            if(!chunkuploader.isExit()) {
+                
+                _finishing_upload = true;
+                
+                swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+                
+                swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int)swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner())-1);
+            
+            } else if(!_finishing_upload) {
+                
+                swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), true);
+            }
             
             if(!_exit && _pause && _paused_workers == _chunkworkers.size()) {
                 
@@ -881,6 +895,8 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                 swingReflectionInvoke("setText", getView().getPause_button(), "RESUME UPLOAD");
                 swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
             } 
+            
+            getView().updateSlotsStatus();
         }
     }
     
@@ -960,6 +976,11 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         swingReflectionInvoke("setText", getView().getStatus_label(), message);
     }
 
-   
+    @Override
+    public void setProgress(long progress) {
+        _progress = progress;
+        getView().updateProgressBar(_progress, _progress_bar_rate);
+    }
+
     
 }

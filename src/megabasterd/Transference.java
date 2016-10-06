@@ -36,17 +36,18 @@ public interface Transference {
     
     long getProgress();
     
-    void updateProgress(int reads);
+    void setProgress(long progress);
     
     String getFile_name();
     
     long getFile_size();
     
-    ProgressMeter getProgress_meter();
-    
     SpeedMeter getSpeed_meter();
+    
+    ProgressMeter getProgress_meter();
     
     MainPanel getMain_panel();
     
     TransferenceView getView();
+
 }

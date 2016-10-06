@@ -452,7 +452,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         
         Long[] quota = null;
         
-        MegaAPI ma = _main_panel.getMega_active_accounts().get((String)account_combobox.getSelectedItem());
+        MegaAPI ma = _main_panel.getMega_active_accounts().get(account_combobox.getSelectedItem());
 
         if(ma == null) {
 

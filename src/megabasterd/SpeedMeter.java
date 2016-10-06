@@ -83,12 +83,17 @@ public final class SpeedMeter implements Runnable, SecureNotifiable
         _lastSpeed = speed;
     }
     
+    public void updateProgress() {
+        
+       _progress = _transference.getProgress();
+    }
+    
     @Override
     public void run()
     { 
         System.out.println("SpeedMeter hello!");
         
-        long p, sp=0;
+        long last_progress=_progress, sp;
         int no_data_count;
         
         _transference.getView().updateSpeed("------", true);
@@ -104,7 +109,7 @@ public final class SpeedMeter implements Runnable, SecureNotifiable
                     
                     if(!_exit)
                     { 
-                        p = _transference.getProgress();
+                        updateProgress();
 
                         if(_transference.isPaused()) {
 
@@ -118,13 +123,13 @@ public final class SpeedMeter implements Runnable, SecureNotifiable
                             
                             secureWait();
 
-                        } else if( p > _progress) {
+                        } else if( _progress > last_progress) {
                             
                             double sleep_time = ((double)SpeedMeter.SLEEP*(no_data_count+1))/1000 ;
                             
-                            double current_speed = (p - _progress) / sleep_time;
+                            double current_speed = (_progress - last_progress) / sleep_time;
 
-                            _progress = p;
+                            last_progress = _progress;
 
                             sp = Math.round(current_speed);
 
@@ -132,7 +137,7 @@ public final class SpeedMeter implements Runnable, SecureNotifiable
 
                                 _transference.getView().updateSpeed(formatBytes(sp)+"/s", true);
  
-                                _transference.getView().updateRemainingTime(calculateRemTime((long)Math.floor((_transference.getFile_size()-p)/sp ) ), true);
+                                _transference.getView().updateRemainingTime(calculateRemTime((long)Math.floor((_transference.getFile_size()-_progress)/sp ) ), true);
                                 
                                 setLastSpeed(sp);
 

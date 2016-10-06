@@ -9,12 +9,14 @@ public final class ProgressMeter implements Runnable, SecureNotifiable
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
     private boolean _notified;
+    private long _progress;
 
     ProgressMeter(Transference transference)
     {
         _notified = false;
         _secure_notify_lock = new Object();
         _transference = transference;
+        _progress = transference.getProgress();
         _exit = false;
     }
     
@@ -74,8 +76,10 @@ public final class ProgressMeter implements Runnable, SecureNotifiable
             
             while( (reads=_transference.getPartialProgress().poll()) !=null )
             {
-                _transference.updateProgress(reads);
+                _progress+=reads;
             }
+            
+            _transference.setProgress(_progress);
             
             if(!_exit)
             {

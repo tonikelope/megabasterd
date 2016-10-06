@@ -31,7 +31,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
     
     private byte[] _new_pass;
     
-    private String _salt;
+    private final String _salt;
 
     public boolean isPass_ok() {
         return _pass_ok;

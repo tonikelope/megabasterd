@@ -58,7 +58,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     url = new URL(worker_url+"/"+chunk.getOffset());
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-                    conn.setReadTimeout(MainPanel.CONNECTION_TIMEOUT);
                     conn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
                     conn.setRequestProperty("Connection", "close");
                     is = new ThrottledInputStream(conn.getInputStream(), getDownload().getMain_panel().getStream_supervisor());
@@ -112,9 +111,20 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                                 getDownload().rejectChunkId(chunk.getId());
                                 
                                 conta_error++;
+                                
+                                if(!isExit()) {
+                                    
+                                    setError_wait(true);
+                                
+                                    getDownload().getView().updateSlotsStatus();
 
-                                Thread.sleep(getWaitTimeExpBackOff(conta_error)*1000);
+                                    Thread.sleep(getWaitTimeExpBackOff(conta_error)*1000);
 
+                                    setError_wait(false);
+
+                                    getDownload().getView().updateSlotsStatus();
+                                }
+                                
                             } else if(!error) {
                                 
                                 getDownload().getChunkwriter().getChunk_queue().put(chunk.getId(), chunk);

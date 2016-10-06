@@ -59,8 +59,8 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     
     private final MainPanel _main_panel;
     private DownloadView _view=null; //lazy init
-    private ProgressMeter _progress_meter=null; //lazy init
     private SpeedMeter _speed_meter=null; //lazy init
+    private ProgressMeter _progress_meter=null; //lazy init;
     private final Object _secure_notify_lock;
     private boolean _notified;
     private final String _url;
@@ -160,14 +160,6 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         return _partialProgressQueue;
     }
 
-    public void setFinishing_download(boolean finishing_download) {
-        _finishing_download = finishing_download;
-    }
-
-    public boolean isFinishing_download() {
-        return _finishing_download;
-    }
-
     public String getFile_key() {
         return _file_key;
     }
@@ -230,14 +222,15 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         return _provision_ok;
     }
 
-    @Override
-    public ProgressMeter getProgress_meter() {
-        return _progress_meter == null?(_progress_meter = new ProgressMeter(this)):_progress_meter;
-    }
     
     @Override
     public SpeedMeter getSpeed_meter() {
         return _speed_meter == null?(_speed_meter = new SpeedMeter(this, getMain_panel().getGlobal_dl_speed())):_speed_meter;
+    }
+    
+    @Override
+    public ProgressMeter getProgress_meter() {
+        return _progress_meter == null?(_progress_meter = new ProgressMeter(this)):_progress_meter;
     }
     
     @Override
@@ -330,10 +323,6 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                     startSlot();
 
                 } else {
-
-                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
-
-                    swingReflectionInvoke("setText", getView().getSlot_status_label(), "Removing slot...");
 
                     stopLastStartedSlot();
                 }
@@ -480,11 +469,11 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                         out.println("Chunkdownloaders finished!");
                 
                         getSpeed_meter().setExit(true);
-
-                        getSpeed_meter().secureNotify();
-
+                        
                         getProgress_meter().setExit(true);
 
+                        getSpeed_meter().secureNotify();
+                        
                         getProgress_meter().secureNotify();
 
                         _thread_pool.shutdown();
@@ -929,8 +918,29 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     {
         if(!_chunkworkers.isEmpty()) {
             
-            ChunkDownloader chunkdownloader = _chunkworkers.remove(_chunkworkers.size()-1);
-            chunkdownloader.setExit(true);
+            swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+            
+            int i = _chunkworkers.size()-1;
+            
+            while(i>=0) {
+                
+                ChunkDownloader chundownloader = _chunkworkers.get(i);
+                
+                if(!chundownloader.isExit()) {
+                    
+                    chundownloader.setExit(true);
+                    
+                    chundownloader.secureNotify();
+            
+                    _view.updateSlotsStatus();
+                    
+                    break;
+                    
+                } else {
+                    
+                    i--;
+                }
+            }
         }
     }
     
@@ -938,7 +948,18 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     {
         if(_chunkworkers.remove(chunkdownloader))
         {
-            swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int)swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner())-1 );
+            if(!chunkdownloader.isExit()) {
+                
+                _finishing_download = true;
+                
+                swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+                
+                swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int)swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner())-1);
+            
+            } else if(!_finishing_download) {
+                
+                swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), true);
+            }
             
             if(!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
                 
@@ -947,20 +968,12 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                 swingReflectionInvoke("setText", getView().getPause_button(), "RESUME DOWNLOAD");
                 
                 swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
-            } 
+            }
+            
+            getView().updateSlotsStatus();
         }
     }
    
-   
-    @Override
-    public void updateProgress(int reads)
-    {
-        _progress+=reads;
-        
-        getView().updateProgressBar(_progress, _progress_bar_rate);
-    }
-    
-    
     
     private boolean verifyFileCBCMAC(String filename) throws FileNotFoundException, Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException
     {
@@ -1037,7 +1050,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                     
                     file_mac = bin2i32a(cryptor.doFinal( i32a2bin(file_mac)));
                     
-                    updateProgress((int)chunk.getSize());
+                    setProgress(tot);
                     
                 }
                 
@@ -1371,5 +1384,15 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             _secure_notify_lock.notifyAll();
         }
     }
+
+    @Override
+    public void setProgress(long progress) {
+        
+        _progress = progress;
+        
+        getView().updateProgressBar(_progress, _progress_bar_rate);
+    }
+    
+    
     
 }

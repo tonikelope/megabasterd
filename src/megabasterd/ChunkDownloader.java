@@ -8,7 +8,6 @@ import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
-import static megabasterd.MiscTools.swingReflectionInvoke;
 
 
 /**
@@ -21,6 +20,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
     private final Download _download;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
+    private volatile boolean _error_wait;
     private boolean _notified;
 
     
@@ -31,6 +31,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
         _secure_notify_lock = new Object();
         _id = id;
         _download = download;
+        _error_wait = false;
     }
     
     public void setExit(boolean exit) {
@@ -48,6 +49,15 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
     public int getId() {
         return _id;
     }
+
+    public boolean isError_wait() {
+        return _error_wait;
+    }
+
+    public void setError_wait(boolean error_wait) {
+        _error_wait = error_wait;
+    }
+    
     
     @Override
     public void secureNotify()
@@ -119,7 +129,6 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                 URL url = new URL(chunk.getUrl());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-                conn.setReadTimeout(MainPanel.CONNECTION_TIMEOUT);
                 conn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
                 conn.setRequestProperty("Connection", "close");
                 
@@ -165,7 +174,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                                 {
                                     _download.getPartialProgressQueue().add(-1*chunk.getOutputStream().size());
                                     
-                                   _download.getProgress_meter().secureNotify();
+                                    _download.getProgress_meter().secureNotify();
 
                                 }
 
@@ -176,11 +185,22 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                         if(error && !_download.isStopped()) {
                             
                             _download.rejectChunkId(chunk.getId());
-                            
+
                             conta_error++;
+                                
+                            if(!_exit) {
+                                
+                                _error_wait = true;
 
-                            Thread.sleep(getWaitTimeExpBackOff(conta_error)*1000);
+                                _download.getView().updateSlotsStatus();
 
+                                Thread.sleep(getWaitTimeExpBackOff(conta_error)*1000);
+
+                                _error_wait = false;
+
+                                _download.getView().updateSlotsStatus();
+                            }
+                            
                         } else if(!error) {
                             
                             System.out.println("Worker ["+_id+"] has downloaded chunk ["+chunk.getId()+"]!");
@@ -214,6 +234,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
      
                } catch (InterruptedException ex) {
                     getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    
                 } finally {
                     conn.disconnect();
                 }
@@ -225,26 +246,11 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
             _download.emergencyStopDownloader(ex.getMessage());
             getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
-        if(!_exit) {
-            
-            swingReflectionInvoke("setEnabled", _download.getView().getSlots_spinner(), false);
-            
-            swingReflectionInvoke("setText", _download.getView().getSlot_status_label(), "");
-            
-            _download.setFinishing_download(true);
-            
-        } else if(!_download.isFinishing_download()) {
-            
-            swingReflectionInvoke("setEnabled", _download.getView().getSlots_spinner(), true);
-            
-            swingReflectionInvoke("setText", _download.getView().getSlot_status_label(), "");
-        }
-
+  
         _download.stopThisSlot(this);
 
         _download.getChunkwriter().secureNotify();
-        
+
         System.out.println("Worker ["+_id+"]: bye bye");
     }
 

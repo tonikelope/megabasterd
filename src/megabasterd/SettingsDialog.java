@@ -80,7 +80,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         updateFont(multi_slot_down_checkbox, FONT_DEFAULT, Font.PLAIN);
         updateFont(multi_slot_up_checkbox, FONT_DEFAULT, Font.PLAIN);
         updateFont(jTabbedPane1, FONT_DEFAULT, Font.PLAIN);
-        updateFont(status, FONT_DEFAULT, Font.PLAIN);
+        updateFont(status, FONT_DEFAULT, Font.BOLD);
         updateFont(remove_account_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(add_account_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(accounts_label, FONT_DEFAULT, Font.PLAIN);
@@ -801,7 +801,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
             insertSettingValueInDB("max_upload_speed", String.valueOf((int)swingReflectionInvokeAndWaitForReturn("getValue", max_up_speed_spinner)));
 
             
-            final DefaultTableModel model = (DefaultTableModel)mega_accounts_table.getModel();
+            if(mega_accounts_table.isEnabled()) {
+                
+                final DefaultTableModel model = (DefaultTableModel)mega_accounts_table.getModel();
             
             swingReflectionInvoke("setText", status, "Checking your MEGA accounts, please wait...");
             
@@ -953,6 +955,12 @@ public final class SettingsDialog extends javax.swing.JDialog {
                    
                 }
             });
+                
+            } else {
+                swingReflectionInvoke("setVisible", this, false);
+            }
+            
+            
         } catch (SQLException ex) {
             getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
         }

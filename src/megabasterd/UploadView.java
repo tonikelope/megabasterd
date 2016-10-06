@@ -106,7 +106,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         updateFont(file_size_label, FONT_DEFAULT, BOLD);
         updateFont(close_button, FONT_DEFAULT, PLAIN);
         updateFont(restart_button, FONT_DEFAULT, PLAIN);
-        updateFont(slot_status_label, FONT_DEFAULT, PLAIN);
+        updateFont(slot_status_label, FONT_DEFAULT, BOLD);
         
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_upload.getMain_panel().getDefault_slots_up(), MIN_WORKERS, MAX_WORKERS, 1));
         swingReflectionInvoke("setEditable", swingReflectionInvokeAndWaitForReturn("getTextField", swingReflectionInvokeAndWaitForReturn("getEditor", slots_spinner)), false);
@@ -522,5 +522,38 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         swingReflectionInvoke("setText", status_label, msg);
     }
 
-    
+   @Override
+    public synchronized void updateSlotsStatus() {
+        
+        int conta_exit = 0;
+        
+        for(ChunkUploader c:_upload.getChunkworkers()) {
+            
+            if(c.isExit()) {
+                
+                conta_exit++;
+            }
+        }
+        
+        int conta_error = 0;
+        
+        for(ChunkUploader c:_upload.getChunkworkers()) {
+            
+            if(c.isError_wait()) {
+                
+                conta_error++;
+            }
+        }
+
+        if(conta_error > 0) {
+            
+            swingReflectionInvoke("setForeground", slot_status_label, Color.red);
+            
+        } else {
+            
+            swingReflectionInvoke("setForeground", slot_status_label, Color.black);
+        }
+        
+        swingReflectionInvoke("setText", slot_status_label, (conta_exit>0?"Removing: "+conta_exit:"") + (conta_error>0?((conta_exit>0?" / ":"")+"Error: " + conta_error):""));
+    }
 }

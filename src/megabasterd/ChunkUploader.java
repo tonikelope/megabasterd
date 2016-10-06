@@ -16,7 +16,6 @@ import java.util.zip.GZIPInputStream;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
-import static megabasterd.MiscTools.swingReflectionInvoke;
 
 
 
@@ -30,6 +29,7 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
     private final Upload _upload;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
+    private volatile boolean _error_wait;
     private boolean _notified;
 
     public ChunkUploader(int id, Upload upload)
@@ -39,13 +39,17 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
         _id = id;
         _upload = upload;
         _exit = false;
+        _error_wait = false;
     }
     
     public void setExit(boolean exit) {
         _exit = exit;
     }
-    
-    
+
+    public boolean isError_wait() {
+        return _error_wait;
+    }
+
     @Override
     public void secureNotify()
     {
@@ -89,6 +93,12 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
     public int getId() {
         return _id;
     }
+
+    public boolean isExit() {
+        return _exit;
+    }
+    
+    
     
     @Override
     public void run()
@@ -128,7 +138,6 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
                 URL url = new URL(chunk.getUrl());
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-                conn.setReadTimeout(MainPanel.CONNECTION_TIMEOUT);
                 conn.setDoOutput(true);
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
@@ -144,8 +153,6 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
                     if(!_exit && !_upload.isStopped()) {
                         
                         CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())));
-                    
-                        conn.connect();
 
                         out = new ThrottledOutputStream(conn.getOutputStream(), _upload.getMain_panel().getStream_supervisor());
                         
@@ -194,48 +201,55 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
                                     
                                 } else {
                                     
-                                    String content_encoding = conn.getContentEncoding();
+                                    if(_upload.getCompletion_handle() == null) {
+                                        
+                                        String content_encoding = conn.getContentEncoding();
             
-                                    InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(conn.getInputStream()):conn.getInputStream();
+                                        InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(conn.getInputStream()):conn.getInputStream();
 
-                                    ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+                                        ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
-                                    while( (reads=is.read(buffer)) != -1 ) {
+                                        while( (reads=is.read(buffer)) != -1 ) {
 
-                                        byte_res.write(buffer, 0, reads);
-                                    }
-
-                                    String response = new String(byte_res.toByteArray());
-
-                                    conn.disconnect();
-
-                                    if(response.length() > 0) {
-
-                                        if( MegaAPI.checkMEGAError(response) != 0 )
-                                        {
-                                            error = true;
-
-                                        } else {
-
-                                            System.out.println("Completion handle -> "+response);
-
-                                            _upload.setCompletion_handle(response);
+                                            byte_res.write(buffer, 0, reads);
                                         }
-                                    } 
+
+                                        String response = new String(byte_res.toByteArray());
+
+                                        if(response.length() > 0) {
+
+                                            if( MegaAPI.checkMEGAError(response) != 0 )
+                                            {
+                                                error = true;
+
+                                            } else {
+
+                                                System.out.println("Completion handle -> "+response);
+
+                                                _upload.setCompletion_handle(response);
+                                            }
+                                        } 
+                                    }
                                 }
                             }
-
-                            conn.disconnect(); 
                             
                             if(error && !_upload.isStopped()) {
 
                                 _upload.rejectChunkId(chunk.getId());
                             
                                 conta_error++;
-                                
+
                                 if(!_exit) {
                                     
+                                    _error_wait = true;
+                                    
+                                    _upload.getView().updateSlotsStatus();
+
                                     Thread.sleep(getWaitTimeExpBackOff(conta_error)*1000);
+                                    
+                                    _error_wait = false;
+                                    
+                                    _upload.getView().updateSlotsStatus();
                                 }
 
                             } else if(!error) {
@@ -269,10 +283,10 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
 
                     getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                     
-               } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | InterruptedException ex) {
+                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | InterruptedException ex) {
                     getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                     
-               } finally {
+                } finally {
                     conn.disconnect();
                 }
                 
@@ -287,21 +301,6 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
             getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
         }
         
-        if(!_exit) {
-            
-            swingReflectionInvoke("setEnabled", _upload.getView().getSlots_spinner(), false);
-
-            swingReflectionInvoke("setText", _upload.getView().getSlot_status_label(), "");
-     
-            _upload.setFinishing_upload(true);
-            
-        } else if(!_upload.isFinishing_upload()) {
-
-            swingReflectionInvoke("setEnabled", _upload.getView().getSlots_spinner(), true);
-            
-            swingReflectionInvoke("setText", _upload.getView().getSlot_status_label(), "");
-        }
-     
         _upload.stopThisSlot(this);
 
         _upload.getMac_generator().secureNotify();
