@@ -283,14 +283,23 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 if(_main_panel.getMega_master_pass() == null) {
                     
                     swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, false);
-                
-                    swingReflectionInvoke("setEnabled", mega_accounts_table, false);
 
                     swingReflectionInvoke("setEnabled", remove_account_button, false);
                     
                     swingReflectionInvoke("setEnabled", add_account_button, false);
 
                     swingReflectionInvoke("setVisible", unlock_accounts_button, true);
+                    
+                    for (Object k: _main_panel.getMega_accounts().keySet()) {
+   
+                        String[] new_row_data = {(String)k, "**************************"};
+
+                        model.addRow(new_row_data);
+                    }
+                    
+                    swingReflectionInvoke("setEnabled", mega_accounts_table, false);
+                    
+                    swingReflectionInvoke("setEnabled", remove_account_button, false);
                 
                 } else {
                     
@@ -300,22 +309,24 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     HashMap<String,Object> data = (HashMap)pair.getValue();
                     
-                    String pass = null;
+                        String pass = null;
                     
-                    try {
-                        
-                        pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                        try {
+
+                            pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
+                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        String[] new_row_data = {(String)pair.getKey(), pass};
+
+                        model.addRow(new_row_data);
+                    }
                     
-                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
-                    } catch (Exception ex) {
-                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
-                    String[] new_row_data = {(String)pair.getKey(), pass};
-
-                    model.addRow(new_row_data);
-                    }
+                    swingReflectionInvoke("setEnabled", remove_account_button, (mega_accounts_table.getRowCount()>0));
                 }
  
             } else {
@@ -330,12 +341,12 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     model.addRow(new_row_data);
                 }
+                
+                swingReflectionInvoke("setEnabled", remove_account_button, (mega_accounts_table.getRowCount()>0));
             }
             
             _remember_master_pass = true;
 
-            swingReflectionInvoke("setEnabled", remove_account_button, (mega_accounts_table.getRowCount()>0));
- 
             _deleted_accounts = new HashSet();
             
             _settings_ok = false;
@@ -949,7 +960,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     private void multi_slot_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multi_slot_down_checkboxStateChanged
         
-        
         if(!(boolean)swingReflectionInvokeAndWaitForReturn("isSelected", multi_slot_down_checkbox)) {
                 
                 swingReflectionInvoke("setEnabled", default_slots_down_spinner, false);
@@ -1037,154 +1047,189 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     private void encrypt_pass_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encrypt_pass_checkboxActionPerformed
         
-        SetMegaMasterPasswordDialog dialog = new SetMegaMasterPasswordDialog((Frame)getParent(),true);
+        swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, false);
         
-        swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, this);
+        final SettingsDialog tthis = this;
         
-        swingReflectionInvokeAndWait("setVisible", dialog, true);
-        
-        byte[] old_mega_master_pass = _main_panel.getMega_master_pass();
-        
-        String old_mega_master_pass_hash = _main_panel.getMega_master_pass_hash();
-        
-        if(dialog.isPass_ok()) {
-            
-            try {
+        THREAD_POOL.execute(new Runnable(){
+                @Override
+                public void run() {
                 
-                if(dialog.getNew_pass() != null && dialog.getNew_pass().length > 0) {
-                    
-                    _main_panel.setMega_master_pass_hash(dialog.getNew_pass_hash());
-                    
-                    _main_panel.setMega_master_pass(dialog.getNew_pass());
-                    
-                } else {
-                    
-                    _main_panel.setMega_master_pass_hash(null);
-                    
-                    _main_panel.setMega_master_pass(null);
-                }
-                
-                dialog.deletePass();
-                
-                insertSettingValueInDB("mega_master_pass_hash", _main_panel.getMega_master_pass_hash());
-                
-                for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+                    SetMegaMasterPasswordDialog dialog = new SetMegaMasterPasswordDialog((Frame)getParent(),true);
+        
+                    swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
 
-                    HashMap<String,Object> data = (HashMap)pair.getValue();
+                    swingReflectionInvokeAndWait("setVisible", dialog, true);
 
-                    String email, password, password_aes, user_hash;
+                    byte[] old_mega_master_pass = _main_panel.getMega_master_pass();
 
-                    email = (String)pair.getKey();
+                    String old_mega_master_pass_hash = _main_panel.getMega_master_pass_hash();
 
-                    if(old_mega_master_pass_hash != null) {
-                        
-                        password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password")) , old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                    if(dialog.isPass_ok()) {
 
-                        password_aes =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password_aes")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                        try {
 
-                        user_hash =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("user_hash")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                            if(dialog.getNew_pass() != null && dialog.getNew_pass().length > 0) {
 
-                    } else {
+                                _main_panel.setMega_master_pass_hash(dialog.getNew_pass_hash());
 
-                        password = (String)data.get("password");
+                                _main_panel.setMega_master_pass(dialog.getNew_pass());
 
-                        password_aes = (String)data.get("password_aes");
+                            } else {
 
-                        user_hash = (String)data.get("user_hash");
+                                _main_panel.setMega_master_pass_hash(null);
+
+                                _main_panel.setMega_master_pass(null);
+                            }
+
+                            dialog.deletePass();
+
+                            insertSettingValueInDB("mega_master_pass_hash", _main_panel.getMega_master_pass_hash());
+
+                            for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+
+                                HashMap<String,Object> data = (HashMap)pair.getValue();
+
+                                String email, password, password_aes, user_hash;
+
+                                email = (String)pair.getKey();
+
+                                if(old_mega_master_pass_hash != null) {
+
+                                    password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password")) , old_mega_master_pass, CryptTools.AES_ZERO_IV));
+
+                                    password_aes =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password_aes")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+
+                                    user_hash =Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("user_hash")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+
+                                } else {
+
+                                    password = (String)data.get("password");
+
+                                    password_aes = (String)data.get("password_aes");
+
+                                    user_hash = (String)data.get("user_hash");
+                                }
+
+                                if(_main_panel.getMega_master_pass() != null) {
+
+                                    password =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(password.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+
+                                    password_aes =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(password_aes), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+
+                                    user_hash =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(user_hash), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                }
+
+                                data.put("password", password);
+
+                                data.put("password_aes", password_aes);
+
+                                data.put("user_hash", user_hash);
+
+                                DBTools.insertMegaAccount(email, password, password_aes, user_hash);
+                            }
+
+                        } catch (Exception ex) {
+                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
                     }
-                    
-                    if(_main_panel.getMega_master_pass() != null) {
 
-                        password =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(password.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
-                    
-                        password_aes =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(password_aes), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
-                    
-                        user_hash =Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(user_hash), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
-                    }
-                    
-                    data.put("password", password);
-                    
-                    data.put("password_aes", password_aes);
-                    
-                    data.put("user_hash", user_hash);
-                    
-                    DBTools.insertMegaAccount(email, password, password_aes, user_hash);
-                }
+                    encrypt_pass_checkbox.setSelected((_main_panel.getMega_master_pass_hash() != null));
+
+                    dialog.dispose();
                 
-            } catch (Exception ex) {
-                Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
-            }
-  
-        }
-        
-        encrypt_pass_checkbox.setSelected((_main_panel.getMega_master_pass_hash() != null));
-        
-        dialog.dispose();
+                    swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, true);
+                    
+                }});
   
     }//GEN-LAST:event_encrypt_pass_checkboxActionPerformed
 
     private void unlock_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlock_accounts_buttonActionPerformed
         
-        GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog((Frame)getParent(),true, _main_panel.getMega_master_pass_hash());
+        swingReflectionInvoke("setEnabled", unlock_accounts_button, false);
         
-        swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, this);
+        final SettingsDialog tthis = this;
         
-        swingReflectionInvokeAndWait("setVisible", dialog, true);
-        
-        if(dialog.isPass_ok()) {
-            
-            _main_panel.setMega_master_pass(dialog.getPass());
-            
-            dialog.deletePass();
-            
-            DefaultTableModel model = (DefaultTableModel)mega_accounts_table.getModel();
-            
-            swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, true);
+        THREAD_POOL.execute(new Runnable(){
+                @Override
+                public void run() {
                 
-            swingReflectionInvoke("setEnabled", mega_accounts_table, true);
+                    GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog((Frame)getParent(),true, _main_panel.getMega_master_pass_hash());
+        
+                    swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
 
-            swingReflectionInvoke("setEnabled", remove_account_button, true);
+                    swingReflectionInvokeAndWait("setVisible", dialog, true);
+
+                    if(dialog.isPass_ok()) {
+
+                        _main_panel.setMega_master_pass(dialog.getPass());
+
+                        dialog.deletePass();
+
+                        DefaultTableModel model = new DefaultTableModel(new Object [][] {},new String [] {"Email", "Password"});
+
+                        mega_accounts_table.setModel(model);
+
+                        swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, true);
+
+                        swingReflectionInvoke("setEnabled", mega_accounts_table, true);
+
+                        swingReflectionInvoke("setEnabled", remove_account_button, true);
+
+                        swingReflectionInvoke("setEnabled", add_account_button, true);
+
+                        swingReflectionInvoke("setVisible", unlock_accounts_button, false);
+
+                        swingReflectionInvoke("setEnabled", delete_all_accounts_button, true);
+
+                        for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+
+                        HashMap<String,Object> data = (HashMap)pair.getValue();
+
+                        String pass = null;
+
+                        try {
+
+                            pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
+                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        String[] new_row_data = {(String)pair.getKey(), pass};
+
+                        model.addRow(new_row_data);
+                        }
+
+                    }
+
+                    _remember_master_pass = dialog.getRemember_checkbox().isSelected();
+
+                    dialog.dispose();
                     
-            swingReflectionInvoke("setEnabled", add_account_button, true);
-
-            swingReflectionInvoke("setVisible", unlock_accounts_button, false);
-            
-            swingReflectionInvoke("setEnabled", delete_all_accounts_button, true);
- 
-            for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
-
-            HashMap<String,Object> data = (HashMap)pair.getValue();
-
-            String pass = null;
-
-            try {
-
-                pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String)data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
-
-            } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (Exception ex) {
-                Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
-            }
-
-            String[] new_row_data = {(String)pair.getKey(), pass};
-
-            model.addRow(new_row_data);
-            }
-        
-        }
-        
-        _remember_master_pass = dialog.getRemember_checkbox().isSelected();
-
-        dialog.dispose();
+                    swingReflectionInvoke("setEnabled", unlock_accounts_button, true);
+                
+                }});
+  
     }//GEN-LAST:event_unlock_accounts_buttonActionPerformed
 
     private void delete_all_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delete_all_accounts_buttonActionPerformed
         
-        Object[] options = {"No",
+        swingReflectionInvoke("setEnabled", delete_all_accounts_button, true);
+        
+        final SettingsDialog tthis = this;
+        
+        THREAD_POOL.execute(new Runnable(){
+                @Override
+                public void run() {
+                
+                    Object[] options = {"No",
                             "Yes"};
         
-            int n = showOptionDialog(this,
+            int n = showOptionDialog(tthis,
             "MEGA master password will be reset and all your MEGA accounts will be removed. (This can't be undone)\n\nDo you want to continue?",
             "Warning!", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
             null,
@@ -1205,7 +1250,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 swingReflectionInvoke("setVisible", unlock_accounts_button, false);
                 
                 swingReflectionInvoke("setVisible", delete_all_accounts_button, true);
+
+                DefaultTableModel new_model = new DefaultTableModel(new Object [][] {},new String [] {"Email", "Password"});
                 
+                mega_accounts_table.setModel(new_model);
+
                 for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
                     
                     try {
@@ -1232,6 +1281,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         }
         
+        swingReflectionInvoke("setEnabled", delete_all_accounts_button, true);
+                
+                
+        }});
+
     }//GEN-LAST:event_delete_all_accounts_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
