@@ -175,8 +175,10 @@ public final class UploadMACGenerator implements Runnable, SecureNotifiable {
                 }
                 
                 if(new_chunk) {
+                    
+                    temp_file_data = (String.valueOf(_last_chunk_id_read)+"|"+String.valueOf(_bytes_read)+"|"+Bin2BASE64(i32a2bin(file_mac)));
 
-                    System.out.println("Macgenerator -> "+(String.valueOf(_last_chunk_id_read)+"|"+String.valueOf(_bytes_read)+"|"+Bin2BASE64(i32a2bin(file_mac))));
+                    System.out.println("Macgenerator -> "+temp_file_data);
 
                     temp_file_out = new FileOutputStream(temp_file);
 
