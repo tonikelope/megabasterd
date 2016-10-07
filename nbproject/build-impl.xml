@@ -46,8 +46,8 @@ is divided into following sections:
         <property file="${user.properties.file}"/>
         <!-- The two properties below are usually overridden -->
         <!-- by the active platform. Just a fallback. -->
-        <property name="default.javac.source" value="1.4"/>
-        <property name="default.javac.target" value="1.4"/>
+        <property name="default.javac.source" value="1.6"/>
+        <property name="default.javac.target" value="1.6"/>
     </target>
     <target depends="-pre-init,-init-private,-init-user" name="-init-project">
         <property file="nbproject/configs/${config}.properties"/>
@@ -76,7 +76,7 @@ is divided into following sections:
             <and>
                 <isset property="javac.profile"/>
                 <length length="0" string="${javac.profile}" when="greater"/>
-                <matches pattern="1\.[89](\..*)?" string="${javac.source}"/>
+                <matches pattern="((1\.[89])|9)(\..*)?" string="${javac.source}"/>
             </and>
         </condition>
         <condition property="do.archive">
@@ -156,6 +156,7 @@ is divided into following sections:
         <property name="application.args" value=""/>
         <property name="source.encoding" value="${file.encoding}"/>
         <property name="runtime.encoding" value="${source.encoding}"/>
+        <property name="manifest.encoding" value="${source.encoding}"/>
         <condition property="javadoc.encoding.used" value="${javadoc.encoding}">
             <and>
                 <isset property="javadoc.encoding"/>
@@ -840,7 +841,7 @@ is divided into following sections:
                     </chainedmapper>
                 </pathconvert>
                 <taskdef classname="org.netbeans.modules.java.j2seproject.copylibstask.CopyLibs" classpath="${libs.CopyLibs.classpath}" name="copylibs"/>
-                <copylibs compress="${jar.compress}" excludeFromCopy="${copylibs.excludes}" index="${jar.index}" indexMetaInf="${jar.index.metainf}" jarfile="${dist.jar}" manifest="@{manifest}" rebase="${copylibs.rebase}" runtimeclasspath="${run.classpath.without.build.classes.dir}">
+                <copylibs compress="${jar.compress}" excludeFromCopy="${copylibs.excludes}" index="${jar.index}" indexMetaInf="${jar.index.metainf}" jarfile="${dist.jar}" manifest="@{manifest}" manifestencoding="UTF-8" rebase="${copylibs.rebase}" runtimeclasspath="${run.classpath.without.build.classes.dir}">
                     <fileset dir="${build.classes.dir}" excludes="${dist.archive.excludes}"/>
                     <manifest>
                         <attribute name="Class-Path" value="${jar.classpath}"/>
@@ -852,7 +853,7 @@ is divided into following sections:
     </target>
     <target name="-init-presetdef-jar">
         <presetdef name="jar" uri="http://www.netbeans.org/ns/j2se-project/1">
-            <jar compress="${jar.compress}" index="${jar.index}" jarfile="${dist.jar}">
+            <jar compress="${jar.compress}" index="${jar.index}" jarfile="${dist.jar}" manifestencoding="UTF-8">
                 <j2seproject1:fileset dir="${build.classes.dir}" excludes="${dist.archive.excludes}"/>
             </jar>
         </presetdef>
@@ -975,15 +976,15 @@ is divided into following sections:
     </target>
     <target depends="init" if="do.archive+manifest.available" name="-do-jar-copy-manifest">
         <tempfile deleteonexit="true" destdir="${build.dir}" property="tmp.manifest.file"/>
-        <copy file="${manifest.file}" tofile="${tmp.manifest.file}"/>
+        <copy encoding="${manifest.encoding}" file="${manifest.file}" outputencoding="UTF-8" tofile="${tmp.manifest.file}"/>
     </target>
     <target depends="init,-do-jar-create-manifest,-do-jar-copy-manifest" if="do.archive+main.class.available" name="-do-jar-set-mainclass">
-        <manifest file="${tmp.manifest.file}" mode="update">
+        <manifest encoding="UTF-8" file="${tmp.manifest.file}" mode="update">
             <attribute name="Main-Class" value="${main.class}"/>
         </manifest>
     </target>
     <target depends="init,-do-jar-create-manifest,-do-jar-copy-manifest" if="do.archive+profile.available" name="-do-jar-set-profile">
-        <manifest file="${tmp.manifest.file}" mode="update">
+        <manifest encoding="UTF-8" file="${tmp.manifest.file}" mode="update">
             <attribute name="Profile" value="${javac.profile}"/>
         </manifest>
     </target>
@@ -991,7 +992,7 @@ is divided into following sections:
         <basename file="${application.splash}" property="splashscreen.basename"/>
         <mkdir dir="${build.classes.dir}/META-INF"/>
         <copy failonerror="false" file="${application.splash}" todir="${build.classes.dir}/META-INF"/>
-        <manifest file="${tmp.manifest.file}" mode="update">
+        <manifest encoding="UTF-8" file="${tmp.manifest.file}" mode="update">
             <attribute name="SplashScreen-Image" value="META-INF/${splashscreen.basename}"/>
         </manifest>
     </target>
@@ -1186,7 +1187,7 @@ is divided into following sections:
     <target depends="-profile-check" description="Profile a selected class in the IDE." if="profiler.configured" name="profile-test-with-main">
         <fail unless="run.class">Must select one file in the IDE or set run.class</fail>
         <startprofiler/>
-        <antcal target="run-test-with-main"/>
+        <antcall target="run-test-with-main"/>
     </target>
     <target depends="-profile-check,-profile-applet-pre72" if="profiler.configured" name="profile-applet" unless="profiler.info.jvmargs.agent">
         <fail unless="applet.url">Must select one file in the IDE or set applet.url</fail>

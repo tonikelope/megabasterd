@@ -1225,19 +1225,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_unlock_accounts_buttonActionPerformed
 
     private void delete_all_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delete_all_accounts_buttonActionPerformed
-        
-        swingReflectionInvoke("setEnabled", delete_all_accounts_button, false);
-        
-        final SettingsDialog tthis = this;
-        
-        THREAD_POOL.execute(new Runnable(){
-                @Override
-                public void run() {
-                
+ 
                     Object[] options = {"No",
                             "Yes"};
         
-            int n = showOptionDialog(tthis,
+            int n = showOptionDialog(this,
             "MEGA master password will be reset and all your MEGA accounts will be removed. (This can't be undone)\n\nDo you want to continue?",
             "Warning!", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
             null,
@@ -1290,9 +1282,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         }
         
         swingReflectionInvoke("setEnabled", delete_all_accounts_button, true);
-                
-                
-        }});
 
     }//GEN-LAST:event_delete_all_accounts_buttonActionPerformed
 
