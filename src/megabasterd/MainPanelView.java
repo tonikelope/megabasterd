@@ -148,8 +148,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         
         swingReflectionInvoke("setVisible", global_speed_down_label, false);
         swingReflectionInvoke("setVisible", global_speed_up_label, false);
-        swingReflectionInvoke("setForeground", global_speed_down_label, getMain_panel().isLimit_download_speed()?new Color(255,0,0):new Color(0,128,255));
-        swingReflectionInvoke("setForeground", global_speed_up_label, getMain_panel().isLimit_upload_speed()?new Color(255,0,0):new Color(0,128,255));
         swingReflectionInvoke("setVisible", close_all_finished_down_button, false);
         swingReflectionInvoke("setVisible", close_all_finished_up_button, false);
         swingReflectionInvoke("setVisible", pause_all_down_button, false);
@@ -615,18 +613,38 @@ public final class MainPanelView extends javax.swing.JFrame {
             
             _main_panel.loadUserSettings();
             
-            _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.isLimit_download_speed()?_main_panel.getMax_dl_speed()*1024:0);
+            if(_main_panel.isLimit_download_speed()) {
             
-            _main_panel.getStream_supervisor().setMaxBytesPerSecOutput( _main_panel.isLimit_upload_speed()?_main_panel.getMax_up_speed()*1024:0);
+                _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.getMax_dl_speed()*1024);
+
+                swingReflectionInvoke("setForeground", getGlobal_speed_down_label(), new Color(255,0,0));
             
-            swingReflectionInvoke("setForeground", global_speed_down_label, _main_panel.isLimit_download_speed()?new Color(255,0,0):new Color(0,128,255));
-            
-            swingReflectionInvoke("setForeground", global_speed_up_label, _main_panel.isLimit_upload_speed()?new Color(255,0,0):new Color(0,128,255));
-            
+            } else {
+
+                _main_panel.getStream_supervisor().setMaxBytesPerSecInput(0);
+
+                swingReflectionInvoke("setForeground", getGlobal_speed_down_label(), new Color(0,128,255));
+
+            }
+
+            if(_main_panel.isLimit_upload_speed()) {
+
+                _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(_main_panel.getMax_up_speed()*1024);
+
+                swingReflectionInvoke("setForeground", getGlobal_speed_up_label(), new Color(255,0,0));
+
+            } else {
+
+                _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(0);
+
+                swingReflectionInvoke("setForeground", getGlobal_speed_up_label(), new Color(0,128,255));
+
+            }
+
             _main_panel.getDownload_manager().setMax_running_trans(_main_panel.getMax_dl());
-            
+
             _main_panel.getUpload_manager().setMax_running_trans(_main_panel.getMax_ul());
-            
+
             _main_panel.getDownload_manager().secureNotify();
 
             _main_panel.getUpload_manager().secureNotify();

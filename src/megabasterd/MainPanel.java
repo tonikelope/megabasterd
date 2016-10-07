@@ -1,6 +1,7 @@
 package megabasterd;
 
 import java.awt.AWTException;
+import java.awt.Color;
 import static java.awt.EventQueue.invokeLater;
 import java.awt.Font;
 import static java.awt.Font.BOLD;
@@ -60,7 +61,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.16";
+    public static final String VERSION="1.17";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
     public static final int STREAMER_PORT = 1337;
@@ -138,6 +139,10 @@ public final class MainPanel {
         THREAD_POOL.execute((_stream_supervisor = new StreamThrottlerSupervisor(_limit_download_speed?_max_dl_speed*1024:0, _limit_upload_speed?_max_up_speed*1024:0, THROTTLE_SLICE_SIZE)));
         
         THREAD_POOL.execute((_clipboardspy = new ClipboardSpy()));
+        
+        swingReflectionInvoke("setForeground", getView().getGlobal_speed_down_label(), _limit_download_speed?new Color(255,0,0):new Color(0,128,255));
+         
+        swingReflectionInvoke("setForeground", getView().getGlobal_speed_up_label(), _limit_upload_speed?new Color(255,0,0):new Color(0,128,255));
         
         resumeDownloads();
         
@@ -348,7 +353,7 @@ public final class MainPanel {
             
             _limit_download_speed = LIMIT_TRANSFERENCE_SPEED_DEFAULT;
         }
-        
+       
         String limit_ul_speed = selectSettingValueFromDB("limit_upload_speed");
 
         if(limit_ul_speed != null) {
@@ -359,6 +364,7 @@ public final class MainPanel {
             
             _limit_upload_speed = LIMIT_TRANSFERENCE_SPEED_DEFAULT;
         }
+
         
         String max_download_speed = selectSettingValueFromDB("max_download_speed");
 
@@ -367,7 +373,7 @@ public final class MainPanel {
         } else {
             _max_dl_speed=MAX_TRANSFERENCE_SPEED_DEFAULT;
         }
-        
+
         String max_upload_speed = selectSettingValueFromDB("max_upload_speed");
 
         if(max_upload_speed != null) {
@@ -398,6 +404,7 @@ public final class MainPanel {
                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
     }
     
     public void _byebye() {

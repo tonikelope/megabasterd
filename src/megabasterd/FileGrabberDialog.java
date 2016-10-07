@@ -106,6 +106,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         swingReflectionInvoke("setEnabled", total_file_size_label, false);
         swingReflectionInvoke("setEnabled", skip_button, false);
         swingReflectionInvoke("setEnabled", skip_rest_button, false);
+        swingReflectionInvoke("setEnabled", dance_button, false);
+        swingReflectionInvoke("setEnabled", file_tree, false);
         
         _main_panel = ((MainPanelView)parent).getMain_panel();
         
@@ -116,13 +118,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 account_combobox.addItem((String)o);
             }
             
-        } else
-        {
+        } else {
             swingReflectionInvoke("setText", used_space_label, "No MEGA accounts available!!");
-            swingReflectionInvoke("setEnabled", dance_button, false);
             swingReflectionInvoke("setEnabled", add_files_button, false);
             swingReflectionInvoke("setEnabled", add_folder_button, false);
-            swingReflectionInvoke("setEnabled", file_tree, false);
             swingReflectionInvoke("setEnabled", dir_name_textfield, false);
         }
         
@@ -174,7 +173,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
         );
 
         upload_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -324,7 +323,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(total_file_size_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -333,7 +332,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(skip_rest_button)
                     .addComponent(skip_button))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addComponent(dance_button)
                 .addContainerGap())
         );
@@ -376,6 +375,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             _genFileList();
             
             file_tree.setRootVisible(root.getChildCount() > 0);
+            
+            swingReflectionInvoke("setEnabled", dance_button, true);
+            
+            swingReflectionInvoke("setEnabled", file_tree, true);
         }
     }//GEN-LAST:event_add_files_buttonActionPerformed
 
@@ -406,6 +409,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             _genFileList();
             
             file_tree.setRootVisible(root.getChildCount() > 0);
+            
+            swingReflectionInvoke("setEnabled", dance_button, true);
+            
+            swingReflectionInvoke("setEnabled", file_tree, true);
         }
     }//GEN-LAST:event_add_folder_buttonActionPerformed
 
@@ -541,17 +548,16 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             }
 
             swingReflectionInvoke("setText", used_space_label, formatBytes(quota[0])+" / "+formatBytes(quota[1]));
-            
-            swingReflectionInvoke("setEnabled", dance_button, true);
             swingReflectionInvoke("setEnabled", add_files_button, true);
             swingReflectionInvoke("setEnabled", add_folder_button, true);
-            swingReflectionInvoke("setEnabled", file_tree, true);
             swingReflectionInvoke("setEnabled", dir_name_textfield, true);
-            swingReflectionInvoke("setEnabled", total_file_size_label, true);
-            swingReflectionInvoke("setEnabled", skip_button, true);
-            swingReflectionInvoke("setEnabled", skip_rest_button, true);
-            swingReflectionInvoke("setEnabled", warning_label, true);
             swingReflectionInvoke("setEnabled", account_combobox, true);
+            swingReflectionInvoke("setEnabled", warning_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+            swingReflectionInvoke("setEnabled", dance_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+            swingReflectionInvoke("setEnabled", file_tree, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+            swingReflectionInvoke("setEnabled", total_file_size_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+            swingReflectionInvoke("setEnabled", skip_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+            swingReflectionInvoke("setEnabled", skip_rest_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
             
         } else {
             
@@ -666,23 +672,14 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         }
         
         swingReflectionInvoke("setText", total_file_size_label, "["+formatBytes(_total_space)+"]");
-        
-        if(conta_files == 0) {
 
-            swingReflectionInvoke("setEnabled", dance_button, false);
-            swingReflectionInvoke("setEnabled", warning_label, false);
-            swingReflectionInvoke("setEnabled", skip_button, false);
-            swingReflectionInvoke("setEnabled", skip_rest_button, false);
-            swingReflectionInvoke("setEnabled", total_file_size_label, false);
+        swingReflectionInvoke("setEnabled", dance_button, conta_files > 0);
+        swingReflectionInvoke("setEnabled", warning_label, conta_files > 0);
+        swingReflectionInvoke("setEnabled", skip_button, conta_files > 0);
+        swingReflectionInvoke("setEnabled", skip_rest_button, conta_files > 0);
+        swingReflectionInvoke("setEnabled", total_file_size_label, conta_files > 0);
+        swingReflectionInvoke("setEnabled", file_tree, conta_files > 0);
             
-        } else {
-
-            swingReflectionInvoke("setEnabled", dance_button, true);
-            swingReflectionInvoke("setEnabled", warning_label, true);
-            swingReflectionInvoke("setEnabled", skip_button, true);
-            swingReflectionInvoke("setEnabled", skip_rest_button, true);
-            swingReflectionInvoke("setEnabled", total_file_size_label, true);
-        }
     }
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
