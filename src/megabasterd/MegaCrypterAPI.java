@@ -9,6 +9,9 @@ import java.net.URL;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.Set;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import java.util.zip.GZIPInputStream;
@@ -32,6 +35,8 @@ import org.codehaus.jackson.map.ObjectMapper;
 public final class MegaCrypterAPI {
     
     public static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0";
+    public static final Set<String> PASS_CACHE = new HashSet<>();
+    public static final Object PASS_LOCK = new Object();
     
     private static String _rawRequest(String request, URL url_api) throws IOException, MegaCrypterAPIException {
         
@@ -213,70 +218,73 @@ public final class MegaCrypterAPI {
             
             Cipher decrypter;
 
-            try {
-                    do
-                    {   
-                        bad_pass = false;
-                        
-                        password = JOptionPane.showInputDialog(panel, "Enter password:");
-                        
-                        if(password!=null) {
-                            
+            synchronized(PASS_LOCK) {
+
+                LinkedList<String> pass_list = new LinkedList(PASS_CACHE);
+
+                do
+                {   
+                    bad_pass = true;
+
+                    if((password = pass_list.poll()) == null) {
+
+                        password = JOptionPane.showInputDialog(panel, "Enter password for MegaCrypter link:");
+                    }
+
+                    if(password != null) {
+
+                        try {
+
+                            info_key=CryptTools.PBKDF2HMACSHA256(password, salt, (int)Math.pow(2, iterations));
+
+                            decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
+
                             try {
-                                
-                                info_key=CryptTools.PBKDF2HMACSHA256(password, salt, (int)Math.pow(2, iterations));
-                                
-                                decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
-                                try {
+                                bad_pass = !Arrays.equals(info_key, decrypter.doFinal(key_check));
 
-                                    bad_pass = !Arrays.equals(info_key, decrypter.doFinal(key_check));
+                                if(!bad_pass) {
 
-                                } catch (IllegalBlockSizeException | BadPaddingException ex) {
-
-                                    bad_pass=true;
+                                    PASS_CACHE.add(password);
                                 }
-                                
-                            } catch (InvalidKeySpecException ex) {
-                                
-                                bad_pass=true;
-                            }
-                        }
- 
-                    }while(password!=null && bad_pass);
 
-                    if(password==null)
-                    {
-                        return null;
-                    }
-                    else
-                    {
-                        decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
+                            } catch (IllegalBlockSizeException | BadPaddingException ex) {}
 
-                        byte[] decrypted_key = decrypter.doFinal(BASE642Bin(fkey));
-
-                        fkey = Bin2UrlBASE64(decrypted_key);
-                        
-                        decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
-                        
-                        byte[] decrypted_name = decrypter.doFinal(BASE642Bin(fname));
-
-                        fname = new String(decrypted_name);
-                        
-                        if(fpath != null)
-                        {
-                            byte[] decrypted_fpath = decrypter.doFinal(BASE642Bin(fpath));
-
-                            fpath = new String(decrypted_fpath);
-                        }
-                        
-                        pass=Bin2BASE64(info_key);
-                        
+                        } catch (InvalidKeySpecException ex) {}
                     }
 
-                    } catch (Exception ex) {
-                        getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                }while(password!=null && bad_pass);
+            }
+
+            if(bad_pass)
+            {
+                throw new MegaCrypterAPIException("25");
+            }
+            else
+            {
+                decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
+
+                byte[] decrypted_key = decrypter.doFinal(BASE642Bin(fkey));
+
+                fkey = Bin2UrlBASE64(decrypted_key);
+
+                decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
+
+                byte[] decrypted_name = decrypter.doFinal(BASE642Bin(fname));
+
+                fname = new String(decrypted_name);
+
+                if(fpath != null)
+                {
+                    byte[] decrypted_fpath = decrypter.doFinal(BASE642Bin(fpath));
+
+                    fpath = new String(decrypted_fpath);
+                }
+
+                pass=Bin2BASE64(info_key);
+
+            }
+
         }
         
         if(fpath != null)

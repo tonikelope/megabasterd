@@ -99,9 +99,9 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         _slots = slots;
         _restart = restart;
         _secure_notify_lock = new Object();
-        _chunkworkers = new ArrayList();
-        _partialProgressQueue = new ConcurrentLinkedQueue();
-        _rejectedChunkIds = new ConcurrentLinkedQueue();
+        _chunkworkers = new ArrayList<>();
+        _partialProgressQueue = new ConcurrentLinkedQueue<>();
+        _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = Executors.newCachedThreadPool();
         
     }

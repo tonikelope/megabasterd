@@ -124,7 +124,7 @@ public final class MiscTools {
         }
         else
         {
-            ArrayList<Integer> list = new ArrayList();
+            ArrayList<Integer> list = new ArrayList<>();
         
             while(int_buffer.hasRemaining()) {
                 list.add(int_buffer.get());
@@ -151,7 +151,7 @@ public final class MiscTools {
         }
         else
         {
-            ArrayList<Byte> list = new ArrayList();
+            ArrayList<Byte> list = new ArrayList<>();
         
             while(int_buffer.hasRemaining()) {
                 list.add(bin_buffer.get());

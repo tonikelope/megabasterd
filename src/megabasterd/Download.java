@@ -121,9 +121,9 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         _slots = slots;
         _restart= restart;
         _secure_notify_lock = new Object();
-        _chunkworkers = new ArrayList();
-        _partialProgressQueue = new ConcurrentLinkedQueue();
-        _rejectedChunkIds = new ConcurrentLinkedQueue();
+        _chunkworkers = new ArrayList<>();
+        _partialProgressQueue = new ConcurrentLinkedQueue<>();
+        _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
     }
 
@@ -1195,6 +1195,10 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                     case 24:
                         emergencyStopDownloader("MegaCrypter link has expired!");
+                        break;
+                        
+                    case 25:
+                        emergencyStopDownloader("MegaCrypter bad password!");
                         break;
 
                     default:

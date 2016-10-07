@@ -212,7 +212,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
 
                 if(!pass_hash.equals(_current_pass_hash)) {
 
-                    JOptionPane.showMessageDialog(tthis, "Bad password!", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(tthis, "BAD PASSWORD!", "Error", JOptionPane.ERROR_MESSAGE);
                     
                     swingReflectionInvoke("setText", status_label, "");
 

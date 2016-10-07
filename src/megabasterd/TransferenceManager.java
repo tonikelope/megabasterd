@@ -51,12 +51,12 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         _pause_all_button = pause_all_button;
         _clean_all_menu = clean_all_menu;
         _secure_notify_lock = new Object();
-        _transference_waitstart_queue = new ConcurrentLinkedQueue();
-        _transference_provision_queue = new ConcurrentLinkedQueue();
-        _transference_remove_queue = new ConcurrentLinkedQueue();
-        _transference_finished_queue = new ConcurrentLinkedQueue();
-        _transference_running_list = new ConcurrentLinkedQueue();
-        _transference_preprocess_queue = new ConcurrentLinkedQueue();
+        _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
+        _transference_provision_queue = new ConcurrentLinkedQueue<>();
+        _transference_remove_queue = new ConcurrentLinkedQueue<>();
+        _transference_finished_queue = new ConcurrentLinkedQueue<>();
+        _transference_running_list = new ConcurrentLinkedQueue<>();
+        _transference_preprocess_queue = new ConcurrentLinkedQueue<>();
     }
 
     abstract public void provision(Transference transference);

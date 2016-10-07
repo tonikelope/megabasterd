@@ -1226,7 +1226,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     private void delete_all_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delete_all_accounts_buttonActionPerformed
         
-        swingReflectionInvoke("setEnabled", delete_all_accounts_button, true);
+        swingReflectionInvoke("setEnabled", delete_all_accounts_button, false);
         
         final SettingsDialog tthis = this;
         

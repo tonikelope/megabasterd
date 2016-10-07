@@ -35,7 +35,7 @@ public final class ChunkWriter implements Runnable, SecureNotifiable {
         _byte_file_key = CryptTools.initMEGALinkKey(_download.getFile_key());
         _byte_iv = CryptTools.initMEGALinkKeyIV(_download.getFile_key());
         _chunk_queue = new ConcurrentHashMap();
-        _rejectedChunkIds = new ConcurrentLinkedQueue();
+        _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         
         if(_download.getProgress() == 0)
         {
