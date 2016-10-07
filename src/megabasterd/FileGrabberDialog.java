@@ -396,7 +396,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             _genFileList();
             
             file_tree.setRootVisible(root.getChildCount() > 0);
-
+        }
+        
             swingReflectionInvoke("setEnabled", add_files_button, true);
 
             swingReflectionInvoke("setEnabled", add_folder_button, true);
@@ -414,7 +415,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             swingReflectionInvoke("setEnabled", skip_rest_button, true);
             
             swingReflectionInvoke("setEnabled", account_combobox, true);
-        }
         
                     }});
     }//GEN-LAST:event_add_files_buttonActionPerformed
@@ -469,24 +469,26 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             
             file_tree.setRootVisible(root.getChildCount() > 0);
             
-            swingReflectionInvoke("setEnabled", add_files_button, true);
-
-            swingReflectionInvoke("setEnabled", add_folder_button, true);
-
-            swingReflectionInvoke("setEnabled", file_tree, true);
-
-            swingReflectionInvoke("setEnabled", warning_label, true);
-
-            swingReflectionInvoke("setEnabled", dance_button, true);
-
-            swingReflectionInvoke("setEnabled", total_file_size_label, true);
-
-            swingReflectionInvoke("setEnabled", skip_button, true);
-
-            swingReflectionInvoke("setEnabled", skip_rest_button, true);
-            
-            swingReflectionInvoke("setEnabled", account_combobox, true);
         }
+            
+        swingReflectionInvoke("setEnabled", add_files_button, true);
+
+        swingReflectionInvoke("setEnabled", add_folder_button, true);
+
+        swingReflectionInvoke("setEnabled", file_tree, true);
+
+        swingReflectionInvoke("setEnabled", warning_label, true);
+
+        swingReflectionInvoke("setEnabled", dance_button, true);
+
+        swingReflectionInvoke("setEnabled", total_file_size_label, true);
+
+        swingReflectionInvoke("setEnabled", skip_button, true);
+
+        swingReflectionInvoke("setEnabled", skip_rest_button, true);
+
+        swingReflectionInvoke("setEnabled", account_combobox, true);
+        
         
                     }});
     }//GEN-LAST:event_add_folder_buttonActionPerformed
