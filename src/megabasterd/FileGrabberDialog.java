@@ -398,23 +398,18 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             file_tree.setRootVisible(root.getChildCount() > 0);
         }
         
-            swingReflectionInvoke("setEnabled", add_files_button, true);
-
-            swingReflectionInvoke("setEnabled", add_folder_button, true);
-
-            swingReflectionInvoke("setEnabled", file_tree, true);
-
-            swingReflectionInvoke("setEnabled", warning_label, true);
-
-            swingReflectionInvoke("setEnabled", dance_button, true);
-
-            swingReflectionInvoke("setEnabled", total_file_size_label, true);
-
-            swingReflectionInvoke("setEnabled", skip_button, true);
-
-            swingReflectionInvoke("setEnabled", skip_rest_button, true);
-            
             swingReflectionInvoke("setEnabled", account_combobox, true);
+            
+        swingReflectionInvoke("setEnabled", add_files_button, true);
+
+        swingReflectionInvoke("setEnabled", add_folder_button, true);
+
+        swingReflectionInvoke("setEnabled", warning_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", dance_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", file_tree, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", total_file_size_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", skip_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", skip_rest_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
         
                     }});
     }//GEN-LAST:event_add_files_buttonActionPerformed
@@ -470,24 +465,19 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             file_tree.setRootVisible(root.getChildCount() > 0);
             
         }
+        
+        swingReflectionInvoke("setEnabled", account_combobox, true);
             
         swingReflectionInvoke("setEnabled", add_files_button, true);
 
         swingReflectionInvoke("setEnabled", add_folder_button, true);
 
-        swingReflectionInvoke("setEnabled", file_tree, true);
-
-        swingReflectionInvoke("setEnabled", warning_label, true);
-
-        swingReflectionInvoke("setEnabled", dance_button, true);
-
-        swingReflectionInvoke("setEnabled", total_file_size_label, true);
-
-        swingReflectionInvoke("setEnabled", skip_button, true);
-
-        swingReflectionInvoke("setEnabled", skip_rest_button, true);
-
-        swingReflectionInvoke("setEnabled", account_combobox, true);
+        swingReflectionInvoke("setEnabled", warning_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", dance_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", file_tree, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", total_file_size_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", skip_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", skip_rest_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
         
         
                     }});
