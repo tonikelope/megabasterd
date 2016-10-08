@@ -369,8 +369,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         filechooser.setDialogTitle("Add files");
         filechooser.setAcceptAllFileFilterUsed(false);
         filechooser.setMultiSelectionEnabled(true);
+        
 
         if( filechooser.showOpenDialog(tthis) == JFileChooser.APPROVE_OPTION ) {
+            
+            swingReflectionInvokeAndWait("setEnabled", file_tree, true);
             
             swingReflectionInvoke("setText", total_file_size_label, "");
             
@@ -398,17 +401,22 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             file_tree.setRootVisible(root.getChildCount() > 0);
         }
         
-            swingReflectionInvoke("setEnabled", account_combobox, true);
+        swingReflectionInvoke("setEnabled", account_combobox, true);
             
         swingReflectionInvoke("setEnabled", add_files_button, true);
 
         swingReflectionInvoke("setEnabled", add_folder_button, true);
 
         swingReflectionInvoke("setEnabled", warning_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        
         swingReflectionInvoke("setEnabled", dance_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        
         swingReflectionInvoke("setEnabled", file_tree, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        
         swingReflectionInvoke("setEnabled", total_file_size_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        
         swingReflectionInvoke("setEnabled", skip_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        
         swingReflectionInvoke("setEnabled", skip_rest_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
         
                     }});
@@ -443,8 +451,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         filechooser.setDialogTitle("Add directory");
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         filechooser.setAcceptAllFileFilterUsed(false);
+        
 
         if( filechooser.showOpenDialog(tthis) == JFileChooser.APPROVE_OPTION ) {
+            
+            swingReflectionInvokeAndWait("setEnabled", file_tree, true);
             
             swingReflectionInvoke("setText", total_file_size_label, "");
             
