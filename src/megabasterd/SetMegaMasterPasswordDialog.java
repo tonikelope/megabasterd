@@ -246,6 +246,12 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
                 JOptionPane.showMessageDialog(tthis, "Passwords does not match!", "Error", JOptionPane.ERROR_MESSAGE);
                 
                 swingReflectionInvoke("setText", status_label, "");
+                
+                swingReflectionInvoke("setText", new_pass_textfield, "");
+                
+                swingReflectionInvoke("setText", confirm_pass_textfield, "");
+                
+                swingReflectionInvoke("grabFocus", new_pass_textfield);
             }
           
         } catch (Exception ex) {

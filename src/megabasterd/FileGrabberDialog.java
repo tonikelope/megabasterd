@@ -373,8 +373,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         if( filechooser.showOpenDialog(tthis) == JFileChooser.APPROVE_OPTION ) {
             
-            swingReflectionInvokeAndWait("setEnabled", file_tree, true);
-            
             swingReflectionInvoke("setText", total_file_size_label, "");
             
             File[] files_selected = filechooser.getSelectedFiles();
@@ -393,6 +391,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 
                 root.add(current_file);
             }
+            
+            swingReflectionInvokeAndWait("setEnabled", file_tree, true);
 
             file_tree.setModel(new DefaultTreeModel( sortTree(root)));
             
@@ -401,23 +401,25 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             file_tree.setRootVisible(root.getChildCount() > 0);
         }
         
+        boolean root_childs = ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
+        
         swingReflectionInvoke("setEnabled", account_combobox, true);
             
         swingReflectionInvoke("setEnabled", add_files_button, true);
 
         swingReflectionInvoke("setEnabled", add_folder_button, true);
 
-        swingReflectionInvoke("setEnabled", warning_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", warning_label, root_childs);
         
-        swingReflectionInvoke("setEnabled", dance_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", dance_button, root_childs);
         
-        swingReflectionInvoke("setEnabled", file_tree, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", file_tree, root_childs);
         
-        swingReflectionInvoke("setEnabled", total_file_size_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", total_file_size_label, root_childs);
         
-        swingReflectionInvoke("setEnabled", skip_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", skip_button, root_childs);
         
-        swingReflectionInvoke("setEnabled", skip_rest_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", skip_rest_button, root_childs);
         
                     }});
     }//GEN-LAST:event_add_files_buttonActionPerformed
@@ -455,8 +457,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         if( filechooser.showOpenDialog(tthis) == JFileChooser.APPROVE_OPTION ) {
             
-            swingReflectionInvokeAndWait("setEnabled", file_tree, true);
-            
             swingReflectionInvoke("setText", total_file_size_label, "");
             
             _base_path = filechooser.getSelectedFile().getAbsolutePath();
@@ -468,6 +468,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             DefaultMutableTreeNode root = new DefaultMutableTreeNode(filechooser.getSelectedFile().getAbsolutePath());
   
             _genFileTree(filechooser.getSelectedFile().getAbsolutePath(), root);
+            
+            swingReflectionInvokeAndWait("setEnabled", file_tree, true);
            
             file_tree.setModel(new DefaultTreeModel(sortTree(root)));
             
@@ -477,18 +479,25 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             
         }
         
+        boolean root_childs = ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
+        
         swingReflectionInvoke("setEnabled", account_combobox, true);
             
         swingReflectionInvoke("setEnabled", add_files_button, true);
 
         swingReflectionInvoke("setEnabled", add_folder_button, true);
 
-        swingReflectionInvoke("setEnabled", warning_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-        swingReflectionInvoke("setEnabled", dance_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-        swingReflectionInvoke("setEnabled", file_tree, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-        swingReflectionInvoke("setEnabled", total_file_size_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-        swingReflectionInvoke("setEnabled", skip_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-        swingReflectionInvoke("setEnabled", skip_rest_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+        swingReflectionInvoke("setEnabled", warning_label, root_childs);
+        
+        swingReflectionInvoke("setEnabled", dance_button, root_childs);
+        
+        swingReflectionInvoke("setEnabled", file_tree, root_childs);
+        
+        swingReflectionInvoke("setEnabled", total_file_size_label, root_childs);
+        
+        swingReflectionInvoke("setEnabled", skip_button, root_childs);
+        
+        swingReflectionInvoke("setEnabled", skip_rest_button, root_childs);
         
         
                     }});
@@ -537,7 +546,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         
         Long[] quota = null;
         
-        MegaAPI ma = _main_panel.getMega_active_accounts().get(account_combobox.getSelectedItem());
+        MegaAPI ma = _main_panel.getMega_active_accounts().get((String)account_combobox.getSelectedItem());
 
         if(ma == null) {
 
@@ -624,18 +633,20 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                 swingReflectionInvoke("setForeground", used_space_label, Color.red);
             }
+            
+            boolean root_childs = ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
 
             swingReflectionInvoke("setText", used_space_label, formatBytes(quota[0])+" / "+formatBytes(quota[1]));
             swingReflectionInvoke("setEnabled", add_files_button, true);
             swingReflectionInvoke("setEnabled", add_folder_button, true);
             swingReflectionInvoke("setEnabled", dir_name_textfield, true);
             swingReflectionInvoke("setEnabled", account_combobox, true);
-            swingReflectionInvoke("setEnabled", warning_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-            swingReflectionInvoke("setEnabled", dance_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-            swingReflectionInvoke("setEnabled", file_tree, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-            swingReflectionInvoke("setEnabled", total_file_size_label, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-            swingReflectionInvoke("setEnabled", skip_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
-            swingReflectionInvoke("setEnabled", skip_rest_button, ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0);
+            swingReflectionInvoke("setEnabled", warning_label, root_childs);
+            swingReflectionInvoke("setEnabled", dance_button, root_childs);
+            swingReflectionInvoke("setEnabled", file_tree, root_childs);
+            swingReflectionInvoke("setEnabled", total_file_size_label, root_childs);
+            swingReflectionInvoke("setEnabled", skip_button, root_childs);
+            swingReflectionInvoke("setEnabled", skip_rest_button, root_childs);
             
         } else {
             
@@ -657,8 +668,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_account_comboboxItemStateChanged
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
-        
-        
+
         if( deleteAllExceptSelectedTreeItems(file_tree)) {
             
             _genFileList();

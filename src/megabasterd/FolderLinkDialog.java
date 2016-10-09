@@ -18,6 +18,7 @@ import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.formatBytes;
 import static megabasterd.MiscTools.sortTree;
 import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.updateFont;
 
 /**
@@ -285,8 +286,6 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                     swingReflectionInvoke("setVisible", restore_button, false);
         
                     swingReflectionInvoke("setEnabled", dance_button, true);
-        
-                    swingReflectionInvoke("setEnabled", file_tree, true);
                     
                     }});
     }//GEN-LAST:event_restore_buttonActionPerformed
@@ -359,6 +358,8 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
                 }while(current_node != root);
             }
+            
+            swingReflectionInvokeAndWait("setEnabled", file_tree, true);
 
             file_tree.setModel(new DefaultTreeModel(sortTree(root)));
     

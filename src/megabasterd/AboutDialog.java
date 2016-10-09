@@ -162,8 +162,7 @@ public final class AboutDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_mcdown_url_buttonActionPerformed
 
     private void check_version_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_check_version_buttonActionPerformed
-        
-        
+
         swingReflectionInvoke("setEnabled", check_version_button, false);
         
         final AboutDialog tthis = this;
@@ -171,36 +170,14 @@ public final class AboutDialog extends javax.swing.JDialog {
         THREAD_POOL.execute(new Runnable(){
             @Override
             public void run() {
-
-                try {
+                
+                if(MiscTools.checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A")) {
                     
-                    MegaAPI ma = new MegaAPI();
+                    JOptionPane.showMessageDialog(tthis, "NEW VERSION IS AVAILABLE!");
                     
-                    HashMap<String, Object> folder_nodes = ma.getFolderNodes("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A");
+                } else {
                     
-                    boolean new_version=true;
-                    
-                    for(Object o:folder_nodes.values()) {
-                    
-                        HashMap<String,Object> current_node = (HashMap<String,Object>)o;
-                        
-                         if(((String)current_node.get("name")).contains("_"+VERSION.replaceAll(" *beta *", "")+".")) {
-                            
-                            JOptionPane.showMessageDialog(tthis, "You have the latest version ;)");
-                            
-                            new_version = false;
-                            
-                            break;
-                        }
-                    }
-                    
-                    if(new_version) {
-                        
-                        JOptionPane.showMessageDialog(tthis, "NEW VERSION IS AVAILABLE!");
-                    }
-
-                } catch (Exception ex) {
-                    getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    JOptionPane.showMessageDialog(tthis, "You have the latest version ;)");
                 }
                 
                 swingReflectionInvoke("setEnabled", check_version_button, true);
@@ -209,7 +186,6 @@ public final class AboutDialog extends javax.swing.JDialog {
         
     }//GEN-LAST:event_check_version_buttonActionPerformed
 
-   
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel author_webpage_label;

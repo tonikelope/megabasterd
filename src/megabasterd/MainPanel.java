@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
+import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
@@ -61,7 +62,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.20";
+    public static final String VERSION="1.21";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
     public static final int STREAMER_PORT = 1337;
@@ -157,6 +158,16 @@ public final class MainPanel {
         }
         
         _mega_master_pass = null;
+        
+        THREAD_POOL.execute(new Runnable(){
+            @Override
+            public void run() {
+                
+                if(MiscTools.checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A")) {
+                    
+                    JOptionPane.showMessageDialog(getView(), "MegaBasterd NEW VERSION is available!\n\n(HELP > ABOUT for more info)");
+                }
+            }});
     }
 
     public String getMega_master_pass_hash() {

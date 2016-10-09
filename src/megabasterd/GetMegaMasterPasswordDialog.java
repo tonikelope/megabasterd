@@ -215,6 +215,11 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
                     JOptionPane.showMessageDialog(tthis, "BAD PASSWORD!", "Error", JOptionPane.ERROR_MESSAGE);
                     
                     swingReflectionInvoke("setText", status_label, "");
+                    
+                    swingReflectionInvoke("setText", current_pass_textfield, "");
+                    
+                    swingReflectionInvoke("grabFocus", current_pass_textfield);
+                    
 
                 } else {
                     

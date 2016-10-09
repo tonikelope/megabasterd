@@ -42,6 +42,7 @@ import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
+import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -51,6 +52,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
 import static megabasterd.MainPanel.CONNECTION_TIMEOUT;
+import static megabasterd.MainPanel.VERSION;
 
 public final class MiscTools {
     
@@ -318,133 +320,141 @@ public final class MiscTools {
     }
  
     private static void _swingReflectionInvoke(final String method_name, final Object obj, final boolean wait, final Object... params) {
-        
-        Runnable r = new Runnable(){
-            
+
+            Runnable r = new Runnable(){
+
             @Override
             public void run() {
-                
-                Method method;
-        
-                try {
+
+                if(obj != null) {
                     
-                    if( (method=REFLECTION_METHOD_CACHE.get( method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length))) != null) {
-                        
-                        try {
-                            
-                            method.invoke(obj, params);
-                            
-                        } catch(SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                            
-                            method = null;
-                        }
-                    }
+                    Method method;
 
-                    if(method == null) {
-                        
-                        for(Method m:obj.getClass().getMethods()) {
+                    try {
 
-                            if(m.getName().equals(method_name) && m.getParameterCount() == params.length) {
+                        if( (method=REFLECTION_METHOD_CACHE.get( method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length))) != null) {
 
-                                try {
+                            try {
 
-                                    m.invoke(obj, params);
-                            
-                                    REFLECTION_METHOD_CACHE.put(method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length), m);
-                                    
-                                    method = m;
+                                method.invoke(obj, params);
 
-                                    break;
+                            } catch(SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 
-                                }catch(SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex2)  {
-
-                                }
+                                method = null;
                             }
                         }
-                        
+
                         if(method == null) {
 
-                            throw new NoSuchMethodException();
-                            
-                        }
-                    }       
-                    
-                } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
-                    
-                    getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-                    
-                    System.out.println("REFLECTION METHOD NOT FOUND -> "+method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length));
+                            for(Method m:obj.getClass().getMethods()) {
+
+                                if(m.getName().equals(method_name) && m.getParameterCount() == params.length) {
+
+                                    try {
+
+                                        m.invoke(obj, params);
+
+                                        REFLECTION_METHOD_CACHE.put(method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length), m);
+
+                                        method = m;
+
+                                        break;
+
+                                    }catch(SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex2)  {
+
+                                    }
+                                }
+                            }
+
+                            if(method == null) {
+
+                                throw new NoSuchMethodException();
+
+                            }
+                        }       
+
+                    } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
+
+                        getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+
+                        System.out.println("REFLECTION METHOD NOT FOUND -> "+method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length));
+                    }
+
                 }
             }
         };
-        
+
         swingInvokeIt(r, wait);
     }
     
 
     public static Object swingReflectionInvokeAndWaitForReturn(final String method_name, final Object obj, final Object... params) {
         
-        Callable c = new Callable(){
-            
+            Callable c = new Callable(){
+
             @Override
             public Object call() {
                 
                 Object ret = null;
                 
-                Method method;
-                
-                try {
-                    
-                    if( (method=REFLECTION_METHOD_CACHE.get( method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length))) != null) {
-                        
-                        try {
-                            
-                            ret = method.invoke(obj, params);
-                            
-                        } catch(SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-                            
-                            method = null;
-                        }
-                    }
+                if(obj != null) {
 
-                    if(method == null) {
-                        
-                        for(Method m:obj.getClass().getMethods()) {
+                    Method method;
 
-                            if(m.getName().equals(method_name) && m.getParameterCount() == params.length) {
+                    try {
 
-                                try {
+                        if( (method=REFLECTION_METHOD_CACHE.get( method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length))) != null) {
 
-                                    ret = m.invoke(obj, params);
-                            
-                                    REFLECTION_METHOD_CACHE.put(method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length), m);
-                                    
-                                    method = m;
+                            try {
 
-                                    break;
+                                ret = method.invoke(obj, params);
 
-                                }catch(SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex2)  {
+                            } catch(SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
 
-                                }
+                                method = null;
                             }
                         }
-                        
+
                         if(method == null) {
 
-                            throw new NoSuchMethodException();
-                        }
-                    }       
-                    
-                } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
-                    getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-                    
-                    System.out.println("REFLECTION METHOD NOT FOUND -> "+method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length));
+                            for(Method m:obj.getClass().getMethods()) {
+
+                                if(m.getName().equals(method_name) && m.getParameterCount() == params.length) {
+
+                                    try {
+
+                                        ret = m.invoke(obj, params);
+
+                                        REFLECTION_METHOD_CACHE.put(method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length), m);
+
+                                        method = m;
+
+                                        break;
+
+                                    }catch(SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex2)  {
+
+                                    }
+                                }
+                            }
+
+                            if(method == null) {
+
+                                throw new NoSuchMethodException();
+                            }
+                        }       
+
+                    } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
+                        getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+
+                        System.out.println("REFLECTION METHOD NOT FOUND -> "+method_name+"#"+obj.getClass().toString()+"#"+String.valueOf(params.length));
+                    }
+
                 }
                 
                 return ret;
             }
         };
-        
+
         return swingInvokeItAndWaitForReturn(c);
     }
     
@@ -621,20 +631,38 @@ public final class MiscTools {
             for (TreePath path : paths) {
             
                 node = (DefaultMutableTreeNode) (path.getLastPathComponent());
-
-                if(node != null && node != model.getRoot()) {
-                                        
-                    DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
-
-                    model.removeNodeFromParent(node);
                     
-                    while(parent.isLeaf() && parent != model.getRoot()) {
+                if(node != null) {
+                    
+                    if(node != model.getRoot()) {
 
-                        DefaultMutableTreeNode parent_aux = (DefaultMutableTreeNode) parent.getParent();
+                        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
 
-                        model.removeNodeFromParent(parent);
+                        model.removeNodeFromParent(node);
 
-                        parent = parent_aux;
+                        while(parent != null && parent.isLeaf()) {
+
+                            if(parent != model.getRoot()) {
+
+                                DefaultMutableTreeNode parent_aux = (DefaultMutableTreeNode) parent.getParent();
+
+                                model.removeNodeFromParent(parent);
+
+                                parent = parent_aux;
+
+                            } else {
+
+                                parent = null;
+                            }
+                        }
+                    
+                    } else {
+                        
+                        swingReflectionInvokeAndWait("setEnabled", tree, true);
+                        
+                        tree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
+                        
+                        return true;
                     }
                 }
             }
@@ -669,49 +697,58 @@ public final class MiscTools {
 
             for (TreePath path : paths) {
                 
-                Object parent = new_root;
-                
-                for(Object path_element:path.getPath()) {
-                    
-                    if((DefaultMutableTreeNode)path_element != (DefaultMutableTreeNode)tree.getModel().getRoot()) {
-                        
-                        if(hashmap_old.get(path_element) == null) {
-                            
-                            Object node=null;
-                                    
-                            if((DefaultMutableTreeNode)path_element == (DefaultMutableTreeNode)path.getLastPathComponent()) {
-                                
-                                node = path_element;
-                                
-                            } else {
-                                
-                                try {
-                
-                                    node = node_class.newInstance();
+                if((DefaultMutableTreeNode)path.getLastPathComponent() != (DefaultMutableTreeNode)tree.getModel().getRoot())
+                {
+                    Object parent = new_root;
 
-                                    ((MutableTreeNode)node).setUserObject( ((DefaultMutableTreeNode)path_element).getUserObject() );
+                    for(Object path_element:path.getPath()) {
 
-                                } catch (InstantiationException | IllegalAccessException ex) {
-                                    getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                        if((DefaultMutableTreeNode)path_element != (DefaultMutableTreeNode)tree.getModel().getRoot()) {
+
+                            if(hashmap_old.get((DefaultMutableTreeNode)path_element) == null) {
+
+                                Object node=null;
+
+                                if((DefaultMutableTreeNode)path_element == (DefaultMutableTreeNode)path.getLastPathComponent()) {
+
+                                    node = path_element;
+
+                                } else {
+
+                                    try {
+
+                                        node = node_class.newInstance();
+
+                                        ((MutableTreeNode)node).setUserObject( ((DefaultMutableTreeNode)path_element).getUserObject() );
+
+                                    } catch (InstantiationException | IllegalAccessException ex) {
+                                        getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
                                 }
+
+                                ((DefaultMutableTreeNode)parent).add((MutableTreeNode)node);
+
+                                if(!((TreeNode)path_element).isLeaf()) {
+
+                                    hashmap_old.put((DefaultMutableTreeNode)path_element, (DefaultMutableTreeNode)node);
+
+                                    parent = node;
+                                }
+
+                            } else {
+
+                                parent = hashmap_old.get((DefaultMutableTreeNode)path_element);
                             }
-     
-                            ((DefaultMutableTreeNode)parent).add((MutableTreeNode)node);
-                            
-                            if(!((TreeNode)path_element).isLeaf()) {
-                                
-                                hashmap_old.put((DefaultMutableTreeNode)path_element, (DefaultMutableTreeNode)node);
-                                
-                                parent = node;
-                            }
-                            
-                        } else {
-                            
-                            parent = hashmap_old.get(path_element);
                         }
                     }
+                    
+                } else {
+                    
+                    return false;
                 }
             }
+            
+            swingReflectionInvokeAndWait("setEnabled", tree, true);
             
             tree.setModel(new DefaultTreeModel(sortTree((DefaultMutableTreeNode)new_root)));
             
@@ -841,5 +878,32 @@ public final class MiscTools {
     private MiscTools() {
     }
     
+    public static boolean checkNewVersion(String folder_node, String folder_key) {
+        
+        boolean new_version = true;
+        
+        try {
+                MegaAPI ma = new MegaAPI();
+
+                HashMap<String, Object> folder_nodes = ma.getFolderNodes(folder_node, folder_key);
+
+                for(Object o:folder_nodes.values()) {
+
+                    HashMap<String,Object> current_node = (HashMap<String,Object>)o;
+
+                     if(((String)current_node.get("name")).contains("_"+VERSION.replaceAll(" *beta *", "")+".")) {
+
+                        new_version = false;
+
+                        break;
+                    }
+                }
+
+            } catch (Exception ex) {
+                getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        
+        return new_version;
+    }
     
 }
