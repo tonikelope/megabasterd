@@ -886,16 +886,23 @@ public final class MiscTools {
                 MegaAPI ma = new MegaAPI();
 
                 HashMap<String, Object> folder_nodes = ma.getFolderNodes(folder_node, folder_key);
+                
+                if(folder_nodes == null || folder_nodes.isEmpty()) {
+                    
+                    new_version = false;
+                    
+                } else {
+                    
+                    for(Object o:folder_nodes.values()) {
 
-                for(Object o:folder_nodes.values()) {
+                        HashMap<String,Object> current_node = (HashMap<String,Object>)o;
 
-                    HashMap<String,Object> current_node = (HashMap<String,Object>)o;
+                        if(((String)current_node.get("name")).contains("_"+VERSION.replaceAll(" *beta *", "")+".run")) {
 
-                     if(((String)current_node.get("name")).contains("_"+VERSION.replaceAll(" *beta *", "")+".")) {
+                            new_version = false;
 
-                        new_version = false;
-
-                        break;
+                            break;
+                        }
                     }
                 }
 
