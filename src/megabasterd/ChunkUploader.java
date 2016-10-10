@@ -23,7 +23,7 @@ import static megabasterd.MiscTools.getWaitTimeExpBackOff;
  *
  * @author tonikelope
  */
-public final class ChunkUploader implements Runnable, SecureNotifiable {
+public class ChunkUploader implements Runnable, SecureNotifiable {
     
     private final int _id;
     private final Upload _upload;
@@ -97,9 +97,17 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
     public boolean isExit() {
         return _exit;
     }
+
+    public Upload getUpload() {
+        return _upload;
+    }
+
+    public void setError_wait(boolean _error_wait) {
+        this._error_wait = _error_wait;
+    }
     
     
-    
+
     @Override
     public void run()
     {
@@ -201,7 +209,7 @@ public final class ChunkUploader implements Runnable, SecureNotifiable {
                                     
                                 } else {
                                     
-                                    if(_upload.getCompletion_handle() == null) {
+                                    if((conn.getContentLengthLong() > 0 || conn.getContentLengthLong() == -1) && _upload.getCompletion_handle() == null) {
                                         
                                         String content_encoding = conn.getContentEncoding();
             

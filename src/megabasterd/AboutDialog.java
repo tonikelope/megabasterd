@@ -1,9 +1,6 @@
 package megabasterd;
 
 import java.awt.Font;
-import java.util.HashMap;
-import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
 import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;

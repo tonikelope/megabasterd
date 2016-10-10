@@ -27,7 +27,7 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jTabbedPane1" max="32767" attributes="0"/>
+                  <Component id="jTabbedPane1" pref="0" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="status" min="-2" pref="657" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -332,7 +332,7 @@
                                   </Group>
                                   <Component id="multi_slot_up_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="110" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="125" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="remove_account_button" min="-2" max="-2" attributes="0"/>
@@ -498,7 +498,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="20" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Use multi slot upload mode (RECOMMENDED; Upload restart needed)"/>
+                <Property name="text" type="java.lang.String" value="Use multi slot upload mode (Recommended; upload restart needed)"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
               <Events>

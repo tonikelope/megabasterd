@@ -3,7 +3,6 @@ package megabasterd;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
@@ -64,6 +63,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     http_status = conn.getResponseCode();
                 }
                 
+                error = false;
+                
                 if(http_status != HttpURLConnection.HTTP_OK){
                     
                     System.out.println("Failed : HTTP error code : " + http_status);
@@ -71,9 +72,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     error  = true;
                     
                 } else {
-                    
-                    error = false;
-                
+
                     try{
 
                         if(!isExit() && !getDownload().isStopped()) {
@@ -115,14 +114,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                                 if(!isExit()) {
                                     
                                     setError_wait(true);
-                                
-                                    getDownload().getView().updateSlotsStatus();
 
                                     Thread.sleep(getWaitTimeExpBackOff(conta_error)*1000);
 
                                     setError_wait(false);
-
-                                    getDownload().getView().updateSlotsStatus();
                                 }
                                 
                             } else if(!error) {
@@ -161,10 +156,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             }
         
         }catch(ChunkInvalidIdException e) {
-        
-        }catch (MalformedURLException ex) {
-            
-            getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
         
         } catch (IOException ex) {
             

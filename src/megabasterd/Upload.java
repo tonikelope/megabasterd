@@ -33,9 +33,8 @@ import static megabasterd.MiscTools.truncateText;
  * @author tonikelope
  */
 public final class Upload implements Transference, Runnable, SecureNotifiable {
-
-    public static final boolean USE_SLOTS_DEFAULT=true;
-    public static final int WORKERS_DEFAULT = 2;
+    
+    public static final boolean USE_SLOTS_DEFAULT = true;
     
     private final MainPanel _main_panel;
     private UploadView _view=null; //lazy init
@@ -663,7 +662,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                     
                 } else {
                     
-                    ChunkUploader c = new ChunkUploader(1, this);
+                    ChunkUploaderMono c = new ChunkUploaderMono(1, this);
 
                     _chunkworkers.add(c);
                     

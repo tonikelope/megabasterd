@@ -595,7 +595,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_uploads_spinner.setDoubleBuffered(true);
 
         multi_slot_up_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        multi_slot_up_checkbox.setText("Use multi slot upload mode (RECOMMENDED; Upload restart needed)");
+        multi_slot_up_checkbox.setText("Use multi slot upload mode (Recommended; upload restart needed)");
         multi_slot_up_checkbox.setDoubleBuffered(true);
         multi_slot_up_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -669,7 +669,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addGap(123, 123, 123)
                                 .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(multi_slot_up_checkbox))
-                        .addGap(0, 110, Short.MAX_VALUE))
+                        .addGap(0, 125, Short.MAX_VALUE))
                     .addGroup(uploads_panelLayout.createSequentialGroup()
                         .addComponent(remove_account_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -730,7 +730,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPane1)
+                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(status, javax.swing.GroupLayout.PREFERRED_SIZE, 657, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
