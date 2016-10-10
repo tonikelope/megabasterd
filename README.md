@@ -1,8 +1,10 @@
-# MegaBasterd
+![MegaBasterd](/src/megabasterd/mbasterd_logo_nuevo.png)
+
 Yet another multiplatform Mega/Megacrypter down/uploader and video/audio streaming suite.
 
-https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A
+[Download last build here (Windows, Linux, macOS)](https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A)
 
+## Screenshots:
 ![Screnshot](/src/megabasterd/screenshot.png)
 
 ![Screnshot](/src/megabasterd/screenshot6.png)
