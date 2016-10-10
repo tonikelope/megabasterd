@@ -38,6 +38,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,7 +48,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
 import static megabasterd.MainPanel.CONNECTION_TIMEOUT;
@@ -625,17 +625,17 @@ public final class MiscTools {
             
             DefaultTreeModel model = (DefaultTreeModel) (tree.getModel());
             
-            DefaultMutableTreeNode node;
+            MutableTreeNode node;
             
             for (TreePath path : paths) {
-            
-                node = (DefaultMutableTreeNode) (path.getLastPathComponent());
+
+                node = (MutableTreeNode)path.getLastPathComponent();
                     
                 if(node != null) {
                     
                     if(node != model.getRoot()) {
 
-                        DefaultMutableTreeNode parent = (DefaultMutableTreeNode) node.getParent();
+                        MutableTreeNode parent = (MutableTreeNode)node.getParent();
 
                         model.removeNodeFromParent(node);
 
@@ -643,7 +643,7 @@ public final class MiscTools {
 
                             if(parent != model.getRoot()) {
 
-                                DefaultMutableTreeNode parent_aux = (DefaultMutableTreeNode) parent.getParent();
+                                MutableTreeNode parent_aux = (MutableTreeNode)parent.getParent();
 
                                 model.removeNodeFromParent(parent);
 
@@ -659,7 +659,11 @@ public final class MiscTools {
                         
                         swingReflectionInvokeAndWait("setEnabled", tree, true);
                         
-                        tree.setModel(new DefaultTreeModel(new DefaultMutableTreeNode()));
+                        try {
+                            tree.setModel(new DefaultTreeModel((MutableTreeNode)tree.getModel().getRoot().getClass().newInstance()));
+                        } catch (InstantiationException | IllegalAccessException ex) {
+                            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                         
                         return true;
                     }
@@ -676,7 +680,7 @@ public final class MiscTools {
         
         TreePath[] paths = tree.getSelectionPaths();
         
-        HashMap<DefaultMutableTreeNode,DefaultMutableTreeNode> hashmap_old = new HashMap<>();
+        HashMap<MutableTreeNode,MutableTreeNode> hashmap_old = new HashMap<>();
         
         if(paths != null) {
             
@@ -696,19 +700,19 @@ public final class MiscTools {
 
             for (TreePath path : paths) {
                 
-                if((DefaultMutableTreeNode)path.getLastPathComponent() != (DefaultMutableTreeNode)tree.getModel().getRoot())
+                if((MutableTreeNode)path.getLastPathComponent() != (MutableTreeNode)tree.getModel().getRoot())
                 {
                     Object parent = new_root;
 
                     for(Object path_element:path.getPath()) {
 
-                        if((DefaultMutableTreeNode)path_element != (DefaultMutableTreeNode)tree.getModel().getRoot()) {
+                        if((MutableTreeNode)path_element != (MutableTreeNode)tree.getModel().getRoot()) {
 
-                            if(hashmap_old.get((DefaultMutableTreeNode)path_element) == null) {
+                            if(hashmap_old.get((MutableTreeNode)path_element) == null) {
 
                                 Object node=null;
 
-                                if((DefaultMutableTreeNode)path_element == (DefaultMutableTreeNode)path.getLastPathComponent()) {
+                                if((MutableTreeNode)path_element == (MutableTreeNode)path.getLastPathComponent()) {
 
                                     node = path_element;
 
@@ -724,19 +728,22 @@ public final class MiscTools {
                                         getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                 }
+                                
+                                if(parent != null) {
+                                    
+                                    ((DefaultMutableTreeNode)parent).add((MutableTreeNode)node);
+                                    
+                                    if(!((MutableTreeNode)path_element).isLeaf()) {
 
-                                ((DefaultMutableTreeNode)parent).add((MutableTreeNode)node);
+                                        hashmap_old.put((MutableTreeNode)path_element, (MutableTreeNode)node);
 
-                                if(!((TreeNode)path_element).isLeaf()) {
-
-                                    hashmap_old.put((DefaultMutableTreeNode)path_element, (DefaultMutableTreeNode)node);
-
-                                    parent = node;
+                                        parent = node;
+                                    }
                                 }
-
+                                
                             } else {
 
-                                parent = hashmap_old.get((DefaultMutableTreeNode)path_element);
+                                parent = hashmap_old.get((MutableTreeNode)path_element);
                             }
                         }
                     }
