@@ -28,8 +28,8 @@ import static megabasterd.MiscTools.getWaitTimeExpBackOff;
  */
 public class ChunkUploaderMono extends ChunkUploader {
     
-    public ChunkUploaderMono(int id, Upload upload) {
-        super(id, upload);
+    public ChunkUploaderMono(Upload upload) {
+        super(1, upload);
     }
     
     @Override

@@ -660,9 +660,12 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                     
                     swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
                     
+                    swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
+                    
+                    
                 } else {
                     
-                    ChunkUploaderMono c = new ChunkUploaderMono(1, this);
+                    ChunkUploaderMono c = new ChunkUploaderMono(this);
 
                     _chunkworkers.add(c);
                     
@@ -671,6 +674,8 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                     swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
                     
                     swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+                    
+                    swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                 }
                 
                 printStatus("Uploading file to mega ("+_ma.getEmail()+") ...");

@@ -448,13 +448,21 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                             
                             swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
                             
+                            swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
+                            
                         } else {
                             
-                            ChunkDownloaderMono c = new ChunkDownloaderMono(1, this);
+                            ChunkDownloaderMono c = new ChunkDownloaderMono(this);
                         
                             _chunkworkers.add(c);
 
                             _thread_pool.execute(c);
+                            
+                            swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
+                            
+                            swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+                            
+                            swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                         }
  
                         getView().printStatusNormal("Downloading file from mega ...");

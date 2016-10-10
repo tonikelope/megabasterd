@@ -16,8 +16,8 @@ import static megabasterd.MiscTools.getWaitTimeExpBackOff;
  */
 public class ChunkDownloaderMono extends ChunkDownloader {
 
-    public ChunkDownloaderMono(int id, Download download) {
-        super(id, download);
+    public ChunkDownloaderMono(Download download) {
+        super(1, download);
     }
     
     @Override
