@@ -20,7 +20,7 @@ public final class DownloadManager extends TransferenceManager {
         
         getScroll_panel().remove(((Download)download).getView());
         
-        getTransference_start_queue().remove(download);
+        getTransference_waitstart_queue().remove(download);
 
         getTransference_running_list().remove(download);
 
@@ -79,13 +79,13 @@ public final class DownloadManager extends TransferenceManager {
             
         if(download.isProvision_ok()) {
 
-            getTransference_start_queue().add(download);
+            getTransference_waitstart_queue().add(download);
 
             if(getTransference_provision_queue().isEmpty()) {
 
                 sortTransferenceStartQueue();
 
-                for(Transference down:getTransference_start_queue()) {
+                for(Transference down:getTransference_waitstart_queue()) {
 
                     getScroll_panel().remove((Component)down.getView());
                     getScroll_panel().add((Component)down.getView());

@@ -385,7 +385,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(jSeparator2);
 
         clean_all_down_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
-        clean_all_down_menu.setText("Remove all waiting downloads");
+        clean_all_down_menu.setText("Remove all pre/pro/wait downloads");
         clean_all_down_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clean_all_down_menuActionPerformed(evt);
@@ -395,7 +395,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(jSeparator5);
 
         clean_all_up_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
-        clean_all_up_menu.setText("Remove all waiting uploads");
+        clean_all_up_menu.setText("Remove all pre/pro/wait uploads");
         clean_all_up_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clean_all_up_menuActionPerformed(evt);
@@ -496,8 +496,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         
         if(dialog.isDownload()) { 
             
-            final MainPanelView tthis = this;
-            
             Runnable run = new Runnable(){
                     @Override
                     public void run() {
@@ -524,50 +522,53 @@ public final class MainPanelView extends javax.swing.JFrame {
                         getMain_panel().getDownload_manager().secureNotify();
 
                         for (String url : urls ) {
+                            
+                            if(getMain_panel().getDownload_manager().getPre_count() > 0)
+                            {
+                                url = url.replaceAll("^mega://", "https://mega.nz");
 
-                            url = url.replaceAll("^mega://", "https://mega.nz");
+                                Download download;
 
-                            Download download;
+                                if(findFirstRegex("#F!", url, 0) != null) {
 
-                            if(findFirstRegex("#F!", url, 0) != null) {
+                                    FolderLinkDialog fdialog = new FolderLinkDialog(_main_panel.getView(), true, url);
 
-                                FolderLinkDialog fdialog = new FolderLinkDialog(tthis, true, url);
-  
-                                if(!fdialog.isMega_error()) {
-                                    
-                                    swingReflectionInvokeAndWait("setLocationRelativeTo", fdialog, tthis);
-                                
-                                    swingReflectionInvokeAndWait("setVisible", fdialog, true);
-                                    
-                                    if(fdialog.isDownload()) {
+                                    if(!fdialog.isMega_error()) {
 
-                                        List<HashMap> folder_links = fdialog.getDownload_links();
+                                        swingReflectionInvokeAndWait("setLocationRelativeTo", fdialog, _main_panel.getView());
 
-                                        fdialog.dispose();
+                                        swingReflectionInvokeAndWait("setVisible", fdialog, true);
 
-                                        for(HashMap folder_link:folder_links) {
+                                        if(fdialog.isDownload()) {
 
-                                            download = new Download(getMain_panel(), (String)folder_link.get("url"), dl_path, (String)folder_link.get("filename"), (String)folder_link.get("filekey"), (long)folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
+                                            List<HashMap> folder_links = fdialog.getDownload_links();
 
-                                            getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                            fdialog.dispose();
+
+                                            for(HashMap folder_link:folder_links) {
+
+                                                download = new Download(getMain_panel(), (String)folder_link.get("url"), dl_path, (String)folder_link.get("filename"), (String)folder_link.get("filekey"), (long)folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
+
+                                                getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                            }
                                         }
-                                    }
-                                    
-                                }
-                                    
-                                fdialog.dispose();
-                                
-                            } else {
-                                
-                                download = new Download(getMain_panel(), url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
 
-                                getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                    }
+
+                                    fdialog.dispose();
+
+                                } else {
+
+                                    download = new Download(getMain_panel(), url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
+
+                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                }
+
+                                getMain_panel().getDownload_manager().addPre_count(-1);
+
+                                getMain_panel().getDownload_manager().secureNotify();
+
                             }
-                            
-                            getMain_panel().getDownload_manager().addPre_count(-1);
-                                        
-                            getMain_panel().getDownload_manager().secureNotify();
-                            
                         }
                 } 
 
@@ -684,20 +685,31 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void clean_all_down_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clean_all_down_menuActionPerformed
         
+        swingReflectionInvokeAndWait("setEnabled", clean_all_down_menu, false);
         
-        Object[] options = {"No",
+        MainPanel.THREAD_POOL.execute(new Runnable(){
+                    @Override
+                    public void run() {
+                    
+                    Object[] options = {"No",
                             "Yes"};
         
-            int n = showOptionDialog(this,
-            "Remove all waiting downloads?",
-            "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
-            null,
-            options,
-            options[0]);
+                        int n = showOptionDialog(_main_panel.getView(),
+                        "Remove all preprocessing, provisioning and waiting downloads?",
+                        "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
+                        null,
+                        options,
+                        options[0]);
+
+                        if(n==1) {
+                            _main_panel.getDownload_manager().closeAllPreProWaiting();
+                        }
+                    
+                    swingReflectionInvokeAndWait("setEnabled", clean_all_down_menu, true);
+                        
+        }});
         
-            if(n==1) {
-                _main_panel.getDownload_manager().closeAllWaiting();
-            }
+        
     }//GEN-LAST:event_clean_all_down_menuActionPerformed
 
     private void pause_all_down_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_all_down_buttonActionPerformed
@@ -770,7 +782,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                                 MegaDirNode file_paths = new MegaDirNode(parent_node);
                                 
                                 for(File f:dialog.getFiles()) {
-
+                                    
+                                    if(getMain_panel().getUpload_manager().getPre_count() > 0)
+                                    {
                                         String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
 
                                         String[] dirs = file_path.split("/");
@@ -811,6 +825,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                         getMain_panel().getUpload_manager().addPre_count(-1);
                                         
                                         getMain_panel().getUpload_manager().secureNotify();
+                                    }
                             
                                     }
                           
@@ -858,19 +873,32 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void clean_all_up_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clean_all_up_menuActionPerformed
         
-         Object[] options = {"No",
+        swingReflectionInvokeAndWait("setEnabled", clean_all_up_menu, false);
+        
+        MainPanel.THREAD_POOL.execute(new Runnable(){
+                    @Override
+                    public void run() {
+                    
+                    Object[] options = {"No",
                             "Yes"};
         
-            int n = showOptionDialog(this,
-            "Remove all waiting uploads?",
+            int n = showOptionDialog(_main_panel.getView(),
+            "Remove all preprocessing, provisioning and waiting uploads?",
             "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
             null,
             options,
             options[0]);
         
             if(n==1) {
-                _main_panel.getUpload_manager().closeAllWaiting();
+                _main_panel.getUpload_manager().closeAllPreProWaiting();
             }
+            
+            swingReflectionInvokeAndWait("setEnabled", clean_all_up_menu, true);
+                    
+                    }});
+        
+        
+         
     }//GEN-LAST:event_clean_all_up_menuActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

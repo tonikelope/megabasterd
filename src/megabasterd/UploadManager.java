@@ -31,13 +31,13 @@ public final class UploadManager extends TransferenceManager {
       
         if(((Upload)upload).isProvision_ok()) {
 
-            getTransference_start_queue().add(upload);
+            getTransference_waitstart_queue().add(upload);
 
             if(getTransference_provision_queue().isEmpty()) {
 
                 sortTransferenceStartQueue();
 
-                for(Transference up:getTransference_start_queue()) {
+                for(Transference up:getTransference_waitstart_queue()) {
 
                     getScroll_panel().remove((Component)up.getView());
                     getScroll_panel().add((Component)up.getView());
@@ -63,7 +63,7 @@ public final class UploadManager extends TransferenceManager {
         
         getScroll_panel().remove(((Upload)upload).getView());
         
-        getTransference_start_queue().remove(upload);
+        getTransference_waitstart_queue().remove(upload);
 
         getTransference_running_list().remove(upload);
 

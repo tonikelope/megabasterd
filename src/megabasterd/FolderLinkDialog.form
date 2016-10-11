@@ -36,11 +36,11 @@
                       <Component id="dance_button" min="-2" pref="300" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="folder_link_label" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <Component id="folder_link_label" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="restore_button" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="total_space_label" alignment="0" pref="876" max="32767" attributes="0"/>
+                  <Component id="total_space_label" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="link_detected_label" min="-2" max="-2" attributes="0"/>
@@ -64,7 +64,7 @@
                   <Component id="restore_button" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="file_tree_scrollpane" pref="368" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" pref="482" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="total_space_label" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
