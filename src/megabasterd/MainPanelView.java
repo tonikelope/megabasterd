@@ -685,31 +685,19 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void clean_all_down_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clean_all_down_menuActionPerformed
         
-        swingReflectionInvokeAndWait("setEnabled", clean_all_down_menu, false);
-        
-        MainPanel.THREAD_POOL.execute(new Runnable(){
-                    @Override
-                    public void run() {
-                    
-                    Object[] options = {"No",
-                            "Yes"};
-        
-                        int n = showOptionDialog(_main_panel.getView(),
-                        "Remove all preprocessing, provisioning and waiting downloads?",
-                        "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
-                        null,
-                        options,
-                        options[0]);
+        Object[] options = {"No",
+                "Yes"};
 
-                        if(n==1) {
-                            _main_panel.getDownload_manager().closeAllPreProWaiting();
-                        }
-                    
-                    swingReflectionInvokeAndWait("setEnabled", clean_all_down_menu, true);
-                        
-        }});
-        
-        
+            int n = showOptionDialog(_main_panel.getView(),
+            "Remove all preprocessing, provisioning and waiting downloads?",
+            "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
+            null,
+            options,
+            options[0]);
+
+            if(n==1) {
+                _main_panel.getDownload_manager().closeAllPreProWaiting();
+            }
     }//GEN-LAST:event_clean_all_down_menuActionPerformed
 
     private void pause_all_down_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_all_down_buttonActionPerformed
@@ -872,33 +860,20 @@ public final class MainPanelView extends javax.swing.JFrame {
     }//GEN-LAST:event_pause_all_up_buttonActionPerformed
 
     private void clean_all_up_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clean_all_up_menuActionPerformed
-        
-        swingReflectionInvokeAndWait("setEnabled", clean_all_up_menu, false);
-        
-        MainPanel.THREAD_POOL.execute(new Runnable(){
-                    @Override
-                    public void run() {
-                    
-                    Object[] options = {"No",
-                            "Yes"};
-        
-            int n = showOptionDialog(_main_panel.getView(),
-            "Remove all preprocessing, provisioning and waiting uploads?",
-            "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
-            null,
-            options,
-            options[0]);
-        
-            if(n==1) {
-                _main_panel.getUpload_manager().closeAllPreProWaiting();
-            }
-            
-            swingReflectionInvokeAndWait("setEnabled", clean_all_up_menu, true);
-                    
-                    }});
-        
-        
          
+                Object[] options = {"No",
+                        "Yes"};
+
+        int n = showOptionDialog(_main_panel.getView(),
+        "Remove all preprocessing, provisioning and waiting uploads?",
+        "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
+        null,
+        options,
+        options[0]);
+
+        if(n==1) {
+            _main_panel.getUpload_manager().closeAllPreProWaiting();
+        }
     }//GEN-LAST:event_clean_all_up_menuActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -301,7 +301,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         
         int finish = _transference_finished_queue.size();
 
-        return (_pre_count+prov+rem+wait+run+finish > 0)?"Pre: "+_pre_count+" / Prov: "+prov+" / Rem: "+rem+" / Wait: "+wait+" / Run: "+run+" / Finish: "+finish:"";
+        return (_pre_count+prov+rem+wait+run+finish > 0)?"Pre: "+_pre_count+" / Pro: "+prov+" / Wait: "+wait+" / Run: "+run+" / Finish: "+finish+" / Rem: "+rem:"";
     }
     
     @Override
