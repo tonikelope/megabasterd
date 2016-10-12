@@ -910,9 +910,13 @@ public final class MiscTools {
                         
                         new_version = MiscTools.findFirstRegex("([0-9\\.]+)\\.run", (String)current_node.get("name"), 1);
 
-                        if(new_version!=null && !new_version.equals(VERSION)) {
+                        if(new_version!=null && Double.parseDouble(new_version) > Double.parseDouble(VERSION)) {
 
                             break;
+                            
+                        } else {
+                            
+                            new_version = null;
                         }
                     }
                 }
