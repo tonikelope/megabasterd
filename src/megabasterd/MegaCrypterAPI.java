@@ -25,6 +25,7 @@ import static megabasterd.MiscTools.Bin2UrlBASE64;
 import static megabasterd.MiscTools.cleanFilePath;
 import static megabasterd.MiscTools.cleanFilename;
 import static megabasterd.MiscTools.findFirstRegex;
+import static megabasterd.MiscTools.getWaitTimeExpBackOff;
 import org.codehaus.jackson.map.ObjectMapper;
 
 
@@ -40,50 +41,80 @@ public final class MegaCrypterAPI {
     
     private static String _rawRequest(String request, URL url_api) throws IOException, MegaCrypterAPIException {
         
-        HttpURLConnection conn = (HttpURLConnection) url_api.openConnection();
-        conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-        conn.setDoOutput(true);
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("User-Agent", USER_AGENT);
-        conn.setRequestProperty("Connection", "close");
+        boolean error;
         
-        OutputStream out;
-        out = conn.getOutputStream();
-	out.write(request.getBytes());
-        out.close();
+        int conta_error=0;
         
-        if (conn.getResponseCode() != HttpURLConnection.HTTP_OK)
-        {    
-            throw new RuntimeException("Failed : HTTP error code : " + conn.getResponseCode());
-        }
+        String response=null;
         
-        String content_encoding = conn.getContentEncoding();
+        do{
             
-        InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(conn.getInputStream()):conn.getInputStream();
+            error = false;
+            
+            HttpURLConnection conn = (HttpURLConnection) url_api.openConnection();
+            conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
+            conn.setDoOutput(true);
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setRequestProperty("User-Agent", USER_AGENT);
+            conn.setRequestProperty("Connection", "close");
 
-        ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+            OutputStream out;
+            out = conn.getOutputStream();
+            out.write(request.getBytes());
+            out.close();
 
-        byte[] buffer = new byte[16*1024];
+            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK)
+            {    
+                System.out.println("Failed : HTTP error code : " + conn.getResponseCode());
 
-        int reads;
+                error = true;
+                
+            } else {
+                
+                String content_encoding = conn.getContentEncoding();
 
-        while( (reads=is.read(buffer)) != -1 ) {
+                InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(conn.getInputStream()):conn.getInputStream();
 
-            byte_res.write(buffer, 0, reads);
-        }
+                ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
-        String response = new String(byte_res.toByteArray());
+                byte[] buffer = new byte[16*1024];
 
-        conn.disconnect();
+                int reads;
 
-        int mc_error;
-        
-        if((mc_error=MegaCrypterAPI.checkMCError(response))!=0)
-        {
-            throw new MegaCrypterAPIException(String.valueOf(mc_error));
-        }
-        
+                while( (reads=is.read(buffer)) != -1 ) {
+
+                    byte_res.write(buffer, 0, reads);
+                }
+
+                response = new String(byte_res.toByteArray());
+
+                conn.disconnect();
+
+                int mc_error;
+
+                if( (mc_error=MegaCrypterAPI.checkMCError(response))!=0 )
+                {
+                    throw new MegaCrypterAPIException(String.valueOf(mc_error));
+                }
+            }
+            
+            if(error) {
+
+                try {
+                    Thread.sleep( getWaitTimeExpBackOff(conta_error++) );
+                } catch (InterruptedException ex) {
+                    getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+
+                conta_error = 0;
+            }
+            
+            conn.disconnect();
+            
+        }while(error);
+
         return response;
         
     }

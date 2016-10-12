@@ -393,12 +393,16 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             }
             
             swingReflectionInvokeAndWait("setEnabled", file_tree, true);
+            
+            file_tree.setRootVisible(root.getChildCount() > 0);
 
             file_tree.setModel(new DefaultTreeModel( sortTree(root)));
             
-            _genFileList();
+            file_tree.revalidate();
             
-            file_tree.setRootVisible(root.getChildCount() > 0);
+            file_tree.repaint();
+            
+            _genFileList();
         }
         
         boolean root_childs = ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
@@ -470,12 +474,16 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             _genFileTree(filechooser.getSelectedFile().getAbsolutePath(), root);
             
             swingReflectionInvokeAndWait("setEnabled", file_tree, true);
+            
+            file_tree.setRootVisible(root.getChildCount() > 0);
            
             file_tree.setModel(new DefaultTreeModel(sortTree(root)));
             
-            _genFileList();
+            file_tree.revalidate();
             
-            file_tree.setRootVisible(root.getChildCount() > 0);
+            file_tree.repaint();
+            
+            _genFileList();
             
         }
         
@@ -501,6 +509,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         
         
                     }});
+        
+        
     }//GEN-LAST:event_add_folder_buttonActionPerformed
 
     private void dance_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dance_buttonActionPerformed

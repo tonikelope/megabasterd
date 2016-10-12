@@ -768,7 +768,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                         
                         getView().hideAllExceptStatus();
                             
-                        _exit_message = "Upload failed!";
+                        _exit_message = "UPLOAD FAILED! (Empty completion handle!)";
 
                         printStatusError(_exit_message);
 

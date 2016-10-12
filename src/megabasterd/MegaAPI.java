@@ -301,14 +301,8 @@ public final class MegaAPI {
             System.out.println("Failed : HTTP error code : " + conn.getResponseCode());
 
             error = true;
-
-            try {
-                Thread.sleep( getWaitTimeExpBackOff(conta_error));
-            } catch (InterruptedException ex) {
-                getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
-            }
             
-            } else {
+       } else {
 
                 String content_encoding = conn.getContentEncoding();
 
@@ -327,8 +321,6 @@ public final class MegaAPI {
 
                 response = new String(byte_res.toByteArray());
 
-                conn.disconnect();
-
                 int mega_error;
 
                 if( (mega_error=checkMEGAError(response))!=0 )
@@ -336,18 +328,27 @@ public final class MegaAPI {
                     if(mega_error == -3) {
 
                         error = true;
-
-                        try {
-                            Thread.sleep(getWaitTimeExpBackOff(conta_error));
-                        } catch (InterruptedException ex) {
-                            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                        
                     } else {
 
                         throw new MegaAPIException(String.valueOf(mega_error));
                     }
                 } 
             }
+        
+            if(error) {
+
+                try {
+                    Thread.sleep( getWaitTimeExpBackOff(conta_error++) );
+                } catch (InterruptedException ex) {
+                    getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+
+                conta_error = 0;
+            }
+            
+            conn.disconnect();
 
         }while(error);
 
