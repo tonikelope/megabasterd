@@ -359,6 +359,10 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             swingReflectionInvokeAndWait("setEnabled", file_tree, true);
 
             file_tree.setModel(new DefaultTreeModel(sortTree(root)));
+            
+            file_tree.revalidate();
+            
+            file_tree.repaint();
     
         } catch (Exception ex) {
             

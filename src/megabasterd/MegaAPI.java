@@ -184,7 +184,7 @@ public final class MegaAPI {
     
     public Long[] getQuota() {
 
-        Long[] quota = new Long[2];
+        Long[] quota = null;
         
         try {
             String request = "[{\"a\": \"uq\", \"xfer\": 1, \"strg\": 1}]";
@@ -198,6 +198,8 @@ public final class MegaAPI {
             ObjectMapper objectMapper = new ObjectMapper();
 
             HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
+            
+            quota = new Long[2];
             
             if(res_map[0].get("cstrg") instanceof Integer) {
                         
@@ -218,6 +220,7 @@ public final class MegaAPI {
             }
             
         } catch (Exception ex) {
+            
             getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
 

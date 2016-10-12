@@ -395,8 +395,13 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             swingReflectionInvokeAndWait("setEnabled", file_tree, true);
 
             file_tree.setModel(new DefaultTreeModel(sortTree(root)));
+            
+            file_tree.revalidate();
+            
+            file_tree.repaint();
 
             _genFileList();
+ 
         }
         
         boolean root_childs = ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
@@ -473,6 +478,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             swingReflectionInvokeAndWait("setEnabled", file_tree, true);
 
             file_tree.setModel(new DefaultTreeModel(sortTree(root)));
+ 
+            file_tree.revalidate();
+            
+            file_tree.repaint();
             
             _genFileList();
             
@@ -499,6 +508,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         swingReflectionInvoke("setEnabled", skip_button, root_childs);
         
         swingReflectionInvoke("setEnabled", skip_rest_button, root_childs);
+        
         
         
                     }});
