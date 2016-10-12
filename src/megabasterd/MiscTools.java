@@ -892,6 +892,8 @@ public final class MiscTools {
         
         boolean new_version = true;
         
+        boolean invalid_repo = true;
+        
         try {
                 MegaAPI ma = new MegaAPI();
 
@@ -909,10 +911,21 @@ public final class MiscTools {
 
                         if(((String)current_node.get("name")).contains("_"+VERSION.replaceAll(" *beta *", "")+".run")) {
 
+                            invalid_repo = false;
+                            
                             new_version = false;
 
                             break;
+                            
+                        } else if(((String)current_node.get("name")).contains(".run")) {
+                            
+                            invalid_repo = false;
                         }
+                    }
+                    
+                    if(invalid_repo) {
+                        
+                        new_version = false;
                     }
                 }
 
