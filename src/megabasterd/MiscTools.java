@@ -893,44 +893,27 @@ public final class MiscTools {
     private MiscTools() {
     }
     
-    public static boolean checkNewVersion(String folder_node, String folder_key) {
+    public static String checkNewVersion(String folder_node, String folder_key) {
         
-        boolean new_version = true;
-        
-        boolean invalid_repo = true;
+        String new_version = null;
         
         try {
                 MegaAPI ma = new MegaAPI();
 
                 HashMap<String, Object> folder_nodes = ma.getFolderNodes(folder_node, folder_key);
                 
-                if(folder_nodes == null || folder_nodes.isEmpty()) {
-                    
-                    new_version = false;
-                    
-                } else {
+                if(folder_nodes != null && !folder_nodes.isEmpty()) {
                     
                     for(Object o:folder_nodes.values()) {
 
                         HashMap<String,Object> current_node = (HashMap<String,Object>)o;
+                        
+                        new_version = MiscTools.findFirstRegex("([0-9\\.]+)\\.run", (String)current_node.get("name"), 1);
 
-                        if(((String)current_node.get("name")).contains("_"+VERSION.replaceAll(" *beta *", "")+".run")) {
-
-                            invalid_repo = false;
-                            
-                            new_version = false;
+                        if(new_version!=null && !new_version.equals(VERSION)) {
 
                             break;
-                            
-                        } else if(((String)current_node.get("name")).contains(".run")) {
-                            
-                            invalid_repo = false;
                         }
-                    }
-                    
-                    if(invalid_repo) {
-                        
-                        new_version = false;
                     }
                 }
 

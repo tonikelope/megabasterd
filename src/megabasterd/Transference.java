@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public interface Transference {
     
-    int MIN_WORKERS = 1;
-    int MAX_WORKERS = 10;
+    int MIN_WORKERS = 2;
+    int MAX_WORKERS = 20;
     int MAX_SIM_TRANSFERENCES=20;
     int WORKERS_DEFAULT = 2;
     int SIM_TRANSFERENCES_DEFAULT=2;

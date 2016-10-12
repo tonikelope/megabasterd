@@ -62,7 +62,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.25";
+    public static final String VERSION="1.26";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
     public static final int STREAMER_PORT = 1337;
@@ -163,9 +163,11 @@ public final class MainPanel {
             @Override
             public void run() {
                 
-                if(MiscTools.checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A")) {
+                String new_version = MiscTools.checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A");
+                
+                if(new_version != null) {
                     
-                    JOptionPane.showMessageDialog(getView(), "MegaBasterd NEW VERSION is available!\n\n(HELP > ABOUT for more info)");
+                    JOptionPane.showMessageDialog(getView(), "MegaBasterd NEW VERSION ("+new_version+") is available!\n\n(HELP > ABOUT for more info)");
                 }
             }});
     }

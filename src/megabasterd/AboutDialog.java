@@ -168,9 +168,11 @@ public final class AboutDialog extends javax.swing.JDialog {
             @Override
             public void run() {
                 
-                if(MiscTools.checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A")) {
+                String new_version = MiscTools.checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A");
+                
+                if(new_version != null) {
                     
-                    JOptionPane.showMessageDialog(tthis, "NEW VERSION IS AVAILABLE!");
+                    JOptionPane.showMessageDialog(tthis, "MegaBasterd NEW VERSION ("+new_version+") is available!\n\n(HELP > ABOUT for more info)");
                     
                 } else {
                     
