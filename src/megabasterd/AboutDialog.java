@@ -16,6 +16,10 @@ import static megabasterd.MiscTools.updateFont;
 public final class AboutDialog extends javax.swing.JDialog {
     
     private static final String MEGA_URL = "https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A";
+    private static final String TONIKELOPE_URL = "http://t0ni.xyz";
+    private static final String MEGACRYPTER_URL = "https://megacrypter.com";
+    private static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
+    private static final String MEGABASTERD_GITHUB_URL = "https://github.com/tonikelope/megabasterd";
    
     
     public AboutDialog(MainPanelView parent, boolean modal) {
@@ -56,11 +60,22 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         title_label.setFont(new java.awt.Font("Dialog", 1, 48)); // NOI18N
         title_label.setText("MegaBasterd X.X");
+        title_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         title_label.setDoubleBuffered(true);
+        title_label.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                title_labelMouseReleased(evt);
+            }
+        });
 
         made_in_spain_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/made_in_spain.jpg"))); // NOI18N
-        made_in_spain_label.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        made_in_spain_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         made_in_spain_label.setDoubleBuffered(true);
+        made_in_spain_label.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                made_in_spain_labelMouseReleased(evt);
+            }
+        });
 
         subtitle_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
@@ -68,11 +83,16 @@ public final class AboutDialog extends javax.swing.JDialog {
         subtitle_label.setDoubleBuffered(true);
 
         mc_logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/mega_crypter.png"))); // NOI18N
-        mc_logo_label.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        mc_logo_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         mc_logo_label.setDoubleBuffered(true);
+        mc_logo_label.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                mc_logo_labelMouseReleased(evt);
+            }
+        });
 
         mcdown_url_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        mcdown_url_button.setText("Copy MegaBasterd URL");
+        mcdown_url_button.setText("Copy MegaBasterd download URL");
         mcdown_url_button.setDoubleBuffered(true);
         mcdown_url_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -80,14 +100,25 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        author_webpage_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        author_webpage_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         author_webpage_label.setForeground(new java.awt.Color(102, 102, 102));
         author_webpage_label.setText("http://t0ni.xyz");
+        author_webpage_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         author_webpage_label.setDoubleBuffered(true);
+        author_webpage_label.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                author_webpage_labelMouseReleased(evt);
+            }
+        });
 
         pica_roja_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/pica_roja_big.png"))); // NOI18N
-        pica_roja_label.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        pica_roja_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         pica_roja_label.setDoubleBuffered(true);
+        pica_roja_label.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                pica_roja_labelMouseReleased(evt);
+            }
+        });
 
         check_version_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         check_version_button.setText("Check version");
@@ -184,6 +215,30 @@ public final class AboutDialog extends javax.swing.JDialog {
             }});
         
     }//GEN-LAST:event_check_version_buttonActionPerformed
+
+    private void pica_roja_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pica_roja_labelMouseReleased
+        
+        MiscTools.openBrowserURL(TONIKELOPE_URL);
+    }//GEN-LAST:event_pica_roja_labelMouseReleased
+
+    private void author_webpage_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_author_webpage_labelMouseReleased
+        
+        MiscTools.openBrowserURL(TONIKELOPE_URL);
+    }//GEN-LAST:event_author_webpage_labelMouseReleased
+
+    private void mc_logo_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mc_logo_labelMouseReleased
+
+        MiscTools.openBrowserURL(MEGACRYPTER_URL);
+    }//GEN-LAST:event_mc_logo_labelMouseReleased
+
+    private void made_in_spain_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_made_in_spain_labelMouseReleased
+        
+        MiscTools.openBrowserURL(SPAIN_URL);
+    }//GEN-LAST:event_made_in_spain_labelMouseReleased
+
+    private void title_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_title_labelMouseReleased
+        MiscTools.openBrowserURL(MEGABASTERD_GITHUB_URL);
+    }//GEN-LAST:event_title_labelMouseReleased
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

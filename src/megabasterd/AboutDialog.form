@@ -95,8 +95,14 @@
           <Font name="Dialog" size="48" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="MegaBasterd X.X"/>
+        <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
+          <Color id="Cursor de Mano"/>
+        </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="title_labelMouseReleased"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="made_in_spain_label">
       <Properties>
@@ -104,10 +110,13 @@
           <Image iconType="3" name="/megabasterd/made_in_spain.jpg"/>
         </Property>
         <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-          <Color id="Cursor Por defecto"/>
+          <Color id="Cursor de Mano"/>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="made_in_spain_labelMouseReleased"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="subtitle_label">
       <Properties>
@@ -127,17 +136,20 @@
           <Image iconType="3" name="/megabasterd/mega_crypter.png"/>
         </Property>
         <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-          <Color id="Cursor Por defecto"/>
+          <Color id="Cursor de Mano"/>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mc_logo_labelMouseReleased"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="mcdown_url_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="18" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Copy MegaBasterd URL"/>
+        <Property name="text" type="java.lang.String" value="Copy MegaBasterd download URL"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
       <Events>
@@ -147,14 +159,20 @@
     <Component class="javax.swing.JLabel" name="author_webpage_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="14" style="1"/>
+          <Font name="Dialog" size="16" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
         <Property name="text" type="java.lang.String" value="http://t0ni.xyz"/>
+        <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
+          <Color id="Cursor de Mano"/>
+        </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="author_webpage_labelMouseReleased"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="pica_roja_label">
       <Properties>
@@ -162,10 +180,13 @@
           <Image iconType="3" name="/megabasterd/pica_roja_big.png"/>
         </Property>
         <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-          <Color id="Cursor Por defecto"/>
+          <Color id="Cursor de Mano"/>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
+      <Events>
+        <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="pica_roja_labelMouseReleased"/>
+      </Events>
     </Component>
     <Component class="javax.swing.JButton" name="check_version_button">
       <Properties>

@@ -1,5 +1,6 @@
 package megabasterd;
 
+import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.FontFormatException;
 import java.awt.GraphicsEnvironment;
@@ -16,6 +17,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
@@ -926,6 +929,15 @@ public final class MiscTools {
             }
         
         return new_version;
+    }
+    
+    public static void openBrowserURL(String url) {
+        
+        try {
+            Desktop.getDesktop().browse(new URI(url));
+        } catch (URISyntaxException | IOException ex) {
+            Logger.getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     
 }
