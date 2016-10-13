@@ -11,7 +11,6 @@ import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 import javax.swing.tree.DefaultTreeModel;
 import static megabasterd.MainPanel.FONT_DEFAULT;
-import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
 import static megabasterd.MiscTools.deleteSelectedTreeItems;
 import static megabasterd.MiscTools.findFirstRegex;
@@ -267,22 +266,17 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         swingReflectionInvoke("setEnabled", dance_button, false);
         
         swingReflectionInvoke("setEnabled", file_tree, false);
+     
+        _loadMegaDirTree();
 
-        THREAD_POOL.execute(new Runnable(){
-                    @Override
-                    public void run() {
-                        
-                    _loadMegaDirTree();
-                    
-                    _genDownloadLiks();
-                    
-                    swingReflectionInvoke("setEnabled", restore_button, true);
-                    
-                    swingReflectionInvoke("setVisible", restore_button, false);
-        
-                    swingReflectionInvoke("setEnabled", dance_button, true);
-                    
-                    }});
+        _genDownloadLiks();
+
+        swingReflectionInvoke("setEnabled", restore_button, true);
+
+        swingReflectionInvoke("setVisible", restore_button, false);
+
+        swingReflectionInvoke("setEnabled", dance_button, true);
+  
     }//GEN-LAST:event_restore_buttonActionPerformed
     
     private void _loadMegaDirTree() {
