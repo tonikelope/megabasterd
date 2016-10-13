@@ -11,10 +11,10 @@ public interface Transference {
     int MIN_WORKERS = 2;
     int MAX_WORKERS = 20;
     int MAX_SIM_TRANSFERENCES=20;
-    int WORKERS_DEFAULT = 2;
+    int WORKERS_DEFAULT = 4;
     int SIM_TRANSFERENCES_DEFAULT=2;
     boolean LIMIT_TRANSFERENCE_SPEED_DEFAULT=false;
-    int MAX_TRANSFERENCE_SPEED_DEFAULT=1;
+    int MAX_TRANSFERENCE_SPEED_DEFAULT=5;
     
     void start();
    
