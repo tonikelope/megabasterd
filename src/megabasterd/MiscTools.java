@@ -661,16 +661,22 @@ public final class MiscTools {
                     
                     } else {
                         
-                        swingReflectionInvokeAndWait("setEnabled", tree, true);
+                        MutableTreeNode new_root;
                         
                         try {
-                            tree.setModel(new DefaultTreeModel((MutableTreeNode)tree.getModel().getRoot().getClass().newInstance()));
                             
-                          
+                            new_root = (MutableTreeNode)tree.getModel().getRoot().getClass().newInstance();
+                            
+                            tree.setModel(new DefaultTreeModel(new_root));
+                            
+                            tree.setRootVisible( new_root.getChildCount() > 0 );
+      
+                            swingReflectionInvokeAndWait("setEnabled", tree, true);
+       
                         } catch (InstantiationException | IllegalAccessException ex) {
                             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                         }
-                        
+
                         return true;
                     }
                 }
@@ -759,13 +765,13 @@ public final class MiscTools {
                     return false;
                 }
             }
-            
-            swingReflectionInvokeAndWait("setEnabled", tree, true);
-            
+ 
             tree.setModel(new DefaultTreeModel(sortTree((DefaultMutableTreeNode)new_root)));
             
-     
-            
+            tree.setRootVisible(new_root!=null?((DefaultMutableTreeNode)new_root).getChildCount() > 0:false);
+  
+            swingReflectionInvokeAndWait("setEnabled", tree, true);
+
             return true;
         }
         
