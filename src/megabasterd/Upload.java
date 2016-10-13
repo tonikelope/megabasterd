@@ -35,9 +35,9 @@ import static megabasterd.MiscTools.truncateText;
 public final class Upload implements Transference, Runnable, SecureNotifiable {
 
     private final MainPanel _main_panel;
-    private UploadView _view=null; //lazy init
-    private SpeedMeter _speed_meter=null; //lazy init
-    private ProgressMeter _progress_meter=null; //lazy init
+    private volatile UploadView _view=null; //lazy init
+    private volatile SpeedMeter _speed_meter=null; //lazy init
+    private volatile ProgressMeter _progress_meter=null; //lazy init
     private String _exit_message;
     private String _dir_name;
     private volatile boolean _exit;
@@ -263,18 +263,69 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     }
     
     @Override
-    public ProgressMeter getProgress_meter() {
-        return _progress_meter == null?(_progress_meter = new ProgressMeter(this)):_progress_meter;
+    public SpeedMeter getSpeed_meter() {
+        
+        SpeedMeter result = _speed_meter;
+        
+        if (result == null) {
+            
+            synchronized(this) {
+                
+                result = _speed_meter;
+                
+                if (result == null) {
+                    
+                    _speed_meter = result = new SpeedMeter(this, getMain_panel().getGlobal_dl_speed());
+                    
+                }
+            }
+        }
+        
+        return result;
     }
     
     @Override
-    public SpeedMeter getSpeed_meter() {
-        return _speed_meter == null?(_speed_meter = new SpeedMeter(this, getMain_panel().getGlobal_up_speed())):_speed_meter;
+    public ProgressMeter getProgress_meter() {
+        
+        ProgressMeter result = _progress_meter;
+        
+        if (result == null) {
+            
+            synchronized(this) {
+                
+                result = _progress_meter;
+                
+                if (result == null) {
+                    
+                    _progress_meter = result = new ProgressMeter(this);
+                    
+                }
+            }
+        }
+        
+        return result;
     }
     
     @Override
     public UploadView getView() {
-        return _view == null?(_view = new UploadView(this)):_view;
+        
+        UploadView result = _view;
+        
+        if (result == null) {
+            
+            synchronized(this) {
+                
+                result = _view;
+                
+                if (result == null) {
+                    
+                    _view = result = new UploadView(this);
+                    
+                }
+            }
+        }
+        
+        return result;
     }
 
     @Override
