@@ -275,7 +275,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                 
                 if (result == null) {
                     
-                    _speed_meter = result = new SpeedMeter(this, getMain_panel().getGlobal_dl_speed());
+                    _speed_meter = result = new SpeedMeter(this, getMain_panel().getGlobal_up_speed());
                     
                 }
             }
