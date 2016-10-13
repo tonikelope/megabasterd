@@ -666,9 +666,7 @@ public final class MiscTools {
                         try {
                             tree.setModel(new DefaultTreeModel((MutableTreeNode)tree.getModel().getRoot().getClass().newInstance()));
                             
-                            tree.revalidate();
-            
-                            tree.repaint();
+                          
                         } catch (InstantiationException | IllegalAccessException ex) {
                             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -766,9 +764,7 @@ public final class MiscTools {
             
             tree.setModel(new DefaultTreeModel(sortTree((DefaultMutableTreeNode)new_root)));
             
-            tree.revalidate();
-            
-            tree.repaint();
+     
             
             return true;
         }

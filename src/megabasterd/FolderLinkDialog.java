@@ -237,8 +237,12 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         if(deleteSelectedTreeItems(file_tree)) {
             
             _genDownloadLiks();
+            
             file_tree.setRootVisible( ((MegaMutableTreeNode)file_tree.getModel().getRoot()).getChildCount() > 0 );
+            
             swingReflectionInvoke("setVisible", restore_button, true);
+            
+            ((DefaultTreeModel)file_tree.getModel()).reload();
         }
   
     }//GEN-LAST:event_skip_buttonActionPerformed
@@ -254,8 +258,12 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         if(deleteAllExceptSelectedTreeItems(file_tree)) {
             
             _genDownloadLiks();
+            
             file_tree.setRootVisible( ((MegaMutableTreeNode)file_tree.getModel().getRoot()).getChildCount() > 0 );
+            
             swingReflectionInvoke("setVisible", restore_button, true);
+            
+            ((DefaultTreeModel)file_tree.getModel()).reload();
         }
      
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
@@ -283,6 +291,8 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                     swingReflectionInvoke("setEnabled", dance_button, true);
                     
                     file_tree.setRootVisible( ((MegaMutableTreeNode)file_tree.getModel().getRoot()).getChildCount() > 0 );
+                    
+                    ((DefaultTreeModel)file_tree.getModel()).reload();
                     
                     }});
     }//GEN-LAST:event_restore_buttonActionPerformed
@@ -360,9 +370,6 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
             file_tree.setModel(new DefaultTreeModel(sortTree(root)));
             
-            file_tree.revalidate();
-            
-            file_tree.repaint();
     
         } catch (Exception ex) {
             

@@ -173,7 +173,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
         );
 
         upload_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -303,7 +303,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(total_file_size_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(warning_label)
@@ -314,7 +313,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                         .addGap(0, 91, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(total_file_size_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -373,7 +373,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         if( filechooser.showOpenDialog(tthis) == JFileChooser.APPROVE_OPTION ) {
             
-            swingReflectionInvoke("setText", total_file_size_label, "");
+            swingReflectionInvoke("setText", total_file_size_label, "[0 B]");
             
             File[] files_selected = filechooser.getSelectedFiles();
             
@@ -391,14 +391,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 
                 root.add(current_file);
             }
-            
-            swingReflectionInvokeAndWait("setEnabled", file_tree, true);
 
             file_tree.setModel(new DefaultTreeModel(sortTree(root)));
-            
-            file_tree.revalidate();
-            
-            file_tree.repaint();
 
             _genFileList();
  
@@ -426,6 +420,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         
         swingReflectionInvoke("setEnabled", skip_rest_button, root_childs);
         
+        ((DefaultTreeModel)file_tree.getModel()).reload();
         
                     }});
     }//GEN-LAST:event_add_files_buttonActionPerformed
@@ -463,7 +458,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         if( filechooser.showOpenDialog(tthis) == JFileChooser.APPROVE_OPTION ) {
             
-            swingReflectionInvoke("setText", total_file_size_label, "");
+            swingReflectionInvoke("setText", total_file_size_label, "[0 B]");
             
             _base_path = filechooser.getSelectedFile().getAbsolutePath();
             
@@ -474,15 +469,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             DefaultMutableTreeNode root = new DefaultMutableTreeNode(filechooser.getSelectedFile().getAbsolutePath());
   
             _genFileTree(filechooser.getSelectedFile().getAbsolutePath(), root);
-            
-            swingReflectionInvokeAndWait("setEnabled", file_tree, true);
 
             file_tree.setModel(new DefaultTreeModel(sortTree(root)));
  
-            file_tree.revalidate();
-            
-            file_tree.repaint();
-            
             _genFileList();
             
         }
@@ -508,8 +497,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         swingReflectionInvoke("setEnabled", skip_button, root_childs);
         
         swingReflectionInvoke("setEnabled", skip_rest_button, root_childs);
-        
-        
+
+        ((DefaultTreeModel)file_tree.getModel()).reload();
         
                     }});
         
@@ -699,6 +688,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             swingReflectionInvoke("setEnabled", skip_button, root_childs);
 
             swingReflectionInvoke("setEnabled", skip_rest_button, root_childs);
+            
+            ((DefaultTreeModel)file_tree.getModel()).reload();
         }
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
@@ -724,6 +715,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             swingReflectionInvoke("setEnabled", skip_button, root_childs);
 
             swingReflectionInvoke("setEnabled", skip_rest_button, root_childs);
+            
+            ((DefaultTreeModel)file_tree.getModel()).reload();
         }
     }//GEN-LAST:event_skip_buttonActionPerformed
 
