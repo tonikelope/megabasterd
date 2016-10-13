@@ -54,7 +54,6 @@ import static megabasterd.MiscTools.truncateText;
 public final class Download implements Transference, Runnable, SecureNotifiable {
         
     public static final boolean VERIFY_CBC_MAC_DEFAULT=false;
-    public static final boolean USE_SLOTS_DEFAULT = false;
     public static final Object CBC_LOCK=new Object();
     
     private final MainPanel _main_panel;

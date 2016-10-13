@@ -33,9 +33,7 @@ import static megabasterd.MiscTools.truncateText;
  * @author tonikelope
  */
 public final class Upload implements Transference, Runnable, SecureNotifiable {
-    
-    public static final boolean USE_SLOTS_DEFAULT = true;
-    
+
     private final MainPanel _main_panel;
     private UploadView _view=null; //lazy init
     private SpeedMeter _speed_meter=null; //lazy init
@@ -53,7 +51,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     private long _last_chunk_id_dispatched;
     private final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
     private final ExecutorService _thread_pool;
-    private volatile int[] _file_meta_mac;
+    private int[] _file_meta_mac;
     private  boolean _finishing_upload;
     private String _fid;
     private boolean _notified;
@@ -152,10 +150,6 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
     public ExecutorService getThread_pool() {
         return _thread_pool;
-    }
-
-    public int[] getFile_meta_mac() {
-        return _file_meta_mac;
     }
 
     public String getFid() {
