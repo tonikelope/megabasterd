@@ -72,7 +72,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         updateFont(cancel_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(default_slots_down_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(default_slots_down_spinner, FONT_DEFAULT, Font.PLAIN);
-        updateFont(default_slots_up, FONT_DEFAULT, Font.PLAIN);
+        updateFont(default_slots_up_spinner, FONT_DEFAULT, Font.PLAIN);
         updateFont(max_downloads_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(max_downloads_spinner, FONT_DEFAULT, Font.PLAIN);
         updateFont(max_uploads_spinner, FONT_DEFAULT, Font.PLAIN);
@@ -117,10 +117,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 default_slots = Integer.parseInt(slots);
             }
             
-            default_slots_down_spinner.setModel(new SpinnerNumberModel(default_slots, Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
-            ((JSpinner.DefaultEditor)default_slots_down_spinner.getEditor()).getTextField().setEditable(false);
+            swingReflectionInvokeAndWait("setModel", default_slots_down_spinner, new SpinnerNumberModel(default_slots, Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
             
-            
+            swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor)default_slots_down_spinner.getEditor()).getTextField(), false);
+
             slots = DBTools.selectSettingValueFromDB("default_slots_up");
             
             default_slots=Upload.WORKERS_DEFAULT;
@@ -129,8 +129,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 default_slots = Integer.parseInt(slots);
             }
             
-            default_slots_up.setModel(new SpinnerNumberModel(default_slots, Upload.MIN_WORKERS, Upload.MAX_WORKERS, 1));
-            ((JSpinner.DefaultEditor)default_slots_up.getEditor()).getTextField().setEditable(false);
+            swingReflectionInvokeAndWait("setModel", default_slots_up_spinner, new SpinnerNumberModel(default_slots, Upload.MIN_WORKERS, Upload.MAX_WORKERS, 1));
+            
+            swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor)default_slots_up_spinner.getEditor()).getTextField(), false);
+            
             
             String max_down = DBTools.selectSettingValueFromDB("max_downloads");
             
@@ -141,8 +143,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
             } 
             
             
-            max_downloads_spinner.setModel(new SpinnerNumberModel(max_dl, 1, Download.MAX_SIM_TRANSFERENCES, 1));
-            ((JSpinner.DefaultEditor)max_downloads_spinner.getEditor()).getTextField().setEditable(false);
+            swingReflectionInvokeAndWait("setModel", max_downloads_spinner, new SpinnerNumberModel(max_dl, 1, Download.MAX_SIM_TRANSFERENCES, 1));
+            swingReflectionInvoke("setEditable",((JSpinner.DefaultEditor)max_downloads_spinner.getEditor()).getTextField(), false);
             
             
             String max_up = DBTools.selectSettingValueFromDB("max_uploads");
@@ -153,10 +155,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 max_ul = Integer.parseInt(max_up);
             } 
             
-            
-            max_uploads_spinner.setModel(new SpinnerNumberModel(max_ul, 1, Upload.MAX_SIM_TRANSFERENCES, 1));
-            ((JSpinner.DefaultEditor)max_uploads_spinner.getEditor()).getTextField().setEditable(false);
-            
+
+            swingReflectionInvokeAndWait("setModel",max_uploads_spinner, new SpinnerNumberModel(max_dl, 1, Upload.MAX_SIM_TRANSFERENCES, 1));
+            swingReflectionInvoke("setEditable",((JSpinner.DefaultEditor)max_uploads_spinner.getEditor()).getTextField(), false);
             
             
             boolean limit_dl_speed = Download.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
@@ -187,8 +188,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
             } 
             
             
-            max_down_speed_spinner.setModel(new SpinnerNumberModel(max_download_speed, 1, Integer.MAX_VALUE, 5));
-            ((JSpinner.DefaultEditor)max_down_speed_spinner.getEditor()).getTextField().setEditable(true);
+            swingReflectionInvokeAndWait("setModel", max_down_speed_spinner, new SpinnerNumberModel(max_download_speed, 1, Integer.MAX_VALUE, 5));
+            
+            swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor)max_down_speed_spinner.getEditor()).getTextField(), true);
             
             
             boolean limit_ul_speed = Upload.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
@@ -218,9 +220,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 max_upload_speed = Integer.parseInt(max_ul_speed);
             }
            
-            max_up_speed_spinner.setModel(new SpinnerNumberModel(max_upload_speed, 1, Integer.MAX_VALUE, 5));
+            swingReflectionInvokeAndWait("setModel", max_up_speed_spinner, new SpinnerNumberModel(max_upload_speed, 1, Integer.MAX_VALUE, 5));
             
-            ((JSpinner.DefaultEditor)max_up_speed_spinner.getEditor()).getTextField().setEditable(true);
+            swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor)max_up_speed_spinner.getEditor()).getTextField(), true);
             
             
             boolean cbc_mac = Download.VERIFY_CBC_MAC_DEFAULT;
@@ -266,13 +268,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
             if(!use_slots) {
                 
                 swingReflectionInvoke("setEnabled", defaut_slots_up_label, false);
-                swingReflectionInvoke("setEnabled", default_slots_up, false);
+                swingReflectionInvoke("setEnabled", default_slots_up_spinner, false);
             } else {
                 swingReflectionInvoke("setEnabled", max_uploads_label, true);
-                swingReflectionInvoke("setEnabled", default_slots_up, true);
+                swingReflectionInvoke("setEnabled", default_slots_up_spinner, true);
             }
-            
-            encrypt_pass_checkbox.setSelected((_main_panel.getMega_master_pass_hash() != null));
+          
+            swingReflectionInvoke("setSelected", encrypt_pass_checkbox, (_main_panel.getMega_master_pass_hash() != null));
 
             swingReflectionInvoke("setEnabled", remove_account_button, (mega_accounts_table.getRowCount()>0));
             
@@ -293,8 +295,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     for (Object k: _main_panel.getMega_accounts().keySet()) {
    
                         String[] new_row_data = {(String)k, "**************************"};
-
-                        model.addRow(new_row_data);
+                        
+                        swingReflectionInvoke("addRow", model, new Object[] {new_row_data});
                     }
                     
                     swingReflectionInvoke("setEnabled", mega_accounts_table, false);
@@ -339,7 +341,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     String[] new_row_data = {(String)pair.getKey(), (String)data.get("password")};
 
-                    model.addRow(new_row_data);
+                    swingReflectionInvoke("addRow", model, new Object[] {new_row_data});
                 }
                 
                 swingReflectionInvoke("setEnabled", remove_account_button, (mega_accounts_table.getRowCount()>0));
@@ -386,7 +388,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         add_account_button = new javax.swing.JButton();
         defaut_slots_up_label = new javax.swing.JLabel();
         max_uploads_label = new javax.swing.JLabel();
-        default_slots_up = new javax.swing.JSpinner();
+        default_slots_up_spinner = new javax.swing.JSpinner();
         max_uploads_spinner = new javax.swing.JSpinner();
         multi_slot_up_checkbox = new javax.swing.JCheckBox();
         max_up_speed_label = new javax.swing.JLabel();
@@ -587,9 +589,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_uploads_label.setText("Max sim uploads:");
         max_uploads_label.setDoubleBuffered(true);
 
-        default_slots_up.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        default_slots_up.setDoubleBuffered(true);
-        default_slots_up.setValue(2);
+        default_slots_up_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        default_slots_up_spinner.setDoubleBuffered(true);
+        default_slots_up_spinner.setValue(2);
 
         max_uploads_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         max_uploads_spinner.setDoubleBuffered(true);
@@ -683,7 +685,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addGroup(javax.swing.GroupLayout.Alignment.LEADING, uploads_panelLayout.createSequentialGroup()
                                     .addComponent(defaut_slots_up_label)
                                     .addGap(73, 73, 73)
-                                    .addComponent(default_slots_up, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                                    .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -711,7 +713,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(defaut_slots_up_label)
-                    .addComponent(default_slots_up, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(limit_upload_speed_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -774,14 +776,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
             
             _download_path = file.getAbsolutePath();
             
-            swingReflectionInvoke("setText", default_dir_label, truncateText(_download_path, 80));
+            default_dir_label.setText(truncateText(_download_path, 80));
             
         }
     }//GEN-LAST:event_change_download_dir_buttonActionPerformed
 
     private void cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_buttonActionPerformed
         
-        swingReflectionInvoke("setVisible", this, false);
+        this.setVisible(false);
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
     private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
@@ -792,7 +794,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
      
             insertSettingValueInDB("default_down_dir", _download_path);
             insertSettingValueInDB("default_slots_down", String.valueOf((int)swingReflectionInvokeAndWaitForReturn("getValue", default_slots_down_spinner)));
-            insertSettingValueInDB("default_slots_up", String.valueOf((int)swingReflectionInvokeAndWaitForReturn("getValue", default_slots_up)));
+            insertSettingValueInDB("default_slots_up", String.valueOf((int)swingReflectionInvokeAndWaitForReturn("getValue", default_slots_up_spinner)));
             insertSettingValueInDB("use_slots_down", (boolean)swingReflectionInvokeAndWaitForReturn("isSelected", multi_slot_down_checkbox)?"yes":"no");
             insertSettingValueInDB("use_slots_up", (boolean)swingReflectionInvokeAndWaitForReturn("isSelected", multi_slot_up_checkbox)?"yes":"no");
             insertSettingValueInDB("max_downloads", String.valueOf((int)swingReflectionInvokeAndWaitForReturn("getValue", max_downloads_spinner)));
@@ -808,23 +810,22 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 
                 final DefaultTableModel model = (DefaultTableModel)mega_accounts_table.getModel();
             
-            swingReflectionInvoke("setText", status, "Checking your MEGA accounts, please wait...");
+            status.setText("Checking your MEGA accounts, please wait...");
             
-            swingReflectionInvoke("setEnabled", ok_button, false);
+            ok_button.setEnabled(false);
             
-            swingReflectionInvoke("setEnabled", cancel_button, false);
+            cancel_button.setEnabled(false);
             
-            swingReflectionInvoke("setEnabled", remove_account_button, false);
+            remove_account_button.setEnabled(false);
             
-            swingReflectionInvoke("setEnabled", add_account_button, false);
+            add_account_button.setEnabled(false);
             
-            swingReflectionInvoke("setEnabled", delete_all_accounts_button, false);
+            delete_all_accounts_button.setEnabled(false);
             
-            swingReflectionInvoke("setEnabled", mega_accounts_table, false);
+            mega_accounts_table.setEnabled(false);
             
-            swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, false);
-            
-            
+            encrypt_pass_checkbox.setEnabled(false);
+         
             final SettingsDialog tthis = this;
             
             THREAD_POOL.execute(new Runnable(){
@@ -960,7 +961,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             });
                 
             } else {
-                swingReflectionInvoke("setVisible", this, false);
+                this.setVisible(false);
             }
             
             
@@ -971,13 +972,15 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     private void multi_slot_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multi_slot_down_checkboxStateChanged
         
-        if(!(boolean)swingReflectionInvokeAndWaitForReturn("isSelected", multi_slot_down_checkbox)) {
+        if(!multi_slot_down_checkbox.isSelected()) {
                 
-                swingReflectionInvoke("setEnabled", default_slots_down_spinner, false);
-                swingReflectionInvoke("setEnabled", default_slots_down_label, false);
+            default_slots_down_spinner.setEnabled(false);
+            default_slots_down_label.setEnabled(false);
+                
         } else {
-                swingReflectionInvoke("setEnabled", default_slots_down_spinner, true);
-                swingReflectionInvoke("setEnabled", default_slots_down_label, true);
+            
+            default_slots_down_spinner.setEnabled(true);
+            default_slots_down_label.setEnabled(true);
        }
     }//GEN-LAST:event_multi_slot_down_checkboxStateChanged
 
@@ -1002,7 +1005,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         if(model.getRowCount() == 0) {
 
-            swingReflectionInvoke("setEnabled", remove_account_button, false);
+            remove_account_button.setEnabled(false);
         }
     }//GEN-LAST:event_remove_account_buttonActionPerformed
 
@@ -1014,51 +1017,53 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         mega_accounts_table.clearSelection();
 
-        swingReflectionInvoke("setEnabled", ok_button, true);
+        ok_button.setEnabled(true);
     }//GEN-LAST:event_add_account_buttonActionPerformed
 
     private void multi_slot_up_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multi_slot_up_checkboxStateChanged
         
-        
-        if(!(boolean)swingReflectionInvokeAndWaitForReturn("isSelected", multi_slot_up_checkbox)) {
+        if(!multi_slot_up_checkbox.isSelected()) {
                 
-                swingReflectionInvoke("setEnabled", defaut_slots_up_label, false);
-                swingReflectionInvoke("setEnabled", default_slots_up, false);
+                defaut_slots_up_label.setEnabled(false);
+                default_slots_up_spinner.setEnabled(false);
+                
         } else {
-                swingReflectionInvoke("setEnabled", defaut_slots_up_label, true);
-                swingReflectionInvoke("setEnabled", default_slots_up, true);
+                defaut_slots_up_label.setEnabled(true);
+                default_slots_up_spinner.setEnabled(true);
        }
     }//GEN-LAST:event_multi_slot_up_checkboxStateChanged
 
     private void limit_download_speed_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_limit_download_speed_checkboxStateChanged
         
         
-        if(!(boolean)swingReflectionInvokeAndWaitForReturn("isSelected", limit_download_speed_checkbox)) {
+        if(!limit_download_speed_checkbox.isSelected()) {
+    
                 
-                swingReflectionInvoke("setEnabled", max_down_speed_label, false);
-                swingReflectionInvoke("setEnabled", max_down_speed_spinner, false);
+                 max_down_speed_label.setEnabled(false);
+                 max_down_speed_spinner.setEnabled(false);
         } else {
-                swingReflectionInvoke("setEnabled", max_down_speed_label, true);
-                swingReflectionInvoke("setEnabled", max_down_speed_spinner, true);
+                max_down_speed_label.setEnabled(true);
+                 max_down_speed_spinner.setEnabled(true);
        }
     }//GEN-LAST:event_limit_download_speed_checkboxStateChanged
 
     private void limit_upload_speed_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_limit_upload_speed_checkboxStateChanged
         
         
-        if(!(boolean)swingReflectionInvokeAndWaitForReturn("isSelected", limit_upload_speed_checkbox)) {
+        if(!limit_upload_speed_checkbox.isSelected()) {
                 
-                swingReflectionInvoke("setEnabled", max_up_speed_label, false);
-                swingReflectionInvoke("setEnabled", max_up_speed_spinner, false);
+               max_up_speed_label.setEnabled(false);
+                 max_up_speed_spinner.setEnabled(false);
+                
         } else {
-                swingReflectionInvoke("setEnabled", max_up_speed_label, true);
-                swingReflectionInvoke("setEnabled", max_up_speed_spinner, true);
+                max_up_speed_label.setEnabled(true);
+                 max_up_speed_spinner.setEnabled(true);
        }
     }//GEN-LAST:event_limit_upload_speed_checkboxStateChanged
 
     private void encrypt_pass_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encrypt_pass_checkboxActionPerformed
-        
-        swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, false);
+   
+        encrypt_pass_checkbox.setEnabled(false);
         
         final SettingsDialog tthis = this;
         
@@ -1165,7 +1170,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     private void unlock_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlock_accounts_buttonActionPerformed
         
-        swingReflectionInvoke("setEnabled", unlock_accounts_button, false);
+  
+        
+        unlock_accounts_button.setEnabled(false);
         
         final SettingsDialog tthis = this;
         
@@ -1249,18 +1256,18 @@ public final class SettingsDialog extends javax.swing.JDialog {
         if(n == 1) {
             
             try {
-                swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, true);
+                encrypt_pass_checkbox.setEnabled(true);
                 
-                swingReflectionInvoke("setEnabled", mega_accounts_table, true);
+                mega_accounts_table.setEnabled(true);
                 
-                swingReflectionInvoke("setEnabled", remove_account_button, true);
+                remove_account_button.setEnabled(true);
                 
-                swingReflectionInvoke("setEnabled", add_account_button, true);
+                add_account_button.setEnabled(true);
                 
-                swingReflectionInvoke("setVisible", unlock_accounts_button, false);
+                unlock_accounts_button.setVisible(false);
                 
-                swingReflectionInvoke("setVisible", delete_all_accounts_button, true);
-
+                delete_all_accounts_button.setVisible(true);
+                
                 DefaultTableModel new_model = new DefaultTableModel(new Object [][] {},new String [] {"Email", "Password"});
                 
                 mega_accounts_table.setModel(new_model);
@@ -1290,8 +1297,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        
-        swingReflectionInvoke("setEnabled", delete_all_accounts_button, true);
 
     }//GEN-LAST:event_delete_all_accounts_buttonActionPerformed
 
@@ -1304,7 +1309,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel default_dir_label;
     private javax.swing.JLabel default_slots_down_label;
     private javax.swing.JSpinner default_slots_down_spinner;
-    private javax.swing.JSpinner default_slots_up;
+    private javax.swing.JSpinner default_slots_up_spinner;
     private javax.swing.JLabel defaut_slots_up_label;
     private javax.swing.JButton delete_all_accounts_button;
     private javax.swing.JLabel down_dir_label;

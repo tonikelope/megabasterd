@@ -114,8 +114,10 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
     private void dance_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dance_buttonActionPerformed
         
-        swingReflectionInvoke("setEnabled", dance_button, false);
-        swingReflectionInvoke("setEnabled", original_link_textfield, false);
+    
+        dance_button.setEnabled(false);
+        
+        original_link_textfield.setEnabled(false);
         
         final StreamerDialog tthis = this;
         

@@ -346,7 +346,7 @@
                                       <Group type="102" alignment="0" attributes="0">
                                           <Component id="defaut_slots_up_label" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace min="-2" pref="73" max="-2" attributes="0"/>
-                                          <Component id="default_slots_up" min="-2" max="-2" attributes="0"/>
+                                          <Component id="default_slots_up_spinner" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
                               </Group>
@@ -384,7 +384,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="defaut_slots_up_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="default_slots_up" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="default_slots_up_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
                       <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
@@ -478,7 +478,7 @@
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
             </Component>
-            <Component class="javax.swing.JSpinner" name="default_slots_up">
+            <Component class="javax.swing.JSpinner" name="default_slots_up_spinner">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="20" style="1"/>

@@ -14,7 +14,6 @@ import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.copyTextToClipboard;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.MiscTools.updateFont;
 import static megabasterd.Transference.MAX_WORKERS;
 import static megabasterd.Transference.MIN_WORKERS;
@@ -108,8 +107,9 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         updateFont(restart_button, FONT_DEFAULT, PLAIN);
         updateFont(slot_status_label, FONT_DEFAULT, BOLD);
         
+        
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_upload.getMain_panel().getDefault_slots_up(), MIN_WORKERS, MAX_WORKERS, 1));
-        swingReflectionInvoke("setEditable", swingReflectionInvokeAndWaitForReturn("getTextField", swingReflectionInvokeAndWaitForReturn("getEditor", slots_spinner)), false);
+        swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor)slots_spinner.getEditor()).getTextField(), false);
         swingReflectionInvoke("setVisible", slots_spinner, false);
         swingReflectionInvoke("setVisible", slots_label, false);
         swingReflectionInvoke("setVisible", pause_button, false);
@@ -373,32 +373,32 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     
     private void folder_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_folder_link_buttonActionPerformed
 
-        swingReflectionInvoke("setEnabled", folder_link_button, false);
+        folder_link_button.setEnabled(false);
         
-        swingReflectionInvoke("setText", folder_link_button, "Please wait...");
+        folder_link_button.setText("Please wait...");
         
         copyTextToClipboard(_upload.getFolder_link());
 
-        swingReflectionInvoke("setText", folder_link_button, "Copy folder link");
+        folder_link_button.setText("Copy folder link");
 
         JOptionPane.showMessageDialog(_upload.getMain_panel().getView(), "MEGA folder link was copied to clipboard!");
 
-        swingReflectionInvoke("setEnabled", folder_link_button, true);
+        folder_link_button.setEnabled(true);
     }//GEN-LAST:event_folder_link_buttonActionPerformed
 
     private void file_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_file_link_buttonActionPerformed
 
-        swingReflectionInvoke("setEnabled", file_link_button, false);
+        file_link_button.setEnabled(false);
         
-        swingReflectionInvoke("setText", file_link_button, "Please wait...");
+        file_link_button.setText("Please wait...");
         
         copyTextToClipboard(_upload.getFile_link());
                     
-        swingReflectionInvoke("setText", file_link_button, "Copy file link");
+        file_link_button.setText("Copy file link");
 
         JOptionPane.showMessageDialog(_upload.getMain_panel().getView(), "MEGA file link was copied to clipboard!");
 
-        swingReflectionInvoke("setEnabled", file_link_button, true);
+        file_link_button.setEnabled(true);
      
     }//GEN-LAST:event_file_link_buttonActionPerformed
 

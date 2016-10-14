@@ -188,13 +188,13 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_buttonActionPerformed
-        
-        swingReflectionInvoke("setVisible", this, false);
+
+        this.setVisible(false);
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
     private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
-       
-        swingReflectionInvoke("setText", status_label, "Verifying your password, please wait...");
+    
+        status_label.setText("Verifying your password, please wait...");
         
         final GetMegaMasterPasswordDialog tthis = this;
         

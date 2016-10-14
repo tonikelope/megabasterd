@@ -182,8 +182,7 @@ public final class AboutDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void mcdown_url_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mcdown_url_buttonActionPerformed
-        
-        
+
         copyTextToClipboard(MEGA_URL);
         
         JOptionPane.showMessageDialog(this, "MEGA URL was copied to clipboard!");
@@ -191,7 +190,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
     private void check_version_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_check_version_buttonActionPerformed
 
-        swingReflectionInvoke("setEnabled", check_version_button, false);
+        check_version_button.setEnabled(false);
         
         final AboutDialog tthis = this;
            

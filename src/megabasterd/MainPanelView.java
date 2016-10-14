@@ -154,10 +154,8 @@ public final class MainPanelView extends javax.swing.JFrame {
         swingReflectionInvoke("setVisible", pause_all_up_button, false);
         swingReflectionInvoke("setEnabled", clean_all_down_menu, false);
         swingReflectionInvoke("setEnabled", clean_all_up_menu, false);
-        
-        jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
-        jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
-
+        swingReflectionInvoke("setUnitIncrement", jScrollPane_down.getVerticalScrollBar(), 20);
+        swingReflectionInvoke("setUnitIncrement", jScrollPane_up.getVerticalScrollBar(), 20);
     }
 
     /**
@@ -469,16 +467,16 @@ public final class MainPanelView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void new_download_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_download_menuActionPerformed
-
-        swingReflectionInvoke("setEnabled", new_download_menu, false);
+        
+        new_download_menu.setEnabled(false);
         
         final LinkGrabberDialog dialog = new LinkGrabberDialog(this, true, _main_panel.getDefault_download_path(), _main_panel.getClipboardspy());
         
         _main_panel.getClipboardspy().attachObserver(dialog);
-
-        swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, this);
-
-        swingReflectionInvokeAndWait("setVisible", dialog, true);
+        
+        dialog.setLocationRelativeTo(this);
+        
+        dialog.setVisible(true);
 
         _main_panel.getClipboardspy().detachObserver(dialog);
         
@@ -570,10 +568,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                 
                 getMain_panel().getDownload_manager().secureNotify();
                 
-                swingReflectionInvoke("setEnabled", new_download_menu, true);
+                new_download_menu.setEnabled(true);
             
         } else {
-            swingReflectionInvoke("setEnabled", new_download_menu, true);
+
+            new_download_menu.setEnabled(true);
         }
             
         dialog.dispose();
@@ -581,13 +580,12 @@ public final class MainPanelView extends javax.swing.JFrame {
     }//GEN-LAST:event_new_download_menuActionPerformed
 
     private void settings_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_settings_menuActionPerformed
-        
-        
+  
         SettingsDialog dialog = new SettingsDialog(this, true);
        
-        swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, this);
+        dialog.setLocationRelativeTo(this);
         
-        swingReflectionInvokeAndWait("setVisible", dialog, true);
+        dialog.setVisible(true);
         
         if(dialog.isSettings_ok()) {
 
@@ -610,13 +608,13 @@ public final class MainPanelView extends javax.swing.JFrame {
             
                 _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.getMax_dl_speed()*1024);
 
-                swingReflectionInvoke("setForeground", getGlobal_speed_down_label(), new Color(255,0,0));
+                global_speed_down_label.setForeground(new Color(255,0,0));
             
             } else {
 
                 _main_panel.getStream_supervisor().setMaxBytesPerSecInput(0);
 
-                swingReflectionInvoke("setForeground", getGlobal_speed_down_label(), new Color(0,128,255));
+                global_speed_down_label.setForeground(new Color(0,128,255));
 
             }
 
@@ -624,13 +622,13 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(_main_panel.getMax_up_speed()*1024);
 
-                swingReflectionInvoke("setForeground", getGlobal_speed_up_label(), new Color(255,0,0));
+                global_speed_up_label.setForeground(new Color(255,0,0));
 
             } else {
 
                 _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(0);
 
-                swingReflectionInvoke("setForeground", getGlobal_speed_up_label(), new Color(0,128,255));
+                global_speed_up_label.setForeground(new Color(0,128,255));
 
             }
 
@@ -660,9 +658,9 @@ public final class MainPanelView extends javax.swing.JFrame {
         
         AboutDialog dialog = new AboutDialog(this, true);
        
-        swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, this);
+        dialog.setLocationRelativeTo(this);
         
-        swingReflectionInvokeAndWait("setVisible", dialog, true);
+        dialog.setVisible(true);
     }//GEN-LAST:event_about_menuActionPerformed
 
     private void exit_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exit_menuActionPerformed
@@ -694,7 +692,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void pause_all_down_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_all_down_buttonActionPerformed
         
-        
         _main_panel.getDownload_manager().pauseAll();
     }//GEN-LAST:event_pause_all_down_buttonActionPerformed
 
@@ -704,9 +701,9 @@ public final class MainPanelView extends javax.swing.JFrame {
         
         _main_panel.getClipboardspy().attachObserver(dialog);
 
-        swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, this);
-
-        swingReflectionInvokeAndWait("setVisible", dialog, true);
+        dialog.setLocationRelativeTo(this);
+        
+        dialog.setVisible(true);
         
         _main_panel.getClipboardspy().detachObserver(dialog);
     }//GEN-LAST:event_new_stream_menuActionPerformed
@@ -717,11 +714,11 @@ public final class MainPanelView extends javax.swing.JFrame {
         
         try{
     
-        swingReflectionInvoke("setEnabled", new_upload_menu, false);
+        new_upload_menu.setEnabled(false);
 
-        swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, this);
-
-        swingReflectionInvokeAndWait("setVisible", dialog, true);
+        dialog.setLocationRelativeTo(this);
+        
+        dialog.setVisible(true);
 
         if(dialog.isUpload() && dialog.getFiles().size() > 0) {
             
@@ -821,11 +818,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                 
                 getMain_panel().getUpload_manager().secureNotify();
                 
-                swingReflectionInvoke("setEnabled", new_upload_menu, true);
+                new_upload_menu.setEnabled(true);
                 
             
         } else {
-            swingReflectionInvoke("setEnabled", new_upload_menu, true);
+            new_upload_menu.setEnabled(true);
         } 
         
         }catch(Exception ex) {}
@@ -841,12 +838,10 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void close_all_finished_up_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_all_finished_up_buttonActionPerformed
         
-        
         _main_panel.getUpload_manager().closeAllFinished();
     }//GEN-LAST:event_close_all_finished_up_buttonActionPerformed
 
     private void pause_all_up_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_all_up_buttonActionPerformed
-        
         
         _main_panel.getUpload_manager().pauseAll();
     }//GEN-LAST:event_pause_all_up_buttonActionPerformed

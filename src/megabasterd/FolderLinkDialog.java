@@ -17,6 +17,7 @@ import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.formatBytes;
 import static megabasterd.MiscTools.sortTree;
 import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.updateFont;
 
 /**
@@ -235,8 +236,8 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         if(deleteSelectedTreeItems(file_tree)) {
             
             _genDownloadLiks();
-            
-            swingReflectionInvoke("setVisible", restore_button, true);
+
+            restore_button.setVisible(true);
         }
   
     }//GEN-LAST:event_skip_buttonActionPerformed
@@ -245,7 +246,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
         _download = true;
         
-        swingReflectionInvoke("setVisible", this, false);
+        this.setVisible(false);
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
@@ -254,28 +255,30 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             
             _genDownloadLiks();
 
-            swingReflectionInvoke("setVisible", restore_button, true);
+            restore_button.setVisible(true);
         }
      
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
     private void restore_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restore_buttonActionPerformed
         
-        swingReflectionInvoke("setEnabled", restore_button, false);
+        restore_button.setEnabled(false);
         
-        swingReflectionInvoke("setEnabled", dance_button, false);
+        dance_button.setEnabled(false);
         
-        swingReflectionInvoke("setEnabled", file_tree, false);
+        file_tree.setEnabled(false);
+        
      
         _loadMegaDirTree();
 
         _genDownloadLiks();
+        
 
-        swingReflectionInvoke("setEnabled", restore_button, true);
-
-        swingReflectionInvoke("setVisible", restore_button, false);
-
-        swingReflectionInvoke("setEnabled", dance_button, true);
+        restore_button.setEnabled(true);
+        
+        dance_button.setEnabled(true);
+        
+        file_tree.setEnabled(true);
   
     }//GEN-LAST:event_restore_buttonActionPerformed
     
@@ -348,9 +351,9 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                 }while(current_node != root);
             }
             
-            file_tree.setModel(new DefaultTreeModel(sortTree(root)));
-            
-            file_tree.setRootVisible(root.getChildCount() > 0);
+            swingReflectionInvokeAndWait("setModel", file_tree, new DefaultTreeModel(sortTree(root)));
+          
+            swingReflectionInvoke("setRootVisible", file_tree, root!=null?root.getChildCount() > 0:false);
  
             swingReflectionInvoke("setEnabled", file_tree, true);
             

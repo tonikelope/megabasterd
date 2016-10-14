@@ -160,12 +160,12 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     private void dance_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dance_buttonActionPerformed
         
         _download=true;
-        dispose();
+        
+        this.setVisible(false);
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void change_dir_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_change_dir_buttonActionPerformed
         
-
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
@@ -179,7 +179,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
             _download_path = file.getAbsolutePath();
 
-            swingReflectionInvoke("setText", download_dir_label, truncateText(_download_path,80));
+            download_dir_label.setText(truncateText(_download_path,80));
         }
     }//GEN-LAST:event_change_dir_buttonActionPerformed
 

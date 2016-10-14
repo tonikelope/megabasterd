@@ -14,7 +14,6 @@ import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.copyTextToClipboard;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.MiscTools.updateFont;
 
 
@@ -105,7 +104,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         updateFont(slot_status_label, FONT_DEFAULT, Font.BOLD);
         
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
-        swingReflectionInvoke("setEditable", swingReflectionInvokeAndWaitForReturn("getTextField", swingReflectionInvokeAndWaitForReturn("getEditor", slots_spinner)), false);
+        swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor)slots_spinner.getEditor()).getTextField(), false);
         swingReflectionInvoke("setVisible", slots_spinner, false);
         swingReflectionInvoke("setVisible", slots_label, false);
         swingReflectionInvoke("setVisible", pause_button, false);

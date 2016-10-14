@@ -10,6 +10,7 @@ import static java.util.logging.Logger.getLogger;
 import javax.swing.JPanel;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 
 /**
  *
@@ -302,9 +303,10 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         
         int finish = _transference_finished_queue.size();
         
-        if(finish > 0 && _pre_count+prov+wait+run == 0 && !_main_panel.getView().isVisible()) {
+        if(finish > 0 && _pre_count+prov+wait+run == 0 && !(boolean)swingReflectionInvokeAndWaitForReturn("isVisible", _main_panel.getView())) {
             
-            _main_panel.getTrayicon().displayMessage("MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
+            swingReflectionInvoke("displayMessage", _main_panel.getTrayicon(), "MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
+            
         }
   
         return (_pre_count+prov+rem+wait+run+finish > 0)?"Pre: "+_pre_count+" / Pro: "+prov+" / Wait: "+wait+" / Run: "+run+" / Finish: "+finish+" / Rem: "+rem:"";
