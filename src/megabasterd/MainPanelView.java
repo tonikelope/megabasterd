@@ -189,17 +189,13 @@ public final class MainPanelView extends javax.swing.JFrame {
         main_menubar = new javax.swing.JMenuBar();
         file_menu = new javax.swing.JMenu();
         new_download_menu = new javax.swing.JMenuItem();
-        jSeparator6 = new javax.swing.JPopupMenu.Separator();
         new_upload_menu = new javax.swing.JMenuItem();
-        jSeparator1 = new javax.swing.JPopupMenu.Separator();
         new_stream_menu = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
-        hide_tray_menu = new javax.swing.JMenuItem();
-        jSeparator2 = new javax.swing.JPopupMenu.Separator();
         clean_all_down_menu = new javax.swing.JMenuItem();
-        jSeparator5 = new javax.swing.JPopupMenu.Separator();
         clean_all_up_menu = new javax.swing.JMenuItem();
-        jSeparator3 = new javax.swing.JPopupMenu.Separator();
+        jSeparator2 = new javax.swing.JPopupMenu.Separator();
+        hide_tray_menu = new javax.swing.JMenuItem();
         exit_menu = new javax.swing.JMenuItem();
         edit_menu = new javax.swing.JMenu();
         settings_menu = new javax.swing.JMenuItem();
@@ -352,7 +348,6 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
         file_menu.add(new_download_menu);
-        file_menu.add(jSeparator6);
 
         new_upload_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         new_upload_menu.setText("New upload");
@@ -362,7 +357,6 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
         file_menu.add(new_upload_menu);
-        file_menu.add(jSeparator1);
 
         new_stream_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         new_stream_menu.setText("New stream");
@@ -374,16 +368,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(new_stream_menu);
         file_menu.add(jSeparator4);
 
-        hide_tray_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
-        hide_tray_menu.setText("Hide to tray");
-        hide_tray_menu.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                hide_tray_menuActionPerformed(evt);
-            }
-        });
-        file_menu.add(hide_tray_menu);
-        file_menu.add(jSeparator2);
-
         clean_all_down_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         clean_all_down_menu.setText("Remove all pre/pro/wait downloads");
         clean_all_down_menu.addActionListener(new java.awt.event.ActionListener() {
@@ -392,7 +376,6 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
         file_menu.add(clean_all_down_menu);
-        file_menu.add(jSeparator5);
 
         clean_all_up_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         clean_all_up_menu.setText("Remove all pre/pro/wait uploads");
@@ -402,7 +385,16 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
         file_menu.add(clean_all_up_menu);
-        file_menu.add(jSeparator3);
+        file_menu.add(jSeparator2);
+
+        hide_tray_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        hide_tray_menu.setText("Hide to tray");
+        hide_tray_menu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                hide_tray_menuActionPerformed(evt);
+            }
+        });
+        file_menu.add(hide_tray_menu);
 
         exit_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         exit_menu.setText("EXIT");
@@ -894,12 +886,8 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel_scroll_up;
     private javax.swing.JScrollPane jScrollPane_down;
     private javax.swing.JScrollPane jScrollPane_up;
-    private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JPopupMenu.Separator jSeparator2;
-    private javax.swing.JPopupMenu.Separator jSeparator3;
     private javax.swing.JPopupMenu.Separator jSeparator4;
-    private javax.swing.JPopupMenu.Separator jSeparator5;
-    private javax.swing.JPopupMenu.Separator jSeparator6;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JLabel kiss_server_status;
     private javax.swing.JLabel logo_label;
