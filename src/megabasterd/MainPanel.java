@@ -62,7 +62,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.29";
+    public static final String VERSION="1.30";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
     public static final int STREAMER_PORT = 1337;
@@ -127,6 +127,8 @@ public final class MainPanel {
         
         loadUserSettings();
         
+        _mega_master_pass = null;
+        
         _mega_active_accounts = new HashMap<>();
         
         THREAD_POOL.execute((_global_dl_speed = new GlobalSpeedMeter(getView().getGlobal_speed_down_label())));
@@ -156,9 +158,7 @@ public final class MainPanel {
         } catch (IOException ex) {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
-        
-        _mega_master_pass = null;
-        
+
         THREAD_POOL.execute(new Runnable(){
             @Override
             public void run() {
@@ -193,20 +193,19 @@ public final class MainPanel {
         
         if(_mega_master_pass != null) {
             
-            for(byte b:_mega_master_pass) {
-                
-                b = 0;
+            for(int i=0; i<_mega_master_pass.length; i++)
+            {
+                _mega_master_pass[i] = 0;
             }
+            
+            _mega_master_pass = null;
         }
-        
-        _mega_master_pass = pass;
 
         if(pass != null) {
             
-            for(byte b:pass) {
+            _mega_master_pass = new byte[pass.length];
             
-                b = 0;
-            }
+            System.arraycopy(pass, 0, _mega_master_pass, 0, pass.length);
         }
     }
  

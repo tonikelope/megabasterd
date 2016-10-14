@@ -1093,7 +1093,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 _main_panel.setMega_master_pass(null);
                             }
 
-                            dialog.deletePass();
+                            dialog.deleteNewPass();
 
                             insertSettingValueInDB("mega_master_pass_hash", _main_panel.getMega_master_pass_hash());
 

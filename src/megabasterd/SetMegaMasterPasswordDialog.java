@@ -36,13 +36,13 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
         return _new_pass;
     }
     
-    public void deletePass() {
+    public void deleteNewPass() {
         
         if(_new_pass != null) {
             
-            for(byte c:_new_pass) {
-            
-                c = 0;
+            for(int i=0; i<_new_pass.length; i++)
+            {
+                _new_pass[i] = 0;
             }
         }
         

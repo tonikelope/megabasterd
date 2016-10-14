@@ -47,9 +47,9 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
     
     public void deletePass() {
         
-        for(byte c:_pass) {
-            
-            c = 0;
+        for(int i=0; i<_pass.length; i++)
+        {
+            _pass[i] = 0;
         }
         
         _pass = null;
@@ -225,11 +225,6 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
                     _pass_ok = true;
                 
                     swingReflectionInvoke("setVisible", tthis, false);
-                }
-
-                for(byte b:pass) {
-
-                    b = 0;
                 }
  
         } catch (Exception ex) {
