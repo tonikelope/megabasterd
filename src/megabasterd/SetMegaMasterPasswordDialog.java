@@ -40,10 +40,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
         
         if(_new_pass != null) {
             
-            for(int i=0; i<_new_pass.length; i++)
-            {
-                _new_pass[i] = 0;
-            }
+            Arrays.fill(_new_pass, (byte)0);
         }
         
         _new_pass = null;

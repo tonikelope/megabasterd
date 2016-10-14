@@ -27,6 +27,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
@@ -192,11 +193,8 @@ public final class MainPanel {
     public void setMega_master_pass(byte[] pass) {
         
         if(_mega_master_pass != null) {
-            
-            for(int i=0; i<_mega_master_pass.length; i++)
-            {
-                _mega_master_pass[i] = 0;
-            }
+
+            Arrays.fill(_mega_master_pass, (byte)0);
             
             _mega_master_pass = null;
         }

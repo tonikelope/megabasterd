@@ -2,6 +2,7 @@ package megabasterd;
 
 import java.awt.Font;
 import java.awt.event.KeyEvent;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JCheckBox;
@@ -47,11 +48,11 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
     
     public void deletePass() {
         
-        for(int i=0; i<_pass.length; i++)
-        {
-            _pass[i] = 0;
+        if(_pass != null) {
+            
+            Arrays.fill(_pass, (byte)0);
         }
-        
+
         _pass = null;
     }
 
