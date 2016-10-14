@@ -1071,9 +1071,16 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
 
                     swingReflectionInvokeAndWait("setVisible", dialog, true);
+                    
+                    byte[] old_mega_master_pass = null;
 
-                    byte[] old_mega_master_pass = _main_panel.getMega_master_pass();
-
+                    if(_main_panel.getMega_master_pass() != null) {
+                    
+                        old_mega_master_pass = new byte[_main_panel.getMega_master_pass().length];
+                        
+                        System.arraycopy(_main_panel.getMega_master_pass(), 0, old_mega_master_pass, 0, _main_panel.getMega_master_pass().length);
+                    }
+                    
                     String old_mega_master_pass_hash = _main_panel.getMega_master_pass_hash();
 
                     if(dialog.isPass_ok()) {
