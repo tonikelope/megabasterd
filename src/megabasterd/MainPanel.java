@@ -6,13 +6,9 @@ import static java.awt.EventQueue.invokeLater;
 import java.awt.Font;
 import static java.awt.Font.BOLD;
 import static java.awt.Frame.NORMAL;
-import java.awt.Image;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
-import java.awt.SystemTray;
 import static java.awt.SystemTray.getSystemTray;
-import static java.awt.SystemTray.isSupported;
-import java.awt.Toolkit;
 import static java.awt.Toolkit.getDefaultToolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
@@ -63,7 +59,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
     
-    public static final String VERSION="1.30";
+    public static final String VERSION="1.31";
     public static final int CONNECTION_TIMEOUT = 30000;
     public static final int THROTTLE_SLICE_SIZE=16*1024;
     public static final int STREAMER_PORT = 1337;
@@ -173,6 +169,10 @@ public final class MainPanel {
             }});
     }
 
+    public TrayIcon getTrayicon() {
+        return _trayicon;
+    }
+ 
     public String getMega_master_pass_hash() {
         return _mega_master_pass_hash;
     }
@@ -583,81 +583,78 @@ public final class MainPanel {
     
     public boolean trayIcon() throws AWTException {
         
-        if (!isSupported()) {
+        if (!java.awt.SystemTray.isSupported()) {
+            
             return false;
         }
 
-    SystemTray tray = getSystemTray();
-    
-    Toolkit toolkit = getDefaultToolkit();
-    
-    Image image = toolkit.getImage(getClass().getResource(ICON_FILE));
+        PopupMenu menu = new PopupMenu();
 
-    PopupMenu menu = new PopupMenu();
+        menu.setFont(FONT_DEFAULT.deriveFont(BOLD, 18));
 
-    menu.setFont(FONT_DEFAULT.deriveFont(BOLD, 18));
-        
-    final MainPanelView myframe = getView();
+        MenuItem messageItem = new MenuItem("Restore window");
 
-    MenuItem messageItem = new MenuItem("Restore window");
-    
-    messageItem.addActionListener(new ActionListener() {
-        
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        
-        swingReflectionInvoke("setExtendedState", myframe, NORMAL);
- 
-        swingReflectionInvoke("setVisible", myframe, true);
-        
-      }
-    });
-    
-    menu.add(messageItem);
+        messageItem.addActionListener(new ActionListener() {
 
-    MenuItem closeItem = new MenuItem("EXIT");
-    
-    
-    closeItem.addActionListener(new ActionListener() {
-      @Override
-      public void actionPerformed(ActionEvent e) {
-        _byebye();
-      }
-    });
-    
-    menu.add(closeItem);
-    
-    ActionListener actionListener = new ActionListener() {
-    @Override
-    public void actionPerformed( ActionEvent e ) {
-      //Double click code here
-    
-        if(!(boolean)swingReflectionInvokeAndWaitForReturn("isVisible", myframe))
-        {   
-            swingReflectionInvoke("setExtendedState", myframe, NORMAL);
-            
-            swingReflectionInvoke("setVisible", myframe, true);
-        } 
-        else
-        {
-            swingReflectionInvoke("dispatchEvent", myframe, new WindowEvent(myframe, WINDOW_CLOSING));
+        @Override
+        public void actionPerformed(ActionEvent e) {
+
+            swingReflectionInvoke("setExtendedState", getView(), NORMAL);
+
+            swingReflectionInvoke("setVisible", getView(), true);
+
+          }
+        });
+
+        menu.add(messageItem);
+
+        MenuItem closeItem = new MenuItem("EXIT");
+
+        closeItem.addActionListener(new ActionListener() {
+
+          @Override
+          public void actionPerformed(ActionEvent e) {
+
+            _byebye();
+
+          }
+          
+        });
+
+        menu.add(closeItem);
+
+        ActionListener actionListener = new ActionListener() {
+
+        @Override
+        public void actionPerformed( ActionEvent e ) {
+
+            if(!(boolean)swingReflectionInvokeAndWaitForReturn("isVisible", getView()))
+            {   
+                swingReflectionInvoke("setExtendedState", getView(), NORMAL);
+
+                swingReflectionInvoke("setVisible", getView(), true);
+            } 
+            else
+            {
+                swingReflectionInvoke("dispatchEvent", getView(), new WindowEvent(getView(), WINDOW_CLOSING));
+            }
         }
-        
-    }
+
         };
+        
+        _trayicon = new TrayIcon(getDefaultToolkit().getImage(getClass().getResource(ICON_FILE)), "MegaBasterd", menu);
+
+        _trayicon.setToolTip("MegaBasterd " + VERSION);
+
+        _trayicon.setImageAutoSize(true);
+
+        _trayicon.addActionListener(actionListener);
+
+        getSystemTray().add(_trayicon);
+
+        return true;
     
-    _trayicon = new TrayIcon(image, "MegaBasterd", menu);
-    
-    _trayicon.setToolTip("MegaBasterd " + VERSION);
-    
-    _trayicon.setImageAutoSize(true);
-    
-    _trayicon.addActionListener(actionListener);
-    
-    tray.add(_trayicon);
-    
-    return true;
-  }
+}
     
  
     private void resumeUploads() {

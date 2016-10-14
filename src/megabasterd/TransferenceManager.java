@@ -1,6 +1,7 @@
 package megabasterd;
 
 import java.awt.Component;
+import java.awt.TrayIcon;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -300,7 +301,12 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         int run = _transference_running_list.size();
         
         int finish = _transference_finished_queue.size();
-
+        
+        if(finish > 0 && _pre_count+prov+wait+run == 0 && !_main_panel.getView().isVisible()) {
+            
+            _main_panel.getTrayicon().displayMessage("MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
+        }
+  
         return (_pre_count+prov+rem+wait+run+finish > 0)?"Pre: "+_pre_count+" / Pro: "+prov+" / Wait: "+wait+" / Run: "+run+" / Finish: "+finish+" / Rem: "+rem:"";
     }
     
