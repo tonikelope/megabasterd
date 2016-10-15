@@ -11,6 +11,7 @@ import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 import javax.swing.tree.DefaultTreeModel;
 import static megabasterd.MainPanel.FONT_DEFAULT;
+import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
 import static megabasterd.MiscTools.deleteSelectedTreeItems;
 import static megabasterd.MiscTools.findFirstRegex;
@@ -233,12 +234,31 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
     private void skip_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_buttonActionPerformed
 
-        if(deleteSelectedTreeItems(file_tree)) {
+        skip_button.setEnabled(false);
+        
+        dance_button.setEnabled(false);
+        
+        file_tree.setEnabled(false);
+        
+        
+        THREAD_POOL.execute(new Runnable(){
+                    @Override
+                    public void run() {
+                    
+                        if(deleteSelectedTreeItems(file_tree)) {
             
-            _genDownloadLiks();
+                            _genDownloadLiks();
 
-            restore_button.setVisible(true);
-        }
+                            swingReflectionInvoke("setVisible", restore_button, true);
+                        }
+                        
+                        swingReflectionInvoke("setEnabled", dance_button, true);
+                    
+                        swingReflectionInvoke("setEnabled", file_tree, true);
+                    
+                    }});
+        
+        
   
     }//GEN-LAST:event_skip_buttonActionPerformed
 
@@ -251,13 +271,29 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
         
-        if(deleteAllExceptSelectedTreeItems(file_tree)) {
+        skip_rest_button.setEnabled(false);
+        
+        dance_button.setEnabled(false);
+        
+        file_tree.setEnabled(false);
+        
+        THREAD_POOL.execute(new Runnable(){
+                    @Override
+                    public void run() {
+                    
+                        
+                        if(deleteAllExceptSelectedTreeItems(file_tree)) {
             
-            _genDownloadLiks();
+                            _genDownloadLiks();
 
-            restore_button.setVisible(true);
-        }
-     
+                            swingReflectionInvoke("setVisible", restore_button, true);
+                        }
+                        
+                        swingReflectionInvoke("setEnabled", dance_button, true);
+                    
+                        swingReflectionInvoke("setEnabled", file_tree, true);
+                    
+                    }});
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
     private void restore_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restore_buttonActionPerformed
@@ -268,17 +304,26 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         
         file_tree.setEnabled(false);
         
-     
-        _loadMegaDirTree();
+        THREAD_POOL.execute(new Runnable(){
+                    @Override
+                    public void run() {
+                    
+                    
+                    _loadMegaDirTree();
 
-        _genDownloadLiks();
-        
-
-        restore_button.setEnabled(true);
-        
-        dance_button.setEnabled(true);
-        
-        file_tree.setEnabled(true);
+                    _genDownloadLiks();
+                    
+                    
+                    swingReflectionInvoke("setEnabled", restore_button, true);
+                    
+                    swingReflectionInvoke("setVisible", restore_button, false);
+                    
+                    swingReflectionInvoke("setEnabled", dance_button, true);
+                    
+                    swingReflectionInvoke("setEnabled", file_tree, true);
+                    
+                    
+                    }});
   
     }//GEN-LAST:event_restore_buttonActionPerformed
     

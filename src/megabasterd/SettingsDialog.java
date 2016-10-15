@@ -1193,8 +1193,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         dialog.deletePass();
 
                         DefaultTableModel model = new DefaultTableModel(new Object [][] {},new String [] {"Email", "Password"});
-
-                        mega_accounts_table.setModel(model);
+                        
+                        swingReflectionInvokeAndWait("setModel", mega_accounts_table, model);
 
                         swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, true);
 

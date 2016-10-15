@@ -598,7 +598,6 @@ public final class MiscTools {
 
     }
     
-    
     private static void _sortTreeNode(DefaultMutableTreeNode parent) {
         
         int n = parent.getChildCount();
@@ -624,7 +623,7 @@ public final class MiscTools {
     public static boolean deleteSelectedTreeItems(JTree tree) {
         
         TreePath[] paths = tree.getSelectionPaths();
-        
+
         if(paths != null) {
             
             DefaultTreeModel model = (DefaultTreeModel) (tree.getModel());
@@ -667,11 +666,11 @@ public final class MiscTools {
                             
                             new_root = (MutableTreeNode)tree.getModel().getRoot().getClass().newInstance();
                             
-                            tree.setModel(new DefaultTreeModel(new_root));
+                            swingReflectionInvokeAndWait("setModel", tree, new DefaultTreeModel(new_root));
                             
-                            tree.setRootVisible( new_root.getChildCount() > 0 );
+                            swingReflectionInvoke("setRootVisible", tree, new_root.getChildCount() > 0);
       
-                            swingReflectionInvokeAndWait("setEnabled", tree, true);
+                            swingReflectionInvoke("setEnabled", tree, true);
        
                         } catch (InstantiationException | IllegalAccessException ex) {
                             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
@@ -765,12 +764,12 @@ public final class MiscTools {
                     return false;
                 }
             }
- 
-            tree.setModel(new DefaultTreeModel(sortTree((DefaultMutableTreeNode)new_root)));
             
-            tree.setRootVisible(new_root!=null?((DefaultMutableTreeNode)new_root).getChildCount() > 0:false);
+            swingReflectionInvokeAndWait("setModel", tree, new DefaultTreeModel(sortTree((DefaultMutableTreeNode)new_root)));
+            
+            swingReflectionInvoke("setRootVisible", tree, new_root!=null?((DefaultMutableTreeNode)new_root).getChildCount() > 0:false);
   
-            swingReflectionInvokeAndWait("setEnabled", tree, true);
+            swingReflectionInvoke("setEnabled", tree, true);
 
             return true;
         }
