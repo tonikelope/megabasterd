@@ -456,25 +456,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         swingReflectionInvoke("setForeground", status_label, Color.BLACK);
         swingReflectionInvoke("setText", status_label, message);
     }
-
-    // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JButton close_button;
-    private javax.swing.JButton copy_link_button;
-    private javax.swing.JLabel file_name_label;
-    private javax.swing.JLabel file_size_label;
-    private javax.swing.JCheckBox keep_temp_checkbox;
-    private javax.swing.JButton pause_button;
-    private javax.swing.JProgressBar progress_pbar;
-    private javax.swing.JLabel remtime_label;
-    private javax.swing.JButton restart_button;
-    private javax.swing.JLabel slot_status_label;
-    private javax.swing.JLabel slots_label;
-    private javax.swing.JSpinner slots_spinner;
-    private javax.swing.JLabel speed_label;
-    private javax.swing.JLabel status_label;
-    private javax.swing.JButton stop_button;
-    // End of variables declaration//GEN-END:variables
-
+    
     @Override
     public synchronized void updateSlotsStatus() {
         
@@ -510,5 +492,25 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         swingReflectionInvoke("setText", slot_status_label, (conta_exit>0?"Removing: "+conta_exit:"") + (conta_error>0?((conta_exit>0?" / ":"")+"Error: " + conta_error):""));
         
     }
+
+    // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JButton close_button;
+    private javax.swing.JButton copy_link_button;
+    private javax.swing.JLabel file_name_label;
+    private javax.swing.JLabel file_size_label;
+    private javax.swing.JCheckBox keep_temp_checkbox;
+    private javax.swing.JButton pause_button;
+    private javax.swing.JProgressBar progress_pbar;
+    private javax.swing.JLabel remtime_label;
+    private javax.swing.JButton restart_button;
+    private javax.swing.JLabel slot_status_label;
+    private javax.swing.JLabel slots_label;
+    private javax.swing.JSpinner slots_spinner;
+    private javax.swing.JLabel speed_label;
+    private javax.swing.JLabel status_label;
+    private javax.swing.JButton stop_button;
+    // End of variables declaration//GEN-END:variables
+
+    
 
 }

@@ -46,7 +46,6 @@ import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
-import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -971,56 +970,4 @@ public final class MiscTools {
             Logger.getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-    
-    public static void setEnabledSwingJcomponent(final boolean status, final JComponent... params) {
-        
-        if(SwingUtilities.isEventDispatchThread()) {
-            
-            for(JComponent component:params) {
-            
-                component.setEnabled(status);
-            }
-            
-        } else {
-            
-            SwingUtilities.invokeLater( new Runnable(){
-
-                @Override
-                public void run() {
-
-                    for(JComponent component:params) {
-
-                    component.setEnabled(status);
-                }
-            
-            }});
-        }
-    }
-    
-    public static void setVisibleSwingJcomponent(final boolean status, final JComponent... params) {
-        
-        if(SwingUtilities.isEventDispatchThread()) {
-            
-            for(JComponent component:params) {
-            
-                component.setVisible(status);
-            }
-            
-        } else {
-            
-            SwingUtilities.invokeLater( new Runnable(){
-
-                @Override
-                public void run() {
-
-                    for(JComponent component:params) {
-
-                    component.setVisible(status);
-                }
-            
-            }});
-            
-        }
-    }
-    
 }

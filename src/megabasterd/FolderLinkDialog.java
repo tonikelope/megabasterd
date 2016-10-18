@@ -79,7 +79,6 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         updateFont(total_space_label, FONT_DEFAULT, BOLD);
         updateFont(folder_link_label, FONT_DEFAULT, PLAIN);
        
-
         swingReflectionInvoke("setText", folder_link_label, link);
         
         swingReflectionInvoke("setVisible", restore_button, false);
@@ -247,7 +246,11 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             
             boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
             
-            MiscTools.setEnabledSwingJcomponent(root_childs, dance_button, skip_button, skip_rest_button);
+            dance_button.setEnabled(root_childs);
+            
+            skip_button.setEnabled(root_childs);
+            
+            skip_rest_button.setEnabled(root_childs);
         }
   
     }//GEN-LAST:event_skip_buttonActionPerformed
@@ -269,7 +272,11 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             
             boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
         
-            MiscTools.setEnabledSwingJcomponent(root_childs, dance_button, skip_button, skip_rest_button);
+            dance_button.setEnabled(root_childs);
+            
+            skip_button.setEnabled(root_childs);
+            
+            skip_rest_button.setEnabled(root_childs);
         }
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
@@ -277,7 +284,11 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
  
         restore_button.setText("Restoring data, please wait...");
         
-        MiscTools.setEnabledSwingJcomponent(false, file_tree, restore_button, dance_button);
+        file_tree.setEnabled(false);
+        
+        restore_button.setEnabled(false);
+        
+        dance_button.setEnabled(false);
         
         THREAD_POOL.execute(new Runnable(){
                     @Override
