@@ -46,6 +46,7 @@ import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
+import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -317,9 +318,23 @@ public final class MiscTools {
         _swingReflectionInvoke(method_name, obj, false, params);
     }
     
+    public static void swingReflectionInvoke(final String method_name, final Object[] obj, final Object... params) {
+        
+        for(Object o:obj) {
+            _swingReflectionInvoke(method_name, o, false, params);
+        }
+    }
+    
     public static void swingReflectionInvokeAndWait(final String method_name, final Object obj, final Object... params) {
         
         _swingReflectionInvoke(method_name, obj, true, params);
+    }
+    
+    public static void swingReflectionInvokeAndWait(final String method_name, final Object[] obj, final Object... params) {
+        
+        for(Object o:obj) {
+            _swingReflectionInvoke(method_name, o, true, params);
+        }
     }
  
     private static void _swingReflectionInvoke(final String method_name, final Object obj, final boolean wait, final Object... params) {
@@ -388,6 +403,20 @@ public final class MiscTools {
         };
 
         swingInvokeIt(r, wait);
+    }
+    
+    public static Object[] swingReflectionInvokeAndWaitForReturn(final String method_name, final Object[] obj, final Object... params) {
+        
+        Object[] ret = new Object[obj.length];
+        
+        int i=0;
+        
+        for(Object o:obj) {
+            
+            ret[i++]=swingReflectionInvokeAndWaitForReturn(method_name, o, params);
+        }
+    
+        return ret;
     }
     
 
@@ -622,11 +651,11 @@ public final class MiscTools {
     
     public static boolean deleteSelectedTreeItems(JTree tree) {
         
-        TreePath[] paths = tree.getSelectionPaths();
+        TreePath[] paths = (TreePath[])swingReflectionInvokeAndWaitForReturn("getSelectionPaths", tree);
 
         if(paths != null) {
-            
-            DefaultTreeModel model = (DefaultTreeModel) (tree.getModel());
+
+            DefaultTreeModel tree_model = (DefaultTreeModel)swingReflectionInvokeAndWaitForReturn("getModel", tree);
             
             MutableTreeNode node;
             
@@ -636,19 +665,19 @@ public final class MiscTools {
                     
                 if(node != null) {
                     
-                    if(node != model.getRoot()) {
+                    if(node != tree_model.getRoot()) {
 
                         MutableTreeNode parent = (MutableTreeNode)node.getParent();
 
-                        model.removeNodeFromParent(node);
+                        tree_model.removeNodeFromParent(node);
 
                         while(parent != null && parent.isLeaf()) {
 
-                            if(parent != model.getRoot()) {
+                            if(parent != tree_model.getRoot()) {
 
                                 MutableTreeNode parent_aux = (MutableTreeNode)parent.getParent();
 
-                                model.removeNodeFromParent(parent);
+                                tree_model.removeNodeFromParent(parent);
 
                                 parent = parent_aux;
 
@@ -664,7 +693,7 @@ public final class MiscTools {
                         
                         try {
                             
-                            new_root = (MutableTreeNode)tree.getModel().getRoot().getClass().newInstance();
+                            new_root = (MutableTreeNode)tree_model.getRoot().getClass().newInstance();
                             
                             swingReflectionInvokeAndWait("setModel", tree, new DefaultTreeModel(new_root));
                             
@@ -689,13 +718,15 @@ public final class MiscTools {
     
     public static boolean deleteAllExceptSelectedTreeItems(JTree tree) {
         
-        TreePath[] paths = tree.getSelectionPaths();
+        TreePath[] paths = (TreePath[])swingReflectionInvokeAndWaitForReturn("getSelectionPaths", tree);
         
         HashMap<MutableTreeNode,MutableTreeNode> hashmap_old = new HashMap<>();
         
+        DefaultTreeModel tree_model = (DefaultTreeModel)swingReflectionInvokeAndWaitForReturn("getModel", tree);
+        
         if(paths != null) {
             
-            Class node_class = tree.getModel().getRoot().getClass();
+            Class node_class = tree_model.getRoot().getClass();
 
             Object new_root = null;
             
@@ -703,7 +734,7 @@ public final class MiscTools {
                 
                 new_root = node_class.newInstance();
                 
-                ((MutableTreeNode)new_root).setUserObject( ((DefaultMutableTreeNode)tree.getModel().getRoot()).getUserObject() );
+                ((MutableTreeNode)new_root).setUserObject( ((DefaultMutableTreeNode)tree_model.getRoot()).getUserObject() );
                 
             } catch (InstantiationException | IllegalAccessException ex) {
                 getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
@@ -711,13 +742,13 @@ public final class MiscTools {
 
             for (TreePath path : paths) {
                 
-                if((MutableTreeNode)path.getLastPathComponent() != (MutableTreeNode)tree.getModel().getRoot())
+                if((MutableTreeNode)path.getLastPathComponent() != (MutableTreeNode)tree_model.getRoot())
                 {
                     Object parent = new_root;
 
                     for(Object path_element:path.getPath()) {
 
-                        if((MutableTreeNode)path_element != (MutableTreeNode)tree.getModel().getRoot()) {
+                        if((MutableTreeNode)path_element != (MutableTreeNode)tree_model.getRoot()) {
 
                             if(hashmap_old.get((MutableTreeNode)path_element) == null) {
 
@@ -932,12 +963,63 @@ public final class MiscTools {
         return new_version;
     }
     
-    public static void openBrowserURL(String url) {
+    public static void openBrowserURL(final String url) {
         
         try {
             Desktop.getDesktop().browse(new URI(url));
         } catch (URISyntaxException | IOException ex) {
             Logger.getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    public static void setEnabledSwingJcomponent(final boolean status, final JComponent... params) {
+        
+        if(SwingUtilities.isEventDispatchThread()) {
+            
+            for(JComponent component:params) {
+            
+                component.setEnabled(status);
+            }
+            
+        } else {
+            
+            SwingUtilities.invokeLater( new Runnable(){
+
+                @Override
+                public void run() {
+
+                    for(JComponent component:params) {
+
+                    component.setEnabled(status);
+                }
+            
+            }});
+        }
+    }
+    
+    public static void setVisibleSwingJcomponent(final boolean status, final JComponent... params) {
+        
+        if(SwingUtilities.isEventDispatchThread()) {
+            
+            for(JComponent component:params) {
+            
+                component.setVisible(status);
+            }
+            
+        } else {
+            
+            SwingUtilities.invokeLater( new Runnable(){
+
+                @Override
+                public void run() {
+
+                    for(JComponent component:params) {
+
+                    component.setVisible(status);
+                }
+            
+            }});
+            
         }
     }
     

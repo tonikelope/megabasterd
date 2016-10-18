@@ -104,35 +104,18 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         updateFont(slot_status_label, FONT_DEFAULT, Font.BOLD);
         
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
+        
         swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor)slots_spinner.getEditor()).getTextField(), false);
-        swingReflectionInvoke("setVisible", slots_spinner, false);
-        swingReflectionInvoke("setVisible", slots_label, false);
-        swingReflectionInvoke("setVisible", pause_button, false);
-        swingReflectionInvoke("setVisible", stop_button, false);
+        
         swingReflectionInvoke("setForeground", speed_label, new Color(0,128,255));
-        swingReflectionInvoke("setVisible", speed_label, false);
-        swingReflectionInvoke("setVisible", remtime_label, false);
-        swingReflectionInvoke("setVisible", progress_pbar, false);
-        swingReflectionInvoke("setVisible", keep_temp_checkbox, false);
-        swingReflectionInvoke("setVisible", file_name_label, false);
-        swingReflectionInvoke("setVisible", close_button, false);
-        swingReflectionInvoke("setVisible", copy_link_button, false);
-        swingReflectionInvoke("setVisible", restart_button, false);
-        swingReflectionInvoke("setVisible", file_size_label, false);
+        
+        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, remtime_label,progress_pbar,keep_temp_checkbox,file_name_label,close_button,copy_link_button,restart_button,file_size_label}, false);
         
     }
     
     public void hideAllExceptStatus()
     {
-        swingReflectionInvoke("setVisible", speed_label, false);
-        swingReflectionInvoke("setVisible", remtime_label, false);
-        swingReflectionInvoke("setVisible", slots_spinner, false);
-        swingReflectionInvoke("setVisible", slots_label, false);
-        swingReflectionInvoke("setVisible", slot_status_label, false);
-        swingReflectionInvoke("setVisible", pause_button, false);
-        swingReflectionInvoke("setVisible", stop_button, false);
-        swingReflectionInvoke("setVisible", progress_pbar, false);
-        swingReflectionInvoke("setVisible", keep_temp_checkbox, false);
+        swingReflectionInvoke("setVisible", new Object[]{speed_label, remtime_label, slots_spinner,slots_label,slot_status_label,slot_status_label,pause_button,stop_button,progress_pbar,keep_temp_checkbox}, false);
     }
 
     /**
@@ -393,13 +376,12 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
      
         printStatusNormal("Downloading file from mega ...");
         
-        swingReflectionInvoke("setEnabled", pause_button, false);
+        swingReflectionInvoke("setEnabled", pause_button, true);
         swingReflectionInvoke("setEnabled", speed_label, true);
         swingReflectionInvoke("setEnabled", slots_label, true);
         swingReflectionInvoke("setEnabled", slots_spinner, true);
         swingReflectionInvoke("setVisible", stop_button, false);
         swingReflectionInvoke("setVisible", keep_temp_checkbox, false);
-        swingReflectionInvoke("setEnabled", pause_button, true);
         swingReflectionInvoke("setText", pause_button, "PAUSE DOWNLOAD");
         swingReflectionInvoke("setVisible", _download.getMain_panel().getView().getPause_all_down_button(), true);
         

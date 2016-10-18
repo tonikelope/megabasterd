@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
+import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
@@ -19,6 +20,7 @@ import static megabasterd.MiscTools.formatBytes;
 import static megabasterd.MiscTools.sortTree;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.MiscTools.updateFont;
 
 /**
@@ -52,6 +54,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
     
     /**
      * Creates new form FolderLink
+     * @param parent
      * @param link
      */
     public FolderLinkDialog(java.awt.Frame parent, boolean modal, String link) {
@@ -63,7 +66,8 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         _mega_error = false;
         _total_space = 0L;
         _download = false;
-        _link = null;
+        _download_links = new ArrayList<>();
+        _link = link;
 
         updateFont(file_tree, FONT_DEFAULT, PLAIN);
         updateFont(link_detected_label, FONT_DEFAULT, PLAIN);
@@ -74,17 +78,12 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         updateFont(skip_rest_button, FONT_DEFAULT, PLAIN);
         updateFont(total_space_label, FONT_DEFAULT, BOLD);
         updateFont(folder_link_label, FONT_DEFAULT, PLAIN);
+       
+
+        swingReflectionInvoke("setText", folder_link_label, link);
         
         swingReflectionInvoke("setVisible", restore_button, false);
         
-        swingReflectionInvoke("setEnabled", total_space_label, false);
-        
-        _link = link;
-        
-        swingReflectionInvoke("setText", folder_link_label, link);
-        
-        _download_links = new ArrayList<>();
-  
         _loadMegaDirTree();
         
         if(!_mega_error) {
@@ -120,11 +119,13 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         file_tree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         file_tree.setDoubleBuffered(true);
+        file_tree.setEnabled(false);
         file_tree_scrollpane.setViewportView(file_tree);
 
         skip_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         skip_button.setText("REMOVE THIS");
         skip_button.setDoubleBuffered(true);
+        skip_button.setEnabled(false);
         skip_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 skip_buttonActionPerformed(evt);
@@ -140,6 +141,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
+        dance_button.setEnabled(false);
         dance_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 dance_buttonActionPerformed(evt);
@@ -153,10 +155,12 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         warning_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         warning_label.setText("If you DO NOT want to download some folder or file you can REMOVE it.");
         warning_label.setDoubleBuffered(true);
+        warning_label.setEnabled(false);
 
         skip_rest_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         skip_rest_button.setText("REMOVE ALL EXCEPT THIS");
         skip_rest_button.setDoubleBuffered(true);
+        skip_rest_button.setEnabled(false);
         skip_rest_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 skip_rest_buttonActionPerformed(evt);
@@ -175,6 +179,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         total_space_label.setFont(new java.awt.Font("Dialog", 1, 28)); // NOI18N
         total_space_label.setText("[0 B]");
         total_space_label.setDoubleBuffered(true);
+        total_space_label.setEnabled(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -233,32 +238,17 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void skip_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_buttonActionPerformed
+       
+        if(deleteSelectedTreeItems(file_tree)) {
 
-        skip_button.setEnabled(false);
-        
-        dance_button.setEnabled(false);
-        
-        file_tree.setEnabled(false);
-        
-        
-        THREAD_POOL.execute(new Runnable(){
-                    @Override
-                    public void run() {
-                    
-                        if(deleteSelectedTreeItems(file_tree)) {
+            _genDownloadLiks();
             
-                            _genDownloadLiks();
-
-                            swingReflectionInvoke("setVisible", restore_button, true);
-                        }
-                        
-                        swingReflectionInvoke("setEnabled", dance_button, true);
-                    
-                        swingReflectionInvoke("setEnabled", file_tree, true);
-                    
-                    }});
-        
-        
+            restore_button.setVisible(true);
+            
+            boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
+            
+            MiscTools.setEnabledSwingJcomponent(root_childs, dance_button, skip_button, skip_rest_button);
+        }
   
     }//GEN-LAST:event_skip_buttonActionPerformed
 
@@ -271,60 +261,44 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
         
-        skip_rest_button.setEnabled(false);
-        
-        dance_button.setEnabled(false);
-        
-        file_tree.setEnabled(false);
-        
-        THREAD_POOL.execute(new Runnable(){
-                    @Override
-                    public void run() {
-                    
-                        
-                        if(deleteAllExceptSelectedTreeItems(file_tree)) {
-            
-                            _genDownloadLiks();
+        if(deleteAllExceptSelectedTreeItems(file_tree)) {
 
-                            swingReflectionInvoke("setVisible", restore_button, true);
-                        }
-                        
-                        swingReflectionInvoke("setEnabled", dance_button, true);
-                    
-                        swingReflectionInvoke("setEnabled", file_tree, true);
-                    
-                    }});
+            _genDownloadLiks();
+            
+            restore_button.setVisible(true);
+            
+            boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
+        
+            MiscTools.setEnabledSwingJcomponent(root_childs, dance_button, skip_button, skip_rest_button);
+        }
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
     private void restore_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restore_buttonActionPerformed
+ 
+        restore_button.setText("Restoring data, please wait...");
         
-        restore_button.setEnabled(false);
-        
-        dance_button.setEnabled(false);
-        
-        file_tree.setEnabled(false);
+        MiscTools.setEnabledSwingJcomponent(false, file_tree, restore_button, dance_button);
         
         THREAD_POOL.execute(new Runnable(){
                     @Override
                     public void run() {
                     
-                    
-                    _loadMegaDirTree();
+                        _loadMegaDirTree();
 
-                    _genDownloadLiks();
-                    
-                    
-                    swingReflectionInvoke("setEnabled", restore_button, true);
-                    
-                    swingReflectionInvoke("setVisible", restore_button, false);
-                    
-                    swingReflectionInvoke("setEnabled", dance_button, true);
-                    
-                    swingReflectionInvoke("setEnabled", file_tree, true);
-                    
-                    
-                    }});
-  
+                        _genDownloadLiks();
+
+                        swingReflectionInvoke("setVisible", restore_button, false);
+                        
+                        swingReflectionInvoke("setText", restore_button, "Restore folder data");
+                        
+                        boolean root_childs = ((DefaultMutableTreeNode)((DefaultTreeModel)swingReflectionInvokeAndWaitForReturn("getModel", file_tree)).getRoot()).getChildCount()>0;
+
+                        swingReflectionInvoke("setEnabled", new Object[]{restore_button,dance_button, skip_button, skip_rest_button, file_tree}, root_childs);
+                        
+                        
+        
+        }});
+        
     }//GEN-LAST:event_restore_buttonActionPerformed
     
     private void _loadMegaDirTree() {
@@ -418,7 +392,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         
         _download_links.clear();
         
-        MegaMutableTreeNode root = (MegaMutableTreeNode)file_tree.getModel().getRoot();
+        MegaMutableTreeNode root = (MegaMutableTreeNode)((DefaultTreeModel)swingReflectionInvokeAndWaitForReturn("getModel", file_tree)).getRoot();
         
         Enumeration files_tree = root.depthFirstEnumeration();
         
@@ -460,23 +434,8 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         }
       
         swingReflectionInvoke("setText", total_space_label, "["+formatBytes(_total_space)+"]");
-        
-        if(_total_space == 0) {
 
-            swingReflectionInvoke("setEnabled", dance_button, false);
-            swingReflectionInvoke("setEnabled", warning_label, false);
-            swingReflectionInvoke("setEnabled", skip_button, false);
-            swingReflectionInvoke("setEnabled", skip_rest_button, false);
-            swingReflectionInvoke("setEnabled", total_space_label, false);
-            
-        } else {
-
-            swingReflectionInvoke("setEnabled", dance_button, true);
-            swingReflectionInvoke("setEnabled", warning_label, true);
-            swingReflectionInvoke("setEnabled", skip_button, true);
-            swingReflectionInvoke("setEnabled", skip_rest_button, true);
-            swingReflectionInvoke("setEnabled", total_space_label, true);
-        }
+        swingReflectionInvoke("setEnabled", new Object[]{dance_button, warning_label, skip_button,skip_rest_button, total_space_label}, root.getChildCount() > 0);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

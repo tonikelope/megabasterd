@@ -104,6 +104,7 @@
               <TreeModel code=""/>
             </Property>
             <Property name="doubleBuffered" type="boolean" value="true"/>
+            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -115,6 +116,7 @@
         </Property>
         <Property name="text" type="java.lang.String" value="REMOVE THIS"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="skip_buttonActionPerformed"/>
@@ -142,6 +144,7 @@
         </Property>
         <Property name="text" type="java.lang.String" value="Let&apos;s dance, baby"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="dance_buttonActionPerformed"/>
@@ -163,6 +166,7 @@
         </Property>
         <Property name="text" type="java.lang.String" value="If you DO NOT want to download some folder or file you can REMOVE it."/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="skip_rest_button">
@@ -172,6 +176,7 @@
         </Property>
         <Property name="text" type="java.lang.String" value="REMOVE ALL EXCEPT THIS"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="skip_rest_buttonActionPerformed"/>
@@ -196,6 +201,7 @@
         </Property>
         <Property name="text" type="java.lang.String" value="[0 B]"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
     </Component>
   </SubComponents>

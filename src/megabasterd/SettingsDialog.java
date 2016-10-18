@@ -156,7 +156,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             } 
             
 
-            swingReflectionInvokeAndWait("setModel",max_uploads_spinner, new SpinnerNumberModel(max_dl, 1, Upload.MAX_SIM_TRANSFERENCES, 1));
+            swingReflectionInvokeAndWait("setModel",max_uploads_spinner, new SpinnerNumberModel(max_ul, 1, Upload.MAX_SIM_TRANSFERENCES, 1));
             swingReflectionInvoke("setEditable",((JSpinner.DefaultEditor)max_uploads_spinner.getEditor()).getTextField(), false);
             
             
@@ -1169,8 +1169,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_encrypt_pass_checkboxActionPerformed
 
     private void unlock_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlock_accounts_buttonActionPerformed
-        
-  
         
         unlock_accounts_button.setEnabled(false);
         

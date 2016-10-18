@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import javax.swing.JComboBox;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.BASE642Bin;
@@ -27,6 +27,7 @@ import static megabasterd.MiscTools.genID;
 import static megabasterd.MiscTools.sortTree;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.MiscTools.updateFont;
 
 /**
@@ -39,7 +40,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private final ArrayList<File> _files;
     private String _base_path;
     private long _total_space;
-    private String _last_selected_account;
+    private volatile String _last_selected_account;
     private final MainPanel _main_panel;
     private boolean _remember_master_pass;
 
@@ -69,25 +70,27 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
  
     /**
      * Creates new form FileGrabber
+     * @param parent
      * @param modal
      */
     public FileGrabberDialog(java.awt.Frame parent, boolean modal) {
         
         super(parent, modal);
         
+        initComponents();
+        
         _last_selected_account = null;
         _total_space = 0L;
         _base_path = null;
         _upload = false;
         _remember_master_pass = true;
+        _files = new ArrayList<>();
         
-        initComponents();
-
         updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(add_files_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(add_folder_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(account_combobox, FONT_DEFAULT, Font.PLAIN);
-        updateFont(upload_name_label, FONT_DEFAULT, Font.PLAIN);
+        updateFont(dir_name_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(account_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(used_space_label, FONT_DEFAULT, Font.BOLD);
         updateFont(total_file_size_label, FONT_DEFAULT, Font.BOLD);
@@ -98,15 +101,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         updateFont(skip_rest_button, FONT_DEFAULT, Font.PLAIN);
         
         swingReflectionInvoke("addMouseListener", dir_name_textfield, new ContextMenuMouseListener());
-   
-        _files = new ArrayList<>();
-        
-        swingReflectionInvoke("setEnabled", warning_label, false);
-        swingReflectionInvoke("setEnabled", total_file_size_label, false);
-        swingReflectionInvoke("setEnabled", skip_button, false);
-        swingReflectionInvoke("setEnabled", skip_rest_button, false);
-        swingReflectionInvoke("setEnabled", dance_button, false);
-        swingReflectionInvoke("setEnabled", file_tree, false);
         
         _main_panel = ((MainPanelView)parent).getMain_panel();
         
@@ -119,11 +113,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             
         } else {
             swingReflectionInvoke("setText", used_space_label, "No MEGA accounts available!!");
-            swingReflectionInvoke("setEnabled", add_files_button, false);
-            swingReflectionInvoke("setEnabled", add_folder_button, false);
-            swingReflectionInvoke("setEnabled", dir_name_textfield, false);
         }
-        
     }
 
     /**
@@ -139,7 +129,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         file_tree_scrollpane = new javax.swing.JScrollPane();
         file_tree = new javax.swing.JTree();
         jPanel2 = new javax.swing.JPanel();
-        upload_name_label = new javax.swing.JLabel();
+        dir_name_label = new javax.swing.JLabel();
         dir_name_textfield = new javax.swing.JTextField();
         account_label = new javax.swing.JLabel();
         account_combobox = new javax.swing.JComboBox<>();
@@ -161,6 +151,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         file_tree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         file_tree.setDoubleBuffered(true);
+        file_tree.setEnabled(false);
         file_tree.setRootVisible(false);
         file_tree_scrollpane.setViewportView(file_tree);
 
@@ -175,12 +166,14 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
         );
 
-        upload_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        upload_name_label.setText("Upload name:");
-        upload_name_label.setDoubleBuffered(true);
+        dir_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        dir_name_label.setText("Upload name:");
+        dir_name_label.setDoubleBuffered(true);
+        dir_name_label.setEnabled(false);
 
         dir_name_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         dir_name_textfield.setDoubleBuffered(true);
+        dir_name_textfield.setEnabled(false);
 
         account_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         account_label.setText("Account:");
@@ -201,6 +194,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         add_folder_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         add_folder_button.setText("Add folder");
         add_folder_button.setDoubleBuffered(true);
+        add_folder_button.setEnabled(false);
         add_folder_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 add_folder_buttonActionPerformed(evt);
@@ -210,6 +204,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         add_files_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         add_files_button.setText("Add files");
         add_files_button.setDoubleBuffered(true);
+        add_files_button.setEnabled(false);
         add_files_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 add_files_buttonActionPerformed(evt);
@@ -223,7 +218,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(upload_name_label)
+                    .addComponent(dir_name_label)
                     .addComponent(account_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -241,7 +236,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(upload_name_label)
+                    .addComponent(dir_name_label)
                     .addComponent(dir_name_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -261,6 +256,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
+        dance_button.setEnabled(false);
         dance_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 dance_buttonActionPerformed(evt);
@@ -270,14 +266,17 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         total_file_size_label.setFont(new java.awt.Font("Dialog", 1, 28)); // NOI18N
         total_file_size_label.setText("[0 B]");
         total_file_size_label.setDoubleBuffered(true);
+        total_file_size_label.setEnabled(false);
 
         warning_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         warning_label.setText("If you DO NOT want to upload some folder or file you can REMOVE it.");
         warning_label.setDoubleBuffered(true);
+        warning_label.setEnabled(false);
 
         skip_rest_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         skip_rest_button.setText("REMOVE ALL EXCEPT THIS");
         skip_rest_button.setDoubleBuffered(true);
+        skip_rest_button.setEnabled(false);
         skip_rest_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 skip_rest_buttonActionPerformed(evt);
@@ -287,6 +286,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         skip_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         skip_button.setText("REMOVE THIS");
         skip_button.setDoubleBuffered(true);
+        skip_button.setEnabled(false);
         skip_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 skip_buttonActionPerformed(evt);
@@ -340,24 +340,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void add_files_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_files_buttonActionPerformed
+          
+        add_files_button.setText("Adding files, please wait...");
         
-        add_files_button.setEnabled(false);
-        
-        add_folder_button.setEnabled(false);
-        
-        file_tree.setEnabled(false);
-        
-        warning_label.setEnabled(false);
-            
-        dance_button.setEnabled(false);
-
-        total_file_size_label.setEnabled(false);
-
-        skip_button.setEnabled(false);
-
-        skip_rest_button.setEnabled(false);
-        
-        account_combobox.setEnabled(false);
+        MiscTools.setEnabledSwingJcomponent(false, add_files_button, add_folder_button, warning_label, skip_button, skip_rest_button, dance_button, dir_name_textfield, dir_name_label);
  
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -366,77 +352,65 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         filechooser.setAcceptAllFileFilterUsed(false);
         
         filechooser.setMultiSelectionEnabled(true);
-
+ 
         if( filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION ) {
-
+            
             total_file_size_label.setText("[0 B]");
-            
+
             File[] files_selected = filechooser.getSelectedFiles();
-            
+
             _base_path = files_selected[0].getParentFile().getAbsolutePath();
-            
+
             System.out.println(_base_path);
 
             dir_name_textfield.setText(files_selected[0].getParentFile().getName()+"_"+genID(10));
             
+            dir_name_textfield.setEnabled(true);
+            
+            dir_name_label.setEnabled(true);
+
             DefaultMutableTreeNode root = new DefaultMutableTreeNode(filechooser.getSelectedFile().getParent());
-           
+
             for(File file:files_selected) {
 
                 DefaultMutableTreeNode current_file = new DefaultMutableTreeNode( file.getName() + (file.isFile()?" ["+ formatBytes(file.length())+"]":"") );
-                
+
                 root.add(current_file);
             }
-           
-            file_tree.setModel(new DefaultTreeModel(sortTree(root)));
+
+            DefaultTreeModel tree_model = new DefaultTreeModel(sortTree(root));
+
+            file_tree.setModel(tree_model);
 
             _genFileList();
-        } 
-        
-        boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount() > 0;
-
-        file_tree.setRootVisible(root_childs);
-        
-        account_combobox.setEnabled(true);
             
-        add_files_button.setEnabled(true);
+            add_files_button.setEnabled(true);
+            
+            add_folder_button.setEnabled(true);
+            
+            add_files_button.setText("Add files");
 
-        add_folder_button.setEnabled(true);
+            boolean root_childs = ((DefaultMutableTreeNode)tree_model.getRoot()).getChildCount()>0;
+            
+            file_tree.setRootVisible(root_childs);
+            
+            MiscTools.setEnabledSwingJcomponent(root_childs, file_tree, warning_label, dance_button, total_file_size_label, skip_button, skip_rest_button);
+            
+        } else {
 
-        warning_label.setEnabled(root_childs);
-        
-        dance_button.setEnabled(root_childs);
-
-        total_file_size_label.setEnabled(root_childs);
-        
-        skip_button.setEnabled(root_childs);
-        
-        skip_rest_button.setEnabled(root_childs);
-        
-        file_tree.setEnabled(root_childs);
-
+            add_files_button.setText("Add files");
+            
+            MiscTools.setEnabledSwingJcomponent(true, add_files_button, add_folder_button, warning_label, skip_button, skip_rest_button, dance_button, dir_name_textfield, dir_name_label);
+        }
+       
     }//GEN-LAST:event_add_files_buttonActionPerformed
 
     private void add_folder_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_folder_buttonActionPerformed
         
-        add_files_button.setEnabled(false);
+        add_folder_button.setText("Adding files, please wait...");
         
-        add_folder_button.setEnabled(false);
-        
-        file_tree.setEnabled(false);
-        
-        warning_label.setEnabled(false);
-            
-        dance_button.setEnabled(false);
-
-        total_file_size_label.setEnabled(false);
-
-        skip_button.setEnabled(false);
-
-        skip_rest_button.setEnabled(false);
-        
-        account_combobox.setEnabled(false);
-        
+        MiscTools.setEnabledSwingJcomponent(false, add_files_button, add_folder_button, warning_label, skip_button, skip_rest_button, dance_button, dir_name_textfield, dir_name_label);
+ 
         JFileChooser filechooser = new javax.swing.JFileChooser();
         
         filechooser.setDialogTitle("Add directory");
@@ -444,7 +418,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         
         filechooser.setAcceptAllFileFilterUsed(false);
-
+        
         if( filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION ) {
             
             total_file_size_label.setText("[0 B]");
@@ -452,41 +426,41 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             _base_path = filechooser.getSelectedFile().getAbsolutePath();
             
             System.out.println(_base_path);
-
+            
             dir_name_textfield.setText(filechooser.getSelectedFile().getName()+"_"+genID(10));
+            
+            dir_name_textfield.setEnabled(true);
+            
+            dir_name_label.setEnabled(true);
             
             DefaultMutableTreeNode root = new DefaultMutableTreeNode(filechooser.getSelectedFile().getAbsolutePath());
   
             _genFileTree(filechooser.getSelectedFile().getAbsolutePath(), root);
+            
+            DefaultTreeModel tree_model = new DefaultTreeModel(sortTree(root));
 
-            file_tree.setModel(new DefaultTreeModel(sortTree(root)));
+            file_tree.setModel(tree_model);
 
             _genFileList();
             
+            add_files_button.setEnabled(true);
+            
+            add_folder_button.setEnabled(true);
+            
+            add_folder_button.setText("Add folder");
+
+            boolean root_childs = ((DefaultMutableTreeNode)tree_model.getRoot()).getChildCount()>0;
+            
+            file_tree.setRootVisible(root_childs);
+            
+            MiscTools.setEnabledSwingJcomponent(root_childs, file_tree, warning_label, dance_button, total_file_size_label, skip_button, skip_rest_button);
+            
+        } else {
+            add_folder_button.setText("Add folder");
+            
+            MiscTools.setEnabledSwingJcomponent(true, add_files_button, add_folder_button, warning_label, skip_button, skip_rest_button, dance_button, dir_name_textfield, dir_name_label);
         }
         
-        boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount() > 0;
-
-        file_tree.setRootVisible(root_childs);
-        
-        account_combobox.setEnabled(true);
-            
-        add_files_button.setEnabled(true);
-
-        add_folder_button.setEnabled(true);
-
-        warning_label.setEnabled(root_childs);
-        
-        dance_button.setEnabled(root_childs);
-
-        total_file_size_label.setEnabled(root_childs);
-        
-        skip_button.setEnabled(root_childs);
-        
-        skip_rest_button.setEnabled(root_childs);
-        
-        file_tree.setEnabled(root_childs);
-
     }//GEN-LAST:event_add_folder_buttonActionPerformed
 
     private void dance_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dance_buttonActionPerformed
@@ -512,16 +486,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             used_space_label.setText("Checking account quota, please wait...");
             
-            account_combobox.setEnabled(false);
-            dance_button.setEnabled(false);
-            add_files_button.setEnabled(false);
-            add_folder_button.setEnabled(false);
-            dir_name_textfield.setEnabled(false);
-            total_file_size_label.setEnabled(false);
-            skip_button.setEnabled(false);
-            skip_rest_button.setEnabled(false);
-            warning_label.setEnabled(false);
-            file_tree.setEnabled(false);
+            MiscTools.setEnabledSwingJcomponent(false, account_combobox, dance_button,add_files_button, add_folder_button,dir_name_textfield,total_file_size_label,skip_button,skip_rest_button,warning_label,file_tree);
             
             THREAD_POOL.execute(new Runnable(){
                     @Override
@@ -619,27 +584,21 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 swingReflectionInvoke("setForeground", used_space_label, Color.red);
             }
             
-            boolean root_childs = ((TreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
-
+            boolean root_childs = ((DefaultMutableTreeNode)((DefaultTreeModel)swingReflectionInvokeAndWaitForReturn("getModel", file_tree)).getRoot()).getChildCount()>0;
+        
             swingReflectionInvoke("setText", used_space_label, formatBytes(quota[0])+" / "+formatBytes(quota[1]));
-            swingReflectionInvoke("setEnabled", add_files_button, true);
-            swingReflectionInvoke("setEnabled", add_folder_button, true);
-            swingReflectionInvoke("setEnabled", dir_name_textfield, true);
-            swingReflectionInvoke("setEnabled", account_combobox, true);
-            swingReflectionInvoke("setEnabled", warning_label, root_childs);
-            swingReflectionInvoke("setEnabled", dance_button, root_childs);
-            swingReflectionInvoke("setEnabled", file_tree, root_childs);
-            swingReflectionInvoke("setEnabled", total_file_size_label, root_childs);
-            swingReflectionInvoke("setEnabled", skip_button, root_childs);
-            swingReflectionInvoke("setEnabled", skip_rest_button, root_childs);
             
+            MiscTools.setEnabledSwingJcomponent(true, add_files_button, add_folder_button, dir_name_textfield, account_combobox);
+            
+            MiscTools.setEnabledSwingJcomponent(root_childs, warning_label, dance_button, file_tree, total_file_size_label, skip_button, skip_rest_button);
+
         } else {
+            
+            _last_selected_account = null;
             
             swingReflectionInvoke("setEnabled", account_combobox, true);
             
             swingReflectionInvoke("setSelectedIndex", account_combobox, -1);
-
-            _last_selected_account = null;
             
             swingReflectionInvoke("setForeground", used_space_label, Color.red);
    
@@ -660,43 +619,20 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             
             boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
             
-            file_tree.setRootVisible(root_childs);
+            MiscTools.setEnabledSwingJcomponent(root_childs, warning_label,dance_button,total_file_size_label,skip_button,skip_rest_button);
             
-            warning_label.setEnabled(root_childs);
-        
-            dance_button.setEnabled(root_childs);
-
-            total_file_size_label.setEnabled(root_childs);
-
-            skip_button.setEnabled(root_childs);
-
-            skip_rest_button.setEnabled(root_childs);
-
-            file_tree.setEnabled(root_childs);
         }
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
     private void skip_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_buttonActionPerformed
-        
+
         if(deleteSelectedTreeItems(file_tree)) {
             
             _genFileList();
             
             boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
-            
-            file_tree.setRootVisible(root_childs);
-            
-            warning_label.setEnabled(root_childs);
-        
-            dance_button.setEnabled(root_childs);
 
-            total_file_size_label.setEnabled(root_childs);
-
-            skip_button.setEnabled(root_childs);
-
-            skip_rest_button.setEnabled(root_childs);
-
-            file_tree.setEnabled(root_childs);
+            MiscTools.setEnabledSwingJcomponent(root_childs, warning_label,dance_button,total_file_size_label,skip_button,skip_rest_button);
         }
     }//GEN-LAST:event_skip_buttonActionPerformed
 
@@ -734,8 +670,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         _files.clear();
         
         _total_space = 0L;
+        
+        DefaultTreeModel tree_model = (DefaultTreeModel)file_tree.getModel();
 
-        DefaultMutableTreeNode root = (DefaultMutableTreeNode)file_tree.getModel().getRoot();
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode)tree_model.getRoot();
         
         Enumeration files_tree = root.depthFirstEnumeration();
         
@@ -767,8 +705,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             }
         }
         
-        swingReflectionInvoke("setText", total_file_size_label, "["+formatBytes(_total_space)+"]");
+        total_file_size_label.setText("["+formatBytes(_total_space)+"]");
     }
+    
     
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox<String> account_combobox;
@@ -776,6 +715,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private javax.swing.JButton add_files_button;
     private javax.swing.JButton add_folder_button;
     private javax.swing.JButton dance_button;
+    private javax.swing.JLabel dir_name_label;
     private javax.swing.JTextField dir_name_textfield;
     private javax.swing.JTree file_tree;
     private javax.swing.JScrollPane file_tree_scrollpane;
@@ -784,7 +724,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private javax.swing.JButton skip_button;
     private javax.swing.JButton skip_rest_button;
     private javax.swing.JLabel total_file_size_label;
-    private javax.swing.JLabel upload_name_label;
     private javax.swing.JLabel used_space_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
