@@ -1,4 +1,4 @@
-![MegaBasterd](/src/megabasterd/mbasterd_logo_nuevo.png)
+![MegaBasterd](/src/megabasterd/mbasterd_logo_git.png)
 
 Yet another multiplatform Mega/Megacrypter down/uploader and video/audio streaming suite.
 
