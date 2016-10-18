@@ -1,5 +1,6 @@
 package megabasterd;
 
+import java.awt.Dialog;
 import java.awt.Font;
 import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.FONT_DEFAULT;
@@ -192,7 +193,9 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         check_version_button.setEnabled(false);
         
-        final AboutDialog tthis = this;
+        check_version_button.setText("Checking, please wait...");
+        
+        final Dialog tthis = this;
            
         THREAD_POOL.execute(new Runnable(){
             @Override
@@ -208,6 +211,8 @@ public final class AboutDialog extends javax.swing.JDialog {
                     
                     JOptionPane.showMessageDialog(tthis, "You have the latest version ;)");
                 }
+                
+                swingReflectionInvoke("setText", check_version_button, "Check version");
                 
                 swingReflectionInvoke("setEnabled", check_version_button, true);
 

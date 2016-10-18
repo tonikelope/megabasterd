@@ -1,6 +1,7 @@
 package megabasterd;
 
 import java.awt.Color;
+import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.Frame;
 import java.io.File;
@@ -515,7 +516,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             
             final String email = selected_item;
         
-            final FileGrabberDialog tthis = this;
+            final Dialog tthis = this;
 
             used_space_label.setForeground(Color.black);
 

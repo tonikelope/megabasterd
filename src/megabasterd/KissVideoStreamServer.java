@@ -134,7 +134,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                     secureWait();
                     
                     try {
-                        Thread.sleep(1000);
+                        Thread.sleep(2000);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
                     }

@@ -1,5 +1,6 @@
 package megabasterd;
 
+import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
@@ -114,12 +115,11 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
     private void dance_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dance_buttonActionPerformed
         
-    
         dance_button.setEnabled(false);
         
         original_link_textfield.setEnabled(false);
         
-        final StreamerDialog tthis = this;
+        final Dialog tthis = this;
         
          THREAD_POOL.execute(new Runnable(){
             @Override

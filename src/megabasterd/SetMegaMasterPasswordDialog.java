@@ -1,5 +1,6 @@
 package megabasterd;
 
+import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
@@ -209,7 +210,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
        
         swingReflectionInvoke("setText", status_label, "Verifying your password, please wait...");
         
-        final SetMegaMasterPasswordDialog tthis = this;
+        final Dialog tthis = this;
         
         THREAD_POOL.execute(new Runnable(){
             

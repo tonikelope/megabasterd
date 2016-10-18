@@ -1,5 +1,6 @@
 package megabasterd;
 
+import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.Frame;
 import java.io.File;
@@ -826,7 +827,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             
             encrypt_pass_checkbox.setEnabled(false);
          
-            final SettingsDialog tthis = this;
+            final Dialog tthis = this;
             
             THREAD_POOL.execute(new Runnable(){
                 @Override
@@ -1065,7 +1066,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
    
         encrypt_pass_checkbox.setEnabled(false);
         
-        final SettingsDialog tthis = this;
+        final Dialog tthis = this;
         
         THREAD_POOL.execute(new Runnable(){
                 @Override
@@ -1172,7 +1173,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         
         unlock_accounts_button.setEnabled(false);
         
-        final SettingsDialog tthis = this;
+        final Dialog tthis = this;
         
         THREAD_POOL.execute(new Runnable(){
                 @Override
