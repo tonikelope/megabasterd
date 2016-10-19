@@ -178,9 +178,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         account_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         account_label.setText("Account:");
         account_label.setDoubleBuffered(true);
+        account_label.setEnabled(false);
 
         account_combobox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         account_combobox.setDoubleBuffered(true);
+        account_combobox.setEnabled(false);
         account_combobox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 account_comboboxItemStateChanged(evt);
@@ -520,9 +522,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             used_space_label.setForeground(Color.black);
 
+            
             used_space_label.setText("Checking account quota, please wait...");
             
             account_combobox.setEnabled(false);
+            account_label.setEnabled(false);
             dance_button.setEnabled(false);
             add_files_button.setEnabled(false);
             add_folder_button.setEnabled(false);
@@ -634,9 +638,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         
             swingReflectionInvoke("setText", used_space_label, formatBytes(quota[0])+" / "+formatBytes(quota[1]));
             
-            swingReflectionInvoke("setEnabled", new Object[]{add_files_button,add_folder_button,dir_name_textfield, account_combobox}, true);
+            swingReflectionInvoke("setEnabled", new Object[]{add_files_button,add_folder_button, account_combobox, account_label}, true);
             
-            swingReflectionInvoke("setEnabled", new Object[]{warning_label, dance_button, file_tree, total_file_size_label, skip_button, skip_rest_button}, root_childs);
+            swingReflectionInvoke("setEnabled", new Object[]{dir_name_textfield, dir_name_label, warning_label, dance_button, file_tree, total_file_size_label, skip_button, skip_rest_button}, root_childs);
             
           
         } else {
@@ -644,6 +648,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             _last_selected_account = null;
             
             swingReflectionInvoke("setEnabled", account_combobox, true);
+            
+            swingReflectionInvoke("setEnabled", account_label, true);
             
             swingReflectionInvoke("setSelectedIndex", account_combobox, -1);
             
@@ -671,6 +677,14 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             total_file_size_label.setEnabled(root_childs);
             skip_button.setEnabled(root_childs);
             skip_rest_button.setEnabled(root_childs);
+            dir_name_textfield.setEnabled(root_childs);
+            dir_name_label.setEnabled(root_childs);
+            
+            if(!root_childs) {
+                
+                dir_name_textfield.setText("");
+            }
+           
         }
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
@@ -687,6 +701,13 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             total_file_size_label.setEnabled(root_childs);
             skip_button.setEnabled(root_childs);
             skip_rest_button.setEnabled(root_childs);
+            dir_name_textfield.setEnabled(root_childs);
+            dir_name_label.setEnabled(root_childs);
+            
+            if(!root_childs) {
+                
+                dir_name_textfield.setText("");
+            }
         }
     }//GEN-LAST:event_skip_buttonActionPerformed
 

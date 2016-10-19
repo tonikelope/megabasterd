@@ -709,6 +709,10 @@ public final class MiscTools {
                 }
             }
             
+            swingReflectionInvoke("setRootVisible", tree, ((MutableTreeNode)tree_model.getRoot()).getChildCount() > 0 );
+      
+            swingReflectionInvoke("setEnabled", tree, true);
+            
             return true;
         }
         

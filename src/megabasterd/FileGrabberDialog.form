@@ -198,6 +198,7 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Account:"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
+            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JComboBox" name="account_combobox">
@@ -209,6 +210,7 @@
               <StringArray count="0"/>
             </Property>
             <Property name="doubleBuffered" type="boolean" value="true"/>
+            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
           <Events>
             <EventHandler event="itemStateChanged" listener="java.awt.event.ItemListener" parameters="java.awt.event.ItemEvent" handler="account_comboboxItemStateChanged"/>

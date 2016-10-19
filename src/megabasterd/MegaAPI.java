@@ -34,7 +34,7 @@ public final class MegaAPI {
  
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
-    public static final String USER_AGENT="MEGAsync/2.9.8.0";
+    public static final String USER_AGENT="Mozilla/5.0";
     public static final int REQ_ID_LENGTH = 10;
     
     
