@@ -68,8 +68,11 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         _download = false;
         _download_links = new ArrayList<>();
         _link = link;
+        
+        MiscTools.swingInvokeIt(new Runnable(){
 
-        updateFont(file_tree, FONT_DEFAULT, PLAIN);
+            @Override
+            public void run() {updateFont(file_tree, FONT_DEFAULT, PLAIN);
         updateFont(link_detected_label, FONT_DEFAULT, PLAIN);
         updateFont(warning_label, FONT_DEFAULT, PLAIN);
         updateFont(skip_button, FONT_DEFAULT, PLAIN);
@@ -77,7 +80,9 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         updateFont(restore_button, FONT_DEFAULT, PLAIN);
         updateFont(skip_rest_button, FONT_DEFAULT, PLAIN);
         updateFont(total_space_label, FONT_DEFAULT, BOLD);
-        updateFont(folder_link_label, FONT_DEFAULT, PLAIN);
+        updateFont(folder_link_label, FONT_DEFAULT, PLAIN);}}, true);
+
+        
        
         swingReflectionInvoke("setText", folder_link_label, link);
         

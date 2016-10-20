@@ -122,8 +122,11 @@ public final class MainPanelView extends javax.swing.JFrame {
         setTitle("MegaBasterd " + VERSION);
         
         setIconImage(new ImageIcon(getClass().getResource(ICON_FILE)).getImage());
+        
+        MiscTools.swingInvokeIt(new Runnable(){
 
-        updateFont(file_menu, FONT_DEFAULT, PLAIN);
+            @Override
+            public void run() {updateFont(file_menu, FONT_DEFAULT, PLAIN);
         updateFont(edit_menu, FONT_DEFAULT, PLAIN);
         updateFont(help_menu, FONT_DEFAULT, PLAIN);
         updateFont(new_download_menu, FONT_DEFAULT, PLAIN);
@@ -144,7 +147,9 @@ public final class MainPanelView extends javax.swing.JFrame {
         updateFont(close_all_finished_up_button, FONT_DEFAULT, BOLD);
         updateFont(pause_all_down_button, FONT_DEFAULT, BOLD);
         updateFont(pause_all_up_button, FONT_DEFAULT, BOLD);
-        updateFont(jTabbedPane1, FONT_DEFAULT, PLAIN);
+        updateFont(jTabbedPane1, FONT_DEFAULT, PLAIN);}}, true);
+
+        
         
         swingReflectionInvoke("setVisible", global_speed_down_label, false);
         swingReflectionInvoke("setVisible", global_speed_up_label, false);

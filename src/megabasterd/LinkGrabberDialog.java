@@ -39,11 +39,15 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         
         initComponents();
         
-        updateFont(links_label, FONT_DEFAULT, Font.PLAIN);
+        MiscTools.swingInvokeIt(new Runnable(){
+
+            @Override
+            public void run() {updateFont(links_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(down_dir_to_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(change_dir_button, FONT_DEFAULT, Font.PLAIN);
-        updateFont(download_dir_label, FONT_DEFAULT, Font.PLAIN);
+        updateFont(download_dir_label, FONT_DEFAULT, Font.PLAIN);}}, true);
+        
         
         _download_path = download_path;
         

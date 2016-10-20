@@ -58,12 +58,17 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         
-        updateFont(new_pass_label, FONT_DEFAULT, Font.PLAIN);
+        MiscTools.swingInvokeIt(new Runnable(){
+
+            @Override
+            public void run() {updateFont(new_pass_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(confirm_pass_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(ok_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(cancel_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(warning_label, FONT_DEFAULT, Font.PLAIN);
-        updateFont(status_label, FONT_DEFAULT, Font.PLAIN);
+        updateFont(status_label, FONT_DEFAULT, Font.PLAIN);}}, true);
+        
+        
         
         _pass_ok = false;
         

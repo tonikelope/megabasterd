@@ -88,22 +88,30 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         initComponents();
         
         _upload = upload;
+        
+        MiscTools.swingInvokeIt(new Runnable(){
 
-        updateFont(status_label, FONT_DEFAULT, BOLD);
-        updateFont(remtime_label, FONT_DEFAULT, PLAIN);
-        updateFont(speed_label, FONT_DEFAULT, BOLD);
-        updateFont(progress_pbar, FONT_DEFAULT, PLAIN);
-        updateFont(slots_label, FONT_DEFAULT, BOLD);
-        updateFont(slots_spinner, FONT_DEFAULT, PLAIN);
-        updateFont(pause_button, FONT_DEFAULT, BOLD);
-        updateFont(stop_button, FONT_DEFAULT, BOLD);
-        updateFont(folder_link_button, FONT_DEFAULT, PLAIN);
-        updateFont(file_link_button, FONT_DEFAULT, PLAIN);
-        updateFont(file_name_label, FONT_DEFAULT, PLAIN);
-        updateFont(file_size_label, FONT_DEFAULT, BOLD);
-        updateFont(close_button, FONT_DEFAULT, PLAIN);
-        updateFont(restart_button, FONT_DEFAULT, PLAIN);
-        updateFont(slot_status_label, FONT_DEFAULT, BOLD);
+            @Override
+            public void run() {
+            
+            updateFont(status_label, FONT_DEFAULT, BOLD);
+            updateFont(remtime_label, FONT_DEFAULT, PLAIN);
+            updateFont(speed_label, FONT_DEFAULT, BOLD);
+            updateFont(progress_pbar, FONT_DEFAULT, PLAIN);
+            updateFont(slots_label, FONT_DEFAULT, BOLD);
+            updateFont(slots_spinner, FONT_DEFAULT, PLAIN);
+            updateFont(pause_button, FONT_DEFAULT, BOLD);
+            updateFont(stop_button, FONT_DEFAULT, BOLD);
+            updateFont(folder_link_button, FONT_DEFAULT, PLAIN);
+            updateFont(file_link_button, FONT_DEFAULT, PLAIN);
+            updateFont(file_name_label, FONT_DEFAULT, PLAIN);
+            updateFont(file_size_label, FONT_DEFAULT, BOLD);
+            updateFont(close_button, FONT_DEFAULT, PLAIN);
+            updateFont(restart_button, FONT_DEFAULT, PLAIN);
+            updateFont(slot_status_label, FONT_DEFAULT, BOLD);
+
+            
+            }}, true);
         
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_upload.getMain_panel().getDefault_slots_up(), MIN_WORKERS, MAX_WORKERS, 1));
         

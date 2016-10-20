@@ -86,7 +86,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         _remember_master_pass = true;
         _files = new ArrayList<>();
         
-        updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
+        MiscTools.swingInvokeIt(new Runnable(){
+
+            @Override
+            public void run() {updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(add_files_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(add_folder_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(account_combobox, FONT_DEFAULT, Font.PLAIN);
@@ -98,9 +101,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         updateFont(warning_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(dir_name_textfield, FONT_DEFAULT, Font.PLAIN);
         updateFont(skip_button, FONT_DEFAULT, Font.PLAIN);
-        updateFont(skip_rest_button, FONT_DEFAULT, Font.PLAIN);
+        updateFont(skip_rest_button, FONT_DEFAULT, Font.PLAIN);}}, true);
         
-        swingReflectionInvoke("addMouseListener", dir_name_textfield, new ContextMenuMouseListener());
+        swingReflectionInvokeAndWait("addMouseListener", dir_name_textfield, new ContextMenuMouseListener());
         
         _main_panel = ((MainPanelView)parent).getMain_panel();
         

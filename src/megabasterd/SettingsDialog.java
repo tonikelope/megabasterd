@@ -66,8 +66,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
     public SettingsDialog(javax.swing.JFrame parent, boolean modal) {
         super(parent, modal);
         initComponents();
- 
-        updateFont(change_download_dir_button, FONT_DEFAULT, Font.PLAIN);
+        
+        MiscTools.swingInvokeIt(new Runnable(){
+
+            @Override
+            public void run() {updateFont(change_download_dir_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(down_dir_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(ok_button, FONT_DEFAULT, Font.PLAIN);
         updateFont(cancel_button, FONT_DEFAULT, Font.PLAIN);
@@ -96,7 +99,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
         updateFont(default_dir_label, FONT_DEFAULT, Font.PLAIN);
         updateFont(encrypt_pass_checkbox, FONT_DEFAULT, Font.PLAIN);
         updateFont(unlock_accounts_button, FONT_DEFAULT, Font.PLAIN);
-        updateFont(delete_all_accounts_button, FONT_DEFAULT, Font.PLAIN);
+        updateFont(delete_all_accounts_button, FONT_DEFAULT, Font.PLAIN);}}, true);
+ 
+        
         
         _main_panel = ((MainPanelView)parent).getMain_panel();
             

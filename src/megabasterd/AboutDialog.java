@@ -30,10 +30,16 @@ public final class AboutDialog extends javax.swing.JDialog {
         initComponents();
         
         swingReflectionInvoke("setText", title_label , "MegaBasterd "+ VERSION);
-        updateFont(title_label, FONT_DEFAULT, Font.BOLD);
+        
+        MiscTools.swingInvokeIt(new Runnable(){
+
+            @Override
+            public void run() { updateFont(title_label, FONT_DEFAULT, Font.BOLD);
         updateFont(subtitle_label, FONT_DEFAULT, Font.BOLD);
         updateFont(mcdown_url_button, FONT_DEFAULT, Font.PLAIN);
-        updateFont(check_version_button, FONT_DEFAULT, Font.PLAIN);
+        updateFont(check_version_button, FONT_DEFAULT, Font.PLAIN);}}, true);
+        
+       
     }
 
     /**
