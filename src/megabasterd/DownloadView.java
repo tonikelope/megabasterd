@@ -363,12 +363,9 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         printStatusNormal("Pausing download ...");
         
-        swingReflectionInvoke("setEnabled", pause_button, false);
-        swingReflectionInvoke("setEnabled", speed_label, false);
-        swingReflectionInvoke("setEnabled", slots_label, false);
-        swingReflectionInvoke("setEnabled", slots_spinner, false);
-        swingReflectionInvoke("setVisible", stop_button, true);
-        swingReflectionInvoke("setVisible", keep_temp_checkbox, true);
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button,speed_label,slots_label,slots_spinner}, false);
+        swingReflectionInvoke("setVisible", new Object[]{stop_button, keep_temp_checkbox}, true);
+       
     }
     
     @Override
@@ -376,12 +373,8 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
      
         printStatusNormal("Downloading file from mega ...");
         
-        swingReflectionInvoke("setEnabled", pause_button, true);
-        swingReflectionInvoke("setEnabled", speed_label, true);
-        swingReflectionInvoke("setEnabled", slots_label, true);
-        swingReflectionInvoke("setEnabled", slots_spinner, true);
-        swingReflectionInvoke("setVisible", stop_button, false);
-        swingReflectionInvoke("setVisible", keep_temp_checkbox, false);
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button,speed_label,slots_label,slots_spinner}, true);
+        swingReflectionInvoke("setVisible", new Object[]{stop_button, keep_temp_checkbox}, false);
         swingReflectionInvoke("setText", pause_button, "PAUSE DOWNLOAD");
         swingReflectionInvoke("setVisible", _download.getMain_panel().getView().getPause_all_down_button(), true);
         
@@ -391,13 +384,8 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     public void stop() {
         
         printStatusNormal("Stopping download safely, please wait...");
-                
-        swingReflectionInvoke("setEnabled", speed_label, false);
-        swingReflectionInvoke("setEnabled", pause_button, false);
-        swingReflectionInvoke("setEnabled", stop_button, false);
-        swingReflectionInvoke("setEnabled", keep_temp_checkbox, false);
-        swingReflectionInvoke("setEnabled", slots_label, false);
-        swingReflectionInvoke("setEnabled", slots_spinner, false);
+        
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button,keep_temp_checkbox,stop_button,speed_label,slots_label,slots_spinner}, false);
     }
 
     

@@ -762,14 +762,9 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                 
                 getMain_panel().getGlobal_up_speed().secureNotify();
                 
-                swingReflectionInvoke("setVisible", getView().getSpeed_label(), false);
-                swingReflectionInvoke("setVisible", getView().getRemtime_label(), false);
                 
-                swingReflectionInvoke("setVisible", getView().getPause_button(), false);
-                swingReflectionInvoke("setVisible", getView().getStop_button(), false);
-                
-                swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
-                swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+                swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(),getView().getRemtime_label(),getView().getPause_button(),getView().getStop_button(),getView().getSlots_label(),getView().getSlots_spinner()}, false);
+                        
                 
                 getMain_panel().getUpload_manager().secureNotify();
                 

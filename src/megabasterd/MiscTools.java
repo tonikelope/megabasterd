@@ -246,9 +246,29 @@ public final class MiscTools {
         return matches;
     }
     
-    public static void updateFont(javax.swing.JComponent label, Font font, int layout)
+    public static void updateFont(final javax.swing.JComponent label, final Font font, final int layout)
     {
-        label.setFont(font.deriveFont(layout, label.getFont().getSize()));
+        if(!SwingUtilities.isEventDispatchThread()) {
+            
+            try {
+                
+            SwingUtilities.invokeAndWait(new Runnable(){
+                
+                @Override
+                public void run() {
+                    
+                    label.setFont(font.deriveFont(layout, label.getFont().getSize()));
+                    
+                }});
+            
+            } catch (InterruptedException | InvocationTargetException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+        } else {
+            
+            label.setFont(font.deriveFont(layout, label.getFont().getSize()));
+        }
     }
     
     

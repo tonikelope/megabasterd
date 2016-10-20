@@ -389,11 +389,8 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     public void pause() {
 
         printStatusNormal("Pausing upload ...");
-
-        swingReflectionInvoke("setEnabled", pause_button, false);
-        swingReflectionInvoke("setEnabled", speed_label, false);
-        swingReflectionInvoke("setEnabled", slots_label, false);
-        swingReflectionInvoke("setEnabled", slots_spinner, false);
+        
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button,speed_label,slots_label,slots_spinner}, false);
         swingReflectionInvoke("setVisible", stop_button, true);
 
     }
@@ -402,13 +399,8 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     public void stop() {
         
         printStatusNormal("Stopping upload safely, please wait...");
-            
-        swingReflectionInvoke("setEnabled", speed_label, false);
-        swingReflectionInvoke("setEnabled", pause_button, false);
-        swingReflectionInvoke("setEnabled", stop_button, false);
-        swingReflectionInvoke("setEnabled", slots_label, false);
-        swingReflectionInvoke("setEnabled", slots_spinner, false);
         
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button,stop_button,speed_label,slots_label,slots_spinner}, false);
     }
 
     @Override
@@ -416,18 +408,9 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         
         printStatusNormal("Uploading file to mega ...");
         
-        swingReflectionInvoke("setEnabled", speed_label, true);
-        
-        swingReflectionInvoke("setEnabled", slots_label, true);
-        
-        swingReflectionInvoke("setEnabled", slots_spinner, true);
-
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button,speed_label,slots_label,slots_spinner}, true);
         swingReflectionInvoke("setVisible", stop_button, false);
-
-        swingReflectionInvoke("setEnabled", pause_button, true);
-
         swingReflectionInvoke("setText", pause_button, "PAUSE UPLOAD");
-
         swingReflectionInvoke("setVisible", _upload.getMain_panel().getView().getPause_all_up_button(), true);
     }
 
