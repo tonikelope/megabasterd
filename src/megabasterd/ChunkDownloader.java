@@ -127,10 +127,10 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                 chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url);
 
                 URL url = new URL(chunk.getUrl());
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-                conn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
-                conn.setRequestProperty("Connection", "close");
+                
+                KissHttpURLConnection kissconn = new KissHttpURLConnection(url);
+                
+                kissconn.doGET();
                 
                 error = false;
 
@@ -138,9 +138,9 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
 
                     if(!_exit && !_download.isStopped()) {
                         
-                        is = new ThrottledInputStream(conn.getInputStream(), _download.getMain_panel().getStream_supervisor());
+                        is = new ThrottledInputStream(kissconn.getInputStream(), _download.getMain_panel().getStream_supervisor());
 
-                        http_status = conn.getResponseCode();
+                        http_status = kissconn.getStatus_code();
 
                         if ( http_status != HttpURLConnection.HTTP_OK )
                         {   
@@ -236,7 +236,8 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                     getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
                     
                 } finally {
-                    conn.disconnect();
+                    
+                    kissconn.close();
                 }
             }
         

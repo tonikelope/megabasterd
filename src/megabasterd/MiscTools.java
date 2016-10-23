@@ -16,6 +16,7 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -53,7 +54,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
-import static megabasterd.MainPanel.CONNECTION_TIMEOUT;
 import static megabasterd.MainPanel.VERSION;
 
 public final class MiscTools {
@@ -589,7 +589,7 @@ public final class MiscTools {
             
         String response = new String(byte_res.toByteArray()).trim();
         
-        return findFirstRegex("http", response, 0)!=null?response:link;
+return findFirstRegex("http", response, 0)!=null?response:link;
     }
     
     public static String formatBytes(Long bytes) {
@@ -909,21 +909,25 @@ public final class MiscTools {
     public static boolean checkMegaDownloadUrl(String string_url) {
         
         boolean url_ok=false;
-               
+        
         try {
-             URL url = new URL(string_url+"/0-0");
-             URLConnection connection = url.openConnection();
-             connection.setConnectTimeout(CONNECTION_TIMEOUT);
-             connection.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
+            
+            URL url = new URL(string_url+"/0");
+            
+            KissHttpURLConnection kissconn = new KissHttpURLConnection(url);
+            
+            kissconn.doGET();
 
-            try (InputStream is = connection.getInputStream()) {
-                while(is.read()!=-1);
-            }
-
-            url_ok=true;
-
-         }catch (Exception ex) {}        
-
+            url_ok=(kissconn.getStatus_code() == HttpURLConnection.HTTP_OK);
+            
+            kissconn.close();
+  
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
         return url_ok;
     }
     
@@ -960,7 +964,7 @@ public final class MiscTools {
                 }
 
             } catch (Exception ex) {
-                getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
+                getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
         
         return new_version;
@@ -971,7 +975,53 @@ public final class MiscTools {
         try {
             Desktop.getDesktop().browse(new URI(url));
         } catch (URISyntaxException | IOException ex) {
-            Logger.getLogger(AboutDialog.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+    
+    public static byte[] decodeChunkedByteArray(byte[] data) {
+        
+        ByteArrayOutputStream decoded = new ByteArrayOutputStream();
+        
+        boolean EOF = false;
+        
+        int i = 0;
+        
+        do {
+            
+            int b;
+            
+            ByteArrayOutputStream temp = new ByteArrayOutputStream();
+                    
+            do{
+
+                b = data[i++];
+                
+                temp.write(b);
+
+            }while(b != -1 && b != 0x0A);
+            
+            long chunk_length;
+            
+            String cl = new String(temp.toByteArray()).trim();
+            
+            chunk_length = Long.parseLong(cl.length()>0?cl:"-1",16);
+
+            if(chunk_length > 0) {
+                
+                for(long j=0; j<chunk_length; j++) {
+                    
+                    decoded.write(data[i++]);
+                }
+                
+            } else if(chunk_length == 0) {
+                
+                EOF = true;
+            }
+
+        } while(!EOF);
+        
+        return decoded.toByteArray();
+    }
+   
 }

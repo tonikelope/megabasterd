@@ -4,15 +4,16 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import java.util.zip.GZIPInputStream;
 import javax.crypto.Cipher;
@@ -34,7 +35,6 @@ public final class MegaAPI {
  
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
-    public static final String USER_AGENT="Mozilla/5.0";
     public static final int REQ_ID_LENGTH = 10;
     
     
@@ -45,7 +45,7 @@ public final class MegaAPI {
         return error != null?Integer.parseInt(error):0;
     }
     
-    private int _seqno;
+    private long _seqno;
     
     private String _sid;
     
@@ -84,7 +84,7 @@ public final class MegaAPI {
         
         Random randomno = new Random();
             
-        _seqno=randomno.nextInt();
+        _seqno=randomno.nextLong() & 0xffffffffL;
         
     }
     public String getEmail() {
@@ -127,7 +127,7 @@ public final class MegaAPI {
    
         String request = "[{\"a\":\"us\", \"user\":\""+_email+"\", \"uh\":\""+_user_hash+"\"}]";
 
-        URL url_api = new URL(API_URL+"/cs?id="+_seqno+(API_KEY!=null?"&ak="+API_KEY:""));
+        URL url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+(API_KEY!=null?"&ak="+API_KEY:""));
 
         String res = _rawRequest(request, url_api);
 
@@ -191,7 +191,7 @@ public final class MegaAPI {
             
             URL url_api;
             
-            url_api = new URL(API_URL+"/cs?id="+_seqno+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
+            url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
             
             String res = _rawRequest(request, url_api);
             
@@ -235,7 +235,7 @@ public final class MegaAPI {
         
         try {
 
-            url_api = new URL(API_URL+"/cs?id="+_seqno+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
+            url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
             
             String res = _rawRequest(request, url_api);
             
@@ -273,7 +273,7 @@ public final class MegaAPI {
 
     }
 
-    private String _rawRequest(String request, URL url_api) throws IOException, MegaAPIException {
+    private String _rawRequest(String request, URL url_api) throws MegaAPIException {
         
         boolean error;
         
@@ -283,75 +283,85 @@ public final class MegaAPI {
   
         do{
             error = false;
+        
+        KissHttpURLConnection kissconn = new KissHttpURLConnection(url_api);
+ 
+        kissconn.setRequestHeader("Content-Type", "application/json");
+        
+        kissconn.doPOST(request.getBytes().length);
+        
+        try {
+            kissconn.getOutputStream().write(request.getBytes());
+        } catch (IOException ex) {
+            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
-            _seqno++;
-        
-        HttpURLConnection conn = (HttpURLConnection) url_api.openConnection();
-        conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-        conn.setDoOutput(true);
-        conn.setRequestMethod("POST");
-        conn.setRequestProperty("Content-Type", "application/json");
-        conn.setRequestProperty("User-Agent", USER_AGENT); 
-        conn.setRequestProperty("Connection", "close");
-        
-        OutputStream out;
-        out = conn.getOutputStream();
-	out.write(request.getBytes());
-        out.close();
-        
-        if (conn.getResponseCode() != HttpURLConnection.HTTP_OK)
+        if (kissconn.getStatus_code() != HttpURLConnection.HTTP_OK)
         {   
-            System.out.println("Failed : HTTP error code : " + conn.getResponseCode());
+            System.out.println("Failed : HTTP error code : " + kissconn.getStatus_code());
 
             error = true;
             
        } else {
 
-                String content_encoding = conn.getContentEncoding();
-
-                InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(conn.getInputStream()):conn.getInputStream();
-
-                ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
-
-                byte[] buffer = new byte[16*1024];
-
-                int reads;
-
-                while( (reads=is.read(buffer)) != -1 ) {
-
-                    byte_res.write(buffer, 0, reads);
-                }
-
-                response = new String(byte_res.toByteArray());
-
-                int mega_error;
-
-                if( (mega_error=checkMEGAError(response))!=0 )
-                {
-                    if(mega_error == -3) {
-
-                        error = true;
+            InputStream is = null;
+                try {
+                    String content_encoding = kissconn.getResponseHeader("Content-Encoding");
+                    is = (content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(kissconn.getInputStream()):kissconn.getInputStream();
+                    ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+                    byte[] buffer = new byte[16*1024];
+                    int reads;
+                    while( (reads=is.read(buffer)) != -1 ) {
                         
-                    } else {
-
-                        throw new MegaAPIException(String.valueOf(mega_error));
+                        byte_res.write(buffer, 0, reads);
+                    }   response = new String(byte_res.toByteArray());
+                    int mega_error;
+                    if( (mega_error=checkMEGAError(response))!=0 )
+                    {
+                        if(mega_error == -3) {
+                            
+                            error = true;
+                            
+                        } else {
+                            
+                            throw new MegaAPIException(String.valueOf(mega_error));
+                        }
                     }
-                } 
+                } catch (IOException ex) { 
+                    
+                    Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                    
+                } finally {
+                    try {
+                        kissconn.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
             }
         
             if(error) {
 
                 try {
-                    Thread.sleep( getWaitTimeExpBackOff(conta_error++) );
-                } catch (InterruptedException ex) {
-                    getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                    
+                    try {
+                        Thread.sleep( getWaitTimeExpBackOff(conta_error++) );
+                    } catch (InterruptedException ex) {
+                        getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    
+                    String new_url = url_api.getProtocol()+"://"+url_api.getAuthority()+url_api.getFile().replace("id\\=[0-9]+", "id="+String.valueOf(++_seqno));
+                    
+                    url_api = new URL(new_url);
+                    
+                } catch (MalformedURLException ex) {
+                    Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                
             } else {
 
                 conta_error = 0;
             }
-            
-            conn.disconnect();
 
         }while(error);
 
@@ -375,12 +385,12 @@ public final class MegaAPI {
             
             request = "[{\"a\":\"g\", \"g\":\"1\", \"n\":\""+file_id+"\"}]";
             
-            url_api = new URL(API_URL+"/cs?id="+_seqno+(API_KEY!=null?"&ak="+API_KEY:"")+"&n="+folder_id);
+            url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+(API_KEY!=null?"&ak="+API_KEY:"")+"&n="+folder_id);
             
         }  else {
             
             request = "[{\"a\":\"g\", \"g\":\"1\", \"p\":\""+file_id+"\"}]";
-            url_api = new URL(API_URL+"/cs?id="+_seqno+(API_KEY!=null?"&ak="+API_KEY:""));
+            url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+(API_KEY!=null?"&ak="+API_KEY:""));
         }
         
         String data = _rawRequest(request, url_api);
@@ -412,13 +422,13 @@ public final class MegaAPI {
             
             request = "[{\"a\":\"g\", \"g\":\"1\", \"n\":\""+file_id+"\"}]";
             
-            url_api = new URL(API_URL+"/cs?id="+_seqno+(API_KEY!=null?"&ak="+API_KEY:"")+"&n="+folder_id);
+            url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+(API_KEY!=null?"&ak="+API_KEY:"")+"&n="+folder_id);
             
         } else {
             
             request = "[{\"a\":\"g\", \"p\":\""+file_id+"\"}]";
             
-            url_api = new URL(API_URL+"/cs?id="+_seqno+(API_KEY!=null?"&ak="+API_KEY:""));
+            url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+(API_KEY!=null?"&ak="+API_KEY:""));
         }
   
         String data = _rawRequest(request, url_api);
@@ -448,8 +458,6 @@ public final class MegaAPI {
         
         return file_data;
     }
-    
-    
     
     
     private byte[] _encAttr(String attr, byte[] key) {
@@ -510,7 +518,7 @@ public final class MegaAPI {
             
             String request = "[{\"a\":\"u\", \"s\":"+String.valueOf(f.length())+"}]";
             
-            URL url_api = new URL(API_URL+"/cs?id="+_seqno+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
+            URL url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
  
             String res = _rawRequest(request, url_api);
             
@@ -535,7 +543,7 @@ public final class MegaAPI {
 
             byte[] enc_att = _encAttr("{\"n\":\""+fbasename+"\"}", i32a2bin(Arrays.copyOfRange(ul_key, 0, 4)));
 
-            URL url_api = new URL(API_URL+"/cs?id="+_seqno+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
+            URL url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
             
             String request = "[{\"a\":\"p\", \"t\":\""+mega_parent+"\", \"n\":[{\"h\":\""+completion_handle+"\", \"t\":0, \"a\":\""+Bin2UrlBASE64(enc_att)+"\", \"k\":\""+Bin2UrlBASE64(encryptKey(i32a2bin(fkey), master_key))+"\"}], \"i\":\""+_req_id+"\", \"cr\" : [ [\"" + root_node + "\"] , [\""+completion_handle+"\"] , [0,0, \""+Bin2UrlBASE64(encryptKey(i32a2bin(fkey), share_key))+"\"]]}]";
 
@@ -588,7 +596,7 @@ public final class MegaAPI {
             
             byte[] enc_node_key = encryptKey(node_key, master_key);
             
-            URL url_api = new URL(API_URL+"/cs?id="+_seqno+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
+            URL url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
             
             String request="[{\"a\":\"p\", \"t\":\""+parent_node+"\", \"n\":[{\"h\":\"xxxxxxxx\",\"t\":1,\"a\":\""+Bin2UrlBASE64(enc_att)+"\",\"k\":\""+Bin2UrlBASE64(enc_node_key)+"\"}],\"i\":\""+_req_id+"\"}]";
             
@@ -621,7 +629,7 @@ public final class MegaAPI {
             
             byte[] enc_node_key_s = encryptKey(node_key, share_key);
             
-            URL url_api = new URL(API_URL+"/cs?id="+_seqno+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
+            URL url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
  
             String request="[{\"a\":\"p\", \"t\":\""+parent_node+"\", \"n\":[{\"h\":\"xxxxxxxx\",\"t\":1,\"a\":\""+Bin2UrlBASE64(enc_att)+"\",\"k\":\""+Bin2UrlBASE64(enc_node_key)+"\"}],\"i\":\""+_req_id+"\", \"cr\" : [ [\"" + root_node + "\"] , [\"xxxxxxxx\"] , [0,0, \""+Bin2UrlBASE64(enc_node_key_s)+"\"]]}]";
             
@@ -654,7 +662,7 @@ public final class MegaAPI {
             
             String request = "[{\"a\":\"l\", \"n\":\""+node+"\"}]";
  
-            URL url_api = new URL(API_URL+"/cs?id="+_seqno+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
+            URL url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
 
             String res=_rawRequest(request, url_api);
             
@@ -687,7 +695,7 @@ public final class MegaAPI {
             
             String request = "[{\"a\":\"l\", \"n\":\""+node+"\", \"i\":\""+_req_id+"\"}]";
  
-            URL url_api = new URL(API_URL+"/cs?id="+_seqno+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
+            URL url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
 
             String res=_rawRequest(request, url_api);
             
@@ -738,7 +746,7 @@ public final class MegaAPI {
             
             System.out.println(request);
             
-            URL url_api = new URL(API_URL+"/cs?id="+_seqno+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
+            URL url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+"&sid="+_sid+(API_KEY!=null?"&ak="+API_KEY:""));
                 
             String res=_rawRequest(request, url_api);
             
@@ -772,7 +780,7 @@ public final class MegaAPI {
 
         String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\"}]";
 
-        URL url_api = new URL(API_URL+"/cs?id="+_seqno+(API_KEY!=null?"&ak="+API_KEY:"")+"&n="+folder_id);
+        URL url_api = new URL(API_URL+"/cs?id="+String.valueOf(_seqno)+(API_KEY!=null?"&ak="+API_KEY:"")+"&n="+folder_id);
 
         String res=_rawRequest(request, url_api);
 

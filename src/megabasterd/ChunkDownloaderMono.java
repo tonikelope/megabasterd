@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
@@ -31,7 +32,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         System.out.println("Worker ["+getId()+"]: let's do some work!");
 
-        HttpURLConnection conn=null;
+        KissHttpURLConnection kissconn = null;
         
         try
         {
@@ -50,17 +51,19 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     worker_url=getDownload().getDownloadUrlForWorker();
                 }
                 
-                chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), worker_url);
+                chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), null);
                 
                 if(url == null || error) {
                     
                     url = new URL(worker_url+"/"+chunk.getOffset());
-                    conn = (HttpURLConnection) url.openConnection();
-                    conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-                    conn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
-                    conn.setRequestProperty("Connection", "close");
-                    is = new ThrottledInputStream(conn.getInputStream(), getDownload().getMain_panel().getStream_supervisor());
-                    http_status = conn.getResponseCode();
+                    
+                    kissconn = new KissHttpURLConnection(url);
+
+                    kissconn.doGET();
+                    
+                    is = new ThrottledInputStream(kissconn.getInputStream(), getDownload().getMain_panel().getStream_supervisor());
+                    
+                    http_status = kissconn.getStatus_code();
                 }
                 
                 error = false;
@@ -164,11 +167,15 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             getDownload().emergencyStopDownloader(ex.getMessage());
             
         } finally {
-            
-            if(conn!=null) {
-                
-                conn.disconnect();
+                 
+            if(kissconn != null) {
+                try {
+                    kissconn.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+            
         }
         
         getDownload().stopThisSlot(this);

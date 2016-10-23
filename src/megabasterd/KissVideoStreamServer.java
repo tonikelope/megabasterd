@@ -358,6 +358,8 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
             
             String httpmethod = xchg.getRequestMethod();
             
+            URLConnection urlConn = null;
+            
             try{
   
             Headers reqheaders=xchg.getRequestHeaders();
@@ -423,7 +425,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                
                 String file_ext = file_name.substring(file_name.lastIndexOf('.')+1).toLowerCase();
 
-                URLConnection urlConn;
+                
                 
           if(httpmethod.equals("HEAD")) {
                 
@@ -536,10 +538,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                     urlConn = url.openConnection();
                     
                     urlConn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-                    
-                    urlConn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
-                    
-                    urlConn.setRequestProperty("Connection", "close");
                     
                     is = urlConn.getInputStream();
 

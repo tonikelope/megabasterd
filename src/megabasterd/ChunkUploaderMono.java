@@ -16,6 +16,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import java.util.zip.GZIPInputStream;
 import javax.crypto.CipherInputStream;
@@ -43,7 +44,7 @@ public class ChunkUploaderMono extends ChunkUploader {
         byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
         boolean error = false;
         OutputStream out=null;
-        HttpURLConnection conn=null;
+        KissHttpURLConnection kissconn = null;
     
         try
         {
@@ -55,7 +56,7 @@ public class ChunkUploaderMono extends ChunkUploader {
             
             while(!isExit() && !getUpload().isStopped())
             { 
-                chunk = new Chunk(getUpload().nextChunkId(), getUpload().getFile_size(), worker_url);
+                chunk = new Chunk(getUpload().nextChunkId(), getUpload().getFile_size(), null);
 
                 f.seek(chunk.getOffset());
                 
@@ -72,14 +73,13 @@ public class ChunkUploaderMono extends ChunkUploader {
                 if(url == null || error) {
                 
                     url = new URL(worker_url+"/"+chunk.getOffset());
-                    conn = (HttpURLConnection) url.openConnection();
-                    conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-                    conn.setDoOutput(true);
-                    conn.setRequestMethod("POST");
-                    conn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
-                    conn.setRequestProperty("Connection", "close");
-                    conn.setFixedLengthStreamingMode(getUpload().getFile_size()-chunk.getOffset());
-                    out = new ThrottledOutputStream(conn.getOutputStream(), getUpload().getMain_panel().getStream_supervisor());
+                    
+                    kissconn = new KissHttpURLConnection(url);
+                    
+                    kissconn.doPOST(getUpload().getFile_size()-chunk.getOffset());
+                    
+                    out = new ThrottledOutputStream(kissconn.getOutputStream(), getUpload().getMain_panel().getStream_supervisor());
+   
                 }
                 
                 tot_bytes_up=0;
@@ -179,23 +179,25 @@ public class ChunkUploaderMono extends ChunkUploader {
                     
                 }
                 
-            if(!error && chunk.getOffset() + tot_bytes_up == getUpload().getFile_size() && conn != null) {
+            if(!error && chunk.getOffset() + tot_bytes_up == getUpload().getFile_size() && kissconn != null) {
                 
-                http_status = conn.getResponseCode();
+                http_status = kissconn.getStatus_code();
+                
+                String content_length = kissconn.getResponseHeader("Content-Length");
             
                 if (http_status != HttpURLConnection.HTTP_OK )
                 {   
                     throw new IOException("UPLOAD FAILED! (HTTP STATUS: "+ http_status+")");
 
-                } else if(!(conn.getContentLengthLong() > 0 || conn.getContentLengthLong() == -1)) {
+                } else if(!(content_length == null || Long.parseLong(content_length) > 0)) {
                     
                     throw new IOException("UPLOAD FAILED! (Empty completion handle!)");
                     
                 } else {
 
-                        String content_encoding = conn.getContentEncoding();
+                        String content_encoding = kissconn.getResponseHeader("Content-Encoding");
 
-                        InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(conn.getInputStream()):conn.getInputStream();
+                        InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(kissconn.getInputStream()):kissconn.getInputStream();
 
                         ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
@@ -234,9 +236,13 @@ public class ChunkUploaderMono extends ChunkUploader {
             
         } finally {
             
-            if(conn!=null) {
+            if(kissconn!=null) {
                 
-                conn.disconnect();
+                try {
+                    kissconn.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(ChunkUploaderMono.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
         

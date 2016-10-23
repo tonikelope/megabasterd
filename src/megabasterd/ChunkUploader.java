@@ -144,13 +144,10 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                 }while(!_exit && !_upload.isStopped() && chunk.getOutputStream().size()<chunk.getSize());
                 
                 URL url = new URL(chunk.getUrl());
-                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-                conn.setDoOutput(true);
-                conn.setRequestMethod("POST");
-                conn.setRequestProperty("User-Agent", MegaAPI.USER_AGENT);
-                conn.setRequestProperty("Connection", "close");
-                conn.setFixedLengthStreamingMode(chunk.getSize());
+                
+                KissHttpURLConnection kissconn = new KissHttpURLConnection(url);
+                
+                kissconn.doPOST(chunk.getSize());
                 
                 tot_bytes_up=0;
                 
@@ -162,7 +159,7 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                         
                         CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())));
 
-                        out = new ThrottledOutputStream(conn.getOutputStream(), _upload.getMain_panel().getStream_supervisor());
+                        out = new ThrottledOutputStream(kissconn.getOutputStream(), _upload.getMain_panel().getStream_supervisor());
                         
                         System.out.println(" Subiendo chunk "+chunk.getId()+" desde worker "+ _id +"...");
 
@@ -186,7 +183,7 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                         
                         if(!_upload.isStopped()) {
                             
-                            http_status = conn.getResponseCode();
+                            http_status = kissconn.getStatus_code();
 
                             if (http_status != HttpURLConnection.HTTP_OK )
                             {   
@@ -209,11 +206,13 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                                     
                                 } else {
                                     
-                                    if((conn.getContentLengthLong() > 0 || conn.getContentLengthLong() == -1) && _upload.getCompletion_handle() == null) {
+                                    String content_length = kissconn.getResponseHeader("Content-Length");
+                                    
+                                    if((content_length == null || Long.parseLong(content_length) > 0) && _upload.getCompletion_handle() == null) {
                                         
-                                        String content_encoding = conn.getContentEncoding();
+                                        String content_encoding = kissconn.getResponseHeader("Content-Encoding");
             
-                                        InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(conn.getInputStream()):conn.getInputStream();
+                                        InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(kissconn.getInputStream()):kissconn.getInputStream();
 
                                         ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
@@ -295,7 +294,7 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                     getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                     
                 } finally {
-                    conn.disconnect();
+                    kissconn.close();
                 }
                 
             }

@@ -11,6 +11,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -313,7 +314,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     
                     swingReflectionInvoke("setVisible", unlock_accounts_button, false);
                    
-                    for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+                    for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
 
                     HashMap<String,Object> data = (HashMap)pair.getValue();
                     
@@ -341,7 +342,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 
                 swingReflectionInvoke("setVisible", unlock_accounts_button, false);
               
-                for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+                for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
             
                     HashMap<String,Object> data = (HashMap)pair.getValue();
 
@@ -1115,7 +1116,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                             insertSettingValueInDB("mega_master_pass_hash", _main_panel.getMega_master_pass_hash());
 
-                            for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+                            for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
 
                                 HashMap<String,Object> data = (HashMap)pair.getValue();
 
@@ -1212,7 +1213,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         swingReflectionInvoke("setEnabled", delete_all_accounts_button, true);
 
-                        for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+                        for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
 
                         HashMap<String,Object> data = (HashMap)pair.getValue();
 
@@ -1276,7 +1277,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 
                 mega_accounts_table.setModel(new_model);
 
-                for (HashMap.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+                for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
                     
                     try {
                         DBTools.deleteMegaAccount((String) pair.getKey());
