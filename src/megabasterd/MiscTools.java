@@ -584,6 +584,8 @@ public final class MiscTools {
             
             httpget.addHeader("User-Agent", MainPanel.DEFAULT_USER_AGENT);
             
+            httpget.addHeader("Connection", "close");
+            
             try(CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
                 
                 Header content_encoding = httpresponse.getEntity().getContentEncoding();
@@ -935,6 +937,8 @@ public final class MiscTools {
 
             HttpGet httpget = new HttpGet(new URI(string_url+"/0"));
             
+            httpget.addHeader("Connection", "close");
+            
             try(CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
                 
                 url_ok = (httpresponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
@@ -1005,7 +1009,6 @@ public final class MiscTools {
                         .add(new RequestContent())
                         .add(new RequestTargetHost())
                         .add(new RequestConnControl())
-                        .add(new RequestExpectContinue())
                         .add(new RequestAddCookies())
                         .add(new ResponseProcessCookies())        
                         .build()

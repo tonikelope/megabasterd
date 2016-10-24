@@ -369,6 +369,8 @@ public final class MegaAPI {
   
         }
         
+        _seqno++;
+        
         return response;
         
     }

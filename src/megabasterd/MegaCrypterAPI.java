@@ -63,7 +63,6 @@ public final class MegaCrypterAPI {
                 try {
                     httppost = new HttpPost(url_api.toURI());
                 
-                
                 httppost.setHeader("Content-type", "application/json");
                 
                 httppost.setHeader("User-Agent", MainPanel.DEFAULT_USER_AGENT);
