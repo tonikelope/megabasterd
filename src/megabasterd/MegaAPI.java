@@ -5,8 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,6 +26,12 @@ import static megabasterd.MiscTools.genRandomByteArray;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
 import static megabasterd.MiscTools.i32a2bin;
 import static megabasterd.MiscTools.mpi2big;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.codehaus.jackson.map.ObjectMapper;
 
 
@@ -267,96 +272,93 @@ public final class MegaAPI {
                 }
             }
 
-        } catch (Exception ex) {
+        } catch (IOException | MegaAPIException ex) {
             getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
 
     }
 
-    private String _rawRequest(String request, URL url_api) throws MegaAPIException {
+    private String _rawRequest(String request, URL url_api) throws IOException, MegaAPIException {
         
-        boolean error;
+        String response=null;
+        
+        try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+            
+            boolean error;
         
         int conta_error=0;
         
-        String response=null;
-  
+        HttpPost httppost;
+        
         do{
-            error = false;
-        
-        KissHttpURLConnection kissconn = new KissHttpURLConnection(url_api);
- 
-        kissconn.setRequestHeader("Content-Type", "application/json");
-        
-        kissconn.doPOST(request.getBytes().length);
-        
-        try {
-            kissconn.getOutputStream().write(request.getBytes());
-        } catch (IOException ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        if (kissconn.getStatus_code() != HttpURLConnection.HTTP_OK)
-        {   
-            System.out.println("Failed : HTTP error code : " + kissconn.getStatus_code());
-
             error = true;
             
-       } else {
+        try {
+            
+            httppost = new HttpPost(url_api.toURI());
+            
+            httppost.setHeader("Content-type", "application/json");
+            
+            httppost.addHeader("Connection", "close");
+            
+            httppost.setEntity(new StringEntity(request));
+            
+            try(CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
+            
+            if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+            {
+                System.out.println("Failed : HTTP error code : " + httpresponse.getStatusLine().getStatusCode());
+                
+            } else {
+                
+                InputStream is;
 
-            InputStream is = null;
-                try {
-                    String content_encoding = kissconn.getResponseHeader("Content-Encoding");
-                    is = (content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(kissconn.getInputStream()):kissconn.getInputStream();
-                    ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
-                    byte[] buffer = new byte[16*1024];
-                    int reads;
-                    while( (reads=is.read(buffer)) != -1 ) {
-                        
-                        byte_res.write(buffer, 0, reads);
-                    }   response = new String(byte_res.toByteArray());
+                Header content_encoding = httpresponse.getEntity().getContentEncoding();
+
+                is = (content_encoding!=null && content_encoding.getValue().equals("gzip"))?new GZIPInputStream(httpresponse.getEntity().getContent()):httpresponse.getEntity().getContent();
+
+                ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+
+                byte[] buffer = new byte[16*1024];
+
+                int reads;
+
+                while( (reads=is.read(buffer)) != -1 ) {
+
+                    byte_res.write(buffer, 0, reads);
+                }   
+
+                response = new String(byte_res.toByteArray());
+
+                if(response.length() > 0) {
+                    
                     int mega_error;
+
                     if( (mega_error=checkMEGAError(response))!=0 )
                     {
-                        if(mega_error == -3) {
-                            
-                            error = true;
-                            
-                        } else {
-                            
+                        if(mega_error != -3) {
                             throw new MegaAPIException(String.valueOf(mega_error));
                         }
-                    }
-                } catch (IOException ex) { 
-                    
-                    Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
-                    
-                } finally {
-                    try {
-                        kissconn.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                        
+                    } else {
+                        error = false;
                     }
                 }
+            } 
+            
             }
         
-            if(error) {
+        } catch (IOException | URISyntaxException ex) {
+            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        if(error) {
 
-                try {
-                    
-                    try {
-                        Thread.sleep( getWaitTimeExpBackOff(conta_error++) );
-                    } catch (InterruptedException ex) {
-                        getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    
-                    String new_url = url_api.getProtocol()+"://"+url_api.getAuthority()+url_api.getFile().replace("id\\=[0-9]+", "id="+String.valueOf(++_seqno));
-                    
-                    url_api = new URL(new_url);
-                    
-                } catch (MalformedURLException ex) {
-                    Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
-                }
+            try {
+                Thread.sleep( getWaitTimeExpBackOff(conta_error++) );
+            } catch (InterruptedException ex) {
+                getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            }
                 
             } else {
 
@@ -364,7 +366,9 @@ public final class MegaAPI {
             }
 
         }while(error);
-
+  
+        }
+        
         return response;
         
     }

@@ -2,12 +2,17 @@ package megabasterd;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 
 /**
@@ -111,7 +116,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
         
         System.out.println("Worker ["+_id+"]: let's do some work!");
 
-        try
+        try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient())
         {
             conta_error = 0;
             
@@ -125,24 +130,22 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                 }
                 
                 chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url);
+                
+                HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
+                
+                httpget.addHeader("Connection", "close");
 
-                URL url = new URL(chunk.getUrl());
-                
-                KissHttpURLConnection kissconn = new KissHttpURLConnection(url);
-                
-                kissconn.doGET();
-                
                 error = false;
 
-                try{
+                try(CloseableHttpResponse httpresponse = httpclient.execute(httpget)){
 
                     if(!_exit && !_download.isStopped()) {
                         
-                        is = new ThrottledInputStream(kissconn.getInputStream(), _download.getMain_panel().getStream_supervisor());
+                        is = new ThrottledInputStream(httpresponse.getEntity().getContent(), _download.getMain_panel().getStream_supervisor());
 
-                        http_status = kissconn.getStatus_code();
+                        http_status = httpresponse.getStatusLine().getStatusCode();
 
-                        if ( http_status != HttpURLConnection.HTTP_OK )
+                        if ( http_status != HttpStatus.SC_OK )
                         {   
                             System.out.println("Failed : HTTP error code : " + http_status);
                             
@@ -235,9 +238,6 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                } catch (InterruptedException ex) {
                     getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
                     
-                } finally {
-                    
-                    kissconn.close();
                 }
             }
         
@@ -246,6 +246,8 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
         }catch (IOException ex) {
             _download.emergencyStopDownloader(ex.getMessage());
             getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
         }
   
         _download.stopThisSlot(this);

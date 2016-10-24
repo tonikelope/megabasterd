@@ -3,8 +3,7 @@ package megabasterd;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
@@ -13,6 +12,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import java.util.zip.GZIPInputStream;
 import javax.crypto.BadPaddingException;
@@ -26,6 +26,12 @@ import static megabasterd.MiscTools.cleanFilePath;
 import static megabasterd.MiscTools.cleanFilename;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.codehaus.jackson.map.ObjectMapper;
 
 
@@ -35,86 +41,97 @@ import org.codehaus.jackson.map.ObjectMapper;
  */
 public final class MegaCrypterAPI {
     
-    public static final String USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0";
     public static final Set<String> PASS_CACHE = new HashSet<>();
     public static final Object PASS_LOCK = new Object();
     
     private static String _rawRequest(String request, URL url_api) throws IOException, MegaCrypterAPIException {
-        
-        boolean error;
-        
-        int conta_error=0;
-        
+       
         String response=null;
         
-        do{
+        try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient())
+        {
+            boolean error;
+        
+            int conta_error=0;
             
-            error = false;
+            HttpPost httppost;
             
-            HttpURLConnection conn = (HttpURLConnection) url_api.openConnection();
-            conn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
-            conn.setDoOutput(true);
-            conn.setRequestMethod("POST");
-            conn.setRequestProperty("Content-Type", "application/json");
-            conn.setRequestProperty("User-Agent", USER_AGENT);
-            conn.setRequestProperty("Connection", "close");
-
-            OutputStream out;
-            out = conn.getOutputStream();
-            out.write(request.getBytes());
-            out.close();
-
-            if (conn.getResponseCode() != HttpURLConnection.HTTP_OK)
-            {    
-                System.out.println("Failed : HTTP error code : " + conn.getResponseCode());
-
+            do{
+            
                 error = true;
-                
-            } else {
-                
-                String content_encoding = conn.getContentEncoding();
-
-                InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(conn.getInputStream()):conn.getInputStream();
-
-                ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
-
-                byte[] buffer = new byte[16*1024];
-
-                int reads;
-
-                while( (reads=is.read(buffer)) != -1 ) {
-
-                    byte_res.write(buffer, 0, reads);
-                }
-
-                response = new String(byte_res.toByteArray());
-
-                conn.disconnect();
-
-                int mc_error;
-
-                if( (mc_error=MegaCrypterAPI.checkMCError(response))!=0 )
-                {
-                    throw new MegaCrypterAPIException(String.valueOf(mc_error));
-                }
-            }
-            
-            if(error) {
 
                 try {
-                    Thread.sleep( getWaitTimeExpBackOff(conta_error++) );
-                } catch (InterruptedException ex) {
-                    getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                    httppost = new HttpPost(url_api.toURI());
+                
+                
+                httppost.setHeader("Content-type", "application/json");
+                
+                httppost.setHeader("User-Agent", MainPanel.DEFAULT_USER_AGENT);
+            
+                httppost.addHeader("Connection", "close");
+            
+                httppost.setEntity(new StringEntity(request));
+
+                try(CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
+                    
+                    if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK)
+                    {    
+                        System.out.println("Failed : HTTP error code : " + httpresponse.getStatusLine().getStatusCode());
+
+                    } else {
+
+                        Header content_encoding = httpresponse.getEntity().getContentEncoding();
+
+                        InputStream is=(content_encoding!=null && content_encoding.getValue().equals("gzip"))?new GZIPInputStream(httpresponse.getEntity().getContent()):httpresponse.getEntity().getContent();
+
+                        ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+
+                        byte[] buffer = new byte[16*1024];
+
+                        int reads;
+
+                        while( (reads=is.read(buffer)) != -1 ) {
+
+                            byte_res.write(buffer, 0, reads);
+                        }
+
+                        response = new String(byte_res.toByteArray());
+
+                        if(response.length() > 0) {
+                            
+                            int mc_error;
+
+                            if( (mc_error=MegaCrypterAPI.checkMCError(response))!=0 )
+                            {
+                                throw new MegaCrypterAPIException(String.valueOf(mc_error));
+                                
+                            } else {
+                                
+                                error = false;
+                            }
+                        }
+                    }
                 }
-            } else {
+                
+                } catch (URISyntaxException ex) {
+                    Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, null, ex);
+                }
 
-                conta_error = 0;
-            }
-            
-            conn.disconnect();
-            
-        }while(error);
+                if(error) {
 
+                    try {
+                        Thread.sleep( getWaitTimeExpBackOff(conta_error++) );
+                    } catch (InterruptedException ex) {
+                        getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else {
+
+                    conta_error = 0;
+                }
+
+            }while(error);
+        }
+  
         return response;
         
     }

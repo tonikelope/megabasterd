@@ -16,12 +16,9 @@ import java.io.UnsupportedEncodingException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -55,12 +52,27 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
 import static megabasterd.MainPanel.VERSION;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.RequestAddCookies;
+import org.apache.http.client.protocol.RequestDefaultHeaders;
+import org.apache.http.client.protocol.ResponseProcessCookies;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.protocol.HttpProcessorBuilder;
+import org.apache.http.protocol.RequestConnControl;
+import org.apache.http.protocol.RequestContent;
+import org.apache.http.protocol.RequestExpectContinue;
+import org.apache.http.protocol.RequestTargetHost;
 
 public final class MiscTools {
     
     public static final int EXP_BACKOFF_BASE=2;
     public static final int EXP_BACKOFF_SECS_RETRY=1;
     public static final int EXP_BACKOFF_MAX_WAIT_TIME=128;
+    
     private static final ConcurrentHashMap<String, Method> REFLECTION_METHOD_CACHE = new ConcurrentHashMap<>();
     
     private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = new Comparator< DefaultMutableTreeNode>() {
@@ -564,32 +576,41 @@ public final class MiscTools {
     
     public static String deflateURL(String link) throws MalformedURLException, IOException {
         
-        String urlString = "http://tinyurl.com/api-create.php?url="+URLEncoder.encode(link.trim(), "UTF-8");
+        String response = null;
         
-        URL url = new URL(urlString);
-        
-        URLConnection conn = url.openConnection();
-        
-        conn.setRequestProperty("User-Agent", MegaCrypterAPI.USER_AGENT);
+        try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
 
-        String content_encoding = conn.getContentEncoding();
+            HttpGet httpget = new HttpGet(new URI("http://tinyurl.com/api-create.php?url="+URLEncoder.encode(link.trim(), "UTF-8")));
             
-        InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(conn.getInputStream()):conn.getInputStream();
+            httpget.addHeader("User-Agent", MainPanel.DEFAULT_USER_AGENT);
+            
+            try(CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+                
+                Header content_encoding = httpresponse.getEntity().getContentEncoding();
+            
+                InputStream is=(content_encoding!=null && content_encoding.getValue().equals("gzip"))?new GZIPInputStream(httpresponse.getEntity().getContent()):httpresponse.getEntity().getContent();
 
-        ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+                ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
-        byte[] buffer = new byte[16*1024];
+                byte[] buffer = new byte[16*1024];
 
-        int reads;
+                int reads;
 
-        while( (reads=is.read(buffer)) != -1 ) {
+                while( (reads=is.read(buffer)) != -1 ) {
 
-            byte_res.write(buffer, 0, reads);
+                    byte_res.write(buffer, 0, reads);
+                }
+            
+                response = new String(byte_res.toByteArray()).trim();
+            }
+  
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | URISyntaxException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
-            
-        String response = new String(byte_res.toByteArray()).trim();
         
-return findFirstRegex("http", response, 0)!=null?response:link;
+        return findFirstRegex("http", response, 0)!=null?response:link;
     }
     
     public static String formatBytes(Long bytes) {
@@ -910,21 +931,18 @@ return findFirstRegex("http", response, 0)!=null?response:link;
         
         boolean url_ok=false;
         
-        try {
-            
-            URL url = new URL(string_url+"/0");
-            
-            KissHttpURLConnection kissconn = new KissHttpURLConnection(url);
-            
-            kissconn.doGET();
+        try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
 
-            url_ok=(kissconn.getStatus_code() == HttpURLConnection.HTTP_OK);
+            HttpGet httpget = new HttpGet(new URI(string_url+"/0"));
             
-            kissconn.close();
+            try(CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+                
+                url_ok = (httpresponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
+            }
   
         } catch (MalformedURLException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
+        } catch (IOException | URISyntaxException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
         
@@ -979,49 +997,19 @@ return findFirstRegex("http", response, 0)!=null?response:link;
         }
     }
     
-    public static byte[] decodeChunkedByteArray(byte[] data) {
+    public static CloseableHttpClient getApacheKissHttpClient() {
         
-        ByteArrayOutputStream decoded = new ByteArrayOutputStream();
-        
-        boolean EOF = false;
-        
-        int i = 0;
-        
-        do {
-            
-            int b;
-            
-            ByteArrayOutputStream temp = new ByteArrayOutputStream();
-                    
-            do{
-
-                b = data[i++];
-                
-                temp.write(b);
-
-            }while(b != -1 && b != 0x0A);
-            
-            long chunk_length;
-            
-            String cl = new String(temp.toByteArray()).trim();
-            
-            chunk_length = Long.parseLong(cl.length()>0?cl:"-1",16);
-
-            if(chunk_length > 0) {
-                
-                for(long j=0; j<chunk_length; j++) {
-                    
-                    decoded.write(data[i++]);
-                }
-                
-            } else if(chunk_length == 0) {
-                
-                EOF = true;
-            }
-
-        } while(!EOF);
-        
-        return decoded.toByteArray();
+        return HttpClients.custom().setHttpProcessor(
+                    HttpProcessorBuilder.create()
+                        .add(new RequestDefaultHeaders())
+                        .add(new RequestContent())
+                        .add(new RequestTargetHost())
+                        .add(new RequestConnControl())
+                        .add(new RequestExpectContinue())
+                        .add(new RequestAddCookies())
+                        .add(new ResponseProcessCookies())        
+                        .build()
+                    ).build();
     }
-   
+    
 }

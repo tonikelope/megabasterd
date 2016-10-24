@@ -2,13 +2,17 @@ package megabasterd;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 
 /**
@@ -29,19 +33,17 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         int reads, max_reads, conta_error, http_status=200;
         byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
         boolean error;
+        HttpGet httpget = null;
+        CloseableHttpResponse httpresponse=null;
 
         System.out.println("Worker ["+getId()+"]: let's do some work!");
 
-        KissHttpURLConnection kissconn = null;
-        
-        try
+        try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient())
         {
             conta_error = 0;
             
             error = false;
-            
-            URL url = null;
-            
+
             InputStream is=null;
 
             while(!isExit() && !getDownload().isStopped())
@@ -49,26 +51,30 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                 if(worker_url == null || error) {
                     
                     worker_url=getDownload().getDownloadUrlForWorker();
+                    
+                    if(httpresponse != null) {
+                        httpresponse.close();
+                    }
                 }
                 
                 chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), null);
                 
-                if(url == null || error) {
+                if(httpget == null || error) {
                     
-                    url = new URL(worker_url+"/"+chunk.getOffset());
+                    httpget = new HttpGet(new URI(worker_url+"/"+chunk.getOffset()));
+                
+                    httpget.addHeader("Connection", "close");
                     
-                    kissconn = new KissHttpURLConnection(url);
-
-                    kissconn.doGET();
+                    httpresponse = httpclient.execute(httpget);
                     
-                    is = new ThrottledInputStream(kissconn.getInputStream(), getDownload().getMain_panel().getStream_supervisor());
+                    is = new ThrottledInputStream(httpresponse.getEntity().getContent(), getDownload().getMain_panel().getStream_supervisor());
                     
-                    http_status = kissconn.getStatus_code();
+                    http_status = httpresponse.getStatusLine().getStatusCode();
                 }
                 
                 error = false;
                 
-                if(http_status != HttpURLConnection.HTTP_OK){
+                if(http_status != HttpStatus.SC_OK){
                     
                     System.out.println("Failed : HTTP error code : " + http_status);
                     
@@ -166,16 +172,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             
             getDownload().emergencyStopDownloader(ex.getMessage());
             
-        } finally {
-                 
-            if(kissconn != null) {
-                try {
-                    kissconn.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-            
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         getDownload().stopThisSlot(this);

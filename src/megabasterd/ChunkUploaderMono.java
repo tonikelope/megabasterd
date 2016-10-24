@@ -9,19 +9,31 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.io.RandomAccessFile;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import java.util.zip.GZIPInputStream;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
+import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
+import org.apache.http.Header;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.InputStreamEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  *
@@ -40,19 +52,19 @@ public class ChunkUploaderMono extends ChunkUploader {
         
         String worker_url=getUpload().getUl_url();
         Chunk chunk;
-        int reads, to_read, conta_error, re, http_status, tot_bytes_up=0;
+        int reads, to_read, conta_error, re, http_status, tot_bytes_up=-1;
         byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
         boolean error = false;
+        CloseableHttpResponse httpresponse;
+        FutureTask<CloseableHttpResponse> futureTask = null;
+        
         OutputStream out=null;
-        KissHttpURLConnection kissconn = null;
-    
-        try
+        
+        try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient())
         {
             RandomAccessFile f = new RandomAccessFile(getUpload().getFile_name(), "r");
             
             conta_error = 0;
-            
-            URL url = null;
             
             while(!isExit() && !getUpload().isStopped())
             { 
@@ -70,15 +82,33 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                 }while(!isExit() && !getUpload().isStopped() && chunk.getOutputStream().size()<chunk.getSize());
                 
-                if(url == null || error) {
+                if(tot_bytes_up == -1 || error) {
+                    
+                    final HttpPost httppost = new HttpPost(new URI(worker_url+"/"+chunk.getOffset()));
                 
-                    url = new URL(worker_url+"/"+chunk.getOffset());
+                    final long postdata_length = getUpload().getFile_size()-chunk.getOffset();
                     
-                    kissconn = new KissHttpURLConnection(url);
+                    httppost.addHeader("Connection", "close");
                     
-                    kissconn.doPOST(getUpload().getFile_size()-chunk.getOffset());
-                    
-                    out = new ThrottledOutputStream(kissconn.getOutputStream(), getUpload().getMain_panel().getStream_supervisor());
+                    final PipedInputStream pipein = new PipedInputStream();
+                        
+                    PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                        
+                    Callable c = new Callable() {
+                        @Override
+                        public CloseableHttpResponse call() throws IOException {
+
+                            httppost.setEntity(new InputStreamEntity(pipein, postdata_length));
+
+                            return httpclient.execute(httppost);
+                        }
+                    };
+
+                    futureTask = new FutureTask<>(c);
+
+                    THREAD_POOL.execute(futureTask);
+
+                    out = new ThrottledOutputStream(pipeout, getUpload().getMain_panel().getStream_supervisor());
    
                 }
                 
@@ -158,6 +188,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                         
                         getUpload().rejectChunkId(chunk.getId());
                     }
+                        
                }
                catch (IOException ex) 
                {      
@@ -179,25 +210,27 @@ public class ChunkUploaderMono extends ChunkUploader {
                     
                 }
                 
-            if(!error && chunk.getOffset() + tot_bytes_up == getUpload().getFile_size() && kissconn != null) {
+            if(!error && chunk.getOffset() + tot_bytes_up == getUpload().getFile_size() && futureTask != null) {
                 
-                http_status = kissconn.getStatus_code();
+                httpresponse = futureTask.get();
                 
-                String content_length = kissconn.getResponseHeader("Content-Length");
+                http_status = httpresponse.getStatusLine().getStatusCode();
+                
+                long content_length = httpresponse.getEntity().getContentLength();
             
-                if (http_status != HttpURLConnection.HTTP_OK )
+                if (http_status != HttpStatus.SC_OK )
                 {   
                     throw new IOException("UPLOAD FAILED! (HTTP STATUS: "+ http_status+")");
 
-                } else if(!(content_length == null || Long.parseLong(content_length) > 0)) {
+                } else if(content_length <= 0) {
                     
                     throw new IOException("UPLOAD FAILED! (Empty completion handle!)");
                     
                 } else {
 
-                        String content_encoding = kissconn.getResponseHeader("Content-Encoding");
+                        Header content_encoding = httpresponse.getEntity().getContentEncoding();
 
-                        InputStream is=(content_encoding!=null && content_encoding.equals("gzip"))?new GZIPInputStream(kissconn.getInputStream()):kissconn.getInputStream();
+                        InputStream is=(content_encoding!=null && content_encoding.getValue().equals("gzip"))?new GZIPInputStream(httpresponse.getEntity().getContent()):httpresponse.getEntity().getContent();
 
                         ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
@@ -223,6 +256,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                        } 
                 }
                 
+                httpresponse.close();
             }
         }
         
@@ -234,17 +268,9 @@ public class ChunkUploaderMono extends ChunkUploader {
             
             getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
             
-        } finally {
-            
-            if(kissconn!=null) {
-                
-                try {
-                    kissconn.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(ChunkUploaderMono.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
+        } catch (URISyntaxException | InterruptedException | ExecutionException ex) {
+            Logger.getLogger(ChunkUploaderMono.class.getName()).log(Level.SEVERE, null, ex);
+        } 
         
         getUpload().stopThisSlot(this);
 

@@ -9,11 +9,9 @@ import static java.awt.Frame.NORMAL;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -29,6 +27,10 @@ import static megabasterd.MiscTools.checkMegaDownloadUrl;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
 import static megabasterd.MiscTools.swingReflectionInvoke;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.CloseableHttpClient;
 
 
 public final class KissVideoStreamServer implements HttpHandler, SecureNotifiable {
@@ -358,9 +360,9 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
             
             String httpmethod = xchg.getRequestMethod();
             
-            URLConnection urlConn = null;
+            HttpGet httpget;
             
-            try{
+            try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()){
   
             Headers reqheaders=xchg.getRequestHeaders();
                 
@@ -441,7 +443,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                 
                 resheaders.add("Connection", "close");
                 
-                xchg.sendResponseHeaders(HttpURLConnection.HTTP_OK, 0);
+                xchg.sendResponseHeaders(HttpStatus.SC_OK, 0);
                 
             } else if(httpmethod.equals("GET")) {
                 
@@ -522,49 +524,47 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
 
                         resheaders.add("Content-Range", "bytes "+ranges[0]+"-"+(ranges[1]>=0?ranges[1]:(file_size-1))+"/"+file_size);
 
-                        xchg.sendResponseHeaders(HttpURLConnection.HTTP_PARTIAL, clength);
+                        xchg.sendResponseHeaders(HttpStatus.SC_PARTIAL_CONTENT, clength);
 
                         url = new URL(cookRangeUrl(temp_url, ranges, sync_bytes));
 
                     } else {
 
-                        xchg.sendResponseHeaders(HttpURLConnection.HTTP_OK, file_size);
+                        xchg.sendResponseHeaders(HttpStatus.SC_OK, file_size);
 
                         url = new URL(temp_url);
                     }
                     
                     updateStatus(WORKER_STATUS_CONNECT);
-                     
-                    urlConn = url.openConnection();
                     
-                    urlConn.setConnectTimeout(MainPanel.CONNECTION_TIMEOUT);
+                    httpget = new HttpGet(url.toURI());
                     
-                    is = urlConn.getInputStream();
+                    httpget.addHeader("Connection", "close");
 
-                    byte[] iv = CryptTools.initMEGALinkKeyIV(file_key);
-
-                    cis = new CipherInputStream(is, CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", CryptTools.initMEGALinkKey(file_key), (header_range!=null && (ranges[0]-sync_bytes)>0)?CryptTools.forwardMEGALinkKeyIV(iv, ranges[0]-sync_bytes):iv));
-
-                    os = xchg.getResponseBody();
-
-                    cis.skip(sync_bytes);
-                    
-                    updateStatus(WORKER_STATUS_STREAM);
-                    
-                    while((reads=cis.read(buffer))!=-1) {
+                    try(CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
                         
-                        os.write(buffer, 0, reads);
-                    }
+                        is = httpresponse.getEntity().getContent();
 
+                        byte[] iv = CryptTools.initMEGALinkKeyIV(file_key);
+
+                        cis = new CipherInputStream(is, CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", CryptTools.initMEGALinkKey(file_key), (header_range!=null && (ranges[0]-sync_bytes)>0)?CryptTools.forwardMEGALinkKeyIV(iv, ranges[0]-sync_bytes):iv));
+
+                        os = xchg.getResponseBody();
+
+                        cis.skip(sync_bytes);
+
+                        updateStatus(WORKER_STATUS_STREAM);
+
+                        while((reads=cis.read(buffer))!=-1) {
+
+                            os.write(buffer, 0, reads);
+                        }
+                    }
             }
         }
         catch(Exception ex){ }
         finally
-        {         
-            if(cis!=null) {
-                cis.close();
-            }
-            
+        {      
             xchg.close();
 
             updateStatus(WORKER_STATUS_EXIT);
