@@ -62,11 +62,11 @@ public class ChunkUploaderMono extends ChunkUploader {
             
             OutputStream out=null;
             
+            FutureTask<CloseableHttpResponse> futureTask = null;
+            
             while(!isExit() && !getUpload().isStopped())
             { 
                 CloseableHttpResponse httpresponse=null;
-                
-                FutureTask<CloseableHttpResponse> futureTask = null;
 
                 chunk = new Chunk(getUpload().nextChunkId(), getUpload().getFile_size(), null);
 
@@ -215,16 +215,10 @@ public class ChunkUploaderMono extends ChunkUploader {
                     httpresponse = futureTask.get();
                     
                     http_status = httpresponse.getStatusLine().getStatusCode();
-                
-                    long content_length = httpresponse.getEntity().getContentLength();
 
                     if (http_status != HttpStatus.SC_OK )
                     {   
                         throw new IOException("UPLOAD FAILED! (HTTP STATUS: "+ http_status+")");
-
-                    } else if(content_length <= 0) {
-
-                        throw new IOException("UPLOAD FAILED! (Empty completion handle!)");
 
                     } else {
 
@@ -253,8 +247,6 @@ public class ChunkUploaderMono extends ChunkUploader {
                                 }
                            } 
                     }
-
-                    httpresponse.close();
 
                     }catch(ExecutionException exception) {}
                     finally{
