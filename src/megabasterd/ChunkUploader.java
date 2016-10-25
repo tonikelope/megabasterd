@@ -18,12 +18,10 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
-import java.util.zip.GZIPInputStream;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
-import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -176,8 +174,8 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                         final PipedInputStream pipein = new PipedInputStream();
                         
                         PipedOutputStream pipeout = new PipedOutputStream(pipein);
-                        
-                        Callable c = new Callable() {
+                   
+                        FutureTask<CloseableHttpResponse> futureTask = new FutureTask<>(new Callable() {
                             @Override
                             public CloseableHttpResponse call() throws IOException {
                                 
@@ -185,9 +183,7 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                                 
                                 return httpclient.execute(httppost);
                             }
-                        };
-                        
-                        FutureTask<CloseableHttpResponse> futureTask = new FutureTask<>(c);
+                        });
                         
                         THREAD_POOL.execute(futureTask);
                         
@@ -213,14 +209,24 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                             }
                         }
                         
+                        out.close();
                         
                         if(!_upload.isStopped()) {
                             
-                            httpresponse = futureTask.get();
+                            try{
                             
-                            http_status = httpresponse.getStatusLine().getStatusCode();
+                                if(!_exit) {
+                                    
+                                    httpresponse = futureTask.get();
 
-                            if (http_status != HttpStatus.SC_OK )
+                                } else {
+                                    
+                                    futureTask.cancel(true);
+                                    
+                                    httpresponse = null;
+                                }
+                            
+                            if (httpresponse != null && (http_status = httpresponse.getStatusLine().getStatusCode()) != HttpStatus.SC_OK )
                             {   
                                 System.out.println("Failed : HTTP error code : " + http_status);
 
@@ -236,14 +242,12 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
 
                                         _upload.getProgress_meter().secureNotify();
                                     }
-                                    
+
                                     error = true;
                                     
                                 } else {
                                     
-                                    long content_length = httpresponse.getEntity().getContentLength();
-                                    
-                                    if((content_length > 0) && _upload.getCompletion_handle() == null) {
+                                    if(httpresponse != null && _upload.getCompletion_handle() == null) {
                                         
                                         InputStream is=httpresponse.getEntity().getContent();
                                         
@@ -303,7 +307,17 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                                 conta_error = 0;
                             }
                             
+                           }catch(ExecutionException exception){}
+                           finally{
+                        
+                                if(httpresponse != null) {
+
+                                    httpresponse.close();
+                                }
+
+                            }
                         }
+
                         
                     } else if(_exit) {
                         
@@ -326,8 +340,6 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                 } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | InterruptedException ex) {
                     getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                     
-                } catch (ExecutionException ex) {
-                    Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                 } finally {
                     
                     if( httpresponse != null ) {

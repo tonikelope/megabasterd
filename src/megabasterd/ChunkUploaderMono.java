@@ -23,12 +23,10 @@ import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
-import java.util.zip.GZIPInputStream;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
-import org.apache.http.Header;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -55,19 +53,21 @@ public class ChunkUploaderMono extends ChunkUploader {
         int reads, to_read, conta_error, re, http_status, tot_bytes_up=-1;
         byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
         boolean error = false;
-        CloseableHttpResponse httpresponse;
-        FutureTask<CloseableHttpResponse> futureTask = null;
-        
-        OutputStream out=null;
-        
+
         try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient())
         {
             RandomAccessFile f = new RandomAccessFile(getUpload().getFile_name(), "r");
             
             conta_error = 0;
             
+            OutputStream out=null;
+            
             while(!isExit() && !getUpload().isStopped())
             { 
+                CloseableHttpResponse httpresponse=null;
+                
+                FutureTask<CloseableHttpResponse> futureTask = null;
+
                 chunk = new Chunk(getUpload().nextChunkId(), getUpload().getFile_size(), null);
 
                 f.seek(chunk.getOffset());
@@ -93,8 +93,8 @@ public class ChunkUploaderMono extends ChunkUploader {
                     final PipedInputStream pipein = new PipedInputStream();
                         
                     PipedOutputStream pipeout = new PipedOutputStream(pipein);
-                        
-                    Callable c = new Callable() {
+                       
+                    futureTask = new FutureTask<>(new Callable() {
                         @Override
                         public CloseableHttpResponse call() throws IOException {
 
@@ -102,9 +102,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                             return httpclient.execute(httppost);
                         }
-                    };
-
-                    futureTask = new FutureTask<>(c);
+                    });
 
                     THREAD_POOL.execute(futureTask);
 
@@ -210,52 +208,78 @@ public class ChunkUploaderMono extends ChunkUploader {
                     
                 }
                 
-            if(!error && chunk.getOffset() + tot_bytes_up == getUpload().getFile_size() && futureTask != null) {
+            if(!error && chunk.getOffset() + tot_bytes_up == getUpload().getFile_size() && futureTask != null) { 
                 
-                httpresponse = futureTask.get();
-                
-                http_status = httpresponse.getStatusLine().getStatusCode();
-                
-                long content_length = httpresponse.getEntity().getContentLength();
-            
-                if (http_status != HttpStatus.SC_OK )
-                {   
-                    throw new IOException("UPLOAD FAILED! (HTTP STATUS: "+ http_status+")");
-
-                } else if(content_length <= 0) {
+                try {
                     
-                    throw new IOException("UPLOAD FAILED! (Empty completion handle!)");
+                    httpresponse = futureTask.get();
                     
-                } else {
+                    http_status = httpresponse.getStatusLine().getStatusCode();
+                
+                    long content_length = httpresponse.getEntity().getContentLength();
 
-                        InputStream is=httpresponse.getEntity().getContent();
-                        
-                        ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+                    if (http_status != HttpStatus.SC_OK )
+                    {   
+                        throw new IOException("UPLOAD FAILED! (HTTP STATUS: "+ http_status+")");
 
-                        while( (reads=is.read(buffer)) != -1 ) {
+                    } else if(content_length <= 0) {
 
-                            byte_res.write(buffer, 0, reads);
-                        }
+                        throw new IOException("UPLOAD FAILED! (Empty completion handle!)");
 
-                        String response = new String(byte_res.toByteArray());
+                    } else {
 
-                        if(response.length() > 0) {
+                            InputStream is=httpresponse.getEntity().getContent();
 
-                            if( MegaAPI.checkMEGAError(response) != 0 )
-                            {
-                                throw new IOException("UPLOAD FAILED! (MEGA ERROR: "+ MegaAPI.checkMEGAError(response)+")");
+                            ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
-                            } else {
+                            while( (reads=is.read(buffer)) != -1 ) {
 
-                                System.out.println("Completion handle -> "+response);
-
-                                getUpload().setCompletion_handle(response);
+                                byte_res.write(buffer, 0, reads);
                             }
-                       } 
-                }
+
+                            String response = new String(byte_res.toByteArray());
+
+                            if(response.length() > 0) {
+
+                                if( MegaAPI.checkMEGAError(response) != 0 )
+                                {
+                                    throw new IOException("UPLOAD FAILED! (MEGA ERROR: "+ MegaAPI.checkMEGAError(response)+")");
+
+                                } else {
+
+                                    System.out.println("Completion handle -> "+response);
+
+                                    getUpload().setCompletion_handle(response);
+                                }
+                           } 
+                    }
+
+                    httpresponse.close();
+
+                    }catch(ExecutionException exception) {}
+                    finally{
+                    
+                        if(out != null) {
+                            out.close();
+                        }
+                        
+                        if(httpresponse != null) {
+                            
+                            httpresponse.close();
+                        }
+                    }
                 
-                httpresponse.close();
-            }
+                } else if(error) {
+                    
+                    if(out != null) {
+                        
+                        out.close();
+                    }
+                
+                    if(futureTask != null) {
+                        futureTask.cancel(true);
+                    }
+                }   
         }
         
         }catch(ChunkInvalidIdException e) {
@@ -266,7 +290,7 @@ public class ChunkUploaderMono extends ChunkUploader {
             
             getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
             
-        } catch (URISyntaxException | InterruptedException | ExecutionException ex) {
+        } catch (URISyntaxException | InterruptedException ex) {
             Logger.getLogger(ChunkUploaderMono.class.getName()).log(Level.SEVERE, null, ex);
         } 
         
