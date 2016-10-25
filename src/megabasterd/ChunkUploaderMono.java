@@ -228,10 +228,8 @@ public class ChunkUploaderMono extends ChunkUploader {
                     
                 } else {
 
-                        Header content_encoding = httpresponse.getEntity().getContentEncoding();
-
-                        InputStream is=(content_encoding!=null && content_encoding.getValue().equals("gzip"))?new GZIPInputStream(httpresponse.getEntity().getContent()):httpresponse.getEntity().getContent();
-
+                        InputStream is=httpresponse.getEntity().getContent();
+                        
                         ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
                         while( (reads=is.read(buffer)) != -1 ) {

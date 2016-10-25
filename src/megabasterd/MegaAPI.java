@@ -311,12 +311,8 @@ public final class MegaAPI {
                 
             } else {
                 
-                InputStream is;
-
-                Header content_encoding = httpresponse.getEntity().getContentEncoding();
-
-                is = (content_encoding!=null && content_encoding.getValue().equals("gzip"))?new GZIPInputStream(httpresponse.getEntity().getContent()):httpresponse.getEntity().getContent();
-
+                InputStream is=httpresponse.getEntity().getContent();
+                
                 ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
                 byte[] buffer = new byte[16*1024];

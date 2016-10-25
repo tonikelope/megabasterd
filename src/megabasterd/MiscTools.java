@@ -43,7 +43,6 @@ import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -52,19 +51,23 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
 import static megabasterd.MainPanel.VERSION;
-import org.apache.http.Header;
+import org.apache.http.HttpException;
+import org.apache.http.HttpRequest;
+import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.client.protocol.RequestAddCookies;
+import org.apache.http.client.protocol.RequestAuthCache;
+import org.apache.http.client.protocol.RequestClientConnControl;
 import org.apache.http.client.protocol.RequestDefaultHeaders;
 import org.apache.http.client.protocol.ResponseProcessCookies;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HttpProcessorBuilder;
-import org.apache.http.protocol.RequestConnControl;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.RequestContent;
-import org.apache.http.protocol.RequestExpectContinue;
 import org.apache.http.protocol.RequestTargetHost;
 
 public final class MiscTools {
@@ -576,22 +579,20 @@ public final class MiscTools {
     
     public static String deflateURL(String link) throws MalformedURLException, IOException {
         
-        String response = null;
+        String response = null; 
         
         try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
 
             HttpGet httpget = new HttpGet(new URI("http://tinyurl.com/api-create.php?url="+URLEncoder.encode(link.trim(), "UTF-8")));
             
-            httpget.addHeader("User-Agent", MainPanel.DEFAULT_USER_AGENT);
+            httpget.addHeader("Custom-User-Agent", MainPanel.DEFAULT_USER_AGENT);
             
             httpget.addHeader("Connection", "close");
             
             try(CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
                 
-                Header content_encoding = httpresponse.getEntity().getContentEncoding();
-            
-                InputStream is=(content_encoding!=null && content_encoding.getValue().equals("gzip"))?new GZIPInputStream(httpresponse.getEntity().getContent()):httpresponse.getEntity().getContent();
-
+                InputStream is=httpresponse.getEntity().getContent();
+                
                 ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
 
                 byte[] buffer = new byte[16*1024];
@@ -933,6 +934,7 @@ public final class MiscTools {
         
         boolean url_ok=false;
         
+ 
         try(CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
 
             HttpGet httpget = new HttpGet(new URI(string_url+"/0"));
@@ -1001,18 +1003,38 @@ public final class MiscTools {
         }
     }
     
-    public static CloseableHttpClient getApacheKissHttpClient() {
-        
-        return HttpClients.custom().setHttpProcessor(
-                    HttpProcessorBuilder.create()
-                        .add(new RequestDefaultHeaders())
-                        .add(new RequestContent())
-                        .add(new RequestTargetHost())
-                        .add(new RequestConnControl())
-                        .add(new RequestAddCookies())
-                        .add(new ResponseProcessCookies())        
-                        .build()
-                    ).build();
-    }
+    public static CloseableHttpClient getApacheKissHttpClient()
+    {
+        return HttpClients.custom()
+                    .addInterceptorFirst(new RequestDefaultHeaders())
+                    .addInterceptorFirst(new RequestContent())
+                    .addInterceptorFirst(new RequestTargetHost())
+                    .addInterceptorFirst(new RequestClientConnControl())
+                    .addInterceptorFirst(new RequestAddCookies())
+                    .addInterceptorFirst(new ResponseProcessCookies())
+                    .addInterceptorFirst(new RequestAuthCache())
+                    .addInterceptorLast(new HttpRequestInterceptor() {
+
+                @Override
+                public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
+                    
+                    if (request.containsHeader("User-Agent")) {
+                        
+                        request.removeHeaders("User-Agent");
+                        
+                    }
+                    
+                    if (request.containsHeader("Custom-User-Agent")) {
+                        
+                        request.addHeader("User-Agent", request.getFirstHeader("Custom-User-Agent").getValue());
+                        
+                        request.removeHeaders("Custom-User-Agent");
+                    }
+                }
+
+            }).build();
+
+    }        
+    
     
 }
