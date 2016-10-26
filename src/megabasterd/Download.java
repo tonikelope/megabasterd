@@ -520,14 +520,12 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                         _thread_pool.shutdown();
 
-                        while (!_thread_pool.isTerminated()) {
-                            try {
+                        try {
 
-                                _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
+                            _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
-                            } catch (InterruptedException ex) {
-                                getLogger(Download.class.getName()).log(SEVERE, null, ex);
-                            }
+                        } catch (InterruptedException ex) {
+                            getLogger(Download.class.getName()).log(SEVERE, null, ex);
                         }
 
                         if (!_thread_pool.isTerminated()) {

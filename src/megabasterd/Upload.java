@@ -734,14 +734,12 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
                 _thread_pool.shutdown();
 
-                while (!_thread_pool.isTerminated()) {
-                    try {
+                try {
 
-                        _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
+                    _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
-                    } catch (InterruptedException ex) {
-                        getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                } catch (InterruptedException ex) {
+                    getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
                 if (!_thread_pool.isTerminated()) {

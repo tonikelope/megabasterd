@@ -335,22 +335,50 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     }//GEN-LAST:event_slots_spinnerStateChanged
 
     private void close_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_buttonActionPerformed
-        _upload.close();
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _upload.close();
+            }
+        });
     }//GEN-LAST:event_close_buttonActionPerformed
 
     private void restart_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restart_buttonActionPerformed
 
-        _upload.restart();
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _upload.restart();
+            }
+        });
     }//GEN-LAST:event_restart_buttonActionPerformed
 
     private void stop_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stop_buttonActionPerformed
 
-        _upload.stop();
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _upload.stop();
+            }
+        });
     }//GEN-LAST:event_stop_buttonActionPerformed
 
     private void pause_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_buttonActionPerformed
 
-        _upload.pause();
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _upload.pause();
+            }
+        });
 
     }//GEN-LAST:event_pause_buttonActionPerformed
 

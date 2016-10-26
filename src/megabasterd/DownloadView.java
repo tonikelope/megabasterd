@@ -335,7 +335,14 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
     private void close_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_buttonActionPerformed
 
-        _download.close();
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _download.close();
+            }
+        });
     }//GEN-LAST:event_close_buttonActionPerformed
 
     private void copy_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_link_buttonActionPerformed
@@ -347,17 +354,39 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
     private void restart_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restart_buttonActionPerformed
 
-        _download.restart();
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _download.restart();
+            }
+        });
     }//GEN-LAST:event_restart_buttonActionPerformed
 
     private void stop_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stop_buttonActionPerformed
 
-        _download.stop();
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _download.stop();
+            }
+        });
+
     }//GEN-LAST:event_stop_buttonActionPerformed
 
     private void pause_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_buttonActionPerformed
 
-        _download.pause();
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _download.pause();
+            }
+        });
     }//GEN-LAST:event_pause_buttonActionPerformed
 
     @Override

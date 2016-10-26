@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
-import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
