@@ -906,23 +906,26 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
     public synchronized void startSlot() {
 
-        int chunk_id = _chunkworkers.size() + 1;
+        if (!_exit) {
 
-        ChunkDownloader c = new ChunkDownloader(chunk_id, this);
+            int chunk_id = _chunkworkers.size() + 1;
 
-        _chunkworkers.add(c);
+            ChunkDownloader c = new ChunkDownloader(chunk_id, this);
 
-        try {
+            _chunkworkers.add(c);
 
-            _thread_pool.execute(c);
+            try {
 
-        } catch (java.util.concurrent.RejectedExecutionException e) {
-            System.out.println(e.getMessage());
+                _thread_pool.execute(c);
+
+            } catch (java.util.concurrent.RejectedExecutionException e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 
     public synchronized void stopLastStartedSlot() {
-        if (!_chunkworkers.isEmpty()) {
+        if (!_exit && !_chunkworkers.isEmpty()) {
 
             swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
 
@@ -951,7 +954,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     }
 
     public synchronized void stopThisSlot(ChunkDownloader chunkdownloader) {
-        if (_chunkworkers.remove(chunkdownloader)) {
+        if (!_exit && _chunkworkers.remove(chunkdownloader)) {
             if (!chunkdownloader.isExit()) {
 
                 _finishing_download = true;
@@ -1061,8 +1064,12 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     }
 
     public synchronized void stopDownloader() {
+
         if (!_exit) {
-            setExit(true);
+
+            System.out.println("Stopping downloader...");
+
+            _exit = true;
 
             try {
                 deleteDownload(_url);
@@ -1095,12 +1102,15 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                     downloader.secureNotify();
                 }
+
+                secureNotify();
             }
         }
     }
 
     public synchronized void emergencyStopDownloader(String reason) {
-        if (_fatal_error == null) {
+
+        if (!_exit && _fatal_error == null) {
             _fatal_error = reason != null ? reason : "FATAL ERROR!";
 
             stopDownloader();
@@ -1319,6 +1329,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
+                    _exit = true;
                     getLogger(Download.class.getName()).log(SEVERE, null, ex);
                 }
             }

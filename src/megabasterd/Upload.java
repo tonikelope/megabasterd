@@ -347,6 +347,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
+                    _exit = true;
                     getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -572,18 +573,22 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     }
 
     public synchronized void startSlot() {
-        int chunkthiser_id = _chunkworkers.size() + 1;
 
-        ChunkUploader c = new ChunkUploader(chunkthiser_id, this);
+        if (!_exit) {
 
-        _chunkworkers.add(c);
+            int chunkthiser_id = _chunkworkers.size() + 1;
 
-        try {
+            ChunkUploader c = new ChunkUploader(chunkthiser_id, this);
 
-            _thread_pool.execute(c);
+            _chunkworkers.add(c);
 
-        } catch (java.util.concurrent.RejectedExecutionException e) {
-            System.out.println(e.getMessage());
+            try {
+
+                _thread_pool.execute(c);
+
+            } catch (java.util.concurrent.RejectedExecutionException e) {
+                System.out.println(e.getMessage());
+            }
         }
     }
 
@@ -592,7 +597,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     }
 
     public synchronized void stopLastStartedSlot() {
-        if (!_chunkworkers.isEmpty()) {
+        if (!_exit && !_chunkworkers.isEmpty()) {
 
             swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
 
@@ -899,7 +904,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     }
 
     public synchronized void stopThisSlot(ChunkUploader chunkuploader) {
-        if (_chunkworkers.remove(chunkuploader)) {
+        if (!_exit && _chunkworkers.remove(chunkuploader)) {
             if (!chunkuploader.isExit()) {
 
                 _finishing_upload = true;
@@ -925,7 +930,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     }
 
     public synchronized void emergencyStopUploader(String reason) {
-        if (_fatal_error == null) {
+        if (!_exit && _fatal_error == null) {
             _fatal_error = reason != null ? reason : "FATAL ERROR!";
 
             stopUploader();
@@ -948,7 +953,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
     public synchronized void stopUploader() {
         if (!_exit) {
-            setExit(true);
+            _exit = true;
 
             try {
                 DBTools.deleteUpload(_file_name, _ma.getEmail());
@@ -972,6 +977,8 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
                 uploader.secureNotify();
             }
+
+            secureNotify();
         }
     }
 

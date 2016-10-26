@@ -1,15 +1,10 @@
 package megabasterd;
 
-import java.io.IOException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import javax.crypto.CipherInputStream;
-import javax.crypto.NoSuchPaddingException;
 
 public final class ChunkWriter implements Runnable, SecureNotifiable {
 
@@ -70,6 +65,7 @@ public final class ChunkWriter implements Runnable, SecureNotifiable {
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
+                    _exit = true;
                     getLogger(ChunkWriter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -154,7 +150,7 @@ public final class ChunkWriter implements Runnable, SecureNotifiable {
                 }
             }
 
-        } catch (IOException | NoSuchAlgorithmException | InvalidKeyException | NoSuchPaddingException | InvalidAlgorithmParameterException ex) {
+        } catch (Exception ex) {
 
             System.out.println(ex.getMessage());
 

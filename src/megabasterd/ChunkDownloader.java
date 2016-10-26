@@ -79,6 +79,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
+                    _exit = true;
                     getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
@@ -144,6 +145,7 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
                         } else {
 
                             while (!_exit && !_download.isStopped() && !_download.getChunkwriter().isExit() && chunk.getOutputStream().size() < chunk.getSize() && (reads = is.read(buffer)) != -1) {
+
                                 chunk.getOutputStream().write(buffer, 0, reads);
 
                                 _download.getPartialProgressQueue().add(reads);

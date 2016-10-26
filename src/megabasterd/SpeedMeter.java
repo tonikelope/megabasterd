@@ -45,6 +45,7 @@ public final class SpeedMeter implements Runnable, SecureNotifiable {
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
+                    _exit = true;
                     getLogger(SpeedMeter.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }

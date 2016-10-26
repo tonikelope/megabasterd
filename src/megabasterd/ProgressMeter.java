@@ -42,6 +42,7 @@ public final class ProgressMeter implements Runnable, SecureNotifiable {
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
+                    _exit = true;
                     getLogger(ProgressMeter.class.getName()).log(SEVERE, null, ex);
                 }
             }
