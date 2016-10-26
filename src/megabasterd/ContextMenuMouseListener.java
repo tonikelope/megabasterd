@@ -22,8 +22,6 @@ public final class ContextMenuMouseListener extends MouseAdapter {
     private JTextComponent _textComponent;
     private String _savedString;
     private _Actions _lastActionSelected;
-    
-    
 
     public ContextMenuMouseListener() {
         _savedString = "";
@@ -32,9 +30,9 @@ public final class ContextMenuMouseListener extends MouseAdapter {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                    _textComponent.setText("");
-                    _textComponent.replaceSelection(_savedString);
-                    _lastActionSelected = _Actions.UNDO;
+                _textComponent.setText("");
+                _textComponent.replaceSelection(_savedString);
+                _lastActionSelected = _Actions.UNDO;
             }
         };
 
@@ -121,5 +119,8 @@ public final class ContextMenuMouseListener extends MouseAdapter {
             _popup.show(e.getComponent(), nx, e.getY() - _popup.getSize().height);
         }
     }
-    private enum _Actions { UNDO, CUT, COPY, PASTE, SELECT_ALL }
+
+    private enum _Actions {
+        UNDO, CUT, COPY, PASTE, SELECT_ALL
+    }
 }

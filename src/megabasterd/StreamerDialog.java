@@ -11,7 +11,6 @@ import static java.util.logging.Logger.getLogger;
 import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.copyTextToClipboard;
 import static megabasterd.MiscTools.deflateURL;
 import static megabasterd.MiscTools.extractFirstMegaLinkFromString;
 import static megabasterd.MiscTools.extractStringFromClipboardContents;
@@ -27,9 +26,10 @@ import static megabasterd.MiscTools.updateFont;
 public final class StreamerDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
 
     private final ClipboardSpy _clipboardspy;
-    
+
     /**
      * Creates new form Streamer
+     *
      * @param clipboardspy
      */
     public StreamerDialog(java.awt.Frame parent, boolean modal, ClipboardSpy clipboardspy) {
@@ -37,16 +37,17 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         initComponents();
 
         _clipboardspy = clipboardspy;
-        
-        MiscTools.swingInvokeIt(new Runnable(){
+
+        MiscTools.swingInvokeIt(new Runnable() {
 
             @Override
-            public void run() {updateFont(put_label, FONT_DEFAULT, Font.PLAIN);
-        
-        updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);}}, true);
-        
-        
-        
+            public void run() {
+                updateFont(put_label, FONT_DEFAULT, Font.PLAIN);
+
+                updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
+            }
+        }, true);
+
         notifyClipboardChange();
     }
 
@@ -119,103 +120,102 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     }// </editor-fold>//GEN-END:initComponents
 
     private void dance_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dance_buttonActionPerformed
-        
+
         dance_button.setEnabled(false);
-        
+
         original_link_textfield.setEnabled(false);
-        
+
         final Dialog tthis = this;
-        
-         THREAD_POOL.execute(new Runnable(){
+
+        THREAD_POOL.execute(new Runnable() {
             @Override
             public void run() {
-                
-                boolean error=false;
-                
-                String stream_link=null;
-            
-                String link=((String)swingReflectionInvokeAndWaitForReturn("getText", original_link_textfield)).trim();
 
-                if(link.length() > 0) {
+                boolean error = false;
 
-                        try {
+                String stream_link = null;
 
-                            link = CryptTools.decryptMegaDownloaderLink(link);
+                String link = ((String) swingReflectionInvokeAndWaitForReturn("getText", original_link_textfield)).trim();
 
-                        } catch (Exception ex) {
-                            getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+                if (link.length() > 0) {
 
-                        String data;
+                    try {
 
-                        link=link.replace("/#!N?", "/#N!");
+                        link = CryptTools.decryptMegaDownloaderLink(link);
 
-                        if( findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null)
-                        {
-                            data=findFirstRegex("/#(N?!.+)", link, 1);
+                    } catch (Exception ex) {
+                        getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 
-                           stream_link = "http://localhost:1337/video/mega/"+data;
+                    String data;
 
-                        } else if( (data=findFirstRegex("https?://([^/]+/![^!]+![0-9a-fA-F]+)", link, 1)) != null) {
+                    link = link.replace("/#!N?", "/#N!");
 
-                            stream_link = "http://localhost:1337/video/"+data;
+                    if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null) {
+                        data = findFirstRegex("/#(N?!.+)", link, 1);
 
-                        } else {
+                        stream_link = "http://localhost:1337/video/mega/" + data;
 
-                            error = true;
-                        }
-                        
+                    } else if ((data = findFirstRegex("https?://([^/]+/![^!]+![0-9a-fA-F]+)", link, 1)) != null) {
+
+                        stream_link = "http://localhost:1337/video/" + data;
+
+                    } else {
+
+                        error = true;
+                    }
+
                 } else {
-                    
+
                     error = true;
                 }
-                
-                if(error) {
-                    
+
+                if (error) {
+
                     JOptionPane.showMessageDialog(tthis, "Please, paste a mega/megacrypter link!", "Error", JOptionPane.ERROR_MESSAGE);
 
                     swingReflectionInvoke("setText", original_link_textfield, "");
-                    
+
                     swingReflectionInvoke("setEnabled", dance_button, true);
-                    
+
                     swingReflectionInvoke("setEnabled", original_link_textfield, true);
-                    
+
                 } else {
-                    
+
                     try {
-                        
-                        copyTextToClipboard(deflateURL(stream_link));
-                        
+
+                        MiscTools.copyTextToClipboard(deflateURL(stream_link));
+
                         JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\n(Remember to keep MegaBasterd running in background while playing)");
 
                         dispose();
-                        
+
                         getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
 
                     } catch (IOException ex) {
                         Logger.getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-            
-            }});
+
+            }
+        });
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     @Override
     public void notifyClipboardChange() {
-        
+
         String link = extractFirstMegaLinkFromString(extractStringFromClipboardContents(_clipboardspy.getContents()));
-        
-        if(!link.contains("/#F!")) {
-            
-            swingReflectionInvoke("setText", original_link_textfield, link);    
+
+        if (!link.contains("/#F!")) {
+
+            swingReflectionInvoke("setText", original_link_textfield, link);
         }
     }
-            
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton dance_button;
     private javax.swing.JTextField original_link_textfield;
     private javax.swing.JLabel put_label;
     // End of variables declaration//GEN-END:variables
 
-    }
+}

@@ -14,7 +14,6 @@ import static megabasterd.MiscTools.HashBin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.updateFont;
 
-
 /**
  *
  * @author tonikelope
@@ -22,11 +21,11 @@ import static megabasterd.MiscTools.updateFont;
 public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
 
     private boolean _pass_ok;
-       
+
     private String _new_pass_hash;
-    
+
     private byte[] _new_pass;
-    
+
     private final String _salt;
 
     public boolean isPass_ok() {
@@ -36,14 +35,14 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
     public byte[] getNew_pass() {
         return _new_pass;
     }
-    
+
     public void deleteNewPass() {
-        
-        if(_new_pass != null) {
-            
-            Arrays.fill(_new_pass, (byte)0);
+
+        if (_new_pass != null) {
+
+            Arrays.fill(_new_pass, (byte) 0);
         }
-        
+
         _new_pass = null;
     }
 
@@ -57,25 +56,26 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
     public SetMegaMasterPasswordDialog(java.awt.Frame parent, boolean modal, String salt) {
         super(parent, modal);
         initComponents();
-        
-        MiscTools.swingInvokeIt(new Runnable(){
+
+        MiscTools.swingInvokeIt(new Runnable() {
 
             @Override
-            public void run() {updateFont(new_pass_label, FONT_DEFAULT, Font.PLAIN);
-        updateFont(confirm_pass_label, FONT_DEFAULT, Font.PLAIN);
-        updateFont(ok_button, FONT_DEFAULT, Font.PLAIN);
-        updateFont(cancel_button, FONT_DEFAULT, Font.PLAIN);
-        updateFont(warning_label, FONT_DEFAULT, Font.PLAIN);
-        updateFont(status_label, FONT_DEFAULT, Font.PLAIN);}}, true);
-        
-        
-        
+            public void run() {
+                updateFont(new_pass_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(confirm_pass_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(ok_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(cancel_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(warning_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(status_label, FONT_DEFAULT, Font.PLAIN);
+            }
+        }, true);
+
         _pass_ok = false;
-        
+
         _new_pass = null;
-        
+
         _new_pass_hash = null;
-        
+
         _salt = salt;
     }
 
@@ -207,65 +207,65 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_buttonActionPerformed
-        
+
         swingReflectionInvoke("setVisible", this, false);
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
     private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
-       
+
         swingReflectionInvoke("setText", status_label, "Verifying your password, please wait...");
-        
+
         final Dialog tthis = this;
-        
-        THREAD_POOL.execute(new Runnable(){
-            
+
+        THREAD_POOL.execute(new Runnable() {
+
             @Override
             public void run() {
-        
-        try {
 
-            if(Arrays.equals(new_pass_textfield.getPassword(), confirm_pass_textfield.getPassword())) {
-                
-                swingReflectionInvoke("setText", status_label, "Processing your password, please wait...");
-                
-                if(new_pass_textfield.getPassword().length > 0) {
+                try {
 
-                    _new_pass = CryptTools.PBKDF2HMACSHA256(new String(new_pass_textfield.getPassword()), MiscTools.BASE642Bin(_salt), CryptTools.PBKDF2_ITERATIONS);
+                    if (Arrays.equals(new_pass_textfield.getPassword(), confirm_pass_textfield.getPassword())) {
 
-                    _new_pass_hash =Bin2BASE64(HashBin("SHA-1", _new_pass));
+                        swingReflectionInvoke("setText", status_label, "Processing your password, please wait...");
+
+                        if (new_pass_textfield.getPassword().length > 0) {
+
+                            _new_pass = CryptTools.PBKDF2HMACSHA256(new String(new_pass_textfield.getPassword()), MiscTools.BASE642Bin(_salt), CryptTools.PBKDF2_ITERATIONS);
+
+                            _new_pass_hash = Bin2BASE64(HashBin("SHA-1", _new_pass));
+                        }
+
+                        _pass_ok = true;
+
+                        swingReflectionInvoke("setVisible", tthis, false);
+
+                    } else {
+
+                        JOptionPane.showMessageDialog(tthis, "Passwords does not match!", "Error", JOptionPane.ERROR_MESSAGE);
+
+                        swingReflectionInvoke("setText", status_label, "");
+
+                        swingReflectionInvoke("setText", new_pass_textfield, "");
+
+                        swingReflectionInvoke("setText", confirm_pass_textfield, "");
+
+                        swingReflectionInvoke("grabFocus", new_pass_textfield);
+                    }
+
+                } catch (Exception ex) {
+                    Logger.getLogger(SetMegaMasterPasswordDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
-
-                _pass_ok = true;
-
-                swingReflectionInvoke("setVisible", tthis, false);
-
-            } else {
-                
-                JOptionPane.showMessageDialog(tthis, "Passwords does not match!", "Error", JOptionPane.ERROR_MESSAGE);
-                
-                swingReflectionInvoke("setText", status_label, "");
-                
-                swingReflectionInvoke("setText", new_pass_textfield, "");
-                
-                swingReflectionInvoke("setText", confirm_pass_textfield, "");
-                
-                swingReflectionInvoke("grabFocus", new_pass_textfield);
             }
-          
-        } catch (Exception ex) {
-            Logger.getLogger(SetMegaMasterPasswordDialog.class.getName()).log(Level.SEVERE, null, ex);
-        }
-            }});
+        });
     }//GEN-LAST:event_ok_buttonActionPerformed
 
     private void confirm_pass_textfieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_confirm_pass_textfieldKeyPressed
-        
-        if(evt.getKeyCode() == KeyEvent.VK_ENTER) {
-            
+
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+
             ok_buttonActionPerformed(null);
         }
     }//GEN-LAST:event_confirm_pass_textfieldKeyPressed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancel_button;

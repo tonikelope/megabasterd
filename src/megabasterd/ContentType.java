@@ -3,14 +3,13 @@ package megabasterd;
 import java.util.HashMap;
 
 public final class ContentType {
-    
-    private final HashMap<String,String> _content_type;
 
+    private final HashMap<String, String> _content_type;
 
     public ContentType() {
-        
+
         _content_type = new HashMap();
-            
+
         _content_type.put("mp2", "audio/x-mpeg");
         _content_type.put("mp3", "audio/x-mpeg");
         _content_type.put("mpga", "audio/x-mpeg");
@@ -26,7 +25,7 @@ public final class ContentType {
         _content_type.put("avi", "video/x-msvideo");
         _content_type.put("ogg", "application/ogg");
         _content_type.put("ogv", "video/ogg");
-        _content_type.put("asf", "video/x-ms-asf-plugin");          
+        _content_type.put("asf", "video/x-ms-asf-plugin");
         _content_type.put("asx", "video/x-ms-asf-plugin");
         _content_type.put("ogv", "video/ogg");
         _content_type.put("wmv", "video/x-ms-wmv");
@@ -48,12 +47,12 @@ public final class ContentType {
         _content_type.put("mov", "video/quicktime");
         _content_type.put("qt", "video/quicktime");
     }
+
     public HashMap<String, String> getContent_type() {
         return _content_type;
     }
-    
-    public String getMIME(String ext)
-    {
+
+    public String getMIME(String ext) {
         return _content_type.get(ext);
     }
 }

@@ -7,15 +7,15 @@ import java.util.HashMap;
  * @author tonikelope
  */
 public final class MegaDirNode {
-    
+
     private final String _node_id;
 
-    private final HashMap <String,MegaDirNode> _children;
+    private final HashMap<String, MegaDirNode> _children;
 
     public MegaDirNode(String node_id) {
-        
+
         _node_id = node_id;
-        
+
         _children = new HashMap<>();
     }
 

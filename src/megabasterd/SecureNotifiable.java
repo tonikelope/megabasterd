@@ -7,8 +7,8 @@ package megabasterd;
 public interface SecureNotifiable {
 
     public void secureNotify();
-    
+
     public void secureNotifyAll();
-    
+
     public void secureWait();
 }

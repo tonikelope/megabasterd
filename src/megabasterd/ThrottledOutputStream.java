@@ -15,7 +15,6 @@ public final class ThrottledOutputStream extends OutputStream {
 
     private Integer slice_size;
 
-
     public ThrottledOutputStream(OutputStream rawStream, StreamThrottlerSupervisor stream_supervisor) {
 
         _rawStream = rawStream;
@@ -26,32 +25,31 @@ public final class ThrottledOutputStream extends OutputStream {
 
     }
 
-
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
 
-        if(_stream_supervisor.getMaxBytesPerSecOutput() > 0) {
+        if (_stream_supervisor.getMaxBytesPerSecOutput() > 0) {
 
-            int writeLen=0;
+            int writeLen = 0;
 
             do {
 
-                throttle(len-writeLen);
+                throttle(len - writeLen);
 
-                if(slice_size != null) {
+                if (slice_size != null) {
 
-                    _rawStream.write(b, off+writeLen, slice_size);
+                    _rawStream.write(b, off + writeLen, slice_size);
 
-                    writeLen+=slice_size;
+                    writeLen += slice_size;
 
                 } else {
 
-                    _rawStream.write(b, off+writeLen, len-writeLen);
+                    _rawStream.write(b, off + writeLen, len - writeLen);
 
                     writeLen = len;
                 }
 
-            }while(  writeLen < len );
+            } while (writeLen < len);
 
         } else {
 
@@ -62,7 +60,7 @@ public final class ThrottledOutputStream extends OutputStream {
     @Override
     public void write(int i) throws IOException {
 
-        if(_stream_supervisor.getMaxBytesPerSecOutput() > 0) {
+        if (_stream_supervisor.getMaxBytesPerSecOutput() > 0) {
 
             throttle(1);
 
@@ -74,17 +72,16 @@ public final class ThrottledOutputStream extends OutputStream {
         }
     }
 
-
     private void throttle(int size) throws IOException {
 
         slice_size = null;
 
-        while(_stream_supervisor.getMaxBytesPerSecOutput() > 0 && (slice_size=_stream_supervisor.getOutput_slice_queue().poll()) == null) {
+        while (_stream_supervisor.getMaxBytesPerSecOutput() > 0 && (slice_size = _stream_supervisor.getOutput_slice_queue().poll()) == null) {
 
             _stream_supervisor.secureWait();
         }
 
-        if(slice_size != null && size < slice_size) {
+        if (slice_size != null && size < slice_size) {
 
             _stream_supervisor.getOutput_slice_queue().add(slice_size - size);
 

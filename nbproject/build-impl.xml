@@ -18,7 +18,7 @@ is divided into following sections:
   - applet
   - cleanup
 
-        -->
+-->
 <project xmlns:j2seproject1="http://www.netbeans.org/ns/j2se-project/1" xmlns:j2seproject3="http://www.netbeans.org/ns/j2se-project/3" xmlns:jaxrpc="http://www.netbeans.org/ns/j2se-project/jax-rpc" basedir=".." default="default" name="MegaBasterd-impl">
     <fail message="Please build using Ant 1.8.0 or higher.">
         <condition>
@@ -29,10 +29,10 @@ is divided into following sections:
     </fail>
     <target depends="test,jar,javadoc" description="Build and test whole project." name="default"/>
     <!-- 
-                ======================
-                INITIALIZATION SECTION 
-                ======================
-            -->
+        ======================
+        INITIALIZATION SECTION 
+        ======================
+    -->
     <target name="-pre-init">
         <!-- Empty placeholder for easier customization. -->
         <!-- You can override this target in the ../build.xml file. -->
@@ -675,8 +675,8 @@ is divided into following sections:
     </target>
     <target depends="-init-macrodef-test-debug-junit,-init-macrodef-test-debug-testng" name="-init-macrodef-test-debug"/>
     <!--
-                pre NB7.2 profiling section; consider it deprecated
-            -->
+        pre NB7.2 profiling section; consider it deprecated
+    -->
     <target depends="-profile-pre-init, init, -profile-post-init, -profile-init-macrodef-profile, -profile-init-check" if="profiler.info.jvmargs.agent" name="profile-init"/>
     <target if="profiler.info.jvmargs.agent" name="-profile-pre-init">
         <!-- Empty placeholder for easier customization. -->
@@ -723,8 +723,8 @@ is divided into following sections:
         <fail unless="profiler.info.jvmargs.agent">Must set profiler agent JVM arguments in profiler.info.jvmargs.agent</fail>
     </target>
     <!--
-                end of pre NB7.2 profiling section
-            -->
+        end of pre NB7.2 profiling section
+    -->
     <target depends="-init-debug-args" name="-init-macrodef-nbjpda">
         <macrodef name="nbjpdastart" uri="http://www.netbeans.org/ns/j2se-project/1">
             <attribute default="${main.class}" name="name"/>
@@ -884,10 +884,10 @@ is divided into following sections:
     </target>
     <target depends="-pre-init,-init-private,-init-user,-init-project,-do-init,-post-init,-init-check,-init-macrodef-property,-init-macrodef-javac,-init-macrodef-test,-init-macrodef-test-debug,-init-macrodef-nbjpda,-init-macrodef-debug,-init-macrodef-java,-init-presetdef-jar,-init-ap-cmdline" name="init"/>
     <!--
-                ===================
-                COMPILATION SECTION
-                ===================
-            -->
+        ===================
+        COMPILATION SECTION
+        ===================
+    -->
     <target name="-deps-jar-init" unless="built-jar.properties">
         <property location="${build.dir}/built-jar.properties" name="built-jar.properties"/>
         <delete file="${built-jar.properties}" quiet="true"/>
@@ -958,10 +958,10 @@ is divided into following sections:
     </target>
     <target depends="init,deps-jar,-verify-automatic-build,-pre-pre-compile,-pre-compile-single,-do-compile-single,-post-compile-single" name="compile-single"/>
     <!--
-                ====================
-                JAR BUILDING SECTION
-                ====================
-            -->
+        ====================
+        JAR BUILDING SECTION
+        ====================
+    -->
     <target depends="init" name="-pre-pre-jar">
         <dirname file="${dist.jar}" property="dist.jar.dir"/>
         <mkdir dir="${dist.jar.dir}"/>
@@ -1032,10 +1032,10 @@ is divided into following sections:
     <target depends="init,compile,-pre-jar,-do-jar-without-libraries,-do-jar-with-libraries,-post-jar" name="-do-jar"/>
     <target depends="init,compile,-pre-jar,-do-jar,-post-jar" description="Build JAR." name="jar"/>
     <!--
-                =================
-                EXECUTION SECTION
-                =================
-            -->
+        =================
+        EXECUTION SECTION
+        =================
+    -->
     <target depends="init,compile" description="Run a main class." name="run">
         <j2seproject1:java>
             <customize>
@@ -1055,10 +1055,10 @@ is divided into following sections:
         <j2seproject1:java classname="${run.class}" classpath="${run.test.classpath}"/>
     </target>
     <!--
-                =================
-                DEBUGGING SECTION
-                =================
-            -->
+        =================
+        DEBUGGING SECTION
+        =================
+    -->
     <target depends="init" if="netbeans.home" name="-debug-start-debugger">
         <j2seproject1:nbjpdastart name="${debug.class}"/>
     </target>
@@ -1096,13 +1096,13 @@ is divided into following sections:
     </target>
     <target depends="init,-pre-debug-fix,-do-debug-fix" if="netbeans.home" name="debug-fix"/>
     <!--
-                =================
-                PROFILING SECTION
-                =================
-            -->
+        =================
+        PROFILING SECTION
+        =================
+    -->
     <!--
-                pre NB7.2 profiler integration
-            -->
+        pre NB7.2 profiler integration
+    -->
     <target depends="profile-init,compile" description="Profile a project in the IDE." if="profiler.info.jvmargs.agent" name="-profile-pre72">
         <fail unless="netbeans.home">This target only works when run from inside the NetBeans IDE.</fail>
         <nbprofiledirect>
@@ -1159,8 +1159,8 @@ is divided into following sections:
         </junit>
     </target>
     <!--
-                end of pre NB72 profiling section
-            -->
+        end of pre NB72 profiling section
+    -->
     <target if="netbeans.home" name="-profile-check">
         <condition property="profiler.configured">
             <or>
@@ -1195,10 +1195,10 @@ is divided into following sections:
         <antcall target="run-applet"/>
     </target>
     <!--
-                ===============
-                JAVADOC SECTION
-                ===============
-            -->
+        ===============
+        JAVADOC SECTION
+        ===============
+    -->
     <target depends="init" if="have.sources" name="-javadoc-build">
         <mkdir dir="${dist.javadoc.dir}"/>
         <condition else="" property="javadoc.endorsed.classpath.cmd.line.arg" value="-J${endorsed.classpath.cmd.line.arg}">
@@ -1239,10 +1239,10 @@ is divided into following sections:
     </target>
     <target depends="init,-javadoc-build,-javadoc-browse" description="Build Javadoc." name="javadoc"/>
     <!--
-                =========================
-                TEST COMPILATION SECTION
-                =========================
-            -->
+        =========================
+        TEST COMPILATION SECTION
+        =========================
+    -->
     <target depends="init,compile" if="have.tests" name="-pre-pre-compile-test">
         <mkdir dir="${build.test.classes.dir}"/>
     </target>
@@ -1282,10 +1282,10 @@ is divided into following sections:
     </target>
     <target depends="init,compile,-pre-pre-compile-test,-pre-compile-test-single,-do-compile-test-single,-post-compile-test-single" name="compile-test-single"/>
     <!--
-                =======================
-                TEST EXECUTION SECTION
-                =======================
-            -->
+        =======================
+        TEST EXECUTION SECTION
+        =======================
+    -->
     <target depends="init" if="have.tests" name="-pre-test-run">
         <mkdir dir="${build.test.results.dir}"/>
     </target>
@@ -1319,10 +1319,10 @@ is divided into following sections:
     </target>
     <target depends="init,compile-test-single,-pre-test-run-single,-do-test-run-single-method,-post-test-run-single-method" description="Run single unit test." name="test-single-method"/>
     <!--
-                =======================
-                TEST DEBUGGING SECTION
-                =======================
-            -->
+        =======================
+        TEST DEBUGGING SECTION
+        =======================
+    -->
     <target depends="init,compile-test-single,-pre-test-run-single" if="have.tests" name="-debug-start-debuggee-test">
         <fail unless="test.class">Must select one file in the IDE or set test.class</fail>
         <j2seproject3:test-debug excludes="" includes="${javac.includes}" testClass="${test.class}" testincludes="${javac.includes}"/>
@@ -1342,10 +1342,10 @@ is divided into following sections:
     </target>
     <target depends="init,-pre-debug-fix,-do-debug-fix-test" if="netbeans.home" name="debug-fix-test"/>
     <!--
-                =========================
-                APPLET EXECUTION SECTION
-                =========================
-            -->
+        =========================
+        APPLET EXECUTION SECTION
+        =========================
+    -->
     <target depends="init,compile-single" name="run-applet">
         <fail unless="applet.url">Must select one file in the IDE or set applet.url</fail>
         <j2seproject1:java classname="sun.applet.AppletViewer">
@@ -1355,10 +1355,10 @@ is divided into following sections:
         </j2seproject1:java>
     </target>
     <!--
-                =========================
-                APPLET DEBUGGING  SECTION
-                =========================
-            -->
+        =========================
+        APPLET DEBUGGING  SECTION
+        =========================
+    -->
     <target depends="init,compile-single" if="netbeans.home" name="-debug-start-debuggee-applet">
         <fail unless="applet.url">Must select one file in the IDE or set applet.url</fail>
         <j2seproject3:debug classname="sun.applet.AppletViewer">
@@ -1369,10 +1369,10 @@ is divided into following sections:
     </target>
     <target depends="init,compile-single,-debug-start-debugger,-debug-start-debuggee-applet" if="netbeans.home" name="debug-applet"/>
     <!--
-                ===============
-                CLEANUP SECTION
-                ===============
-            -->
+        ===============
+        CLEANUP SECTION
+        ===============
+    -->
     <target name="-deps-clean-init" unless="built-clean.properties">
         <property location="${build.dir}/built-clean.properties" name="built-clean.properties"/>
         <delete file="${built-clean.properties}" quiet="true"/>

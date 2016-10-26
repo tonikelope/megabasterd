@@ -11,11 +11,9 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.copyTextToClipboard;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.updateFont;
-
 
 public final class DownloadView extends javax.swing.JPanel implements TransferenceView {
 
@@ -82,45 +80,45 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     }
 
     public DownloadView(Download download) {
-        
+
         initComponents();
-        
+
         _download = download;
-        
-        MiscTools.swingInvokeIt(new Runnable(){
+
+        MiscTools.swingInvokeIt(new Runnable() {
 
             @Override
             public void run() {
                 updateFont(status_label, FONT_DEFAULT, Font.BOLD);
-            updateFont(remtime_label, FONT_DEFAULT, Font.PLAIN);
-            updateFont(speed_label, FONT_DEFAULT, Font.BOLD);
-            updateFont(progress_pbar, FONT_DEFAULT, Font.PLAIN);
-            updateFont(slots_label, FONT_DEFAULT, Font.BOLD);
-            updateFont(slots_spinner, FONT_DEFAULT, Font.PLAIN);
-            updateFont(pause_button, FONT_DEFAULT, Font.BOLD);
-            updateFont(stop_button, FONT_DEFAULT, Font.BOLD);
-            updateFont(keep_temp_checkbox, FONT_DEFAULT, Font.PLAIN);
-            updateFont(file_name_label, FONT_DEFAULT, Font.PLAIN);
-            updateFont(file_size_label, FONT_DEFAULT, Font.BOLD);
-            updateFont(close_button, FONT_DEFAULT, Font.PLAIN);
-            updateFont(copy_link_button, FONT_DEFAULT, Font.PLAIN);
-            updateFont(restart_button, FONT_DEFAULT, Font.PLAIN);
-            updateFont(slot_status_label, FONT_DEFAULT, Font.BOLD);}}, true);
-        
-        
+                updateFont(remtime_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(speed_label, FONT_DEFAULT, Font.BOLD);
+                updateFont(progress_pbar, FONT_DEFAULT, Font.PLAIN);
+                updateFont(slots_label, FONT_DEFAULT, Font.BOLD);
+                updateFont(slots_spinner, FONT_DEFAULT, Font.PLAIN);
+                updateFont(pause_button, FONT_DEFAULT, Font.BOLD);
+                updateFont(stop_button, FONT_DEFAULT, Font.BOLD);
+                updateFont(keep_temp_checkbox, FONT_DEFAULT, Font.PLAIN);
+                updateFont(file_name_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(file_size_label, FONT_DEFAULT, Font.BOLD);
+                updateFont(close_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(copy_link_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(restart_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(slot_status_label, FONT_DEFAULT, Font.BOLD);
+            }
+        }, true);
+
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
-        
-        swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor)slots_spinner.getEditor()).getTextField(), false);
-        
-        swingReflectionInvoke("setForeground", speed_label, new Color(0,128,255));
-        
-        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, remtime_label,progress_pbar,keep_temp_checkbox,file_name_label,close_button,copy_link_button,restart_button,file_size_label}, false);
-        
+
+        swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor) slots_spinner.getEditor()).getTextField(), false);
+
+        swingReflectionInvoke("setForeground", speed_label, new Color(0, 128, 255));
+
+        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, remtime_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label}, false);
+
     }
-    
-    public void hideAllExceptStatus()
-    {
-        swingReflectionInvoke("setVisible", new Object[]{speed_label, remtime_label, slots_spinner,slots_label,slot_status_label,slot_status_label,pause_button,stop_button,progress_pbar,keep_temp_checkbox}, false);
+
+    public void hideAllExceptStatus() {
+        swingReflectionInvoke("setVisible", new Object[]{speed_label, remtime_label, slots_spinner, slots_label, slot_status_label, slot_status_label, pause_button, stop_button, progress_pbar, keep_temp_checkbox}, false);
     }
 
     /**
@@ -325,41 +323,40 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
     private void slots_spinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_slots_spinnerStateChanged
 
-        THREAD_POOL.execute(new Runnable(){
-            
+        THREAD_POOL.execute(new Runnable() {
+
             @Override
             public void run() {
-                
+
                 _download.checkSlotsAndWorkers();
             }
         });
     }//GEN-LAST:event_slots_spinnerStateChanged
 
-   
     private void close_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_buttonActionPerformed
-      
+
         _download.close();
     }//GEN-LAST:event_close_buttonActionPerformed
 
     private void copy_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_link_buttonActionPerformed
-        
-        copyTextToClipboard(_download.getUrl());
-        
+
+        MiscTools.copyTextToClipboard(_download.getUrl());
+
         JOptionPane.showMessageDialog(_download.getMain_panel().getView(), "Link was copied to clipboard!");
     }//GEN-LAST:event_copy_link_buttonActionPerformed
 
     private void restart_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restart_buttonActionPerformed
-        
+
         _download.restart();
     }//GEN-LAST:event_restart_buttonActionPerformed
 
     private void stop_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stop_buttonActionPerformed
-        
+
         _download.stop();
     }//GEN-LAST:event_stop_buttonActionPerformed
 
     private void pause_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_buttonActionPerformed
-        
+
         _download.pause();
     }//GEN-LAST:event_pause_buttonActionPerformed
 
@@ -367,123 +364,119 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     public void pause() {
 
         printStatusNormal("Pausing download ...");
-        
-        swingReflectionInvoke("setEnabled", new Object[]{pause_button,speed_label,slots_label,slots_spinner}, false);
+
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button, speed_label, slots_label, slots_spinner}, false);
         swingReflectionInvoke("setVisible", new Object[]{stop_button, keep_temp_checkbox}, true);
-       
+
     }
-    
+
     @Override
     public void resume() {
-     
+
         printStatusNormal("Downloading file from mega ...");
-        
-        swingReflectionInvoke("setEnabled", new Object[]{pause_button,speed_label,slots_label,slots_spinner}, true);
+
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button, speed_label, slots_label, slots_spinner}, true);
         swingReflectionInvoke("setVisible", new Object[]{stop_button, keep_temp_checkbox}, false);
         swingReflectionInvoke("setText", pause_button, "PAUSE DOWNLOAD");
         swingReflectionInvoke("setVisible", _download.getMain_panel().getView().getPause_all_down_button(), true);
-        
-    }
-    
-    @Override
-    public void stop() {
-        
-        printStatusNormal("Stopping download safely, please wait...");
-        
-        swingReflectionInvoke("setEnabled", new Object[]{pause_button,keep_temp_checkbox,stop_button,speed_label,slots_label,slots_spinner}, false);
+
     }
 
-    
+    @Override
+    public void stop() {
+
+        printStatusNormal("Stopping download safely, please wait...");
+
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button, keep_temp_checkbox, stop_button, speed_label, slots_label, slots_spinner}, false);
+    }
+
     @Override
     public void updateSpeed(String speed, Boolean visible) {
-        
-        if(speed != null) {
-            
+
+        if (speed != null) {
+
             swingReflectionInvoke("setText", speed_label, speed);
         }
-        
-        if(visible != null) {
-            
+
+        if (visible != null) {
+
             swingReflectionInvoke("setVisible", speed_label, visible);
         }
     }
 
     @Override
     public void updateRemainingTime(String rem_time, Boolean visible) {
-        
-        if(speed_label != null) {
-            
+
+        if (speed_label != null) {
+
             swingReflectionInvoke("setText", remtime_label, rem_time);
         }
-        
-        if(visible != null) {
-            
+
+        if (visible != null) {
+
             swingReflectionInvoke("setVisible", remtime_label, visible);
         }
     }
 
     @Override
     public void updateProgressBar(long progress, double bar_rate) {
-        
-        swingReflectionInvoke("setValue", progress_pbar, (int)Math.ceil(bar_rate*progress));
-        
+
+        swingReflectionInvoke("setValue", progress_pbar, (int) Math.ceil(bar_rate * progress));
+
     }
-    
+
     @Override
-    public void printStatusError(String message)
-    {
+    public void printStatusError(String message) {
         swingReflectionInvoke("setForeground", status_label, Color.red);
         swingReflectionInvoke("setText", status_label, message);
     }
-    
+
     @Override
-    public void printStatusOK(String message)
-    {        
-        swingReflectionInvoke("setForeground", status_label, new Color(0,128,0));
+    public void printStatusOK(String message) {
+        swingReflectionInvoke("setForeground", status_label, new Color(0, 128, 0));
         swingReflectionInvoke("setText", status_label, message);
     }
-    
+
     @Override
-    public void printStatusNormal(String message)
-    {
+    public void printStatusNormal(String message) {
         swingReflectionInvoke("setForeground", status_label, Color.BLACK);
         swingReflectionInvoke("setText", status_label, message);
     }
-    
+
     @Override
     public synchronized void updateSlotsStatus() {
-        
+
         int conta_exit = 0;
-        
-        for(ChunkDownloader c:_download.getChunkworkers()) {
-            
-            if(c.isExit()) {
-                
+
+        for (ChunkDownloader c : _download.getChunkworkers()) {
+
+            if (c.isExit()) {
+
                 conta_exit++;
             }
         }
-        
+
         int conta_error = 0;
-        
-        for(ChunkDownloader c:_download.getChunkworkers()) {
-            
-            if(c.isError_wait()) {
-                
+
+        for (ChunkDownloader c : _download.getChunkworkers()) {
+
+            if (c.isError_wait()) {
+
                 conta_error++;
             }
         }
 
-        if(conta_error > 0) {
-            
+        if (conta_error > 0) {
+
             swingReflectionInvoke("setForeground", slot_status_label, Color.red);
-            
+
         } else {
-            
+
             swingReflectionInvoke("setForeground", slot_status_label, Color.black);
         }
-  
-        swingReflectionInvoke("setText", slot_status_label, (conta_exit>0?"Removing: "+conta_exit:"") + (conta_error>0?((conta_exit>0?" / ":"")+"Error: " + conta_error):""));
-        
+
+        swingReflectionInvoke("setText", slot_status_label, (conta_exit > 0 ? "Removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Error: " + conta_error) : ""));
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -503,7 +496,5 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     private javax.swing.JLabel status_label;
     private javax.swing.JButton stop_button;
     // End of variables declaration//GEN-END:variables
-
-    
 
 }

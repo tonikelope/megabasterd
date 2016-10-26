@@ -11,7 +11,6 @@ import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.truncateText;
 import static megabasterd.MiscTools.updateFont;
 
-
 public final class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
 
     private boolean _download;
@@ -29,36 +28,35 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     public JTextArea getLinks_textarea() {
         return links_textarea;
     }
-    
-    
-    
+
     public LinkGrabberDialog(java.awt.Frame parent, boolean modal, String download_path, ClipboardSpy clipboardspy) {
-        
+
         super(parent, modal);
         _download = false;
-        
+
         initComponents();
-        
-        MiscTools.swingInvokeIt(new Runnable(){
+
+        MiscTools.swingInvokeIt(new Runnable() {
 
             @Override
-            public void run() {updateFont(links_label, FONT_DEFAULT, Font.PLAIN);
-        updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
-        updateFont(down_dir_to_label, FONT_DEFAULT, Font.PLAIN);
-        updateFont(change_dir_button, FONT_DEFAULT, Font.PLAIN);
-        updateFont(download_dir_label, FONT_DEFAULT, Font.PLAIN);}}, true);
-        
-        
+            public void run() {
+                updateFont(links_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(down_dir_to_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(change_dir_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(download_dir_label, FONT_DEFAULT, Font.PLAIN);
+            }
+        }, true);
+
         _download_path = download_path;
-        
+
         _clipboardpy = clipboardspy;
-        
-        swingReflectionInvoke("setText", download_dir_label, truncateText(download_path,80));
-        
+
+        swingReflectionInvoke("setText", download_dir_label, truncateText(download_path, 80));
+
         notifyClipboardChange();
     }
 
-    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -162,14 +160,14 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     }// </editor-fold>//GEN-END:initComponents
 
     private void dance_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dance_buttonActionPerformed
-        
-        _download=true;
-        
+
+        _download = true;
+
         this.setVisible(false);
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void change_dir_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_change_dir_buttonActionPerformed
-        
+
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
@@ -177,16 +175,15 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         filechooser.setAcceptAllFileFilterUsed(false);
 
-        if( filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION ) {
+        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
             File file = filechooser.getSelectedFile();
 
             _download_path = file.getAbsolutePath();
 
-            download_dir_label.setText(truncateText(_download_path,80));
+            download_dir_label.setText(truncateText(_download_path, 80));
         }
     }//GEN-LAST:event_change_dir_buttonActionPerformed
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton change_dir_button;
@@ -200,7 +197,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
     @Override
     public void notifyClipboardChange() {
-        
-        swingReflectionInvoke("setText", links_textarea,extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardpy.getContents())));
+
+        swingReflectionInvoke("setText", links_textarea, extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardpy.getContents())));
     }
 }

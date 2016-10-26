@@ -11,7 +11,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.copyTextToClipboard;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.updateFont;
@@ -82,45 +81,44 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         return status_label;
     }
 
-    
-    public UploadView(Upload upload){
-        
+    public UploadView(Upload upload) {
+
         initComponents();
-        
+
         _upload = upload;
-        
-        MiscTools.swingInvokeIt(new Runnable(){
+
+        MiscTools.swingInvokeIt(new Runnable() {
 
             @Override
             public void run() {
-            
-            updateFont(status_label, FONT_DEFAULT, BOLD);
-            updateFont(remtime_label, FONT_DEFAULT, PLAIN);
-            updateFont(speed_label, FONT_DEFAULT, BOLD);
-            updateFont(progress_pbar, FONT_DEFAULT, PLAIN);
-            updateFont(slots_label, FONT_DEFAULT, BOLD);
-            updateFont(slots_spinner, FONT_DEFAULT, PLAIN);
-            updateFont(pause_button, FONT_DEFAULT, BOLD);
-            updateFont(stop_button, FONT_DEFAULT, BOLD);
-            updateFont(folder_link_button, FONT_DEFAULT, PLAIN);
-            updateFont(file_link_button, FONT_DEFAULT, PLAIN);
-            updateFont(file_name_label, FONT_DEFAULT, PLAIN);
-            updateFont(file_size_label, FONT_DEFAULT, BOLD);
-            updateFont(close_button, FONT_DEFAULT, PLAIN);
-            updateFont(restart_button, FONT_DEFAULT, PLAIN);
-            updateFont(slot_status_label, FONT_DEFAULT, BOLD);
 
-            
-            }}, true);
-        
+                updateFont(status_label, FONT_DEFAULT, BOLD);
+                updateFont(remtime_label, FONT_DEFAULT, PLAIN);
+                updateFont(speed_label, FONT_DEFAULT, BOLD);
+                updateFont(progress_pbar, FONT_DEFAULT, PLAIN);
+                updateFont(slots_label, FONT_DEFAULT, BOLD);
+                updateFont(slots_spinner, FONT_DEFAULT, PLAIN);
+                updateFont(pause_button, FONT_DEFAULT, BOLD);
+                updateFont(stop_button, FONT_DEFAULT, BOLD);
+                updateFont(folder_link_button, FONT_DEFAULT, PLAIN);
+                updateFont(file_link_button, FONT_DEFAULT, PLAIN);
+                updateFont(file_name_label, FONT_DEFAULT, PLAIN);
+                updateFont(file_size_label, FONT_DEFAULT, BOLD);
+                updateFont(close_button, FONT_DEFAULT, PLAIN);
+                updateFont(restart_button, FONT_DEFAULT, PLAIN);
+                updateFont(slot_status_label, FONT_DEFAULT, BOLD);
+
+            }
+        }, true);
+
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_upload.getMain_panel().getDefault_slots_up(), MIN_WORKERS, MAX_WORKERS, 1));
-        
-        swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor)slots_spinner.getEditor()).getTextField(), false);
-       
-        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label,pause_button,stop_button,speed_label,remtime_label,progress_pbar,file_name_label,close_button,restart_button,file_size_label}, false);
 
-        swingReflectionInvoke("setForeground", speed_label, new Color(0,128,255));
-        
+        swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor) slots_spinner.getEditor()).getTextField(), false);
+
+        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, remtime_label, progress_pbar, file_name_label, close_button, restart_button, file_size_label}, false);
+
+        swingReflectionInvoke("setForeground", speed_label, new Color(0, 128, 255));
+
     }
 
     /**
@@ -326,11 +324,11 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
     private void slots_spinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_slots_spinnerStateChanged
 
-        THREAD_POOL.execute(new Runnable(){
-            
+        THREAD_POOL.execute(new Runnable() {
+
             @Override
             public void run() {
-                
+
                 _upload.checkSlotsAndWorkers();
             }
         });
@@ -341,33 +339,32 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     }//GEN-LAST:event_close_buttonActionPerformed
 
     private void restart_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restart_buttonActionPerformed
-        
+
         _upload.restart();
     }//GEN-LAST:event_restart_buttonActionPerformed
 
     private void stop_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stop_buttonActionPerformed
-       
+
         _upload.stop();
     }//GEN-LAST:event_stop_buttonActionPerformed
 
     private void pause_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_buttonActionPerformed
- 
+
         _upload.pause();
- 
+
     }//GEN-LAST:event_pause_buttonActionPerformed
 
-    public void hideAllExceptStatus()
-    {
-        swingReflectionInvoke("setVisible", new Object[]{speed_label, remtime_label, slots_spinner, slots_label,slot_status_label,pause_button,stop_button,progress_pbar}, false);
+    public void hideAllExceptStatus() {
+        swingReflectionInvoke("setVisible", new Object[]{speed_label, remtime_label, slots_spinner, slots_label, slot_status_label, pause_button, stop_button, progress_pbar}, false);
     }
-    
+
     private void folder_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_folder_link_buttonActionPerformed
 
         folder_link_button.setEnabled(false);
-        
+
         folder_link_button.setText("Please wait...");
-        
-        copyTextToClipboard(_upload.getFolder_link());
+
+        MiscTools.copyTextToClipboard(_upload.getFolder_link());
 
         folder_link_button.setText("Copy folder link");
 
@@ -379,44 +376,43 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     private void file_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_file_link_buttonActionPerformed
 
         file_link_button.setEnabled(false);
-        
+
         file_link_button.setText("Please wait...");
-        
-        copyTextToClipboard(_upload.getFile_link());
-                    
+
+        MiscTools.copyTextToClipboard(_upload.getFile_link());
+
         file_link_button.setText("Copy file link");
 
         JOptionPane.showMessageDialog(_upload.getMain_panel().getView(), "MEGA file link was copied to clipboard!");
 
         file_link_button.setEnabled(true);
-     
-    }//GEN-LAST:event_file_link_buttonActionPerformed
 
+    }//GEN-LAST:event_file_link_buttonActionPerformed
 
     @Override
     public void pause() {
 
         printStatusNormal("Pausing upload ...");
-        
-        swingReflectionInvoke("setEnabled", new Object[]{pause_button,speed_label,slots_label,slots_spinner}, false);
+
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button, speed_label, slots_label, slots_spinner}, false);
         swingReflectionInvoke("setVisible", stop_button, true);
 
     }
 
     @Override
     public void stop() {
-        
+
         printStatusNormal("Stopping upload safely, please wait...");
-        
-        swingReflectionInvoke("setEnabled", new Object[]{pause_button,stop_button,speed_label,slots_label,slots_spinner}, false);
+
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button, stop_button, speed_label, slots_label, slots_spinner}, false);
     }
 
     @Override
     public void resume() {
-        
+
         printStatusNormal("Uploading file to mega ...");
-        
-        swingReflectionInvoke("setEnabled", new Object[]{pause_button,speed_label,slots_label,slots_spinner}, true);
+
+        swingReflectionInvoke("setEnabled", new Object[]{pause_button, speed_label, slots_label, slots_spinner}, true);
         swingReflectionInvoke("setVisible", stop_button, false);
         swingReflectionInvoke("setText", pause_button, "PAUSE UPLOAD");
         swingReflectionInvoke("setVisible", _upload.getMain_panel().getView().getPause_all_up_button(), true);
@@ -424,36 +420,36 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
     @Override
     public void updateSpeed(String sp, Boolean visible) {
-        
-        if(sp != null) {
-            
+
+        if (sp != null) {
+
             swingReflectionInvoke("setText", speed_label, sp);
         }
-        
-        if(visible != null) {
-            
+
+        if (visible != null) {
+
             swingReflectionInvoke("setVisible", speed_label, visible);
         }
     }
 
     @Override
     public void updateRemainingTime(String remtime, Boolean visible) {
-        
-        if(remtime != null) {
-            
+
+        if (remtime != null) {
+
             swingReflectionInvoke("setText", remtime_label, remtime);
         }
-        
-        if(visible != null) {
-            
+
+        if (visible != null) {
+
             swingReflectionInvoke("setVisible", remtime_label, visible);
         }
     }
 
     @Override
     public void updateProgressBar(long progress, double bar_rate) {
-        
-        swingReflectionInvoke("setValue", progress_pbar, (int)Math.ceil(bar_rate*progress));
+
+        swingReflectionInvoke("setValue", progress_pbar, (int) Math.ceil(bar_rate * progress));
     }
 
     @Override
@@ -464,53 +460,52 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
     @Override
     public void printStatusOK(String msg) {
-        swingReflectionInvoke("setForeground", status_label, new Color(0,128,0));
+        swingReflectionInvoke("setForeground", status_label, new Color(0, 128, 0));
         swingReflectionInvoke("setText", status_label, msg);
     }
 
     @Override
     public void printStatusError(String msg) {
-        
+
         swingReflectionInvoke("setForeground", status_label, Color.red);
         swingReflectionInvoke("setText", status_label, msg);
     }
 
-   @Override
+    @Override
     public synchronized void updateSlotsStatus() {
-        
+
         int conta_exit = 0;
-        
-        for(ChunkUploader c:_upload.getChunkworkers()) {
-            
-            if(c.isExit()) {
-                
+
+        for (ChunkUploader c : _upload.getChunkworkers()) {
+
+            if (c.isExit()) {
+
                 conta_exit++;
             }
         }
-        
+
         int conta_error = 0;
-        
-        for(ChunkUploader c:_upload.getChunkworkers()) {
-            
-            if(c.isError_wait()) {
-                
+
+        for (ChunkUploader c : _upload.getChunkworkers()) {
+
+            if (c.isError_wait()) {
+
                 conta_error++;
             }
         }
 
-        if(conta_error > 0) {
-            
+        if (conta_error > 0) {
+
             swingReflectionInvoke("setForeground", slot_status_label, Color.red);
-            
+
         } else {
-            
+
             swingReflectionInvoke("setForeground", slot_status_label, Color.black);
         }
-        
-        swingReflectionInvoke("setText", slot_status_label, (conta_exit>0?"Removing: "+conta_exit:"") + (conta_error>0?((conta_exit>0?" / ":"")+"Error: " + conta_error):""));
+
+        swingReflectionInvoke("setText", slot_status_label, (conta_exit > 0 ? "Removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Error: " + conta_error) : ""));
     }
-    
-    
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton close_button;
     private javax.swing.JButton file_link_button;

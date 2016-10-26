@@ -11,6 +11,8 @@ import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeModel;
+import javax.swing.tree.TreeNode;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
@@ -30,13 +32,13 @@ import static megabasterd.MiscTools.updateFont;
 public final class FolderLinkDialog extends javax.swing.JDialog {
 
     private String _link;
-    
+
     private boolean _download;
-    
+
     private final List<HashMap> _download_links;
-    
+
     private long _total_space;
-    
+
     private boolean _mega_error;
 
     public List<HashMap> getDownload_links() {
@@ -50,17 +52,17 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
     public boolean isMega_error() {
         return _mega_error;
     }
-    
-    
+
     /**
      * Creates new form FolderLink
+     *
      * @param parent
      * @param link
      */
     public FolderLinkDialog(java.awt.Frame parent, boolean modal, String link) {
-        
+
         super(parent, modal);
- 
+
         initComponents();
 
         _mega_error = false;
@@ -68,30 +70,31 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         _download = false;
         _download_links = new ArrayList<>();
         _link = link;
-        
-        MiscTools.swingInvokeIt(new Runnable(){
+
+        MiscTools.swingInvokeIt(new Runnable() {
 
             @Override
-            public void run() {updateFont(file_tree, FONT_DEFAULT, PLAIN);
-        updateFont(link_detected_label, FONT_DEFAULT, PLAIN);
-        updateFont(warning_label, FONT_DEFAULT, PLAIN);
-        updateFont(skip_button, FONT_DEFAULT, PLAIN);
-        updateFont(dance_button, FONT_DEFAULT, PLAIN);
-        updateFont(restore_button, FONT_DEFAULT, PLAIN);
-        updateFont(skip_rest_button, FONT_DEFAULT, PLAIN);
-        updateFont(total_space_label, FONT_DEFAULT, BOLD);
-        updateFont(folder_link_label, FONT_DEFAULT, PLAIN);}}, true);
+            public void run() {
+                updateFont(file_tree, FONT_DEFAULT, PLAIN);
+                updateFont(link_detected_label, FONT_DEFAULT, PLAIN);
+                updateFont(warning_label, FONT_DEFAULT, PLAIN);
+                updateFont(skip_button, FONT_DEFAULT, PLAIN);
+                updateFont(dance_button, FONT_DEFAULT, PLAIN);
+                updateFont(restore_button, FONT_DEFAULT, PLAIN);
+                updateFont(skip_rest_button, FONT_DEFAULT, PLAIN);
+                updateFont(total_space_label, FONT_DEFAULT, BOLD);
+                updateFont(folder_link_label, FONT_DEFAULT, PLAIN);
+            }
+        }, true);
 
-        
-       
         swingReflectionInvoke("setText", folder_link_label, link);
-        
+
         swingReflectionInvoke("setVisible", restore_button, false);
-        
+
         _loadMegaDirTree();
-        
-        if(!_mega_error) {
-            
+
+        if (!_mega_error) {
+
             _genDownloadLiks();
         }
     }
@@ -242,103 +245,102 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void skip_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_buttonActionPerformed
-       
-        if(deleteSelectedTreeItems(file_tree)) {
+
+        if (deleteSelectedTreeItems(file_tree)) {
 
             _genDownloadLiks();
-            
+
             restore_button.setVisible(true);
-            
-            boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
-            
+
+            boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
+
             dance_button.setEnabled(root_childs);
-            
+
             skip_button.setEnabled(root_childs);
-            
+
             skip_rest_button.setEnabled(root_childs);
         }
-  
+
     }//GEN-LAST:event_skip_buttonActionPerformed
 
     private void dance_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dance_buttonActionPerformed
 
         _download = true;
-        
+
         this.setVisible(false);
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
-        
-        if(deleteAllExceptSelectedTreeItems(file_tree)) {
+
+        if (deleteAllExceptSelectedTreeItems(file_tree)) {
 
             _genDownloadLiks();
-            
+
             restore_button.setVisible(true);
-            
-            boolean root_childs = ((DefaultMutableTreeNode)file_tree.getModel().getRoot()).getChildCount()>0;
-        
+
+            boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
+
             dance_button.setEnabled(root_childs);
-            
+
             skip_button.setEnabled(root_childs);
-            
+
             skip_rest_button.setEnabled(root_childs);
         }
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
     private void restore_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restore_buttonActionPerformed
- 
+
         restore_button.setText("Restoring data, please wait...");
-        
+
         file_tree.setEnabled(false);
-        
+
         restore_button.setEnabled(false);
-        
+
         dance_button.setEnabled(false);
-        
-        THREAD_POOL.execute(new Runnable(){
-                    @Override
-                    public void run() {
-                    
-                        _loadMegaDirTree();
 
-                        _genDownloadLiks();
+        THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
 
-                        swingReflectionInvoke("setVisible", restore_button, false);
-                        
-                        swingReflectionInvoke("setText", restore_button, "Restore folder data");
-                        
-                        boolean root_childs = ((DefaultMutableTreeNode)((DefaultTreeModel)swingReflectionInvokeAndWaitForReturn("getModel", file_tree)).getRoot()).getChildCount()>0;
+                _loadMegaDirTree();
 
-                        swingReflectionInvoke("setEnabled", new Object[]{restore_button,dance_button, skip_button, skip_rest_button, file_tree}, root_childs);
-                        
-                        
-        
-        }});
-        
+                _genDownloadLiks();
+
+                swingReflectionInvoke("setVisible", restore_button, false);
+
+                swingReflectionInvoke("setText", restore_button, "Restore folder data");
+
+                boolean root_childs = ((TreeNode) ((TreeModel) swingReflectionInvokeAndWaitForReturn("getModel", file_tree)).getRoot()).getChildCount() > 0;
+
+                swingReflectionInvoke("setEnabled", new Object[]{restore_button, dance_button, skip_button, skip_rest_button, file_tree}, root_childs);
+
+            }
+        });
+
     }//GEN-LAST:event_restore_buttonActionPerformed
-    
+
     private void _loadMegaDirTree() {
-        
+
         try {
-            HashMap<String,Object> folder_nodes;
-            
+            HashMap<String, Object> folder_nodes;
+
             MegaAPI ma = new MegaAPI();
-            
+
             String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
-            
+
             String folder_key = findFirstRegex("#F![^!]+!(.+)", _link, 1);
-            
+
             folder_nodes = ma.getFolderNodes(folder_id, folder_key);
-             
-            MegaMutableTreeNode root=null;
 
-            for(Object o:folder_nodes.values()) {
+            MegaMutableTreeNode root = null;
 
-                HashMap<String,Object> current_hashmap_node = (HashMap<String,Object>)o;
+            for (Object o : folder_nodes.values()) {
+
+                HashMap<String, Object> current_hashmap_node = (HashMap<String, Object>) o;
 
                 MegaMutableTreeNode current_node;
 
-                if(current_hashmap_node.get("jtree_node") == null) {
+                if (current_hashmap_node.get("jtree_node") == null) {
 
                     current_node = new MegaMutableTreeNode(current_hashmap_node);
 
@@ -346,22 +348,22 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
                 } else {
 
-                    current_node = (MegaMutableTreeNode)current_hashmap_node.get("jtree_node");
+                    current_node = (MegaMutableTreeNode) current_hashmap_node.get("jtree_node");
                 }
 
-                String parent_id=(String)current_hashmap_node.get("parent");
+                String parent_id = (String) current_hashmap_node.get("parent");
 
-                root=null;
+                root = null;
 
-                do{
+                do {
 
-                    if(folder_nodes.get(parent_id) != null) {
+                    if (folder_nodes.get(parent_id) != null) {
 
-                        HashMap<String,Object> parent_hashmap_node = (HashMap)folder_nodes.get(parent_id);
+                        HashMap<String, Object> parent_hashmap_node = (HashMap) folder_nodes.get(parent_id);
 
                         MegaMutableTreeNode parent_node;
 
-                        if(parent_hashmap_node.get("jtree_node") == null) {
+                        if (parent_hashmap_node.get("jtree_node") == null) {
 
                             parent_node = new MegaMutableTreeNode(parent_hashmap_node);
 
@@ -369,12 +371,12 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
                         } else {
 
-                            parent_node = (MegaMutableTreeNode)parent_hashmap_node.get("jtree_node");
+                            parent_node = (MegaMutableTreeNode) parent_hashmap_node.get("jtree_node");
                         }
 
                         parent_node.add(current_node);
 
-                        parent_id = (String)parent_hashmap_node.get("parent");
+                        parent_id = (String) parent_hashmap_node.get("parent");
 
                         current_node = parent_node;
 
@@ -383,57 +385,56 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                         root = current_node;
                     }
 
-                }while(current_node != root);
+                } while (current_node != root);
             }
-            
+
             swingReflectionInvokeAndWait("setModel", file_tree, new DefaultTreeModel(sortTree(root)));
-          
-            swingReflectionInvoke("setRootVisible", file_tree, root!=null?root.getChildCount() > 0:false);
- 
+
+            swingReflectionInvoke("setRootVisible", file_tree, root != null ? root.getChildCount() > 0 : false);
+
             swingReflectionInvoke("setEnabled", file_tree, true);
-            
-    
+
         } catch (Exception ex) {
-            
+
             getLogger(FolderLinkDialog.class.getName()).log(SEVERE, null, ex);
-            
+
             _mega_error = true;
         }
 
     }
-    
-    private void _genDownloadLiks(){
-        
-        String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
-        
-        _download_links.clear();
-        
-        MegaMutableTreeNode root = (MegaMutableTreeNode)((DefaultTreeModel)swingReflectionInvokeAndWaitForReturn("getModel", file_tree)).getRoot();
-        
-        Enumeration files_tree = root.depthFirstEnumeration();
-        
-        _total_space = 0L;
-        
-        while(files_tree.hasMoreElements()) {
-            
-            MegaMutableTreeNode node = (MegaMutableTreeNode)files_tree.nextElement();
-            
-            if(node.isLeaf() && node!=root && ((HashMap<String,Object>)node.getUserObject()).get("size") != null) {
-                
-                String path = "";
-                
-                Object[] object_path = node.getUserObjectPath();
-                
-                for(Object p:object_path) {
-                    
-                    path+="/"+((Map<String,Object>)p).get("name");
-                }
-                
-                path = path.replaceAll("^/+", "").trim();
-                
-                String url = "https://mega.nz/#N!" + ((Map<String, Object>) node.getUserObject()).get("h") + "!" + ((Map<String, Object>) node.getUserObject()).get("key") + "###n=" + folder_id ;
 
-                HashMap<String,Object> download_link = new HashMap<>();
+    private void _genDownloadLiks() {
+
+        String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
+
+        _download_links.clear();
+
+        MegaMutableTreeNode root = (MegaMutableTreeNode) ((TreeModel) swingReflectionInvokeAndWaitForReturn("getModel", file_tree)).getRoot();
+
+        Enumeration files_tree = root.depthFirstEnumeration();
+
+        _total_space = 0L;
+
+        while (files_tree.hasMoreElements()) {
+
+            MegaMutableTreeNode node = (MegaMutableTreeNode) files_tree.nextElement();
+
+            if (node.isLeaf() && node != root && ((HashMap<String, Object>) node.getUserObject()).get("size") != null) {
+
+                String path = "";
+
+                Object[] object_path = node.getUserObjectPath();
+
+                for (Object p : object_path) {
+
+                    path += "/" + ((Map<String, Object>) p).get("name");
+                }
+
+                path = path.replaceAll("^/+", "").trim();
+
+                String url = "https://mega.nz/#N!" + ((Map<String, Object>) node.getUserObject()).get("h") + "!" + ((Map<String, Object>) node.getUserObject()).get("key") + "###n=" + folder_id;
+
+                HashMap<String, Object> download_link = new HashMap<>();
 
                 download_link.put("url", url);
 
@@ -441,17 +442,17 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
                 download_link.put("filekey", ((Map<String, Object>) node.getUserObject()).get("key"));
 
-                download_link.put("filesize", ((Map<String,Object>)node.getUserObject()).get("size"));
-                
-                _total_space+=(long)download_link.get("filesize");
+                download_link.put("filesize", ((Map<String, Object>) node.getUserObject()).get("size"));
+
+                _total_space += (long) download_link.get("filesize");
 
                 _download_links.add(download_link);
             }
         }
-      
-        swingReflectionInvoke("setText", total_space_label, "["+formatBytes(_total_space)+"]");
 
-        swingReflectionInvoke("setEnabled", new Object[]{dance_button, warning_label, skip_button,skip_rest_button, total_space_label}, root.getChildCount() > 0);
+        swingReflectionInvoke("setText", total_space_label, "[" + formatBytes(_total_space) + "]");
+
+        swingReflectionInvoke("setEnabled", new Object[]{dance_button, warning_label, skip_button, skip_rest_button, total_space_label}, root.getChildCount() > 0);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

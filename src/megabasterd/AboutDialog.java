@@ -6,7 +6,6 @@ import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MainPanel.VERSION;
-import static megabasterd.MiscTools.copyTextToClipboard;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.updateFont;
 
@@ -15,31 +14,32 @@ import static megabasterd.MiscTools.updateFont;
  * @author tonikelope
  */
 public final class AboutDialog extends javax.swing.JDialog {
-    
+
     private static final String MEGA_URL = "https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A";
     private static final String TONIKELOPE_URL = "http://t0ni.xyz";
     private static final String MEGACRYPTER_URL = "https://megacrypter.com";
     private static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
     private static final String MEGABASTERD_GITHUB_URL = "https://github.com/tonikelope/megabasterd";
-   
-    
+
     public AboutDialog(MainPanelView parent, boolean modal) {
-        
+
         super(parent, modal);
-        
+
         initComponents();
-        
-        swingReflectionInvoke("setText", title_label , "MegaBasterd "+ VERSION);
-        
-        MiscTools.swingInvokeIt(new Runnable(){
+
+        swingReflectionInvoke("setText", title_label, "MegaBasterd " + VERSION);
+
+        MiscTools.swingInvokeIt(new Runnable() {
 
             @Override
-            public void run() { updateFont(title_label, FONT_DEFAULT, Font.BOLD);
-        updateFont(subtitle_label, FONT_DEFAULT, Font.BOLD);
-        updateFont(mcdown_url_button, FONT_DEFAULT, Font.PLAIN);
-        updateFont(check_version_button, FONT_DEFAULT, Font.PLAIN);}}, true);
-        
-       
+            public void run() {
+                updateFont(title_label, FONT_DEFAULT, Font.BOLD);
+                updateFont(subtitle_label, FONT_DEFAULT, Font.BOLD);
+                updateFont(mcdown_url_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(check_version_button, FONT_DEFAULT, Font.PLAIN);
+            }
+        }, true);
+
     }
 
     /**
@@ -190,49 +190,50 @@ public final class AboutDialog extends javax.swing.JDialog {
 
     private void mcdown_url_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mcdown_url_buttonActionPerformed
 
-        copyTextToClipboard(MEGA_URL);
-        
+        MiscTools.copyTextToClipboard(MEGA_URL);
+
         JOptionPane.showMessageDialog(this, "MEGA URL was copied to clipboard!");
     }//GEN-LAST:event_mcdown_url_buttonActionPerformed
 
     private void check_version_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_check_version_buttonActionPerformed
 
         check_version_button.setEnabled(false);
-        
+
         check_version_button.setText("Checking, please wait...");
-        
+
         final Dialog tthis = this;
-           
-        THREAD_POOL.execute(new Runnable(){
+
+        THREAD_POOL.execute(new Runnable() {
             @Override
             public void run() {
-                
+
                 String new_version = MiscTools.checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A");
-                
-                if(new_version != null) {
-                    
-                    JOptionPane.showMessageDialog(tthis, "MegaBasterd NEW VERSION ("+new_version+") is available!\n\n(HELP > ABOUT for more info)");
-                    
+
+                if (new_version != null) {
+
+                    JOptionPane.showMessageDialog(tthis, "MegaBasterd NEW VERSION (" + new_version + ") is available!\n\n(HELP > ABOUT for more info)");
+
                 } else {
-                    
+
                     JOptionPane.showMessageDialog(tthis, "You have the latest version ;)");
                 }
-                
+
                 swingReflectionInvoke("setText", check_version_button, "Check version");
-                
+
                 swingReflectionInvoke("setEnabled", check_version_button, true);
 
-            }});
-        
+            }
+        });
+
     }//GEN-LAST:event_check_version_buttonActionPerformed
 
     private void pica_roja_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pica_roja_labelMouseReleased
-        
+
         MiscTools.openBrowserURL(TONIKELOPE_URL);
     }//GEN-LAST:event_pica_roja_labelMouseReleased
 
     private void author_webpage_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_author_webpage_labelMouseReleased
-        
+
         MiscTools.openBrowserURL(TONIKELOPE_URL);
     }//GEN-LAST:event_author_webpage_labelMouseReleased
 
@@ -242,14 +243,13 @@ public final class AboutDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_mc_logo_labelMouseReleased
 
     private void made_in_spain_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_made_in_spain_labelMouseReleased
-        
+
         MiscTools.openBrowserURL(SPAIN_URL);
     }//GEN-LAST:event_made_in_spain_labelMouseReleased
 
     private void title_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_title_labelMouseReleased
         MiscTools.openBrowserURL(MEGABASTERD_GITHUB_URL);
     }//GEN-LAST:event_title_labelMouseReleased
-
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel author_webpage_label;

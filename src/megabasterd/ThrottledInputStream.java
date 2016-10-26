@@ -17,7 +17,6 @@ public final class ThrottledInputStream extends InputStream {
 
     private boolean _stream_finish;
 
-
     public ThrottledInputStream(InputStream rawStream, StreamThrottlerSupervisor stream_supervisor) {
 
         _rawStream = rawStream;
@@ -29,23 +28,22 @@ public final class ThrottledInputStream extends InputStream {
         _slice_size = null;
     }
 
-
     @Override
     public int read() throws IOException {
 
-        if(_stream_supervisor.getMaxBytesPerSecInput() > 0) {
+        if (_stream_supervisor.getMaxBytesPerSecInput() > 0) {
 
-            if(!_stream_finish) {
+            if (!_stream_finish) {
 
                 int r;
 
                 throttle(1);
 
-                if(_slice_size != null) {
+                if (_slice_size != null) {
 
                     r = _rawStream.read();
 
-                    if(r == -1) {
+                    if (r == -1) {
 
                         _stream_finish = true;
                     }
@@ -69,46 +67,45 @@ public final class ThrottledInputStream extends InputStream {
 
     }
 
-
     @Override
     public int read(byte[] b) throws IOException {
 
-        if(_stream_supervisor.getMaxBytesPerSecInput() > 0) {
+        if (_stream_supervisor.getMaxBytesPerSecInput() > 0) {
 
-            if(!_stream_finish) {
+            if (!_stream_finish) {
 
-                int readLen = 0, readSlice, len=b.length, r=0;
+                int readLen = 0, readSlice, len = b.length, r = 0;
 
                 do {
 
                     throttle(len - readLen);
 
-                    if(_slice_size != null) {
+                    if (_slice_size != null) {
 
-                        readSlice=0;
+                        readSlice = 0;
 
-                        do{
-                            r = _rawStream.read(b, readLen+readSlice, _slice_size-readSlice );
+                        do {
+                            r = _rawStream.read(b, readLen + readSlice, _slice_size - readSlice);
 
-                            if(r!=-1){
+                            if (r != -1) {
 
-                                readSlice+=r;
+                                readSlice += r;
 
                             } else {
 
                                 _stream_finish = true;
                             }
 
-                        }while(r != -1 && readSlice < _slice_size);
+                        } while (r != -1 && readSlice < _slice_size);
 
-                        readLen+=readSlice;
+                        readLen += readSlice;
 
                     } else {
 
                         return _rawStream.read(b);
                     }
 
-                }while( r != -1 && readLen < len );
+                } while (r != -1 && readLen < len);
 
                 return readLen;
 
@@ -123,47 +120,46 @@ public final class ThrottledInputStream extends InputStream {
         }
     }
 
-
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
 
-        if(_stream_supervisor.getMaxBytesPerSecInput() > 0) {
+        if (_stream_supervisor.getMaxBytesPerSecInput() > 0) {
 
-            if(!_stream_finish) {
+            if (!_stream_finish) {
 
-                int readLen = 0, r=0;
+                int readLen = 0, r = 0;
 
                 do {
 
-                    throttle(len-readLen);
+                    throttle(len - readLen);
 
-                    if(_slice_size != null) {
+                    if (_slice_size != null) {
 
-                        int readSlice=0;
+                        int readSlice = 0;
 
-                        do{
-                            r = _rawStream.read(b, off+readSlice+readLen, _slice_size - readSlice);
+                        do {
+                            r = _rawStream.read(b, off + readSlice + readLen, _slice_size - readSlice);
 
-                            if(r!=-1){
+                            if (r != -1) {
 
-                                readSlice+=r;
+                                readSlice += r;
 
                             } else {
 
                                 _stream_finish = true;
                             }
 
-                        }while(r!=-1 && readSlice<_slice_size);
+                        } while (r != -1 && readSlice < _slice_size);
 
-                        readLen+=readSlice;
+                        readLen += readSlice;
 
                     } else {
 
-                        r = _rawStream.read(b, off+readLen, len-readLen);
+                        r = _rawStream.read(b, off + readLen, len - readLen);
 
-                        if(r!=-1){
+                        if (r != -1) {
 
-                            readLen+=r;
+                            readLen += r;
 
                         } else {
 
@@ -171,7 +167,7 @@ public final class ThrottledInputStream extends InputStream {
                         }
                     }
 
-                }while( r!=-1 && readLen < len );
+                } while (r != -1 && readLen < len);
 
                 return readLen;
 
@@ -186,7 +182,6 @@ public final class ThrottledInputStream extends InputStream {
         }
 
     }
-  
 
     @Override
     public void reset() throws IOException {
@@ -197,17 +192,16 @@ public final class ThrottledInputStream extends InputStream {
 
     }
 
-
     private void throttle(int size) throws IOException {
 
         _slice_size = null;
 
-        while(_stream_supervisor.getMaxBytesPerSecInput() > 0 && (_slice_size=_stream_supervisor.getInput_slice_queue().poll()) == null) {
+        while (_stream_supervisor.getMaxBytesPerSecInput() > 0 && (_slice_size = _stream_supervisor.getInput_slice_queue().poll()) == null) {
 
             _stream_supervisor.secureWait();
         }
 
-        if(_slice_size != null && size < _slice_size) {
+        if (_slice_size != null && size < _slice_size) {
 
             _stream_supervisor.getInput_slice_queue().add(_slice_size - size);
 
