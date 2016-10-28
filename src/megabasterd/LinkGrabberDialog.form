@@ -117,7 +117,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="20" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Put your MEGA/MegaCrypter link/s here (one per line):"/>
+        <Property name="text" type="java.lang.String" value="Put your MEGA/MegaCrypter/ELC link/s here (one per line):"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
@@ -147,7 +147,6 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="16" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="jLabel3"/>
       </Properties>
     </Component>
   </SubComponents>

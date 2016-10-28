@@ -97,7 +97,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         });
 
         links_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        links_label.setText("Put your MEGA/MegaCrypter link/s here (one per line):");
+        links_label.setText("Put your MEGA/MegaCrypter/ELC link/s here (one per line):");
         links_label.setDoubleBuffered(true);
 
         change_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
@@ -114,7 +114,6 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         down_dir_to_label.setDoubleBuffered(true);
 
         download_dir_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        download_dir_label.setText("jLabel3");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
