@@ -301,7 +301,7 @@ public final class CryptTools {
         HashSet<String> links = new HashSet<>();
 
         if ((elc = findFirstRegex("mega://elc\\?([0-9a-zA-Z,_-]+)", link, 1)) != null) {
-            System.out.println(elc);
+            
             try {
 
                 byte[] elc_byte = UrlBASE642Bin(elc);
@@ -345,6 +345,11 @@ public final class CryptTools {
 
                 byte[] url_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2, 4 + bin_links_length + 2 + url_bin_length);
 
+                if(!new String(url_bin).contains("http")) {
+                    
+                    throw new Exception("BAD ELC HOST URL!");
+                }
+         
                 short pass_bin_length = ByteBuffer.wrap(recReverseArray(Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2 + url_bin_length, 4 + bin_links_length + 2 + url_bin_length + 2), 0, 1)).getShort();
 
                 byte[] pass_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2 + url_bin_length + 2, 4 + bin_links_length + 2 + url_bin_length + 2 + pass_bin_length);
@@ -352,6 +357,8 @@ public final class CryptTools {
                 try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
                     HttpPost httppost = new HttpPost(new String(url_bin));
+                    
+                    httppost.setHeader("Custom-User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                     ArrayList<NameValuePair> nameValuePairs = new ArrayList<>();
 
@@ -483,7 +490,7 @@ public final class CryptTools {
 
             } catch (Exception ex) {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "ELC decryption Error", JOptionPane.ERROR_MESSAGE);
             }
         }
 

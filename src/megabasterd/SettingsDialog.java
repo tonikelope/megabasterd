@@ -1003,23 +1003,27 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             HashMap<String, Object> elc_account_data = (HashMap) _main_panel.getElc_accounts().get(host_table);
 
                             String user = (String) elc_account_data.get("user");
+                            
+                            String apikey = (String) elc_account_data.get("apikey");
 
                             if (_main_panel.getMaster_pass() != null) {
 
                                 try {
 
                                     user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(user), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                    
+                                    apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(apikey), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                 } catch (Exception ex) {
                                     Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
 
-                            if (!user.equals(user_table)) {
+                            if (!user.equals(user_table) || !apikey.equals(apikey_table)) {
 
                                 user = user_table;
 
-                                String apikey = apikey_table;
+                                apikey = apikey_table;
 
                                 if (_main_panel.getMaster_pass() != null) {
 

@@ -61,9 +61,7 @@ public final class MegaCrypterAPI {
 
                     httppost.setHeader("Content-type", "application/json");
 
-                    httppost.setHeader("User-Agent", MainPanel.DEFAULT_USER_AGENT);
-
-                    httppost.addHeader("Connection", "close");
+                    httppost.setHeader("Custom-User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                     httppost.setEntity(new StringEntity(request));
 

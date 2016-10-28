@@ -147,8 +147,6 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
 
                 final long postdata_length = chunk.getSize();
 
-                httppost.addHeader("Connection", "close");
-
                 tot_bytes_up = 0;
 
                 error = false;

@@ -125,8 +125,6 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
 
                 HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
 
-                httpget.addHeader("Connection", "close");
-
                 error = false;
 
                 try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {

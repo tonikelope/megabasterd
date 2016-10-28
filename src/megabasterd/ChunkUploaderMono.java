@@ -84,8 +84,6 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     final long postdata_length = getUpload().getFile_size() - chunk.getOffset();
 
-                    httppost.addHeader("Connection", "close");
-
                     final PipedInputStream pipein = new PipedInputStream();
 
                     PipedOutputStream pipeout = new PipedOutputStream(pipein);

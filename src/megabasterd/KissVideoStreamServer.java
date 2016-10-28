@@ -504,8 +504,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
 
                 httpget = new HttpGet(url.toURI());
 
-                httpget.addHeader("Connection", "close");
-
                 try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
 
                     is = httpresponse.getEntity().getContent();

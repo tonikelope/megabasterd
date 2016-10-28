@@ -59,8 +59,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     httpget = new HttpGet(new URI(worker_url + "/" + chunk.getOffset()));
 
-                    httpget.addHeader("Connection", "close");
-
                     httpresponse = httpclient.execute(httpget);
 
                     is = new ThrottledInputStream(httpresponse.getEntity().getContent(), getDownload().getMain_panel().getStream_supervisor());

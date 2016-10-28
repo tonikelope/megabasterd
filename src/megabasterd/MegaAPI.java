@@ -291,8 +291,6 @@ public final class MegaAPI {
 
                     httppost.setHeader("Content-type", "application/json");
 
-                    httppost.addHeader("Connection", "close");
-
                     httppost.setEntity(new StringEntity(request));
 
                     try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {

@@ -563,8 +563,6 @@ public final class MiscTools {
 
             httpget.addHeader("Custom-User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-            httpget.addHeader("Connection", "close");
-
             try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
 
                 InputStream is = httpresponse.getEntity().getContent();
@@ -913,8 +911,6 @@ public final class MiscTools {
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
 
             HttpGet httpget = new HttpGet(new URI(string_url + "/0"));
-
-            httpget.addHeader("Connection", "close");
 
             try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
 
