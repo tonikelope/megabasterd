@@ -24,6 +24,7 @@ public final class DBTools {
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS uploads(filename TEXT, email TEXT, url TEXT, ul_key TEXT, parent_node TEXT, root_node TEXT, share_key TEXT, folder_link TEXT, PRIMARY KEY ('filename'), UNIQUE(filename, email));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS settings(key VARCHAR(255), value TEXT, PRIMARY KEY('key'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS mega_accounts(email TEXT, password TEXT, password_aes TEXT, user_hash TEXT, PRIMARY KEY('email'));");
+            stat.executeUpdate("CREATE TABLE IF NOT EXISTS elc_accounts(host TEXT, user TEXT, apikey TEXT, PRIMARY KEY('host'));");
         }
     }
 
@@ -218,6 +219,30 @@ public final class DBTools {
         return accounts;
     }
 
+    public static HashMap<String, Object> selectELCAccounts() throws SQLException {
+
+        HashMap<String, Object> accounts = new HashMap<>();
+
+        ResultSet res;
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+
+            res = stat.executeQuery("SELECT * FROM elc_accounts");
+
+            while (res.next()) {
+
+                HashMap<String, Object> account_data = new HashMap<>();
+
+                account_data.put("user", res.getString("user"));
+                account_data.put("apikey", res.getString("apikey"));
+
+                accounts.put(res.getString("host"), account_data);
+            }
+        }
+
+        return accounts;
+    }
+
     public static void insertMegaAccount(String email, String password, String password_aes, String user_hash) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO mega_accounts (email,password,password_aes,user_hash) VALUES (?, ?, ?, ?)")) {
@@ -236,11 +261,36 @@ public final class DBTools {
 
     }
 
+    public static void insertELCAccount(String host, String user, String apikey) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO elc_accounts (host,user,apikey) VALUES (?, ?, ?)")) {
+
+            ps.setString(1, host);
+
+            ps.setString(2, user);
+
+            ps.setString(3, apikey);
+
+            ps.executeUpdate();
+        }
+
+    }
+
     public static void deleteMegaAccount(String email) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE from mega_accounts WHERE email=?")) {
 
             ps.setString(1, email);
+
+            ps.executeUpdate();
+        }
+    }
+
+    public static void deleteELCAccount(String host) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE from elc_accounts WHERE host=?")) {
+
+            ps.setString(1, host);
 
             ps.executeUpdate();
         }

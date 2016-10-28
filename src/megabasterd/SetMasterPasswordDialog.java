@@ -18,7 +18,7 @@ import static megabasterd.MiscTools.updateFont;
  *
  * @author tonikelope
  */
-public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
+public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
     private boolean _pass_ok;
 
@@ -53,7 +53,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
     /**
      * Creates new form MegaPassDialog
      */
-    public SetMegaMasterPasswordDialog(java.awt.Frame parent, boolean modal, String salt) {
+    public SetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String salt) {
         super(parent, modal);
         initComponents();
 
@@ -99,7 +99,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
         status_label = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("MegaMasterPassword");
+        setTitle("MasterPassword");
         setResizable(false);
 
         confirm_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
@@ -136,7 +136,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
         lock_label.setDoubleBuffered(true);
 
         warning_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        warning_label.setText("WARNING: if you forget this password, you will have to insert all your MEGA accounts again.");
+        warning_label.setText("WARNING: if you forget this password, you will have to insert all your accounts again.");
         warning_label.setDoubleBuffered(true);
 
         new_pass_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -253,7 +253,7 @@ public class SetMegaMasterPasswordDialog extends javax.swing.JDialog {
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(SetMegaMasterPasswordDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(SetMasterPasswordDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });

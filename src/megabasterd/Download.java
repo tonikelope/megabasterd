@@ -23,6 +23,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 import javax.crypto.BadPaddingException;
@@ -45,6 +46,7 @@ import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.MiscTools.truncateText;
+import static megabasterd.Transference.MAX_WAIT_WORKERS_SHUTDOWN;
 
 /**
  *
@@ -508,6 +510,8 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                         secureWait();
 
+                        _thread_pool.shutdown();
+
                         System.out.println("Chunkdownloaders finished!");
 
                         getSpeed_meter().setExit(true);
@@ -518,14 +522,14 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                         getProgress_meter().secureNotify();
 
-                        _thread_pool.shutdown();
-
                         try {
+
+                            System.out.println("Esperando a que todos los hilos terminen...");
 
                             _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
                         } catch (InterruptedException ex) {
-                            getLogger(Download.class.getName()).log(SEVERE, null, ex);
+                            getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                         }
 
                         if (!_thread_pool.isTerminated()) {
@@ -925,6 +929,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     }
 
     public synchronized void stopLastStartedSlot() {
+
         if (!_exit && !_chunkworkers.isEmpty()) {
 
             swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
@@ -954,7 +959,9 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     }
 
     public synchronized void stopThisSlot(ChunkDownloader chunkdownloader) {
-        if (!_exit && _chunkworkers.remove(chunkdownloader)) {
+
+        if (_chunkworkers.remove(chunkdownloader) && !_exit) {
+
             if (!chunkdownloader.isExit()) {
 
                 _finishing_download = true;
@@ -1096,6 +1103,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                 swingReflectionInvoke("setEnabled", getView().getStop_button(), false);
             } else {
+
                 getView().stop();
 
                 for (ChunkDownloader downloader : _chunkworkers) {

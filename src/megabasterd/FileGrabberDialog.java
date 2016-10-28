@@ -562,11 +562,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                         try {
 
-                            if (_main_panel.getMega_master_pass_hash() != null) {
+                            if (_main_panel.getMaster_pass_hash() != null) {
 
-                                if (_main_panel.getMega_master_pass() == null) {
+                                if (_main_panel.getMaster_pass() == null) {
 
-                                    GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMega_master_pass_hash(), _main_panel.getMega_master_pass_salt());
+                                    GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt());
 
                                     swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
 
@@ -574,7 +574,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                                     if (dialog.isPass_ok()) {
 
-                                        _main_panel.setMega_master_pass(dialog.getPass());
+                                        _main_panel.setMaster_pass(dialog.getPass());
 
                                         dialog.deletePass();
 
@@ -582,9 +582,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                                         dialog.dispose();
 
-                                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                     } else {
 
@@ -595,9 +595,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                                 } else {
 
-                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                 }
 

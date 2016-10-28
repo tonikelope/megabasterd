@@ -727,6 +727,8 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
                 secureWait();
 
+                _thread_pool.shutdown();
+
                 System.out.println("Chunkuploaders finished!");
 
                 getSpeed_meter().setExit(true);
@@ -737,9 +739,9 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
                 getProgress_meter().secureNotify();
 
-                _thread_pool.shutdown();
-
                 try {
+
+                    System.out.println("Esperando a que todos los hilos terminen...");
 
                     _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
@@ -904,7 +906,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     }
 
     public synchronized void stopThisSlot(ChunkUploader chunkuploader) {
-        if (!_exit && _chunkworkers.remove(chunkuploader)) {
+        if (_chunkworkers.remove(chunkuploader) && !_exit) {
             if (!chunkuploader.isExit()) {
 
                 _finishing_upload = true;

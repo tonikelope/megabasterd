@@ -37,6 +37,7 @@ import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import static megabasterd.DBTools.deleteUpload;
 import static megabasterd.DBTools.selectDownloads;
+import static megabasterd.DBTools.selectELCAccounts;
 import static megabasterd.DBTools.selectMegaAccounts;
 import static megabasterd.DBTools.selectSettingValueFromDB;
 import static megabasterd.DBTools.selectUploads;
@@ -58,7 +59,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "1.44";
+    public static final String VERSION = "1.45";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
@@ -90,13 +91,14 @@ public final class MainPanel {
     private boolean _use_slots_down, _use_slots_up, _limit_download_speed, _limit_upload_speed;
     private String _default_download_path;
     private HashMap<String, Object> _mega_accounts;
+    private HashMap<String, Object> _elc_accounts;
     private final HashMap<String, MegaAPI> _mega_active_accounts;
     private TrayIcon _trayicon;
     private final ClipboardSpy _clipboardspy;
     private KissVideoStreamServer _streamserver;
-    private byte[] _mega_master_pass;
-    private String _mega_master_pass_hash;
-    private String _mega_master_pass_salt;
+    private byte[] _master_pass;
+    private String _master_pass_hash;
+    private String _master_pass_salt;
 
     public MainPanel() {
 
@@ -121,11 +123,13 @@ public final class MainPanel {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
-        loadUserSettings();
+        _elc_accounts = new HashMap<>();
 
-        _mega_master_pass = null;
+        _master_pass = null;
 
         _mega_active_accounts = new HashMap<>();
+
+        loadUserSettings();
 
         THREAD_POOL.execute((_global_dl_speed = new GlobalSpeedMeter(getView().getGlobal_speed_down_label())));
 
@@ -169,40 +173,44 @@ public final class MainPanel {
         });
     }
 
+    public HashMap<String, Object> getElc_accounts() {
+        return _elc_accounts;
+    }
+
     public TrayIcon getTrayicon() {
         return _trayicon;
     }
 
-    public String getMega_master_pass_hash() {
-        return _mega_master_pass_hash;
+    public String getMaster_pass_hash() {
+        return _master_pass_hash;
     }
 
-    public void setMega_master_pass_hash(String mega_master_pass_hash) {
-        _mega_master_pass_hash = mega_master_pass_hash;
+    public void setMaster_pass_hash(String mega_master_pass_hash) {
+        _master_pass_hash = mega_master_pass_hash;
     }
 
-    public String getMega_master_pass_salt() {
-        return _mega_master_pass_salt;
+    public String getMaster_pass_salt() {
+        return _master_pass_salt;
     }
 
-    public byte[] getMega_master_pass() {
-        return _mega_master_pass;
+    public byte[] getMaster_pass() {
+        return _master_pass;
     }
 
-    public void setMega_master_pass(byte[] pass) {
+    public void setMaster_pass(byte[] pass) {
 
-        if (_mega_master_pass != null) {
+        if (_master_pass != null) {
 
-            Arrays.fill(_mega_master_pass, (byte) 0);
+            Arrays.fill(_master_pass, (byte) 0);
 
-            _mega_master_pass = null;
+            _master_pass = null;
         }
 
         if (pass != null) {
 
-            _mega_master_pass = new byte[pass.length];
+            _master_pass = new byte[pass.length];
 
-            System.arraycopy(pass, 0, _mega_master_pass, 0, pass.length);
+            System.arraycopy(pass, 0, _master_pass, 0, pass.length);
         }
     }
 
@@ -406,27 +414,27 @@ public final class MainPanel {
 
         try {
             _mega_accounts = selectMegaAccounts();
+            _elc_accounts = selectELCAccounts();
         } catch (SQLException ex) {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
-        _mega_master_pass_hash = DBTools.selectSettingValueFromDB("mega_master_pass_hash");
+        _master_pass_hash = DBTools.selectSettingValueFromDB("mega_master_pass_hash");
 
-        _mega_master_pass_salt = DBTools.selectSettingValueFromDB("mega_master_pass_salt");
+        _master_pass_salt = DBTools.selectSettingValueFromDB("mega_master_pass_salt");
 
-        if (_mega_master_pass_salt == null) {
+        if (_master_pass_salt == null) {
 
             try {
 
-                _mega_master_pass_salt = MiscTools.Bin2BASE64(MiscTools.genRandomByteArray(CryptTools.PBKDF2_SALT_BYTE_LENGTH));
+                _master_pass_salt = MiscTools.Bin2BASE64(MiscTools.genRandomByteArray(CryptTools.PBKDF2_SALT_BYTE_LENGTH));
 
-                DBTools.insertSettingValueInDB("mega_master_pass_salt", _mega_master_pass_salt);
+                DBTools.insertSettingValueInDB("mega_master_pass_salt", _master_pass_salt);
 
             } catch (Exception ex) {
                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-
     }
 
     public void _byebye() {
@@ -687,13 +695,13 @@ public final class MainPanel {
 
                                     String password_aes, user_hash;
 
-                                    if (getMega_master_pass_hash() != null) {
+                                    if (getMaster_pass_hash() != null) {
 
-                                        if (getMega_master_pass() == null) {
+                                        if (getMaster_pass() == null) {
 
                                             getView().getjTabbedPane1().setSelectedIndex(1);
 
-                                            GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog(getView(), true, getMega_master_pass_hash(), getMega_master_pass_salt());
+                                            GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(getView(), true, getMaster_pass_hash(), getMaster_pass_salt());
 
                                             swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, getView());
 
@@ -701,7 +709,7 @@ public final class MainPanel {
 
                                             if (dialog.isPass_ok()) {
 
-                                                setMega_master_pass(dialog.getPass());
+                                                setMaster_pass(dialog.getPass());
 
                                                 dialog.deletePass();
 
@@ -709,9 +717,9 @@ public final class MainPanel {
 
                                                 dialog.dispose();
 
-                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                             } else {
 
@@ -722,9 +730,9 @@ public final class MainPanel {
 
                                         } else {
 
-                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                         }
 
@@ -767,7 +775,7 @@ public final class MainPanel {
 
                     if (!remember_pass) {
 
-                        setMega_master_pass(null);
+                        setMaster_pass(null);
                     }
 
                     swingReflectionInvoke("setText", getView().getStatus_up_label(), "");

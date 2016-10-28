@@ -876,7 +876,7 @@ public final class MiscTools {
 
             ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", data, 0);
 
-            links.addAll(findAllRegex("mega://enc.*?[^\r\n]+", data, 0));
+            links.addAll(findAllRegex("mega://e(n|l)c.*?[^\r\n]+", data, 0));
 
             for (String s : links) {
 
@@ -1007,6 +1007,24 @@ public final class MiscTools {
 
                 }).build();
 
+    }
+
+    public static byte[] recReverseArray(byte[] arr, int start, int end) {
+
+        byte temp;
+
+        if (start < end) {
+            temp = arr[start];
+
+            arr[start] = arr[end];
+
+            arr[end] = temp;
+
+            return recReverseArray(arr, start + 1, end - 1);
+
+        } else {
+            return arr;
+        }
     }
 
 }

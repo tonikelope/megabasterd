@@ -20,7 +20,7 @@ import static megabasterd.MiscTools.updateFont;
  *
  * @author tonikelope
  */
-public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
+public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
     private boolean _pass_ok;
 
@@ -59,7 +59,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
     /**
      * Creates new form MegaPassDialog
      */
-    public GetMegaMasterPasswordDialog(java.awt.Frame parent, boolean modal, String current_pass_hash, String salt) {
+    public GetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String current_pass_hash, String salt) {
         super(parent, modal);
         initComponents();
 
@@ -103,7 +103,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
         remember_checkbox = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("MegaMasterPassword");
+        setTitle("MasterPassword");
         setResizable(false);
 
         current_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
@@ -235,7 +235,7 @@ public class GetMegaMasterPasswordDialog extends javax.swing.JDialog {
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(GetMegaMasterPasswordDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(GetMasterPasswordDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });

@@ -1,6 +1,10 @@
 package megabasterd;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -9,7 +13,13 @@ import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
 import java.security.spec.RSAPrivateKeySpec;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -18,13 +28,25 @@ import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
+import javax.swing.JOptionPane;
+import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2UrlBASE64;
 import static megabasterd.MiscTools.UrlBASE642Bin;
 import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.findFirstRegex;
+import static megabasterd.MiscTools.getApacheKissHttpClient;
 import static megabasterd.MiscTools.hex2bin;
 import static megabasterd.MiscTools.i32a2bin;
 import static megabasterd.MiscTools.long2bytearray;
+import static megabasterd.MiscTools.recReverseArray;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.codehaus.jackson.map.ObjectMapper;
 
 public final class CryptTools {
 
@@ -270,6 +292,202 @@ public final class CryptTools {
         } else {
             return link;
         }
+    }
+
+    public static HashSet<String> decryptELC(String link, MainPanel main_panel) {
+
+        String elc;
+
+        HashSet<String> links = new HashSet<>();
+
+        if ((elc = findFirstRegex("mega://elc\\?([0-9a-zA-Z,_-]+)", link, 1)) != null) {
+            System.out.println(elc);
+            try {
+
+                byte[] elc_byte = UrlBASE642Bin(elc);
+
+                boolean compression;
+
+                if (((int) elc_byte[0] & 0xFF) != 112 && ((int) elc_byte[0] & 0xFF) != 185) {
+
+                    throw new Exception("BAD ELC!");
+
+                } else {
+
+                    compression = (((int) elc_byte[0] & 0xFF) == 112);
+                }
+
+                elc_byte = Arrays.copyOfRange(elc_byte, 1, elc_byte.length);
+
+                if (compression) {
+
+                    InputStream is = new GZIPInputStream(new ByteArrayInputStream(elc_byte));
+
+                    ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+                    byte[] buffer = new byte[16 * 1024];
+
+                    int reads;
+
+                    while ((reads = is.read(buffer)) != -1) {
+
+                        out.write(buffer, 0, reads);
+                    }
+
+                    elc_byte = out.toByteArray();
+                }
+
+                int bin_links_length = ByteBuffer.wrap(recReverseArray(Arrays.copyOfRange(elc_byte, 0, 4), 0, 3)).getInt();
+
+                byte[] bin_links = Arrays.copyOfRange(elc_byte, 4, 4 + bin_links_length);
+
+                short url_bin_length = ByteBuffer.wrap(recReverseArray(Arrays.copyOfRange(elc_byte, 4 + bin_links_length, 4 + bin_links_length + 2), 0, 1)).getShort();
+
+                byte[] url_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2, 4 + bin_links_length + 2 + url_bin_length);
+
+                short pass_bin_length = ByteBuffer.wrap(recReverseArray(Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2 + url_bin_length, 4 + bin_links_length + 2 + url_bin_length + 2), 0, 1)).getShort();
+
+                byte[] pass_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2 + url_bin_length + 2, 4 + bin_links_length + 2 + url_bin_length + 2 + pass_bin_length);
+
+                try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+
+                    HttpPost httppost = new HttpPost(new String(url_bin));
+
+                    ArrayList<NameValuePair> nameValuePairs = new ArrayList<>();
+
+                    nameValuePairs.add(new BasicNameValuePair("OPERATION_TYPE", "D"));
+
+                    nameValuePairs.add(new BasicNameValuePair("DATA", new String(pass_bin)));
+
+                    HashMap<String, String> elc_account_data;
+
+                    String user, api_key;
+
+                    boolean remember_master_pass;
+
+                    if (main_panel.getElc_accounts().get(httppost.getURI().getHost()) != null) {
+
+                        elc_account_data = (HashMap) main_panel.getElc_accounts().get(httppost.getURI().getHost());
+
+                        if (main_panel.getMaster_pass_hash() != null) {
+
+                            if (main_panel.getMaster_pass() == null) {
+
+                                GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(main_panel.getView(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt());
+
+                                swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, main_panel.getView());
+
+                                swingReflectionInvokeAndWait("setVisible", dialog, true);
+
+                                if (dialog.isPass_ok()) {
+
+                                    main_panel.setMaster_pass(dialog.getPass());
+
+                                    dialog.deletePass();
+
+                                    remember_master_pass = dialog.getRemember_checkbox().isSelected();
+
+                                    dialog.dispose();
+
+                                    user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                    api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                    if (!remember_master_pass) {
+
+                                        main_panel.setMaster_pass(null);
+                                    }
+
+                                } else {
+
+                                    dialog.dispose();
+
+                                    throw new Exception("NO valid ELC account available!");
+                                }
+
+                            } else {
+
+                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                            }
+
+                        } else {
+
+                            user = (String) elc_account_data.get("user");
+
+                            api_key = (String) elc_account_data.get("apikey");
+                        }
+
+                    } else {
+
+                        throw new Exception("NO valid ELC account available!");
+                    }
+
+                    nameValuePairs.add(new BasicNameValuePair("USER", user));
+
+                    nameValuePairs.add(new BasicNameValuePair("APIKEY", api_key));
+
+                    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+
+                    try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
+
+                        InputStream is = httpresponse.getEntity().getContent();
+
+                        ByteArrayOutputStream out = new ByteArrayOutputStream();
+
+                        byte[] buffer = new byte[16 * 1024];
+
+                        int reads;
+
+                        while ((reads = is.read(buffer)) != -1) {
+
+                            out.write(buffer, 0, reads);
+                        }
+
+                        ObjectMapper objectMapper = new ObjectMapper();
+
+                        HashMap res_map = objectMapper.readValue(new String(out.toByteArray()), HashMap.class);
+
+                        String dec_pass = (String) res_map.get("d");
+
+                        if (dec_pass != null && dec_pass.length() > 0) {
+
+                            dec_pass = (String) res_map.get("d");
+
+                            byte[] pass_dec_byte = MiscTools.BASE642Bin(dec_pass);
+
+                            byte[] key = Arrays.copyOfRange(pass_dec_byte, 0, 16);
+
+                            byte[] iv = new byte[16];
+
+                            Arrays.fill(iv, (byte) 0);
+
+                            System.arraycopy(pass_dec_byte, 16, iv, 0, 8);
+
+                            byte[] bin_links_dec = CryptTools.aes_cbc_decrypt(bin_links, key, iv);
+
+                            String[] links_string = (new String(bin_links_dec).trim()).split("\\|");
+
+                            for (String s : links_string) {
+
+                                links.add("https://mega.nz/" + s);
+                            }
+
+                        } else {
+                            throw new Exception(httppost.getURI().getAuthority() + " ELC server ERROR -> " + new String(out.toByteArray()));
+                        }
+                    }
+                }
+
+            } catch (Exception ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+
+        return links;
     }
 
     public static String MEGAUserHash(byte[] str, int[] aeskey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, Exception {

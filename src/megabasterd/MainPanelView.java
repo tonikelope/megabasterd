@@ -24,6 +24,7 @@ import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import static megabasterd.CryptTools.decryptMegaDownloaderLink;
+import static megabasterd.DBTools.deleteELCAccount;
 import static megabasterd.DBTools.deleteMegaAccount;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.ICON_FILE;
@@ -506,6 +507,19 @@ public final class MainPanelView extends javax.swing.JFrame {
                         }
                     }
 
+                    Set<String> elc = new HashSet(findAllRegex("mega://elc.*?[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+
+                    for (String link : elc) {
+
+                        try {
+
+                            urls.addAll(CryptTools.decryptELC(link, getMain_panel()));
+
+                        } catch (Exception ex) {
+                            getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                        }
+                    }
+
                     if (!urls.isEmpty()) {
 
                         getMain_panel().getDownload_manager().addPre_count(urls.size());
@@ -590,7 +604,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         if (dialog.isSettings_ok()) {
 
-            for (String email : dialog.getDeleted_accounts()) {
+            for (String email : dialog.getDeleted_mega_accounts()) {
 
                 try {
                     deleteMegaAccount(email);
@@ -601,6 +615,17 @@ public final class MainPanelView extends javax.swing.JFrame {
                 _main_panel.getMega_accounts().remove(email);
 
                 _main_panel.getMega_active_accounts().remove(email);
+            }
+            
+            for (String host : dialog.getDeleted_elc_accounts()) {
+
+                try {
+                    deleteELCAccount(host);
+                } catch (SQLException ex) {
+                    getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                }
+
+                _main_panel.getElc_accounts().remove(host);
             }
 
             _main_panel.loadUserSettings();
@@ -644,7 +669,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         if (!dialog.isRemember_master_pass()) {
 
-            _main_panel.setMega_master_pass(null);
+            _main_panel.setMaster_pass(null);
         }
 
         dialog.dispose();
@@ -829,7 +854,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         if (!dialog.isRemember_master_pass()) {
 
-            _main_panel.setMega_master_pass(null);
+            _main_panel.setMaster_pass(null);
         }
 
         dialog.dispose();

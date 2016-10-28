@@ -42,7 +42,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     private String _download_path;
     private boolean _settings_ok;
-    private final Set<String> _deleted_accounts;
+    private final Set<String> _deleted_mega_accounts;
+    private final Set<String> _deleted_elc_accounts;
     private final MainPanel _main_panel;
     private boolean _remember_master_pass;
 
@@ -50,9 +51,15 @@ public final class SettingsDialog extends javax.swing.JDialog {
         return _settings_ok;
     }
 
-    public Set<String> getDeleted_accounts() {
-        return _deleted_accounts;
+    public Set<String> getDeleted_mega_accounts() {
+        return _deleted_mega_accounts;
     }
+
+    public Set<String> getDeleted_elc_accounts() {
+        return _deleted_elc_accounts;
+    }
+    
+    
 
     public boolean isRemember_master_pass() {
         return _remember_master_pass;
@@ -87,9 +94,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 updateFont(multi_slot_up_checkbox, FONT_DEFAULT, Font.PLAIN);
                 updateFont(jTabbedPane1, FONT_DEFAULT, Font.PLAIN);
                 updateFont(status, FONT_DEFAULT, Font.BOLD);
-                updateFont(remove_account_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(add_account_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(accounts_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(remove_mega_account_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(add_mega_account_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(mega_accounts_label, FONT_DEFAULT, Font.BOLD);
                 updateFont(defaut_slots_up_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(max_uploads_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(max_down_speed_label, FONT_DEFAULT, Font.PLAIN);
@@ -102,6 +109,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 updateFont(encrypt_pass_checkbox, FONT_DEFAULT, Font.PLAIN);
                 updateFont(unlock_accounts_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(delete_all_accounts_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(remove_elc_account_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(add_elc_account_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(elc_accounts_label, FONT_DEFAULT, Font.BOLD);
             }
         }, true);
 
@@ -273,21 +283,29 @@ public final class SettingsDialog extends javax.swing.JDialog {
             swingReflectionInvoke("setEnabled", default_slots_up_spinner, true);
         }
 
-        swingReflectionInvoke("setSelected", encrypt_pass_checkbox, (_main_panel.getMega_master_pass_hash() != null));
+        DefaultTableModel mega_model = (DefaultTableModel) swingReflectionInvokeAndWaitForReturn("getModel", mega_accounts_table);
 
-        swingReflectionInvoke("setEnabled", remove_account_button, (mega_accounts_table.getRowCount() > 0));
+        DefaultTableModel elc_model = (DefaultTableModel) swingReflectionInvokeAndWaitForReturn("getModel", elc_accounts_table);
 
-        DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
+        swingReflectionInvoke("setSelected", encrypt_pass_checkbox, (_main_panel.getMaster_pass_hash() != null));
 
-        if (_main_panel.getMega_master_pass_hash() != null) {
+        swingReflectionInvoke("setEnabled", remove_mega_account_button, (mega_model.getRowCount() > 0));
 
-            if (_main_panel.getMega_master_pass() == null) {
+        swingReflectionInvoke("setEnabled", remove_elc_account_button, (elc_model.getRowCount() > 0));
+
+        if (_main_panel.getMaster_pass_hash() != null) {
+
+            if (_main_panel.getMaster_pass() == null) {
 
                 swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, false);
 
-                swingReflectionInvoke("setEnabled", remove_account_button, false);
+                swingReflectionInvoke("setEnabled", remove_mega_account_button, false);
 
-                swingReflectionInvoke("setEnabled", add_account_button, false);
+                swingReflectionInvoke("setEnabled", remove_elc_account_button, false);
+
+                swingReflectionInvoke("setEnabled", add_mega_account_button, false);
+
+                swingReflectionInvoke("setEnabled", add_elc_account_button, false);
 
                 swingReflectionInvoke("setVisible", unlock_accounts_button, true);
 
@@ -295,12 +313,19 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     String[] new_row_data = {(String) k, "**************************"};
 
-                    swingReflectionInvoke("addRow", model, new Object[]{new_row_data});
+                    swingReflectionInvoke("addRow", mega_model, new Object[]{new_row_data});
+                }
+
+                for (Object k : _main_panel.getElc_accounts().keySet()) {
+
+                    String[] new_row_data = {(String) k, "**************************", "**************************"};
+
+                    swingReflectionInvoke("addRow", elc_model, new Object[]{new_row_data});
                 }
 
                 swingReflectionInvoke("setEnabled", mega_accounts_table, false);
 
-                swingReflectionInvoke("setEnabled", remove_account_button, false);
+                swingReflectionInvoke("setEnabled", elc_accounts_table, false);
 
             } else {
 
@@ -314,7 +339,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     try {
 
-                        pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                        pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                     } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
                         Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
@@ -324,10 +349,39 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     String[] new_row_data = {(String) pair.getKey(), pass};
 
-                    model.addRow(new_row_data);
+                    swingReflectionInvokeAndWait("addRow", mega_model, new Object[]{new_row_data});
                 }
 
-                swingReflectionInvoke("setEnabled", remove_account_button, (mega_accounts_table.getRowCount() > 0));
+                for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+
+                    HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                    String user = null, apikey = null;
+
+                    try {
+
+                        user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                        apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (Exception ex) {
+                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                    String[] new_row_data = {(String) pair.getKey(), user, apikey};
+
+                    swingReflectionInvokeAndWait("addRow", elc_model, new Object[]{new_row_data});
+                }
+
+                mega_model = (DefaultTableModel) swingReflectionInvokeAndWaitForReturn("getModel", mega_accounts_table);
+
+                elc_model = (DefaultTableModel) swingReflectionInvokeAndWaitForReturn("getModel", elc_accounts_table);
+
+                swingReflectionInvoke("setEnabled", remove_mega_account_button, (mega_model.getRowCount() > 0));
+
+                swingReflectionInvoke("setEnabled", remove_elc_account_button, (elc_model.getRowCount() > 0));
             }
 
         } else {
@@ -340,15 +394,30 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 String[] new_row_data = {(String) pair.getKey(), (String) data.get("password")};
 
-                swingReflectionInvoke("addRow", model, new Object[]{new_row_data});
+                swingReflectionInvokeAndWait("addRow", mega_model, new Object[]{new_row_data});
             }
 
-            swingReflectionInvoke("setEnabled", remove_account_button, (mega_accounts_table.getRowCount() > 0));
+            for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+
+                HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                String[] new_row_data = {(String) pair.getKey(), (String) data.get("user"), (String) data.get("apikey")};
+
+                swingReflectionInvokeAndWait("addRow", elc_model, new Object[]{new_row_data});
+            }
+
+            swingReflectionInvoke("setEnabled", remove_mega_account_button, (mega_model.getRowCount() > 0));
+
+            swingReflectionInvoke("setEnabled", remove_elc_account_button, (elc_model.getRowCount() > 0));
+
+            System.out.println("asasasf");
         }
 
         _remember_master_pass = true;
 
-        _deleted_accounts = new HashSet();
+        _deleted_mega_accounts = new HashSet();
+
+        _deleted_elc_accounts = new HashSet();
 
         _settings_ok = false;
 
@@ -380,11 +449,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_down_speed_spinner = new javax.swing.JSpinner();
         default_dir_label = new javax.swing.JLabel();
         uploads_panel = new javax.swing.JPanel();
-        accounts_scrollpane = new javax.swing.JScrollPane();
-        mega_accounts_table = new javax.swing.JTable();
-        accounts_label = new javax.swing.JLabel();
-        remove_account_button = new javax.swing.JButton();
-        add_account_button = new javax.swing.JButton();
         defaut_slots_up_label = new javax.swing.JLabel();
         max_uploads_label = new javax.swing.JLabel();
         default_slots_up_spinner = new javax.swing.JSpinner();
@@ -393,13 +457,25 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_up_speed_label = new javax.swing.JLabel();
         max_up_speed_spinner = new javax.swing.JSpinner();
         limit_upload_speed_checkbox = new javax.swing.JCheckBox();
+        accounts_panel = new javax.swing.JPanel();
+        mega_accounts_scrollpane = new javax.swing.JScrollPane();
+        mega_accounts_table = new javax.swing.JTable();
+        mega_accounts_label = new javax.swing.JLabel();
+        remove_mega_account_button = new javax.swing.JButton();
+        add_mega_account_button = new javax.swing.JButton();
         encrypt_pass_checkbox = new javax.swing.JCheckBox();
-        unlock_accounts_button = new javax.swing.JButton();
         delete_all_accounts_button = new javax.swing.JButton();
+        unlock_accounts_button = new javax.swing.JButton();
+        elc_accounts_scrollpane = new javax.swing.JScrollPane();
+        elc_accounts_table = new javax.swing.JTable();
+        elc_accounts_label = new javax.swing.JLabel();
+        remove_elc_account_button = new javax.swing.JButton();
+        add_elc_account_button = new javax.swing.JButton();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Settings");
+        setResizable(false);
 
         ok_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
         ok_button.setText("OK");
@@ -427,7 +503,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         default_slots_down_spinner.setValue(2);
 
         max_downloads_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        max_downloads_label.setText("Max sim downloads:");
+        max_downloads_label.setText("Max parallel downloads:");
         max_downloads_label.setDoubleBuffered(true);
 
         max_downloads_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -508,7 +584,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             .addComponent(limit_download_speed_checkbox)
                             .addComponent(down_dir_label)
                             .addComponent(multi_slot_down_checkbox))
-                        .addGap(0, 239, Short.MAX_VALUE)))
+                        .addGap(0, 317, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
@@ -538,54 +614,17 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(verify_file_down_checkbox)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(256, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
-
-        mega_accounts_table.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        mega_accounts_table.setModel(new javax.swing.table.DefaultTableModel(
-            new Object [][] {
-
-            },
-            new String [] {
-                "Email", "Password"
-            }
-        ));
-        mega_accounts_table.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
-        mega_accounts_table.setDoubleBuffered(true);
-        mega_accounts_table.setRowHeight(24);
-        accounts_scrollpane.setViewportView(mega_accounts_table);
-
-        accounts_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        accounts_label.setText("Your MEGA accounts:");
-        accounts_label.setDoubleBuffered(true);
-
-        remove_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        remove_account_button.setText("Remove selected");
-        remove_account_button.setDoubleBuffered(true);
-        remove_account_button.setEnabled(false);
-        remove_account_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                remove_account_buttonActionPerformed(evt);
-            }
-        });
-
-        add_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        add_account_button.setText("Add account");
-        add_account_button.setDoubleBuffered(true);
-        add_account_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                add_account_buttonActionPerformed(evt);
-            }
-        });
 
         defaut_slots_up_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         defaut_slots_up_label.setText("Default slots per file:");
         defaut_slots_up_label.setDoubleBuffered(true);
 
         max_uploads_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        max_uploads_label.setText("Max sim uploads:");
+        max_uploads_label.setText("Max parallel uploads:");
         max_uploads_label.setDoubleBuffered(true);
 
         default_slots_up_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -596,7 +635,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_uploads_spinner.setDoubleBuffered(true);
 
         multi_slot_up_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        multi_slot_up_checkbox.setText("Use multi slot upload mode (Upload restart needed)");
+        multi_slot_up_checkbox.setText("Use multi slot upload mode (upload restart needed)");
         multi_slot_up_checkbox.setDoubleBuffered(true);
         multi_slot_up_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -617,34 +656,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        encrypt_pass_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        encrypt_pass_checkbox.setText("Encrypt passwords (on disk)");
-        encrypt_pass_checkbox.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                encrypt_pass_checkboxActionPerformed(evt);
-            }
-        });
-
-        unlock_accounts_button.setBackground(new java.awt.Color(0, 153, 51));
-        unlock_accounts_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        unlock_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
-        unlock_accounts_button.setText("Unlock");
-        unlock_accounts_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                unlock_accounts_buttonActionPerformed(evt);
-            }
-        });
-
-        delete_all_accounts_button.setBackground(new java.awt.Color(255, 51, 0));
-        delete_all_accounts_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        delete_all_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
-        delete_all_accounts_button.setText("RESET ACCOUNTS");
-        delete_all_accounts_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                delete_all_accounts_buttonActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
         uploads_panelLayout.setHorizontalGroup(
@@ -652,58 +663,28 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(accounts_scrollpane)
-                    .addGroup(uploads_panelLayout.createSequentialGroup()
-                        .addComponent(remove_account_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(add_account_button))
-                    .addGroup(uploads_panelLayout.createSequentialGroup()
-                        .addComponent(accounts_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(unlock_accounts_button)
-                        .addGap(18, 18, 18)
-                        .addComponent(delete_all_accounts_button)
-                        .addGap(18, 18, Short.MAX_VALUE)
-                        .addComponent(encrypt_pass_checkbox))
+                    .addComponent(multi_slot_up_checkbox)
                     .addGroup(uploads_panelLayout.createSequentialGroup()
                         .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(max_uploads_label)
                             .addGroup(uploads_panelLayout.createSequentialGroup()
-                                .addComponent(max_uploads_label)
-                                .addGap(117, 117, 117)
+                                .addGap(2, 2, 2)
+                                .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(limit_upload_speed_checkbox)
+                                    .addComponent(max_up_speed_label)))
+                            .addComponent(defaut_slots_up_label))
+                        .addGap(53, 53, 53)
+                        .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(multi_slot_up_checkbox)
-                            .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, uploads_panelLayout.createSequentialGroup()
-                                    .addGap(2, 2, 2)
-                                    .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(limit_upload_speed_checkbox)
-                                        .addGroup(uploads_panelLayout.createSequentialGroup()
-                                            .addComponent(max_up_speed_label)
-                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, uploads_panelLayout.createSequentialGroup()
-                                    .addComponent(defaut_slots_up_label)
-                                    .addGap(73, 73, 73)
-                                    .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addContainerGap(393, Short.MAX_VALUE))
         );
         uploads_panelLayout.setVerticalGroup(
             uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(uploads_panelLayout.createSequentialGroup()
-                .addGap(6, 6, 6)
-                .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(accounts_label)
-                    .addComponent(encrypt_pass_checkbox)
-                    .addComponent(unlock_accounts_button)
-                    .addComponent(delete_all_accounts_button))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 258, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(remove_account_button)
-                    .addComponent(add_account_button))
-                .addGap(18, 18, 18)
+                .addContainerGap()
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_uploads_label)
                     .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -719,10 +700,187 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_up_speed_label)
                     .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addContainerGap(390, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Uploads", uploads_panel);
+
+        mega_accounts_table.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        mega_accounts_table.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Email", "Password"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        mega_accounts_table.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        mega_accounts_table.setDoubleBuffered(true);
+        mega_accounts_table.setRowHeight(24);
+        mega_accounts_scrollpane.setViewportView(mega_accounts_table);
+
+        mega_accounts_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        mega_accounts_label.setText("Your MEGA accounts:");
+        mega_accounts_label.setDoubleBuffered(true);
+
+        remove_mega_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        remove_mega_account_button.setText("Remove selected");
+        remove_mega_account_button.setDoubleBuffered(true);
+        remove_mega_account_button.setEnabled(false);
+        remove_mega_account_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                remove_mega_account_buttonActionPerformed(evt);
+            }
+        });
+
+        add_mega_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        add_mega_account_button.setText("Add account");
+        add_mega_account_button.setDoubleBuffered(true);
+        add_mega_account_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                add_mega_account_buttonActionPerformed(evt);
+            }
+        });
+
+        encrypt_pass_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        encrypt_pass_checkbox.setText("Encrypt sensitive information");
+        encrypt_pass_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                encrypt_pass_checkboxActionPerformed(evt);
+            }
+        });
+
+        delete_all_accounts_button.setBackground(new java.awt.Color(255, 51, 0));
+        delete_all_accounts_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        delete_all_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
+        delete_all_accounts_button.setText("RESET ACCOUNTS");
+        delete_all_accounts_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                delete_all_accounts_buttonActionPerformed(evt);
+            }
+        });
+
+        unlock_accounts_button.setBackground(new java.awt.Color(0, 153, 51));
+        unlock_accounts_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        unlock_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
+        unlock_accounts_button.setText("Unlock");
+        unlock_accounts_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                unlock_accounts_buttonActionPerformed(evt);
+            }
+        });
+
+        elc_accounts_scrollpane.setDoubleBuffered(true);
+
+        elc_accounts_table.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        elc_accounts_table.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+
+            },
+            new String [] {
+                "Host", "User", "API-KEY"
+            }
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+        });
+        elc_accounts_table.setRowHeight(24);
+        elc_accounts_scrollpane.setViewportView(elc_accounts_table);
+
+        elc_accounts_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        elc_accounts_label.setText("Your ELC accounts:");
+        elc_accounts_label.setDoubleBuffered(true);
+
+        remove_elc_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        remove_elc_account_button.setText("Remove selected");
+        remove_elc_account_button.setDoubleBuffered(true);
+        remove_elc_account_button.setEnabled(false);
+        remove_elc_account_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                remove_elc_account_buttonActionPerformed(evt);
+            }
+        });
+
+        add_elc_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        add_elc_account_button.setText("Add account");
+        add_elc_account_button.setDoubleBuffered(true);
+        add_elc_account_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                add_elc_account_buttonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout accounts_panelLayout = new javax.swing.GroupLayout(accounts_panel);
+        accounts_panel.setLayout(accounts_panelLayout);
+        accounts_panelLayout.setHorizontalGroup(
+            accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(accounts_panelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 998, Short.MAX_VALUE)
+                    .addComponent(elc_accounts_scrollpane)
+                    .addGroup(accounts_panelLayout.createSequentialGroup()
+                        .addComponent(remove_mega_account_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(add_mega_account_button))
+                    .addGroup(accounts_panelLayout.createSequentialGroup()
+                        .addComponent(remove_elc_account_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(add_elc_account_button))
+                    .addGroup(accounts_panelLayout.createSequentialGroup()
+                        .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(mega_accounts_label)
+                            .addComponent(elc_accounts_label))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(accounts_panelLayout.createSequentialGroup()
+                        .addComponent(delete_all_accounts_button)
+                        .addGap(18, 18, 18)
+                        .addComponent(unlock_accounts_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(encrypt_pass_checkbox)))
+                .addContainerGap())
+        );
+        accounts_panelLayout.setVerticalGroup(
+            accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(accounts_panelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(unlock_accounts_button)
+                    .addComponent(delete_all_accounts_button)
+                    .addComponent(encrypt_pass_checkbox))
+                .addGap(18, 18, 18)
+                .addComponent(mega_accounts_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(remove_mega_account_button)
+                    .addComponent(add_mega_account_button))
+                .addGap(18, 18, 18)
+                .addComponent(elc_accounts_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.PREFERRED_SIZE, 180, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(remove_elc_account_button)
+                    .addComponent(add_elc_account_button))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Accounts", accounts_panel);
 
         status.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         status.setDoubleBuffered(true);
@@ -803,7 +961,84 @@ public final class SettingsDialog extends javax.swing.JDialog {
             insertSettingValueInDB("limit_upload_speed", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", limit_upload_speed_checkbox) ? "yes" : "no");
             insertSettingValueInDB("max_upload_speed", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", max_up_speed_spinner)));
 
+            ok_button.setEnabled(false);
+
+            cancel_button.setEnabled(false);
+
+            remove_mega_account_button.setEnabled(false);
+
+            add_mega_account_button.setEnabled(false);
+
+            delete_all_accounts_button.setEnabled(false);
+
+            encrypt_pass_checkbox.setEnabled(false);
+
+            if (elc_accounts_table.isEnabled()) {
+
+                DefaultTableModel model = (DefaultTableModel) elc_accounts_table.getModel();
+
+                for (int i = 0; i < model.getRowCount(); i++) {
+
+                    String host_table = (String) model.getValueAt(i, 0);
+
+                    String user_table = (String) model.getValueAt(i, 1);
+
+                    String apikey_table = (String) model.getValueAt(i, 2);
+
+                    if (!host_table.isEmpty() && !user_table.isEmpty() && !apikey_table.isEmpty()) {
+
+                        if (_main_panel.getElc_accounts().get(host_table) == null) {
+
+                            if (_main_panel.getMaster_pass_hash() != null) {
+
+                                user_table = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(user_table.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                apikey_table = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(apikey_table.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            }
+
+                            DBTools.insertELCAccount(host_table, user_table, apikey_table);
+
+                        } else {
+
+                            HashMap<String, Object> elc_account_data = (HashMap) _main_panel.getElc_accounts().get(host_table);
+
+                            String user = (String) elc_account_data.get("user");
+
+                            if (_main_panel.getMaster_pass() != null) {
+
+                                try {
+
+                                    user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(user), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                } catch (Exception ex) {
+                                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+
+                            if (!user.equals(user_table)) {
+
+                                user = user_table;
+
+                                String apikey = apikey_table;
+
+                                if (_main_panel.getMaster_pass() != null) {
+
+                                    user = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(user_table.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                    apikey = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(apikey_table.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                }
+
+                                DBTools.insertELCAccount(host_table, user, apikey);
+                            }
+                        }
+                    }
+                }
+            }
+
             if (mega_accounts_table.isEnabled()) {
+
+                mega_accounts_table.setEnabled(false);
 
                 final DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
 
@@ -813,9 +1048,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 cancel_button.setEnabled(false);
 
-                remove_account_button.setEnabled(false);
+                remove_mega_account_button.setEnabled(false);
 
-                add_account_button.setEnabled(false);
+                add_mega_account_button.setEnabled(false);
 
                 delete_all_accounts_button.setEnabled(false);
 
@@ -852,13 +1087,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                         String password = pass, password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
 
-                                        if (_main_panel.getMega_master_pass_hash() != null) {
+                                        if (_main_panel.getMaster_pass_hash() != null) {
 
-                                            password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                            password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(ma.getUser_hash()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
                                         }
 
                                         DBTools.insertMegaAccount(email, password, password_aes, user_hash);
@@ -873,15 +1108,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                     HashMap<String, Object> mega_account_data = (HashMap) _main_panel.getMega_accounts().get(email);
 
-                                    String password;
+                                    String password = (String) mega_account_data.get("password");
 
-                                    password = (String) mega_account_data.get("password");
-
-                                    if (_main_panel.getMega_master_pass() != null) {
+                                    if (_main_panel.getMaster_pass() != null) {
 
                                         try {
 
-                                            password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(password), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                            password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(password), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                         } catch (Exception ex) {
                                             Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
@@ -901,13 +1134,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                             String password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
 
-                                            if (_main_panel.getMega_master_pass() != null) {
+                                            if (_main_panel.getMaster_pass() != null) {
 
-                                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(ma.getUser_hash()), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
                                             }
 
                                             DBTools.insertMegaAccount(email, password, password_aes, user_hash);
@@ -940,9 +1173,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                             swingReflectionInvoke("setEnabled", cancel_button, true);
 
-                            swingReflectionInvoke("setEnabled", remove_account_button, true);
+                            swingReflectionInvoke("setEnabled", remove_mega_account_button, true);
 
-                            swingReflectionInvoke("setEnabled", add_account_button, true);
+                            swingReflectionInvoke("setEnabled", add_mega_account_button, true);
 
                             swingReflectionInvoke("setEnabled", mega_accounts_table, true);
 
@@ -958,11 +1191,16 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 });
 
             } else {
+
                 this.setVisible(false);
             }
 
         } catch (SQLException ex) {
             getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_ok_buttonActionPerformed
 
@@ -980,7 +1218,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_multi_slot_down_checkboxStateChanged
 
-    private void remove_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_account_buttonActionPerformed
+    private void remove_mega_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_mega_account_buttonActionPerformed
 
         DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
 
@@ -990,7 +1228,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             String email = (String) model.getValueAt(mega_accounts_table.convertRowIndexToModel(selected), 0);
 
-            _deleted_accounts.add(email);
+            _deleted_mega_accounts.add(email);
 
             model.removeRow(mega_accounts_table.convertRowIndexToModel(selected));
 
@@ -1001,11 +1239,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         if (model.getRowCount() == 0) {
 
-            remove_account_button.setEnabled(false);
+            remove_mega_account_button.setEnabled(false);
         }
-    }//GEN-LAST:event_remove_account_buttonActionPerformed
+    }//GEN-LAST:event_remove_mega_account_buttonActionPerformed
 
-    private void add_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_account_buttonActionPerformed
+    private void add_mega_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_mega_account_buttonActionPerformed
 
         DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
 
@@ -1013,8 +1251,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         mega_accounts_table.clearSelection();
 
-        ok_button.setEnabled(true);
-    }//GEN-LAST:event_add_account_buttonActionPerformed
+        remove_mega_account_button.setEnabled(true);
+    }//GEN-LAST:event_add_mega_account_buttonActionPerformed
 
     private void multi_slot_up_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multi_slot_up_checkboxStateChanged
 
@@ -1064,7 +1302,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             @Override
             public void run() {
 
-                SetMegaMasterPasswordDialog dialog = new SetMegaMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMega_master_pass_salt());
+                SetMasterPasswordDialog dialog = new SetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_salt());
 
                 swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
 
@@ -1072,14 +1310,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 byte[] old_mega_master_pass = null;
 
-                if (_main_panel.getMega_master_pass() != null) {
+                if (_main_panel.getMaster_pass() != null) {
 
-                    old_mega_master_pass = new byte[_main_panel.getMega_master_pass().length];
+                    old_mega_master_pass = new byte[_main_panel.getMaster_pass().length];
 
-                    System.arraycopy(_main_panel.getMega_master_pass(), 0, old_mega_master_pass, 0, _main_panel.getMega_master_pass().length);
+                    System.arraycopy(_main_panel.getMaster_pass(), 0, old_mega_master_pass, 0, _main_panel.getMaster_pass().length);
                 }
 
-                String old_mega_master_pass_hash = _main_panel.getMega_master_pass_hash();
+                String old_mega_master_pass_hash = _main_panel.getMaster_pass_hash();
 
                 if (dialog.isPass_ok()) {
 
@@ -1087,20 +1325,20 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         if (dialog.getNew_pass() != null && dialog.getNew_pass().length > 0) {
 
-                            _main_panel.setMega_master_pass_hash(dialog.getNew_pass_hash());
+                            _main_panel.setMaster_pass_hash(dialog.getNew_pass_hash());
 
-                            _main_panel.setMega_master_pass(dialog.getNew_pass());
+                            _main_panel.setMaster_pass(dialog.getNew_pass());
 
                         } else {
 
-                            _main_panel.setMega_master_pass_hash(null);
+                            _main_panel.setMaster_pass_hash(null);
 
-                            _main_panel.setMega_master_pass(null);
+                            _main_panel.setMaster_pass(null);
                         }
 
                         dialog.deleteNewPass();
 
-                        insertSettingValueInDB("mega_master_pass_hash", _main_panel.getMega_master_pass_hash());
+                        insertSettingValueInDB("mega_master_pass_hash", _main_panel.getMaster_pass_hash());
 
                         for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
 
@@ -1127,13 +1365,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 user_hash = (String) data.get("user_hash");
                             }
 
-                            if (_main_panel.getMega_master_pass() != null) {
+                            if (_main_panel.getMaster_pass() != null) {
 
-                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(password.getBytes(), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(password.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(password_aes), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(password_aes), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(user_hash), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(user_hash), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
                             }
 
                             data.put("password", password);
@@ -1145,13 +1383,49 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             DBTools.insertMegaAccount(email, password, password_aes, user_hash);
                         }
 
+                        for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+
+                            HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                            String host, user, apikey;
+
+                            host = (String) pair.getKey();
+
+                            if (old_mega_master_pass_hash != null) {
+
+                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+
+                                apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+
+                            } else {
+
+                                user = (String) data.get("user");
+
+                                apikey = (String) data.get("apikey");
+
+                            }
+
+                            if (_main_panel.getMaster_pass() != null) {
+
+                                user = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(user.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                apikey = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(apikey.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            }
+
+                            data.put("user", user);
+
+                            data.put("apikey", apikey);
+
+                            DBTools.insertELCAccount(host, user, apikey);
+                        }
+
                     } catch (Exception ex) {
                         Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
                 }
 
-                encrypt_pass_checkbox.setSelected((_main_panel.getMega_master_pass_hash() != null));
+                encrypt_pass_checkbox.setSelected((_main_panel.getMaster_pass_hash() != null));
 
                 dialog.dispose();
 
@@ -1172,7 +1446,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             @Override
             public void run() {
 
-                GetMegaMasterPasswordDialog dialog = new GetMegaMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMega_master_pass_hash(), _main_panel.getMega_master_pass_salt());
+                GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt());
 
                 swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
 
@@ -1180,21 +1454,31 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 if (dialog.isPass_ok()) {
 
-                    _main_panel.setMega_master_pass(dialog.getPass());
+                    _main_panel.setMaster_pass(dialog.getPass());
 
                     dialog.deletePass();
 
-                    DefaultTableModel model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
+                    DefaultTableModel mega_model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
 
-                    swingReflectionInvokeAndWait("setModel", mega_accounts_table, model);
+                    DefaultTableModel elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API KEY"});
+
+                    swingReflectionInvokeAndWait("setModel", mega_accounts_table, mega_model);
+
+                    swingReflectionInvokeAndWait("setModel", elc_accounts_table, elc_model);
 
                     swingReflectionInvoke("setEnabled", encrypt_pass_checkbox, true);
 
                     swingReflectionInvoke("setEnabled", mega_accounts_table, true);
 
-                    swingReflectionInvoke("setEnabled", remove_account_button, true);
+                    swingReflectionInvoke("setEnabled", elc_accounts_table, true);
 
-                    swingReflectionInvoke("setEnabled", add_account_button, true);
+                    swingReflectionInvoke("setEnabled", remove_mega_account_button, true);
+
+                    swingReflectionInvoke("setEnabled", remove_elc_account_button, true);
+
+                    swingReflectionInvoke("setEnabled", add_mega_account_button, true);
+
+                    swingReflectionInvoke("setEnabled", add_elc_account_button, true);
 
                     swingReflectionInvoke("setVisible", unlock_accounts_button, false);
 
@@ -1208,7 +1492,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         try {
 
-                            pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMega_master_pass(), CryptTools.AES_ZERO_IV));
+                            pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
                             Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
@@ -1218,7 +1502,30 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         String[] new_row_data = {(String) pair.getKey(), pass};
 
-                        model.addRow(new_row_data);
+                        mega_model.addRow(new_row_data);
+                    }
+
+                    for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+
+                        HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                        String user = null, apikey = null;
+
+                        try {
+
+                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                            apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
+                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        String[] new_row_data = {(String) pair.getKey(), user, apikey};
+
+                        elc_model.addRow(new_row_data);
                     }
 
                 }
@@ -1240,7 +1547,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             "Yes"};
 
         int n = showOptionDialog(this,
-                "MEGA master password will be reset and all your MEGA accounts will be removed. (This can't be undone)\n\nDo you want to continue?",
+                "Master password will be reset and all your accounts will be removed. (This can't be undone)\n\nDo you want to continue?",
                 "Warning!", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
                 null,
                 options,
@@ -1253,17 +1560,27 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 mega_accounts_table.setEnabled(true);
 
-                remove_account_button.setEnabled(true);
+                elc_accounts_table.setEnabled(true);
 
-                add_account_button.setEnabled(true);
+                remove_mega_account_button.setEnabled(true);
+
+                remove_elc_account_button.setEnabled(true);
+
+                add_mega_account_button.setEnabled(true);
+
+                add_elc_account_button.setEnabled(true);
 
                 unlock_accounts_button.setVisible(false);
 
                 delete_all_accounts_button.setVisible(true);
 
-                DefaultTableModel new_model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
+                DefaultTableModel new_mega_model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
 
-                mega_accounts_table.setModel(new_model);
+                DefaultTableModel new_elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API KEY"});
+
+                mega_accounts_table.setModel(new_mega_model);
+
+                elc_accounts_table.setModel(new_elc_model);
 
                 for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
 
@@ -1274,9 +1591,18 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     }
                 }
 
-                _main_panel.setMega_master_pass_hash(null);
+                for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
 
-                _main_panel.setMega_master_pass(null);
+                    try {
+                        DBTools.deleteELCAccount((String) pair.getKey());
+                    } catch (SQLException ex) {
+                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                _main_panel.setMaster_pass_hash(null);
+
+                _main_panel.setMaster_pass(null);
 
                 insertSettingValueInDB("mega_master_pass_hash", null);
 
@@ -1286,6 +1612,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 _main_panel.getMega_active_accounts().clear();
 
+                _main_panel.getElc_accounts().clear();
+
             } catch (SQLException ex) {
                 Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -1293,10 +1621,46 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_delete_all_accounts_buttonActionPerformed
 
+    private void remove_elc_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_elc_account_buttonActionPerformed
+        DefaultTableModel model = (DefaultTableModel) elc_accounts_table.getModel();
+
+        int selected = elc_accounts_table.getSelectedRow();
+
+        while (selected >= 0) {
+
+            String host = (String) model.getValueAt(elc_accounts_table.convertRowIndexToModel(selected), 0);
+
+            _deleted_elc_accounts.add(host);
+
+            model.removeRow(elc_accounts_table.convertRowIndexToModel(selected));
+
+            selected = elc_accounts_table.getSelectedRow();
+        }
+
+        elc_accounts_table.clearSelection();
+
+        if (model.getRowCount() == 0) {
+
+            remove_elc_account_button.setEnabled(false);
+        }
+    }//GEN-LAST:event_remove_elc_account_buttonActionPerformed
+
+    private void add_elc_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_elc_account_buttonActionPerformed
+
+        DefaultTableModel model = (DefaultTableModel) elc_accounts_table.getModel();
+
+        model.addRow(new Object[]{"", "", ""});
+
+        elc_accounts_table.clearSelection();
+
+        remove_elc_account_button.setEnabled(true);
+
+    }//GEN-LAST:event_add_elc_account_buttonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel accounts_label;
-    private javax.swing.JScrollPane accounts_scrollpane;
-    private javax.swing.JButton add_account_button;
+    private javax.swing.JPanel accounts_panel;
+    private javax.swing.JButton add_elc_account_button;
+    private javax.swing.JButton add_mega_account_button;
     private javax.swing.JButton cancel_button;
     private javax.swing.JButton change_download_dir_button;
     private javax.swing.JLabel default_dir_label;
@@ -1307,6 +1671,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JButton delete_all_accounts_button;
     private javax.swing.JLabel down_dir_label;
     private javax.swing.JPanel downloads_panel;
+    private javax.swing.JLabel elc_accounts_label;
+    private javax.swing.JScrollPane elc_accounts_scrollpane;
+    private javax.swing.JTable elc_accounts_table;
     private javax.swing.JCheckBox encrypt_pass_checkbox;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JCheckBox limit_download_speed_checkbox;
@@ -1319,11 +1686,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JSpinner max_up_speed_spinner;
     private javax.swing.JLabel max_uploads_label;
     private javax.swing.JSpinner max_uploads_spinner;
+    private javax.swing.JLabel mega_accounts_label;
+    private javax.swing.JScrollPane mega_accounts_scrollpane;
     private javax.swing.JTable mega_accounts_table;
     private javax.swing.JCheckBox multi_slot_down_checkbox;
     private javax.swing.JCheckBox multi_slot_up_checkbox;
     private javax.swing.JButton ok_button;
-    private javax.swing.JButton remove_account_button;
+    private javax.swing.JButton remove_elc_account_button;
+    private javax.swing.JButton remove_mega_account_button;
     private javax.swing.JLabel status;
     private javax.swing.JButton unlock_accounts_button;
     private javax.swing.JPanel uploads_panel;
