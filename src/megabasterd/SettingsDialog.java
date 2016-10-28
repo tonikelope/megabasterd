@@ -979,7 +979,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 for (int i = 0; i < model.getRowCount(); i++) {
 
-                    String host_table = (String) model.getValueAt(i, 0);
+                    String host_table = ((String)model.getValueAt(i, 0)).trim().replaceAll("^(https?://)?([^/]+).*$", "$2");
 
                     String user_table = (String) model.getValueAt(i, 1);
 
