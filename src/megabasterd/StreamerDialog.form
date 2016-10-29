@@ -62,7 +62,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="20" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Put your mega/megacrypter link here in order to get a streaming link:"/>
+        <Property name="text" type="java.lang.String" value="Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>

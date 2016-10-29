@@ -64,7 +64,7 @@
                   <Component id="restore_button" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="file_tree_scrollpane" pref="482" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" pref="368" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="total_space_label" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>

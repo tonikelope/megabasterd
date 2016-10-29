@@ -70,7 +70,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         setResizable(false);
 
         put_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        put_label.setText("Put your mega/megacrypter link here in order to get a streaming link:");
+        put_label.setText("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:");
         put_label.setDoubleBuffered(true);
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
@@ -188,7 +188,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                 if (error) {
 
-                    JOptionPane.showMessageDialog(tthis, "Please, paste a mega/megacrypter/elc link!", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(tthis, "Please, paste a Mega/MegaCrypter/ELC link!", "Error", JOptionPane.ERROR_MESSAGE);
 
                     swingReflectionInvoke("setText", original_link_textfield, "");
 

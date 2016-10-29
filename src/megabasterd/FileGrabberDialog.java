@@ -172,7 +172,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
         );
 
         dir_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -320,7 +320,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                                 .addComponent(skip_rest_button)
                                 .addGap(18, 18, 18)
                                 .addComponent(skip_button)))
-                        .addGap(0, 91, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))

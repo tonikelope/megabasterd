@@ -223,7 +223,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                     .addComponent(folder_link_label)
                     .addComponent(restore_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 482, Short.MAX_VALUE)
+                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 368, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(total_space_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
