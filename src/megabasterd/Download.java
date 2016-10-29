@@ -424,7 +424,6 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                     _last_download_url = getMegaFileDownloadUrl(_url);
 
                     if (!_exit) {
-                        _retrying_request = false;
 
                         swingReflectionInvoke("setMinimum", getView().getProgress_pbar(), 0);
                         swingReflectionInvoke("setMaximum", getView().getProgress_pbar(), MAX_VALUE);
@@ -748,15 +747,14 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
         String exit_message = null;
 
+        _provision_ok = false;
+
         try {
             if (_file_name == null) {
+
                 file_info = getMegaFileMetadata(_url, getMain_panel().getView(), retry);
 
-                if (file_info == null) {
-
-                    _provision_ok = false;
-
-                } else {
+                if (file_info != null) {
 
                     _file_name = file_info[0];
 
@@ -765,6 +763,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                     _file_key = file_info[2];
 
                     if (file_info.length == 5) {
+
                         _file_pass = file_info[3];
 
                         _file_noexpire = file_info[4];
@@ -774,33 +773,37 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                         insertDownload(_url, _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
 
-                    } catch (SQLException ex) {
+                        _provision_ok = true;
 
-                        _provision_ok = false;
+                    } catch (SQLException ex) {
 
                         exit_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading)";
                     }
+
                 }
+
             } else if (_restart) {
 
                 try {
 
                     insertDownload(_url, _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
 
-                } catch (SQLException ex) {
+                    _provision_ok = true;
 
-                    _provision_ok = false;
+                } catch (SQLException ex) {
 
                     exit_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading)";
                 }
+            } else {
+
+                _provision_ok = true;
             }
+
         } catch (MegaAPIException | MegaCrypterAPIException ex) {
 
             throw ex;
 
         } catch (Exception ex) {
-
-            _provision_ok = false;
 
             exit_message = ex.getMessage();
         }
@@ -1086,7 +1089,10 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
             getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
 
-            getMain_panel().getDownload_manager().getTransference_finished_queue().add(this);
+            if (_provision_ok) {
+
+                getMain_panel().getDownload_manager().getTransference_finished_queue().add(this);
+            }
 
             getMain_panel().getDownload_manager().getScroll_panel().remove(getView());
 
@@ -1095,16 +1101,16 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             getMain_panel().getDownload_manager().secureNotify();
 
             if (isRetrying_request()) {
-                getView().printStatusNormal("Retrying cancelled!");
 
-                swingReflectionInvoke("setEnabled", getView().getStop_button(), false);
+                getView().stop("Retrying cancelled!");
+
             } else if (isChecking_cbc()) {
-                getView().printStatusNormal("Verification cancelled!");
 
-                swingReflectionInvoke("setEnabled", getView().getStop_button(), false);
+                getView().stop("Verification cancelled!");
+
             } else {
 
-                getView().stop();
+                getView().stop("Stopping download safely, please wait...");
 
                 for (ChunkDownloader downloader : _chunkworkers) {
 
@@ -1142,7 +1148,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         }
     }
 
-    public String[] getMegaFileMetadata(String link, MainPanelView panel, boolean retry_request) throws IOException, InterruptedException, MegaAPIException, MegaCrypterAPIException {
+    public String[] getMegaFileMetadata(String link, MainPanelView panel, boolean retry_request) throws MegaAPIException, MegaCrypterAPIException {
 
         String[] file_info = null;
         int retry = 0, error_code;
@@ -1154,9 +1160,11 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             try {
 
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {
+
                     MegaAPI ma = new MegaAPI();
 
                     file_info = ma.getMegaFileMetadata(link);
+
                 } else {
                     file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel);
                 }
@@ -1219,13 +1227,17 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                             }
                         }
                 }
+
             } catch (Exception ex) {
-                emergencyStopDownloader("Mega link is not valid!");
+
+                if (!(ex instanceof MegaAPIException || ex instanceof MegaCrypterAPIException)) {
+                    emergencyStopDownloader("Mega link is not valid!");
+                }
             }
 
         } while (!_exit && error);
 
-        if (!error) {
+        if (!_exit && !error) {
             swingReflectionInvoke("setText", getView().getStop_button(), "CANCEL DOWNLOAD");
             swingReflectionInvoke("setVisible", getView().getStop_button(), false);
         }

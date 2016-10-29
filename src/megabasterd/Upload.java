@@ -375,9 +375,9 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
         File the_file = new File(_file_name);
 
-        if (!the_file.exists()) {
+        _provision_ok = false;
 
-            _provision_ok = false;
+        if (!the_file.exists()) {
 
             exit_msg = "ERROR: FILE NOT FOUND -> " + _file_name;
 
@@ -419,12 +419,16 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
                         DBTools.insertUpload(_file_name, _ma.getEmail(), _parent_node, Bin2BASE64(i32a2bin(_ul_key)), _root_node, Bin2BASE64(_share_key), _folder_link);
 
-                    } catch (IOException | SQLException ex) {
+                        _provision_ok = true;
 
-                        _provision_ok = false;
+                    } catch (IOException | SQLException ex) {
 
                         exit_msg = ex.getMessage();
                     }
+
+                } else {
+
+                    _provision_ok = true;
                 }
 
             } catch (Exception ex) {
@@ -965,7 +969,10 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
             getMain_panel().getUpload_manager().getTransference_running_list().remove(this);
 
-            getMain_panel().getUpload_manager().getTransference_finished_queue().add(this);
+            if (_provision_ok) {
+
+                getMain_panel().getDownload_manager().getTransference_finished_queue().add(this);
+            }
 
             getMain_panel().getUpload_manager().getScroll_panel().remove(getView());
 
@@ -973,7 +980,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
             getMain_panel().getUpload_manager().secureNotify();
 
-            getView().stop();
+            getView().stop("Stopping upload safely, please wait...");
 
             for (ChunkUploader uploader : _chunkworkers) {
 

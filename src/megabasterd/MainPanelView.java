@@ -616,7 +616,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 _main_panel.getMega_active_accounts().remove(email);
             }
-            
+
             for (String host : dialog.getDeleted_elc_accounts()) {
 
                 try {

@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.IOException;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -141,9 +142,24 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                     try {
 
-                        link = CryptTools.decryptMegaDownloaderLink(link);
+                        if (MiscTools.findFirstRegex("://enc", link, 0) != null) {
+
+                            link = CryptTools.decryptMegaDownloaderLink(link);
+
+                        } else if (MiscTools.findFirstRegex("://elc", link, 0) != null) {
+
+                            HashSet links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
+
+                            if (links != null) {
+
+                                link = (String) links.iterator().next();
+                            }
+                        }
 
                     } catch (Exception ex) {
+
+                        error = true;
+
                         getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
@@ -172,7 +188,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                 if (error) {
 
-                    JOptionPane.showMessageDialog(tthis, "Please, paste a mega/megacrypter link!", "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(tthis, "Please, paste a mega/megacrypter/elc link!", "Error", JOptionPane.ERROR_MESSAGE);
 
                     swingReflectionInvoke("setText", original_link_textfield, "");
 

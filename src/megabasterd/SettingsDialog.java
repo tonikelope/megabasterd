@@ -58,8 +58,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
     public Set<String> getDeleted_elc_accounts() {
         return _deleted_elc_accounts;
     }
-    
-    
 
     public boolean isRemember_master_pass() {
         return _remember_master_pass;
@@ -979,7 +977,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 for (int i = 0; i < model.getRowCount(); i++) {
 
-                    String host_table = ((String)model.getValueAt(i, 0)).trim().replaceAll("^(https?://)?([^/]+).*$", "$2");
+                    String host_table = ((String) model.getValueAt(i, 0)).trim().replaceAll("^(https?://)?([^/]+).*$", "$2");
 
                     String user_table = (String) model.getValueAt(i, 1);
 
@@ -1003,7 +1001,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             HashMap<String, Object> elc_account_data = (HashMap) _main_panel.getElc_accounts().get(host_table);
 
                             String user = (String) elc_account_data.get("user");
-                            
+
                             String apikey = (String) elc_account_data.get("apikey");
 
                             if (_main_panel.getMaster_pass() != null) {
@@ -1011,7 +1009,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 try {
 
                                     user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(user), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-                                    
+
                                     apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(apikey), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                 } catch (Exception ex) {

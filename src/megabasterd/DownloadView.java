@@ -386,9 +386,9 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     }
 
     @Override
-    public void stop() {
+    public void stop(String status) {
 
-        printStatusNormal("Stopping download safely, please wait...");
+        printStatusNormal(status);
 
         swingReflectionInvoke("setEnabled", new Object[]{pause_button, keep_temp_checkbox, stop_button, speed_label, slots_label, slots_spinner}, false);
     }

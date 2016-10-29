@@ -404,9 +404,9 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     }
 
     @Override
-    public void stop() {
+    public void stop(String status) {
 
-        printStatusNormal("Stopping upload safely, please wait...");
+        printStatusNormal(status);
 
         swingReflectionInvoke("setEnabled", new Object[]{pause_button, stop_button, speed_label, slots_label, slots_spinner}, false);
     }

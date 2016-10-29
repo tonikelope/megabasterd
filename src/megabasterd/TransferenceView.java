@@ -8,7 +8,7 @@ public interface TransferenceView {
 
     void pause();
 
-    void stop();
+    void stop(String status);
 
     void resume();
 

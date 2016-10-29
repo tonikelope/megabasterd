@@ -893,7 +893,7 @@ public final class MiscTools {
 
             ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", data, 0);
 
-            links.addAll(findAllRegex("mega://enc.*?[^\r\n]+", data, 0));
+            links.addAll(findAllRegex("mega://e(n|l)c.*?[^\r\n]+", data, 0));
 
             if (links.size() > 0) {
 
