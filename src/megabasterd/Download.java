@@ -309,8 +309,6 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     @Override
     public void pause() {
 
-        System.out.println("Pause hello");
-
         if (isPause()) {
 
             setPause(false);
@@ -334,8 +332,6 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         }
 
         _main_panel.getDownload_manager().secureNotify();
-
-        System.out.println("Pause bye");
     }
 
     @Override
