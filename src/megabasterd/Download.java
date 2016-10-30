@@ -309,6 +309,8 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     @Override
     public void pause() {
 
+        System.out.println("Pause hello");
+
         if (isPause()) {
 
             setPause(false);
@@ -332,6 +334,8 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         }
 
         _main_panel.getDownload_manager().secureNotify();
+
+        System.out.println("Pause bye");
     }
 
     @Override
@@ -1073,11 +1077,9 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
     }
 
-    public synchronized void stopDownloader() {
+    public void stopDownloader() {
 
         if (!_exit) {
-
-            System.out.println("Stopping downloader...");
 
             _exit = true;
 
@@ -1122,7 +1124,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         }
     }
 
-    public synchronized void emergencyStopDownloader(String reason) {
+    public void emergencyStopDownloader(String reason) {
 
         if (!_exit && _fatal_error == null) {
             _fatal_error = reason != null ? reason : "FATAL ERROR!";

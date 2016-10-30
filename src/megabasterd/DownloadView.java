@@ -360,7 +360,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     private void pause_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_buttonActionPerformed
 
         _download.pause();
-
     }//GEN-LAST:event_pause_buttonActionPerformed
 
     @Override

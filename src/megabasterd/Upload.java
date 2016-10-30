@@ -935,7 +935,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         }
     }
 
-    public synchronized void emergencyStopUploader(String reason) {
+    public void emergencyStopUploader(String reason) {
         if (!_exit && _fatal_error == null) {
             _fatal_error = reason != null ? reason : "FATAL ERROR!";
 
@@ -957,7 +957,8 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         _exit = exit;
     }
 
-    public synchronized void stopUploader() {
+    public void stopUploader() {
+
         if (!_exit) {
             _exit = true;
 
