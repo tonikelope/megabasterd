@@ -1110,9 +1110,12 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                 getView().stop("Stopping download safely, please wait...");
 
-                for (ChunkDownloader downloader : _chunkworkers) {
+                synchronized (this) {
 
-                    downloader.secureNotify();
+                    for (ChunkDownloader downloader : _chunkworkers) {
+
+                        downloader.secureNotify();
+                    }
                 }
 
                 secureNotify();

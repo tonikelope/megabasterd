@@ -983,9 +983,12 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
             getView().stop("Stopping upload safely, please wait...");
 
-            for (ChunkUploader uploader : _chunkworkers) {
+            synchronized (this) {
 
-                uploader.secureNotify();
+                for (ChunkUploader uploader : _chunkworkers) {
+
+                    uploader.secureNotify();
+                }
             }
 
             secureNotify();

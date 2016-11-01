@@ -483,14 +483,14 @@ public final class CryptTools {
                             }
 
                         } else {
-                            throw new Exception(httppost.getURI().getAuthority() + " ELC server ERROR -> " + new String(out.toByteArray()));
+                            throw new Exception(httppost.getURI().getAuthority() + " ELC SERVER ERROR " + new String(out.toByteArray()));
                         }
                     }
                 }
 
             } catch (Exception ex) {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-                JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "ELC decryption Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "ELC ERROR", JOptionPane.ERROR_MESSAGE);
             }
         }
 

@@ -408,7 +408,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             swingReflectionInvoke("setEnabled", remove_elc_account_button, (elc_model.getRowCount() > 0));
 
-            System.out.println("asasasf");
         }
 
         _remember_master_pass = true;
