@@ -236,7 +236,7 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
 
                                             InputStream is = httpresponse.getEntity().getContent();
 
-                                            ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+                                            try(ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                                             while ((reads = is.read(buffer)) != -1) {
 
@@ -256,6 +256,8 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
 
                                                     _upload.setCompletion_handle(response);
                                                 }
+                                            }
+                                            
                                             }
                                         }
                                     }

@@ -213,7 +213,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                             InputStream is = httpresponse.getEntity().getContent();
 
-                            ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+                            try(ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                             while ((reads = is.read(buffer)) != -1) {
 
@@ -233,6 +233,8 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                                     getUpload().setCompletion_handle(response);
                                 }
+                            }
+                            
                             }
                         }
 

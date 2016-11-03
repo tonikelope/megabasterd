@@ -302,7 +302,7 @@ public final class MegaAPI {
 
                             InputStream is = httpresponse.getEntity().getContent();
 
-                            ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+                            try(ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                             byte[] buffer = new byte[16 * 1024];
 
@@ -327,6 +327,8 @@ public final class MegaAPI {
                                 } else {
                                     error = false;
                                 }
+                            }
+                            
                             }
                         }
 

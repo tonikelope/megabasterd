@@ -567,7 +567,7 @@ public final class MiscTools {
 
                 InputStream is = httpresponse.getEntity().getContent();
 
-                ByteArrayOutputStream byte_res = new ByteArrayOutputStream();
+                try(ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                 byte[] buffer = new byte[16 * 1024];
 
@@ -579,6 +579,8 @@ public final class MiscTools {
                 }
 
                 response = new String(byte_res.toByteArray()).trim();
+                
+                }
             }
 
         } catch (MalformedURLException ex) {

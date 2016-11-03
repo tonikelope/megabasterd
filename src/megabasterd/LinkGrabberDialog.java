@@ -1,9 +1,17 @@
 package megabasterd;
 
 import java.awt.Font;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MiscTools.extractMegaLinksFromString;
 import static megabasterd.MiscTools.extractStringFromClipboardContents;
@@ -45,6 +53,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                 updateFont(down_dir_to_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(change_dir_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(download_dir_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(dlc_button, FONT_DEFAULT, Font.PLAIN);
             }
         }, true);
 
@@ -73,6 +82,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         change_dir_button = new javax.swing.JButton();
         down_dir_to_label = new javax.swing.JLabel();
         download_dir_label = new javax.swing.JLabel();
+        dlc_button = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("LinkGrabber");
@@ -115,6 +125,14 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         download_dir_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
 
+        dlc_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        dlc_button.setText("Load DLC container");
+        dlc_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                dlc_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -122,36 +140,36 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(links_scrollpane, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(links_scrollpane)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(links_label)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(change_dir_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(down_dir_to_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(download_dir_label, javax.swing.GroupLayout.PREFERRED_SIZE, 404, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(download_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(links_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(dlc_button)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(links_label)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(links_label)
+                    .addComponent(dlc_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(links_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 282, Short.MAX_VALUE)
+                .addComponent(links_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 246, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(change_dir_button)
-                            .addComponent(down_dir_to_label)
-                            .addComponent(download_dir_label))
-                        .addGap(5, 5, 5)))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(change_dir_button)
+                    .addComponent(down_dir_to_label)
+                    .addComponent(download_dir_label)
+                    .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addContainerGap())
         );
 
@@ -184,9 +202,68 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         }
     }//GEN-LAST:event_change_dir_buttonActionPerformed
 
+    private void dlc_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dlc_buttonActionPerformed
+        
+        dlc_button.setText("Loading DLC, please wait...");
+        
+        dlc_button.setEnabled(false);
+        
+        javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
+
+        filechooser.setDialogTitle("Select DLC container");
+        
+        filechooser.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
+        
+        filechooser.addChoosableFileFilter(new FileNameExtensionFilter("DLC", "dlc"));
+        
+        filechooser.setAcceptAllFileFilterUsed(false);
+
+        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+            File file = filechooser.getSelectedFile();
+
+            try(FileInputStream is = new FileInputStream(file)) {
+                
+                try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+
+                    byte[] buffer = new byte[16 * 1024];
+
+                    int reads;
+
+                    while ((reads = is.read(buffer)) != -1) {
+
+                        out.write(buffer, 0, reads);
+                    }
+                        
+                    String dlc = new String(out.toByteArray());
+                    
+                    Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView)getParent()).getMain_panel());
+                        
+                    for(String link:links) {
+
+                        if(MiscTools.findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) != null) {
+
+                            this.links_textarea.append(link+"\r\n");
+                        }
+                    }
+                }
+                
+            } catch (FileNotFoundException ex) {
+                Logger.getLogger(LinkGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IOException ex) {
+                Logger.getLogger(LinkGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        dlc_button.setText("Load DLC container");
+        
+        dlc_button.setEnabled(true);
+    }//GEN-LAST:event_dlc_buttonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton change_dir_button;
     private javax.swing.JButton dance_button;
+    private javax.swing.JButton dlc_button;
     private javax.swing.JLabel down_dir_to_label;
     private javax.swing.JLabel download_dir_label;
     private javax.swing.JLabel links_label;
