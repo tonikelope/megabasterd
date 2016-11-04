@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -238,13 +239,29 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     String dlc = new String(out.toByteArray());
                     
                     Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView)getParent()).getMain_panel());
+                    
+                    for (Iterator<String> i = links.iterator(); i.hasNext();) {
                         
-                    for(String link:links) {
+                        String link = i.next();
+                        
+                        if(MiscTools.findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) == null) {
 
-                        if(MiscTools.findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) != null) {
-
-                            this.links_textarea.append(link+"\r\n");
+                            i.remove();
                         }
+                    }
+                        
+                    if(!links.isEmpty()) {
+                        
+                        links_textarea.setText("");
+                        
+                        for (Iterator<String> i = links.iterator(); i.hasNext();) {
+                        
+                            links_textarea.append(i.next());
+                            
+                            if(i.hasNext()) {
+                                links_textarea.append("\r\n");
+                            }
+                        }   
                     }
                 }
                 
