@@ -74,31 +74,31 @@ public final class MegaCrypterAPI {
 
                             InputStream is = httpresponse.getEntity().getContent();
 
-                            try(ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                            try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                            byte[] buffer = new byte[16 * 1024];
+                                byte[] buffer = new byte[16 * 1024];
 
-                            int reads;
+                                int reads;
 
-                            while ((reads = is.read(buffer)) != -1) {
+                                while ((reads = is.read(buffer)) != -1) {
 
-                                byte_res.write(buffer, 0, reads);
-                            }
-
-                            response = new String(byte_res.toByteArray());
-
-                            if (response.length() > 0) {
-
-                                int mc_error;
-
-                                if ((mc_error = MegaCrypterAPI.checkMCError(response)) != 0) {
-                                    throw new MegaCrypterAPIException(String.valueOf(mc_error));
-
-                                } else {
-
-                                    error = false;
+                                    byte_res.write(buffer, 0, reads);
                                 }
-                            }
+
+                                response = new String(byte_res.toByteArray());
+
+                                if (response.length() > 0) {
+
+                                    int mc_error;
+
+                                    if ((mc_error = MegaCrypterAPI.checkMCError(response)) != 0) {
+                                        throw new MegaCrypterAPIException(String.valueOf(mc_error));
+
+                                    } else {
+
+                                        error = false;
+                                    }
+                                }
                             }
                         }
                     }

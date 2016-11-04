@@ -302,33 +302,33 @@ public final class MegaAPI {
 
                             InputStream is = httpresponse.getEntity().getContent();
 
-                            try(ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                            try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                            byte[] buffer = new byte[16 * 1024];
+                                byte[] buffer = new byte[16 * 1024];
 
-                            int reads;
+                                int reads;
 
-                            while ((reads = is.read(buffer)) != -1) {
+                                while ((reads = is.read(buffer)) != -1) {
 
-                                byte_res.write(buffer, 0, reads);
-                            }
-
-                            response = new String(byte_res.toByteArray());
-
-                            if (response.length() > 0) {
-
-                                int mega_error;
-
-                                if ((mega_error = checkMEGAError(response)) != 0) {
-                                    if (mega_error != -3) {
-                                        throw new MegaAPIException(String.valueOf(mega_error));
-                                    }
-
-                                } else {
-                                    error = false;
+                                    byte_res.write(buffer, 0, reads);
                                 }
-                            }
-                            
+
+                                response = new String(byte_res.toByteArray());
+
+                                if (response.length() > 0) {
+
+                                    int mega_error;
+
+                                    if ((mega_error = checkMEGAError(response)) != 0) {
+                                        if (mega_error != -3) {
+                                            throw new MegaAPIException(String.valueOf(mega_error));
+                                        }
+
+                                    } else {
+                                        error = false;
+                                    }
+                                }
+
                             }
                         }
 

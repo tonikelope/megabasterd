@@ -567,19 +567,19 @@ public final class MiscTools {
 
                 InputStream is = httpresponse.getEntity().getContent();
 
-                try(ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                byte[] buffer = new byte[16 * 1024];
+                    byte[] buffer = new byte[16 * 1024];
 
-                int reads;
+                    int reads;
 
-                while ((reads = is.read(buffer)) != -1) {
+                    while ((reads = is.read(buffer)) != -1) {
 
-                    byte_res.write(buffer, 0, reads);
-                }
+                        byte_res.write(buffer, 0, reads);
+                    }
 
-                response = new String(byte_res.toByteArray()).trim();
-                
+                    response = new String(byte_res.toByteArray()).trim();
+
                 }
             }
 

@@ -14,6 +14,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import static megabasterd.MainPanel.FONT_DEFAULT;
+import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.extractMegaLinksFromString;
 import static megabasterd.MiscTools.extractStringFromClipboardContents;
 import static megabasterd.MiscTools.swingReflectionInvoke;
@@ -204,77 +205,96 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     }//GEN-LAST:event_change_dir_buttonActionPerformed
 
     private void dlc_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dlc_buttonActionPerformed
-        
+
         dlc_button.setText("Loading DLC, please wait...");
-        
+
         dlc_button.setEnabled(false);
-        
+
+        links_textarea.setEnabled(false);
+
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
         filechooser.setDialogTitle("Select DLC container");
-        
+
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
-        
+
         filechooser.addChoosableFileFilter(new FileNameExtensionFilter("DLC", "dlc"));
-        
+
         filechooser.setAcceptAllFileFilterUsed(false);
 
         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
-            File file = filechooser.getSelectedFile();
+            final File file = filechooser.getSelectedFile();
 
-            try(FileInputStream is = new FileInputStream(file)) {
-                
-                try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            THREAD_POOL.execute(new Runnable() {
+                @Override
+                public void run() {
 
-                    byte[] buffer = new byte[16 * 1024];
+                    try (FileInputStream is = new FileInputStream(file)) {
 
-                    int reads;
+                        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-                    while ((reads = is.read(buffer)) != -1) {
+                            byte[] buffer = new byte[16 * 1024];
 
-                        out.write(buffer, 0, reads);
-                    }
-                        
-                    String dlc = new String(out.toByteArray());
-                    
-                    Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView)getParent()).getMain_panel());
-                    
-                    for (Iterator<String> i = links.iterator(); i.hasNext();) {
-                        
-                        String link = i.next();
-                        
-                        if(MiscTools.findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) == null) {
+                            int reads;
 
-                            i.remove();
-                        }
-                    }
-                        
-                    if(!links.isEmpty()) {
-                        
-                        links_textarea.setText("");
-                        
-                        for (Iterator<String> i = links.iterator(); i.hasNext();) {
-                        
-                            links_textarea.append(i.next());
-                            
-                            if(i.hasNext()) {
-                                links_textarea.append("\r\n");
+                            while ((reads = is.read(buffer)) != -1) {
+
+                                out.write(buffer, 0, reads);
                             }
-                        }   
+
+                            String dlc = new String(out.toByteArray());
+
+                            Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView) getParent()).getMain_panel());
+
+                            for (Iterator<String> i = links.iterator(); i.hasNext();) {
+
+                                String link = i.next();
+
+                                if (MiscTools.findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) == null) {
+
+                                    i.remove();
+                                }
+                            }
+
+                            if (!links.isEmpty()) {
+
+                                swingReflectionInvoke("setText", links_textarea, "");
+
+                                for (Iterator<String> i = links.iterator(); i.hasNext();) {
+
+                                    swingReflectionInvoke("append", links_textarea, i.next());
+
+                                    if (i.hasNext()) {
+                                        swingReflectionInvoke("append", links_textarea, "\r\n");
+                                    }
+                                }
+                            }
+                        }
+
+                    } catch (FileNotFoundException ex) {
+                        Logger.getLogger(LinkGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IOException ex) {
+                        Logger.getLogger(LinkGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
                     }
+
+                    swingReflectionInvoke("setText", dlc_button, "Load DLC container");
+
+                    swingReflectionInvoke("setEnabled", dlc_button, true);
+
+                    swingReflectionInvoke("setEnabled", links_textarea, true);
+
                 }
-                
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(LinkGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IOException ex) {
-                Logger.getLogger(LinkGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            });
+
+        } else {
+
+            dlc_button.setText("Load DLC container");
+
+            dlc_button.setEnabled(true);
+
+            links_textarea.setEnabled(true);
         }
-        
-        dlc_button.setText("Load DLC container");
-        
-        dlc_button.setEnabled(true);
     }//GEN-LAST:event_dlc_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

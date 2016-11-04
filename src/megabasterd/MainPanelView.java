@@ -519,17 +519,17 @@ public final class MainPanelView extends javax.swing.JFrame {
                             getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
                         }
                     }
-                    
+
                     Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", dialog.getLinks_textarea().getText(), 1));
 
                     for (String d : dlc) {
-                        
+
                         Set<String> links = CryptTools.decryptDLC(d, _main_panel);
-                        
-                        for(String link:links) {
-                            
-                            if(MiscTools.findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) != null) {
-                                
+
+                        for (String link : links) {
+
+                            if (MiscTools.findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) != null) {
+
                                 urls.add(link);
                             }
                         }

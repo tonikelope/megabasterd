@@ -236,28 +236,28 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
 
                                             InputStream is = httpresponse.getEntity().getContent();
 
-                                            try(ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                                            try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                            while ((reads = is.read(buffer)) != -1) {
+                                                while ((reads = is.read(buffer)) != -1) {
 
-                                                byte_res.write(buffer, 0, reads);
-                                            }
-
-                                            String response = new String(byte_res.toByteArray());
-
-                                            if (response.length() > 0) {
-
-                                                if (MegaAPI.checkMEGAError(response) != 0) {
-                                                    error = true;
-
-                                                } else {
-
-                                                    System.out.println("Completion handle -> " + response);
-
-                                                    _upload.setCompletion_handle(response);
+                                                    byte_res.write(buffer, 0, reads);
                                                 }
-                                            }
-                                            
+
+                                                String response = new String(byte_res.toByteArray());
+
+                                                if (response.length() > 0) {
+
+                                                    if (MegaAPI.checkMEGAError(response) != 0) {
+                                                        error = true;
+
+                                                    } else {
+
+                                                        System.out.println("Completion handle -> " + response);
+
+                                                        _upload.setCompletion_handle(response);
+                                                    }
+                                                }
+
                                             }
                                         }
                                     }

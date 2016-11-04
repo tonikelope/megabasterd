@@ -138,7 +138,7 @@ public final class CryptTools {
 
         return decryptor.doFinal(data);
     }
-    
+
     public static byte[] aes_ecb_encrypt_pkcs7(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher cryptor = CryptTools.genCrypter("AES", "AES/ECB/PKCS5Padding", key, null);
@@ -338,19 +338,19 @@ public final class CryptTools {
 
                     InputStream is = new GZIPInputStream(new ByteArrayInputStream(elc_byte));
 
-                    try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-                    byte[] buffer = new byte[16 * 1024];
+                        byte[] buffer = new byte[16 * 1024];
 
-                    int reads;
+                        int reads;
 
-                    while ((reads = is.read(buffer)) != -1) {
+                        while ((reads = is.read(buffer)) != -1) {
 
-                        out.write(buffer, 0, reads);
-                    }
+                            out.write(buffer, 0, reads);
+                        }
 
-                    elc_byte = out.toByteArray();
-                    
+                        elc_byte = out.toByteArray();
+
                     }
                 }
 
@@ -459,50 +459,50 @@ public final class CryptTools {
 
                         InputStream is = httpresponse.getEntity().getContent();
 
-                        try(ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-                        byte[] buffer = new byte[16 * 1024];
+                            byte[] buffer = new byte[16 * 1024];
 
-                        int reads;
+                            int reads;
 
-                        while ((reads = is.read(buffer)) != -1) {
+                            while ((reads = is.read(buffer)) != -1) {
 
-                            out.write(buffer, 0, reads);
-                        }
-
-                        ObjectMapper objectMapper = new ObjectMapper();
-
-                        HashMap res_map = objectMapper.readValue(new String(out.toByteArray()), HashMap.class);
-                        
-                        String dec_pass = (String) res_map.get("d");
-
-                        if (dec_pass != null && dec_pass.length() > 0) {
-
-                            dec_pass = (String) res_map.get("d");
-
-                            byte[] pass_dec_byte = MiscTools.BASE642Bin(dec_pass);
-
-                            byte[] key = Arrays.copyOfRange(pass_dec_byte, 0, 16);
-
-                            byte[] iv = new byte[16];
-
-                            Arrays.fill(iv, (byte) 0);
-
-                            System.arraycopy(pass_dec_byte, 16, iv, 0, 8);
-
-                            byte[] bin_links_dec = CryptTools.aes_cbc_decrypt(bin_links, key, iv);
-
-                            String[] links_string = (new String(bin_links_dec).trim()).split("\\|");
-
-                            for (String s : links_string) {
-
-                                links.add("https://mega.nz/" + s);
+                                out.write(buffer, 0, reads);
                             }
 
-                        } else {
-                            throw new Exception(httppost.getURI().getAuthority() + " ELC SERVER ERROR " + new String(out.toByteArray()));
-                        }
-                        
+                            ObjectMapper objectMapper = new ObjectMapper();
+
+                            HashMap res_map = objectMapper.readValue(new String(out.toByteArray()), HashMap.class);
+
+                            String dec_pass = (String) res_map.get("d");
+
+                            if (dec_pass != null && dec_pass.length() > 0) {
+
+                                dec_pass = (String) res_map.get("d");
+
+                                byte[] pass_dec_byte = MiscTools.BASE642Bin(dec_pass);
+
+                                byte[] key = Arrays.copyOfRange(pass_dec_byte, 0, 16);
+
+                                byte[] iv = new byte[16];
+
+                                Arrays.fill(iv, (byte) 0);
+
+                                System.arraycopy(pass_dec_byte, 16, iv, 0, 8);
+
+                                byte[] bin_links_dec = CryptTools.aes_cbc_decrypt(bin_links, key, iv);
+
+                                String[] links_string = (new String(bin_links_dec).trim()).split("\\|");
+
+                                for (String s : links_string) {
+
+                                    links.add("https://mega.nz/" + s);
+                                }
+
+                            } else {
+                                throw new Exception(httppost.getURI().getAuthority() + " ELC SERVER ERROR " + new String(out.toByteArray()));
+                            }
+
                         }
                     }
                 }
@@ -515,86 +515,87 @@ public final class CryptTools {
 
         return links;
     }
-    
+
     public static HashSet<String> decryptDLC(String data, MainPanel main_panel) {
-        
+
         HashSet<String> links = new HashSet<>();
-        
+
         String dlc_url = "http://service.jdownloader.org/dlcrypt/service.php";
-        
+
         String dlc_rev = "34065";
-                
+
         String dlc_master_key = "447E787351E60E2C6A96B3964BE0C9BD";
-        
-        String dlc_id = data.substring(data.length()-88);
-        
-        String enc_dlc_data = data.substring(0, data.length()-88);
-        
+
+        String dlc_id = data.substring(data.length() - 88);
+
+        String enc_dlc_data = data.substring(0, data.length() - 88);
+
         try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
-            
+
             HttpPost httppost = new HttpPost(new URI(dlc_url));
 
             httppost.setHeader("Custom-User-Agent", "Mozilla/5.0 (X11; U; Linux amd64; rv:44.0) Gecko/20100101 Firefox/44.0");
-            
+
             httppost.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
-            
+
             httppost.setHeader("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
-            
+
             httppost.setHeader("Accept-Encoding", "gzip, deflate");
-            
+
             httppost.setHeader("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
-            
+
             httppost.setHeader("Cache-Control", "no-cache");
-            
+
             httppost.setHeader("rev", dlc_rev);
 
             ArrayList<NameValuePair> nameValuePairs = new ArrayList<>();
 
             nameValuePairs.add(new BasicNameValuePair("destType", "jdtc6"));
-            
+
             nameValuePairs.add(new BasicNameValuePair("b", "JD"));
-            
+
             nameValuePairs.add(new BasicNameValuePair("srcType", "dlc"));
-            
+
             nameValuePairs.add(new BasicNameValuePair("data", dlc_id));
-            
+
             nameValuePairs.add(new BasicNameValuePair("v", dlc_rev));
-            
+
             httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-            
+
             try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
-             
+
                 InputStream is = httpresponse.getEntity().getContent();
 
                 String enc_dlc_key;
-                
+
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                     byte[] buffer = new byte[16 * 1024];
                     int reads;
                     while ((reads = is.read(buffer)) != -1) {
-                        
+
                         out.write(buffer, 0, reads);
-                    }   enc_dlc_key = MiscTools.findFirstRegex("< *rc *>(.+)< */ *rc *>", new String(out.toByteArray()), 1);
+                    }
+                    enc_dlc_key = MiscTools.findFirstRegex("< *rc *>(.+)< */ *rc *>", new String(out.toByteArray()), 1);
                 }
-                
+
                 String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt(MiscTools.BASE642Bin(enc_dlc_key), MiscTools.hex2bin(dlc_master_key))).trim();
-               
+
                 String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt(MiscTools.BASE642Bin(enc_dlc_data), MiscTools.BASE642Bin(dec_dlc_key), MiscTools.BASE642Bin(dec_dlc_key))).trim();
-                
+
                 ArrayList<String> urls = MiscTools.findAllRegex("< *url *>(.+)< */ *url *>", new String(MiscTools.BASE642Bin(dec_dlc_data)), 1);
-                
-                for(String s:urls) {
-                    
+
+                for (String s : urls) {
+
                     links.add(new String(MiscTools.BASE642Bin(s)));
                 }
             }
         } catch (Exception ex) {
-            
+
             Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, null, ex);
-            
+
             JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "DLC ERROR", JOptionPane.ERROR_MESSAGE);
         }
-        
+
         return links;
     }
 
