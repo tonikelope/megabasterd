@@ -52,6 +52,8 @@ import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.Transference.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
+import org.apache.http.auth.Credentials;
+import org.apache.http.auth.UsernamePasswordCredentials;
 
 /**
  *
@@ -59,7 +61,7 @@ import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "1.53";
+    public static final String VERSION = "1.54";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
@@ -99,6 +101,10 @@ public final class MainPanel {
     private byte[] _master_pass;
     private String _master_pass_hash;
     private String _master_pass_salt;
+    private static String _proxy_host;
+    private static int _proxy_port;
+    private static Credentials _proxy_credentials;
+    private static boolean _use_proxy;
 
     public MainPanel() {
 
@@ -128,6 +134,14 @@ public final class MainPanel {
         _master_pass = null;
 
         _mega_active_accounts = new HashMap<>();
+
+        _proxy_host = null;
+
+        _proxy_port = 3128;
+
+        _proxy_credentials = null;
+        
+        _use_proxy = false;
 
         loadUserSettings();
 
@@ -174,6 +188,22 @@ public final class MainPanel {
 
     }
 
+    public static boolean isUse_proxy() {
+        return _use_proxy;
+    }
+
+    public static String getProxy_host() {
+        return _proxy_host;
+    }
+
+    public static int getProxy_port() {
+        return _proxy_port;
+    }
+
+    public static Credentials getProxy_credentials() {
+        return _proxy_credentials;
+    }
+
     public HashMap<String, Object> getElc_accounts() {
         return _elc_accounts;
     }
@@ -186,8 +216,8 @@ public final class MainPanel {
         return _master_pass_hash;
     }
 
-    public void setMaster_pass_hash(String mega_master_pass_hash) {
-        _master_pass_hash = mega_master_pass_hash;
+    public void setMaster_pass_hash(String master_pass_hash) {
+        _master_pass_hash = master_pass_hash;
     }
 
     public String getMaster_pass_salt() {
@@ -420,9 +450,9 @@ public final class MainPanel {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
-        _master_pass_hash = DBTools.selectSettingValueFromDB("mega_master_pass_hash");
+        _master_pass_hash = DBTools.selectSettingValueFromDB("master_pass_hash");
 
-        _master_pass_salt = DBTools.selectSettingValueFromDB("mega_master_pass_salt");
+        _master_pass_salt = DBTools.selectSettingValueFromDB("master_pass_salt");
 
         if (_master_pass_salt == null) {
 
@@ -430,10 +460,37 @@ public final class MainPanel {
 
                 _master_pass_salt = MiscTools.Bin2BASE64(MiscTools.genRandomByteArray(CryptTools.PBKDF2_SALT_BYTE_LENGTH));
 
-                DBTools.insertSettingValueInDB("mega_master_pass_salt", _master_pass_salt);
+                DBTools.insertSettingValueInDB("master_pass_salt", _master_pass_salt);
 
             } catch (Exception ex) {
                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        String use_proxy = selectSettingValueFromDB("use_proxy");
+
+        if (use_proxy != null) {
+            _use_proxy = use_proxy.equals("yes");
+        } else {
+            _use_proxy = false;
+        }
+
+        if (_use_proxy) {
+
+            _proxy_host = DBTools.selectSettingValueFromDB("proxy_host");
+
+            String proxy_port = DBTools.selectSettingValueFromDB("proxy_port");
+
+            _proxy_port = (proxy_port == null || proxy_port.isEmpty()) ? 8080 : Integer.parseInt(proxy_port);
+
+            String proxy_user = DBTools.selectSettingValueFromDB("proxy_user");
+
+            String proxy_pass = DBTools.selectSettingValueFromDB("proxy_pass");
+
+            if (proxy_user != null && !proxy_user.isEmpty() && proxy_pass != null) {
+                _proxy_credentials = new UsernamePasswordCredentials(proxy_user, proxy_pass);
+            } else {
+                _proxy_credentials = null;
             }
         }
     }

@@ -211,7 +211,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         dlc_button.setEnabled(false);
 
         links_textarea.setEnabled(false);
-        
+
         dance_button.setEnabled(false);
 
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
@@ -285,7 +285,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     swingReflectionInvoke("setEnabled", dlc_button, true);
 
                     swingReflectionInvoke("setEnabled", links_textarea, true);
-                    
+
                     swingReflectionInvoke("setEnabled", dance_button, true);
 
                 }
@@ -298,7 +298,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             dlc_button.setEnabled(true);
 
             links_textarea.setEnabled(true);
-            
+
             dance_button.setEnabled(true);
         }
     }//GEN-LAST:event_dlc_buttonActionPerformed

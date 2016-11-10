@@ -110,6 +110,12 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 updateFont(remove_elc_account_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(add_elc_account_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(elc_accounts_label, FONT_DEFAULT, Font.BOLD);
+                updateFont(proxy_host_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(proxy_port_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(proxy_user_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(proxy_pass_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(use_proxy_checkbox, FONT_DEFAULT, Font.PLAIN);
+                updateFont(proxy_warning_label, FONT_DEFAULT, Font.PLAIN);
             }
         }, true);
 
@@ -410,6 +416,24 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         }
 
+        boolean use_proxy = false;
+
+        String use_proxy_val = DBTools.selectSettingValueFromDB("use_proxy");
+
+        if (use_proxy_val != null) {
+            use_proxy = (use_proxy_val.equals("yes"));
+        }
+
+        use_proxy_checkbox.setSelected(use_proxy);
+
+        swingReflectionInvoke("setText", proxy_host_textfield, DBTools.selectSettingValueFromDB("proxy_host"));
+
+        swingReflectionInvoke("setText", proxy_port_textfield, DBTools.selectSettingValueFromDB("proxy_port"));
+
+        swingReflectionInvoke("setText", proxy_user_textfield, DBTools.selectSettingValueFromDB("proxy_user"));
+
+        swingReflectionInvoke("setText", proxy_pass_textfield, DBTools.selectSettingValueFromDB("proxy_pass"));
+
         _remember_master_pass = true;
 
         _deleted_mega_accounts = new HashSet();
@@ -468,6 +492,19 @@ public final class SettingsDialog extends javax.swing.JDialog {
         elc_accounts_label = new javax.swing.JLabel();
         remove_elc_account_button = new javax.swing.JButton();
         add_elc_account_button = new javax.swing.JButton();
+        jPanel1 = new javax.swing.JPanel();
+        proxy_panel = new javax.swing.JPanel();
+        proxy_host_label = new javax.swing.JLabel();
+        proxy_host_textfield = new javax.swing.JTextField();
+        proxy_port_label = new javax.swing.JLabel();
+        proxy_port_textfield = new javax.swing.JTextField();
+        use_proxy_checkbox = new javax.swing.JCheckBox();
+        proxy_warning_label = new javax.swing.JLabel();
+        proxy_auth_panel = new javax.swing.JPanel();
+        proxy_user_label = new javax.swing.JLabel();
+        proxy_user_textfield = new javax.swing.JTextField();
+        proxy_pass_label = new javax.swing.JLabel();
+        proxy_pass_textfield = new javax.swing.JTextField();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -611,7 +648,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(verify_file_down_checkbox)
-                .addContainerGap(170, Short.MAX_VALUE))
+                .addContainerGap(174, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
@@ -634,9 +671,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
         multi_slot_up_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         multi_slot_up_checkbox.setText("Use multi slot upload mode (upload restart needed)");
         multi_slot_up_checkbox.setDoubleBuffered(true);
-        multi_slot_up_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
-            public void stateChanged(javax.swing.event.ChangeEvent evt) {
-                multi_slot_up_checkboxStateChanged(evt);
+        multi_slot_up_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                multi_slot_up_checkboxActionPerformed(evt);
             }
         });
 
@@ -697,7 +734,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_up_speed_label)
                     .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(304, Short.MAX_VALUE))
+                .addContainerGap(308, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Uploads", uploads_panel);
@@ -879,6 +916,147 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         jTabbedPane1.addTab("Accounts", accounts_panel);
 
+        proxy_panel.setBorder(javax.swing.BorderFactory.createTitledBorder("Proxy settings"));
+
+        proxy_host_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        proxy_host_label.setText("Host:");
+        proxy_host_label.setDoubleBuffered(true);
+        proxy_host_label.setEnabled(false);
+
+        proxy_host_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        proxy_host_textfield.setDoubleBuffered(true);
+        proxy_host_textfield.setEnabled(false);
+        proxy_host_textfield.addMouseListener(new ContextMenuMouseListener());
+
+        proxy_port_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        proxy_port_label.setText("Port:");
+        proxy_port_label.setDoubleBuffered(true);
+        proxy_port_label.setEnabled(false);
+
+        proxy_port_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        proxy_port_textfield.setDoubleBuffered(true);
+        proxy_port_textfield.setEnabled(false);
+        proxy_port_textfield.addMouseListener(new ContextMenuMouseListener());
+
+        use_proxy_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        use_proxy_checkbox.setText("Use proxy (app restart is recommended).");
+        use_proxy_checkbox.setDoubleBuffered(true);
+        use_proxy_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                use_proxy_checkboxStateChanged(evt);
+            }
+        });
+
+        proxy_warning_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        proxy_warning_label.setText("Warning: Megabasterd will use this proxy for all connections.");
+        proxy_warning_label.setEnabled(false);
+
+        proxy_auth_panel.setBorder(javax.swing.BorderFactory.createTitledBorder("Authentication"));
+
+        proxy_user_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        proxy_user_label.setText("Username:");
+        proxy_user_label.setDoubleBuffered(true);
+        proxy_user_label.setEnabled(false);
+
+        proxy_user_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        proxy_user_textfield.setDoubleBuffered(true);
+        proxy_user_textfield.setEnabled(false);
+        proxy_user_textfield.addMouseListener(new ContextMenuMouseListener());
+
+        proxy_pass_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        proxy_pass_label.setText("Password:");
+        proxy_pass_label.setDoubleBuffered(true);
+        proxy_pass_label.setEnabled(false);
+
+        proxy_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        proxy_pass_textfield.setDoubleBuffered(true);
+        proxy_pass_textfield.setEnabled(false);
+        proxy_pass_textfield.addMouseListener(new ContextMenuMouseListener());
+
+        javax.swing.GroupLayout proxy_auth_panelLayout = new javax.swing.GroupLayout(proxy_auth_panel);
+        proxy_auth_panel.setLayout(proxy_auth_panelLayout);
+        proxy_auth_panelLayout.setHorizontalGroup(
+            proxy_auth_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(proxy_auth_panelLayout.createSequentialGroup()
+                .addComponent(proxy_user_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                .addComponent(proxy_pass_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE))
+        );
+        proxy_auth_panelLayout.setVerticalGroup(
+            proxy_auth_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(proxy_auth_panelLayout.createSequentialGroup()
+                .addGroup(proxy_auth_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(proxy_user_label)
+                    .addComponent(proxy_user_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(proxy_pass_label)
+                    .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout proxy_panelLayout = new javax.swing.GroupLayout(proxy_panel);
+        proxy_panel.setLayout(proxy_panelLayout);
+        proxy_panelLayout.setHorizontalGroup(
+            proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(proxy_panelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(proxy_auth_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(proxy_panelLayout.createSequentialGroup()
+                        .addGroup(proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(use_proxy_checkbox)
+                            .addComponent(proxy_warning_label)
+                            .addGroup(proxy_panelLayout.createSequentialGroup()
+                                .addComponent(proxy_host_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(proxy_host_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(proxy_port_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(proxy_port_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
+        );
+        proxy_panelLayout.setVerticalGroup(
+            proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, proxy_panelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(use_proxy_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(proxy_warning_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(proxy_host_label)
+                    .addComponent(proxy_host_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(proxy_port_label)
+                    .addComponent(proxy_port_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(proxy_auth_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(proxy_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(299, Short.MAX_VALUE))
+        );
+
+        jTabbedPane1.addTab("Advanced", jPanel1);
+
         status.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         status.setDoubleBuffered(true);
 
@@ -957,6 +1135,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
             insertSettingValueInDB("max_download_speed", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", max_down_speed_spinner)));
             insertSettingValueInDB("limit_upload_speed", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", limit_upload_speed_checkbox) ? "yes" : "no");
             insertSettingValueInDB("max_upload_speed", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", max_up_speed_spinner)));
+            insertSettingValueInDB("use_proxy", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", use_proxy_checkbox) ? "yes" : "no");
+            insertSettingValueInDB("proxy_host", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_host_textfield));
+            insertSettingValueInDB("proxy_port", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_port_textfield));
+            insertSettingValueInDB("proxy_user", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_user_textfield));
+            insertSettingValueInDB("proxy_pass", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_pass_textfield));
 
             ok_button.setEnabled(false);
 
@@ -1255,19 +1438,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         remove_mega_account_button.setEnabled(true);
     }//GEN-LAST:event_add_mega_account_buttonActionPerformed
 
-    private void multi_slot_up_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multi_slot_up_checkboxStateChanged
-
-        if (!multi_slot_up_checkbox.isSelected()) {
-
-            defaut_slots_up_label.setEnabled(false);
-            default_slots_up_spinner.setEnabled(false);
-
-        } else {
-            defaut_slots_up_label.setEnabled(true);
-            default_slots_up_spinner.setEnabled(true);
-        }
-    }//GEN-LAST:event_multi_slot_up_checkboxStateChanged
-
     private void limit_download_speed_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_limit_download_speed_checkboxStateChanged
 
         if (!limit_download_speed_checkbox.isSelected()) {
@@ -1309,16 +1479,16 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 swingReflectionInvokeAndWait("setVisible", dialog, true);
 
-                byte[] old_mega_master_pass = null;
+                byte[] old_master_pass = null;
 
                 if (_main_panel.getMaster_pass() != null) {
 
-                    old_mega_master_pass = new byte[_main_panel.getMaster_pass().length];
+                    old_master_pass = new byte[_main_panel.getMaster_pass().length];
 
-                    System.arraycopy(_main_panel.getMaster_pass(), 0, old_mega_master_pass, 0, _main_panel.getMaster_pass().length);
+                    System.arraycopy(_main_panel.getMaster_pass(), 0, old_master_pass, 0, _main_panel.getMaster_pass().length);
                 }
 
-                String old_mega_master_pass_hash = _main_panel.getMaster_pass_hash();
+                String old_master_pass_hash = _main_panel.getMaster_pass_hash();
 
                 if (dialog.isPass_ok()) {
 
@@ -1339,7 +1509,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         dialog.deleteNewPass();
 
-                        insertSettingValueInDB("mega_master_pass_hash", _main_panel.getMaster_pass_hash());
+                        insertSettingValueInDB("master_pass_hash", _main_panel.getMaster_pass_hash());
 
                         for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
 
@@ -1349,13 +1519,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                             email = (String) pair.getKey();
 
-                            if (old_mega_master_pass_hash != null) {
+                            if (old_master_pass_hash != null) {
 
-                                password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                                password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), old_master_pass, CryptTools.AES_ZERO_IV));
 
-                                password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password_aes")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                                password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password_aes")), old_master_pass, CryptTools.AES_ZERO_IV));
 
-                                user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user_hash")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                                user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user_hash")), old_master_pass, CryptTools.AES_ZERO_IV));
 
                             } else {
 
@@ -1392,11 +1562,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                             host = (String) pair.getKey();
 
-                            if (old_mega_master_pass_hash != null) {
+                            if (old_master_pass_hash != null) {
 
-                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), old_master_pass, CryptTools.AES_ZERO_IV));
 
-                                apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), old_mega_master_pass, CryptTools.AES_ZERO_IV));
+                                apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), old_master_pass, CryptTools.AES_ZERO_IV));
 
                             } else {
 
@@ -1605,7 +1775,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 _main_panel.setMaster_pass(null);
 
-                insertSettingValueInDB("mega_master_pass_hash", null);
+                insertSettingValueInDB("master_pass_hash", null);
 
                 encrypt_pass_checkbox.setSelected(false);
 
@@ -1658,6 +1828,39 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_add_elc_account_buttonActionPerformed
 
+    private void use_proxy_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_use_proxy_checkboxStateChanged
+
+        if (!use_proxy_checkbox.isSelected()) {
+
+            proxy_host_label.setEnabled(false);
+            proxy_host_textfield.setEnabled(false);
+            proxy_port_label.setEnabled(false);
+            proxy_port_textfield.setEnabled(false);
+            proxy_user_label.setEnabled(false);
+            proxy_user_textfield.setEnabled(false);
+            proxy_pass_label.setEnabled(false);
+            proxy_pass_textfield.setEnabled(false);
+            proxy_warning_label.setEnabled(false);
+
+        } else {
+
+            proxy_host_label.setEnabled(true);
+            proxy_host_textfield.setEnabled(true);
+            proxy_port_label.setEnabled(true);
+            proxy_port_textfield.setEnabled(true);
+            proxy_user_label.setEnabled(true);
+            proxy_user_textfield.setEnabled(true);
+            proxy_pass_label.setEnabled(true);
+            proxy_pass_textfield.setEnabled(true);
+            proxy_warning_label.setEnabled(true);
+        }
+
+    }//GEN-LAST:event_use_proxy_checkboxStateChanged
+
+    private void multi_slot_up_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_multi_slot_up_checkboxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_multi_slot_up_checkboxActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -1676,6 +1879,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JScrollPane elc_accounts_scrollpane;
     private javax.swing.JTable elc_accounts_table;
     private javax.swing.JCheckBox encrypt_pass_checkbox;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JCheckBox limit_download_speed_checkbox;
     private javax.swing.JCheckBox limit_upload_speed_checkbox;
@@ -1693,11 +1897,23 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox multi_slot_down_checkbox;
     private javax.swing.JCheckBox multi_slot_up_checkbox;
     private javax.swing.JButton ok_button;
+    private javax.swing.JPanel proxy_auth_panel;
+    private javax.swing.JLabel proxy_host_label;
+    private javax.swing.JTextField proxy_host_textfield;
+    private javax.swing.JPanel proxy_panel;
+    private javax.swing.JLabel proxy_pass_label;
+    private javax.swing.JTextField proxy_pass_textfield;
+    private javax.swing.JLabel proxy_port_label;
+    private javax.swing.JTextField proxy_port_textfield;
+    private javax.swing.JLabel proxy_user_label;
+    private javax.swing.JTextField proxy_user_textfield;
+    private javax.swing.JLabel proxy_warning_label;
     private javax.swing.JButton remove_elc_account_button;
     private javax.swing.JButton remove_mega_account_button;
     private javax.swing.JLabel status;
     private javax.swing.JButton unlock_accounts_button;
     private javax.swing.JPanel uploads_panel;
+    private javax.swing.JCheckBox use_proxy_checkbox;
     private javax.swing.JCheckBox verify_file_down_checkbox;
     // End of variables declaration//GEN-END:variables
 }

@@ -53,9 +53,12 @@ import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
 import static megabasterd.MainPanel.VERSION;
 import org.apache.http.HttpException;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpStatus;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.RequestAddCookies;
@@ -63,7 +66,9 @@ import org.apache.http.client.protocol.RequestAuthCache;
 import org.apache.http.client.protocol.RequestClientConnControl;
 import org.apache.http.client.protocol.RequestDefaultHeaders;
 import org.apache.http.client.protocol.ResponseProcessCookies;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.RequestContent;
@@ -975,7 +980,8 @@ public final class MiscTools {
         }
     }
 
-    public static CloseableHttpClient getApacheKissHttpClient() {
+    private static HttpClientBuilder _getApacheKissHttpClientBuilder() {
+
         return HttpClients.custom()
                 .addInterceptorFirst(new RequestDefaultHeaders())
                 .addInterceptorFirst(new RequestContent())
@@ -1003,8 +1009,32 @@ public final class MiscTools {
                         }
                     }
 
-                }).build();
+                });
+    }
 
+    public static CloseableHttpClient getApacheKissHttpClient() {
+
+        HttpClientBuilder builder = _getApacheKissHttpClientBuilder();
+
+        if (MainPanel.isUse_proxy() && MainPanel.getProxy_host() != null) {
+
+            HttpHost proxy = new HttpHost(MainPanel.getProxy_host(), MainPanel.getProxy_port());
+
+            builder = builder.setProxy(proxy);
+
+            if (MainPanel.getProxy_credentials() != null) {
+
+                CredentialsProvider credsProvider = new BasicCredentialsProvider();
+
+                AuthScope authScope = new AuthScope(MainPanel.getProxy_host(), MainPanel.getProxy_port());
+
+                credsProvider.setCredentials(authScope, MainPanel.getProxy_credentials());
+
+                builder = builder.setDefaultCredentialsProvider(credsProvider);
+            }
+        }
+
+        return builder.build();
     }
 
     public static byte[] recReverseArray(byte[] arr, int start, int end) {

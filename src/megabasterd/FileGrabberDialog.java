@@ -121,7 +121,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             }
 
         } else {
-            swingReflectionInvoke("setText", used_space_label, "No MEGA accounts available!!");
+            swingReflectionInvoke("setForeground", used_space_label, Color.red);
+            swingReflectionInvoke("setText", used_space_label, "No MEGA accounts available (Go to Settings > Accounts)");
         }
     }
 
