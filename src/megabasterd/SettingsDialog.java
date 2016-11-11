@@ -504,7 +504,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         proxy_user_label = new javax.swing.JLabel();
         proxy_user_textfield = new javax.swing.JTextField();
         proxy_pass_label = new javax.swing.JLabel();
-        proxy_pass_textfield = new javax.swing.JTextField();
+        proxy_pass_textfield = new javax.swing.JPasswordField();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -785,7 +785,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         encrypt_pass_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        encrypt_pass_checkbox.setText("Encrypt sensitive information");
+        encrypt_pass_checkbox.setText("Encrypt on disk sensitive information");
         encrypt_pass_checkbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 encrypt_pass_checkboxActionPerformed(evt);
@@ -969,22 +969,23 @@ public final class SettingsDialog extends javax.swing.JDialog {
         proxy_pass_label.setEnabled(false);
 
         proxy_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
-        proxy_pass_textfield.setDoubleBuffered(true);
+        proxy_pass_textfield.setText("jPasswordField1");
         proxy_pass_textfield.setEnabled(false);
-        proxy_pass_textfield.addMouseListener(new ContextMenuMouseListener());
 
         javax.swing.GroupLayout proxy_auth_panelLayout = new javax.swing.GroupLayout(proxy_auth_panel);
         proxy_auth_panel.setLayout(proxy_auth_panelLayout);
         proxy_auth_panelLayout.setHorizontalGroup(
             proxy_auth_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(proxy_auth_panelLayout.createSequentialGroup()
+                .addContainerGap()
                 .addComponent(proxy_user_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(proxy_user_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 38, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
                 .addComponent(proxy_pass_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 292, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 280, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
         proxy_auth_panelLayout.setVerticalGroup(
             proxy_auth_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1001,23 +1002,20 @@ public final class SettingsDialog extends javax.swing.JDialog {
         proxy_panel.setLayout(proxy_panelLayout);
         proxy_panelLayout.setHorizontalGroup(
             proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(proxy_panelLayout.createSequentialGroup()
-                .addContainerGap()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, proxy_panelLayout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(proxy_auth_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(proxy_auth_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(use_proxy_checkbox)
+                    .addComponent(proxy_warning_label)
                     .addGroup(proxy_panelLayout.createSequentialGroup()
-                        .addGroup(proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(use_proxy_checkbox)
-                            .addComponent(proxy_warning_label)
-                            .addGroup(proxy_panelLayout.createSequentialGroup()
-                                .addComponent(proxy_host_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(proxy_host_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(proxy_port_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(proxy_port_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(proxy_host_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(proxy_host_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(proxy_port_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(proxy_port_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, 90, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         proxy_panelLayout.setVerticalGroup(
@@ -1044,8 +1042,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(proxy_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1122,6 +1120,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
         try {
 
             _settings_ok = true;
+            
+            if((boolean) swingReflectionInvokeAndWaitForReturn("isEmpty", proxy_host_textfield.getText())) {
+                
+                swingReflectionInvokeAndWait("setSelected", use_proxy_checkbox, false);
+            }
 
             insertSettingValueInDB("default_down_dir", _download_path);
             insertSettingValueInDB("default_slots_down", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", default_slots_down_spinner)));
@@ -1139,7 +1142,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             insertSettingValueInDB("proxy_host", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_host_textfield));
             insertSettingValueInDB("proxy_port", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_port_textfield));
             insertSettingValueInDB("proxy_user", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_user_textfield));
-            insertSettingValueInDB("proxy_pass", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_pass_textfield));
+            insertSettingValueInDB("proxy_pass", new String((char[]) swingReflectionInvokeAndWaitForReturn("getPassword", proxy_pass_textfield)));
 
             ok_button.setEnabled(false);
 
@@ -1902,7 +1905,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JTextField proxy_host_textfield;
     private javax.swing.JPanel proxy_panel;
     private javax.swing.JLabel proxy_pass_label;
-    private javax.swing.JTextField proxy_pass_textfield;
+    private javax.swing.JPasswordField proxy_pass_textfield;
     private javax.swing.JLabel proxy_port_label;
     private javax.swing.JTextField proxy_port_textfield;
     private javax.swing.JLabel proxy_user_label;
