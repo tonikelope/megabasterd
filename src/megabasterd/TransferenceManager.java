@@ -38,6 +38,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     private volatile boolean _starting_transferences;
     private volatile boolean _preprocessing_transferences;
     private volatile int _pre_count;
+    private volatile boolean _tray_icon_finish;
 
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
@@ -45,6 +46,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         _provisioning_transferences = false;
         _starting_transferences = false;
         _preprocessing_transferences = false;
+        _tray_icon_finish = false;
         _pre_count = 0;
         _main_panel = main_panel;
         _max_running_trans = max_running_trans;
@@ -296,10 +298,11 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
 
         int finish = _transference_finished_queue.size();
 
-        if (finish > 0 && _pre_count + prov + wait + run == 0 && !(boolean) swingReflectionInvokeAndWaitForReturn("isVisible", _main_panel.getView())) {
+        if (!_tray_icon_finish && finish > 0 && _pre_count + prov + wait + run == 0 && !(boolean) swingReflectionInvokeAndWaitForReturn("isVisible", _main_panel.getView())) {
+
+            _tray_icon_finish = true;
 
             swingReflectionInvoke("displayMessage", _main_panel.getTrayicon(), "MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
-
         }
 
         return (_pre_count + prov + rem + wait + run + finish > 0) ? "Pre: " + _pre_count + " / Pro: " + prov + " / Wait: " + wait + " / Run: " + run + " / Finish: " + finish + " / Rem: " + rem : "";
@@ -337,6 +340,8 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
             if (!isProvisioning_transferences() && !getTransference_provision_queue().isEmpty()) {
 
                 setProvisioning_transferences(true);
+
+                _tray_icon_finish = false;
 
                 THREAD_POOL.execute(new Runnable() {
                     @Override

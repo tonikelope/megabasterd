@@ -1126,9 +1126,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
         try {
 
             _settings_ok = true;
-            
-            if((boolean) swingReflectionInvokeAndWaitForReturn("isEmpty", proxy_host_textfield.getText())) {
-                
+
+            if ((boolean) swingReflectionInvokeAndWaitForReturn("isEmpty", proxy_host_textfield.getText())) {
+
                 swingReflectionInvokeAndWait("setSelected", use_proxy_checkbox, false);
             }
 

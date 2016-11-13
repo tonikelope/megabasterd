@@ -39,6 +39,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkUploaderMono extends ChunkUploader {
 
+    public static final int MAX_LAST_CHUNK_RETRY = 10;
+
     public ChunkUploaderMono(Upload upload) {
         super(1, upload);
     }
@@ -169,7 +171,11 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                                 getUpload().getMac_generator().secureNotify();
 
-                                conta_error = 0;
+                                if (chunk.getOffset() + chunk.getSize() != getUpload().getFile_size()) {
+
+                                    conta_error = 0;
+
+                                }
                             }
 
                         }
@@ -232,9 +238,41 @@ public class ChunkUploaderMono extends ChunkUploader {
                                         System.out.println("Completion handle -> " + response);
 
                                         getUpload().setCompletion_handle(response);
+
+                                        conta_error = 0;
+                                    }
+
+                                } else if (chunk.getOffset() + chunk.getSize() == getUpload().getFile_size()) {
+
+                                    if (conta_error <= MAX_LAST_CHUNK_RETRY) {
+
+                                        error = true;
+
+                                        getUpload().rejectChunkId(chunk.getId());
+
+                                        if (tot_bytes_up > 0) {
+
+                                            getUpload().getPartialProgress().add(-1 * tot_bytes_up);
+
+                                            getUpload().getProgress_meter().secureNotify();
+                                        }
+
+                                        conta_error++;
+
+                                        if (!isExit()) {
+
+                                            setError_wait(true);
+
+                                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+
+                                            setError_wait(false);
+                                        }
+
+                                    } else {
+
+                                        throw new IOException("UPLOAD FAILED! (Empty completion handle!)");
                                     }
                                 }
-
                             }
                         }
 

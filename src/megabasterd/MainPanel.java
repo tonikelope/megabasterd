@@ -61,7 +61,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "1.55";
+    public static final String VERSION = "1.56";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
@@ -140,7 +140,7 @@ public final class MainPanel {
         _proxy_port = 3128;
 
         _proxy_credentials = null;
-        
+
         _use_proxy = false;
 
         loadUserSettings();
@@ -488,13 +488,13 @@ public final class MainPanel {
             String proxy_pass = DBTools.selectSettingValueFromDB("proxy_pass");
 
             if (proxy_user != null && !proxy_user.isEmpty() && proxy_pass != null) {
-                
+
                 _proxy_credentials = new UsernamePasswordCredentials(proxy_user, proxy_pass);
-                
+
             } else {
-                
+
                 _proxy_credentials = null;
-                
+
             }
         }
     }
