@@ -290,7 +290,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="16" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Close all finished"/>
+                <Property name="text" type="java.lang.String" value="Close all OK finished"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
               <Events>
@@ -396,7 +396,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="16" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Close all finished"/>
+                <Property name="text" type="java.lang.String" value="Close all OK finished"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
               <Events>

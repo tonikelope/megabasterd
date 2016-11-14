@@ -52,4 +52,6 @@ public interface Transference {
 
     TransferenceView getView();
 
+    boolean isStatusError();
+
 }

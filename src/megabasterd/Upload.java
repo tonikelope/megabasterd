@@ -95,6 +95,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         _use_slots = use_slots;
         _slots = slots;
         _restart = restart;
+        _completion_handle = null;
         _secure_notify_lock = new Object();
         _chunkworkers = new ArrayList<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
@@ -778,7 +779,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
                         File f = new File(_file_name);
 
-                        HashMap<String, Object> upload_res = null;
+                        HashMap<String, Object> upload_res;
 
                         int[] ul_key = _ul_key;
 
@@ -1014,6 +1015,11 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     public void setProgress(long progress) {
         _progress = progress;
         getView().updateProgressBar(_progress, _progress_bar_rate);
+    }
+
+    @Override
+    public boolean isStatusError() {
+        return _status_error;
     }
 
 }

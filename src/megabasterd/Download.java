@@ -1378,4 +1378,9 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         getView().updateProgressBar(_progress, _progress_bar_rate);
     }
 
+    @Override
+    public boolean isStatusError() {
+        return _status_error;
+    }
+
 }

@@ -18,6 +18,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
@@ -38,8 +39,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
  * @author tonikelope
  */
 public class ChunkUploaderMono extends ChunkUploader {
-
-    public static final int MAX_LAST_CHUNK_RETRY = 10;
 
     public ChunkUploaderMono(Upload upload) {
         super(1, upload);
@@ -167,14 +166,13 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                                 System.out.println(" Worker " + getId() + " ha subido chunk " + chunk.getId());
 
-                                getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
+                                if (chunk.getOffset() + tot_bytes_up < getUpload().getFile_size()) {
 
-                                getUpload().getMac_generator().secureNotify();
+                                    getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
 
-                                if (chunk.getOffset() + chunk.getSize() != getUpload().getFile_size()) {
+                                    getUpload().getMac_generator().secureNotify();
 
                                     conta_error = 0;
-
                                 }
                             }
 
@@ -240,43 +238,25 @@ public class ChunkUploaderMono extends ChunkUploader {
                                         getUpload().setCompletion_handle(response);
 
                                         conta_error = 0;
-                                    }
 
-                                } else if (chunk.getOffset() + chunk.getSize() == getUpload().getFile_size()) {
+                                        getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
 
-                                    if (conta_error <= MAX_LAST_CHUNK_RETRY) {
-
-                                        error = true;
-
-                                        getUpload().rejectChunkId(chunk.getId());
-
-                                        if (tot_bytes_up > 0) {
-
-                                            getUpload().getPartialProgress().add(-1 * tot_bytes_up);
-
-                                            getUpload().getProgress_meter().secureNotify();
-                                        }
-
-                                        conta_error++;
-
-                                        if (!isExit()) {
-
-                                            setError_wait(true);
-
-                                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-
-                                            setError_wait(false);
-                                        }
-
-                                    } else {
-
-                                        throw new IOException("UPLOAD FAILED! (Empty completion handle!)");
+                                        getUpload().getMac_generator().secureNotify();
                                     }
                                 }
                             }
                         }
 
-                    } catch (ExecutionException exception) {
+                    } catch (ExecutionException | InterruptedException | CancellationException exception) {
+
+                        error = true;
+
+                        getUpload().rejectChunkId(chunk.getId());
+
+                        getUpload().getPartialProgress().add(-1 * tot_bytes_up);
+
+                        getUpload().getProgress_meter().secureNotify();
+
                     } finally {
 
                         if (out != null) {
@@ -310,7 +290,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
             getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
 
-        } catch (URISyntaxException | InterruptedException ex) {
+        } catch (URISyntaxException ex) {
             Logger.getLogger(ChunkUploaderMono.class.getName()).log(Level.SEVERE, null, ex);
         }
 

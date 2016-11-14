@@ -13,6 +13,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
@@ -293,7 +294,17 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
                                     conta_error = 0;
                                 }
 
-                            } catch (ExecutionException exception) {
+                            } catch (ExecutionException | InterruptedException | CancellationException exception) {
+
+                                _upload.rejectChunkId(chunk.getId());
+
+                                if (tot_bytes_up > 0) {
+
+                                    _upload.getPartialProgress().add(-1 * tot_bytes_up);
+
+                                    _upload.getProgress_meter().secureNotify();
+                                }
+
                             } finally {
 
                                 if (httpresponse != null) {
@@ -320,7 +331,7 @@ public class ChunkUploader implements Runnable, SecureNotifiable {
 
                     getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
 
-                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | InterruptedException ex) {
+                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
                     getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
 
                 } finally {

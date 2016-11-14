@@ -188,9 +188,15 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     }
 
     public void closeAllFinished() {
-        _transference_remove_queue.addAll(new ArrayList(_transference_finished_queue));
 
-        _transference_finished_queue.clear();
+        for (Transference t : _transference_finished_queue) {
+
+            if (!t.isStatusError()) {
+
+                _transference_finished_queue.remove(t);
+                _transference_remove_queue.add(t);
+            }
+        }
 
         secureNotify();
     }
@@ -274,7 +280,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
 
         if (!_transference_finished_queue.isEmpty()) {
 
-            swingReflectionInvoke("setText", _close_all_button, "Close all finished (" + _transference_finished_queue.size() + ")");
+            swingReflectionInvoke("setText", _close_all_button, "Close all OK finished");
 
             swingReflectionInvoke("setVisible", _close_all_button, true);
 
