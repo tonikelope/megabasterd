@@ -12,6 +12,7 @@ import java.io.OutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -41,7 +42,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
     public static final int WORKER_STATUS_EXIT = 0x05;
 
     private final MainPanel _main_panel;
-    private final ConcurrentHashMap<String, String[]> _link_cache;
+    private final ConcurrentHashMap<String, HashMap<String, Object>> _link_cache;
     private final ConcurrentHashMap<Thread, Integer> _working_threads;
     private final ContentType _ctype;
     private boolean _notified;
@@ -60,7 +61,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
         return _main_panel;
     }
 
-    public ConcurrentHashMap<String, String[]> getLink_cache() {
+    public ConcurrentHashMap<String, HashMap<String, Object>> getLink_cache() {
         return _link_cache;
     }
 
@@ -329,7 +330,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
 
         OutputStream os;
 
-        CipherInputStream cis = null;
+        CipherInputStream cis;
 
         String httpmethod = xchg.getRequestMethod();
 
@@ -353,46 +354,42 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                 link = "http://" + mc_host + link;
             }
 
-            String[] cache_info, file_info;
+            HashMap cache_info, file_info = null;
 
             cache_info = getLink_cache().get(link);
 
             if (cache_info != null) {
 
-                file_info = new String[6];
-
-                System.arraycopy(cache_info, 0, file_info, 0, cache_info.length);
+                file_info = cache_info;
 
             } else {
 
-                file_info = getMegaFileMetadata(link, _main_panel.getView());
+                String[] finfo = getMegaFileMetadata(link, _main_panel.getView());
 
-                cache_info = new String[6];
+                file_info = new HashMap<>();
 
-                System.arraycopy(file_info, 0, cache_info, 0, file_info.length);
+                file_info.put("file_name", finfo[0]);
 
-                cache_info[5] = null;
+                file_info.put("file_size", Long.parseLong(finfo[1]));
 
+                file_info.put("file_key", finfo[2]);
+
+                file_info.put("pass_hash", finfo.length >= 5 ? finfo[3] : null);
+
+                file_info.put("noexpiretoken", finfo.length >= 5 ? finfo[4] : null);
+
+                file_info.put("url", null);
             }
 
-            String file_name = file_info[0];
+            String file_name = (String) file_info.get("file_name");
 
-            long file_size = Long.parseLong(file_info[1]);
+            long file_size = (long) file_info.get("file_size");
 
-            String file_key = file_info[2];
+            String file_key = (String) file_info.get("file_key");
 
-            String pass_hash, noexpire_token;
+            String pass_hash = (String) file_info.get("pass_hash");
 
-            if (file_info.length >= 5) {
-                pass_hash = file_info[3];
-
-                noexpire_token = file_info[4];
-
-            } else {
-                pass_hash = null;
-
-                noexpire_token = null;
-            }
+            String noexpire_token = (String) file_info.get("noexpiretoken");
 
             String file_ext = file_name.substring(file_name.lastIndexOf('.') + 1).toLowerCase();
 
@@ -430,25 +427,26 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
 
                 String temp_url;
 
-                if (cache_info[5] != null) {
+                if (file_info.get("url") != null) {
 
-                    temp_url = cache_info[5];
+                    temp_url = (String) file_info.get("url");
 
                     if (!checkMegaDownloadUrl(temp_url)) {
 
                         temp_url = getMegaFileDownloadUrl(link, pass_hash, noexpire_token);
 
-                        cache_info[5] = temp_url;
+                        file_info.put("url", temp_url);
 
                         getLink_cache().put(link, file_info);
                     }
 
                 } else {
+
                     temp_url = getMegaFileDownloadUrl(link, pass_hash, noexpire_token);
 
-                    cache_info[5] = temp_url;
+                    file_info.put("url", temp_url);
 
-                    getLink_cache().put(link, cache_info);
+                    getLink_cache().put(link, file_info);
                 }
 
                 long[] ranges = new long[2];
