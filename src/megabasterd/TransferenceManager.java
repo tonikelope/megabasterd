@@ -278,7 +278,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
 
         swingReflectionInvoke("setEnabled", _clean_all_menu, !_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty() || !_transference_waitstart_queue.isEmpty());
 
-        if (!_transference_finished_queue.isEmpty()) {
+        if (!_transference_finished_queue.isEmpty() && _isOKFinishedInQueue()) {
 
             swingReflectionInvoke("setText", _close_all_button, "Close all OK finished");
 
@@ -312,6 +312,19 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         }
 
         return (_pre_count + prov + rem + wait + run + finish > 0) ? "Pre: " + _pre_count + " / Pro: " + prov + " / Wait: " + wait + " / Run: " + run + " / Finish: " + finish + " / Rem: " + rem : "";
+    }
+
+    private boolean _isOKFinishedInQueue() {
+
+        for (Transference t : _transference_finished_queue) {
+
+            if (!t.isStatusError()) {
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     @Override

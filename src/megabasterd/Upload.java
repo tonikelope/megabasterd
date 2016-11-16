@@ -83,6 +83,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         _saved_file_mac = new int[]{0, 0, 0, 0};
         _notified = false;
         _provision_ok = true;
+        _status_error = false;
         _main_panel = main_panel;
         _ma = ma;
         _file_name = filename;
@@ -973,7 +974,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
             if (_provision_ok) {
 
-                getMain_panel().getDownload_manager().getTransference_finished_queue().add(this);
+                getMain_panel().getUpload_manager().getTransference_finished_queue().add(this);
             }
 
             getMain_panel().getUpload_manager().getScroll_panel().remove(getView());

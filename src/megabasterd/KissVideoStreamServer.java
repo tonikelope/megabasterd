@@ -436,8 +436,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                         temp_url = getMegaFileDownloadUrl(link, pass_hash, noexpire_token);
 
                         file_info.put("url", temp_url);
-
-                        getLink_cache().put(link, file_info);
                     }
 
                 } else {
@@ -445,9 +443,9 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                     temp_url = getMegaFileDownloadUrl(link, pass_hash, noexpire_token);
 
                     file_info.put("url", temp_url);
-
-                    getLink_cache().put(link, file_info);
                 }
+
+                getLink_cache().put(link, file_info);
 
                 long[] ranges = new long[2];
 
