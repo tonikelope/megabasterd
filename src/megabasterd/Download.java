@@ -711,10 +711,14 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
         if (!_exit) {
 
-            try {
-                deleteDownload(_url);
-            } catch (SQLException ex) {
-                getLogger(Download.class.getName()).log(SEVERE, null, ex);
+            if (!_status_error) {
+
+                try {
+                    deleteDownload(_url);
+                } catch (SQLException ex) {
+                    getLogger(Download.class.getName()).log(SEVERE, null, ex);
+                }
+
             }
 
             getMain_panel().getDownload_manager().getTransference_running_list().remove(this);

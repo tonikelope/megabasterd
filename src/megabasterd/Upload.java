@@ -875,10 +875,14 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
         if (!_exit) {
 
-            try {
-                DBTools.deleteUpload(_file_name, _ma.getEmail());
-            } catch (SQLException ex) {
-                getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+            if (!_status_error) {
+
+                try {
+                    DBTools.deleteUpload(_file_name, _ma.getEmail());
+                } catch (SQLException ex) {
+                    getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
             }
 
             getMain_panel().getUpload_manager().getTransference_running_list().remove(this);
