@@ -288,19 +288,19 @@ public final class MiscTools {
         return md.digest(data);
     }
 
-    public static byte[] BASE642Bin(String data) throws Exception {
+    public static byte[] BASE642Bin(String data) {
         return Base64.getDecoder().decode(data);
     }
 
-    public static String Bin2BASE64(byte[] data) throws Exception {
+    public static String Bin2BASE64(byte[] data) {
         return Base64.getEncoder().encodeToString(data);
     }
 
-    public static byte[] UrlBASE642Bin(String data) throws Exception {
+    public static byte[] UrlBASE642Bin(String data) {
         return Base64.getUrlDecoder().decode(data);
     }
 
-    public static String Bin2UrlBASE64(byte[] data) throws Exception {
+    public static String Bin2UrlBASE64(byte[] data) {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 

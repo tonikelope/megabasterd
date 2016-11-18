@@ -1201,7 +1201,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                         break;
 
                     case 25:
-                        emergencyStopDownloader("MegaCrypter bad password!");
+                        emergencyStopDownloader("MegaCrypter link pass error!");
                         break;
 
                     default:
@@ -1286,6 +1286,10 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                     case 24:
                         emergencyStopDownloader("MegaCrypter link has expired!");
+                        break;
+
+                    case 25:
+                        emergencyStopDownloader("MegaCrypter link pass error!");
                         break;
 
                     default:

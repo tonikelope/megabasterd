@@ -238,7 +238,7 @@ public final class CryptTools {
         return plainText;
     }
 
-    public static byte[] initMEGALinkKey(String key_string) throws Exception {
+    public static byte[] initMEGALinkKey(String key_string) {
         int[] int_key = bin2i32a(UrlBASE642Bin(key_string));
         int[] k = new int[4];
 

@@ -203,11 +203,15 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
 
             try {
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {
+
                     MegaAPI ma = new MegaAPI();
 
                     file_info = ma.getMegaFileMetadata(link);
+
                 } else {
+
                     file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel);
+
                 }
 
             } catch (MegaAPIException | MegaCrypterAPIException e) {
@@ -229,6 +233,9 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                     case 24:
                         throw new IOException("MegaCrypter link has expired!");
 
+                    case 25:
+                        throw new IOException("MegaCrypter link pass error!");
+
                     default:
 
                         updateStatus(WORKER_STATUS_RETRY);
@@ -240,8 +247,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                             }
                         }
                 }
-
-            } catch (Exception ex) {
 
             }
 
@@ -280,6 +285,9 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
 
                     case 24:
                         throw new IOException("MegaCrypter link has expired!");
+
+                    case 25:
+                        throw new IOException("MegaCrypter link pass error!");
 
                     default:
 

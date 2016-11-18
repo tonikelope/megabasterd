@@ -3,9 +3,9 @@ package megabasterd;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,9 +14,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
 import javax.swing.JOptionPane;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2BASE64;
@@ -152,14 +150,14 @@ public final class MegaCrypterAPI {
                 dl_url = new String(decrypted_url);
 
             } catch (Exception ex) {
-                getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, null, ex);
+                throw new MegaCrypterAPIException("25");
             }
         }
 
         return dl_url;
     }
 
-    public static String[] getMegaFileMetadata(String link, MainPanelView panel) throws Exception, MegaCrypterAPIException {
+    public static String[] getMegaFileMetadata(String link, MainPanelView panel) throws MegaCrypterAPIException, MalformedURLException, IOException {
         String request = "{\"m\":\"info\", \"link\": \"" + link + "\"}";
 
         URL url_api = new URL(findFirstRegex("https?://[^/]+", link, 0) + "/api");
@@ -232,7 +230,7 @@ public final class MegaCrypterAPI {
             String[] pass_items = pass.split("#");
 
             if (pass_items.length != 4) {
-                throw new MegaCrypterAPIException("Bad password data!");
+                throw new MegaCrypterAPIException("25");
             }
 
             int iterations = Integer.parseInt(pass_items[0]);
@@ -271,19 +269,16 @@ public final class MegaCrypterAPI {
 
                             decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
-                            try {
+                            bad_pass = !Arrays.equals(info_key, decrypter.doFinal(key_check));
 
-                                bad_pass = !Arrays.equals(info_key, decrypter.doFinal(key_check));
+                            if (!bad_pass) {
 
-                                if (!bad_pass) {
-
-                                    PASS_CACHE.add(password);
-                                }
-
-                            } catch (IllegalBlockSizeException | BadPaddingException ex) {
+                                PASS_CACHE.add(password);
                             }
 
-                        } catch (InvalidKeySpecException ex) {
+                        } catch (Exception ex) {
+
+                            throw new MegaCrypterAPIException("25");
                         }
                     }
 
@@ -291,30 +286,39 @@ public final class MegaCrypterAPI {
             }
 
             if (bad_pass) {
+
                 throw new MegaCrypterAPIException("25");
+
             } else {
-                decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
-                byte[] decrypted_key = decrypter.doFinal(BASE642Bin(fkey));
+                try {
 
-                fkey = Bin2UrlBASE64(decrypted_key);
+                    decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
-                decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
+                    byte[] decrypted_key = decrypter.doFinal(BASE642Bin(fkey));
 
-                byte[] decrypted_name = decrypter.doFinal(BASE642Bin(fname));
+                    fkey = Bin2UrlBASE64(decrypted_key);
 
-                fname = new String(decrypted_name);
+                    decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
-                if (fpath != null) {
-                    byte[] decrypted_fpath = decrypter.doFinal(BASE642Bin(fpath));
+                    byte[] decrypted_name = decrypter.doFinal(BASE642Bin(fname));
 
-                    fpath = new String(decrypted_fpath);
+                    fname = new String(decrypted_name);
+
+                    if (fpath != null) {
+                        byte[] decrypted_fpath = decrypter.doFinal(BASE642Bin(fpath));
+
+                        fpath = new String(decrypted_fpath);
+                    }
+
+                    pass = Bin2BASE64(info_key);
+
+                } catch (Exception ex) {
+
+                    throw new MegaCrypterAPIException("25");
+
                 }
-
-                pass = Bin2BASE64(info_key);
-
             }
-
         }
 
         if (fpath != null) {

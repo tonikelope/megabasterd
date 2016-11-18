@@ -3,7 +3,6 @@ package megabasterd;
 import java.awt.Color;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -423,7 +422,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
                         _provision_ok = true;
 
-                    } catch (IOException | SQLException ex) {
+                    } catch (SQLException ex) {
 
                         exit_msg = ex.getMessage();
                     }

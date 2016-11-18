@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
@@ -392,7 +393,7 @@ public final class MegaAPI {
         return (String) res_map[0].get("g");
     }
 
-    public String[] getMegaFileMetadata(String link) throws Exception, MegaAPIException {
+    public String[] getMegaFileMetadata(String link) throws MegaAPIException, MalformedURLException, IOException {
 
         link = link.replace("/#!N?", "/#N!");
 
