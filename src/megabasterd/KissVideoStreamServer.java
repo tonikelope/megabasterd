@@ -529,6 +529,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                 }
             }
         } catch (Exception ex) {
+            Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             xchg.close();
 
