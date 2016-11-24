@@ -1104,11 +1104,11 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
             if (isRetrying_request()) {
 
-                getView().stop("Retrying cancelled!");
+                getView().stop("Retrying cancelled! " + MiscTools.truncateText(_url, 80));
 
             } else if (isChecking_cbc()) {
 
-                getView().stop("Verification cancelled!");
+                getView().stop("Verification cancelled! " + MiscTools.truncateText(_file_name, 80));
 
             } else {
 
@@ -1181,27 +1181,27 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                 switch (error_code) {
                     case -2:
-                        emergencyStopDownloader("Mega link is not valid!");
+                        emergencyStopDownloader("Mega link is not valid! " + MiscTools.truncateText(link, 80));
                         break;
 
                     case -14:
-                        emergencyStopDownloader("Mega link is not valid!");
+                        emergencyStopDownloader("Mega link is not valid! " + MiscTools.truncateText(link, 80));
                         break;
 
                     case 22:
-                        emergencyStopDownloader("MegaCrypter link is not valid!");
+                        emergencyStopDownloader("MegaCrypter link is not valid! " + MiscTools.truncateText(link, 80));
                         break;
 
                     case 23:
-                        emergencyStopDownloader("MegaCrypter link is blocked!");
+                        emergencyStopDownloader("MegaCrypter link is blocked! " + MiscTools.truncateText(link, 80));
                         break;
 
                     case 24:
-                        emergencyStopDownloader("MegaCrypter link has expired!");
+                        emergencyStopDownloader("MegaCrypter link has expired! " + MiscTools.truncateText(link, 80));
                         break;
 
                     case 25:
-                        emergencyStopDownloader("MegaCrypter link pass error!");
+                        emergencyStopDownloader("MegaCrypter link pass error! " + MiscTools.truncateText(link, 80));
                         break;
 
                     default:
@@ -1236,7 +1236,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
             } catch (Exception ex) {
 
                 if (!(ex instanceof MegaAPIException || ex instanceof MegaCrypterAPIException)) {
-                    emergencyStopDownloader("Mega link is not valid!");
+                    emergencyStopDownloader("Mega link is not valid! " + MiscTools.truncateText(link, 80));
                 }
             }
 
@@ -1277,19 +1277,19 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                 switch (error_code) {
                     case 22:
-                        emergencyStopDownloader("MegaCrypter link is not valid!");
+                        emergencyStopDownloader("MegaCrypter link is not valid! " + MiscTools.truncateText(link, 80));
                         break;
 
                     case 23:
-                        emergencyStopDownloader("MegaCrypter link is blocked!");
+                        emergencyStopDownloader("MegaCrypter link is blocked! " + MiscTools.truncateText(link, 80));
                         break;
 
                     case 24:
-                        emergencyStopDownloader("MegaCrypter link has expired!");
+                        emergencyStopDownloader("MegaCrypter link has expired! " + MiscTools.truncateText(link, 80));
                         break;
 
                     case 25:
-                        emergencyStopDownloader("MegaCrypter link pass error!");
+                        emergencyStopDownloader("MegaCrypter link pass error! " + MiscTools.truncateText(link, 80));
                         break;
 
                     default:
