@@ -363,8 +363,7 @@ public final class MegaAPI {
     }
 
     public String getMegaFileDownloadUrl(String link) throws IOException, MegaAPIException {
-        link = link.replace("/#!N?", "/#N!");
-
+        
         String file_id = findFirstRegex("#.*?!([^!]+)", link, 1);
 
         String request;
@@ -394,8 +393,6 @@ public final class MegaAPI {
     }
 
     public String[] getMegaFileMetadata(String link) throws MegaAPIException, MalformedURLException, IOException {
-
-        link = link.replace("/#!N?", "/#N!");
 
         String file_id = findFirstRegex("#.*?!([^!]+)", link, 1);
 

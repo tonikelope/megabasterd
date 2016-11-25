@@ -165,8 +165,6 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                     String data;
 
-                    link = link.replace("/#!N?", "/#N!");
-
                     if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null) {
                         data = findFirstRegex("/#(N?!.+)", link, 1);
 
