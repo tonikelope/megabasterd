@@ -680,6 +680,11 @@ public final class MainPanelView extends javax.swing.JFrame {
             _main_panel.getDownload_manager().secureNotify();
 
             _main_panel.getUpload_manager().secureNotify();
+
+            if (_main_panel.isRestart()) {
+
+                MiscTools.restartApplication(1);
+            }
         }
 
         if (!dialog.isRemember_master_pass()) {

@@ -363,7 +363,7 @@ public final class MegaAPI {
     }
 
     public String getMegaFileDownloadUrl(String link) throws IOException, MegaAPIException {
-        
+
         String file_id = findFirstRegex("#.*?!([^!]+)", link, 1);
 
         String request;

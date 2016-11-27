@@ -829,7 +829,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="20" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Use proxy (app restart is recommended)."/>
+                    <Property name="text" type="java.lang.String" value="Use HTTP PROXY (app restart required)."/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                   </Properties>
                   <Events>

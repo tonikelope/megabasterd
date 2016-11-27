@@ -10,9 +10,11 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.math.BigInteger;
@@ -1053,6 +1055,30 @@ public final class MiscTools {
         } else {
             return arr;
         }
+    }
+
+    public static void restartApplication(int delay) {
+        StringBuilder cmd = new StringBuilder();
+
+        cmd.append(System.getProperty("java.home")).append(File.separator).append("bin").append(File.separator).append("java ");
+
+        for (String jvmArg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+            cmd.append(jvmArg).append(" ");
+        }
+
+        cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
+
+        cmd.append(MainPanel.class.getName()).append(" ");
+
+        cmd.append(String.valueOf(delay));
+
+        try {
+            Runtime.getRuntime().exec(cmd.toString());
+        } catch (IOException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        System.exit(0);
     }
 
 }

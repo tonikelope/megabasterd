@@ -939,7 +939,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         proxy_port_textfield.addMouseListener(new ContextMenuMouseListener());
 
         use_proxy_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        use_proxy_checkbox.setText("Use proxy (app restart is recommended).");
+        use_proxy_checkbox.setText("Use HTTP PROXY (app restart required).");
         use_proxy_checkbox.setDoubleBuffered(true);
         use_proxy_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -1144,11 +1144,36 @@ public final class SettingsDialog extends javax.swing.JDialog {
             insertSettingValueInDB("max_download_speed", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", max_down_speed_spinner)));
             insertSettingValueInDB("limit_upload_speed", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", limit_upload_speed_checkbox) ? "yes" : "no");
             insertSettingValueInDB("max_upload_speed", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", max_up_speed_spinner)));
-            insertSettingValueInDB("use_proxy", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", use_proxy_checkbox) ? "yes" : "no");
-            insertSettingValueInDB("proxy_host", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_host_textfield));
-            insertSettingValueInDB("proxy_port", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_port_textfield));
-            insertSettingValueInDB("proxy_user", (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_user_textfield));
-            insertSettingValueInDB("proxy_pass", new String((char[]) swingReflectionInvokeAndWaitForReturn("getPassword", proxy_pass_textfield)));
+
+            boolean old_use_proxy = false;
+
+            String use_proxy_val = DBTools.selectSettingValueFromDB("use_proxy");
+
+            if (use_proxy_val != null) {
+                old_use_proxy = (use_proxy_val.equals("yes"));
+            }
+
+            boolean use_proxy = (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", use_proxy_checkbox);
+
+            String old_proxy_host = DBTools.selectSettingValueFromDB("proxy_host");
+            String proxy_host = (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_host_textfield);
+            String old_proxy_port = DBTools.selectSettingValueFromDB("proxy_port");
+            String proxy_port = (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_port_textfield);
+            String old_proxy_user = DBTools.selectSettingValueFromDB("proxy_user");
+            String proxy_user = (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_user_textfield);
+            String old_proxy_pass = DBTools.selectSettingValueFromDB("proxy_pass");
+            String proxy_pass = new String((char[]) swingReflectionInvokeAndWaitForReturn("getPassword", proxy_pass_textfield));
+
+            insertSettingValueInDB("use_proxy", use_proxy ? "yes" : "no");
+            insertSettingValueInDB("proxy_host", proxy_host);
+            insertSettingValueInDB("proxy_port", proxy_port);
+            insertSettingValueInDB("proxy_user", proxy_user);
+            insertSettingValueInDB("proxy_pass", proxy_pass);
+
+            if (use_proxy != old_use_proxy || !proxy_host.equals(old_proxy_host) || !proxy_port.equals(old_proxy_port) || !proxy_user.equals(old_proxy_user) || !proxy_pass.equals(old_proxy_pass)) {
+
+                _main_panel.setRestart(true);
+            }
 
             ok_button.setEnabled(false);
 

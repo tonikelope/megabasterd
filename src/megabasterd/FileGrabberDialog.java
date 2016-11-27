@@ -420,7 +420,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         } else {
 
-            boolean root_childs = ((DefaultMutableTreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
+            boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
             add_files_button.setText("Add files");
             add_files_button.setEnabled(true);
@@ -502,7 +502,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         } else {
 
-            boolean root_childs = ((DefaultMutableTreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
+            boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
             add_folder_button.setText("Add folder");
             add_files_button.setEnabled(true);

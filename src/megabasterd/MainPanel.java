@@ -61,7 +61,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "1.61";
+    public static final String VERSION = "1.62";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
@@ -73,6 +73,16 @@ public final class MainPanel {
     public static void main(String args[]) {
 
         setNimbusLookAndFeel();
+
+        if (args.length > 0) {
+
+            try {
+                System.out.println("Waiting " + args[0] + " seconds before start...");
+                Thread.sleep(Long.parseLong(args[0]) * 1000);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
 
         final MainPanel main_panel = new MainPanel();
 
@@ -101,6 +111,7 @@ public final class MainPanel {
     private byte[] _master_pass;
     private String _master_pass_hash;
     private String _master_pass_salt;
+    private boolean _restart;
     private static String _proxy_host;
     private static int _proxy_port;
     private static Credentials _proxy_credentials;
@@ -128,6 +139,8 @@ public final class MainPanel {
         } catch (SQLException ex) {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
+
+        _restart = false;
 
         _elc_accounts = new HashMap<>();
 
@@ -186,6 +199,14 @@ public final class MainPanel {
             }
         });
 
+    }
+
+    public boolean isRestart() {
+        return _restart;
+    }
+
+    public void setRestart(boolean _restart) {
+        this._restart = _restart;
     }
 
     public static boolean isUse_proxy() {
