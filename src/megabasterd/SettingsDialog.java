@@ -939,7 +939,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         proxy_port_textfield.addMouseListener(new ContextMenuMouseListener());
 
         use_proxy_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        use_proxy_checkbox.setText("Use HTTP PROXY (app restart required).");
+        use_proxy_checkbox.setText("Use HTTP PROXY (app restart required)");
         use_proxy_checkbox.setDoubleBuffered(true);
         use_proxy_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -1156,11 +1156,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
             boolean use_proxy = (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", use_proxy_checkbox);
 
             String old_proxy_host = DBTools.selectSettingValueFromDB("proxy_host");
-            String proxy_host = (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_host_textfield);
+            String proxy_host = ((String) swingReflectionInvokeAndWaitForReturn("getText", proxy_host_textfield)).trim();
             String old_proxy_port = DBTools.selectSettingValueFromDB("proxy_port");
-            String proxy_port = (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_port_textfield);
+            String proxy_port = ((String) swingReflectionInvokeAndWaitForReturn("getText", proxy_port_textfield)).trim();
             String old_proxy_user = DBTools.selectSettingValueFromDB("proxy_user");
-            String proxy_user = (String) swingReflectionInvokeAndWaitForReturn("getText", proxy_user_textfield);
+            String proxy_user = ((String) swingReflectionInvokeAndWaitForReturn("getText", proxy_user_textfield)).trim();
             String old_proxy_pass = DBTools.selectSettingValueFromDB("proxy_pass");
             String proxy_pass = new String((char[]) swingReflectionInvokeAndWaitForReturn("getPassword", proxy_pass_textfield));
 
