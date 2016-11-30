@@ -62,6 +62,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     private volatile SpeedMeter _speed_meter = null; //lazy init
     private volatile ProgressMeter _progress_meter = null; //lazy init;
     private final Object _secure_notify_lock;
+    private final Object _workers_lock;
     private boolean _notified;
     private final String _url;
     private final String _download_path;
@@ -121,6 +122,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         _slots = slots;
         _restart = restart;
         _secure_notify_lock = new Object();
+        _workers_lock = new Object();
         _chunkworkers = new ArrayList<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
@@ -317,9 +319,12 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
             getSpeed_meter().secureNotify();
 
-            for (ChunkDownloader downloader : getChunkworkers()) {
+            synchronized (_workers_lock) {
 
-                downloader.secureNotify();
+                for (ChunkDownloader downloader : getChunkworkers()) {
+
+                    downloader.secureNotify();
+                }
             }
 
             getView().resume();
@@ -1114,13 +1119,15 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
                 getView().stop("Stopping download safely, please wait...");
 
-                synchronized (this) {
+                synchronized (_workers_lock) {
 
                     for (ChunkDownloader downloader : _chunkworkers) {
 
                         downloader.secureNotify();
                     }
                 }
+
+                System.out.println("stop4");
 
                 secureNotify();
             }

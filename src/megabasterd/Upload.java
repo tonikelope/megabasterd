@@ -42,6 +42,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     private volatile boolean _exit;
     private final int _slots;
     private final Object _secure_notify_lock;
+    private final Object _workers_lock;
     private byte[] _byte_file_key;
     private String _fatal_error;
     private volatile long _progress;
@@ -97,6 +98,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         _restart = restart;
         _completion_handle = null;
         _secure_notify_lock = new Object();
+        _workers_lock = new Object();
         _chunkworkers = new ArrayList<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
@@ -494,9 +496,12 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
             getSpeed_meter().secureNotify();
 
-            for (ChunkUploader uploader : getChunkworkers()) {
+            synchronized (_workers_lock) {
 
-                uploader.secureNotify();
+                for (ChunkUploader uploader : getChunkworkers()) {
+
+                    uploader.secureNotify();
+                }
             }
 
             setPaused_workers(0);
@@ -988,7 +993,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
 
             getView().stop("Stopping upload safely, please wait...");
 
-            synchronized (this) {
+            synchronized (_workers_lock) {
 
                 for (ChunkUploader uploader : _chunkworkers) {
 
