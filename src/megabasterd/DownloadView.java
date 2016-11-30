@@ -354,14 +354,12 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     private void stop_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stop_buttonActionPerformed
 
         _download.stop();
-        System.out.println("stopped");
 
     }//GEN-LAST:event_stop_buttonActionPerformed
 
     private void pause_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_buttonActionPerformed
 
         _download.pause();
-        System.out.println("paused!");
     }//GEN-LAST:event_pause_buttonActionPerformed
 
     @Override

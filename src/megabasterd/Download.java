@@ -1127,8 +1127,6 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
                     }
                 }
 
-                System.out.println("stop4");
-
                 secureNotify();
             }
         }
