@@ -32,6 +32,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
     private int _max_running_trans;
     private final MainPanel _main_panel;
     private final Object _secure_notify_lock;
+    private final Object _pre_lock;
     private boolean _notified;
     private volatile boolean _removing_transferences;
     private volatile boolean _provisioning_transferences;
@@ -56,6 +57,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         _pause_all_button = pause_all_button;
         _clean_all_menu = clean_all_menu;
         _secure_notify_lock = new Object();
+        _pre_lock = new Object();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
         _transference_provision_queue = new ConcurrentLinkedQueue<>();
         _transference_remove_queue = new ConcurrentLinkedQueue<>();
@@ -100,12 +102,16 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         return _transference_preprocess_queue;
     }
 
-    public synchronized void addPre_count(int pre_count) {
-        _pre_count += pre_count;
+    public void addPre_count(int pre_count) {
 
-        if (_pre_count < 0) {
+        synchronized (_pre_lock) {
 
-            _pre_count = 0;
+            _pre_count += pre_count;
+
+            if (_pre_count < 0) {
+
+                _pre_count = 0;
+            }
         }
     }
 

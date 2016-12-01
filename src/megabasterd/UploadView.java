@@ -476,38 +476,42 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     }
 
     @Override
-    public synchronized void updateSlotsStatus() {
+    public void updateSlotsStatus() {
 
-        int conta_exit = 0;
+        synchronized (_upload.getWorkers_lock()) {
 
-        for (ChunkUploader c : _upload.getChunkworkers()) {
+            int conta_exit = 0;
 
-            if (c.isExit()) {
+            for (ChunkUploader c : _upload.getChunkworkers()) {
 
-                conta_exit++;
+                if (c.isExit()) {
+
+                    conta_exit++;
+                }
             }
-        }
 
-        int conta_error = 0;
+            int conta_error = 0;
 
-        for (ChunkUploader c : _upload.getChunkworkers()) {
+            for (ChunkUploader c : _upload.getChunkworkers()) {
 
-            if (c.isError_wait()) {
+                if (c.isError_wait()) {
 
-                conta_error++;
+                    conta_error++;
+                }
             }
+
+            if (conta_error > 0) {
+
+                swingReflectionInvoke("setForeground", slot_status_label, Color.red);
+
+            } else {
+
+                swingReflectionInvoke("setForeground", slot_status_label, Color.black);
+            }
+
+            swingReflectionInvoke("setText", slot_status_label, (conta_exit > 0 ? "Removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Error: " + conta_error) : ""));
+
         }
-
-        if (conta_error > 0) {
-
-            swingReflectionInvoke("setForeground", slot_status_label, Color.red);
-
-        } else {
-
-            swingReflectionInvoke("setForeground", slot_status_label, Color.black);
-        }
-
-        swingReflectionInvoke("setText", slot_status_label, (conta_exit > 0 ? "Removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Error: " + conta_error) : ""));
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

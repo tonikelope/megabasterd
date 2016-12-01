@@ -43,6 +43,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     private final int _slots;
     private final Object _secure_notify_lock;
     private final Object _workers_lock;
+    private final Object _chunkid_lock;
     private byte[] _byte_file_key;
     private String _fatal_error;
     private volatile long _progress;
@@ -99,11 +100,16 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         _completion_handle = null;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
+        _chunkid_lock = new Object();
         _chunkworkers = new ArrayList<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = Executors.newCachedThreadPool();
 
+    }
+
+    public Object getWorkers_lock() {
+        return _workers_lock;
     }
 
     public String getDir_name() {
@@ -549,26 +555,30 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
     }
 
     @Override
-    public synchronized void checkSlotsAndWorkers() {
+    public void checkSlotsAndWorkers() {
 
         if (!isExit()) {
 
-            int sl = (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner());
+            synchronized (_workers_lock) {
 
-            int cworkers = getChunkworkers().size();
+                int sl = (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner());
 
-            if (sl != cworkers) {
+                int cworkers = getChunkworkers().size();
 
-                if (sl > cworkers) {
+                if (sl != cworkers) {
 
-                    startSlot();
+                    if (sl > cworkers) {
 
-                } else {
+                        startSlot();
 
-                    stopLastStartedSlot();
+                    } else {
 
+                        stopLastStartedSlot();
+
+                    }
                 }
             }
+
         }
     }
 
@@ -582,23 +592,28 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         return _main_panel;
     }
 
-    public synchronized void startSlot() {
+    public void startSlot() {
 
         if (!_exit) {
 
-            int chunkthiser_id = _chunkworkers.size() + 1;
+            synchronized (_workers_lock) {
 
-            ChunkUploader c = new ChunkUploader(chunkthiser_id, this);
+                int chunkthiser_id = _chunkworkers.size() + 1;
 
-            _chunkworkers.add(c);
+                ChunkUploader c = new ChunkUploader(chunkthiser_id, this);
 
-            try {
+                _chunkworkers.add(c);
 
-                _thread_pool.execute(c);
+                try {
 
-            } catch (java.util.concurrent.RejectedExecutionException e) {
-                System.out.println(e.getMessage());
+                    _thread_pool.execute(c);
+
+                } catch (java.util.concurrent.RejectedExecutionException e) {
+                    System.out.println(e.getMessage());
+                }
+
             }
+
         }
     }
 
@@ -606,32 +621,41 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         _pause = pause;
     }
 
-    public synchronized void stopLastStartedSlot() {
-        if (!_exit && !_chunkworkers.isEmpty()) {
+    public void stopLastStartedSlot() {
 
-            swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+        if (!_exit) {
 
-            int i = _chunkworkers.size() - 1;
+            synchronized (_workers_lock) {
 
-            while (i >= 0) {
+                if (!_chunkworkers.isEmpty()) {
 
-                ChunkUploader chunkuploader = _chunkworkers.get(i);
+                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
 
-                if (!chunkuploader.isExit()) {
+                    int i = _chunkworkers.size() - 1;
 
-                    chunkuploader.setExit(true);
+                    while (i >= 0) {
 
-                    chunkuploader.secureNotify();
+                        ChunkUploader chunkuploader = _chunkworkers.get(i);
 
-                    _view.updateSlotsStatus();
+                        if (!chunkuploader.isExit()) {
 
-                    break;
+                            chunkuploader.setExit(true);
 
-                } else {
+                            chunkuploader.secureNotify();
 
-                    i--;
+                            _view.updateSlotsStatus();
+
+                            break;
+
+                        } else {
+
+                            i--;
+                        }
+                    }
                 }
+
             }
+
         }
     }
 
@@ -909,39 +933,46 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         System.out.println("Uploader BYE BYE");
     }
 
-    public synchronized void pause_worker() {
+    public void pause_worker() {
 
-        if (++_paused_workers >= _chunkworkers.size() && !_exit) {
+        synchronized (_workers_lock) {
 
-            printStatus("Upload paused!");
-            swingReflectionInvoke("setText", getView().getPause_button(), "RESUME UPLOAD");
-            swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
-        }
-    }
-
-    public synchronized void stopThisSlot(ChunkUploader chunkuploader) {
-        if (_chunkworkers.remove(chunkuploader) && !_exit) {
-            if (!chunkuploader.isExit()) {
-
-                _finishing_upload = true;
-
-                swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
-
-                swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner()) - 1);
-
-            } else if (!_finishing_upload) {
-
-                swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), true);
-            }
-
-            if (!_exit && _pause && _paused_workers == _chunkworkers.size()) {
+            if (++_paused_workers >= _chunkworkers.size() && !_exit) {
 
                 printStatus("Upload paused!");
                 swingReflectionInvoke("setText", getView().getPause_button(), "RESUME UPLOAD");
                 swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
             }
+        }
 
-            getView().updateSlotsStatus();
+    }
+
+    public void stopThisSlot(ChunkUploader chunkuploader) {
+
+        synchronized (_workers_lock) {
+            if (_chunkworkers.remove(chunkuploader) && !_exit) {
+                if (!chunkuploader.isExit()) {
+
+                    _finishing_upload = true;
+
+                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+
+                    swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner()) - 1);
+
+                } else if (!_finishing_upload) {
+
+                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), true);
+                }
+
+                if (!_exit && _pause && _paused_workers == _chunkworkers.size()) {
+
+                    printStatus("Upload paused!");
+                    swingReflectionInvoke("setText", getView().getPause_button(), "RESUME UPLOAD");
+                    swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
+                }
+
+                getView().updateSlotsStatus();
+            }
         }
     }
 
@@ -953,13 +984,17 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         }
     }
 
-    public synchronized long nextChunkId() {
-        Long next_id;
+    public long nextChunkId() {
 
-        if ((next_id = _rejectedChunkIds.poll()) != null) {
-            return next_id;
-        } else {
-            return ++_last_chunk_id_dispatched;
+        synchronized (_chunkid_lock) {
+
+            Long next_id;
+
+            if ((next_id = _rejectedChunkIds.poll()) != null) {
+                return next_id;
+            } else {
+                return ++_last_chunk_id_dispatched;
+            }
         }
     }
 

@@ -63,6 +63,8 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     private volatile ProgressMeter _progress_meter = null; //lazy init;
     private final Object _secure_notify_lock;
     private final Object _workers_lock;
+    private final Object _chunkid_lock;
+    private final Object _dl_url_lock;
     private boolean _notified;
     private final String _url;
     private final String _download_path;
@@ -123,10 +125,16 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         _restart = restart;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
+        _chunkid_lock = new Object();
+        _dl_url_lock = new Object();
         _chunkworkers = new ArrayList<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
+    }
+
+    public Object getWorkers_lock() {
+        return _workers_lock;
     }
 
     public boolean isChecking_cbc() {
@@ -362,23 +370,26 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
     }
 
     @Override
-    public synchronized void checkSlotsAndWorkers() {
+    public void checkSlotsAndWorkers() {
 
         if (!isExit()) {
 
-            int sl = (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner());
+            synchronized (_workers_lock) {
 
-            int cworkers = getChunkworkers().size();
+                int sl = (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner());
 
-            if (sl != cworkers) {
+                int cworkers = getChunkworkers().size();
 
-                if (sl > cworkers) {
+                if (sl != cworkers) {
 
-                    startSlot();
+                    if (sl > cworkers) {
 
-                } else {
+                        startSlot();
 
-                    stopLastStartedSlot();
+                    } else {
+
+                        stopLastStartedSlot();
+                    }
                 }
             }
         }
@@ -851,13 +862,16 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
     }
 
-    public synchronized void pause_worker() {
+    public void pause_worker() {
 
-        if (++_paused_workers == _chunkworkers.size() && !_exit) {
+        synchronized (_workers_lock) {
 
-            getView().printStatusNormal("Download paused!");
-            swingReflectionInvoke("setText", getView().getPause_button(), "RESUME DOWNLOAD");
-            swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
+            if (++_paused_workers == _chunkworkers.size() && !_exit) {
+
+                getView().printStatusNormal("Download paused!");
+                swingReflectionInvoke("setText", getView().getPause_button(), "RESUME DOWNLOAD");
+                swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
+            }
         }
     }
 
@@ -869,135 +883,154 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
 
     }
 
-    public synchronized String getDownloadUrlForWorker() throws IOException {
-        if (_last_download_url != null && checkMegaDownloadUrl(_last_download_url)) {
+    public String getDownloadUrlForWorker() throws IOException {
 
-            return _last_download_url;
-        }
+        synchronized (_dl_url_lock) {
 
-        boolean error;
+            if (_last_download_url != null && checkMegaDownloadUrl(_last_download_url)) {
 
-        int api_error_retry = 0;
-
-        String download_url;
-
-        do {
-
-            error = false;
-
-            try {
-                if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
-                    MegaAPI ma = new MegaAPI();
-
-                    download_url = ma.getMegaFileDownloadUrl(_url);
-                } else {
-                    download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire);
-                }
-
-                if (checkMegaDownloadUrl(download_url)) {
-
-                    _last_download_url = download_url;
-
-                } else {
-
-                    error = true;
-                }
-
-            } catch (MegaCrypterAPIException | MegaAPIException e) {
-
-                error = true;
-
-                for (long i = getWaitTimeExpBackOff(api_error_retry++); i > 0 && !_exit; i--) {
-                    try {
-                        sleep(1000);
-                    } catch (InterruptedException ex) {
-                    }
-                }
+                return _last_download_url;
             }
 
-        } while (error);
+            boolean error;
 
-        return _last_download_url;
+            int api_error_retry = 0;
+
+            String download_url;
+
+            do {
+
+                error = false;
+
+                try {
+                    if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
+                        MegaAPI ma = new MegaAPI();
+
+                        download_url = ma.getMegaFileDownloadUrl(_url);
+
+                    } else {
+                        download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire);
+                    }
+
+                    if (checkMegaDownloadUrl(download_url)) {
+
+                        _last_download_url = download_url;
+
+                    } else {
+
+                        error = true;
+                    }
+
+                } catch (MegaCrypterAPIException | MegaAPIException e) {
+
+                    error = true;
+
+                    for (long i = getWaitTimeExpBackOff(api_error_retry++); i > 0 && !_exit; i--) {
+                        try {
+                            sleep(1000);
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+                }
+
+            } while (error);
+
+            return _last_download_url;
+
+        }
     }
 
-    public synchronized void startSlot() {
+    public void startSlot() {
 
         if (!_exit) {
 
-            int chunk_id = _chunkworkers.size() + 1;
+            synchronized (_workers_lock) {
 
-            ChunkDownloader c = new ChunkDownloader(chunk_id, this);
+                int chunk_id = _chunkworkers.size() + 1;
 
-            _chunkworkers.add(c);
+                ChunkDownloader c = new ChunkDownloader(chunk_id, this);
 
-            try {
+                _chunkworkers.add(c);
 
-                _thread_pool.execute(c);
+                try {
 
-            } catch (java.util.concurrent.RejectedExecutionException e) {
-                System.out.println(e.getMessage());
-            }
-        }
-    }
+                    _thread_pool.execute(c);
 
-    public synchronized void stopLastStartedSlot() {
-
-        if (!_exit && !_chunkworkers.isEmpty()) {
-
-            swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
-
-            int i = _chunkworkers.size() - 1;
-
-            while (i >= 0) {
-
-                ChunkDownloader chundownloader = _chunkworkers.get(i);
-
-                if (!chundownloader.isExit()) {
-
-                    chundownloader.setExit(true);
-
-                    chundownloader.secureNotify();
-
-                    _view.updateSlotsStatus();
-
-                    break;
-
-                } else {
-
-                    i--;
+                } catch (java.util.concurrent.RejectedExecutionException e) {
+                    System.out.println(e.getMessage());
                 }
             }
         }
     }
 
-    public synchronized void stopThisSlot(ChunkDownloader chunkdownloader) {
+    public void stopLastStartedSlot() {
 
-        if (_chunkworkers.remove(chunkdownloader) && !_exit) {
+        if (!_exit) {
 
-            if (!chunkdownloader.isExit()) {
+            synchronized (_workers_lock) {
 
-                _finishing_download = true;
+                if (!_chunkworkers.isEmpty()) {
 
-                swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
 
-                swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner()) - 1);
+                    int i = _chunkworkers.size() - 1;
 
-            } else if (!_finishing_download) {
+                    while (i >= 0) {
 
-                swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), true);
+                        ChunkDownloader chundownloader = _chunkworkers.get(i);
+
+                        if (!chundownloader.isExit()) {
+
+                            chundownloader.setExit(true);
+
+                            chundownloader.secureNotify();
+
+                            _view.updateSlotsStatus();
+
+                            break;
+
+                        } else {
+
+                            i--;
+                        }
+                    }
+                }
             }
-
-            if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
-
-                getView().printStatusNormal("Download paused!");
-
-                swingReflectionInvoke("setText", getView().getPause_button(), "RESUME DOWNLOAD");
-
-                swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
-            }
-
-            getView().updateSlotsStatus();
         }
+    }
+
+    public void stopThisSlot(ChunkDownloader chunkdownloader) {
+
+        synchronized (_workers_lock) {
+
+            if (_chunkworkers.remove(chunkdownloader) && !_exit) {
+
+                if (!chunkdownloader.isExit()) {
+
+                    _finishing_download = true;
+
+                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+
+                    swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner()) - 1);
+
+                } else if (!_finishing_download) {
+
+                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), true);
+                }
+
+                if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
+
+                    getView().printStatusNormal("Download paused!");
+
+                    swingReflectionInvoke("setText", getView().getPause_button(), "RESUME DOWNLOAD");
+
+                    swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
+                }
+
+                getView().updateSlotsStatus();
+            }
+        }
+
     }
 
     private boolean verifyFileCBCMAC(String filename) throws FileNotFoundException, Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
@@ -1330,14 +1363,19 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         return dl_url;
     }
 
-    public synchronized long nextChunkId() {
-        Long next_id;
+    public long nextChunkId() {
 
-        if ((next_id = _rejectedChunkIds.poll()) != null) {
-            return next_id;
-        } else {
-            return ++_last_chunk_id_dispatched;
+        synchronized (_chunkid_lock) {
+
+            Long next_id;
+
+            if ((next_id = _rejectedChunkIds.poll()) != null) {
+                return next_id;
+            } else {
+                return ++_last_chunk_id_dispatched;
+            }
         }
+
     }
 
     public void rejectChunkId(long chunk_id) {
