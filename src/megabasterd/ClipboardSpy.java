@@ -8,10 +8,11 @@ import static java.lang.Thread.sleep;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
+import static megabasterd.MainPanel.THREAD_POOL;
 
 public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotifiable, ClipboardChangeObservable {
 
-    private static final int SLEEP = 50;
+    private static final int SLEEP = 250;
 
     private final Clipboard _sysClip;
 
@@ -22,11 +23,14 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
     private Transferable _contents;
 
     private final Object _secure_notify_lock;
+    
+    private volatile boolean _gaining_ownership;
 
     public ClipboardSpy() {
         _sysClip = getDefaultToolkit().getSystemClipboard();
         _notified = false;
         _contents = null;
+        _gaining_ownership = false;
         _secure_notify_lock = new Object();
         _observers = new ConcurrentLinkedQueue<>();
     }
@@ -36,6 +40,10 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
         return _contents;
     }
 
+    public Clipboard getSysClip() {
+        return _sysClip;
+    }
+    
     @Override
     public void secureNotify() {
         synchronized (_secure_notify_lock) {
@@ -89,15 +97,33 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
     @Override
     public void lostOwnership(Clipboard c, Transferable t) {
 
-        _contents = getClipboardContents();
+        if(!_gaining_ownership)
+        {
+            _gaining_ownership = true;
+            
+            THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+                
+                _contents = getClipboardContents();
 
-        notifyChangeToMyObservers();
+                notifyChangeToMyObservers();
 
-        gainOwnership(_contents);
+                gainOwnership(_contents);
+                
+                _gaining_ownership = false;
+            }});
+        }
     }
 
     private Transferable getClipboardContents() {
 
+        try{
+            sleep(SLEEP);
+        } catch (InterruptedException ex1) {
+            getLogger(ClipboardSpy.class.getName()).log(SEVERE, null, ex1);
+        }
+        
         boolean error;
 
         Transferable c = null;
@@ -127,6 +153,12 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
 
     private void gainOwnership(Transferable t) {
 
+        try{
+            sleep(SLEEP);
+        } catch (InterruptedException ex1) {
+            getLogger(ClipboardSpy.class.getName()).log(SEVERE, null, ex1);
+        }
+        
         boolean error;
 
         do {
