@@ -8,7 +8,6 @@ import static java.lang.Thread.sleep;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
-import static megabasterd.MainPanel.THREAD_POOL;
 
 public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotifiable, ClipboardChangeObservable {
 
@@ -23,14 +22,14 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
     private Transferable _contents;
 
     private final Object _secure_notify_lock;
-    
-    private volatile boolean _gaining_ownership;
+
+    private volatile boolean _enabled;
 
     public ClipboardSpy() {
         _sysClip = getDefaultToolkit().getSystemClipboard();
         _notified = false;
+        _enabled = false;
         _contents = null;
-        _gaining_ownership = false;
         _secure_notify_lock = new Object();
         _observers = new ConcurrentLinkedQueue<>();
     }
@@ -40,10 +39,25 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
         return _contents;
     }
 
-    public Clipboard getSysClip() {
-        return _sysClip;
+    private void _setEnabled(boolean enabled) {
+
+        _enabled = enabled;
+
+        if (_enabled) {
+
+            _contents = getClipboardContents();
+
+            notifyChangeToMyObservers();
+
+            gainOwnership(_contents);
+
+            System.out.println("Spying clipboard ON...");
+
+        } else {
+            System.out.println("Spying clipboard OFF...");
+        }
     }
-    
+
     @Override
     public void secureNotify() {
         synchronized (_secure_notify_lock) {
@@ -85,45 +99,24 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
     @Override
     public void run() {
 
-        _contents = getClipboardContents();
-
-        gainOwnership(_contents);
-
-        System.out.println("Spying clipboard...");
-
         secureWait();
     }
 
     @Override
     public void lostOwnership(Clipboard c, Transferable t) {
 
-        if(!_gaining_ownership)
-        {
-            _gaining_ownership = true;
-            
-            THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-                
-                _contents = getClipboardContents();
+        if (_enabled) {
 
-                notifyChangeToMyObservers();
+            _contents = getClipboardContents();
 
-                gainOwnership(_contents);
-                
-                _gaining_ownership = false;
-            }});
+            notifyChangeToMyObservers();
+
+            gainOwnership(_contents);
         }
     }
 
     private Transferable getClipboardContents() {
 
-        try{
-            sleep(SLEEP);
-        } catch (InterruptedException ex1) {
-            getLogger(ClipboardSpy.class.getName()).log(SEVERE, null, ex1);
-        }
-        
         boolean error;
 
         Transferable c = null;
@@ -133,7 +126,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
 
             try {
 
-                c = _sysClip.getContents(null);
+                c = _sysClip.getContents(this);
 
             } catch (Exception ex) {
 
@@ -153,12 +146,6 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
 
     private void gainOwnership(Transferable t) {
 
-        try{
-            sleep(SLEEP);
-        } catch (InterruptedException ex1) {
-            getLogger(ClipboardSpy.class.getName()).log(SEVERE, null, ex1);
-        }
-        
         boolean error;
 
         do {
@@ -190,6 +177,11 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
 
             _observers.add(observer);
         }
+
+        if (!_observers.isEmpty() && !_enabled) {
+
+            _setEnabled(true);
+        }
     }
 
     @Override
@@ -197,6 +189,10 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
 
         _observers.remove(observer);
 
+        if (_observers.isEmpty() && _enabled) {
+
+            _setEnabled(false);
+        }
     }
 
     @Override

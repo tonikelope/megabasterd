@@ -49,7 +49,6 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
             }
         }, true);
 
-        notifyClipboardChange();
     }
 
     /**

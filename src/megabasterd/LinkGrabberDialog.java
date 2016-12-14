@@ -25,7 +25,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
     private boolean _download;
     private String _download_path;
-    private final ClipboardSpy _clipboardpy;
+    private final ClipboardSpy _clipboardspy;
 
     public boolean isDownload() {
         return _download;
@@ -61,11 +61,9 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         _download_path = download_path;
 
-        _clipboardpy = clipboardspy;
+        _clipboardspy = clipboardspy;
 
         swingReflectionInvoke("setText", download_dir_label, truncateText(download_path, 80));
-
-        notifyClipboardChange();
     }
 
     /**
@@ -317,6 +315,6 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     @Override
     public void notifyClipboardChange() {
 
-        swingReflectionInvoke("setText", links_textarea, extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardpy.getContents())));
+        swingReflectionInvoke("setText", links_textarea, extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
     }
 }
