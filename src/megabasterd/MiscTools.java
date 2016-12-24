@@ -838,7 +838,7 @@ public final class MiscTools {
 
     public static String cleanFilePath(String path) {
 
-        return path.equals(".") ? ((System.getProperty("os.name").toLowerCase().contains("win") ? path.replaceAll("[<>:\"\\|\\?\\*]+", "").replaceAll("[ \\.]{1,}/{1,}", "/") : path).replaceAll("[\\.]{1,}$", "").trim()) : path;
+        return !path.equals(".") ? ((System.getProperty("os.name").toLowerCase().contains("win") ? path.replaceAll("[<>:\"\\|\\?\\*]+", "").replaceAll("[ \\.]{1,}/{1,}", "/") : path).replaceAll("[\\.]{1,}$", "").trim()) : path;
     }
 
     public static byte[] genRandomByteArray(int length) {

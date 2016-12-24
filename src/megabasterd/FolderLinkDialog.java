@@ -437,7 +437,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
                 download_link.put("url", url);
 
-                download_link.put("filename", path);
+                download_link.put("filename", MiscTools.cleanFilePath(path));
 
                 download_link.put("filekey", ((Map<String, Object>) node.getUserObject()).get("key"));
 
