@@ -1156,12 +1156,39 @@ public final class SettingsDialog extends javax.swing.JDialog {
             boolean use_proxy = (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", use_proxy_checkbox);
 
             String old_proxy_host = DBTools.selectSettingValueFromDB("proxy_host");
+            
+            if(old_proxy_host == null) {
+                
+                old_proxy_host="";
+            }
+            
             String proxy_host = ((String) swingReflectionInvokeAndWaitForReturn("getText", proxy_host_textfield)).trim();
+            
             String old_proxy_port = DBTools.selectSettingValueFromDB("proxy_port");
+            
+            if(old_proxy_port == null) {
+                
+                old_proxy_port="";
+            }
+            
             String proxy_port = ((String) swingReflectionInvokeAndWaitForReturn("getText", proxy_port_textfield)).trim();
+            
             String old_proxy_user = DBTools.selectSettingValueFromDB("proxy_user");
+            
+            if(old_proxy_user == null) {
+                
+                old_proxy_user="";
+            }
+            
             String proxy_user = ((String) swingReflectionInvokeAndWaitForReturn("getText", proxy_user_textfield)).trim();
+            
             String old_proxy_pass = DBTools.selectSettingValueFromDB("proxy_pass");
+            
+            if(old_proxy_pass == null) {
+                
+                old_proxy_pass="";
+            }
+            
             String proxy_pass = new String((char[]) swingReflectionInvokeAndWaitForReturn("getPassword", proxy_pass_textfield));
 
             insertSettingValueInDB("use_proxy", use_proxy ? "yes" : "no");
