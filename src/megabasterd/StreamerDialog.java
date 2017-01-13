@@ -164,14 +164,9 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                     String data;
 
-                    if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null) {
-                        data = findFirstRegex("/#(N?!.+)", link, 1);
+                    if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
 
-                        stream_link = "http://localhost:1337/video/mega/" + data;
-
-                    } else if ((data = findFirstRegex("https?://([^/]+/![^!]+![0-9a-fA-F]+)", link, 1)) != null) {
-
-                        stream_link = "http://localhost:1337/video/" + data;
+                        stream_link = "http://localhost:1337/video/" + MiscTools.Bin2UrlBASE64(link.getBytes());
 
                     } else {
 

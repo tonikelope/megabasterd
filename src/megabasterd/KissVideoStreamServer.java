@@ -5,7 +5,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.awt.Color;
-import static java.awt.Frame.NORMAL;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -15,9 +14,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -123,32 +120,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
         httpserver.setExecutor(THREAD_POOL);
 
         httpserver.start();
-
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                while (true) {
-
-                    secureWait();
-
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-
-                    if (_working_threads.isEmpty()) {
-
-                        swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), "Kissvideostreamer on localhost:" + STREAMER_PORT + " (Waiting for request...)");
-
-                        swingReflectionInvoke("setExtendedState", _main_panel.getView(), NORMAL);
-
-                        swingReflectionInvoke("setVisible", _main_panel.getView(), true);
-                    }
-                }
-            }
-        });
     }
 
     private void updateStatus(Integer new_status) {
@@ -354,13 +325,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
 
             String link = url_path.substring(url_path.indexOf("/video/") + 7);
 
-            if (link.indexOf("mega/") == 0) {
-                link = link.replaceAll("mega/", "https://mega.co.nz/#");
-            } else {
-                String mc_host = findFirstRegex("^[^/]+/", link, 0);
-
-                link = "http://" + mc_host + link;
-            }
+            link = new String(MiscTools.UrlBASE642Bin(link));
 
             HashMap cache_info, file_info = null;
 
@@ -529,13 +494,11 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
                 }
             }
         } catch (Exception ex) {
-            Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
+            //Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
             xchg.close();
 
             updateStatus(WORKER_STATUS_EXIT);
-
-            secureNotify();
         }
     }
 
