@@ -320,7 +320,7 @@
                                           <Component id="max_up_speed_label" alignment="0" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
-                                  <Component id="defaut_slots_up_label" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="default_slots_up_label" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" pref="53" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="1" attributes="0">
@@ -348,7 +348,7 @@
                       <Component id="multi_slot_up_checkbox" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="defaut_slots_up_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="default_slots_up_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="default_slots_up_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="separate" max="-2" attributes="0"/>
@@ -364,7 +364,7 @@
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JLabel" name="defaut_slots_up_label">
+            <Component class="javax.swing.JLabel" name="default_slots_up_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="20" style="1"/>

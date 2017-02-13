@@ -95,7 +95,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 updateFont(remove_mega_account_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(add_mega_account_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(mega_accounts_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(defaut_slots_up_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(default_slots_up_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(max_uploads_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(max_down_speed_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(limit_download_speed_checkbox, FONT_DEFAULT, Font.PLAIN);
@@ -280,7 +280,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         if (!use_slots) {
 
-            swingReflectionInvoke("setEnabled", defaut_slots_up_label, false);
+            swingReflectionInvoke("setEnabled", default_slots_up_label, false);
             swingReflectionInvoke("setEnabled", default_slots_up_spinner, false);
         } else {
             swingReflectionInvoke("setEnabled", max_uploads_label, true);
@@ -470,7 +470,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_down_speed_spinner = new javax.swing.JSpinner();
         default_dir_label = new javax.swing.JLabel();
         uploads_panel = new javax.swing.JPanel();
-        defaut_slots_up_label = new javax.swing.JLabel();
+        default_slots_up_label = new javax.swing.JLabel();
         max_uploads_label = new javax.swing.JLabel();
         default_slots_up_spinner = new javax.swing.JSpinner();
         max_uploads_spinner = new javax.swing.JSpinner();
@@ -653,9 +653,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
 
-        defaut_slots_up_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        defaut_slots_up_label.setText("Default slots per file:");
-        defaut_slots_up_label.setDoubleBuffered(true);
+        default_slots_up_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        default_slots_up_label.setText("Default slots per file:");
+        default_slots_up_label.setDoubleBuffered(true);
 
         max_uploads_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         max_uploads_label.setText("Max parallel uploads:");
@@ -706,7 +706,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(limit_upload_speed_checkbox)
                                     .addComponent(max_up_speed_label)))
-                            .addComponent(defaut_slots_up_label))
+                            .addComponent(default_slots_up_label))
                         .addGap(53, 53, 53)
                         .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -726,7 +726,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addComponent(multi_slot_up_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(defaut_slots_up_label)
+                    .addComponent(default_slots_up_label)
                     .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(limit_upload_speed_checkbox)
@@ -1920,6 +1920,18 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     private void multi_slot_up_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_multi_slot_up_checkboxActionPerformed
         // TODO add your handling code here:
+        
+         if (!multi_slot_up_checkbox.isSelected()) {
+
+            default_slots_up_spinner.setEnabled(false);
+            default_slots_up_label.setEnabled(false);
+
+        } else {
+
+            default_slots_up_spinner.setEnabled(true);
+            default_slots_up_label.setEnabled(true);
+        }
+        
     }//GEN-LAST:event_multi_slot_up_checkboxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1931,8 +1943,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel default_dir_label;
     private javax.swing.JLabel default_slots_down_label;
     private javax.swing.JSpinner default_slots_down_spinner;
+    private javax.swing.JLabel default_slots_up_label;
     private javax.swing.JSpinner default_slots_up_spinner;
-    private javax.swing.JLabel defaut_slots_up_label;
     private javax.swing.JButton delete_all_accounts_button;
     private javax.swing.JLabel down_dir_label;
     private javax.swing.JPanel downloads_panel;
