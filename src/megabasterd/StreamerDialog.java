@@ -44,7 +44,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
             @Override
             public void run() {
                 updateFont(put_label, FONT_DEFAULT, Font.PLAIN);
-
+                updateFont(original_link_textfield, FONT_DEFAULT, Font.PLAIN);
                 updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
             }
         }, true);

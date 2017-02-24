@@ -56,6 +56,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                 updateFont(change_dir_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(download_dir_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(dlc_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(links_textarea, FONT_DEFAULT, Font.PLAIN);
             }
         }, true);
 
