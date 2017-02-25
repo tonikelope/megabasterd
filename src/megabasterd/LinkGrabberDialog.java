@@ -90,7 +90,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         setModal(true);
 
         links_textarea.setColumns(20);
-        links_textarea.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        links_textarea.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         links_textarea.setRows(5);
         links_textarea.setDoubleBuffered(true);
         links_scrollpane.setViewportView(links_textarea);

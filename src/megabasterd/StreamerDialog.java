@@ -83,7 +83,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
             }
         });
 
-        original_link_textfield.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        original_link_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         original_link_textfield.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

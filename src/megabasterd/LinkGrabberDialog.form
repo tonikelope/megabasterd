@@ -82,7 +82,7 @@
           <Properties>
             <Property name="columns" type="int" value="20"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="14" style="0"/>
+              <Font name="Dialog" size="18" style="0"/>
             </Property>
             <Property name="rows" type="int" value="5"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
