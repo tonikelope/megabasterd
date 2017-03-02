@@ -61,7 +61,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "1.72";
+    public static final String VERSION = "1.73";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
@@ -69,7 +69,7 @@ public final class MainPanel {
     public static final String ICON_FILE = "mbasterd_mini.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
     public static final Font FONT_DEFAULT = createAndRegisterFont("UbuntuMono-R.ttf");
-    public static final double FONT_ZOOM_DEFAULT = 1.05;
+    public static final double FONT_ZOOM_DEFAULT = 1.04;
 
     public static void main(String args[]) {
 

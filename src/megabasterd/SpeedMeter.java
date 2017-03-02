@@ -5,7 +5,7 @@ import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import static megabasterd.MiscTools.formatBytes;
 
-public final class SpeedMeter implements Runnable, SecureNotifiable {
+public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int SLEEP = 3000;
     private long _progress;
@@ -54,16 +54,7 @@ public final class SpeedMeter implements Runnable, SecureNotifiable {
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
+   
 
     public void setExit(boolean exit) {
         _exit = exit;

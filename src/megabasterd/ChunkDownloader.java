@@ -18,7 +18,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  *
  * @author tonikelope
  */
-public class ChunkDownloader implements Runnable, SecureNotifiable {
+public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     private final int _id;
     private final Download _download;
@@ -85,17 +85,6 @@ public class ChunkDownloader implements Runnable, SecureNotifiable {
             }
 
             _notified = false;
-        }
-    }
-
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
         }
     }
 

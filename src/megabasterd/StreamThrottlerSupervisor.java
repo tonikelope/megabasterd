@@ -1,33 +1,43 @@
 package megabasterd;
 
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 
 /**
  *
  * @author tonikelope
  */
-public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiable {
+public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNotifiable {
 
-    private final ConcurrentLinkedQueue<Integer> _input_slice_queue;
-
-    private final ConcurrentLinkedQueue<Integer> _output_slice_queue;
+    private ConcurrentLinkedQueue<Integer> _input_slice_queue, _output_slice_queue;
 
     private final int _slice_size;
 
     private volatile int _maxBytesPerSecInput;
 
     private volatile int _maxBytesPerSecOutput;
+    
+    private volatile boolean _queue_swapping;
 
     private final Object _secure_notify_lock;
-
-    private boolean _notified;
+    
+    private final Object _timer_lock;
+    
+    private final ConcurrentHashMap <Thread,Boolean> _notified_threads;
 
     public StreamThrottlerSupervisor(int maxBytesPerSecInput, int maxBytesPerSecOutput, int slice_size) {
-        _notified = false;
-
+  
         _secure_notify_lock = new Object();
+        
+        _timer_lock = new Object();
+        
+        _queue_swapping = false;
 
         _maxBytesPerSecInput = maxBytesPerSecInput;
 
@@ -38,6 +48,9 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
         _input_slice_queue = new ConcurrentLinkedQueue<>();
 
         _output_slice_queue = new ConcurrentLinkedQueue<>();
+        
+        _notified_threads = new ConcurrentHashMap<>();
+
     }
 
     public int getMaxBytesPerSecInput() {
@@ -64,21 +77,24 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
         return _output_slice_queue;
     }
 
-    @Override
-    public void secureNotify() {
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notify();
-        }
+    public boolean isQueue_swapping() {
+        return _queue_swapping;
     }
+    
 
     @Override
     public void secureWait() {
 
         synchronized (_secure_notify_lock) {
-            while (!_notified) {
+            
+            Thread current_thread = Thread.currentThread();
+            
+            if(!_notified_threads.containsKey(current_thread)) {
+                
+                _notified_threads.put(current_thread, false);
+            }
+            
+            while (!_notified_threads.get(current_thread)) {
 
                 try {
                     _secure_notify_lock.wait();
@@ -87,7 +103,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
                 }
             }
 
-            _notified = false;
+            _notified_threads.put(current_thread, false);
         }
     }
 
@@ -96,7 +112,10 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
 
         synchronized (_secure_notify_lock) {
 
-            _notified = true;
+            for(Map.Entry<Thread, Boolean> entry: _notified_threads.entrySet()) {
+                
+                entry.setValue(true);
+            }
 
             _secure_notify_lock.notifyAll();
         }
@@ -104,48 +123,83 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureNotifiab
 
     @Override
     public void run() {
+        
+        Timer timer = new Timer();
+        
+        TimerTask task = new TimerTask() {
+            
+            @Override
+            public void run()
+            {
+                synchronized (_timer_lock) {
+                    
+                    _timer_lock.notify();
+                }
+            }
+        };
+        
+        ConcurrentLinkedQueue<Integer> old_input_queue, new_input_queue, old_output_queue, new_output_queue;
+        
+        old_input_queue = new ConcurrentLinkedQueue<>();
+
+        old_output_queue = new ConcurrentLinkedQueue<>();
+        
+        new_input_queue = _resetSliceQueue(old_input_queue, _maxBytesPerSecInput);
+        
+        new_output_queue = _resetSliceQueue(old_output_queue, _maxBytesPerSecOutput);
+        
+        timer.schedule(task, 0, 1000);
 
         while (true) {
+            
+            _queue_swapping = true;
 
-            if (_maxBytesPerSecInput > 0) {
-
-                _input_slice_queue.clear();
-
-                int slice_num = (int) Math.floor((double) _maxBytesPerSecInput / _slice_size);
-
-                for (int i = 0; i < slice_num; i++) {
-                    _input_slice_queue.add(_slice_size);
-                }
-
-                if (_maxBytesPerSecInput % _slice_size != 0) {
-
-                    _input_slice_queue.add(_maxBytesPerSecInput % _slice_size);
-                }
-            }
-
-            if (_maxBytesPerSecOutput > 0) {
-
-                _output_slice_queue.clear();
-
-                int slice_num = (int) Math.floor((double) _maxBytesPerSecOutput / _slice_size);
-
-                for (int i = 0; i < slice_num; i++) {
-                    _output_slice_queue.add(_slice_size);
-                }
-
-                if (_maxBytesPerSecOutput % _slice_size != 0) {
-
-                    _output_slice_queue.add(_maxBytesPerSecOutput % _slice_size);
-                }
-            }
-
+            old_input_queue = _input_slice_queue;
+            
+            old_output_queue = _output_slice_queue;
+            
+            _input_slice_queue = new_input_queue;
+            
+            _output_slice_queue = new_output_queue;
+            
+            _queue_swapping = false;
+            
             secureNotifyAll();
+            
+            new_input_queue = _resetSliceQueue(old_input_queue, _maxBytesPerSecInput);
+        
+            new_output_queue = _resetSliceQueue(old_output_queue, _maxBytesPerSecOutput);
 
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-                getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
+            synchronized (_timer_lock) {
+            
+                try {
+                    _timer_lock.wait();
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
         }
     }
+    
+    private ConcurrentLinkedQueue<Integer> _resetSliceQueue(ConcurrentLinkedQueue<Integer> queue, int max_bytes) {
+        
+        if(max_bytes > 0) {
+            
+            queue.clear();
+
+            int slice_num = (int) Math.floor((double) max_bytes / _slice_size);
+
+            for (int i = 0; i < slice_num; i++) {
+                queue.add(_slice_size);
+            }
+
+            if (max_bytes % _slice_size != 0) {
+
+                queue.add(max_bytes % _slice_size);
+            }
+        }
+        
+        return queue;
+    }
+    
 }

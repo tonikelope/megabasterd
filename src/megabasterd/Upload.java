@@ -31,7 +31,7 @@ import static megabasterd.MiscTools.truncateText;
  *
  * @author tonikelope
  */
-public final class Upload implements Transference, Runnable, SecureNotifiable {
+public final class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     private final MainPanel _main_panel;
     private volatile UploadView _view = null; //lazy init
@@ -365,16 +365,7 @@ public final class Upload implements Transference, Runnable, SecureNotifiable {
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
+    
 
     public void provisionIt() {
 

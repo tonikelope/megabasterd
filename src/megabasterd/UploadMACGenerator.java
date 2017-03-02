@@ -22,7 +22,7 @@ import static megabasterd.MiscTools.i32a2bin;
  *
  * @author tonikelope
  */
-public final class UploadMACGenerator implements Runnable, SecureNotifiable {
+public final class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiable {
 
     private long _last_chunk_id_read;
     private final ConcurrentHashMap<Long, Chunk> _chunk_queue;
@@ -70,16 +70,7 @@ public final class UploadMACGenerator implements Runnable, SecureNotifiable {
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
+    
 
     public long getLast_chunk_id_read() {
         return _last_chunk_id_read;

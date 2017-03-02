@@ -4,11 +4,9 @@ package megabasterd;
  *
  * @author tonikelope
  */
-public interface SecureNotifiable {
+public interface SecureSingleThreadNotifiable {
 
     public void secureNotify();
-
-    public void secureNotifyAll();
 
     public void secureWait();
 }

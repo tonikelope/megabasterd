@@ -6,7 +6,7 @@ import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import javax.crypto.CipherInputStream;
 
-public final class ChunkWriter implements Runnable, SecureNotifiable {
+public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable {
 
     private long _last_chunk_id_written;
     private long _bytes_written;
@@ -74,16 +74,6 @@ public final class ChunkWriter implements Runnable, SecureNotifiable {
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
 
     public byte[] getByte_file_key() {
         return _byte_file_key;

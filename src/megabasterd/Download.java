@@ -52,7 +52,7 @@ import static megabasterd.Transference.MAX_WAIT_WORKERS_SHUTDOWN;
  *
  * @author tonikelope
  */
-public final class Download implements Transference, Runnable, SecureNotifiable {
+public final class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
     public static final Object CBC_LOCK = new Object();
@@ -1410,16 +1410,7 @@ public final class Download implements Transference, Runnable, SecureNotifiable 
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
+    
 
     @Override
     public void setProgress(long progress) {

@@ -16,7 +16,7 @@ import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
  *
  * @author tonikelope
  */
-abstract public class TransferenceManager implements Runnable, SecureNotifiable {
+abstract public class TransferenceManager implements Runnable, SecureSingleThreadNotifiable {
 
     private final ConcurrentLinkedQueue<Transference> _transference_provision_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_waitstart_queue;
@@ -146,16 +146,7 @@ abstract public class TransferenceManager implements Runnable, SecureNotifiable 
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
+   
 
     public MainPanel getMain_panel() {
         return _main_panel;

@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 
-public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotifiable, ClipboardChangeObservable {
+public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThreadNotifiable, ClipboardChangeObservable {
 
     private static final int SLEEP = 250;
 
@@ -85,17 +85,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureNotif
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
-
+  
     @Override
     public void run() {
 

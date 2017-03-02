@@ -30,7 +30,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
-public final class KissVideoStreamServer implements HttpHandler, SecureNotifiable {
+public final class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNotifiable {
 
     public static final int WORKER_STATUS_FILE_INFO = 0x01;
     public static final int WORKER_STATUS_CONNECT = 0x02;
@@ -97,16 +97,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureNotifiabl
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
+    
 
     public void start(int port, String context) throws IOException {
         swingReflectionInvoke("setForeground", _main_panel.getView().getKiss_server_status(), new Color(0, 128, 0));

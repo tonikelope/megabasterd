@@ -3,7 +3,7 @@ package megabasterd;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 
-public final class ProgressMeter implements Runnable, SecureNotifiable {
+public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
 
     private final Transference _transference;
     private volatile boolean _exit;
@@ -51,16 +51,6 @@ public final class ProgressMeter implements Runnable, SecureNotifiable {
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
 
     @Override
     public void run() {

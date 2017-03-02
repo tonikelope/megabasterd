@@ -7,7 +7,7 @@ import javax.swing.JLabel;
 import static megabasterd.MiscTools.formatBytes;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 
-public final class GlobalSpeedMeter implements Runnable, SecureNotifiable {
+public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
     private final JLabel _speed_label;
     private final ConcurrentLinkedQueue<SpeedMeter> _speedmeters;
@@ -48,16 +48,7 @@ public final class GlobalSpeedMeter implements Runnable, SecureNotifiable {
         }
     }
 
-    @Override
-    public void secureNotifyAll() {
-
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notifyAll();
-        }
-    }
+   
 
     public void attachSpeedMeter(SpeedMeter speed) {
         _speedmeters.add(speed);
