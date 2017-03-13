@@ -321,7 +321,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                                 .addComponent(skip_rest_button)
                                 .addGap(18, 18, 18)
                                 .addComponent(skip_button)))
-                        .addGap(0, 51, Short.MAX_VALUE))
+                        .addGap(0, 121, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
