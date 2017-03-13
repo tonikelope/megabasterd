@@ -16,7 +16,7 @@ import static java.util.logging.Logger.getLogger;
  */
 public final class DBTools {
 
-    public static void setupSqliteTables() throws SQLException {
+    public static synchronized void setupSqliteTables() throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
 
@@ -28,7 +28,7 @@ public final class DBTools {
         }
     }
 
-    public static void vaccum() throws SQLException {
+    public static synchronized void vaccum() throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
 
@@ -36,7 +36,7 @@ public final class DBTools {
         }
     }
 
-    public static void insertDownload(String url, String path, String filename, String filekey, Long size, String filepass, String filenoexpire) throws SQLException {
+    public static synchronized void insertDownload(String url, String path, String filename, String filekey, Long size, String filepass, String filenoexpire) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO downloads (url, path, filename, filekey, filesize, filepass, filenoexpire) VALUES (?,?,?,?,?,?,?)")) {
 
@@ -52,7 +52,7 @@ public final class DBTools {
         }
     }
 
-    public static void deleteDownload(String url) throws SQLException {
+    public static synchronized void deleteDownload(String url) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE url=?")) {
 
@@ -63,7 +63,7 @@ public final class DBTools {
         }
     }
 
-    public static void insertUpload(String filename, String email, String parent_node, String ul_key, String root_node, String share_key, String folder_link) throws SQLException {
+    public static synchronized void insertUpload(String filename, String email, String parent_node, String ul_key, String root_node, String share_key, String folder_link) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link) VALUES (?,?,?,?,?,?,?)")) {
 
@@ -79,7 +79,7 @@ public final class DBTools {
         }
     }
 
-    public static void updateUploadUrl(String filename, String email, String ul_url) throws SQLException {
+    public static synchronized void updateUploadUrl(String filename, String email, String ul_url) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("UPDATE uploads SET url=? WHERE filename=? AND email=?")) {
 
@@ -92,7 +92,7 @@ public final class DBTools {
         }
     }
 
-    public static void deleteUpload(String filename, String email) throws SQLException {
+    public static synchronized void deleteUpload(String filename, String email) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM uploads WHERE filename=? AND email=?")) {
 
@@ -104,7 +104,7 @@ public final class DBTools {
         }
     }
 
-    public static String selectSettingValueFromDB(String key) {
+    public static synchronized String selectSettingValueFromDB(String key) {
 
         String value = null;
 
@@ -124,7 +124,7 @@ public final class DBTools {
         return value;
     }
 
-    public static void insertSettingValueInDB(String key, String value) throws SQLException {
+    public static synchronized void insertSettingValueInDB(String key, String value) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO settings (key,value) VALUES (?, ?)")) {
 
@@ -136,7 +136,7 @@ public final class DBTools {
         }
     }
 
-    public static ArrayList<HashMap<String, Object>> selectDownloads() throws SQLException {
+    public static synchronized ArrayList<HashMap<String, Object>> selectDownloads() throws SQLException {
 
         ArrayList<HashMap<String, Object>> downloads = new ArrayList<>();
 
@@ -165,7 +165,7 @@ public final class DBTools {
         return downloads;
     }
 
-    public static ArrayList<HashMap<String, Object>> selectUploads() throws SQLException {
+    public static synchronized ArrayList<HashMap<String, Object>> selectUploads() throws SQLException {
 
         ArrayList<HashMap<String, Object>> uploads = new ArrayList<>();
 
@@ -194,7 +194,7 @@ public final class DBTools {
         return uploads;
     }
 
-    public static HashMap<String, Object> selectMegaAccounts() throws SQLException {
+    public static synchronized HashMap<String, Object> selectMegaAccounts() throws SQLException {
 
         HashMap<String, Object> accounts = new HashMap<>();
 
@@ -219,7 +219,7 @@ public final class DBTools {
         return accounts;
     }
 
-    public static HashMap<String, Object> selectELCAccounts() throws SQLException {
+    public static synchronized HashMap<String, Object> selectELCAccounts() throws SQLException {
 
         HashMap<String, Object> accounts = new HashMap<>();
 
@@ -243,7 +243,7 @@ public final class DBTools {
         return accounts;
     }
 
-    public static void insertMegaAccount(String email, String password, String password_aes, String user_hash) throws SQLException {
+    public static synchronized void insertMegaAccount(String email, String password, String password_aes, String user_hash) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO mega_accounts (email,password,password_aes,user_hash) VALUES (?, ?, ?, ?)")) {
 
@@ -261,7 +261,7 @@ public final class DBTools {
 
     }
 
-    public static void insertELCAccount(String host, String user, String apikey) throws SQLException {
+    public static synchronized void insertELCAccount(String host, String user, String apikey) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO elc_accounts (host,user,apikey) VALUES (?, ?, ?)")) {
 
@@ -276,7 +276,7 @@ public final class DBTools {
 
     }
 
-    public static void deleteMegaAccount(String email) throws SQLException {
+    public static synchronized void deleteMegaAccount(String email) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE from mega_accounts WHERE email=?")) {
 
@@ -286,7 +286,7 @@ public final class DBTools {
         }
     }
 
-    public static void deleteELCAccount(String host) throws SQLException {
+    public static synchronized void deleteELCAccount(String host) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE from elc_accounts WHERE host=?")) {
 

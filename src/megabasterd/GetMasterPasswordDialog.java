@@ -168,7 +168,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(remember_checkbox)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(please_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(please_label, javax.swing.GroupLayout.DEFAULT_SIZE, 564, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(

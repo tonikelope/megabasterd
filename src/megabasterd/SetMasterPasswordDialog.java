@@ -164,7 +164,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                             .addComponent(new_pass_label))
                         .addGap(15, 15, 15)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(confirm_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 398, Short.MAX_VALUE)
+                            .addComponent(confirm_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 418, Short.MAX_VALUE)
                             .addComponent(new_pass_textfield))
                         .addContainerGap())
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()

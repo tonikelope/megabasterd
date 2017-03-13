@@ -54,7 +54,7 @@
                           </Group>
                       </Group>
                   </Group>
-                  <Component id="title_label" max="32767" attributes="0"/>
+                  <Component id="title_label" pref="546" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>

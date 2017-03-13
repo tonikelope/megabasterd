@@ -159,7 +159,7 @@ public final class AboutDialog extends javax.swing.JDialog {
                                 .addComponent(pica_roja_label)
                                 .addGap(18, 18, 18)
                                 .addComponent(mc_logo_label))))
-                    .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
