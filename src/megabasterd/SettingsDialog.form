@@ -975,7 +975,7 @@
           <Font name="Dialog" size="20" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="1c" green="8c" red="f5" type="rgb"/>
+          <Color blue="9" green="7e" red="eb" type="rgb"/>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>

@@ -1089,7 +1089,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         jTabbedPane1.addTab("Advanced", jPanel1);
 
         status.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        status.setForeground(new java.awt.Color(245, 140, 28));
+        status.setForeground(new java.awt.Color(235, 126, 9));
         status.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -1365,8 +1365,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                             password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                             password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                            
+                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(MiscTools.UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
                                         }
 
                                         DBTools.insertMegaAccount(email, password, password_aes, user_hash);
@@ -1413,7 +1413,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                                 password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(MiscTools.UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
                                             }
 
                                             DBTools.insertMegaAccount(email, password, password_aes, user_hash);
