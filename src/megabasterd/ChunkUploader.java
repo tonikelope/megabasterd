@@ -249,10 +249,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                                         _upload.setCompletion_handle(response);
                                                     }
-                                                    
-                                                } else {
-                                                    
-                                                    System.out.println("UPLOAD FAILED! (UPLOAD RESPONSE IS EMPTY)");
                                                 }
                                             }
                                         }
