@@ -46,7 +46,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
     @Override
     public void run() {
-        System.out.println("ChunkUploader " + getId() + " hello!");
+        System.out.println("ChunkUploaderMONO " + getId() + " hello! "+ getUpload().getFile_name());
 
         String worker_url = getUpload().getUl_url();
         Chunk chunk;
@@ -165,7 +165,9 @@ public class ChunkUploaderMono extends ChunkUploader {
                             } else if (!error) {
 
                                 System.out.println(" Worker " + getId() + " ha subido chunk " + chunk.getId());
-
+                                
+                                System.out.println(chunk.getOffset()+" "+ tot_bytes_up + " "+ getUpload().getFile_size());
+                                
                                 if (chunk.getOffset() + tot_bytes_up < getUpload().getFile_size()) {
 
                                     getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
@@ -243,6 +245,9 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                                         getUpload().getMac_generator().secureNotify();
                                     }
+                                } else {
+                                    
+                                    throw new IOException("UPLOAD FAILED! (UPLOAD RESPONSE IS EMPTY)");
                                 }
                             }
                         }
@@ -298,7 +303,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
         getUpload().getMac_generator().secureNotify();
 
-        System.out.println("ChunkUploader " + getId() + " bye bye...");
+        System.out.println("ChunkUploaderMONO " + getId() + " bye bye...");
     }
 
 }

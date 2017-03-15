@@ -105,7 +105,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
     @Override
     public void run() {
-        System.out.println("ChunkUploader " + _id + " hello!");
+        System.out.println("ChunkUploader " + getId() + " hello! "+ getUpload().getFile_name());
 
         String worker_url = _upload.getUl_url();
         Chunk chunk;
@@ -238,6 +238,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                                 if (response.length() > 0) {
 
                                                     if (MegaAPI.checkMEGAError(response) != 0) {
+                                                        
+                                                        System.out.println("UPLOAD FAILED! (MEGA ERROR: " + MegaAPI.checkMEGAError(response) + ")");
+                                                        
                                                         error = true;
 
                                                     } else {
@@ -246,8 +249,11 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                                         _upload.setCompletion_handle(response);
                                                     }
+                                                    
+                                                } else {
+                                                    
+                                                    System.out.println("UPLOAD FAILED! (UPLOAD RESPONSE IS EMPTY)");
                                                 }
-
                                             }
                                         }
                                     }
