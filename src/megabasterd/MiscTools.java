@@ -260,7 +260,7 @@ public final class MiscTools {
     }
 
     public static void updateFont(javax.swing.JComponent label, Font font, int layout) {
-        label.setFont(font.deriveFont(layout, (int)Math.floor((float)label.getFont().getSize()*FONT_ZOOM_DEFAULT)));
+        label.setFont(font.deriveFont(layout, (float)Math.floor(label.getFont().getSize()*FONT_ZOOM_DEFAULT)));
     }
 
     public static String HashString(String algo, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
