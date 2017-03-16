@@ -70,8 +70,6 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
         }
     }
 
-    
-
     public long getLast_chunk_id_read() {
         return _last_chunk_id_read;
     }
@@ -173,7 +171,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                 }
 
                 if (!_exit && (!_upload.isStopped() || !_upload.getChunkworkers().isEmpty()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1))) {
-                    System.out.println(_bytes_read+"/"+_upload.getFile_size()+" METAMAC wait...");
+                    System.out.println(_bytes_read + "/" + _upload.getFile_size() + " METAMAC wait...");
                     secureWait();
                 }
             }

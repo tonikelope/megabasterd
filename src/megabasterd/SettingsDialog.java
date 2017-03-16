@@ -599,44 +599,46 @@ public final class SettingsDialog extends javax.swing.JDialog {
         default_dir_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
 
         rec_download_slots_label.setFont(new java.awt.Font("DejaVu Sans", 0, 16)); // NOI18N
-        rec_download_slots_label.setText("Note: it is recommended to disable MULTI SLOT.");
+        rec_download_slots_label.setText("Note: it is recommended not to enable MULTI SLOT.");
 
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
         downloads_panelLayout.setHorizontalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(downloads_panelLayout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator1)
-                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jSeparator3)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, downloads_panelLayout.createSequentialGroup()
                         .addComponent(change_download_dir_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(default_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jSeparator2)
-                    .addComponent(jSeparator3)
-                    .addComponent(jSeparator4)
-                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator4, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, downloads_panelLayout.createSequentialGroup()
                         .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(verify_file_down_checkbox)
-                            .addGroup(downloads_panelLayout.createSequentialGroup()
-                                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(max_down_speed_label)
-                                    .addComponent(limit_download_speed_checkbox))
-                                .addGap(34, 34, 34)
-                                .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(down_dir_label)
+                            .addComponent(multi_slot_down_checkbox)
+                            .addComponent(rec_download_slots_label)
+                            .addComponent(limit_download_speed_checkbox)
                             .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                                 .addGroup(downloads_panelLayout.createSequentialGroup()
                                     .addComponent(max_downloads_label)
-                                    .addGap(79, 79, 79)
+                                    .addGap(120, 120, 120)
                                     .addComponent(max_downloads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                 .addGroup(downloads_panelLayout.createSequentialGroup()
-                                    .addComponent(default_slots_down_label)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(default_slots_down_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(down_dir_label)
-                            .addComponent(multi_slot_down_checkbox)
-                            .addComponent(rec_download_slots_label))
+                                    .addGap(12, 12, 12)
+                                    .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                        .addGroup(downloads_panelLayout.createSequentialGroup()
+                                            .addComponent(max_down_speed_label)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                        .addGroup(downloads_panelLayout.createSequentialGroup()
+                                            .addComponent(default_slots_down_label)
+                                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(default_slots_down_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                         .addGap(0, 221, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -657,7 +659,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(max_downloads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(8, 8, 8)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(multi_slot_down_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -668,17 +670,16 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(4, 4, 4)
-                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(downloads_panelLayout.createSequentialGroup()
-                        .addComponent(limit_download_speed_checkbox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(max_down_speed_label))
-                    .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(15, 15, 15)
+                .addComponent(limit_download_speed_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(max_down_speed_label))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(3, 3, 3)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(verify_file_down_checkbox)
-                .addContainerGap(139, Short.MAX_VALUE))
+                .addContainerGap(151, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
@@ -734,22 +735,24 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(jSeparator6)
                     .addGroup(uploads_panelLayout.createSequentialGroup()
                         .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(rec_upload_slots_label)
                             .addComponent(multi_slot_up_checkbox)
                             .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addComponent(rec_upload_slots_label, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addGroup(uploads_panelLayout.createSequentialGroup()
-                                    .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(default_slots_up_label)
-                                        .addComponent(max_uploads_label))
+                                    .addGap(12, 12, 12)
+                                    .addComponent(default_slots_up_label)
                                     .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                        .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addComponent(limit_upload_speed_checkbox)
+                                    .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGroup(uploads_panelLayout.createSequentialGroup()
+                                    .addComponent(max_uploads_label)
+                                    .addGap(120, 120, 120)
+                                    .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                             .addGroup(uploads_panelLayout.createSequentialGroup()
+                                .addGap(12, 12, 12)
                                 .addComponent(max_up_speed_label)
-                                .addGap(174, 174, 174)
-                                .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(98, 98, 98)
+                                .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(limit_upload_speed_checkbox))
                         .addGap(0, 285, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -762,12 +765,12 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(2, 2, 2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(multi_slot_up_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(default_slots_up_label)
-                    .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(default_slots_up_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rec_upload_slots_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -778,7 +781,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_up_speed_label)
                     .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(278, Short.MAX_VALUE))
+                .addContainerGap(290, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Uploads", uploads_panel);
@@ -1100,13 +1103,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(299, Short.MAX_VALUE))
+                .addContainerGap(327, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Advanced", jPanel1);
 
         status.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        status.setForeground(new java.awt.Color(235, 126, 9));
+        status.setForeground(new java.awt.Color(9, 109, 235));
         status.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -1382,7 +1385,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                             password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                             password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-                                            
+
                                             user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(MiscTools.UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
                                         }
 
@@ -1555,19 +1558,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
             max_down_speed_spinner.setEnabled(true);
         }
     }//GEN-LAST:event_limit_download_speed_checkboxStateChanged
-
-    private void limit_upload_speed_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_limit_upload_speed_checkboxStateChanged
-
-        if (!limit_upload_speed_checkbox.isSelected()) {
-
-            max_up_speed_label.setEnabled(false);
-            max_up_speed_spinner.setEnabled(false);
-
-        } else {
-            max_up_speed_label.setEnabled(true);
-            max_up_speed_spinner.setEnabled(true);
-        }
-    }//GEN-LAST:event_limit_upload_speed_checkboxStateChanged
 
     private void encrypt_pass_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encrypt_pass_checkboxActionPerformed
 
@@ -1963,10 +1953,23 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_use_proxy_checkboxStateChanged
 
+    private void limit_upload_speed_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_limit_upload_speed_checkboxStateChanged
+
+        if (!limit_upload_speed_checkbox.isSelected()) {
+
+            max_up_speed_label.setEnabled(false);
+            max_up_speed_spinner.setEnabled(false);
+
+        } else {
+            max_up_speed_label.setEnabled(true);
+            max_up_speed_spinner.setEnabled(true);
+        }
+    }//GEN-LAST:event_limit_upload_speed_checkboxStateChanged
+
     private void multi_slot_up_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_multi_slot_up_checkboxActionPerformed
         // TODO add your handling code here:
-        
-         if (!multi_slot_up_checkbox.isSelected()) {
+
+        if (!multi_slot_up_checkbox.isSelected()) {
 
             default_slots_up_spinner.setEnabled(false);
             default_slots_up_label.setEnabled(false);
@@ -1976,7 +1979,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             default_slots_up_spinner.setEnabled(true);
             default_slots_up_label.setEnabled(true);
         }
-        
+
     }//GEN-LAST:event_multi_slot_up_checkboxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

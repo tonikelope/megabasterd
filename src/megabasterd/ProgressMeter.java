@@ -51,7 +51,6 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
         }
     }
 
-
     @Override
     public void run() {
         System.out.println("ProgressMeter hello!");

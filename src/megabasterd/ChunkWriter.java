@@ -74,7 +74,6 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
         }
     }
 
-
     public byte[] getByte_file_key() {
         return _byte_file_key;
     }

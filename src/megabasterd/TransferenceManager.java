@@ -146,8 +146,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         }
     }
 
-   
-
     public MainPanel getMain_panel() {
         return _main_panel;
     }

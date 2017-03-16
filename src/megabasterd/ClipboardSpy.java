@@ -85,7 +85,6 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
         }
     }
 
-  
     @Override
     public void run() {
 

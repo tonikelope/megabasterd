@@ -54,8 +54,6 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
         }
     }
 
-   
-
     public void setExit(boolean exit) {
         _exit = exit;
     }

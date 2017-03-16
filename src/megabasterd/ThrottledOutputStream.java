@@ -83,13 +83,13 @@ public final class ThrottledOutputStream extends OutputStream {
 
         if (slice_size != null && size < slice_size) {
 
-            if(!_stream_supervisor.isQueue_swapping()) {
-                
+            if (!_stream_supervisor.isQueue_swapping()) {
+
                 _stream_supervisor.getOutput_slice_queue().add(slice_size - size);
 
                 _stream_supervisor.secureNotifyAll();
             }
-            
+
             slice_size = size;
         }
     }

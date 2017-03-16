@@ -22,21 +22,21 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
     private volatile int _maxBytesPerSecInput;
 
     private volatile int _maxBytesPerSecOutput;
-    
+
     private volatile boolean _queue_swapping;
 
     private final Object _secure_notify_lock;
-    
+
     private final Object _timer_lock;
-    
-    private final ConcurrentHashMap <Thread,Boolean> _notified_threads;
+
+    private final ConcurrentHashMap<Thread, Boolean> _notified_threads;
 
     public StreamThrottlerSupervisor(int maxBytesPerSecInput, int maxBytesPerSecOutput, int slice_size) {
-  
+
         _secure_notify_lock = new Object();
-        
+
         _timer_lock = new Object();
-        
+
         _queue_swapping = false;
 
         _maxBytesPerSecInput = maxBytesPerSecInput;
@@ -48,7 +48,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
         _input_slice_queue = new ConcurrentLinkedQueue<>();
 
         _output_slice_queue = new ConcurrentLinkedQueue<>();
-        
+
         _notified_threads = new ConcurrentHashMap<>();
 
     }
@@ -80,20 +80,19 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
     public boolean isQueue_swapping() {
         return _queue_swapping;
     }
-    
 
     @Override
     public void secureWait() {
 
         synchronized (_secure_notify_lock) {
-            
+
             Thread current_thread = Thread.currentThread();
-            
-            if(!_notified_threads.containsKey(current_thread)) {
-                
+
+            if (!_notified_threads.containsKey(current_thread)) {
+
                 _notified_threads.put(current_thread, false);
             }
-            
+
             while (!_notified_threads.get(current_thread)) {
 
                 try {
@@ -112,8 +111,8 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
 
         synchronized (_secure_notify_lock) {
 
-            for(Map.Entry<Thread, Boolean> entry: _notified_threads.entrySet()) {
-                
+            for (Map.Entry<Thread, Boolean> entry : _notified_threads.entrySet()) {
+
                 entry.setValue(true);
             }
 
@@ -123,55 +122,54 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
 
     @Override
     public void run() {
-        
+
         Timer timer = new Timer();
-        
+
         TimerTask task = new TimerTask() {
-            
+
             @Override
-            public void run()
-            {
+            public void run() {
                 synchronized (_timer_lock) {
-                    
+
                     _timer_lock.notify();
                 }
             }
         };
-        
+
         ConcurrentLinkedQueue<Integer> old_input_queue, new_input_queue, old_output_queue, new_output_queue;
-        
+
         old_input_queue = new ConcurrentLinkedQueue<>();
 
         old_output_queue = new ConcurrentLinkedQueue<>();
-        
+
         new_input_queue = _resetSliceQueue(old_input_queue, _maxBytesPerSecInput);
-        
+
         new_output_queue = _resetSliceQueue(old_output_queue, _maxBytesPerSecOutput);
-        
+
         timer.schedule(task, 0, 1000);
 
         while (true) {
-            
+
             _queue_swapping = true;
 
             old_input_queue = _input_slice_queue;
-            
+
             old_output_queue = _output_slice_queue;
-            
+
             _input_slice_queue = new_input_queue;
-            
+
             _output_slice_queue = new_output_queue;
-            
+
             _queue_swapping = false;
-            
+
             secureNotifyAll();
-            
+
             new_input_queue = _resetSliceQueue(old_input_queue, _maxBytesPerSecInput);
-        
+
             new_output_queue = _resetSliceQueue(old_output_queue, _maxBytesPerSecOutput);
 
             synchronized (_timer_lock) {
-            
+
                 try {
                     _timer_lock.wait();
                 } catch (InterruptedException ex) {
@@ -180,11 +178,11 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
             }
         }
     }
-    
+
     private ConcurrentLinkedQueue<Integer> _resetSliceQueue(ConcurrentLinkedQueue<Integer> queue, int max_bytes) {
-        
-        if(max_bytes > 0) {
-            
+
+        if (max_bytes > 0) {
+
             queue.clear();
 
             int slice_num = (int) Math.floor((double) max_bytes / _slice_size);
@@ -198,8 +196,8 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
                 queue.add(max_bytes % _slice_size);
             }
         }
-        
+
         return queue;
     }
-    
+
 }

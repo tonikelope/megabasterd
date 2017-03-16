@@ -48,8 +48,6 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
         }
     }
 
-   
-
     public void attachSpeedMeter(SpeedMeter speed) {
         _speedmeters.add(speed);
     }

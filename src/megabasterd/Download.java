@@ -58,7 +58,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public static final Object CBC_LOCK = new Object();
     public static final boolean USE_SLOTS_DEFAULT = false;
     public static final int WORKERS_DEFAULT = 6;
-    
+
     private final MainPanel _main_panel;
     private volatile DownloadView _view = null; //lazy init
     private volatile SpeedMeter _speed_meter = null; //lazy init
@@ -1011,13 +1011,13 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     _finishing_download = true;
 
-                    if(_use_slots) {
-                        
+                    if (_use_slots) {
+
                         swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
 
                         swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner()) - 1);
                     }
-                    
+
                 } else if (!_finishing_download && _use_slots) {
 
                     swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), true);
@@ -1031,8 +1031,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
                 }
-                
-                if(_use_slots) {
+
+                if (_use_slots) {
                     getView().updateSlotsStatus();
                 }
             }
@@ -1416,8 +1416,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             _notified = false;
         }
     }
-
-    
 
     @Override
     public void setProgress(long progress) {

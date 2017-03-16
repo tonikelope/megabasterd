@@ -329,10 +329,10 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             @Override
             public void run() {
 
-                if(_upload.isUse_slots()) {
+                if (_upload.isUse_slots()) {
                     _upload.checkSlotsAndWorkers();
                 }
-                
+
             }
         });
     }//GEN-LAST:event_slots_spinnerStateChanged

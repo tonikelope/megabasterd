@@ -328,10 +328,10 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             @Override
             public void run() {
 
-                if(_download.isUse_slots()) {
-                     _download.checkSlotsAndWorkers();
+                if (_download.isUse_slots()) {
+                    _download.checkSlotsAndWorkers();
                 }
-               
+
             }
         });
     }//GEN-LAST:event_slots_spinnerStateChanged

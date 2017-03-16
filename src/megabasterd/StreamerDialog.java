@@ -4,15 +4,12 @@ import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.deflateURL;
 import static megabasterd.MiscTools.extractFirstMegaLinkFromString;
 import static megabasterd.MiscTools.extractStringFromClipboardContents;
 import static megabasterd.MiscTools.findFirstRegex;
@@ -188,19 +185,10 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                 } else {
 
-                    try {
-
-                        MiscTools.copyTextToClipboard(deflateURL(stream_link));
-
-                        JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\n(Remember to keep MegaBasterd running in background while playing)");
-
-                        dispose();
-
-                        getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
-
-                    } catch (IOException ex) {
-                        Logger.getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    MiscTools.copyTextToClipboard(stream_link);
+                    JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\n(Remember to keep MegaBasterd running in background while playing)");
+                    dispose();
+                    getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
                 }
 
             }

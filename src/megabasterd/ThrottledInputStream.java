@@ -203,13 +203,13 @@ public final class ThrottledInputStream extends InputStream {
 
         if (_slice_size != null && size < _slice_size) {
 
-            if(!_stream_supervisor.isQueue_swapping()) {
-                
+            if (!_stream_supervisor.isQueue_swapping()) {
+
                 _stream_supervisor.getInput_slice_queue().add(_slice_size - size);
 
                 _stream_supervisor.secureNotifyAll();
             }
-            
+
             _slice_size = size;
         }
     }
