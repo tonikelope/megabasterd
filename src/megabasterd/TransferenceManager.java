@@ -68,7 +68,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     abstract public void provision(Transference transference);
 
-    abstract public void remove(Transference transference);
+    abstract public void remove(Transference[] transference);
 
     public boolean isRemoving_transferences() {
         return _removing_transferences;
@@ -388,13 +388,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     @Override
                     public void run() {
 
-                        while (!getTransference_remove_queue().isEmpty()) {
+                        if (!getTransference_remove_queue().isEmpty()) {
 
-                            Transference transference = getTransference_remove_queue().poll();
+                            ArrayList<Transference> transferences = new ArrayList(getTransference_remove_queue());
 
-                            if (transference != null) {
-                                remove(transference);
-                            }
+                            getTransference_remove_queue().clear();
+
+                            remove(transferences.toArray(new Transference[transferences.size()]));
                         }
 
                         setRemoving_transferences(false);

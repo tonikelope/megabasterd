@@ -318,14 +318,7 @@ public final class MegaAPI {
 
                                 if (response.length() > 0) {
 
-                                    int mega_error;
-
-                                    if ((mega_error = checkMEGAError(response)) != 0) {
-                                        if (mega_error != -3) {
-                                            throw new MegaAPIException(String.valueOf(mega_error));
-                                        }
-
-                                    } else {
+                                    if (checkMEGAError(response) == 0) {
                                         error = false;
                                     }
                                 }

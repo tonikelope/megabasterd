@@ -2,10 +2,12 @@ package megabasterd;
 
 import java.awt.Component;
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
-import static megabasterd.DBTools.deleteUpload;
 import static megabasterd.MiscTools.HashString;
 
 /**
@@ -55,36 +57,43 @@ public final class UploadManager extends TransferenceManager {
     }
 
     @Override
-    public void remove(Transference upload) {
+    public void remove(Transference[] uploads) {
 
-        getScroll_panel().remove(((Upload) upload).getView());
+        ArrayList<String[]> delete_up = new ArrayList<>();
 
-        getTransference_waitstart_queue().remove(upload);
+        for (Transference u : uploads) {
 
-        getTransference_running_list().remove(upload);
+            getScroll_panel().remove(((Upload) u).getView());
 
-        getTransference_finished_queue().remove(upload);
+            getTransference_waitstart_queue().remove(u);
 
-        if (((Upload) upload).isProvision_ok()) {
+            getTransference_running_list().remove(u);
 
-            try {
-                deleteUpload(upload.getFile_name(), ((Upload) upload).getMa().getEmail());
-            } catch (SQLException ex) {
-                getLogger(UploadManager.class.getName()).log(SEVERE, null, ex);
-            }
+            getTransference_finished_queue().remove(u);
 
-            try {
+            if (((Upload) u).isProvision_ok()) {
 
-                File temp_file = new File("." + HashString("SHA-1", upload.getFile_name()));
+                delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getEmail()});
 
-                if (temp_file.exists()) {
+                try {
 
-                    temp_file.delete();
+                    File temp_file = new File("." + HashString("SHA-1", u.getFile_name()));
+
+                    if (temp_file.exists()) {
+
+                        temp_file.delete();
+                    }
+
+                } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
+                    getLogger(UploadManager.class.getName()).log(SEVERE, null, ex);
                 }
-
-            } catch (Exception ex) {
-                getLogger(UploadManager.class.getName()).log(SEVERE, null, ex);
             }
+        }
+
+        try {
+            DBTools.deleteUploads(delete_up.toArray(new String[delete_up.size()][]));
+        } catch (SQLException ex) {
+            getLogger(UploadManager.class.getName()).log(SEVERE, null, ex);
         }
 
         secureNotify();

@@ -6,6 +6,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
@@ -15,6 +17,8 @@ import static java.util.logging.Logger.getLogger;
  * @author tonikelope
  */
 public final class DBTools {
+    
+    public static final int MAX_TRANSFERENCES_QUERY = 100;
 
     public static synchronized void setupSqliteTables() throws SQLException {
 
@@ -63,6 +67,32 @@ public final class DBTools {
         }
     }
 
+    public static synchronized void deleteDownloads(String[] urls) throws SQLException {
+
+        for(int n=0, t=0; t < urls.length; n++) {
+            
+            String[] sub_array = Arrays.copyOfRange(urls, n*MAX_TRANSFERENCES_QUERY, t+Math.min(MAX_TRANSFERENCES_QUERY, urls.length-t));
+            
+            t+=sub_array.length;
+            
+            String whereClause = String.format("url in (%s)", String.join(",", Collections.nCopies(sub_array.length, "?")));
+
+            try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE " + whereClause)) {
+
+                int i=1;
+                
+                for (String value:sub_array) {
+
+                    ps.setString(i, value);
+                    
+                    i++;
+                }
+
+                ps.executeUpdate();
+            }
+        }
+    }
+
     public static synchronized void insertUpload(String filename, String email, String parent_node, String ul_key, String root_node, String share_key, String folder_link) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link) VALUES (?,?,?,?,?,?,?)")) {
@@ -101,6 +131,34 @@ public final class DBTools {
             ps.setString(2, email);
 
             ps.executeUpdate();
+        }
+    }
+
+    public static synchronized void deleteUploads(String[][] uploads) throws SQLException {
+
+        for(int n=0, t=0; t < uploads.length; n++) {
+            
+            String[][] sub_array = Arrays.copyOfRange(uploads, n*MAX_TRANSFERENCES_QUERY, t+Math.min(MAX_TRANSFERENCES_QUERY, uploads.length-t));
+            
+            t+=sub_array.length;
+            
+            String whereClause = String.join(" OR ", Collections.nCopies(sub_array.length, "(filename=? AND email=?)"));
+
+            try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM uploads WHERE " + whereClause)) {
+
+                int i=1;
+                
+                for(String[] pair:sub_array) {
+                    
+                    ps.setString(i, pair[0]);
+
+                    ps.setString(i + 1, pair[1]);
+                    
+                    i+=2;
+                }
+
+                ps.executeUpdate();
+            }
         }
     }
 

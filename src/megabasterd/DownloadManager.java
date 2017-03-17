@@ -2,9 +2,10 @@ package megabasterd;
 
 import java.awt.Component;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
-import static megabasterd.DBTools.deleteDownload;
+import static megabasterd.DBTools.deleteDownloads;
 import static megabasterd.MainPanel.THREAD_POOL;
 
 public final class DownloadManager extends TransferenceManager {
@@ -15,23 +16,30 @@ public final class DownloadManager extends TransferenceManager {
     }
 
     @Override
-    public void remove(Transference download) {
+    public void remove(Transference[] downloads) {
 
-        getScroll_panel().remove(((Download) download).getView());
+        ArrayList<String> delete_down = new ArrayList<>();
 
-        getTransference_waitstart_queue().remove(download);
+        for (Transference d : downloads) {
 
-        getTransference_running_list().remove(download);
+            getScroll_panel().remove(((Download) d).getView());
 
-        getTransference_finished_queue().remove(download);
+            getTransference_waitstart_queue().remove(d);
 
-        if (((Download) download).isProvision_ok()) {
+            getTransference_running_list().remove(d);
 
-            try {
-                deleteDownload(((Download) download).getUrl());
-            } catch (SQLException ex) {
-                getLogger(DownloadManager.class.getName()).log(SEVERE, null, ex);
+            getTransference_finished_queue().remove(d);
+
+            if (((Download) d).isProvision_ok()) {
+
+                delete_down.add(((Download) d).getUrl());
             }
+        }
+
+        try {
+            deleteDownloads(delete_down.toArray(new String[delete_down.size()]));
+        } catch (SQLException ex) {
+            getLogger(DownloadManager.class.getName()).log(SEVERE, null, ex);
         }
 
         secureNotify();
