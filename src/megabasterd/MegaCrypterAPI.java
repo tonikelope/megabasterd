@@ -210,12 +210,20 @@ public final class MegaCrypterAPI {
 
             noexpire_token = aux[1];
         }
-
-        String pass;
-
-        Object pass_val = res_map.get("pass");
         
-        pass = (String) pass_val;
+        
+        Object pass_val = res_map.get("pass");
+
+        String pass=null;
+        
+        if (pass_val instanceof Boolean) {
+
+            pass = null;
+
+        } else if (pass_val instanceof String) {
+
+            pass = (String)pass_val;
+        }
             
         System.out.println("PASS: "+pass);
         
