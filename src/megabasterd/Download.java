@@ -764,6 +764,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         getView().printStatusNormal("Provisioning download, please wait...");
 
         swingReflectionInvoke("setVisible", getView().getCopy_link_button(), true);
+        swingReflectionInvoke("setVisible", getView().getOpen_folder_button(), true);
 
         String[] file_info;
 

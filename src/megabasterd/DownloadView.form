@@ -53,10 +53,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="file_name_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="copy_link_button" alignment="1" min="-2" max="-2" attributes="0"/>
-                          <Component id="slot_status_label" alignment="1" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="slot_status_label" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -64,6 +61,12 @@
                           <Component id="file_size_label" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="1" attributes="0">
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="open_folder_button" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="copy_link_button" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -89,7 +92,10 @@
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="slot_status_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="copy_link_button" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="copy_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="open_folder_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -290,6 +296,18 @@
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JButton" name="open_folder_button">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="16" style="1"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Open Folder"/>
+        <Property name="doubleBuffered" type="boolean" value="true"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="open_folder_buttonActionPerformed"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

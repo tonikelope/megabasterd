@@ -1,7 +1,12 @@
 package megabasterd;
 
 import java.awt.Color;
+import java.awt.Desktop;
 import java.awt.Font;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -25,6 +30,10 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
     public JButton getCopy_link_button() {
         return copy_link_button;
+    }
+    
+    public JButton getOpen_folder_button() {
+        return open_folder_button;
     }
 
     public JLabel getFile_name_label() {
@@ -102,6 +111,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                 updateFont(file_size_label, FONT_DEFAULT, Font.BOLD);
                 updateFont(close_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(copy_link_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(open_folder_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(restart_button, FONT_DEFAULT, Font.PLAIN);
                 updateFont(slot_status_label, FONT_DEFAULT, Font.BOLD);
             }
@@ -113,7 +123,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         swingReflectionInvoke("setForeground", speed_label, new Color(0, 128, 255));
 
-        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, remtime_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label}, false);
+        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, remtime_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label, open_folder_button}, false);
 
     }
 
@@ -145,6 +155,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         restart_button = new javax.swing.JButton();
         file_size_label = new javax.swing.JLabel();
         slot_status_label = new javax.swing.JLabel();
+        open_folder_button = new javax.swing.JButton();
 
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 4, true));
 
@@ -246,6 +257,15 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         slot_status_label.setDoubleBuffered(true);
 
+        open_folder_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        open_folder_button.setText("Open Folder");
+        open_folder_button.setDoubleBuffered(true);
+        open_folder_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                open_folder_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -275,14 +295,17 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(file_name_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(copy_link_button, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(slot_status_label, javax.swing.GroupLayout.Alignment.TRAILING)))
+                        .addComponent(slot_status_label))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(remtime_label)
                             .addComponent(file_size_label))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(open_folder_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(copy_link_button)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -302,7 +325,9 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(slot_status_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(copy_link_button)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(copy_link_button)
+                            .addComponent(open_folder_button))))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(remtime_label)
                 .addGap(6, 6, 6)
@@ -364,6 +389,18 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         _download.pause();
     }//GEN-LAST:event_pause_buttonActionPerformed
+
+    private void open_folder_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_open_folder_buttonActionPerformed
+
+        if (Desktop.isDesktopSupported()) {
+            try {
+                Desktop.getDesktop().open(new File(_download.getDownload_path()));
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(_download.getMain_panel().getView(), "No se ha podido abrir la carpeta.");
+            }
+        }
+
+    }//GEN-LAST:event_open_folder_buttonActionPerformed
 
     @Override
     public void pause() {
@@ -493,6 +530,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     private javax.swing.JLabel file_name_label;
     private javax.swing.JLabel file_size_label;
     private javax.swing.JCheckBox keep_temp_checkbox;
+    private javax.swing.JButton open_folder_button;
     private javax.swing.JButton pause_button;
     private javax.swing.JProgressBar progress_pbar;
     private javax.swing.JLabel remtime_label;
