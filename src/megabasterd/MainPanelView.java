@@ -27,7 +27,7 @@ import static megabasterd.CryptTools.decryptMegaDownloaderLink;
 import static megabasterd.DBTools.deleteELCAccount;
 import static megabasterd.DBTools.deleteMegaAccount;
 import static megabasterd.MainPanel.FONT_DEFAULT;
-import static megabasterd.MainPanel.ICON_FILE;
+import static megabasterd.MainPanel.ICON_FILE_MED;
 import static megabasterd.MainPanel.VERSION;
 import static megabasterd.MiscTools.findAllRegex;
 import static megabasterd.MiscTools.findFirstRegex;
@@ -117,7 +117,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         setTitle("MegaBasterd " + VERSION);
 
-        setIconImage(new ImageIcon(getClass().getResource(ICON_FILE)).getImage());
+        setIconImage(new ImageIcon(getClass().getResource(ICON_FILE_MED)).getImage());
 
         MiscTools.swingInvokeIt(new Runnable() {
 
