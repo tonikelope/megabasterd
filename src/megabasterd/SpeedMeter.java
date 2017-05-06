@@ -1,5 +1,7 @@
 package megabasterd;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
@@ -8,6 +10,7 @@ import static megabasterd.MiscTools.formatBytes;
 public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int SLEEP = 3000;
+    public static final int MAX_SPEED_REC = 20;
     private long _progress;
     private final Transference _transference;
     private final GlobalSpeedMeter _gspeed;
@@ -15,6 +18,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
     private boolean _notified;
+    private final Queue<Double> _speeds;
 
     SpeedMeter(Transference transference, GlobalSpeedMeter gspeed) {
         _notified = false;
@@ -24,6 +28,28 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
         _lastSpeed = 0;
         _gspeed = gspeed;
         _exit = false;
+        _speeds = new ArrayDeque<>();
+    }
+
+    private Double calculateAverageSpeed(Double speed) {
+
+        _speeds.add(speed);
+
+        if (_speeds.size() > MAX_SPEED_REC) {
+
+            _speeds.poll();
+        }
+
+        double total = 0, weight = 0.1, total_weight = 0;
+
+        for (Double sp : _speeds) {
+
+            total += sp * weight;
+            total_weight += weight;
+            weight += 0.1;
+        }
+
+        return total / total_weight;
     }
 
     @Override
@@ -106,7 +132,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
                         double sleep_time = ((double) SpeedMeter.SLEEP * (no_data_count + 1)) / 1000;
 
-                        double current_speed = (_progress - last_progress) / sleep_time;
+                        double current_speed = this.calculateAverageSpeed((_progress - last_progress) / sleep_time);
 
                         last_progress = _progress;
 
