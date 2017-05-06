@@ -67,6 +67,7 @@ public final class MainPanel {
     public static final int WATCHDOG_PORT = 1338;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0";
     public static final String ICON_FILE = "mbasterd_mini.png";
+    public static final String ICON_FILE_MED = "mbasterd_med.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
     public static final Font FONT_DEFAULT = createAndRegisterFont("UbuntuMono-R.ttf");
     public static final double FONT_ZOOM_DEFAULT = 1.04;
