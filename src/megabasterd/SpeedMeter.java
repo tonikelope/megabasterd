@@ -10,7 +10,7 @@ import static megabasterd.MiscTools.formatBytes;
 public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int SLEEP = 3000;
-    public static final int MAX_SPEED_REC = 20;
+    public static final int MAX_SPEED_REC = 40;
     private long _progress;
     private final Transference _transference;
     private final GlobalSpeedMeter _gspeed;
@@ -46,7 +46,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
             total += sp * weight;
             total_weight += weight;
-            weight += 0.1;
+            weight *= 2;
         }
 
         return total / total_weight;

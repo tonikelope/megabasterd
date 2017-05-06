@@ -1,5 +1,7 @@
 package megabasterd;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
@@ -9,16 +11,19 @@ import static megabasterd.MiscTools.swingReflectionInvoke;
 
 public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
+    public static final int MAX_SPEED_REC = 40;
     private final JLabel _speed_label;
     private final ConcurrentLinkedQueue<SpeedMeter> _speedmeters;
     private final Object _secure_notify_lock;
     private boolean _notified;
+    private final Queue<Long> _speeds;
 
     GlobalSpeedMeter(JLabel sp_label) {
         _notified = false;
         _secure_notify_lock = new Object();
         _speed_label = sp_label;
         _speedmeters = new ConcurrentLinkedQueue<>();
+        _speeds = new ArrayDeque<>();
     }
 
     @Override
@@ -63,6 +68,24 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
         for (SpeedMeter speed : _speedmeters) {
             sp += speed.getLastSpeed();
         }
+        
+        _speeds.add(sp);
+
+        if (_speeds.size() > MAX_SPEED_REC) {
+
+            _speeds.poll();
+        }
+
+        double total = 0, weight = 0.1, total_weight = 0;
+
+        for (Long speed : _speeds) {
+
+            total += (double)speed * weight;
+            total_weight += weight;
+            weight *= 2;
+        }
+        
+        sp = Math.round(total / total_weight);
 
         return sp;
     }
