@@ -57,7 +57,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
     public static final Object CBC_LOCK = new Object();
     public static final boolean USE_SLOTS_DEFAULT = false;
-    public static final int WORKERS_DEFAULT = 6;
+    public static final int WORKERS_DEFAULT = 4;
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view = null; //lazy init

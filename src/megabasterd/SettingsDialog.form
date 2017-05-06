@@ -497,7 +497,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="DejaVu Sans" size="16" style="0"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: it is recommended to enable MULTI SLOT with 2 slots."/>
+                <Property name="text" type="java.lang.String" value="Note: it is recommended to enable MULTI SLOT with 4 slots."/>
               </Properties>
             </Component>
           </SubComponents>

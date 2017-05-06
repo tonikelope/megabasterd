@@ -722,7 +722,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         rec_upload_slots_label.setFont(new java.awt.Font("DejaVu Sans", 0, 16)); // NOI18N
-        rec_upload_slots_label.setText("Note: it is recommended to enable MULTI SLOT with 2 slots.");
+        rec_upload_slots_label.setText("Note: it is recommended to enable MULTI SLOT with 4 slots.");
 
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
