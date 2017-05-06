@@ -302,7 +302,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="16" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Open Folder"/>
+        <Property name="text" type="java.lang.String" value="Open folder"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
       <Events>

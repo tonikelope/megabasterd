@@ -29,7 +29,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     public JButton getCopy_link_button() {
         return copy_link_button;
     }
-    
+
     public JButton getOpen_folder_button() {
         return open_folder_button;
     }
@@ -256,7 +256,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         slot_status_label.setDoubleBuffered(true);
 
         open_folder_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        open_folder_button.setText("Open Folder");
+        open_folder_button.setText("Open folder");
         open_folder_button.setDoubleBuffered(true);
         open_folder_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -392,9 +392,9 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         if (Desktop.isDesktopSupported()) {
             try {
-                Desktop.getDesktop().open(new File(_download.getDownload_path()));
+                Desktop.getDesktop().open(new File(_download.getDownload_path() + "/" + _download.getFile_name()).getParentFile());
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(_download.getMain_panel().getView(), "No se ha podido abrir la carpeta.");
+                JOptionPane.showMessageDialog(_download.getMain_panel().getView(), "Folder not found");
             }
         }
 
