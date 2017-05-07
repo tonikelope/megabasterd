@@ -7,11 +7,11 @@ import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import javax.swing.JLabel;
 import static megabasterd.MiscTools.formatBytes;
-import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 
 public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int MAX_SPEED_REC = 10;
+    public static final int MAX_SPEED_REC = 20;
     private final JLabel _speed_label;
     private final ConcurrentLinkedQueue<SpeedMeter> _speedmeters;
     private final Object _secure_notify_lock;
@@ -69,6 +69,11 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
             sp += speed.getLastSpeed();
         }
 
+        return sp;
+    }
+
+    private long calcAverageSpeed(long sp) {
+
         _speeds.add(sp);
 
         if (_speeds.size() > MAX_SPEED_REC) {
@@ -76,37 +81,43 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
             _speeds.poll();
         }
 
-        double total = 0;
+        double total = 0, weight = 0.1, total_weight = 0;
 
         for (Long speed : _speeds) {
 
-            total += (double) speed;
+            total_weight += weight;
+
+            total += weight * speed;
+
+            weight += 0.1;
         }
 
-        sp = Math.round(total / _speeds.size());
+        sp = Math.round(total / total_weight);
 
         return sp;
     }
 
     @Override
     public void run() {
-        long sp;
+        long sp, avgSp;
 
-        swingReflectionInvoke("setText", _speed_label, "------");
-        swingReflectionInvoke("setVisible", _speed_label, true);
+        swingReflectionInvokeAndWait("setText", _speed_label, "------");
+        swingReflectionInvokeAndWait("setVisible", _speed_label, true);
 
         while (true) {
             secureWait();
 
             sp = calcSpeed();
 
+            avgSp = calcAverageSpeed(sp);
+
             if (sp > 0) {
 
-                swingReflectionInvoke("setText", _speed_label, formatBytes(sp) + "/s");
+                swingReflectionInvokeAndWait("setText", _speed_label, formatBytes(avgSp) + "/s");
 
             } else {
-                swingReflectionInvoke("setText", _speed_label, "------");
 
+                swingReflectionInvokeAndWait("setText", _speed_label, "------");
             }
         }
 

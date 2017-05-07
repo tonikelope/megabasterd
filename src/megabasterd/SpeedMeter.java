@@ -1,5 +1,7 @@
 package megabasterd;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
@@ -8,7 +10,7 @@ import static megabasterd.MiscTools.formatBytes;
 public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int SLEEP = 3000;
-    public static final int MAX_SPEED_REC = 10;
+    public static final int MAX_SPEED_REC = 20;
     private long _progress;
     private final Transference _transference;
     private final GlobalSpeedMeter _gspeed;
@@ -16,6 +18,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
     private boolean _notified;
+    private final Queue<Long> _speeds;
 
     SpeedMeter(Transference transference, GlobalSpeedMeter gspeed) {
         _notified = false;
@@ -25,6 +28,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
         _lastSpeed = 0;
         _gspeed = gspeed;
         _exit = false;
+        _speeds = new ArrayDeque<>();
     }
 
     @Override
@@ -72,11 +76,36 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
         _progress = _transference.getProgress();
     }
 
+    private long calcAverageSpeed(long sp) {
+
+        _speeds.add(sp);
+
+        if (_speeds.size() > MAX_SPEED_REC) {
+
+            _speeds.poll();
+        }
+
+        double total = 0, weight = 0.1, total_weight = 0;
+
+        for (Long speed : _speeds) {
+
+            total_weight += weight;
+
+            total += weight * speed;
+
+            weight += 0.1;
+        }
+
+        sp = Math.round(total / total_weight);
+
+        return sp;
+    }
+
     @Override
     public void run() {
         System.out.println("SpeedMeter hello!");
 
-        long last_progress = _progress, sp;
+        long last_progress = _progress, sp, avgSp;
         int no_data_count;
 
         _transference.getView().updateSpeed("------", true);
@@ -113,11 +142,13 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
                         sp = Math.round(current_speed);
 
+                        avgSp = calcAverageSpeed(sp);
+
                         if (sp > 0) {
 
                             _transference.getView().updateSpeed(formatBytes(sp) + "/s", true);
 
-                            _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - _progress) / sp)), true);
+                            _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - _progress) / avgSp)), true);
 
                             setLastSpeed(sp);
 
