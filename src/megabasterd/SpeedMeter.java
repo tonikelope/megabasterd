@@ -162,11 +162,16 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
                         _transference.getView().updateSpeed("------", true);
 
                         _transference.getView().updateRemainingTime("--d --:--:--", true);
+                        
+                        if(this.getLastSpeed() > 0) {
+                            
+                            double last_speed = (double)getLastSpeed()*0.5;
+                        
+                            setLastSpeed(Math.round(last_speed));
 
-                        setLastSpeed(0);
-
-                        _gspeed.secureNotify();
-
+                            _gspeed.secureNotify();
+                        }
+                        
                         no_data_count++;
                     }
                 }
