@@ -10,7 +10,7 @@ import static megabasterd.MiscTools.formatBytes;
 public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int SLEEP = 3000;
-    public static final int MAX_SPEED_REC = 20;
+    public static final int MAX_SPEED_REC = 10;
     private long _progress;
     private final Transference _transference;
     private final GlobalSpeedMeter _gspeed;
@@ -150,7 +150,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
                             _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - _progress) / avgSp)), true);
 
-                            setLastSpeed(sp);
+                            setLastSpeed(avgSp);
 
                             _gspeed.secureNotify();
                         }
@@ -159,18 +159,24 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
                     } else {
 
-                        _transference.getView().updateSpeed("------", true);
-
-                        _transference.getView().updateRemainingTime("--d --:--:--", true);
+                        avgSp = calcAverageSpeed(Math.round(getLastSpeed()*0.7));
                         
-                        if(this.getLastSpeed() > 0) {
+                        if (avgSp > 0) {
+
+                            _transference.getView().updateSpeed(formatBytes(avgSp) + "/s *", true);
+
+                            _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - _progress) / avgSp)), true);
+                        
+                        } else {
                             
-                            double last_speed = (double)getLastSpeed()*0.5;
-                        
-                            setLastSpeed(Math.round(last_speed));
+                            _transference.getView().updateSpeed("------", true);
 
-                            _gspeed.secureNotify();
+                            _transference.getView().updateRemainingTime("--d --:--:--", true);
                         }
+                        
+                        setLastSpeed(avgSp);
+
+                        _gspeed.secureNotify();
                         
                         no_data_count++;
                     }

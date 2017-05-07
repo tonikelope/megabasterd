@@ -11,7 +11,6 @@ import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 
 public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int MAX_SPEED_REC = 20;
     private final JLabel _speed_label;
     private final ConcurrentLinkedQueue<SpeedMeter> _speedmeters;
     private final Object _secure_notify_lock;
@@ -72,31 +71,6 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
         return sp;
     }
 
-    private long calcAverageSpeed(long sp) {
-
-        _speeds.add(sp);
-
-        if (_speeds.size() > MAX_SPEED_REC) {
-
-            _speeds.poll();
-        }
-
-        double total = 0, weight = 0.1, total_weight = 0;
-
-        for (Long speed : _speeds) {
-
-            total_weight += weight;
-
-            total += weight * speed;
-
-            weight += 0.1;
-        }
-
-        sp = Math.round(total / total_weight);
-
-        return sp;
-    }
-
     @Override
     public void run() {
         long sp, avgSp;
@@ -109,11 +83,9 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
 
             sp = calcSpeed();
 
-            avgSp = calcAverageSpeed(sp);
-
             if (sp > 0) {
 
-                swingReflectionInvokeAndWait("setText", _speed_label, formatBytes(avgSp) + "/s");
+                swingReflectionInvokeAndWait("setText", _speed_label, formatBytes(sp) + "/s");
 
             } else {
 
