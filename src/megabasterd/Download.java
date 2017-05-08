@@ -524,8 +524,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         swingReflectionInvoke("setVisible", getView().getPause_button(), true);
                         swingReflectionInvoke("setVisible", getView().getProgress_pbar(), true);
-                        
-                        getMain_panel().getDownload_manager().clearSpeedBuffers();
 
                         secureWait();
 
@@ -560,8 +558,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         System.out.println("Downloader thread pool finished!");
                         
-                        getMain_panel().getDownload_manager().clearSpeedBuffers();
-
                         getMain_panel().getGlobal_dl_speed().detachSpeedMeter(getSpeed_meter());
 
                         getMain_panel().getGlobal_dl_speed().secureNotify();

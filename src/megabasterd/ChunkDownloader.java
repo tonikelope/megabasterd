@@ -98,6 +98,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         boolean error;
 
         System.out.println("Worker [" + _id + "]: let's do some work!");
+        
+        _download.getMain_panel().getDownload_manager().clearSpeedBuffers();
 
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
             conta_error = 0;
@@ -227,6 +229,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _download.stopThisSlot(this);
 
         _download.getChunkwriter().secureNotify();
+        
+        _download.getMain_panel().getDownload_manager().clearSpeedBuffers();
 
         System.out.println("Worker [" + _id + "]: bye bye");
     }

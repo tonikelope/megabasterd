@@ -753,9 +753,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 swingReflectionInvoke("setVisible", getView().getPause_button(), true);
 
                 swingReflectionInvoke("setVisible", getView().getProgress_pbar(), true);
-                
-                getMain_panel().getUpload_manager().clearSpeedBuffers();
-
+         
                 secureWait();
 
                 System.out.println("Uploader llamando a shutdown del pool...");
@@ -791,8 +789,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 System.out.println("Uploader thread pool finished!");
                 
-                getMain_panel().getUpload_manager().clearSpeedBuffers();
-
                 getMain_panel().getGlobal_up_speed().detachSpeedMeter(getSpeed_meter());
 
                 getMain_panel().getGlobal_up_speed().secureNotify();
