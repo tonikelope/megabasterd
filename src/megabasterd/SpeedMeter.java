@@ -10,7 +10,8 @@ import static megabasterd.MiscTools.formatBytes;
 public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int SLEEP = 3000;
-    public static final int MAX_SPEED_REC = 10;
+    public static final int TRANS_SPEED_BUFFER_MAX_SIZE = 20;
+    public static final double TRANS_COOLING_FACTOR = 0.3;
     private long _progress;
     private final Transference _transference;
     private final GlobalSpeedMeter _gspeed;
@@ -80,7 +81,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
         _speeds.add(sp);
 
-        if (_speeds.size() > MAX_SPEED_REC) {
+        if (_speeds.size() > TRANS_SPEED_BUFFER_MAX_SIZE) {
 
             _speeds.poll();
         }
@@ -159,7 +160,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
                     } else {
 
-                        avgSp = calcAverageSpeed(Math.round(getLastSpeed()*0.7));
+                        avgSp = calcAverageSpeed(Math.round(getLastSpeed()*TRANS_COOLING_FACTOR));
                         
                         if (avgSp > 0) {
 
