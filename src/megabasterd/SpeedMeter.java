@@ -10,7 +10,7 @@ import static megabasterd.MiscTools.formatBytes;
 public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int SLEEP = 3000;
-    public static final int TRANS_SPEED_BUFFER_MAX_SIZE = 20;
+    public static final int SPEED_BUFFER_MAX_SIZE = 20;
     public static final double TRANS_COOLING_FACTOR = 0.3;
     private long _progress;
     private final Transference _transference;
@@ -20,6 +20,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
     private final Object _secure_notify_lock;
     private boolean _notified;
     private final Queue<Long> _speeds;
+    private volatile boolean _clearSpeedBuffer;
 
     SpeedMeter(Transference transference, GlobalSpeedMeter gspeed) {
         _notified = false;
@@ -30,6 +31,12 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
         _gspeed = gspeed;
         _exit = false;
         _speeds = new ArrayDeque<>();
+        _clearSpeedBuffer = false;
+    }
+
+    public void setClearSpeedBuffer() {
+
+        _clearSpeedBuffer = true;
     }
 
     @Override
@@ -79,9 +86,16 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
     private long calcAverageSpeed(long sp) {
 
+        if (_clearSpeedBuffer) {
+
+            _speeds.clear();
+
+            _clearSpeedBuffer = false;
+        }
+
         _speeds.add(sp);
 
-        if (_speeds.size() > TRANS_SPEED_BUFFER_MAX_SIZE) {
+        if (_speeds.size() > SPEED_BUFFER_MAX_SIZE) {
 
             _speeds.poll();
         }
@@ -160,25 +174,25 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
                     } else {
 
-                        avgSp = calcAverageSpeed(Math.round(getLastSpeed()*TRANS_COOLING_FACTOR));
-                        
+                        avgSp = calcAverageSpeed(Math.round(getLastSpeed() * TRANS_COOLING_FACTOR));
+
                         if (avgSp > 0) {
 
                             _transference.getView().updateSpeed(formatBytes(avgSp) + "/s *", true);
 
                             _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - _progress) / avgSp)), true);
-                        
+
                         } else {
-                            
+
                             _transference.getView().updateSpeed("------", true);
 
                             _transference.getView().updateRemainingTime("--d --:--:--", true);
                         }
-                        
+
                         setLastSpeed(avgSp);
 
                         _gspeed.secureNotify();
-                        
+
                         no_data_count++;
                     }
                 }

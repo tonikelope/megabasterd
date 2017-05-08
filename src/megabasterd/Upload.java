@@ -753,6 +753,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 swingReflectionInvoke("setVisible", getView().getPause_button(), true);
 
                 swingReflectionInvoke("setVisible", getView().getProgress_pbar(), true);
+                
+                getMain_panel().getUpload_manager().clearSpeedBuffers();
 
                 secureWait();
 

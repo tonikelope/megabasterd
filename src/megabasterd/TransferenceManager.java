@@ -101,6 +101,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public ConcurrentLinkedQueue<Runnable> getTransference_preprocess_queue() {
         return _transference_preprocess_queue;
     }
+    
+    public void clearSpeedBuffers() {
+        
+        for (Transference trans : getTransference_running_list()) {
+
+            trans.getSpeed_meter().setClearSpeedBuffer();
+        }
+    }
 
     public void addPre_count(int pre_count) {
 
@@ -421,7 +429,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                 start(transference);
                             }
                         }
-
+                        
                         setStarting_transferences(false);
 
                         secureNotify();
