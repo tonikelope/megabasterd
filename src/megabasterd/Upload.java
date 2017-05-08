@@ -511,8 +511,10 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             getView().pause();
         }
+        
+        _main_panel.getUpload_manager().clearSpeedBuffers();
 
-        getMain_panel().getUpload_manager().secureNotify();
+        _main_panel.getUpload_manager().secureNotify();
     }
 
     @Override

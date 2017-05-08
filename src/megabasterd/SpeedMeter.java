@@ -121,15 +121,15 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
         System.out.println("SpeedMeter hello!");
 
         long last_progress = _progress, sp, avgSp;
-        int no_data_count;
+        int no_data_count=0;
 
         _transference.getView().updateSpeed("------", true);
         _transference.getView().updateRemainingTime("--d --:--:--", true);
 
-        try {
-            no_data_count = 0;
-
-            while (!_exit) {
+        while (!_exit) {
+                
+            try {
+                
                 Thread.sleep(SpeedMeter.SLEEP * (no_data_count + 1));
 
                 if (!_exit) {
@@ -184,7 +184,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
                         } else {
 
-                            _transference.getView().updateSpeed("------", true);
+                            _transference.getView().updateSpeed("------ *", true);
 
                             _transference.getView().updateRemainingTime("--d --:--:--", true);
                         }
@@ -196,11 +196,10 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
                         no_data_count++;
                     }
                 }
+            } catch (InterruptedException ex) {
+                
             }
-        } catch (InterruptedException ex) {
-
         }
-
     }
 
     private String calculateRemTime(long seconds) {

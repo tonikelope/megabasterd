@@ -346,6 +346,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             getView().pause();
         }
 
+        _main_panel.getDownload_manager().clearSpeedBuffers();
+        
         _main_panel.getDownload_manager().secureNotify();
     }
 
