@@ -790,6 +790,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 }
 
                 System.out.println("Uploader thread pool finished!");
+                
+                getMain_panel().getUpload_manager().clearSpeedBuffers();
 
                 getMain_panel().getGlobal_up_speed().detachSpeedMeter(getSpeed_meter());
 
@@ -928,7 +930,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         if (_status_error) {
             swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
         }
-
+        
         System.out.println("Uploader BYE BYE");
     }
 
