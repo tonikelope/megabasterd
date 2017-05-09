@@ -327,8 +327,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             setPaused_workers(0);
 
-            getSpeed_meter().secureNotify();
-
             synchronized (_workers_lock) {
 
                 for (ChunkDownloader downloader : getChunkworkers()) {
@@ -345,8 +343,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             getView().pause();
         }
-
-        _main_panel.getDownload_manager().clearSpeedBuffers();
+        
+  
+        
+        _main_panel.getGlobal_dl_speed().secureNotify();
         
         _main_panel.getDownload_manager().secureNotify();
     }
@@ -485,8 +485,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         _thread_pool.execute(getSpeed_meter());
 
-                        getMain_panel().getGlobal_dl_speed().attachSpeedMeter(getSpeed_meter());
-
                         getMain_panel().getGlobal_dl_speed().secureNotify();
 
                         if (_use_slots) {
@@ -532,12 +530,12 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         _thread_pool.shutdown();
 
                         System.out.println("Chunkdownloaders finished!");
-
+                        
                         getSpeed_meter().setExit(true);
 
+                        getMain_panel().getGlobal_dl_speed().secureNotify();
+                        
                         getProgress_meter().setExit(true);
-
-                        getSpeed_meter().secureNotify();
 
                         getProgress_meter().secureNotify();
 
@@ -560,10 +558,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         System.out.println("Downloader thread pool finished!");
                         
-                        getMain_panel().getGlobal_dl_speed().detachSpeedMeter(getSpeed_meter());
-
-                        getMain_panel().getGlobal_dl_speed().secureNotify();
-
                         _output_stream.close();
 
                         swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(), getView().getRemtime_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner(), getView().getKeep_temp_checkbox()}, false);

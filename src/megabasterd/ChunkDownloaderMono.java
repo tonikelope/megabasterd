@@ -36,8 +36,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         System.out.println("Worker [" + getId() + "]: let's do some work!");
         
-        getDownload().getMain_panel().getDownload_manager().clearSpeedBuffers();
-
+     
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
             conta_error = 0;
 
@@ -171,7 +170,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         getDownload().getChunkwriter().secureNotify();
         
-        getDownload().getMain_panel().getDownload_manager().clearSpeedBuffers();
+   
 
         System.out.println("Worker [" + getId() + "]: bye bye");
 

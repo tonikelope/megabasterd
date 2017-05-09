@@ -48,8 +48,7 @@ public class ChunkUploaderMono extends ChunkUploader {
     public void run() {
         System.out.println("ChunkUploaderMONO " + getId() + " hello! " + getUpload().getFile_name());
         
-        getUpload().getMain_panel().getUpload_manager().clearSpeedBuffers();
-
+      
         String worker_url = getUpload().getUl_url();
         Chunk chunk;
         int reads, to_read, conta_error, re, http_status, tot_bytes_up = -1;
@@ -305,7 +304,6 @@ public class ChunkUploaderMono extends ChunkUploader {
 
         getUpload().getMac_generator().secureNotify();
         
-        getUpload().getMain_panel().getUpload_manager().clearSpeedBuffers();
 
         System.out.println("ChunkUploaderMONO " + getId() + " bye bye...");
     }

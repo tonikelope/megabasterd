@@ -491,7 +491,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             setPause(false);
 
-            getSpeed_meter().secureNotify();
+            _main_panel.getGlobal_up_speed().secureNotify();
 
             synchronized (_workers_lock) {
 
@@ -511,8 +511,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             getView().pause();
         }
+    
         
-        _main_panel.getUpload_manager().clearSpeedBuffers();
+        _main_panel.getGlobal_up_speed().secureNotify();
 
         _main_panel.getUpload_manager().secureNotify();
     }
@@ -707,8 +708,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 _thread_pool.execute(getSpeed_meter());
 
-                getMain_panel().getGlobal_up_speed().attachSpeedMeter(getSpeed_meter());
-
                 getMain_panel().getGlobal_up_speed().secureNotify();
 
                 _mac_generator = new UploadMACGenerator(this);
@@ -763,12 +762,12 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 _thread_pool.shutdown();
 
                 System.out.println("Chunkuploaders finished!");
-
+                
                 getSpeed_meter().setExit(true);
 
-                getProgress_meter().setExit(true);
+                getMain_panel().getGlobal_up_speed().secureNotify();
 
-                getSpeed_meter().secureNotify();
+                getProgress_meter().setExit(true);
 
                 getProgress_meter().secureNotify();
 
@@ -791,10 +790,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 System.out.println("Uploader thread pool finished!");
                 
-                getMain_panel().getGlobal_up_speed().detachSpeedMeter(getSpeed_meter());
-
-                getMain_panel().getGlobal_up_speed().secureNotify();
-
                 swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(), getView().getRemtime_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner()}, false);
 
                 getMain_panel().getUpload_manager().secureNotify();

@@ -14,7 +14,7 @@ public interface Transference {
     int SIM_TRANSFERENCES_DEFAULT = 2;
     boolean LIMIT_TRANSFERENCE_SPEED_DEFAULT = false;
     int MAX_TRANSFERENCE_SPEED_DEFAULT = 5;
-    int MAX_WAIT_WORKERS_SHUTDOWN = 10;
+    int MAX_WAIT_WORKERS_SHUTDOWN = 15;
 
     void start();
 

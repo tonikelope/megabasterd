@@ -6,7 +6,7 @@ package megabasterd;
  */
 public interface SecureMultiThreadNotifiable {
 
-    public void secureNotifyAll();
+    public void secureMultiNotifyAll();
 
-    public void secureWait();
+    public void secureMultiWait();
 }

@@ -3,30 +3,20 @@ package megabasterd;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
 import static megabasterd.MiscTools.formatBytes;
 
-public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable {
+public final class SpeedMeter implements Runnable {
 
-    public static final int SLEEP = 3000;
-    public static final int SPEED_BUFFER_MAX_SIZE = 20;
-    public static final double TRANS_COOLING_FACTOR = 0.3;
-    private long _progress;
+    public static final int SPEED_BUFFER_MAX_SIZE = 12;
     private final Transference _transference;
     private final GlobalSpeedMeter _gspeed;
     private volatile long _lastSpeed;
     private volatile boolean _exit;
-    private final Object _secure_notify_lock;
-    private boolean _notified;
     private final Queue<Long> _speeds;
     private volatile boolean _clearSpeedBuffer;
 
     SpeedMeter(Transference transference, GlobalSpeedMeter gspeed) {
-        _notified = false;
-        _secure_notify_lock = new Object();
         _transference = transference;
-        _progress = transference.getProgress();
         _lastSpeed = 0;
         _gspeed = gspeed;
         _exit = false;
@@ -34,37 +24,13 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
         _clearSpeedBuffer = false;
     }
 
+    public Transference getTransference() {
+        return _transference;
+    }
+    
     public void setClearSpeedBuffer() {
 
         _clearSpeedBuffer = true;
-    }
-
-    @Override
-    public void secureNotify() {
-        synchronized (_secure_notify_lock) {
-
-            _notified = true;
-
-            _secure_notify_lock.notify();
-        }
-    }
-
-    @Override
-    public void secureWait() {
-
-        synchronized (_secure_notify_lock) {
-            while (!_notified) {
-
-                try {
-                    _secure_notify_lock.wait();
-                } catch (InterruptedException ex) {
-                    _exit = true;
-                    getLogger(SpeedMeter.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-
-            _notified = false;
-        }
     }
 
     public void setExit(boolean exit) {
@@ -77,11 +43,6 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
     public void setLastSpeed(long speed) {
         _lastSpeed = speed;
-    }
-
-    public void updateProgress() {
-
-        _progress = _transference.getProgress();
     }
 
     private long calcAverageSpeed(long sp) {
@@ -120,40 +81,41 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
     public void run() {
         System.out.println("SpeedMeter hello!");
 
-        long last_progress = _progress, sp, avgSp;
-        int no_data_count=0;
+        long last_progress, progress, sp, avgSp, sleepTime, wakeupTime;
 
+        _gspeed.attachSpeedMeter(this);
+        
         _transference.getView().updateSpeed("------", true);
         _transference.getView().updateRemainingTime("--d --:--:--", true);
+        last_progress = _transference.getProgress();
 
         while (!_exit) {
-                
-            try {
-                
-                Thread.sleep(SpeedMeter.SLEEP * (no_data_count + 1));
 
                 if (!_exit) {
-                    updateProgress();
+                    
+                    sleepTime = System.currentTimeMillis();
+                
+                    _gspeed.secureMultiWait();
 
+                    wakeupTime = System.currentTimeMillis();
+
+                    progress = _transference.getProgress();
+                    
                     if (_transference.isPaused()) {
 
                         _transference.getView().updateSpeed("------", true);
 
                         _transference.getView().updateRemainingTime("--d --:--:--", true);
 
-                        setLastSpeed(0);
+                        _gspeed.getSpeedQueue().put(this, 0L);
 
                         _gspeed.secureNotify();
 
-                        secureWait();
+                    } else if (progress > last_progress) {
 
-                    } else if (_progress > last_progress) {
+                        double current_speed = (progress - last_progress) / (((double)(wakeupTime - sleepTime))/1000);
 
-                        double sleep_time = ((double) SpeedMeter.SLEEP * (no_data_count + 1)) / 1000;
-
-                        double current_speed = (_progress - last_progress) / sleep_time;
-
-                        last_progress = _progress;
+                        last_progress = progress;
 
                         sp = Math.round(current_speed);
 
@@ -163,43 +125,27 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
                             _transference.getView().updateSpeed(formatBytes(sp) + "/s", true);
 
-                            _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - _progress) / avgSp)), true);
+                            _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - progress) / avgSp)), true);
 
-                            setLastSpeed(avgSp);
+                            _gspeed.getSpeedQueue().put(this, sp);
 
                             _gspeed.secureNotify();
                         }
 
-                        no_data_count = 0;
-
                     } else {
 
-                        avgSp = calcAverageSpeed(Math.round(getLastSpeed() * TRANS_COOLING_FACTOR));
+                        _transference.getView().updateSpeed("------", true);
 
-                        if (avgSp > 0) {
+                        _transference.getView().updateRemainingTime("--d --:--:--", true);
 
-                            _transference.getView().updateSpeed(formatBytes(avgSp) + "/s *", true);
-
-                            _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - _progress) / avgSp)), true);
-
-                        } else {
-
-                            _transference.getView().updateSpeed("------ *", true);
-
-                            _transference.getView().updateRemainingTime("--d --:--:--", true);
-                        }
-
-                        setLastSpeed(avgSp);
+                        _gspeed.getSpeedQueue().put(this, 0L);
 
                         _gspeed.secureNotify();
-
-                        no_data_count++;
                     }
                 }
-            } catch (InterruptedException ex) {
-                
-            }
         }
+        
+        _gspeed.detachSpeedMeter(this);
     }
 
     private String calculateRemTime(long seconds) {

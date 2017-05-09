@@ -198,7 +198,7 @@ public final class ThrottledInputStream extends InputStream {
 
         while (_stream_supervisor.getMaxBytesPerSecInput() > 0 && (_stream_supervisor.isQueue_swapping() || (_slice_size = _stream_supervisor.getInput_slice_queue().poll()) == null)) {
 
-            _stream_supervisor.secureWait();
+            _stream_supervisor.secureMultiWait();
         }
 
         if (_slice_size != null && size < _slice_size) {
@@ -207,7 +207,7 @@ public final class ThrottledInputStream extends InputStream {
 
                 _stream_supervisor.getInput_slice_queue().add(_slice_size - size);
 
-                _stream_supervisor.secureNotifyAll();
+                _stream_supervisor.secureMultiNotifyAll();
             }
 
             _slice_size = size;

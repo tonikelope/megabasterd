@@ -25,7 +25,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
 
     private volatile boolean _queue_swapping;
 
-    private final Object _secure_notify_lock;
+    private final Object _secure_notify_lock_multi;
 
     private final Object _timer_lock;
 
@@ -33,7 +33,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
 
     public StreamThrottlerSupervisor(int maxBytesPerSecInput, int maxBytesPerSecOutput, int slice_size) {
 
-        _secure_notify_lock = new Object();
+        _secure_notify_lock_multi = new Object();
 
         _timer_lock = new Object();
 
@@ -82,9 +82,9 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
     }
 
     @Override
-    public void secureWait() {
+    public void secureMultiWait() {
 
-        synchronized (_secure_notify_lock) {
+        synchronized (_secure_notify_lock_multi) {
 
             Thread current_thread = Thread.currentThread();
 
@@ -96,7 +96,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
             while (!_notified_threads.get(current_thread)) {
 
                 try {
-                    _secure_notify_lock.wait();
+                    _secure_notify_lock_multi.wait();
                 } catch (InterruptedException ex) {
                     getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -107,16 +107,16 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
     }
 
     @Override
-    public void secureNotifyAll() {
+    public void secureMultiNotifyAll() {
 
-        synchronized (_secure_notify_lock) {
+        synchronized (_secure_notify_lock_multi) {
 
             for (Map.Entry<Thread, Boolean> entry : _notified_threads.entrySet()) {
 
                 entry.setValue(true);
             }
 
-            _secure_notify_lock.notifyAll();
+            _secure_notify_lock_multi.notifyAll();
         }
     }
 
@@ -162,7 +162,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
 
             _queue_swapping = false;
 
-            secureNotifyAll();
+            secureMultiNotifyAll();
 
             new_input_queue = _resetSliceQueue(old_input_queue, _maxBytesPerSecInput);
 

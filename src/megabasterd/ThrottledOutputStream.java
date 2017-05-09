@@ -78,7 +78,7 @@ public final class ThrottledOutputStream extends OutputStream {
 
         while (_stream_supervisor.getMaxBytesPerSecOutput() > 0 && (_stream_supervisor.isQueue_swapping() || (slice_size = _stream_supervisor.getOutput_slice_queue().poll()) == null)) {
 
-            _stream_supervisor.secureWait();
+            _stream_supervisor.secureMultiWait();
         }
 
         if (slice_size != null && size < slice_size) {
@@ -87,7 +87,7 @@ public final class ThrottledOutputStream extends OutputStream {
 
                 _stream_supervisor.getOutput_slice_queue().add(slice_size - size);
 
-                _stream_supervisor.secureNotifyAll();
+                _stream_supervisor.secureMultiNotifyAll();
             }
 
             slice_size = size;

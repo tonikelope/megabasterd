@@ -107,7 +107,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
     public void run() {
         System.out.println("ChunkUploader " + getId() + " hello! " + getUpload().getFile_name());
         
-        _upload.getMain_panel().getUpload_manager().clearSpeedBuffers();
+       
 
         String worker_url = _upload.getUl_url();
         Chunk chunk;
@@ -352,7 +352,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         _upload.getMac_generator().secureNotify();
         
-        _upload.getMain_panel().getUpload_manager().clearSpeedBuffers();
+      
 
         System.out.println("ChunkUploader " + _id + " bye bye...");
     }

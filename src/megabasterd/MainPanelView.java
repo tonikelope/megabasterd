@@ -686,10 +686,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 MiscTools.restartApplication(1);
             }
 
-            _main_panel.getDownload_manager().clearSpeedBuffers();
-            
-            _main_panel.getUpload_manager().clearSpeedBuffers();
-            
+
         }
 
         if (!dialog.isRemember_master_pass()) {
