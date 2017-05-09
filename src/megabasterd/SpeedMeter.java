@@ -1,7 +1,6 @@
 package megabasterd;
 
 import java.util.ArrayDeque;
-import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import static megabasterd.MiscTools.formatBytes;
 
@@ -12,7 +11,7 @@ public final class SpeedMeter implements Runnable {
     private final GlobalSpeedMeter _gspeed;
     private volatile long _lastSpeed;
     private volatile boolean _exit;
-    private final Queue<Long> _speeds;
+    private final ArrayDeque<Long> _speeds;
     private volatile boolean _clearSpeedBuffer;
 
     SpeedMeter(Transference transference, GlobalSpeedMeter gspeed) {
@@ -21,16 +20,10 @@ public final class SpeedMeter implements Runnable {
         _gspeed = gspeed;
         _exit = false;
         _speeds = new ArrayDeque<>();
-        _clearSpeedBuffer = false;
     }
 
     public Transference getTransference() {
         return _transference;
-    }
-    
-    public void setClearSpeedBuffer() {
-
-        _clearSpeedBuffer = true;
     }
 
     public void setExit(boolean exit) {
@@ -86,7 +79,9 @@ public final class SpeedMeter implements Runnable {
         _gspeed.attachSpeedMeter(this);
         
         _transference.getView().updateSpeed("------", true);
+        
         _transference.getView().updateRemainingTime("--d --:--:--", true);
+        
         last_progress = _transference.getProgress();
 
         while (!_exit) {
@@ -107,7 +102,7 @@ public final class SpeedMeter implements Runnable {
 
                         _transference.getView().updateRemainingTime("--d --:--:--", true);
 
-                        _gspeed.getSpeedQueue().put(this, 0L);
+                        _gspeed.getSpeedMap().put(this, 0L);
 
                         _gspeed.secureNotify();
 
@@ -127,7 +122,7 @@ public final class SpeedMeter implements Runnable {
 
                             _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - progress) / avgSp)), true);
 
-                            _gspeed.getSpeedQueue().put(this, sp);
+                            _gspeed.getSpeedMap().put(this, sp);
 
                             _gspeed.secureNotify();
                         }
@@ -138,7 +133,7 @@ public final class SpeedMeter implements Runnable {
 
                         _transference.getView().updateRemainingTime("--d --:--:--", true);
 
-                        _gspeed.getSpeedQueue().put(this, 0L);
+                        _gspeed.getSpeedMap().put(this, 0L);
 
                         _gspeed.secureNotify();
                     }

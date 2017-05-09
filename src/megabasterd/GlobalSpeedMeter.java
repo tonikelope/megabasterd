@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import javax.swing.JLabel;
 import static megabasterd.MiscTools.formatBytes;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
+import static megabasterd.MiscTools.swingReflectionInvoke;
 
 public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotifiable, SecureMultiThreadNotifiable {
 
@@ -32,7 +32,7 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
         _notified_threads = new ConcurrentHashMap<>();
     }
 
-    public ConcurrentHashMap<SpeedMeter, Long> getSpeedQueue() {
+    public ConcurrentHashMap<SpeedMeter, Long> getSpeedMap() {
         return _speedMap;
     }
 
@@ -92,17 +92,6 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
         secureNotify();
     }
     
-    public long getProgress() {
-
-        long progress = 0;
-
-        for (SpeedMeter speed : _speedmeters) {
-            progress+=speed.getTransference().getProgress();
-        }
-        
-        return progress;
-    }
-    
     private void resetSpeedMap() {
         
         for(SpeedMeter speedMeter:_speedmeters) {
@@ -115,8 +104,8 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
     public void run() {
         long sp;
 
-        swingReflectionInvokeAndWait("setText", _speed_label, "------");
-        swingReflectionInvokeAndWait("setVisible", _speed_label, true);
+        swingReflectionInvoke("setText", _speed_label, "------");
+        swingReflectionInvoke("setVisible", _speed_label, true);
 
         while (true) {
             
@@ -154,11 +143,11 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
                 
                 if (sp > 0) {
                     
-                    swingReflectionInvokeAndWait("setText", _speed_label, formatBytes(sp) + "/s");
+                    swingReflectionInvoke("setText", _speed_label, formatBytes(sp) + "/s");
                     
                 } else {
                     
-                    swingReflectionInvokeAndWait("setText", _speed_label, "------");
+                    swingReflectionInvoke("setText", _speed_label, "------");
                 }
             } catch (InterruptedException ex) {
                 Logger.getLogger(GlobalSpeedMeter.class.getName()).log(Level.SEVERE, null, ex);
