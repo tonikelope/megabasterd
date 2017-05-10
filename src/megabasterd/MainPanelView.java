@@ -752,7 +752,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         dialog.setLocationRelativeTo(this);
 
         dialog.setVisible(true);
-
+        
         _main_panel.getClipboardspy().detachObserver(dialog);
     }//GEN-LAST:event_new_stream_menuActionPerformed
 
