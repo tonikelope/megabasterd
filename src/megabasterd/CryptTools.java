@@ -373,7 +373,7 @@ public final class CryptTools {
 
                 try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
-                    HttpPost httppost = new HttpPost(new String(url_bin));
+                    HttpPost httppost = new HttpPost(new String(url_bin).trim());
 
                     httppost.setHeader("Custom-User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
