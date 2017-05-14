@@ -80,22 +80,22 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
     }
 
     public void detachSpeedMeter(SpeedMeter speed) {
-        
-        if(_speedmeters.contains(speed)) {
+
+        if (_speedmeters.contains(speed)) {
             _speedmeters.remove(speed);
         }
-        
-        if(_speedMap.containsKey(speed)) {
+
+        if (_speedMap.containsKey(speed)) {
             _speedMap.remove(speed);
         }
-        
+
         secureNotify();
     }
-    
+
     private void resetSpeedMap() {
-        
-        for(SpeedMeter speedMeter:_speedmeters) {
-            
+
+        for (SpeedMeter speedMeter : _speedmeters) {
+
             _speedMap.put(speedMeter, -1L);
         }
     }
@@ -108,45 +108,44 @@ public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotif
         swingReflectionInvoke("setVisible", _speed_label, true);
 
         while (true) {
-            
+
             try {
-                
+
                 Thread.sleep(SLEEP);
-                
+
                 resetSpeedMap();
-                
+
                 secureMultiNotifyAll();
-                
-                sp=0;
-                
-                while(!this._speedMap.isEmpty())
-                {
-                    Iterator<Map.Entry<SpeedMeter,Long>> it = _speedMap.entrySet().iterator();
-                    
-                    while(it.hasNext()) {
-                        
-                        Map.Entry<SpeedMeter,Long> entry = it.next();
-                        
-                        if(entry.getValue() != -1) {
-                            
-                            sp+=entry.getValue();
-                            
+
+                sp = 0;
+
+                while (!this._speedMap.isEmpty()) {
+                    Iterator<Map.Entry<SpeedMeter, Long>> it = _speedMap.entrySet().iterator();
+
+                    while (it.hasNext()) {
+
+                        Map.Entry<SpeedMeter, Long> entry = it.next();
+
+                        if (entry.getValue() != -1) {
+
+                            sp += entry.getValue();
+
                             it.remove();
                         }
                     }
-                    
-                    if(!this._speedMap.isEmpty()) {
-                        
+
+                    if (!this._speedMap.isEmpty()) {
+
                         this.secureWait();
                     }
                 }
-                
+
                 if (sp > 0) {
-                    
+
                     swingReflectionInvoke("setText", _speed_label, formatBytes(sp) + "/s");
-                    
+
                 } else {
-                    
+
                     swingReflectionInvoke("setText", _speed_label, "------");
                 }
             } catch (InterruptedException ex) {

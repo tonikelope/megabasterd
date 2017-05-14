@@ -35,8 +35,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         CloseableHttpResponse httpresponse = null;
 
         System.out.println("Worker [" + getId() + "]: let's do some work!");
-        
-     
+
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
             conta_error = 0;
 
@@ -169,8 +168,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         getDownload().stopThisSlot(this);
 
         getDownload().getChunkwriter().secureNotify();
-        
-   
 
         System.out.println("Worker [" + getId() + "]: bye bye");
 

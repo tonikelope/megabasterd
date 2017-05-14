@@ -101,7 +101,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public ConcurrentLinkedQueue<Runnable> getTransference_preprocess_queue() {
         return _transference_preprocess_queue;
     }
-    
+
     public void addPre_count(int pre_count) {
 
         synchronized (_pre_lock) {
@@ -421,7 +421,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                 start(transference);
                             }
                         }
-                        
+
                         setStarting_transferences(false);
 
                         secureNotify();

@@ -343,11 +343,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             getView().pause();
         }
-        
-  
-        
+
         _main_panel.getGlobal_dl_speed().secureNotify();
-        
+
         _main_panel.getDownload_manager().secureNotify();
     }
 
@@ -530,11 +528,11 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         _thread_pool.shutdown();
 
                         System.out.println("Chunkdownloaders finished!");
-                        
+
                         getSpeed_meter().setExit(true);
 
                         getMain_panel().getGlobal_dl_speed().secureNotify();
-                        
+
                         getProgress_meter().setExit(true);
 
                         getProgress_meter().secureNotify();
@@ -557,7 +555,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         }
 
                         System.out.println("Downloader thread pool finished!");
-                        
+
                         _output_stream.close();
 
                         swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(), getView().getRemtime_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner(), getView().getKeep_temp_checkbox()}, false);
@@ -745,7 +743,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             getMain_panel().getDownload_manager().secureNotify();
         }
-        
+
         swingReflectionInvoke("setVisible", getView().getClose_button(), true);
 
         if (_status_error) {

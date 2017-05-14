@@ -21,11 +21,14 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
+import static megabasterd.ChunkUploader.FUTURE_TIMEOUT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
 import org.apache.http.HttpStatus;
@@ -47,8 +50,7 @@ public class ChunkUploaderMono extends ChunkUploader {
     @Override
     public void run() {
         System.out.println("ChunkUploaderMONO " + getId() + " hello! " + getUpload().getFile_name());
-        
-      
+
         String worker_url = getUpload().getUl_url();
         Chunk chunk;
         int reads, to_read, conta_error, re, http_status, tot_bytes_up = -1;
@@ -88,7 +90,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     final PipedInputStream pipein = new PipedInputStream();
 
-                    PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                    final PipedOutputStream pipeout = new PipedOutputStream(pipein);
 
                     futureTask = new FutureTask<>(new Callable() {
                         @Override
@@ -118,7 +120,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                         System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + getId() + "...");
 
-                        while (!isExit() && !getUpload().isStopped() && (reads = cis.read(buffer)) != -1 && out != null) {
+                        while (!isExit() && !getUpload().isStopped() && tot_bytes_up < chunk.getSize() && (reads = cis.read(buffer)) != -1 && out != null) {
                             out.write(buffer, 0, reads);
 
                             getUpload().getPartialProgress().add(reads);
@@ -134,6 +136,8 @@ public class ChunkUploaderMono extends ChunkUploader {
                                 secureWait();
                             }
                         }
+
+                        cis.close();
 
                         if (!getUpload().isStopped()) {
 
@@ -209,7 +213,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     try {
 
-                        httpresponse = futureTask.get();
+                        httpresponse = futureTask.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
 
                         http_status = httpresponse.getStatusLine().getStatusCode();
 
@@ -253,7 +257,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                             }
                         }
 
-                    } catch (ExecutionException | InterruptedException | CancellationException exception) {
+                    } catch (ExecutionException | InterruptedException | CancellationException | TimeoutException exception) {
 
                         error = true;
 
@@ -303,7 +307,6 @@ public class ChunkUploaderMono extends ChunkUploader {
         getUpload().stopThisSlot(this);
 
         getUpload().getMac_generator().secureNotify();
-        
 
         System.out.println("ChunkUploaderMONO " + getId() + " bye bye...");
     }

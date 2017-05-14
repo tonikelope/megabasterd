@@ -81,7 +81,7 @@ public final class MiscTools {
 
     public static final int EXP_BACKOFF_BASE = 2;
     public static final int EXP_BACKOFF_SECS_RETRY = 1;
-    public static final int EXP_BACKOFF_MAX_WAIT_TIME = 64;
+    public static final int EXP_BACKOFF_MAX_WAIT_TIME = 32;
 
     private static final ConcurrentHashMap<String, Method> REFLECTION_METHOD_CACHE = new ConcurrentHashMap<>();
 

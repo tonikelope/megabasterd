@@ -36,7 +36,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         initComponents();
 
         _clipboardspy = clipboardspy;
-        _mainPanelView = (MainPanelView)parent;
+        _mainPanelView = (MainPanelView) parent;
 
         MiscTools.swingInvokeIt(new Runnable() {
 
@@ -186,8 +186,8 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                     swingReflectionInvoke("setEnabled", original_link_textfield, true);
 
                 } else {
-                    
-                    _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver)tthis);
+
+                    _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
                     MiscTools.copyTextToClipboard(stream_link);
                     JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\n(Remember to keep MegaBasterd running in background while playing)");
                     dispose();

@@ -511,8 +511,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             getView().pause();
         }
-    
-        
+
         _main_panel.getGlobal_up_speed().secureNotify();
 
         _main_panel.getUpload_manager().secureNotify();
@@ -754,7 +753,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 swingReflectionInvoke("setVisible", getView().getPause_button(), true);
 
                 swingReflectionInvoke("setVisible", getView().getProgress_pbar(), true);
-         
+
                 secureWait();
 
                 System.out.println("Uploader llamando a shutdown del pool...");
@@ -762,7 +761,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 _thread_pool.shutdown();
 
                 System.out.println("Chunkuploaders finished!");
-                
+
                 getSpeed_meter().setExit(true);
 
                 getMain_panel().getGlobal_up_speed().secureNotify();
@@ -789,7 +788,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 }
 
                 System.out.println("Uploader thread pool finished!");
-                
+
                 swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(), getView().getRemtime_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner()}, false);
 
                 getMain_panel().getUpload_manager().secureNotify();
@@ -923,7 +922,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         if (_status_error) {
             swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
         }
-        
+
         System.out.println("Uploader BYE BYE");
     }
 

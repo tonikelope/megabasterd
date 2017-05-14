@@ -16,6 +16,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
@@ -35,6 +37,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
+    public static final int FUTURE_TIMEOUT = 120;
     private final int _id;
     private final Upload _upload;
     private volatile boolean _exit;
@@ -106,8 +109,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
     @Override
     public void run() {
         System.out.println("ChunkUploader " + getId() + " hello! " + getUpload().getFile_name());
-        
-       
 
         String worker_url = _upload.getUl_url();
         Chunk chunk;
@@ -153,7 +154,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         final PipedInputStream pipein = new PipedInputStream();
 
-                        PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                        final PipedOutputStream pipeout = new PipedOutputStream(pipein);
 
                         FutureTask<CloseableHttpResponse> futureTask = new FutureTask<>(new Callable() {
                             @Override
@@ -171,7 +172,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + _id + "...");
 
-                        while (!_exit && !_upload.isStopped() && (reads = cis.read(buffer)) != -1) {
+                        while (!_exit && !_upload.isStopped() && tot_bytes_up < chunk.getSize() && (reads = cis.read(buffer)) != -1) {
                             out.write(buffer, 0, reads);
 
                             _upload.getPartialProgress().add(reads);
@@ -188,6 +189,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                             }
                         }
 
+                        cis.close();
+
                         out.close();
 
                         if (!_upload.isStopped()) {
@@ -196,7 +199,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 if (!_exit) {
 
-                                    httpresponse = futureTask.get();
+                                    httpresponse = futureTask.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
 
                                 } else {
 
@@ -287,7 +290,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     conta_error = 0;
                                 }
 
-                            } catch (ExecutionException | InterruptedException | CancellationException exception) {
+                            } catch (ExecutionException | InterruptedException | CancellationException | TimeoutException exception) {
 
                                 _upload.rejectChunkId(chunk.getId());
 
@@ -351,8 +354,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
         _upload.stopThisSlot(this);
 
         _upload.getMac_generator().secureNotify();
-        
-      
 
         System.out.println("ChunkUploader " + _id + " bye bye...");
     }

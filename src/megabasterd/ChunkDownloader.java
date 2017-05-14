@@ -98,7 +98,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         boolean error;
 
         System.out.println("Worker [" + _id + "]: let's do some work!");
-        
+
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
             conta_error = 0;
 

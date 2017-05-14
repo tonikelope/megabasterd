@@ -77,69 +77,69 @@ public final class SpeedMeter implements Runnable {
         long last_progress, progress, sp, avgSp, sleepTime, wakeupTime;
 
         _gspeed.attachSpeedMeter(this);
-        
+
         _transference.getView().updateSpeed("------", true);
-        
+
         _transference.getView().updateRemainingTime("--d --:--:--", true);
-        
+
         last_progress = _transference.getProgress();
 
         while (!_exit) {
 
-                if (!_exit) {
-                    
-                    sleepTime = System.currentTimeMillis();
-                
-                    _gspeed.secureMultiWait();
+            if (!_exit) {
 
-                    wakeupTime = System.currentTimeMillis();
+                sleepTime = System.currentTimeMillis();
 
-                    progress = _transference.getProgress();
-                    
-                    if (_transference.isPaused()) {
+                _gspeed.secureMultiWait();
 
-                        _transference.getView().updateSpeed("------", true);
+                wakeupTime = System.currentTimeMillis();
 
-                        _transference.getView().updateRemainingTime("--d --:--:--", true);
+                progress = _transference.getProgress();
 
-                        _gspeed.getSpeedMap().put(this, 0L);
+                if (_transference.isPaused()) {
 
-                        _gspeed.secureNotify();
+                    _transference.getView().updateSpeed("------", true);
 
-                    } else if (progress > last_progress) {
+                    _transference.getView().updateRemainingTime("--d --:--:--", true);
 
-                        double current_speed = (progress - last_progress) / (((double)(wakeupTime - sleepTime))/1000);
+                    _gspeed.getSpeedMap().put(this, 0L);
 
-                        last_progress = progress;
+                    _gspeed.secureNotify();
 
-                        sp = Math.round(current_speed);
+                } else if (progress > last_progress) {
 
-                        avgSp = calcAverageSpeed(sp);
+                    double current_speed = (progress - last_progress) / (((double) (wakeupTime - sleepTime)) / 1000);
 
-                        if (sp > 0) {
+                    last_progress = progress;
 
-                            _transference.getView().updateSpeed(formatBytes(sp) + "/s", true);
+                    sp = Math.round(current_speed);
 
-                            _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - progress) / avgSp)), true);
+                    avgSp = calcAverageSpeed(sp);
 
-                            _gspeed.getSpeedMap().put(this, sp);
+                    if (sp > 0) {
 
-                            _gspeed.secureNotify();
-                        }
+                        _transference.getView().updateSpeed(formatBytes(sp) + "/s", true);
 
-                    } else {
+                        _transference.getView().updateRemainingTime(calculateRemTime((long) Math.floor((_transference.getFile_size() - progress) / avgSp)), true);
 
-                        _transference.getView().updateSpeed("------", true);
-
-                        _transference.getView().updateRemainingTime("--d --:--:--", true);
-
-                        _gspeed.getSpeedMap().put(this, 0L);
+                        _gspeed.getSpeedMap().put(this, sp);
 
                         _gspeed.secureNotify();
                     }
+
+                } else {
+
+                    _transference.getView().updateSpeed("------", true);
+
+                    _transference.getView().updateRemainingTime("--d --:--:--", true);
+
+                    _gspeed.getSpeedMap().put(this, 0L);
+
+                    _gspeed.secureNotify();
                 }
+            }
         }
-        
+
         _gspeed.detachSpeedMeter(this);
     }
 

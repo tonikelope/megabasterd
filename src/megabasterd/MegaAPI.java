@@ -333,11 +333,11 @@ public final class MegaAPI {
                 }
 
                 if (error) {
-                    
+
                     System.out.println("MegaAPI ERROR. Waiting for retry...");
-                    
+
                     try {
-                        Thread.sleep(getWaitTimeExpBackOff(conta_error++)*1000);
+                        Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                     } catch (InterruptedException ex) {
                         Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
                     }
