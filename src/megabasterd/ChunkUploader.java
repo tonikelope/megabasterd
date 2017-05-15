@@ -199,7 +199,18 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 if (!_exit) {
 
-                                    httpresponse = futureTask.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
+                                    try {
+                                        
+                                        httpresponse = futureTask.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
+                                        
+                                    } catch (TimeoutException ex) {
+                                        
+                                        futureTask.cancel(true);
+
+                                        httpresponse = null;
+                                        
+                                        Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
 
                                 } else {
 
@@ -290,7 +301,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     conta_error = 0;
                                 }
 
-                            } catch (ExecutionException | InterruptedException | CancellationException | TimeoutException exception) {
+                            } catch (ExecutionException | InterruptedException | CancellationException exception) {
 
                                 _upload.rejectChunkId(chunk.getId());
 

@@ -191,6 +191,13 @@ public final class ThrottledInputStream extends InputStream {
         _rawStream.reset();
 
     }
+    
+    @Override
+    public void close() throws IOException {
+
+        _rawStream.close();
+
+    }
 
     private void throttle(int size) throws IOException {
 

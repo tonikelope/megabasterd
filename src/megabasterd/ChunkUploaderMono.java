@@ -259,6 +259,10 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     } catch (ExecutionException | InterruptedException | CancellationException | TimeoutException exception) {
 
+                        if(exception instanceof TimeoutException) {
+                            futureTask.cancel(true);
+                        }
+                        
                         error = true;
 
                         getUpload().rejectChunkId(chunk.getId());
@@ -270,6 +274,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                     } finally {
 
                         if (out != null) {
+                            
                             out.close();
                         }
 
