@@ -177,9 +177,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         progress_pbar.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
         progress_pbar.setDoubleBuffered(true);
 
-        pause_button.setBackground(new java.awt.Color(255, 153, 0));
         pause_button.setFont(new java.awt.Font("Verdana", 1, 16)); // NOI18N
-        pause_button.setForeground(java.awt.Color.white);
         pause_button.setText("PAUSE UPLOAD");
         pause_button.setDoubleBuffered(true);
         pause_button.addActionListener(new java.awt.event.ActionListener() {
@@ -188,9 +186,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
-        stop_button.setBackground(new java.awt.Color(255, 0, 0));
         stop_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        stop_button.setForeground(java.awt.Color.white);
         stop_button.setText("CANCEL UPLOAD");
         stop_button.setDoubleBuffered(true);
         stop_button.addActionListener(new java.awt.event.ActionListener() {
@@ -213,9 +209,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
-        restart_button.setBackground(new java.awt.Color(51, 51, 255));
         restart_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        restart_button.setForeground(new java.awt.Color(255, 255, 255));
         restart_button.setText("Restart");
         restart_button.setDoubleBuffered(true);
         restart_button.addActionListener(new java.awt.event.ActionListener() {

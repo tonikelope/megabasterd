@@ -839,9 +839,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        delete_all_accounts_button.setBackground(new java.awt.Color(255, 51, 0));
         delete_all_accounts_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        delete_all_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
         delete_all_accounts_button.setText("RESET ACCOUNTS");
         delete_all_accounts_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -849,9 +847,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        unlock_accounts_button.setBackground(new java.awt.Color(0, 153, 51));
         unlock_accounts_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        unlock_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
         unlock_accounts_button.setText("Unlock accounts");
         unlock_accounts_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

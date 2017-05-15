@@ -232,9 +232,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         jPanel_scroll_down.setLayout(new javax.swing.BoxLayout(jPanel_scroll_down, javax.swing.BoxLayout.Y_AXIS));
         jScrollPane_down.setViewportView(jPanel_scroll_down);
 
-        pause_all_down_button.setBackground(new java.awt.Color(255, 153, 0));
         pause_all_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        pause_all_down_button.setForeground(new java.awt.Color(255, 255, 255));
         pause_all_down_button.setText("PAUSE ALL");
         pause_all_down_button.setDoubleBuffered(true);
         pause_all_down_button.addActionListener(new java.awt.event.ActionListener() {

@@ -142,7 +142,6 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         link_detected_label.setText("Folder link detected!");
         link_detected_label.setDoubleBuffered(true);
 
-        dance_button.setBackground(new java.awt.Color(102, 204, 255));
         dance_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");

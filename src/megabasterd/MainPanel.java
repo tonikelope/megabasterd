@@ -31,10 +31,12 @@ import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
+import javax.swing.UnsupportedLookAndFeelException;
 import static megabasterd.DBTools.deleteUpload;
 import static megabasterd.DBTools.selectDownloads;
 import static megabasterd.DBTools.selectELCAccounts;
@@ -74,8 +76,23 @@ public final class MainPanel {
 
     public static void main(String args[]) {
 
-        setNimbusLookAndFeel();
-
+        //setNimbusLookAndFeel();
+        try {
+                JFrame.setDefaultLookAndFeelDecorated(true);
+                String estilo = javax.swing.UIManager.getSystemLookAndFeelClassName();
+                if (System.getProperty("os.name").toLowerCase().contains("win")) {
+                    javax.swing.UIManager.setLookAndFeel(estilo);
+                } else if (System.getProperty("os.name").toLowerCase().contains("linux")) {
+                for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                    if ("GTK+".equals(info.getName())) {
+                        javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                        break;
+                    }
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e) {
+            System.err.println(e.getCause());
+        }
         if (args.length > 0) {
 
             try {

@@ -263,7 +263,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        dance_button.setBackground(new java.awt.Color(102, 204, 255));
         dance_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
