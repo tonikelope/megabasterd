@@ -48,7 +48,6 @@ import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.createAndRegisterFont;
-import static megabasterd.MiscTools.setNimbusLookAndFeel;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
