@@ -652,7 +652,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                         boolean root_childs = ((TreeNode) ((TreeModel) swingReflectionInvokeAndWaitForReturn("getModel", file_tree)).getRoot()).getChildCount() > 0;
 
-                        swingReflectionInvoke("setText", used_space_label, formatBytes(quota[0]) + " / " + formatBytes(quota[1]));
+                        swingReflectionInvoke("setText", used_space_label, "Used space: "+formatBytes(quota[0]) + " / " + formatBytes(quota[1]));
 
                         swingReflectionInvoke("setEnabled", new Object[]{add_files_button, add_folder_button, account_combobox, account_label}, true);
 
@@ -670,7 +670,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                         swingReflectionInvoke("setForeground", used_space_label, Color.red);
 
-                        swingReflectionInvoke("setText", used_space_label, "ERROR checking account quota!");
+                        swingReflectionInvoke("setText", used_space_label, "Used space: ERROR checking account quota!");
                     }
 
                 }

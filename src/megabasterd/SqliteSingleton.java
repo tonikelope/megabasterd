@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 public final class SqliteSingleton {
 
     public static final String SQLITE_FILE = "megabasterd.db";
+    
+    public static final int VALID_TIMEOUT = 15;
 
     private Connection conn = null;
 
@@ -27,7 +29,12 @@ public final class SqliteSingleton {
     public Connection getConn() {
 
         try {
-            if (conn == null || conn.isClosed()) {
+            if (conn == null || !conn.isValid(VALID_TIMEOUT)) {
+                
+                if(conn != null && !conn.isClosed()) {
+                    
+                    conn.close();
+                }
 
                 Class.forName("org.sqlite.JDBC");
 

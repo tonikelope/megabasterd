@@ -77,6 +77,8 @@ public final class DBTools {
 
     public static synchronized void deleteDownloads(String[] urls) throws SQLException {
 
+        Connection conn = SqliteSingleton.getInstance().getConn();
+        
         for (int n = 0, t = 0; t < urls.length; n++) {
 
             String[] sub_array = Arrays.copyOfRange(urls, n * MAX_TRANSFERENCES_QUERY, t + Math.min(MAX_TRANSFERENCES_QUERY, urls.length - t));
@@ -84,8 +86,6 @@ public final class DBTools {
             t += sub_array.length;
 
             String whereClause = String.format("url in (%s)", String.join(",", Collections.nCopies(sub_array.length, "?")));
-
-            Connection conn = SqliteSingleton.getInstance().getConn();
 
             try (PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE " + whereClause)) {
 
@@ -152,6 +152,8 @@ public final class DBTools {
 
     public static synchronized void deleteUploads(String[][] uploads) throws SQLException {
 
+        Connection conn = SqliteSingleton.getInstance().getConn();
+        
         for (int n = 0, t = 0; t < uploads.length; n++) {
 
             String[][] sub_array = Arrays.copyOfRange(uploads, n * MAX_TRANSFERENCES_QUERY, t + Math.min(MAX_TRANSFERENCES_QUERY, uploads.length - t));
@@ -159,8 +161,6 @@ public final class DBTools {
             t += sub_array.length;
 
             String whereClause = String.join(" OR ", Collections.nCopies(sub_array.length, "(filename=? AND email=?)"));
-
-            Connection conn = SqliteSingleton.getInstance().getConn();
 
             try (PreparedStatement ps = conn.prepareStatement("DELETE FROM uploads WHERE " + whereClause)) {
 
