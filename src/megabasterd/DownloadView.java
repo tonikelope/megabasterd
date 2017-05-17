@@ -155,8 +155,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         slot_status_label = new javax.swing.JLabel();
         open_folder_button = new javax.swing.JButton();
 
-        setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 4, true));
-
         status_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         status_label.setText("status");
         status_label.setDoubleBuffered(true);
@@ -186,9 +184,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         progress_pbar.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
         progress_pbar.setDoubleBuffered(true);
 
-        pause_button.setBackground(new java.awt.Color(255, 153, 0));
         pause_button.setFont(new java.awt.Font("Verdana", 1, 16)); // NOI18N
-        pause_button.setForeground(java.awt.Color.white);
         pause_button.setText("PAUSE DOWNLOAD");
         pause_button.setDoubleBuffered(true);
         pause_button.addActionListener(new java.awt.event.ActionListener() {
@@ -197,9 +193,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             }
         });
 
-        stop_button.setBackground(new java.awt.Color(255, 0, 0));
         stop_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        stop_button.setForeground(java.awt.Color.white);
         stop_button.setText("CANCEL DOWNLOAD");
         stop_button.setDoubleBuffered(true);
         stop_button.addActionListener(new java.awt.event.ActionListener() {
@@ -238,7 +232,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         restart_button.setBackground(new java.awt.Color(51, 51, 255));
         restart_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        restart_button.setForeground(new java.awt.Color(255, 255, 255));
         restart_button.setText("Restart");
         restart_button.setDoubleBuffered(true);
         restart_button.addActionListener(new java.awt.event.ActionListener() {
@@ -282,7 +275,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                     .addComponent(progress_pbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(speed_label, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 73, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 81, Short.MAX_VALUE)
                         .addComponent(pause_button))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(status_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

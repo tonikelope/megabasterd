@@ -169,14 +169,8 @@
     </Component>
     <Component class="javax.swing.JButton" name="pause_button">
       <Properties>
-        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="0" green="99" red="ff" type="rgb"/>
-        </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Verdana" size="16" style="1"/>
-        </Property>
-        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ff" green="ff" id="white" palette="1" red="ff" type="palette"/>
         </Property>
         <Property name="text" type="java.lang.String" value="PAUSE UPLOAD"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -187,14 +181,8 @@
     </Component>
     <Component class="javax.swing.JButton" name="stop_button">
       <Properties>
-        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="0" green="0" red="ff" type="rgb"/>
-        </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="16" style="1"/>
-        </Property>
-        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ff" green="ff" id="white" palette="1" red="ff" type="palette"/>
         </Property>
         <Property name="text" type="java.lang.String" value="CANCEL UPLOAD"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -229,14 +217,8 @@
     </Component>
     <Component class="javax.swing.JButton" name="restart_button">
       <Properties>
-        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ff" green="33" red="33" type="rgb"/>
-        </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="16" style="1"/>
-        </Property>
-        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ff" green="ff" red="ff" type="rgb"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Restart"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
