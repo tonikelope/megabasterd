@@ -22,7 +22,9 @@ public final class DBTools {
 
     public static synchronized void setupSqliteTables() throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (Statement stat = conn.createStatement()) {
 
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS downloads(url TEXT, path TEXT, filename TEXT, filekey TEXT, filesize UNSIGNED BIG INT, filepass VARCHAR(64), filenoexpire VARCHAR(64), PRIMARY KEY ('url'), UNIQUE(path, filename));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS uploads(filename TEXT, email TEXT, url TEXT, ul_key TEXT, parent_node TEXT, root_node TEXT, share_key TEXT, folder_link TEXT, PRIMARY KEY ('filename'), UNIQUE(filename, email));");
@@ -34,7 +36,9 @@ public final class DBTools {
 
     public static synchronized void vaccum() throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (Statement stat = conn.createStatement()) {
 
             stat.execute("VACUUM");
         }
@@ -42,7 +46,9 @@ public final class DBTools {
 
     public static synchronized void insertDownload(String url, String path, String filename, String filekey, Long size, String filepass, String filenoexpire) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO downloads (url, path, filename, filekey, filesize, filepass, filenoexpire) VALUES (?,?,?,?,?,?,?)")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("INSERT INTO downloads (url, path, filename, filekey, filesize, filepass, filenoexpire) VALUES (?,?,?,?,?,?,?)")) {
 
             ps.setString(1, url);
             ps.setString(2, path);
@@ -58,7 +64,9 @@ public final class DBTools {
 
     public static synchronized void deleteDownload(String url) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE url=?")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE url=?")) {
 
             ps.setString(1, url);
 
@@ -69,6 +77,8 @@ public final class DBTools {
 
     public static synchronized void deleteDownloads(String[] urls) throws SQLException {
 
+        Connection conn = SqliteSingleton.getInstance().getConn();
+        
         for (int n = 0, t = 0; t < urls.length; n++) {
 
             String[] sub_array = Arrays.copyOfRange(urls, n * MAX_TRANSFERENCES_QUERY, t + Math.min(MAX_TRANSFERENCES_QUERY, urls.length - t));
@@ -77,7 +87,7 @@ public final class DBTools {
 
             String whereClause = String.format("url in (%s)", String.join(",", Collections.nCopies(sub_array.length, "?")));
 
-            try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE " + whereClause)) {
+            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE " + whereClause)) {
 
                 int i = 1;
 
@@ -95,7 +105,9 @@ public final class DBTools {
 
     public static synchronized void insertUpload(String filename, String email, String parent_node, String ul_key, String root_node, String share_key, String folder_link) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link) VALUES (?,?,?,?,?,?,?)")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link) VALUES (?,?,?,?,?,?,?)")) {
 
             ps.setString(1, filename);
             ps.setString(2, email);
@@ -111,7 +123,9 @@ public final class DBTools {
 
     public static synchronized void updateUploadUrl(String filename, String email, String ul_url) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("UPDATE uploads SET url=? WHERE filename=? AND email=?")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("UPDATE uploads SET url=? WHERE filename=? AND email=?")) {
 
             ps.setString(1, ul_url);
             ps.setString(2, filename);
@@ -124,7 +138,9 @@ public final class DBTools {
 
     public static synchronized void deleteUpload(String filename, String email) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM uploads WHERE filename=? AND email=?")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("DELETE FROM uploads WHERE filename=? AND email=?")) {
 
             ps.setString(1, filename);
 
@@ -136,6 +152,8 @@ public final class DBTools {
 
     public static synchronized void deleteUploads(String[][] uploads) throws SQLException {
 
+        Connection conn = SqliteSingleton.getInstance().getConn();
+        
         for (int n = 0, t = 0; t < uploads.length; n++) {
 
             String[][] sub_array = Arrays.copyOfRange(uploads, n * MAX_TRANSFERENCES_QUERY, t + Math.min(MAX_TRANSFERENCES_QUERY, uploads.length - t));
@@ -144,7 +162,7 @@ public final class DBTools {
 
             String whereClause = String.join(" OR ", Collections.nCopies(sub_array.length, "(filename=? AND email=?)"));
 
-            try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM uploads WHERE " + whereClause)) {
+            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM uploads WHERE " + whereClause)) {
 
                 int i = 1;
 
@@ -166,7 +184,9 @@ public final class DBTools {
 
         String value = null;
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT value from settings WHERE key=?")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("SELECT value from settings WHERE key=?")) {
 
             ps.setString(1, key);
 
@@ -184,7 +204,9 @@ public final class DBTools {
 
     public static synchronized void insertSettingValueInDB(String key, String value) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO settings (key,value) VALUES (?, ?)")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO settings (key,value) VALUES (?, ?)")) {
 
             ps.setString(1, key);
 
@@ -200,7 +222,9 @@ public final class DBTools {
 
         ResultSet res;
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (Statement stat = conn.createStatement()) {
 
             res = stat.executeQuery("SELECT * FROM downloads");
 
@@ -229,7 +253,9 @@ public final class DBTools {
 
         ResultSet res;
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (Statement stat = conn.createStatement()) {
 
             res = stat.executeQuery("SELECT * FROM uploads");
 
@@ -258,7 +284,9 @@ public final class DBTools {
 
         ResultSet res;
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (Statement stat = conn.createStatement()) {
 
             res = stat.executeQuery("SELECT * FROM mega_accounts");
 
@@ -283,7 +311,9 @@ public final class DBTools {
 
         ResultSet res;
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (Statement stat = conn.createStatement()) {
 
             res = stat.executeQuery("SELECT * FROM elc_accounts");
 
@@ -303,7 +333,9 @@ public final class DBTools {
 
     public static synchronized void insertMegaAccount(String email, String password, String password_aes, String user_hash) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO mega_accounts (email,password,password_aes,user_hash) VALUES (?, ?, ?, ?)")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO mega_accounts (email,password,password_aes,user_hash) VALUES (?, ?, ?, ?)")) {
 
             ps.setString(1, email);
 
@@ -321,7 +353,9 @@ public final class DBTools {
 
     public static synchronized void insertELCAccount(String host, String user, String apikey) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO elc_accounts (host,user,apikey) VALUES (?, ?, ?)")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO elc_accounts (host,user,apikey) VALUES (?, ?, ?)")) {
 
             ps.setString(1, host);
 
@@ -336,7 +370,9 @@ public final class DBTools {
 
     public static synchronized void deleteMegaAccount(String email) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE from mega_accounts WHERE email=?")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("DELETE from mega_accounts WHERE email=?")) {
 
             ps.setString(1, email);
 
@@ -346,7 +382,9 @@ public final class DBTools {
 
     public static synchronized void deleteELCAccount(String host) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE from elc_accounts WHERE host=?")) {
+        Connection conn = SqliteSingleton.getInstance().getConn();
+
+        try (PreparedStatement ps = conn.prepareStatement("DELETE from elc_accounts WHERE host=?")) {
 
             ps.setString(1, host);
 

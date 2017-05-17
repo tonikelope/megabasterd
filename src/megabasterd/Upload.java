@@ -591,9 +591,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             synchronized (_workers_lock) {
 
-                int chunkthiser_id = _chunkworkers.size() + 1;
+                int chunk_id = _chunkworkers.size() + 1;
 
-                ChunkUploader c = new ChunkUploader(chunkthiser_id, this);
+                ChunkUploader c = new ChunkUploader(chunk_id, this);
 
                 _chunkworkers.add(c);
 
@@ -713,37 +713,42 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 _thread_pool.execute(_mac_generator);
 
-                if (_use_slots) {
+                synchronized (_workers_lock) {
 
-                    for (int t = 1; t <= _slots; t++) {
-                        ChunkUploader c = new ChunkUploader(t, this);
+                    if (_use_slots) {
+
+                        for (int t = 1; t <= _slots; t++) {
+
+                            ChunkUploader c = new ChunkUploader(t, this);
+
+                            _chunkworkers.add(c);
+
+                            System.out.println("Lanzando chunkuploader" + t + " ...");
+
+                            _thread_pool.execute(c);
+                        }
+
+                        swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
+
+                        swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
+
+                        swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
+
+                    } else {
+
+                        ChunkUploaderMono c = new ChunkUploaderMono(this);
 
                         _chunkworkers.add(c);
 
-                        System.out.println("Lanzando chunkuploader" + t + " ...");
-
                         _thread_pool.execute(c);
+
+                        swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
+
+                        swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+
+                        swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                     }
 
-                    swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
-
-                    swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
-
-                    swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
-
-                } else {
-
-                    ChunkUploaderMono c = new ChunkUploaderMono(this);
-
-                    _chunkworkers.add(c);
-
-                    _thread_pool.execute(c);
-
-                    swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
-
-                    swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
-
-                    swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                 }
 
                 printStatus("Uploading file to mega (" + _ma.getEmail() + ") ...");

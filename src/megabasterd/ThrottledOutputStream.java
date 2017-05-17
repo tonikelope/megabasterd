@@ -71,14 +71,14 @@ public final class ThrottledOutputStream extends OutputStream {
             _rawStream.write(i);
         }
     }
-    
+
     @Override
     public void close() throws IOException {
 
         _rawStream.close();
 
     }
-    
+
     private void throttle(int size) throws IOException {
 
         slice_size = null;
