@@ -37,7 +37,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int FUTURE_TIMEOUT = 120;
+    public static final int FUTURE_TIMEOUT = 300;
     private final int _id;
     private final Upload _upload;
     private volatile boolean _exit;
@@ -117,20 +117,19 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
         boolean error;
         OutputStream out;
 
-        try (final CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
-            RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");
+        try (final CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient(); RandomAccessFile random_file = new RandomAccessFile(_upload.getFile_name(), "r");) {
 
             conta_error = 0;
 
             while (!_exit && !_upload.isStopped()) {
                 chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url);
 
-                f.seek(chunk.getOffset());
+                random_file.seek(chunk.getOffset());
 
                 do {
                     to_read = chunk.getSize() - chunk.getOutputStream().size() >= buffer.length ? buffer.length : (int) (chunk.getSize() - chunk.getOutputStream().size());
 
-                    re = f.read(buffer, 0, to_read);
+                    re = random_file.read(buffer, 0, to_read);
 
                     chunk.getOutputStream().write(buffer, 0, re);
 
@@ -150,46 +149,41 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (!_exit && !_upload.isStopped()) {
 
-                        CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())));
+                        FutureTask<CloseableHttpResponse> futureTask;
 
-                        final PipedInputStream pipein = new PipedInputStream();
+                        try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())))) {
 
-                        final PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                            final PipedInputStream pipein = new PipedInputStream();
+                            final PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                            futureTask = new FutureTask<>(new Callable() {
+                                @Override
+                                public CloseableHttpResponse call() throws IOException {
 
-                        FutureTask<CloseableHttpResponse> futureTask = new FutureTask<>(new Callable() {
-                            @Override
-                            public CloseableHttpResponse call() throws IOException {
+                                    httppost.setEntity(new InputStreamEntity(pipein, postdata_length));
 
-                                httppost.setEntity(new InputStreamEntity(pipein, postdata_length));
+                                    return httpclient.execute(httppost);
+                                }
+                            });
+                            THREAD_POOL.execute(futureTask);
+                            out = new ThrottledOutputStream(pipeout, _upload.getMain_panel().getStream_supervisor());
+                            System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + _id + "...");
+                            while (!_exit && !_upload.isStopped() && tot_bytes_up < chunk.getSize() && (reads = cis.read(buffer)) != -1) {
+                                out.write(buffer, 0, reads);
 
-                                return httpclient.execute(httppost);
-                            }
-                        });
+                                _upload.getPartialProgress().add(reads);
 
-                        THREAD_POOL.execute(futureTask);
+                                _upload.getProgress_meter().secureNotify();
 
-                        out = new ThrottledOutputStream(pipeout, _upload.getMain_panel().getStream_supervisor());
+                                tot_bytes_up += reads;
 
-                        System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + _id + "...");
+                                if (_upload.isPaused() && !_upload.isStopped()) {
 
-                        while (!_exit && !_upload.isStopped() && tot_bytes_up < chunk.getSize() && (reads = cis.read(buffer)) != -1) {
-                            out.write(buffer, 0, reads);
+                                    _upload.pause_worker();
 
-                            _upload.getPartialProgress().add(reads);
-
-                            _upload.getProgress_meter().secureNotify();
-
-                            tot_bytes_up += reads;
-
-                            if (_upload.isPaused() && !_upload.isStopped()) {
-
-                                _upload.pause_worker();
-
-                                secureWait();
+                                    secureWait();
+                                }
                             }
                         }
-
-                        cis.close();
 
                         out.close();
 
@@ -200,15 +194,15 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                 if (!_exit) {
 
                                     try {
-                                        
+
                                         httpresponse = futureTask.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
-                                        
+
                                     } catch (TimeoutException ex) {
-                                        
+
                                         futureTask.cancel(true);
 
                                         httpresponse = null;
-                                        
+
                                         Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                                     }
 

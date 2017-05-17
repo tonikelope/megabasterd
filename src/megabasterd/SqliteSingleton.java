@@ -4,7 +4,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 
 /**
  *
@@ -13,6 +13,8 @@ import static java.util.logging.Logger.getLogger;
 public final class SqliteSingleton {
 
     public static final String SQLITE_FILE = "megabasterd.db";
+
+    private Connection conn = null;
 
     public static SqliteSingleton getInstance() {
 
@@ -24,16 +26,15 @@ public final class SqliteSingleton {
 
     public Connection getConn() {
 
-        Connection conn = null;
-
         try {
+            if (conn == null || conn.isClosed()) {
 
-            Class.forName("org.sqlite.JDBC");
+                Class.forName("org.sqlite.JDBC");
 
-            conn = DriverManager.getConnection("jdbc:sqlite:" + SQLITE_FILE);
-
-        } catch (ClassNotFoundException | SQLException ex) {
-            getLogger(SqliteSingleton.class.getName()).log(Level.SEVERE, null, ex);
+                conn = DriverManager.getConnection("jdbc:sqlite:" + SQLITE_FILE);
+            }
+        } catch (SQLException | ClassNotFoundException ex) {
+            Logger.getLogger(SqliteSingleton.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return conn;

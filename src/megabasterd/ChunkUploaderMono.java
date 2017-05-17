@@ -57,8 +57,7 @@ public class ChunkUploaderMono extends ChunkUploader {
         byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
         boolean error = false;
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
-            RandomAccessFile f = new RandomAccessFile(getUpload().getFile_name(), "r");
+        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient(); RandomAccessFile random_file = new RandomAccessFile(getUpload().getFile_name(), "r");) {
 
             conta_error = 0;
 
@@ -71,12 +70,12 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                 chunk = new Chunk(getUpload().nextChunkId(), getUpload().getFile_size(), null);
 
-                f.seek(chunk.getOffset());
+                random_file.seek(chunk.getOffset());
 
                 do {
                     to_read = chunk.getSize() - chunk.getOutputStream().size() >= buffer.length ? buffer.length : (int) (chunk.getSize() - chunk.getOutputStream().size());
 
-                    re = f.read(buffer, 0, to_read);
+                    re = random_file.read(buffer, 0, to_read);
 
                     chunk.getOutputStream().write(buffer, 0, re);
 
@@ -116,28 +115,27 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     if (!isExit() && !getUpload().isStopped()) {
 
-                        CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", getUpload().getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(getUpload().getByte_file_iv(), chunk.getOffset())));
+                        try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", getUpload().getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(getUpload().getByte_file_iv(), chunk.getOffset())))) {
 
-                        System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + getId() + "...");
+                            System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + getId() + "...");
 
-                        while (!isExit() && !getUpload().isStopped() && tot_bytes_up < chunk.getSize() && (reads = cis.read(buffer)) != -1 && out != null) {
-                            out.write(buffer, 0, reads);
+                            while (!isExit() && !getUpload().isStopped() && tot_bytes_up < chunk.getSize() && (reads = cis.read(buffer)) != -1 && out != null) {
+                                out.write(buffer, 0, reads);
 
-                            getUpload().getPartialProgress().add(reads);
+                                getUpload().getPartialProgress().add(reads);
 
-                            getUpload().getProgress_meter().secureNotify();
+                                getUpload().getProgress_meter().secureNotify();
 
-                            tot_bytes_up += reads;
+                                tot_bytes_up += reads;
 
-                            if (getUpload().isPaused() && !getUpload().isStopped()) {
+                                if (getUpload().isPaused() && !getUpload().isStopped()) {
 
-                                getUpload().pause_worker();
+                                    getUpload().pause_worker();
 
-                                secureWait();
+                                    secureWait();
+                                }
                             }
                         }
-
-                        cis.close();
 
                         if (!getUpload().isStopped()) {
 
@@ -259,10 +257,10 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     } catch (ExecutionException | InterruptedException | CancellationException | TimeoutException exception) {
 
-                        if(exception instanceof TimeoutException) {
+                        if (exception instanceof TimeoutException) {
                             futureTask.cancel(true);
                         }
-                        
+
                         error = true;
 
                         getUpload().rejectChunkId(chunk.getId());
@@ -274,7 +272,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                     } finally {
 
                         if (out != null) {
-                            
+
                             out.close();
                         }
 

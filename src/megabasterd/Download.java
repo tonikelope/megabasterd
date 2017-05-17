@@ -485,35 +485,39 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         getMain_panel().getGlobal_dl_speed().secureNotify();
 
-                        if (_use_slots) {
+                        synchronized (_workers_lock) {
 
-                            for (int t = 1; t <= _slots; t++) {
-                                ChunkDownloader c = new ChunkDownloader(t, this);
+                            if (_use_slots) {
+
+                                for (int t = 1; t <= _slots; t++) {
+                                    ChunkDownloader c = new ChunkDownloader(t, this);
+
+                                    _chunkworkers.add(c);
+
+                                    _thread_pool.execute(c);
+                                }
+
+                                swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
+
+                                swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
+
+                                swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
+
+                            } else {
+
+                                ChunkDownloaderMono c = new ChunkDownloaderMono(this);
 
                                 _chunkworkers.add(c);
 
                                 _thread_pool.execute(c);
+
+                                swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
+
+                                swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+
+                                swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                             }
 
-                            swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
-
-                            swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
-
-                            swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
-
-                        } else {
-
-                            ChunkDownloaderMono c = new ChunkDownloaderMono(this);
-
-                            _chunkworkers.add(c);
-
-                            _thread_pool.execute(c);
-
-                            swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
-
-                            swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
-
-                            swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                         }
 
                         getView().printStatusNormal("Downloading file from mega ...");
