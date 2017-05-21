@@ -55,7 +55,6 @@ import static megabasterd.Transference.MAX_WAIT_WORKERS_SHUTDOWN;
 public final class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
-    public static final Object CBC_LOCK = new Object();
     public static final boolean USE_SLOTS_DEFAULT = false;
     public static final int WORKERS_DEFAULT = 4;
 
@@ -589,42 +588,39 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                                 swingReflectionInvoke("setValue", getView().getProgress_pbar(), 0);
 
-                                synchronized (CBC_LOCK) {
+                                getView().printStatusNormal("Checking file integrity, please wait...");
 
-                                    getView().printStatusNormal("Checking file integrity, please wait...");
+                                swingReflectionInvoke("setVisible", getView().getStop_button(), true);
 
-                                    swingReflectionInvoke("setVisible", getView().getStop_button(), true);
+                                swingReflectionInvoke("setText", getView().getStop_button(), "CANCEL CHECK");
 
-                                    swingReflectionInvoke("setText", getView().getStop_button(), "CANCEL CHECK");
+                                getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
 
-                                    getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
+                                getMain_panel().getDownload_manager().secureNotify();
 
-                                    getMain_panel().getDownload_manager().secureNotify();
+                                if (verifyFileCBCMAC(filename)) {
+                                    exit_message = "File successfully downloaded! (Integrity check PASSED)";
 
-                                    if (verifyFileCBCMAC(filename)) {
-                                        exit_message = "File successfully downloaded! (Integrity check PASSED)";
+                                    getView().printStatusOK(exit_message);
+                                } else if (!_exit) {
+                                    exit_message = "BAD NEWS :( File is DAMAGED!";
 
-                                        getView().printStatusOK(exit_message);
-                                    } else if (!_exit) {
-                                        exit_message = "BAD NEWS :( File is DAMAGED!";
+                                    getView().printStatusError(exit_message);
 
-                                        getView().printStatusError(exit_message);
+                                    _status_error = true;
+                                } else {
+                                    exit_message = "File successfully downloaded! (but integrity check CANCELED)";
 
-                                        _status_error = true;
-                                    } else {
-                                        exit_message = "File successfully downloaded! (but integrity check CANCELED)";
+                                    getView().printStatusOK(exit_message);
 
-                                        getView().printStatusOK(exit_message);
-
-                                        _status_error = true;
-
-                                    }
-
-                                    swingReflectionInvoke("setVisible", getView().getStop_button(), false);
-
-                                    swingReflectionInvoke("setValue", getView().getProgress_pbar(), MAX_VALUE);
+                                    _status_error = true;
 
                                 }
+
+                                swingReflectionInvoke("setVisible", getView().getStop_button(), false);
+
+                                swingReflectionInvoke("setValue", getView().getProgress_pbar(), MAX_VALUE);
+
                             } else {
                                 exit_message = "File successfully downloaded!";
 

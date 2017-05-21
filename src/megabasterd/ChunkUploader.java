@@ -146,46 +146,42 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (!_exit && !_upload.isStopped()) {
 
-                        CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())));
+                        FutureTask<CloseableHttpResponse> futureTask;
 
-                        final PipedInputStream pipein = new PipedInputStream();
+                        try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())))) {
 
-                        PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                            final PipedInputStream pipein = new PipedInputStream();
+                            final PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                            futureTask = new FutureTask<>(new Callable() {
+                                @Override
+                                public CloseableHttpResponse call() throws IOException {
 
-                        FutureTask<CloseableHttpResponse> futureTask = new FutureTask<>(new Callable() {
-                            @Override
-                            public CloseableHttpResponse call() throws IOException {
+                                    httppost.setEntity(new InputStreamEntity(pipein, postdata_length));
 
-                                httppost.setEntity(new InputStreamEntity(pipein, postdata_length));
+                                    return httpclient.execute(httppost);
+                                }
+                            });
+                            THREAD_POOL.execute(futureTask);
+                            out = new ThrottledOutputStream(pipeout, _upload.getMain_panel().getStream_supervisor());
+                            System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + _id + "...");
+                            while (!_exit && !_upload.isStopped() && (reads = cis.read(buffer)) != -1) {
+                                out.write(buffer, 0, reads);
 
-                                return httpclient.execute(httppost);
+                                _upload.getPartialProgress().add(reads);
+
+                                _upload.getProgress_meter().secureNotify();
+
+                                tot_bytes_up += reads;
+
+                                if (_upload.isPaused() && !_upload.isStopped()) {
+
+                                    _upload.pause_worker();
+
+                                    secureWait();
+                                }
                             }
-                        });
-
-                        THREAD_POOL.execute(futureTask);
-
-                        out = new ThrottledOutputStream(pipeout, _upload.getMain_panel().getStream_supervisor());
-
-                        System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + _id + "...");
-
-                        while (!_exit && !_upload.isStopped() && (reads = cis.read(buffer)) != -1) {
-                            out.write(buffer, 0, reads);
-
-                            _upload.getPartialProgress().add(reads);
-
-                            _upload.getProgress_meter().secureNotify();
-
-                            tot_bytes_up += reads;
-
-                            if (_upload.isPaused() && !_upload.isStopped()) {
-
-                                _upload.pause_worker();
-
-                                secureWait();
-                            }
+                            out.close();
                         }
-
-                        out.close();
 
                         if (!_upload.isStopped()) {
 

@@ -86,7 +86,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     final PipedInputStream pipein = new PipedInputStream();
 
-                    PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                    final PipedOutputStream pipeout = new PipedOutputStream(pipein);
 
                     futureTask = new FutureTask<>(new Callable() {
                         @Override
@@ -112,24 +112,25 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     if (!isExit() && !getUpload().isStopped()) {
 
-                        CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", getUpload().getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(getUpload().getByte_file_iv(), chunk.getOffset())));
+                        try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", getUpload().getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(getUpload().getByte_file_iv(), chunk.getOffset())))) {
 
-                        System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + getId() + "...");
+                            System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + getId() + "...");
 
-                        while (!isExit() && !getUpload().isStopped() && (reads = cis.read(buffer)) != -1 && out != null) {
-                            out.write(buffer, 0, reads);
+                            while (!isExit() && !getUpload().isStopped() && (reads = cis.read(buffer)) != -1 && out != null) {
+                                out.write(buffer, 0, reads);
 
-                            getUpload().getPartialProgress().add(reads);
+                                getUpload().getPartialProgress().add(reads);
 
-                            getUpload().getProgress_meter().secureNotify();
+                                getUpload().getProgress_meter().secureNotify();
 
-                            tot_bytes_up += reads;
+                                tot_bytes_up += reads;
 
-                            if (getUpload().isPaused() && !getUpload().isStopped()) {
+                                if (getUpload().isPaused() && !getUpload().isStopped()) {
 
-                                getUpload().pause_worker();
+                                    getUpload().pause_worker();
 
-                                secureWait();
+                                    secureWait();
+                                }
                             }
                         }
 

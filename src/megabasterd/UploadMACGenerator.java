@@ -4,15 +4,13 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
 import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
+import static megabasterd.CryptTools.genCrypter;
 import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.HashString;
 import static megabasterd.MiscTools.bin2i32a;
@@ -108,14 +106,16 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
             int[] file_iv = bin2i32a(_upload.getByte_file_iv()), int_block, file_mac = _upload.getSaved_file_mac(), mac_iv = CryptTools.AES_ZERO_IV_I32A;
             int reads;
             byte[] byte_block = new byte[16];
-            String temp_file_data = "";
+            String temp_file_data;
             boolean new_chunk = false;
             boolean upload_workers_finish = false;
+            Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", _upload.getByte_file_key(), i32a2bin(mac_iv));
 
             while (!_exit && (!_upload.isStopped() || !_upload.getChunkworkers().isEmpty()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1))) {
+
                 while (_chunk_queue.containsKey(_last_chunk_id_read + 1)) {
 
-                    if (_upload.getChunkworkers().isEmpty() && !upload_workers_finish) {
+                    if (!upload_workers_finish && _upload.getChunkworkers().isEmpty()) {
 
                         _upload.getView().printStatusNormal("Finishing FILE MAC calculation... ***DO NOT EXIT MEGABASTERD NOW***");
 
@@ -132,6 +132,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                         InputStream chunk_is = chunk.getInputStream();
 
                         while ((reads = chunk_is.read(byte_block)) != -1) {
+
                             if (reads < byte_block.length) {
                                 for (int i = reads; i < byte_block.length; i++) {
                                     byte_block[i] = 0;
@@ -144,18 +145,18 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                                 chunk_mac[i] ^= int_block[i];
                             }
 
-                            chunk_mac = CryptTools.aes_cbc_encrypt_ia32(chunk_mac, bin2i32a(_upload.getByte_file_key()), mac_iv);
+                            chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
                         }
 
                         for (int i = 0; i < file_mac.length; i++) {
                             file_mac[i] ^= chunk_mac[i];
                         }
 
-                        file_mac = CryptTools.aes_cbc_encrypt_ia32(file_mac, bin2i32a(_upload.getByte_file_key()), mac_iv);
+                        file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
 
                         _bytes_read += chunk.getSize();
 
-                    } catch (IOException | NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                    } catch (IOException | IllegalBlockSizeException | BadPaddingException ex) {
                         getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
@@ -164,10 +165,9 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                     _last_chunk_id_read = chunk.getId();
 
                     new_chunk = true;
-
                 }
 
-                if (new_chunk) {
+                if (!upload_workers_finish && new_chunk) {
 
                     temp_file_data = (String.valueOf(_last_chunk_id_read) + "|" + String.valueOf(_bytes_read) + "|" + Bin2BASE64(i32a2bin(file_mac)));
 
