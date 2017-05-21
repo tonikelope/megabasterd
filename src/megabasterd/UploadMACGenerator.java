@@ -117,7 +117,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                     if (_upload.getChunkworkers().isEmpty() && !upload_workers_finish) {
 
-                        _upload.getView().printStatusNormal("Uploading file to mega (" + _upload.getMa().getEmail() + ") [finishing FILE MAC generation] ...");
+                        _upload.getView().printStatusNormal("Finishing FILE MAC calculation... ***DO NOT EXIT MEGABASTERD NOW***");
 
                         swingReflectionInvokeAndWait("setEnabled", _upload.getView().getPause_button(), false);
 

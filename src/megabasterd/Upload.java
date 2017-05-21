@@ -805,7 +805,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     if (_completion_handle != null) {
 
-                        printStatus("Uploading file to mega (" + _ma.getEmail() + ") [creating new MEGA node] ...");
+                        printStatus("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***");
 
                         File f = new File(_file_name);
 
