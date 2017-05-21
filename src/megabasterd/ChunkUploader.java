@@ -114,8 +114,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
         boolean error;
         OutputStream out;
 
-        try (final CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient();RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");) {
-            
+        try (final CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");) {
+
             conta_error = 0;
 
             while (!_exit && !_upload.isStopped()) {

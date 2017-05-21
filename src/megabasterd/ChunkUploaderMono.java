@@ -54,8 +54,8 @@ public class ChunkUploaderMono extends ChunkUploader {
         byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
         boolean error = false;
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient();RandomAccessFile f = new RandomAccessFile(getUpload().getFile_name(), "r");) {
-            
+        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(getUpload().getFile_name(), "r");) {
+
             conta_error = 0;
 
             OutputStream out = null;

@@ -176,10 +176,10 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
     @Override
     public void detachObserver(ClipboardChangeObserver observer) {
 
-        if(_observers.contains(observer)) {
-            
+        if (_observers.contains(observer)) {
+
             _observers.remove(observer);
-            
+
             if (_observers.isEmpty() && _enabled) {
 
                 _setEnabled(false);

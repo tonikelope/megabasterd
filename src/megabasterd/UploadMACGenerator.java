@@ -17,6 +17,7 @@ import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.HashString;
 import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.i32a2bin;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 
 /**
  *
@@ -109,9 +110,20 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
             byte[] byte_block = new byte[16];
             String temp_file_data = "";
             boolean new_chunk = false;
+            boolean upload_workers_finish = false;
 
             while (!_exit && (!_upload.isStopped() || !_upload.getChunkworkers().isEmpty()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1))) {
                 while (_chunk_queue.containsKey(_last_chunk_id_read + 1)) {
+
+                    if (_upload.getChunkworkers().isEmpty() && !upload_workers_finish) {
+
+                        _upload.getView().printStatusNormal("Uploading file to mega (" + _upload.getMa().getEmail() + ") [finishing FILE MAC generation] ...");
+
+                        swingReflectionInvokeAndWait("setEnabled", _upload.getView().getPause_button(), false);
+
+                        upload_workers_finish = true;
+                    }
+
                     chunk = _chunk_queue.get(_last_chunk_id_read + 1);
 
                     try {

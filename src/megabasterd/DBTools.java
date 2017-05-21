@@ -17,7 +17,7 @@ import static java.util.logging.Logger.getLogger;
  * @author tonikelope
  */
 public final class DBTools {
-    
+
     public static final int MAX_TRANSFERENCES_QUERY = 100;
 
     public static synchronized void setupSqliteTables() throws SQLException {
@@ -69,22 +69,22 @@ public final class DBTools {
 
     public static synchronized void deleteDownloads(String[] urls) throws SQLException {
 
-        for(int n=0, t=0; t < urls.length; n++) {
-            
-            String[] sub_array = Arrays.copyOfRange(urls, n*MAX_TRANSFERENCES_QUERY, t+Math.min(MAX_TRANSFERENCES_QUERY, urls.length-t));
-            
-            t+=sub_array.length;
-            
+        for (int n = 0, t = 0; t < urls.length; n++) {
+
+            String[] sub_array = Arrays.copyOfRange(urls, n * MAX_TRANSFERENCES_QUERY, t + Math.min(MAX_TRANSFERENCES_QUERY, urls.length - t));
+
+            t += sub_array.length;
+
             String whereClause = String.format("url in (%s)", String.join(",", Collections.nCopies(sub_array.length, "?")));
 
             try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE " + whereClause)) {
 
-                int i=1;
-                
-                for (String value:sub_array) {
+                int i = 1;
+
+                for (String value : sub_array) {
 
                     ps.setString(i, value);
-                    
+
                     i++;
                 }
 
@@ -136,25 +136,25 @@ public final class DBTools {
 
     public static synchronized void deleteUploads(String[][] uploads) throws SQLException {
 
-        for(int n=0, t=0; t < uploads.length; n++) {
-            
-            String[][] sub_array = Arrays.copyOfRange(uploads, n*MAX_TRANSFERENCES_QUERY, t+Math.min(MAX_TRANSFERENCES_QUERY, uploads.length-t));
-            
-            t+=sub_array.length;
-            
+        for (int n = 0, t = 0; t < uploads.length; n++) {
+
+            String[][] sub_array = Arrays.copyOfRange(uploads, n * MAX_TRANSFERENCES_QUERY, t + Math.min(MAX_TRANSFERENCES_QUERY, uploads.length - t));
+
+            t += sub_array.length;
+
             String whereClause = String.join(" OR ", Collections.nCopies(sub_array.length, "(filename=? AND email=?)"));
 
             try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM uploads WHERE " + whereClause)) {
 
-                int i=1;
-                
-                for(String[] pair:sub_array) {
-                    
+                int i = 1;
+
+                for (String[] pair : sub_array) {
+
                     ps.setString(i, pair[0]);
 
                     ps.setString(i + 1, pair[1]);
-                    
-                    i+=2;
+
+                    i += 2;
                 }
 
                 ps.executeUpdate();

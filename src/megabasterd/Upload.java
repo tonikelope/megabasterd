@@ -188,7 +188,11 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     }
 
     public ArrayList<ChunkUploader> getChunkworkers() {
-        return _chunkworkers;
+
+        synchronized (_workers_lock) {
+            return _chunkworkers;
+        }
+
     }
 
     @Override
@@ -801,7 +805,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     if (_completion_handle != null) {
 
-                        printStatus("Uploading (finishing) file to mega (" + _ma.getEmail() + ") ...");
+                        printStatus("Uploading file to mega (" + _ma.getEmail() + ") [creating new MEGA node] ...");
 
                         File f = new File(_file_name);
 
