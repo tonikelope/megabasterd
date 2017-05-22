@@ -235,7 +235,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         jScrollPane_down.setViewportView(jPanel_scroll_down);
 
         pause_all_down_button.setBackground(new java.awt.Color(255, 153, 0));
-        pause_all_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        pause_all_down_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         pause_all_down_button.setForeground(new java.awt.Color(255, 255, 255));
         pause_all_down_button.setText("PAUSE ALL");
         pause_all_down_button.setDoubleBuffered(true);
@@ -251,7 +251,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addComponent(global_speed_down_label, javax.swing.GroupLayout.PREFERRED_SIZE, 404, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 364, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 340, Short.MAX_VALUE)
                 .addComponent(pause_all_down_button))
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()

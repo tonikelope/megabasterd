@@ -236,7 +236,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="global_speed_down_label" min="-2" pref="404" max="-2" attributes="0"/>
-                      <EmptySpace pref="364" max="32767" attributes="0"/>
+                      <EmptySpace pref="340" max="32767" attributes="0"/>
                       <Component id="pause_all_down_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
@@ -321,7 +321,7 @@
                   <Color blue="0" green="99" red="ff" type="rgb"/>
                 </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="16" style="1"/>
+                  <Font name="Dialog" size="20" style="1"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
