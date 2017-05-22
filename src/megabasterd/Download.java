@@ -188,7 +188,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     }
 
     public ArrayList<ChunkDownloader> getChunkworkers() {
-        return _chunkworkers;
+        
+        synchronized(_workers_lock) {
+            return _chunkworkers;
+        }
     }
 
     public void setPaused_workers(int paused_workers) {
@@ -486,37 +489,41 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         getMain_panel().getGlobal_dl_speed().secureNotify();
 
-                        if (_use_slots) {
+                        
+                        synchronized(_workers_lock) {
+                            
+                                if (_use_slots) {
 
-                            for (int t = 1; t <= _slots; t++) {
-                                ChunkDownloader c = new ChunkDownloader(t, this);
+                                for (int t = 1; t <= _slots; t++) {
+                                    ChunkDownloader c = new ChunkDownloader(t, this);
+
+                                    _chunkworkers.add(c);
+
+                                    _thread_pool.execute(c);
+                                }
+
+                                swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
+
+                                swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
+
+                                swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
+
+                            } else {
+
+                                ChunkDownloaderMono c = new ChunkDownloaderMono(this);
 
                                 _chunkworkers.add(c);
 
                                 _thread_pool.execute(c);
+
+                                swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
+
+                                swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+
+                                swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                             }
-
-                            swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
-
-                            swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
-
-                            swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
-
-                        } else {
-
-                            ChunkDownloaderMono c = new ChunkDownloaderMono(this);
-
-                            _chunkworkers.add(c);
-
-                            _thread_pool.execute(c);
-
-                            swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
-
-                            swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
-
-                            swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                         }
-
+                        
                         getView().printStatusNormal("Downloading file from mega ...");
 
                         getMain_panel().getDownload_manager().secureNotify();

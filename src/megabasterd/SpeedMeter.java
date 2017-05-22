@@ -85,7 +85,7 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
             no_data_count = 0;
 
             while (!_exit) {
-                Thread.sleep(SpeedMeter.SLEEP * (no_data_count + 1));
+                Thread.sleep(SpeedMeter.SLEEP);
 
                 if (!_exit) {
                     updateProgress();
@@ -127,9 +127,9 @@ public final class SpeedMeter implements Runnable, SecureSingleThreadNotifiable 
 
                     } else {
 
-                        _transference.getView().updateSpeed("------", true);
+                        _transference.getView().updateSpeed("------ *", true);
 
-                        _transference.getView().updateRemainingTime("--d --:--:--", true);
+                        _transference.getView().updateRemainingTime("--d --:--:-- *", true);
 
                         setLastSpeed(0);
 

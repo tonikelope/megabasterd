@@ -101,7 +101,6 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
     @Override
     public void run() {
         Chunk current_chunk;
-        CipherInputStream cis;
         byte[] buffer = new byte[16 * 1024];
         int reads;
 
@@ -114,13 +113,11 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
                     while (_chunk_queue.containsKey(_last_chunk_id_written + 1)) {
                         current_chunk = _chunk_queue.get(_last_chunk_id_written + 1);
 
-                        cis = new CipherInputStream(current_chunk.getInputStream(), CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, CryptTools.forwardMEGALinkKeyIV(_byte_iv, _bytes_written)));
-
-                        while ((reads = cis.read(buffer)) != -1) {
-                            _download.getOutput_stream().write(buffer, 0, reads);
+                        try (CipherInputStream cis = new CipherInputStream(current_chunk.getInputStream(), CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, CryptTools.forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
+                            while ((reads = cis.read(buffer)) != -1) {
+                                _download.getOutput_stream().write(buffer, 0, reads);
+                            }
                         }
-
-                        cis.close();
 
                         _bytes_written += current_chunk.getSize();
 

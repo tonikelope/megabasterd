@@ -717,7 +717,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 _thread_pool.execute(_mac_generator);
 
-                if (_use_slots) {
+                synchronized (_workers_lock) {
+                    
+                    if (_use_slots) {
 
                     for (int t = 1; t <= _slots; t++) {
                         ChunkUploader c = new ChunkUploader(t, this);
@@ -735,21 +737,22 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
 
-                } else {
+                    } else {
 
-                    ChunkUploaderMono c = new ChunkUploaderMono(this);
+                        ChunkUploaderMono c = new ChunkUploaderMono(this);
 
-                    _chunkworkers.add(c);
+                        _chunkworkers.add(c);
 
-                    _thread_pool.execute(c);
+                        _thread_pool.execute(c);
 
-                    swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
+                        swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
 
-                    swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+                        swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
 
-                    swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
+                        swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
+                    }
                 }
-
+                
                 printStatus("Uploading file to mega (" + _ma.getEmail() + ") ...");
 
                 getMain_panel().getUpload_manager().secureNotify();

@@ -220,7 +220,9 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_down_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         status_down_label.setDoubleBuffered(true);
 
+        close_all_finished_down_button.setBackground(new java.awt.Color(0, 153, 51));
         close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        close_all_finished_down_button.setForeground(new java.awt.Color(255, 255, 255));
         close_all_finished_down_button.setText("Close all OK finished");
         close_all_finished_down_button.setDoubleBuffered(true);
         close_all_finished_down_button.addActionListener(new java.awt.event.ActionListener() {
@@ -281,7 +283,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         status_up_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
 
+        close_all_finished_up_button.setBackground(new java.awt.Color(0, 153, 51));
         close_all_finished_up_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        close_all_finished_up_button.setForeground(new java.awt.Color(255, 255, 255));
         close_all_finished_up_button.setText("Close all OK finished");
         close_all_finished_up_button.setDoubleBuffered(true);
         close_all_finished_up_button.addActionListener(new java.awt.event.ActionListener() {
@@ -294,7 +298,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         jScrollPane_up.setViewportView(jPanel_scroll_up);
 
         pause_all_up_button.setBackground(new java.awt.Color(255, 153, 0));
-        pause_all_up_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        pause_all_up_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         pause_all_up_button.setForeground(new java.awt.Color(255, 255, 255));
         pause_all_up_button.setText("PAUSE ALL");
         pause_all_up_button.setDoubleBuffered(true);
@@ -310,7 +314,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addComponent(global_speed_up_label, javax.swing.GroupLayout.PREFERRED_SIZE, 404, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 364, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 340, Short.MAX_VALUE)
                 .addComponent(pause_all_up_button))
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
