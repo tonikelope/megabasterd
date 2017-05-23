@@ -419,6 +419,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         if (!_provision_ok) {
 
+            _status_error = true;
+
             getView().hideAllExceptStatus();
 
             if (_fatal_error != null) {

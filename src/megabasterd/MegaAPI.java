@@ -38,6 +38,7 @@ public final class MegaAPI {
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
+    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16};
 
     public static int checkMEGAError(String data) {
         String error = findFirstRegex("^\\[?(\\-[0-9]+)\\]?$", data, 1);
@@ -277,14 +278,12 @@ public final class MegaAPI {
 
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
 
-            boolean error;
-
-            int conta_error = 0;
+            int error, conta_error = 0;
 
             HttpPost httppost;
 
             do {
-                error = true;
+                error = 0;
 
                 try {
 
@@ -318,9 +317,8 @@ public final class MegaAPI {
 
                                 if (response.length() > 0) {
 
-                                    if (checkMEGAError(response) == 0) {
-                                        error = false;
-                                    }
+                                    error = checkMEGAError(response);
+
                                 }
 
                             }
@@ -332,9 +330,14 @@ public final class MegaAPI {
                     Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
-                if (error) {
+                if (error != 0) {
 
-                    System.out.println("MegaAPI ERROR. Waiting for retry...");
+                    if (Arrays.asList(MEGA_ERROR_EXCEPTION_CODES).contains(error)) {
+
+                        throw new MegaAPIException(String.valueOf(error));
+                    }
+
+                    System.out.println("MegaAPI ERROR " + String.valueOf(error) + " Waiting for retry...");
 
                     try {
                         Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
@@ -347,8 +350,11 @@ public final class MegaAPI {
                     conta_error = 0;
                 }
 
-            } while (error);
+            } while (error != 0);
 
+        } catch (MegaAPIException | IOException exception) {
+
+            throw exception;
         }
 
         _seqno++;

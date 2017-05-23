@@ -15,6 +15,7 @@ public interface Transference {
     boolean LIMIT_TRANSFERENCE_SPEED_DEFAULT = false;
     int MAX_TRANSFERENCE_SPEED_DEFAULT = 5;
     int MAX_WAIT_WORKERS_SHUTDOWN = 15;
+    Integer[] FATAL_ERROR_API_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16, 22, 23, 24, 25};
 
     void start();
 

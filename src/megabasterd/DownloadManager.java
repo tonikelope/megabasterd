@@ -30,9 +30,9 @@ public final class DownloadManager extends TransferenceManager {
 
             getTransference_finished_queue().remove(d);
 
-            _total_transferences_size -= d.getFile_size();
-
             if (((Download) d).isProvision_ok()) {
+
+                _total_transferences_size -= d.getFile_size();
 
                 delete_down.add(((Download) d).getUrl());
             }
