@@ -146,7 +146,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (!_exit && !_upload.isStopped()) {
 
-                        FutureTask<CloseableHttpResponse> futureTask;
+                        final FutureTask<CloseableHttpResponse> futureTask;
 
                         try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())))) {
 

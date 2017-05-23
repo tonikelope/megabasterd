@@ -42,8 +42,6 @@ public interface Transference {
 
     long getFile_size();
 
-    SpeedMeter getSpeed_meter();
-
     ProgressMeter getProgress_meter();
 
     MainPanel getMain_panel();

@@ -60,7 +60,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view = null; //lazy init
-    private volatile SpeedMeter _speed_meter = null; //lazy init
     private volatile ProgressMeter _progress_meter = null; //lazy init;
     private final Object _secure_notify_lock;
     private final Object _workers_lock;
@@ -188,8 +187,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     }
 
     public ArrayList<ChunkDownloader> getChunkworkers() {
-        
-        synchronized(_workers_lock) {
+
+        synchronized (_workers_lock) {
             return _chunkworkers;
         }
     }
@@ -233,28 +232,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public boolean isProvision_ok() {
         return _provision_ok;
-    }
-
-    @Override
-    public SpeedMeter getSpeed_meter() {
-
-        SpeedMeter result = _speed_meter;
-
-        if (result == null) {
-
-            synchronized (this) {
-
-                result = _speed_meter;
-
-                if (result == null) {
-
-                    _speed_meter = result = new SpeedMeter(this, getMain_panel().getGlobal_dl_speed());
-
-                }
-            }
-        }
-
-        return result;
     }
 
     @Override
@@ -328,8 +305,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             setPause(false);
 
             setPaused_workers(0);
-
-            getSpeed_meter().secureNotify();
 
             synchronized (_workers_lock) {
 
@@ -483,16 +458,11 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         _thread_pool.execute(getProgress_meter());
 
-                        _thread_pool.execute(getSpeed_meter());
+                        getMain_panel().getGlobal_dl_speed().attachTransference(this);
 
-                        getMain_panel().getGlobal_dl_speed().attachSpeedMeter(getSpeed_meter());
+                        synchronized (_workers_lock) {
 
-                        getMain_panel().getGlobal_dl_speed().secureNotify();
-
-                        
-                        synchronized(_workers_lock) {
-                            
-                                if (_use_slots) {
+                            if (_use_slots) {
 
                                 for (int t = 1; t <= _slots; t++) {
                                     ChunkDownloader c = new ChunkDownloader(t, this);
@@ -523,7 +493,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                 swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                             }
                         }
-                        
+
                         getView().printStatusNormal("Downloading file from mega ...");
 
                         getMain_panel().getDownload_manager().secureNotify();
@@ -537,11 +507,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         System.out.println("Chunkdownloaders finished!");
 
-                        getSpeed_meter().setExit(true);
-
                         getProgress_meter().setExit(true);
-
-                        getSpeed_meter().secureNotify();
 
                         getProgress_meter().secureNotify();
 
@@ -564,13 +530,11 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         System.out.println("Downloader thread pool finished!");
 
-                        getMain_panel().getGlobal_dl_speed().detachSpeedMeter(getSpeed_meter());
-
-                        getMain_panel().getGlobal_dl_speed().secureNotify();
+                        getMain_panel().getGlobal_dl_speed().detachTransference(this);
 
                         _output_stream.close();
 
-                        swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(), getView().getRemtime_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner(), getView().getKeep_temp_checkbox()}, false);
+                        swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner(), getView().getKeep_temp_checkbox()}, false);
 
                         getMain_panel().getDownload_manager().secureNotify();
 

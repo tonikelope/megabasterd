@@ -37,7 +37,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     public static final int WORKERS_DEFAULT = 4;
     private final MainPanel _main_panel;
     private volatile UploadView _view = null; //lazy init
-    private volatile SpeedMeter _speed_meter = null; //lazy init
     private volatile ProgressMeter _progress_meter = null; //lazy init
     private String _exit_message;
     private String _dir_name;
@@ -278,28 +277,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     }
 
     @Override
-    public SpeedMeter getSpeed_meter() {
-
-        SpeedMeter result = _speed_meter;
-
-        if (result == null) {
-
-            synchronized (this) {
-
-                result = _speed_meter;
-
-                if (result == null) {
-
-                    _speed_meter = result = new SpeedMeter(this, getMain_panel().getGlobal_up_speed());
-
-                }
-            }
-        }
-
-        return result;
-    }
-
-    @Override
     public ProgressMeter getProgress_meter() {
 
         ProgressMeter result = _progress_meter;
@@ -494,8 +471,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         if (isPaused()) {
 
             setPause(false);
-
-            getSpeed_meter().secureNotify();
 
             synchronized (_workers_lock) {
 
@@ -707,35 +682,31 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 _thread_pool.execute(getProgress_meter());
 
-                _thread_pool.execute(getSpeed_meter());
-
-                getMain_panel().getGlobal_up_speed().attachSpeedMeter(getSpeed_meter());
-
-                getMain_panel().getGlobal_up_speed().secureNotify();
+                getMain_panel().getGlobal_up_speed().attachTransference(this);
 
                 _mac_generator = new UploadMACGenerator(this);
 
                 _thread_pool.execute(_mac_generator);
 
                 synchronized (_workers_lock) {
-                    
+
                     if (_use_slots) {
 
-                    for (int t = 1; t <= _slots; t++) {
-                        ChunkUploader c = new ChunkUploader(t, this);
+                        for (int t = 1; t <= _slots; t++) {
+                            ChunkUploader c = new ChunkUploader(t, this);
 
-                        _chunkworkers.add(c);
+                            _chunkworkers.add(c);
 
-                        System.out.println("Lanzando chunkuploader" + t + " ...");
+                            System.out.println("Lanzando chunkuploader" + t + " ...");
 
-                        _thread_pool.execute(c);
-                    }
+                            _thread_pool.execute(c);
+                        }
 
-                    swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
+                        swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
 
-                    swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
+                        swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
 
-                    swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
+                        swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
 
                     } else {
 
@@ -752,7 +723,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                         swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
                     }
                 }
-                
+
                 printStatus("Uploading file to mega (" + _ma.getEmail() + ") ...");
 
                 getMain_panel().getUpload_manager().secureNotify();
@@ -769,11 +740,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 System.out.println("Chunkuploaders finished!");
 
-                getSpeed_meter().setExit(true);
-
                 getProgress_meter().setExit(true);
-
-                getSpeed_meter().secureNotify();
 
                 getProgress_meter().secureNotify();
 
@@ -796,11 +763,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 System.out.println("Uploader thread pool finished!");
 
-                getMain_panel().getGlobal_up_speed().detachSpeedMeter(getSpeed_meter());
+                getMain_panel().getGlobal_up_speed().detachTransference(this);
 
-                getMain_panel().getGlobal_up_speed().secureNotify();
-
-                swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(), getView().getRemtime_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner()}, false);
+                swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner()}, false);
 
                 getMain_panel().getUpload_manager().secureNotify();
 

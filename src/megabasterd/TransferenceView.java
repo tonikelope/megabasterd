@@ -14,8 +14,6 @@ public interface TransferenceView {
 
     void updateSpeed(String speed, Boolean visible);
 
-    void updateRemainingTime(String rem_time, Boolean visible);
-
     void updateProgressBar(long progress, double bar_rate);
 
     void updateSlotsStatus();

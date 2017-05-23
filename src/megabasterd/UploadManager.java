@@ -30,6 +30,8 @@ public final class UploadManager extends TransferenceManager {
 
         if (((Upload) upload).isProvision_ok()) {
 
+            _total_transferences_size += upload.getFile_size();
+
             getTransference_waitstart_queue().add(upload);
 
             if (getTransference_provision_queue().isEmpty()) {
@@ -70,6 +72,8 @@ public final class UploadManager extends TransferenceManager {
             getTransference_running_list().remove(u);
 
             getTransference_finished_queue().remove(u);
+
+            _total_transferences_size -= u.getFile_size();
 
             if (((Upload) u).isProvision_ok()) {
 

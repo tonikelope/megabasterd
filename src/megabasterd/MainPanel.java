@@ -61,7 +61,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.04";
+    public static final String VERSION = "2.05";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
@@ -160,13 +160,13 @@ public final class MainPanel {
 
         loadUserSettings();
 
-        THREAD_POOL.execute((_global_dl_speed = new GlobalSpeedMeter(getView().getGlobal_speed_down_label())));
-
-        THREAD_POOL.execute((_global_up_speed = new GlobalSpeedMeter(getView().getGlobal_speed_up_label())));
-
         THREAD_POOL.execute((_download_manager = new DownloadManager(this)));
 
         THREAD_POOL.execute((_upload_manager = new UploadManager(this)));
+
+        THREAD_POOL.execute((_global_dl_speed = new GlobalSpeedMeter(_download_manager, getView().getGlobal_speed_down_label(), getView().getDown_remtime_label())));
+
+        THREAD_POOL.execute((_global_up_speed = new GlobalSpeedMeter(_upload_manager, getView().getGlobal_speed_up_label(), getView().getUp_remtime_label())));
 
         THREAD_POOL.execute((_stream_supervisor = new StreamThrottlerSupervisor(_limit_download_speed ? _max_dl_speed * 1024 : 0, _limit_upload_speed ? _max_up_speed * 1024 : 0, THROTTLE_SLICE_SIZE)));
 

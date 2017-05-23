@@ -1,93 +1,165 @@
 package megabasterd;
 
-import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 import javax.swing.JLabel;
 import static megabasterd.MiscTools.formatBytes;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 
-public final class GlobalSpeedMeter implements Runnable, SecureSingleThreadNotifiable {
+public final class GlobalSpeedMeter implements Runnable {
 
+    public static final int SLEEP = 3000;
     private final JLabel _speed_label;
-    private final ConcurrentLinkedQueue<SpeedMeter> _speedmeters;
-    private final Object _secure_notify_lock;
-    private boolean _notified;
+    private final JLabel _rem_label;
+    private final TransferenceManager _trans_manager;
+    private final ConcurrentHashMap<Transference, HashMap> _transferences;
 
-    GlobalSpeedMeter(JLabel sp_label) {
-        _notified = false;
-        _secure_notify_lock = new Object();
+    GlobalSpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
         _speed_label = sp_label;
-        _speedmeters = new ConcurrentLinkedQueue<>();
+        _rem_label = rem_label;
+        _trans_manager = trans_manager;
+        _transferences = new ConcurrentHashMap<>();
     }
 
-    @Override
-    public void secureNotify() {
-        synchronized (_secure_notify_lock) {
+    public void attachTransference(Transference transference) {
 
-            _notified = true;
+        HashMap<String, Object> properties = new HashMap<>();
 
-            _secure_notify_lock.notify();
+        properties.put("last_progress", -1L);
+        properties.put("no_data_count", 0);
+
+        _transferences.put(transference, properties);
+
+    }
+
+    public void detachTransference(Transference transference) {
+
+        if (_transferences.containsKey(transference)) {
+            _transferences.remove(transference);
         }
     }
 
-    @Override
-    public void secureWait() {
+    private String calculateRemTime(long seconds) {
+        int days = (int) TimeUnit.SECONDS.toDays(seconds);
 
-        synchronized (_secure_notify_lock) {
-            while (!_notified) {
+        long hours = TimeUnit.SECONDS.toHours(seconds)
+                - TimeUnit.DAYS.toHours(days);
 
-                try {
-                    _secure_notify_lock.wait();
-                } catch (InterruptedException ex) {
-                    getLogger(GlobalSpeedMeter.class.getName()).log(Level.SEVERE, null, ex);
-                }
+        long minutes = TimeUnit.SECONDS.toMinutes(seconds)
+                - TimeUnit.DAYS.toMinutes(days)
+                - TimeUnit.HOURS.toMinutes(hours);
+
+        long secs = TimeUnit.SECONDS.toSeconds(seconds)
+                - TimeUnit.DAYS.toSeconds(days)
+                - TimeUnit.HOURS.toSeconds(hours)
+                - TimeUnit.MINUTES.toSeconds(minutes);
+
+        return String.format("%dd %d:%02d:%02d", days, hours, minutes, secs);
+    }
+
+    private long calcTransferenceSpeed(Transference transference, HashMap properties) {
+
+        long sp, progress = transference.getProgress(), last_progress = (long) properties.get("last_progress");
+        int no_data_count = (int) properties.get("no_data_count");
+
+        if (transference.isPaused()) {
+
+            transference.getView().updateSpeed("------", true);
+
+            sp = 0L;
+
+        } else if (progress > last_progress) {
+
+            double sleep_time = ((double) SLEEP * (no_data_count + 1)) / 1000;
+
+            double current_speed = (progress - last_progress) / sleep_time;
+
+            last_progress = progress;
+
+            sp = Math.round(current_speed);
+
+            if (sp > 0) {
+
+                transference.getView().updateSpeed(formatBytes(sp) + "/s", true);
             }
 
-            _notified = false;
+            no_data_count = 0;
+
+        } else {
+
+            transference.getView().updateSpeed("------ *", true);
+
+            sp = 0L;
+
+            no_data_count++;
         }
-    }
 
-    public void attachSpeedMeter(SpeedMeter speed) {
-        _speedmeters.add(speed);
-    }
+        properties.put("last_progress", last_progress);
 
-    public void detachSpeedMeter(SpeedMeter speed) {
-        _speedmeters.remove(speed);
-    }
+        properties.put("no_data_count", no_data_count);
 
-    private long calcSpeed() {
-
-        long sp = 0;
-
-        for (SpeedMeter speed : _speedmeters) {
-            sp += speed.getLastSpeed();
-        }
+        _transferences.put(transference, properties);
 
         return sp;
     }
 
     @Override
     public void run() {
-        long sp;
+        long sp, progress;
+        boolean visible = false;
 
-        swingReflectionInvoke("setText", _speed_label, "------");
         swingReflectionInvoke("setVisible", _speed_label, true);
+        swingReflectionInvoke("setVisible", _rem_label, true);
+        swingReflectionInvoke("setText", _speed_label, "");
+        swingReflectionInvoke("setText", _rem_label, "");
 
-        while (true) {
-            secureWait();
+        do {
 
-            sp = calcSpeed();
+            try {
 
-            if (sp > 0) {
+                if (!_transferences.isEmpty()) {
 
-                swingReflectionInvoke("setText", _speed_label, formatBytes(sp) + "/s");
+                    visible = true;
 
-            } else {
-                swingReflectionInvoke("setText", _speed_label, "------");
+                    sp = 0L;
 
+                    progress = 0L;
+
+                    for (Map.Entry<Transference, HashMap> entry : _transferences.entrySet()) {
+
+                        sp += calcTransferenceSpeed(entry.getKey(), entry.getValue());
+                        progress += entry.getKey().getProgress();
+                    }
+
+                    if (sp > 0) {
+
+                        swingReflectionInvoke("setText", _speed_label, formatBytes(sp) + "/s");
+                        swingReflectionInvoke("setText", _rem_label, formatBytes(progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ " + calculateRemTime((long) Math.floor((_trans_manager.getTotal_transferences_size() - progress) / sp)));
+
+                    } else {
+
+                        swingReflectionInvoke("setText", _speed_label, "------");
+                        swingReflectionInvoke("setText", _rem_label, formatBytes(progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ --d --:--:--");
+
+                    }
+
+                } else if (visible) {
+
+                    swingReflectionInvoke("setText", _speed_label, "");
+                    swingReflectionInvoke("setText", _rem_label, "");
+                    visible = false;
+                }
+
+                Thread.sleep(SLEEP);
+
+            } catch (InterruptedException ex) {
+                Logger.getLogger(GlobalSpeedMeter.class.getName()).log(Level.SEVERE, null, ex);
             }
-        }
 
+        } while (true);
     }
 }

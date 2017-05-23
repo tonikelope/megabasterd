@@ -65,10 +65,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         return speed_label;
     }
 
-    public JLabel getRemtime_label() {
-        return remtime_label;
-    }
-
     public JButton getStop_button() {
         return stop_button;
     }
@@ -93,7 +89,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             public void run() {
 
                 updateFont(status_label, FONT_DEFAULT, BOLD);
-                updateFont(remtime_label, FONT_DEFAULT, PLAIN);
                 updateFont(speed_label, FONT_DEFAULT, BOLD);
                 updateFont(progress_pbar, FONT_DEFAULT, PLAIN);
                 updateFont(slots_label, FONT_DEFAULT, BOLD);
@@ -115,7 +110,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor) slots_spinner.getEditor()).getTextField(), false);
 
-        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, remtime_label, progress_pbar, file_name_label, close_button, restart_button, file_size_label}, false);
+        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, file_name_label, close_button, restart_button, file_size_label}, false);
 
         swingReflectionInvoke("setForeground", speed_label, new Color(0, 128, 255));
 
@@ -134,7 +129,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         slots_label = new javax.swing.JLabel();
         slots_spinner = new javax.swing.JSpinner();
         speed_label = new javax.swing.JLabel();
-        remtime_label = new javax.swing.JLabel();
         progress_pbar = new javax.swing.JProgressBar();
         pause_button = new javax.swing.JButton();
         stop_button = new javax.swing.JButton();
@@ -169,10 +163,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         speed_label.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         speed_label.setText("speed");
         speed_label.setDoubleBuffered(true);
-
-        remtime_label.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
-        remtime_label.setText("remaining_time");
-        remtime_label.setDoubleBuffered(true);
 
         progress_pbar.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
         progress_pbar.setDoubleBuffered(true);
@@ -262,9 +252,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                         .addComponent(folder_link_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(file_link_button))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(remtime_label)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(progress_pbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(speed_label, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -305,9 +292,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                     .addComponent(file_size_label)
                     .addComponent(folder_link_button)
                     .addComponent(file_link_button))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(remtime_label)
-                .addGap(6, 6, 6)
+                .addGap(35, 35, 35)
                 .addComponent(progress_pbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -362,7 +347,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     }//GEN-LAST:event_pause_buttonActionPerformed
 
     public void hideAllExceptStatus() {
-        swingReflectionInvoke("setVisible", new Object[]{speed_label, remtime_label, slots_spinner, slots_label, slot_status_label, pause_button, stop_button, progress_pbar}, false);
+        swingReflectionInvoke("setVisible", new Object[]{speed_label, slots_spinner, slots_label, slot_status_label, pause_button, stop_button, progress_pbar}, false);
     }
 
     private void folder_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_folder_link_buttonActionPerformed
@@ -440,20 +425,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     }
 
     @Override
-    public void updateRemainingTime(String remtime, Boolean visible) {
-
-        if (remtime != null) {
-
-            swingReflectionInvoke("setText", remtime_label, remtime);
-        }
-
-        if (visible != null) {
-
-            swingReflectionInvoke("setVisible", remtime_label, visible);
-        }
-    }
-
-    @Override
     public void updateProgressBar(long progress, double bar_rate) {
 
         swingReflectionInvoke("setValue", progress_pbar, (int) Math.ceil(bar_rate * progress));
@@ -525,7 +496,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     private javax.swing.JButton folder_link_button;
     private javax.swing.JButton pause_button;
     private javax.swing.JProgressBar progress_pbar;
-    private javax.swing.JLabel remtime_label;
     private javax.swing.JButton restart_button;
     private javax.swing.JLabel slot_status_label;
     private javax.swing.JLabel slots_label;

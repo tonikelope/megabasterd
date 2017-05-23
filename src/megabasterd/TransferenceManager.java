@@ -40,6 +40,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private volatile boolean _preprocessing_transferences;
     private volatile int _pre_count;
     private volatile boolean _tray_icon_finish;
+    protected volatile long _total_transferences_size;
 
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
@@ -56,6 +57,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _close_all_button = close_all_button;
         _pause_all_button = pause_all_button;
         _clean_all_menu = clean_all_menu;
+        _total_transferences_size = 0L;
         _secure_notify_lock = new Object();
         _pre_lock = new Object();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
@@ -76,6 +78,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void setRemoving_transferences(boolean removing) {
         _removing_transferences = removing;
+    }
+
+    public long getTotal_transferences_size() {
+        return _total_transferences_size;
     }
 
     public boolean isProvisioning_transferences() {

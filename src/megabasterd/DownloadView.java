@@ -54,10 +54,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         return progress_pbar;
     }
 
-    public JLabel getRemtime_label() {
-        return remtime_label;
-    }
-
     public JButton getRestart_button() {
         return restart_button;
     }
@@ -97,7 +93,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             @Override
             public void run() {
                 updateFont(status_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(remtime_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(speed_label, FONT_DEFAULT, Font.BOLD);
                 updateFont(progress_pbar, FONT_DEFAULT, Font.PLAIN);
                 updateFont(slots_label, FONT_DEFAULT, Font.BOLD);
@@ -121,12 +116,12 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         swingReflectionInvoke("setForeground", speed_label, new Color(0, 128, 255));
 
-        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, remtime_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label, open_folder_button}, false);
+        swingReflectionInvoke("setVisible", new Object[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label, open_folder_button}, false);
 
     }
 
     public void hideAllExceptStatus() {
-        swingReflectionInvoke("setVisible", new Object[]{speed_label, remtime_label, slots_spinner, slots_label, slot_status_label, slot_status_label, pause_button, stop_button, progress_pbar, keep_temp_checkbox}, false);
+        swingReflectionInvoke("setVisible", new Object[]{speed_label, slots_spinner, slots_label, slot_status_label, slot_status_label, pause_button, stop_button, progress_pbar, keep_temp_checkbox}, false);
     }
 
     /**
@@ -141,7 +136,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         status_label = new javax.swing.JLabel();
         slots_label = new javax.swing.JLabel();
         slots_spinner = new javax.swing.JSpinner();
-        remtime_label = new javax.swing.JLabel();
         speed_label = new javax.swing.JLabel();
         progress_pbar = new javax.swing.JProgressBar();
         pause_button = new javax.swing.JButton();
@@ -173,10 +167,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                 slots_spinnerStateChanged(evt);
             }
         });
-
-        remtime_label.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
-        remtime_label.setText("remaining_time");
-        remtime_label.setDoubleBuffered(true);
 
         speed_label.setFont(new java.awt.Font("Verdana", 3, 26)); // NOI18N
         speed_label.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
@@ -295,10 +285,8 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(slot_status_label))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(remtime_label)
-                            .addComponent(file_size_label))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addComponent(file_size_label)
+                        .addGap(0, 503, Short.MAX_VALUE))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(open_folder_button)
@@ -326,9 +314,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(copy_link_button)
                             .addComponent(open_folder_button))))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(remtime_label)
-                .addGap(6, 6, 6)
+                .addGap(35, 35, 35)
                 .addComponent(progress_pbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -445,20 +431,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     }
 
     @Override
-    public void updateRemainingTime(String rem_time, Boolean visible) {
-
-        if (speed_label != null) {
-
-            swingReflectionInvoke("setText", remtime_label, rem_time);
-        }
-
-        if (visible != null) {
-
-            swingReflectionInvoke("setVisible", remtime_label, visible);
-        }
-    }
-
-    @Override
     public void updateProgressBar(long progress, double bar_rate) {
 
         swingReflectionInvoke("setValue", progress_pbar, (int) Math.ceil(bar_rate * progress));
@@ -531,7 +503,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     private javax.swing.JButton open_folder_button;
     private javax.swing.JButton pause_button;
     private javax.swing.JProgressBar progress_pbar;
-    private javax.swing.JLabel remtime_label;
     private javax.swing.JButton restart_button;
     private javax.swing.JLabel slot_status_label;
     private javax.swing.JLabel slots_label;
