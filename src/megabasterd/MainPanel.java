@@ -61,7 +61,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.06";
+    public static final String VERSION = "2.07";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
@@ -102,7 +102,8 @@ public final class MainPanel {
     private final UploadManager _upload_manager;
     private final StreamThrottlerSupervisor _stream_supervisor;
     private int _max_dl, _max_ul, _default_slots_down, _default_slots_up, _max_dl_speed, _max_up_speed;
-    private boolean _use_slots_down, _use_slots_up, _limit_download_speed, _limit_upload_speed;
+    private boolean _use_slots_down, _use_slots_up, _limit_download_speed, _limit_upload_speed, _use_mega_account_down;
+    private String _mega_account_down;
     private String _default_download_path;
     private HashMap<String, Object> _mega_accounts;
     private HashMap<String, Object> _elc_accounts;
@@ -201,6 +202,14 @@ public final class MainPanel {
             }
         });
 
+    }
+
+    public boolean isUse_mega_account_down() {
+        return _use_mega_account_down;
+    }
+
+    public String getMega_account_down() {
+        return _mega_account_down;
     }
 
     public boolean isRestart() {
@@ -472,6 +481,12 @@ public final class MainPanel {
         } catch (SQLException ex) {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
+        
+        _mega_account_down = DBTools.selectSettingValueFromDB("mega_account_down");
+        
+        String use_account;
+        
+        _use_mega_account_down = ((use_account=DBTools.selectSettingValueFromDB("use_mega_account_down"))!=null && use_account.equals("yes"));
 
         _master_pass_hash = DBTools.selectSettingValueFromDB("master_pass_hash");
 
@@ -643,7 +658,7 @@ public final class MainPanel {
 
                     for (HashMap<String, Object> o : res) {
 
-                        Download download = new Download(tthis, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, _default_slots_down, false);
+                        Download download = new Download(tthis, new MegaAPI(), (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, _default_slots_down, false);
 
                         getDownload_manager().getTransference_provision_queue().add(download);
 

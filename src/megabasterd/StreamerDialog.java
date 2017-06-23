@@ -2,18 +2,26 @@ package megabasterd;
 
 import java.awt.Dialog;
 import java.awt.Font;
+import java.awt.Frame;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MiscTools.BASE642Bin;
+import static megabasterd.MiscTools.Bin2BASE64;
+import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.extractFirstMegaLinkFromString;
 import static megabasterd.MiscTools.extractStringFromClipboardContents;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.MiscTools.updateFont;
 
@@ -25,7 +33,22 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
     private final ClipboardSpy _clipboardspy;
     private final MainPanelView _mainPanelView;
+    private final MainPanel _main_panel;
+    private volatile String _last_selected_account;
+    private boolean _remember_master_pass;
 
+    public boolean isRemember_master_pass() {
+        return _remember_master_pass;
+    }
+
+    public JButton getDance_button() {
+        return dance_button;
+    }
+
+    public JComboBox<String> getUse_mega_account_down_combobox() {
+        return use_mega_account_down_combobox;
+    }
+    
     /**
      * Creates new form Streamer
      *
@@ -37,6 +60,8 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
         _clipboardspy = clipboardspy;
         _mainPanelView = (MainPanelView) parent;
+        _last_selected_account = null;
+        _remember_master_pass = true;
 
         MiscTools.swingInvokeIt(new Runnable() {
 
@@ -45,8 +70,25 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                 updateFont(put_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(original_link_textfield, FONT_DEFAULT, Font.PLAIN);
                 updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
+                updateFont(use_mega_account_down_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(use_mega_account_down_combobox, FONT_DEFAULT, Font.PLAIN);
             }
         }, true);
+        
+        _main_panel = ((MainPanelView) parent).getMain_panel();
+        
+        if(_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
+            
+            for (Object o : _main_panel.getMega_accounts().keySet()) {
+
+                swingReflectionInvoke("addItem", use_mega_account_down_combobox, o);
+            }
+        } else {
+            swingReflectionInvoke("setEnabled", use_mega_account_down_combobox, false);
+            swingReflectionInvoke("setEnabled", use_mega_account_down_label, false);
+            swingReflectionInvoke("setVisible", use_mega_account_down_combobox, false);
+            swingReflectionInvoke("setVisible", use_mega_account_down_label, false);
+        }
 
     }
 
@@ -62,10 +104,11 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         put_label = new javax.swing.JLabel();
         dance_button = new javax.swing.JButton();
         original_link_textfield = new javax.swing.JTextField();
+        use_mega_account_down_label = new javax.swing.JLabel();
+        use_mega_account_down_combobox = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Streamer");
-        setResizable(false);
 
         put_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         put_label.setText("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:");
@@ -85,6 +128,16 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         original_link_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         original_link_textfield.setDoubleBuffered(true);
 
+        use_mega_account_down_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        use_mega_account_down_label.setText("Use this account for streaming (only MEGA/ELC):");
+
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        use_mega_account_down_combobox.addItemListener(new java.awt.event.ItemListener() {
+            public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                use_mega_account_down_comboboxItemStateChanged(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -93,21 +146,27 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 646, Short.MAX_VALUE)
+                        .addComponent(use_mega_account_down_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(use_mega_account_down_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(18, 18, 18)
                         .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(original_link_textfield)
-                    .addComponent(put_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(put_label, javax.swing.GroupLayout.DEFAULT_SIZE, 1076, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(put_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(original_link_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(use_mega_account_down_label))
                 .addContainerGap())
         );
 
@@ -198,6 +257,105 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         });
     }//GEN-LAST:event_dance_buttonActionPerformed
 
+    private void use_mega_account_down_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_use_mega_account_down_comboboxItemStateChanged
+        String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
+
+        if (_main_panel.isUse_mega_account_down() && selected_item != null && !selected_item.equals(_last_selected_account)) {
+            
+            use_mega_account_down_combobox.setEnabled(false);
+            
+            dance_button.setEnabled(false);
+            
+            _last_selected_account = selected_item;
+
+            final String email = selected_item;
+
+            final Dialog tthis = this;
+            
+            THREAD_POOL.execute(new Runnable() {
+                @Override
+                public void run() {
+
+                    HashMap<String, Object> account_info = (HashMap) _main_panel.getMega_accounts().get(email);
+
+                    MegaAPI ma = _main_panel.getMega_active_accounts().get(use_mega_account_down_combobox.getSelectedItem());
+
+                    if (ma == null) {
+
+                        ma = new MegaAPI();
+
+                        String password_aes, user_hash;
+
+                        try {
+
+                            if (_main_panel.getMaster_pass_hash() != null) {
+
+                                if (_main_panel.getMaster_pass() == null) {
+
+                                    GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt());
+
+                                    swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
+
+                                    swingReflectionInvokeAndWait("setVisible", dialog, true);
+
+                                    if (dialog.isPass_ok()) {
+
+                                        _main_panel.setMaster_pass(dialog.getPass());
+
+                                        dialog.deletePass();
+
+                                        _remember_master_pass = dialog.getRemember_checkbox().isSelected();
+
+                                        dialog.dispose();
+
+                                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                    } else {
+
+                                        dialog.dispose();
+
+                                        throw new Exception();
+                                    }
+
+                                } else {
+
+                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                }
+
+                            } else {
+
+                                password_aes = (String) account_info.get("password_aes");
+
+                                user_hash = (String) account_info.get("user_hash");
+                            }
+
+                            ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash);
+
+                            _main_panel.getMega_active_accounts().put(email, ma);
+
+                        } catch (Exception ex) {
+
+                            //getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+                            
+                            _last_selected_account = null;
+                            
+                            swingReflectionInvoke("setSelectedIndex", ((StreamerDialog)tthis).getUse_mega_account_down_combobox(), -1);
+                        }
+                    }
+                    
+                    swingReflectionInvokeAndWait("setEnabled",((StreamerDialog)tthis).getUse_mega_account_down_combobox(), true);
+                    
+                    swingReflectionInvokeAndWait("setEnabled",((StreamerDialog)tthis).getDance_button(), true);
+                }
+            });
+        }
+    }//GEN-LAST:event_use_mega_account_down_comboboxItemStateChanged
+
     @Override
     public void notifyClipboardChange() {
 
@@ -213,6 +371,8 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     private javax.swing.JButton dance_button;
     private javax.swing.JTextField original_link_textfield;
     private javax.swing.JLabel put_label;
+    private javax.swing.JComboBox<String> use_mega_account_down_combobox;
+    private javax.swing.JLabel use_mega_account_down_label;
     // End of variables declaration//GEN-END:variables
 
 }

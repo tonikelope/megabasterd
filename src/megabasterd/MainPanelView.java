@@ -511,7 +511,27 @@ public final class MainPanelView extends javax.swing.JFrame {
         _main_panel.getClipboardspy().detachObserver(dialog);
 
         final String dl_path = dialog.getDownload_path();
+        
+        final MegaAPI ma;
+        
+        if(getMain_panel().isUse_mega_account_down()) 
+        {
+            final String mega_account = (String) dialog.getUse_mega_account_down_combobox().getSelectedItem();
+        
+            if(mega_account == null) {
 
+                ma = new MegaAPI();
+
+            } else {
+
+                ma = getMain_panel().getMega_active_accounts().get(mega_account);
+            }
+            
+        } else {
+            
+            ma = new MegaAPI();
+        }
+            
         jTabbedPane1.setSelectedIndex(0);
 
         if (dialog.isDownload()) {
@@ -594,7 +614,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                             for (HashMap folder_link : folder_links) {
 
-                                                download = new Download(getMain_panel(), (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
+                                                download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
 
                                                 getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
                                             }
@@ -606,7 +626,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 } else {
 
-                                    download = new Download(getMain_panel(), url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
+                                    download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
 
                                     getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
                                 }
@@ -631,6 +651,11 @@ public final class MainPanelView extends javax.swing.JFrame {
         } else {
 
             new_download_menu.setEnabled(true);
+        }
+        
+        if (!dialog.isRemember_master_pass()) {
+
+            _main_panel.setMaster_pass(null);
         }
 
         dialog.dispose();

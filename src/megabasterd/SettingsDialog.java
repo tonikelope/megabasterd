@@ -1,5 +1,6 @@
 package megabasterd;
 
+import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Font;
 import java.awt.Frame;
@@ -118,6 +119,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 updateFont(proxy_warning_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(rec_upload_slots_label, FONT_DEFAULT, Font.PLAIN);
                 updateFont(rec_download_slots_label, FONT_DEFAULT, Font.PLAIN);
+                updateFont(use_mega_account_down_checkbox, FONT_DEFAULT, Font.PLAIN);
+                updateFont(use_mega_account_down_combobox, FONT_DEFAULT, Font.PLAIN);
+                updateFont(use_mega_label, FONT_DEFAULT, Font.PLAIN);
             }
         }, true);
 
@@ -287,6 +291,28 @@ public final class SettingsDialog extends javax.swing.JDialog {
         } else {
             swingReflectionInvoke("setEnabled", max_uploads_label, true);
             swingReflectionInvoke("setEnabled", default_slots_up_spinner, true);
+        }
+        
+        boolean use_mega_account = Download.USE_MEGA_ACCOUNT_DOWN;
+        
+        String use_mega_acc = DBTools.selectSettingValueFromDB("use_mega_account_down");
+        
+        String mega_account = null;
+        
+        if (use_mega_acc != null) {
+            
+            use_mega_account = use_mega_acc.equals("yes");
+            
+            mega_account = DBTools.selectSettingValueFromDB("mega_account_down");
+        }
+        
+        if(use_mega_account) {
+            
+            swingReflectionInvoke("setSelected", use_mega_account_down_checkbox, true);
+            
+        } else {
+            
+            swingReflectionInvoke("setSelected", use_mega_account_down_checkbox, false);
         }
 
         DefaultTableModel mega_model = (DefaultTableModel) swingReflectionInvokeAndWaitForReturn("getModel", mega_accounts_table);
@@ -476,6 +502,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
         jSeparator3 = new javax.swing.JSeparator();
         jSeparator4 = new javax.swing.JSeparator();
         rec_download_slots_label = new javax.swing.JLabel();
+        use_mega_account_down_checkbox = new javax.swing.JCheckBox();
+        use_mega_account_down_combobox = new javax.swing.JComboBox<>();
+        jSeparator7 = new javax.swing.JSeparator();
+        use_mega_label = new javax.swing.JLabel();
         uploads_panel = new javax.swing.JPanel();
         default_slots_up_label = new javax.swing.JLabel();
         max_uploads_label = new javax.swing.JLabel();
@@ -601,24 +631,37 @@ public final class SettingsDialog extends javax.swing.JDialog {
         rec_download_slots_label.setFont(new java.awt.Font("DejaVu Sans", 0, 16)); // NOI18N
         rec_download_slots_label.setText("Note: it is recommended not to enable MULTI SLOT.");
 
+        use_mega_account_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        use_mega_account_down_checkbox.setText("Use MEGA account for download/stream (only MEGA/ELC)");
+        use_mega_account_down_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                use_mega_account_down_checkboxStateChanged(evt);
+            }
+        });
+
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+
+        use_mega_label.setFont(new java.awt.Font("DejaVu Sans", 0, 16)); // NOI18N
+        use_mega_label.setText("Default account:");
+
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
         downloads_panelLayout.setHorizontalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, downloads_panelLayout.createSequentialGroup()
+            .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSeparator3)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, downloads_panelLayout.createSequentialGroup()
+                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator3, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jSeparator1)
+                    .addGroup(downloads_panelLayout.createSequentialGroup()
                         .addComponent(change_download_dir_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(default_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator4, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, downloads_panelLayout.createSequentialGroup()
+                    .addComponent(jSeparator2)
+                    .addComponent(jSeparator4)
+                    .addComponent(jSeparator7)
+                    .addGroup(downloads_panelLayout.createSequentialGroup()
                         .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(verify_file_down_checkbox)
                             .addComponent(down_dir_label)
                             .addComponent(multi_slot_down_checkbox)
                             .addComponent(rec_download_slots_label)
@@ -638,8 +681,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addGroup(downloads_panelLayout.createSequentialGroup()
                                             .addComponent(default_slots_down_label)
                                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(default_slots_down_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                        .addGap(0, 221, Short.MAX_VALUE)))
+                                            .addComponent(default_slots_down_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                            .addComponent(use_mega_account_down_checkbox)
+                            .addComponent(verify_file_down_checkbox)
+                            .addGroup(downloads_panelLayout.createSequentialGroup()
+                                .addComponent(use_mega_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 569, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGap(0, 190, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
@@ -679,7 +728,15 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(verify_file_down_checkbox)
-                .addContainerGap(151, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jSeparator7, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(use_mega_account_down_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(use_mega_label))
+                .addContainerGap(54, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
@@ -1192,7 +1249,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
             insertSettingValueInDB("max_download_speed", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", max_down_speed_spinner)));
             insertSettingValueInDB("limit_upload_speed", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", limit_upload_speed_checkbox) ? "yes" : "no");
             insertSettingValueInDB("max_upload_speed", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", max_up_speed_spinner)));
+            insertSettingValueInDB("use_mega_account_down", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", use_mega_account_down_checkbox) ? "yes" : "no");
+            insertSettingValueInDB("mega_account_down", (String)swingReflectionInvokeAndWaitForReturn("getSelectedItem", use_mega_account_down_combobox));
 
+            
+            
             boolean old_use_proxy = false;
 
             String use_proxy_val = DBTools.selectSettingValueFromDB("use_proxy");
@@ -1982,6 +2043,48 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_multi_slot_up_checkboxActionPerformed
 
+    private void use_mega_account_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_use_mega_account_down_checkboxStateChanged
+        
+        if (!use_mega_account_down_checkbox.isSelected()) {
+
+            use_mega_account_down_combobox.setEnabled(false);
+            
+            use_mega_label.setEnabled(false);
+
+        } else {
+
+            use_mega_account_down_combobox.setEnabled(true);
+            
+            use_mega_label.setEnabled(true);
+            
+            use_mega_account_down_combobox.removeAllItems();
+            
+            if (_main_panel.getMega_accounts().size() > 0) {
+
+                for (Object o : _main_panel.getMega_accounts().keySet()) {
+
+                   use_mega_account_down_combobox.addItem((String)o);
+                   
+                }
+                
+                String use_mega_account_down = DBTools.selectSettingValueFromDB("mega_account_down");
+                
+                if(use_mega_account_down != null) {
+                    
+                    use_mega_account_down_combobox.setSelectedItem(use_mega_account_down);
+                }
+
+           } else {
+                
+                use_mega_account_down_combobox.setEnabled(false);
+                
+                use_mega_label.setEnabled(false);
+                
+                use_mega_account_down_checkbox.setSelected(false);
+           }
+        }
+    }//GEN-LAST:event_use_mega_account_down_checkboxStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -2007,6 +2110,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator4;
     private javax.swing.JSeparator jSeparator5;
     private javax.swing.JSeparator jSeparator6;
+    private javax.swing.JSeparator jSeparator7;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JCheckBox limit_download_speed_checkbox;
     private javax.swing.JCheckBox limit_upload_speed_checkbox;
@@ -2042,6 +2146,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel status;
     private javax.swing.JButton unlock_accounts_button;
     private javax.swing.JPanel uploads_panel;
+    private javax.swing.JCheckBox use_mega_account_down_checkbox;
+    private javax.swing.JComboBox<String> use_mega_account_down_combobox;
+    private javax.swing.JLabel use_mega_label;
     private javax.swing.JCheckBox use_proxy_checkbox;
     private javax.swing.JCheckBox verify_file_down_checkbox;
     // End of variables declaration//GEN-END:variables

@@ -58,6 +58,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
     public static final boolean USE_SLOTS_DEFAULT = false;
     public static final int WORKERS_DEFAULT = 4;
+    public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view = null; //lazy init
@@ -97,10 +98,12 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private boolean _status_error;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private long _last_chunk_id_dispatched;
+    private final MegaAPI _ma;
 
-    public Download(MainPanel main_panel, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
+    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
 
         _paused_workers = 0;
+        _ma = ma;
         _last_chunk_id_dispatched = 0L;
         _status_error = false;
         _fatal_error = null;
@@ -327,10 +330,16 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _main_panel.getDownload_manager().secureNotify();
     }
 
+    public MegaAPI getMa() {
+        return _ma;
+    }
+    
+    
+
     @Override
     public void restart() {
 
-        Download new_download = new Download(getMain_panel(), getUrl(), getDownload_path(), getFile_name(), getFile_key(), getFile_size(), getFile_pass(), getFile_noexpire(), getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
+        Download new_download = new Download(getMain_panel(), getMa(), getUrl(), getDownload_path(), getFile_name(), getFile_key(), getFile_size(), getFile_pass(), getFile_noexpire(), getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
 
         getMain_panel().getDownload_manager().getTransference_remove_queue().add(this);
 
@@ -877,9 +886,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 try {
                     if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
-                        MegaAPI ma = new MegaAPI();
 
-                        download_url = ma.getMegaFileDownloadUrl(_url);
+                        download_url = _ma.getMegaFileDownloadUrl(_url);
 
                     } else {
                         download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire);
@@ -1182,9 +1190,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {
 
-                    MegaAPI ma = new MegaAPI();
-
-                    file_info = ma.getMegaFileMetadata(link);
+                    file_info = _ma.getMegaFileMetadata(link);
 
                 } else {
                     file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel);
@@ -1286,9 +1292,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             try {
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
-                    MegaAPI ma = new MegaAPI();
-
-                    dl_url = ma.getMegaFileDownloadUrl(link);
+ 
+                    dl_url = _ma.getMegaFileDownloadUrl(link);
 
                 } else {
                     dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire);

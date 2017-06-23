@@ -376,12 +376,12 @@ public final class MegaAPI {
 
             request = "[{\"a\":\"g\", \"g\":\"1\", \"n\":\"" + file_id + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&sid=" + _sid + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
 
         } else {
 
             request = "[{\"a\":\"g\", \"g\":\"1\", \"p\":\"" + file_id + "\"}]";
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&sid=" + _sid + (API_KEY != null ? "&ak=" + API_KEY : ""));
         }
 
         String data = _rawRequest(request, url_api);
@@ -408,13 +408,13 @@ public final class MegaAPI {
 
             request = "[{\"a\":\"g\", \"g\":\"1\", \"n\":\"" + file_id + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&sid=" + _sid + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
 
         } else {
 
             request = "[{\"a\":\"g\", \"p\":\"" + file_id + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&sid=" + _sid + (API_KEY != null ? "&ak=" + API_KEY : ""));
         }
 
         String data = _rawRequest(request, url_api);
