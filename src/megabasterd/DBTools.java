@@ -24,7 +24,7 @@ public final class DBTools {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
 
-            stat.executeUpdate("CREATE TABLE IF NOT EXISTS downloads(url TEXT, path TEXT, filename TEXT, filekey TEXT, filesize UNSIGNED BIG INT, filepass VARCHAR(64), filenoexpire VARCHAR(64), PRIMARY KEY ('url'), UNIQUE(path, filename));");
+            stat.executeUpdate("CREATE TABLE IF NOT EXISTS downloads(url TEXT, email TEXT, path TEXT, filename TEXT, filekey TEXT, filesize UNSIGNED BIG INT, filepass VARCHAR(64), filenoexpire VARCHAR(64), PRIMARY KEY ('url'), UNIQUE(path, filename));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS uploads(filename TEXT, email TEXT, url TEXT, ul_key TEXT, parent_node TEXT, root_node TEXT, share_key TEXT, folder_link TEXT, PRIMARY KEY ('filename'), UNIQUE(filename, email));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS settings(key VARCHAR(255), value TEXT, PRIMARY KEY('key'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS mega_accounts(email TEXT, password TEXT, password_aes TEXT, user_hash TEXT, PRIMARY KEY('email'));");
@@ -40,17 +40,18 @@ public final class DBTools {
         }
     }
 
-    public static synchronized void insertDownload(String url, String path, String filename, String filekey, Long size, String filepass, String filenoexpire) throws SQLException {
+    public static synchronized void insertDownload(String url, String email, String path, String filename, String filekey, Long size, String filepass, String filenoexpire) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO downloads (url, path, filename, filekey, filesize, filepass, filenoexpire) VALUES (?,?,?,?,?,?,?)")) {
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO downloads (url, email, path, filename, filekey, filesize, filepass, filenoexpire) VALUES (?,?,?,?,?,?,?,?)")) {
 
             ps.setString(1, url);
-            ps.setString(2, path);
-            ps.setString(3, filename);
-            ps.setString(4, filekey);
-            ps.setLong(5, size);
-            ps.setString(6, filepass);
-            ps.setString(7, filenoexpire);
+            ps.setString(2, email);
+            ps.setString(3, path);
+            ps.setString(4, filename);
+            ps.setString(5, filekey);
+            ps.setLong(6, size);
+            ps.setString(7, filepass);
+            ps.setString(8, filenoexpire);
 
             ps.executeUpdate();
         }
@@ -209,6 +210,7 @@ public final class DBTools {
                 HashMap<String, Object> download = new HashMap<>();
 
                 download.put("url", res.getString("url"));
+                download.put("email", res.getString("email"));
                 download.put("path", res.getString("path"));
                 download.put("filename", res.getString("filename"));
                 download.put("filekey", res.getString("filekey"));

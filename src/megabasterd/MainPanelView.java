@@ -803,6 +803,11 @@ public final class MainPanelView extends javax.swing.JFrame {
         dialog.setLocationRelativeTo(this);
 
         dialog.setVisible(true);
+        
+        if (!dialog.isRemember_master_pass()) {
+
+            _main_panel.setMaster_pass(null);
+        }
 
         _main_panel.getClipboardspy().detachObserver(dialog);
     }//GEN-LAST:event_new_stream_menuActionPerformed

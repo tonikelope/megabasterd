@@ -504,7 +504,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                             }
                         }
 
-                        getView().printStatusNormal("Downloading file from mega ...");
+                        getView().printStatusNormal("Downloading file from mega "+(_ma.getEmail()!=null?"("+_ma.getEmail()+")":"")+" ...");
 
                         getMain_panel().getDownload_manager().secureNotify();
 
@@ -771,13 +771,15 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     try {
 
-                        insertDownload(_url, _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
+                        insertDownload(_url, _ma.getEmail(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
 
                         _provision_ok = true;
 
                     } catch (SQLException ex) {
 
-                        exit_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading)";
+                        getLogger(Download.class.getName()).log(SEVERE, null, ex);
+                        
+                        exit_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading or megabasterd.db file is corrupted :()";
                     }
 
                 }
@@ -786,7 +788,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 try {
 
-                    insertDownload(_url, _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
+                    insertDownload(_url, _ma.getEmail(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
 
                     _provision_ok = true;
 

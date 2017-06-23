@@ -61,7 +61,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.07";
+    public static final String VERSION = "2.08";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
@@ -651,18 +651,104 @@ public final class MainPanel {
             public void run() {
 
                 int conta_downloads = 0;
+                
+                boolean remember_pass = true;
 
                 try {
 
                     ArrayList<HashMap<String, Object>> res = selectDownloads();
 
                     for (HashMap<String, Object> o : res) {
+                        System.out.println(o);
+                        try {
+                            
+                        String email = (String) o.get("email");
 
-                        Download download = new Download(tthis, new MegaAPI(), (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, _default_slots_down, false);
+                            MegaAPI ma;
 
-                        getDownload_manager().getTransference_provision_queue().add(download);
+                            if (tthis.isUse_mega_account_down() && _mega_accounts.get(email) != null) {
 
-                        conta_downloads++;
+                                final HashMap<String, Object> account_info = (HashMap) _mega_accounts.get(email);
+
+                                ma = _mega_active_accounts.get(email);
+
+                                if (ma == null) {
+
+                                    ma = new MegaAPI();
+
+                                    String password_aes, user_hash;
+
+                                    if (getMaster_pass_hash() != null) {
+
+                                        if (getMaster_pass() == null) {
+
+                                            getView().getjTabbedPane1().setSelectedIndex(1);
+
+                                            GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(getView(), true, getMaster_pass_hash(), getMaster_pass_salt());
+
+                                            swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, getView());
+
+                                            swingReflectionInvokeAndWait("setVisible", dialog, true);
+
+                                            if (dialog.isPass_ok()) {
+
+                                                setMaster_pass(dialog.getPass());
+
+                                                dialog.deletePass();
+
+                                                remember_pass = dialog.getRemember_checkbox().isSelected();
+
+                                                dialog.dispose();
+
+                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                            } else {
+
+                                                dialog.dispose();
+
+                                                throw new Exception();
+                                            }
+
+                                        } else {
+
+                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                        }
+
+                                    } else {
+
+                                        password_aes = (String) account_info.get("password_aes");
+
+                                        user_hash = (String) account_info.get("user_hash");
+                                    }
+
+                                    ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash);
+
+                                    _mega_active_accounts.put(email, ma);
+
+                                } else {
+                                    
+                                    ma = new MegaAPI();
+                                }
+
+                            } else {
+                                
+                                ma = new MegaAPI();
+                            }
+                            
+                            Download download = new Download(tthis, ma, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, _default_slots_down, false);
+
+                            getDownload_manager().getTransference_provision_queue().add(download);
+
+                            conta_downloads++;
+                            
+                        } catch (Exception ex) {
+                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
 
                 } catch (SQLException ex) {
