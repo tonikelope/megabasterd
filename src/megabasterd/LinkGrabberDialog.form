@@ -174,7 +174,7 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="16" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Use this account for download (only MEGA/ELC):"/>
+        <Property name="text" type="java.lang.String" value="Use this account for download:"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JComboBox" name="use_mega_account_down_combobox">

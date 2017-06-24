@@ -184,7 +184,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         });
 
         use_mega_account_down_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        use_mega_account_down_label.setText("Use this account for download (only MEGA/ELC):");
+        use_mega_account_down_label.setText("Use this account for download:");
 
         use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         use_mega_account_down_combobox.addItemListener(new java.awt.event.ItemListener() {
