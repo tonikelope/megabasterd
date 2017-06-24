@@ -349,7 +349,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="20" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Use MEGA account for download/stream (only MEGA/ELC)"/>
+                <Property name="text" type="java.lang.String" value="Use MEGA account for download/stream"/>
               </Properties>
               <Events>
                 <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="use_mega_account_down_checkboxStateChanged"/>

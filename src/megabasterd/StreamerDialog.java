@@ -129,7 +129,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         original_link_textfield.setDoubleBuffered(true);
 
         use_mega_account_down_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        use_mega_account_down_label.setText("Use this account for streaming (only MEGA/ELC):");
+        use_mega_account_down_label.setText("Use this account for streaming:");
 
         use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         use_mega_account_down_combobox.addItemListener(new java.awt.event.ItemListener() {
@@ -222,7 +222,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                     if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
 
-                        stream_link = "http://localhost:1337/video/" + MiscTools.Bin2UrlBASE64(link.getBytes());
+                        stream_link = "http://localhost:1337/video/" + (_last_selected_account != null?_last_selected_account:"") + "#" + MiscTools.Bin2UrlBASE64(link.getBytes());
 
                     } else {
 

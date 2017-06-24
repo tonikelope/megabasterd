@@ -99,9 +99,11 @@ public final class MegaCrypterAPI {
 
     }
 
-    public static String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token) throws IOException, MegaCrypterAPIException {
-        String request = noexpire_token != null ? "{\"m\":\"dl\", \"link\": \"" + link + "\", \"noexpire\": \"" + noexpire_token + "\"}" : "{\"m\":\"dl\", \"link\": \"" + link + "\"}";
+    public static String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String sid) throws IOException, MegaCrypterAPIException {
+        String request = "{\"m\":\"dl\", \"link\": \"" + link + "\"" + (noexpire_token != null ?", \"noexpire\": \"" + noexpire_token + "\"":"") + (sid!=null?", \"sid\": \""+sid+"\"":"") + "}";
 
+        System.out.println(request);
+        
         URL url_api = new URL(findFirstRegex("https?://[^/]+", link, 0) + "/api");
 
         String res = MegaCrypterAPI._rawRequest(request, url_api);

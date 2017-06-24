@@ -632,7 +632,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         rec_download_slots_label.setText("Note: it is recommended not to enable MULTI SLOT.");
 
         use_mega_account_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        use_mega_account_down_checkbox.setText("Use MEGA account for download/stream (only MEGA/ELC)");
+        use_mega_account_down_checkbox.setText("Use MEGA account for download/stream");
         use_mega_account_down_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 use_mega_account_down_checkboxStateChanged(evt);
