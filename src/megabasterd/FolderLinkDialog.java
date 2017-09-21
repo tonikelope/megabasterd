@@ -1,7 +1,5 @@
 package megabasterd;
 
-import static java.awt.Font.BOLD;
-import static java.awt.Font.PLAIN;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -12,7 +10,6 @@ import static java.util.logging.Logger.getLogger;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
 import static megabasterd.MiscTools.deleteSelectedTreeItems;
@@ -22,7 +19,6 @@ import static megabasterd.MiscTools.sortTree;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
-import static megabasterd.MiscTools.updateFont;
 
 /**
  *
@@ -69,22 +65,6 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         _download = false;
         _download_links = new ArrayList<>();
         _link = link;
-
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(file_tree, FONT_DEFAULT, PLAIN);
-                updateFont(link_detected_label, FONT_DEFAULT, PLAIN);
-                updateFont(warning_label, FONT_DEFAULT, PLAIN);
-                updateFont(skip_button, FONT_DEFAULT, PLAIN);
-                updateFont(dance_button, FONT_DEFAULT, PLAIN);
-                updateFont(restore_button, FONT_DEFAULT, PLAIN);
-                updateFont(skip_rest_button, FONT_DEFAULT, PLAIN);
-                updateFont(total_space_label, FONT_DEFAULT, BOLD);
-                updateFont(folder_link_label, FONT_DEFAULT, PLAIN);
-            }
-        }, true);
 
         swingReflectionInvoke("setText", folder_link_label, link);
 

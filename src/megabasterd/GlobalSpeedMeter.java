@@ -134,12 +134,12 @@ public final class GlobalSpeedMeter implements Runnable {
                         sp += calcTransferenceSpeed(entry.getKey(), entry.getValue());
                         progress += entry.getKey().getProgress();
                     }
-                    
+
                     for (Transference transference : _trans_manager.getTransference_finished_queue()) {
 
                         if (!transference.isStatusError()) {
 
-                            progress+=transference.getProgress();
+                            progress += transference.getProgress();
                         }
                     }
 

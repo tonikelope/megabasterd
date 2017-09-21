@@ -1,19 +1,15 @@
 package megabasterd;
 
 import java.awt.Color;
-import static java.awt.Font.BOLD;
-import static java.awt.Font.PLAIN;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.updateFont;
 import static megabasterd.Transference.MAX_WORKERS;
 import static megabasterd.Transference.MIN_WORKERS;
 
@@ -82,29 +78,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         initComponents();
 
         _upload = upload;
-
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-
-                updateFont(status_label, FONT_DEFAULT, BOLD);
-                updateFont(speed_label, FONT_DEFAULT, BOLD);
-                updateFont(progress_pbar, FONT_DEFAULT, PLAIN);
-                updateFont(slots_label, FONT_DEFAULT, BOLD);
-                updateFont(slots_spinner, FONT_DEFAULT, PLAIN);
-                updateFont(pause_button, FONT_DEFAULT, BOLD);
-                updateFont(stop_button, FONT_DEFAULT, BOLD);
-                updateFont(folder_link_button, FONT_DEFAULT, PLAIN);
-                updateFont(file_link_button, FONT_DEFAULT, PLAIN);
-                updateFont(file_name_label, FONT_DEFAULT, PLAIN);
-                updateFont(file_size_label, FONT_DEFAULT, BOLD);
-                updateFont(close_button, FONT_DEFAULT, PLAIN);
-                updateFont(restart_button, FONT_DEFAULT, PLAIN);
-                updateFont(slot_status_label, FONT_DEFAULT, BOLD);
-
-            }
-        }, true);
 
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_upload.getMain_panel().getDefault_slots_up(), MIN_WORKERS, MAX_WORKERS, 1));
 

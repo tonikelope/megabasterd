@@ -1,8 +1,6 @@
 package megabasterd;
 
-import java.awt.Color;
 import java.awt.Dialog;
-import java.awt.Font;
 import java.awt.Frame;
 import java.io.File;
 import java.security.InvalidAlgorithmParameterException;
@@ -28,7 +26,6 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
 import static megabasterd.DBTools.insertSettingValueInDB;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2BASE64;
@@ -37,7 +34,6 @@ import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.MiscTools.truncateText;
-import static megabasterd.MiscTools.updateFont;
 
 public final class SettingsDialog extends javax.swing.JDialog {
 
@@ -73,57 +69,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
     public SettingsDialog(javax.swing.JFrame parent, boolean modal) {
         super(parent, modal);
         initComponents();
-
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(change_download_dir_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(down_dir_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(ok_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(cancel_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(default_slots_down_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(default_slots_down_spinner, FONT_DEFAULT, Font.PLAIN);
-                updateFont(default_slots_up_spinner, FONT_DEFAULT, Font.PLAIN);
-                updateFont(max_downloads_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(max_downloads_spinner, FONT_DEFAULT, Font.PLAIN);
-                updateFont(max_uploads_spinner, FONT_DEFAULT, Font.PLAIN);
-                updateFont(verify_file_down_checkbox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(multi_slot_down_checkbox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(multi_slot_up_checkbox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(jTabbedPane1, FONT_DEFAULT, Font.PLAIN);
-                updateFont(status, FONT_DEFAULT, Font.BOLD);
-                updateFont(remove_mega_account_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(add_mega_account_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(mega_accounts_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(default_slots_up_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(max_uploads_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(max_down_speed_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(limit_download_speed_checkbox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(max_down_speed_spinner, FONT_DEFAULT, Font.PLAIN);
-                updateFont(max_up_speed_spinner, FONT_DEFAULT, Font.PLAIN);
-                updateFont(max_up_speed_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(limit_upload_speed_checkbox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(default_dir_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(encrypt_pass_checkbox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(unlock_accounts_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(delete_all_accounts_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(remove_elc_account_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(add_elc_account_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(elc_accounts_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(proxy_host_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(proxy_port_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(proxy_user_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(proxy_pass_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(use_proxy_checkbox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(proxy_warning_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(rec_upload_slots_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(rec_download_slots_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(use_mega_account_down_checkbox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(use_mega_account_down_combobox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(use_mega_label, FONT_DEFAULT, Font.PLAIN);
-            }
-        }, true);
 
         _main_panel = ((MainPanelView) parent).getMain_panel();
 
@@ -292,27 +237,29 @@ public final class SettingsDialog extends javax.swing.JDialog {
             swingReflectionInvoke("setEnabled", max_uploads_label, true);
             swingReflectionInvoke("setEnabled", default_slots_up_spinner, true);
         }
-        
+
         boolean use_mega_account = Download.USE_MEGA_ACCOUNT_DOWN;
-        
+
         String use_mega_acc = DBTools.selectSettingValueFromDB("use_mega_account_down");
-        
+
         String mega_account = null;
-        
+
         if (use_mega_acc != null) {
-            
+
             use_mega_account = use_mega_acc.equals("yes");
-            
+
             mega_account = DBTools.selectSettingValueFromDB("mega_account_down");
         }
-        
-        if(use_mega_account) {
-            
+
+        if (use_mega_account) {
+
             swingReflectionInvoke("setSelected", use_mega_account_down_checkbox, true);
-            
+
         } else {
-            
+
             swingReflectionInvoke("setSelected", use_mega_account_down_checkbox, false);
+            swingReflectionInvoke("setEnabled", use_mega_account_down_combobox, false);
+            swingReflectionInvoke("setEnabled", use_mega_label, false);
         }
 
         DefaultTableModel mega_model = (DefaultTableModel) swingReflectionInvokeAndWaitForReturn("getModel", mega_accounts_table);
@@ -572,7 +519,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         jTabbedPane1.setDoubleBuffered(true);
         jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
 
-        default_slots_down_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        default_slots_down_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         default_slots_down_spinner.setDoubleBuffered(true);
         default_slots_down_spinner.setValue(2);
 
@@ -580,7 +527,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_downloads_label.setText("Max parallel downloads:");
         max_downloads_label.setDoubleBuffered(true);
 
-        max_downloads_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        max_downloads_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         max_downloads_spinner.setDoubleBuffered(true);
 
         verify_file_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -624,7 +571,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_down_speed_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         max_down_speed_label.setText("Max speed (KB/s):");
 
-        max_down_speed_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        max_down_speed_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
 
         default_dir_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
 
@@ -639,7 +586,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
 
         use_mega_label.setFont(new java.awt.Font("DejaVu Sans", 0, 16)); // NOI18N
         use_mega_label.setText("Default account:");
@@ -749,11 +696,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_uploads_label.setText("Max parallel uploads:");
         max_uploads_label.setDoubleBuffered(true);
 
-        default_slots_up_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        default_slots_up_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         default_slots_up_spinner.setDoubleBuffered(true);
         default_slots_up_spinner.setValue(2);
 
-        max_uploads_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        max_uploads_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         max_uploads_spinner.setDoubleBuffered(true);
 
         multi_slot_up_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -768,7 +715,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_up_speed_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         max_up_speed_label.setText("Max speed (KB/s):");
 
-        max_up_speed_spinner.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        max_up_speed_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
 
         limit_upload_speed_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         limit_upload_speed_checkbox.setText("Limit upload speed");
@@ -1051,7 +998,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        proxy_warning_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        proxy_warning_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         proxy_warning_label.setText("Warning: Megabasterd will use this proxy for ALL connections.");
         proxy_warning_label.setEnabled(false);
 
@@ -1250,10 +1197,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
             insertSettingValueInDB("limit_upload_speed", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", limit_upload_speed_checkbox) ? "yes" : "no");
             insertSettingValueInDB("max_upload_speed", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", max_up_speed_spinner)));
             insertSettingValueInDB("use_mega_account_down", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", use_mega_account_down_checkbox) ? "yes" : "no");
-            insertSettingValueInDB("mega_account_down", (String)swingReflectionInvokeAndWaitForReturn("getSelectedItem", use_mega_account_down_combobox));
+            insertSettingValueInDB("mega_account_down", (String) swingReflectionInvokeAndWaitForReturn("getSelectedItem", use_mega_account_down_combobox));
 
-            
-            
             boolean old_use_proxy = false;
 
             String use_proxy_val = DBTools.selectSettingValueFromDB("use_proxy");
@@ -2044,44 +1989,44 @@ public final class SettingsDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_multi_slot_up_checkboxActionPerformed
 
     private void use_mega_account_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_use_mega_account_down_checkboxStateChanged
-        
+
         if (!use_mega_account_down_checkbox.isSelected()) {
 
             use_mega_account_down_combobox.setEnabled(false);
-            
+
             use_mega_label.setEnabled(false);
 
         } else {
 
             use_mega_account_down_combobox.setEnabled(true);
-            
+
             use_mega_label.setEnabled(true);
-            
+
             use_mega_account_down_combobox.removeAllItems();
-            
+
             if (_main_panel.getMega_accounts().size() > 0) {
 
                 for (Object o : _main_panel.getMega_accounts().keySet()) {
 
-                   use_mega_account_down_combobox.addItem((String)o);
-                   
+                    use_mega_account_down_combobox.addItem((String) o);
+
                 }
-                
+
                 String use_mega_account_down = DBTools.selectSettingValueFromDB("mega_account_down");
-                
-                if(use_mega_account_down != null) {
-                    
+
+                if (use_mega_account_down != null) {
+
                     use_mega_account_down_combobox.setSelectedItem(use_mega_account_down);
                 }
 
-           } else {
-                
+            } else {
+
                 use_mega_account_down_combobox.setEnabled(false);
-                
+
                 use_mega_label.setEnabled(false);
-                
+
                 use_mega_account_down_checkbox.setSelected(false);
-           }
+            }
         }
     }//GEN-LAST:event_use_mega_account_down_checkboxStateChanged
 

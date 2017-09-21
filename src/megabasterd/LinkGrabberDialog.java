@@ -1,7 +1,6 @@
 package megabasterd;
 
 import java.awt.Dialog;
-import java.awt.Font;
 import java.awt.Frame;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -18,7 +17,6 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2BASE64;
@@ -28,7 +26,6 @@ import static megabasterd.MiscTools.extractStringFromClipboardContents;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.truncateText;
-import static megabasterd.MiscTools.updateFont;
 
 public final class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
 
@@ -50,7 +47,6 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     public JButton getDance_button() {
         return dance_button;
     }
-    
 
     public boolean isDownload() {
         return _download;
@@ -71,36 +67,20 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         initComponents();
 
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(links_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(down_dir_to_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(change_dir_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(download_dir_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(dlc_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(links_textarea, FONT_DEFAULT, Font.PLAIN);
-                updateFont(use_mega_account_down_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(use_mega_account_down_combobox, FONT_DEFAULT, Font.PLAIN);
-            }
-        }, true);
-
         _download_path = download_path;
 
         _clipboardspy = clipboardspy;
-        
+
         _last_selected_account = null;
-        
+
         _remember_master_pass = true;
 
         swingReflectionInvoke("setText", download_dir_label, truncateText(download_path, 80));
-        
+
         _main_panel = ((MainPanelView) parent).getMain_panel();
-        
-        if(_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
-            
+
+        if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
+
             for (Object o : _main_panel.getMega_accounts().keySet()) {
 
                 swingReflectionInvoke("addItem", use_mega_account_down_combobox, o);
@@ -186,7 +166,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         use_mega_account_down_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         use_mega_account_down_label.setText("Use this account for download:");
 
-        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         use_mega_account_down_combobox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 use_mega_account_down_comboboxItemStateChanged(evt);
@@ -206,12 +186,12 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(down_dir_to_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(download_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(download_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, 359, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(links_label, javax.swing.GroupLayout.PREFERRED_SIZE, 662, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 59, Short.MAX_VALUE)
+                        .addComponent(links_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(dlc_button))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(use_mega_account_down_label)
@@ -373,17 +353,17 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
         if (_main_panel.isUse_mega_account_down() && selected_item != null && !selected_item.equals(_last_selected_account)) {
-            
+
             use_mega_account_down_combobox.setEnabled(false);
-            
+
             dance_button.setEnabled(false);
-            
+
             _last_selected_account = selected_item;
 
             final String email = selected_item;
 
             final Dialog tthis = this;
-            
+
             THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -453,16 +433,15 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         } catch (Exception ex) {
 
                             //getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
-                            
                             _last_selected_account = null;
-                            
-                            swingReflectionInvoke("setSelectedIndex", ((LinkGrabberDialog)tthis).getUse_mega_account_down_combobox(), -1);
+
+                            swingReflectionInvoke("setSelectedIndex", ((LinkGrabberDialog) tthis).getUse_mega_account_down_combobox(), -1);
                         }
                     }
-                    
-                    swingReflectionInvokeAndWait("setEnabled",((LinkGrabberDialog)tthis).getUse_mega_account_down_combobox(), true);
-                    
-                    swingReflectionInvokeAndWait("setEnabled",((LinkGrabberDialog)tthis).getDance_button(), true);
+
+                    swingReflectionInvokeAndWait("setEnabled", ((LinkGrabberDialog) tthis).getUse_mega_account_down_combobox(), true);
+
+                    swingReflectionInvokeAndWait("setEnabled", ((LinkGrabberDialog) tthis).getDance_button(), true);
                 }
             });
         }

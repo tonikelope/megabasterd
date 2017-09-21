@@ -2,7 +2,6 @@ package megabasterd;
 
 import java.awt.Color;
 import java.awt.Desktop;
-import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
 import javax.swing.JButton;
@@ -12,11 +11,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.updateFont;
 
 public final class DownloadView extends javax.swing.JPanel implements TransferenceView {
 
@@ -87,28 +84,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         initComponents();
 
         _download = download;
-
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(status_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(speed_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(progress_pbar, FONT_DEFAULT, Font.PLAIN);
-                updateFont(slots_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(slots_spinner, FONT_DEFAULT, Font.PLAIN);
-                updateFont(pause_button, FONT_DEFAULT, Font.BOLD);
-                updateFont(stop_button, FONT_DEFAULT, Font.BOLD);
-                updateFont(keep_temp_checkbox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(file_name_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(file_size_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(close_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(copy_link_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(open_folder_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(restart_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(slot_status_label, FONT_DEFAULT, Font.BOLD);
-            }
-        }, true);
 
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
 

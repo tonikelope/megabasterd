@@ -1,7 +1,6 @@
 package megabasterd;
 
 import java.awt.Dialog;
-import java.awt.Font;
 import java.awt.Frame;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
@@ -12,7 +11,6 @@ import static java.util.logging.Logger.getLogger;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2BASE64;
@@ -23,7 +21,6 @@ import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
-import static megabasterd.MiscTools.updateFont;
 
 /**
  *
@@ -48,7 +45,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     public JComboBox<String> getUse_mega_account_down_combobox() {
         return use_mega_account_down_combobox;
     }
-    
+
     /**
      * Creates new form Streamer
      *
@@ -63,22 +60,10 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         _last_selected_account = null;
         _remember_master_pass = true;
 
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(put_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(original_link_textfield, FONT_DEFAULT, Font.PLAIN);
-                updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(use_mega_account_down_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(use_mega_account_down_combobox, FONT_DEFAULT, Font.PLAIN);
-            }
-        }, true);
-        
         _main_panel = ((MainPanelView) parent).getMain_panel();
-        
-        if(_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
-            
+
+        if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
+
             for (Object o : _main_panel.getMega_accounts().keySet()) {
 
                 swingReflectionInvoke("addItem", use_mega_account_down_combobox, o);
@@ -222,7 +207,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                     if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
 
-                        stream_link = "http://localhost:1337/video/" + (_last_selected_account != null?_last_selected_account:"") + "#" + MiscTools.Bin2UrlBASE64(link.getBytes());
+                        stream_link = "http://localhost:1337/video/" + (_last_selected_account != null ? _last_selected_account : "") + "#" + MiscTools.Bin2UrlBASE64(link.getBytes());
 
                     } else {
 
@@ -261,17 +246,17 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
         if (_main_panel.isUse_mega_account_down() && selected_item != null && !selected_item.equals(_last_selected_account)) {
-            
+
             use_mega_account_down_combobox.setEnabled(false);
-            
+
             dance_button.setEnabled(false);
-            
+
             _last_selected_account = selected_item;
 
             final String email = selected_item;
 
             final Dialog tthis = this;
-            
+
             THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
@@ -341,16 +326,15 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                         } catch (Exception ex) {
 
                             //getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
-                            
                             _last_selected_account = null;
-                            
-                            swingReflectionInvoke("setSelectedIndex", ((StreamerDialog)tthis).getUse_mega_account_down_combobox(), -1);
+
+                            swingReflectionInvoke("setSelectedIndex", ((StreamerDialog) tthis).getUse_mega_account_down_combobox(), -1);
                         }
                     }
-                    
-                    swingReflectionInvokeAndWait("setEnabled",((StreamerDialog)tthis).getUse_mega_account_down_combobox(), true);
-                    
-                    swingReflectionInvokeAndWait("setEnabled",((StreamerDialog)tthis).getDance_button(), true);
+
+                    swingReflectionInvokeAndWait("setEnabled", ((StreamerDialog) tthis).getUse_mega_account_down_combobox(), true);
+
+                    swingReflectionInvokeAndWait("setEnabled", ((StreamerDialog) tthis).getDance_button(), true);
                 }
             });
         }

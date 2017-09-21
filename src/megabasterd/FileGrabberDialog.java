@@ -2,7 +2,6 @@ package megabasterd;
 
 import java.awt.Color;
 import java.awt.Dialog;
-import java.awt.Font;
 import java.awt.Frame;
 import java.io.File;
 import java.util.ArrayList;
@@ -17,7 +16,6 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2BASE64;
@@ -30,7 +28,6 @@ import static megabasterd.MiscTools.sortTree;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
-import static megabasterd.MiscTools.updateFont;
 
 /**
  *
@@ -88,26 +85,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         _upload = false;
         _remember_master_pass = true;
         _files = new ArrayList<>();
-
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(dance_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(add_files_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(add_folder_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(account_combobox, FONT_DEFAULT, Font.PLAIN);
-                updateFont(dir_name_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(account_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(used_space_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(total_file_size_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(file_tree, FONT_DEFAULT, Font.PLAIN);
-                updateFont(warning_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(dir_name_textfield, FONT_DEFAULT, Font.PLAIN);
-                updateFont(skip_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(skip_rest_button, FONT_DEFAULT, Font.PLAIN);
-            }
-        }, true);
 
         swingReflectionInvokeAndWait("addMouseListener", dir_name_textfield, new ContextMenuMouseListener());
 

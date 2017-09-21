@@ -1,13 +1,10 @@
 package megabasterd;
 
 import java.awt.Dialog;
-import java.awt.Font;
 import javax.swing.JOptionPane;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MainPanel.VERSION;
 import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.updateFont;
 
 /**
  *
@@ -28,17 +25,6 @@ public final class AboutDialog extends javax.swing.JDialog {
         initComponents();
 
         swingReflectionInvoke("setText", title_label, "MegaBasterd " + VERSION);
-
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(title_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(subtitle_label, FONT_DEFAULT, Font.BOLD);
-                updateFont(mcdown_url_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(check_version_button, FONT_DEFAULT, Font.PLAIN);
-            }
-        }, true);
 
     }
 

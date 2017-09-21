@@ -3,8 +3,6 @@ package megabasterd;
 import java.awt.AWTException;
 import java.awt.Color;
 import static java.awt.EventQueue.invokeLater;
-import java.awt.Font;
-import static java.awt.Font.BOLD;
 import static java.awt.Frame.NORMAL;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
@@ -45,7 +43,6 @@ import static megabasterd.DBTools.setupSqliteTables;
 import static megabasterd.MiscTools.BASE642Bin;
 import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.bin2i32a;
-import static megabasterd.MiscTools.createAndRegisterFont;
 import static megabasterd.MiscTools.setNimbusLookAndFeel;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
@@ -61,7 +58,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.11";
+    public static final String VERSION = "2.12";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
@@ -69,7 +66,6 @@ public final class MainPanel {
     public static final String ICON_FILE = "mbasterd_mini.png";
     public static final String ICON_FILE_MED = "mbasterd_med.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
-    public static final Font FONT_DEFAULT = createAndRegisterFont("UbuntuMono-R.ttf");
     public static final double FONT_ZOOM_DEFAULT = 1.04;
 
     public static void main(String args[]) {
@@ -481,12 +477,12 @@ public final class MainPanel {
         } catch (SQLException ex) {
             getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
-        
+
         _mega_account_down = DBTools.selectSettingValueFromDB("mega_account_down");
-        
+
         String use_account;
-        
-        _use_mega_account_down = ((use_account=DBTools.selectSettingValueFromDB("use_mega_account_down"))!=null && use_account.equals("yes"));
+
+        _use_mega_account_down = ((use_account = DBTools.selectSettingValueFromDB("use_mega_account_down")) != null && use_account.equals("yes"));
 
         _master_pass_hash = DBTools.selectSettingValueFromDB("master_pass_hash");
 
@@ -651,7 +647,7 @@ public final class MainPanel {
             public void run() {
 
                 int conta_downloads = 0;
-                
+
                 boolean remember_pass = true;
 
                 try {
@@ -661,8 +657,8 @@ public final class MainPanel {
                     for (HashMap<String, Object> o : res) {
                         System.out.println(o);
                         try {
-                            
-                        String email = (String) o.get("email");
+
+                            String email = (String) o.get("email");
 
                             MegaAPI ma;
 
@@ -731,21 +727,21 @@ public final class MainPanel {
                                     _mega_active_accounts.put(email, ma);
 
                                 } else {
-                                    
+
                                     ma = new MegaAPI();
                                 }
 
                             } else {
-                                
+
                                 ma = new MegaAPI();
                             }
-                            
+
                             Download download = new Download(tthis, ma, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, _default_slots_down, false);
 
                             getDownload_manager().getTransference_provision_queue().add(download);
 
                             conta_downloads++;
-                            
+
                         } catch (Exception ex) {
                             Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -779,8 +775,6 @@ public final class MainPanel {
         }
 
         PopupMenu menu = new PopupMenu();
-
-        menu.setFont(FONT_DEFAULT.deriveFont(BOLD, 18));
 
         MenuItem messageItem = new MenuItem("Restore window");
 

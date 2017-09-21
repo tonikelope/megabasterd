@@ -333,8 +333,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public MegaAPI getMa() {
         return _ma;
     }
-    
-    
 
     @Override
     public void restart() {
@@ -504,7 +502,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                             }
                         }
 
-                        getView().printStatusNormal("Downloading file from mega "+(_ma.getEmail()!=null?"("+_ma.getEmail()+")":"")+" ...");
+                        getView().printStatusNormal("Downloading file from mega " + (_ma.getEmail() != null ? "(" + _ma.getEmail() + ")" : "") + " ...");
 
                         getMain_panel().getDownload_manager().secureNotify();
 
@@ -778,7 +776,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     } catch (SQLException ex) {
 
                         getLogger(Download.class.getName()).log(SEVERE, null, ex);
-                        
+
                         exit_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading or megabasterd.db file is corrupted :()";
                     }
 
@@ -1294,7 +1292,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             try {
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
- 
+
                     dl_url = _ma.getMegaFileDownloadUrl(link);
 
                 } else {

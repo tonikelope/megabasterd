@@ -1,18 +1,15 @@
 package megabasterd;
 
 import java.awt.Dialog;
-import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.HashBin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.updateFont;
 
 /**
  *
@@ -56,19 +53,6 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
     public SetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String salt) {
         super(parent, modal);
         initComponents();
-
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(new_pass_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(confirm_pass_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(ok_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(cancel_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(warning_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(status_label, FONT_DEFAULT, Font.PLAIN);
-            }
-        }, true);
 
         _pass_ok = false;
 

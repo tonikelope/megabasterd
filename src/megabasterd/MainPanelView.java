@@ -1,8 +1,6 @@
 package megabasterd;
 
 import java.awt.Color;
-import static java.awt.Font.BOLD;
-import static java.awt.Font.PLAIN;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
@@ -26,7 +24,6 @@ import javax.swing.JTabbedPane;
 import static megabasterd.CryptTools.decryptMegaDownloaderLink;
 import static megabasterd.DBTools.deleteELCAccount;
 import static megabasterd.DBTools.deleteMegaAccount;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.ICON_FILE_MED;
 import static megabasterd.MainPanel.VERSION;
 import static megabasterd.MiscTools.findAllRegex;
@@ -35,7 +32,6 @@ import static megabasterd.MiscTools.genID;
 import static megabasterd.MiscTools.i32a2bin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.updateFont;
 
 public final class MainPanelView extends javax.swing.JFrame {
 
@@ -126,37 +122,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         setTitle("MegaBasterd " + VERSION);
 
         setIconImage(new ImageIcon(getClass().getResource(ICON_FILE_MED)).getImage());
-
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(file_menu, FONT_DEFAULT, PLAIN);
-                updateFont(edit_menu, FONT_DEFAULT, PLAIN);
-                updateFont(help_menu, FONT_DEFAULT, PLAIN);
-                updateFont(new_download_menu, FONT_DEFAULT, PLAIN);
-                updateFont(exit_menu, FONT_DEFAULT, PLAIN);
-                updateFont(settings_menu, FONT_DEFAULT, PLAIN);
-                updateFont(hide_tray_menu, FONT_DEFAULT, PLAIN);
-                updateFont(about_menu, FONT_DEFAULT, PLAIN);
-                updateFont(new_stream_menu, FONT_DEFAULT, PLAIN);
-                updateFont(new_upload_menu, FONT_DEFAULT, PLAIN);
-                updateFont(clean_all_up_menu, FONT_DEFAULT, PLAIN);
-                updateFont(clean_all_down_menu, FONT_DEFAULT, PLAIN);
-                updateFont(global_speed_down_label, FONT_DEFAULT, BOLD);
-                updateFont(global_speed_up_label, FONT_DEFAULT, BOLD);
-                updateFont(kiss_server_status, FONT_DEFAULT, BOLD);
-                updateFont(status_down_label, FONT_DEFAULT, BOLD);
-                updateFont(status_up_label, FONT_DEFAULT, BOLD);
-                updateFont(close_all_finished_down_button, FONT_DEFAULT, BOLD);
-                updateFont(close_all_finished_up_button, FONT_DEFAULT, BOLD);
-                updateFont(pause_all_down_button, FONT_DEFAULT, BOLD);
-                updateFont(pause_all_up_button, FONT_DEFAULT, BOLD);
-                updateFont(jTabbedPane1, FONT_DEFAULT, PLAIN);
-                updateFont(down_remtime_label, FONT_DEFAULT, BOLD);
-                updateFont(up_remtime_label, FONT_DEFAULT, BOLD);
-            }
-        }, true);
 
         swingReflectionInvoke("setVisible", global_speed_down_label, false);
         swingReflectionInvoke("setVisible", global_speed_up_label, false);
@@ -285,7 +250,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
+                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(down_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -353,7 +318,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 312, Short.MAX_VALUE)
+                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 314, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(up_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -366,9 +331,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         file_menu.setText("File");
         file_menu.setDoubleBuffered(true);
-        file_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        file_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
-        new_download_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        new_download_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         new_download_menu.setText("New download");
         new_download_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -377,7 +342,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         });
         file_menu.add(new_download_menu);
 
-        new_upload_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        new_upload_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         new_upload_menu.setText("New upload");
         new_upload_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -386,7 +351,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         });
         file_menu.add(new_upload_menu);
 
-        new_stream_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        new_stream_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         new_stream_menu.setText("New stream");
         new_stream_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -396,7 +361,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(new_stream_menu);
         file_menu.add(jSeparator4);
 
-        clean_all_down_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        clean_all_down_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         clean_all_down_menu.setText("Remove all pre/pro/wait downloads");
         clean_all_down_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -405,7 +370,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         });
         file_menu.add(clean_all_down_menu);
 
-        clean_all_up_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        clean_all_up_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         clean_all_up_menu.setText("Remove all pre/pro/wait uploads");
         clean_all_up_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -415,7 +380,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(clean_all_up_menu);
         file_menu.add(jSeparator2);
 
-        hide_tray_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        hide_tray_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         hide_tray_menu.setText("Hide to tray");
         hide_tray_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -424,7 +389,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         });
         file_menu.add(hide_tray_menu);
 
-        exit_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        exit_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         exit_menu.setText("EXIT");
         exit_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -437,9 +402,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         edit_menu.setText("Edit");
         edit_menu.setDoubleBuffered(true);
-        edit_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        edit_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
-        settings_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        settings_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         settings_menu.setText("Settings");
         settings_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -452,9 +417,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         help_menu.setText("Help");
         help_menu.setDoubleBuffered(true);
-        help_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        help_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
-        about_menu.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        about_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         about_menu.setText("About");
         about_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -511,14 +476,13 @@ public final class MainPanelView extends javax.swing.JFrame {
         _main_panel.getClipboardspy().detachObserver(dialog);
 
         final String dl_path = dialog.getDownload_path();
-        
+
         final MegaAPI ma;
-        
-        if(getMain_panel().isUse_mega_account_down()) 
-        {
+
+        if (getMain_panel().isUse_mega_account_down()) {
             final String mega_account = (String) dialog.getUse_mega_account_down_combobox().getSelectedItem();
-        
-            if(mega_account == null) {
+
+            if (mega_account == null) {
 
                 ma = new MegaAPI();
 
@@ -526,12 +490,12 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 ma = getMain_panel().getMega_active_accounts().get(mega_account);
             }
-            
+
         } else {
-            
+
             ma = new MegaAPI();
         }
-            
+
         jTabbedPane1.setSelectedIndex(0);
 
         if (dialog.isDownload()) {
@@ -652,7 +616,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             new_download_menu.setEnabled(true);
         }
-        
+
         if (!dialog.isRemember_master_pass()) {
 
             _main_panel.setMaster_pass(null);
@@ -803,7 +767,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         dialog.setLocationRelativeTo(this);
 
         dialog.setVisible(true);
-        
+
         if (!dialog.isRemember_master_pass()) {
 
             _main_panel.setMaster_pass(null);

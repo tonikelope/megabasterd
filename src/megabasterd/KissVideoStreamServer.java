@@ -235,21 +235,21 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
             error = false;
 
             try {
-                
-                 MegaAPI ma = null;
-                
-                if(mega_account != null && _main_panel.getMega_active_accounts().containsKey(mega_account)) {
-                    
+
+                MegaAPI ma = null;
+
+                if (mega_account != null && _main_panel.getMega_active_accounts().containsKey(mega_account)) {
+
                     ma = _main_panel.getMega_active_accounts().get(mega_account);
-                    
+
                 } else {
-                    
+
                     ma = new MegaAPI();
                 }
-                
+
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {
                     dl_url = ma.getMegaFileDownloadUrl(link);
-                    
+
                 } else {
                     dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, ma.getSid());
                 }
@@ -333,19 +333,19 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
             String url_path = xchg.getRequestURI().getPath();
 
             String mega_account;
-            
+
             String link;
 
             String[] url_parts = url_path.substring(url_path.indexOf("/video/") + 7).split("#");
-            
+
             mega_account = url_parts[0];
-            
-            if(mega_account.isEmpty()) {
-                mega_account=null;
+
+            if (mega_account.isEmpty()) {
+                mega_account = null;
             }
-            
+
             link = new String(MiscTools.UrlBASE642Bin(url_parts[1]));
-            
+
             HashMap cache_info, file_info;
 
             cache_info = getLink_cache().get(link);

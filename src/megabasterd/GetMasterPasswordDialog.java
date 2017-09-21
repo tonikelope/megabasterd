@@ -1,7 +1,6 @@
 package megabasterd;
 
 import java.awt.Dialog;
-import java.awt.Font;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -9,12 +8,10 @@ import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import static megabasterd.MainPanel.FONT_DEFAULT;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.HashBin;
 import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.updateFont;
 
 /**
  *
@@ -62,18 +59,6 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
     public GetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String current_pass_hash, String salt) {
         super(parent, modal);
         initComponents();
-
-        MiscTools.swingInvokeIt(new Runnable() {
-
-            @Override
-            public void run() {
-                updateFont(ok_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(cancel_button, FONT_DEFAULT, Font.PLAIN);
-                updateFont(please_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(status_label, FONT_DEFAULT, Font.PLAIN);
-                updateFont(remember_checkbox, FONT_DEFAULT, Font.PLAIN);
-            }
-        }, true);
 
         _current_pass_hash = current_pass_hash;
 
