@@ -575,8 +575,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         default_dir_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
 
-        rec_download_slots_label.setFont(new java.awt.Font("DejaVu Sans", 0, 16)); // NOI18N
-        rec_download_slots_label.setText("Note: it is recommended not to enable MULTI SLOT (except you want to download +5GB file with a free account).");
+        rec_download_slots_label.setFont(new java.awt.Font("DejaVu Sans", 0, 12)); // NOI18N
+        rec_download_slots_label.setText("Note: it is recommended not to enable MULTI SLOT (unless you want to download +5GB file without PRO account, in which case you will MUST USE multi slot). ");
 
         use_mega_account_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         use_mega_account_down_checkbox.setText("Use MEGA account for download/stream");
@@ -635,7 +635,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addComponent(use_mega_label)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 569, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 10, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
@@ -683,7 +683,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(use_mega_label))
-                .addContainerGap(54, Short.MAX_VALUE))
+                .addContainerGap(90, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
@@ -757,7 +757,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addGap(98, 98, 98)
                                 .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(limit_upload_speed_checkbox))
-                        .addGap(0, 285, Short.MAX_VALUE)))
+                        .addGap(0, 353, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         uploads_panelLayout.setVerticalGroup(
@@ -1123,7 +1123,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                    .addComponent(jTabbedPane1)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(status, javax.swing.GroupLayout.PREFERRED_SIZE, 657, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
