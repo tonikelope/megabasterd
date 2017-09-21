@@ -920,7 +920,7 @@ public final class MiscTools {
 
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
 
-            HttpGet httpget = new HttpGet(new URI(string_url + "/0"));
+            HttpGet httpget = new HttpGet(new URI(string_url + "/0-1"));
 
             try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
 
@@ -930,6 +930,7 @@ public final class MiscTools {
         } catch (MalformedURLException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException | URISyntaxException ex) {
+            System.out.println(ex.getMessage());
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
 

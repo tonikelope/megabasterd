@@ -576,7 +576,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         default_dir_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
 
         rec_download_slots_label.setFont(new java.awt.Font("DejaVu Sans", 0, 16)); // NOI18N
-        rec_download_slots_label.setText("Note: it is recommended not to enable MULTI SLOT.");
+        rec_download_slots_label.setText("Note: it is recommended not to enable MULTI SLOT (except you want to download +5GB file with a free account).");
 
         use_mega_account_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         use_mega_account_down_checkbox.setText("Use MEGA account for download/stream");
@@ -635,7 +635,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addComponent(use_mega_label)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 569, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 190, Short.MAX_VALUE)))
+                        .addGap(0, 10, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
