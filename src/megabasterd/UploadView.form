@@ -38,7 +38,7 @@
                   <Component id="progress_pbar" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="speed_label" min="-2" pref="340" max="-2" attributes="0"/>
-                      <EmptySpace pref="106" max="32767" attributes="0"/>
+                      <EmptySpace pref="121" max="32767" attributes="0"/>
                       <Component id="pause_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
@@ -107,7 +107,7 @@
     <Component class="javax.swing.JLabel" name="status_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="20" style="1"/>
+          <Font name="Ubuntu" size="20" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="status"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -116,7 +116,7 @@
     <Component class="javax.swing.JLabel" name="slots_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="18" style="1"/>
+          <Font name="Ubuntu" size="18" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Slots"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -125,7 +125,7 @@
     <Component class="javax.swing.JSpinner" name="slots_spinner">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="18" style="1"/>
+          <Font name="Ubuntu" size="18" style="0"/>
         </Property>
         <Property name="toolTipText" type="java.lang.String" value="Slots"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -137,7 +137,7 @@
     <Component class="javax.swing.JLabel" name="speed_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Verdana" size="26" style="3"/>
+          <Font name="Ubuntu" size="26" style="3"/>
         </Property>
         <Property name="horizontalAlignment" type="int" value="2"/>
         <Property name="text" type="java.lang.String" value="speed"/>
@@ -147,7 +147,7 @@
     <Component class="javax.swing.JProgressBar" name="progress_pbar">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Verdana" size="18" style="1"/>
+          <Font name="Ubuntu" size="18" style="1"/>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
@@ -158,7 +158,7 @@
           <Color blue="0" green="99" red="ff" type="rgb"/>
         </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Verdana" size="16" style="1"/>
+          <Font name="Ubuntu" size="16" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" id="white" palette="1" red="ff" type="palette"/>
@@ -176,7 +176,7 @@
           <Color blue="0" green="0" red="ff" type="rgb"/>
         </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="16" style="1"/>
+          <Font name="Ubuntu" size="16" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" id="white" palette="1" red="ff" type="palette"/>
@@ -191,7 +191,7 @@
     <Component class="javax.swing.JLabel" name="file_name_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="20" style="1"/>
+          <Font name="Ubuntu" size="20" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="33" red="33" type="rgb"/>
@@ -203,7 +203,7 @@
     <Component class="javax.swing.JButton" name="close_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="16" style="1"/>
+          <Font name="Ubuntu" size="16" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Close"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -218,7 +218,7 @@
           <Color blue="ff" green="33" red="33" type="rgb"/>
         </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="16" style="1"/>
+          <Font name="Ubuntu" size="16" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -233,7 +233,7 @@
     <Component class="javax.swing.JLabel" name="file_size_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="20" style="1"/>
+          <Font name="Ubuntu" size="20" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="33" red="33" type="rgb"/>
@@ -253,7 +253,7 @@
     <Component class="javax.swing.JButton" name="folder_link_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="16" style="1"/>
+          <Font name="Ubuntu" size="16" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Copy folder link"/>
       </Properties>
@@ -264,7 +264,7 @@
     <Component class="javax.swing.JButton" name="file_link_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="16" style="1"/>
+          <Font name="Ubuntu" size="16" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Copy file link"/>
         <Property name="enabled" type="boolean" value="false"/>

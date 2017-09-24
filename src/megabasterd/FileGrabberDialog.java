@@ -134,7 +134,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Files"));
 
-        file_tree.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        file_tree.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         file_tree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         file_tree.setDoubleBuffered(true);
@@ -150,24 +150,24 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 216, Short.MAX_VALUE)
         );
 
-        dir_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        dir_name_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         dir_name_label.setText("Upload name:");
         dir_name_label.setDoubleBuffered(true);
         dir_name_label.setEnabled(false);
 
-        dir_name_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        dir_name_textfield.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         dir_name_textfield.setDoubleBuffered(true);
         dir_name_textfield.setEnabled(false);
 
-        account_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        account_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         account_label.setText("Account:");
         account_label.setDoubleBuffered(true);
         account_label.setEnabled(false);
 
-        account_combobox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        account_combobox.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         account_combobox.setDoubleBuffered(true);
         account_combobox.setEnabled(false);
         account_combobox.addItemListener(new java.awt.event.ItemListener() {
@@ -176,11 +176,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             }
         });
 
-        used_space_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        used_space_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         used_space_label.setText("Used space: 0.00GB");
         used_space_label.setDoubleBuffered(true);
 
-        add_folder_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        add_folder_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         add_folder_button.setText("Add folder");
         add_folder_button.setDoubleBuffered(true);
         add_folder_button.setEnabled(false);
@@ -190,7 +190,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             }
         });
 
-        add_files_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        add_files_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         add_files_button.setText("Add files");
         add_files_button.setDoubleBuffered(true);
         add_files_button.setEnabled(false);
@@ -241,7 +241,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
-        dance_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        dance_button.setFont(new java.awt.Font("Ubuntu", 1, 24)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
@@ -252,17 +252,17 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             }
         });
 
-        total_file_size_label.setFont(new java.awt.Font("Dialog", 1, 28)); // NOI18N
+        total_file_size_label.setFont(new java.awt.Font("Ubuntu", 1, 28)); // NOI18N
         total_file_size_label.setText("[0 B]");
         total_file_size_label.setDoubleBuffered(true);
         total_file_size_label.setEnabled(false);
 
-        warning_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        warning_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         warning_label.setText("If you DO NOT want to upload some folder or file you can REMOVE it.");
         warning_label.setDoubleBuffered(true);
         warning_label.setEnabled(false);
 
-        skip_rest_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        skip_rest_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         skip_rest_button.setText("REMOVE ALL EXCEPT THIS");
         skip_rest_button.setDoubleBuffered(true);
         skip_rest_button.setEnabled(false);
@@ -272,7 +272,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             }
         });
 
-        skip_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        skip_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         skip_button.setText("REMOVE THIS");
         skip_button.setDoubleBuffered(true);
         skip_button.setEnabled(false);
@@ -298,11 +298,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                                 .addComponent(skip_rest_button)
                                 .addGap(18, 18, 18)
                                 .addComponent(skip_button)))
-                        .addGap(0, 121, Short.MAX_VALUE))
+                        .addGap(0, 245, Short.MAX_VALUE))
+                    .addComponent(total_file_size_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(total_file_size_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(dance_button)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(

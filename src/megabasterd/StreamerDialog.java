@@ -95,12 +95,12 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Streamer");
 
-        put_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        put_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         put_label.setText("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:");
         put_label.setDoubleBuffered(true);
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
-        dance_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        dance_button.setFont(new java.awt.Font("Ubuntu", 1, 24)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
@@ -110,13 +110,13 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
             }
         });
 
-        original_link_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        original_link_textfield.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
         original_link_textfield.setDoubleBuffered(true);
 
-        use_mega_account_down_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        use_mega_account_down_label.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         use_mega_account_down_label.setText("Use this account for streaming:");
 
-        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         use_mega_account_down_combobox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 use_mega_account_down_comboboxItemStateChanged(evt);
@@ -134,8 +134,8 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                         .addComponent(use_mega_account_down_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(use_mega_account_down_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)
-                        .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(dance_button))
                     .addComponent(original_link_textfield)
                     .addComponent(put_label, javax.swing.GroupLayout.DEFAULT_SIZE, 1076, Short.MAX_VALUE))
                 .addContainerGap())

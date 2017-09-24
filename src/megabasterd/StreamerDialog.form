@@ -31,8 +31,8 @@
                       <Component id="use_mega_account_down_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="use_mega_account_down_combobox" max="32767" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
-                      <Component id="dance_button" min="-2" pref="300" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="dance_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="original_link_textfield" max="32767" attributes="0"/>
                   <Component id="put_label" alignment="0" pref="1076" max="32767" attributes="0"/>
@@ -63,7 +63,7 @@
     <Component class="javax.swing.JLabel" name="put_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="20" style="1"/>
+          <Font name="Ubuntu" size="20" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -75,7 +75,7 @@
           <Color blue="ff" green="cc" red="66" type="rgb"/>
         </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="24" style="1"/>
+          <Font name="Ubuntu" size="24" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -90,7 +90,7 @@
     <Component class="javax.swing.JTextField" name="original_link_textfield">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="18" style="0"/>
+          <Font name="Ubuntu" size="18" style="0"/>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
@@ -101,7 +101,7 @@
     <Component class="javax.swing.JLabel" name="use_mega_account_down_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="16" style="1"/>
+          <Font name="Ubuntu" size="16" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Use this account for streaming:"/>
       </Properties>
@@ -109,7 +109,7 @@
     <Component class="javax.swing.JComboBox" name="use_mega_account_down_combobox">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="16" style="1"/>
+          <Font name="Ubuntu" size="16" style="1"/>
         </Property>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
           <StringArray count="0"/>

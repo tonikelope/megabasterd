@@ -9,14 +9,14 @@
             <Property name="text" type="java.lang.String" value="File"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="18" style="0"/>
+              <Font name="Ubuntu" size="18" style="0"/>
             </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="new_download_menu">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="0"/>
+                  <Font name="Ubuntu" size="18" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="New download"/>
               </Properties>
@@ -27,7 +27,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="new_upload_menu">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="0"/>
+                  <Font name="Ubuntu" size="18" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="New upload"/>
               </Properties>
@@ -38,7 +38,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="new_stream_menu">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="0"/>
+                  <Font name="Ubuntu" size="18" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="New stream"/>
               </Properties>
@@ -51,7 +51,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="clean_all_down_menu">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="0"/>
+                  <Font name="Ubuntu" size="18" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Remove all pre/pro/wait downloads"/>
               </Properties>
@@ -62,7 +62,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="clean_all_up_menu">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="0"/>
+                  <Font name="Ubuntu" size="18" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Remove all pre/pro/wait uploads"/>
               </Properties>
@@ -75,7 +75,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="hide_tray_menu">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="0"/>
+                  <Font name="Ubuntu" size="18" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Hide to tray"/>
               </Properties>
@@ -86,7 +86,7 @@
             <MenuItem class="javax.swing.JMenuItem" name="exit_menu">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="0"/>
+                  <Font name="Ubuntu" size="18" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="EXIT"/>
               </Properties>
@@ -101,14 +101,14 @@
             <Property name="text" type="java.lang.String" value="Edit"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="18" style="0"/>
+              <Font name="Ubuntu" size="18" style="0"/>
             </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="settings_menu">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="0"/>
+                  <Font name="Ubuntu" size="18" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Settings"/>
               </Properties>
@@ -123,14 +123,14 @@
             <Property name="text" type="java.lang.String" value="Help"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="18" style="0"/>
+              <Font name="Ubuntu" size="18" style="0"/>
             </Property>
           </Properties>
           <SubComponents>
             <MenuItem class="javax.swing.JMenuItem" name="about_menu">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="0"/>
+                  <Font name="Ubuntu" size="18" style="0"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="About"/>
               </Properties>
@@ -207,7 +207,7 @@
     <Component class="javax.swing.JLabel" name="kiss_server_status">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="14" style="1"/>
+          <Font name="Ubuntu" size="14" style="2"/>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
@@ -216,7 +216,7 @@
       <Properties>
         <Property name="doubleBuffered" type="boolean" value="true"/>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="22" style="1"/>
+          <Font name="Ubuntu" size="22" style="1"/>
         </Property>
       </Properties>
 
@@ -241,7 +241,7 @@
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="status_down_label" pref="657" max="32767" attributes="0"/>
+                      <Component id="status_down_label" pref="683" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="close_all_finished_down_button" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -258,7 +258,7 @@
                           <Component id="status_down_label" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="jScrollPane_down" pref="314" max="32767" attributes="0"/>
+                      <Component id="jScrollPane_down" pref="318" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                       <Component id="down_remtime_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -274,7 +274,7 @@
             <Component class="javax.swing.JLabel" name="global_speed_down_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="54" style="1"/>
+                  <Font name="Ubuntu" size="54" style="1"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Speed"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -283,7 +283,7 @@
             <Component class="javax.swing.JLabel" name="status_down_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="1"/>
+                  <Font name="Ubuntu" size="16" style="2"/>
                 </Property>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
@@ -294,7 +294,7 @@
                   <Color blue="33" green="99" red="0" type="rgb"/>
                 </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="16" style="1"/>
+                  <Font name="Ubuntu" size="16" style="1"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -324,7 +324,7 @@
                   <Color blue="0" green="99" red="ff" type="rgb"/>
                 </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Ubuntu" size="20" style="1"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -339,7 +339,7 @@
             <Component class="javax.swing.JLabel" name="down_remtime_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="DejaVu Sans" size="20" style="1"/>
+                  <Font name="Ubuntu" size="20" style="1"/>
                 </Property>
               </Properties>
             </Component>
@@ -364,7 +364,7 @@
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="status_up_label" pref="657" max="32767" attributes="0"/>
+                      <Component id="status_up_label" pref="683" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="close_all_finished_up_button" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -381,7 +381,7 @@
                           <Component id="status_up_label" alignment="0" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="jScrollPane_up" pref="314" max="32767" attributes="0"/>
+                      <Component id="jScrollPane_up" pref="318" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                       <Component id="up_remtime_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -397,7 +397,7 @@
             <Component class="javax.swing.JLabel" name="global_speed_up_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="54" style="1"/>
+                  <Font name="Ubuntu" size="54" style="1"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Speed"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -406,7 +406,7 @@
             <Component class="javax.swing.JLabel" name="status_up_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="18" style="1"/>
+                  <Font name="Ubuntu" size="16" style="2"/>
                 </Property>
               </Properties>
             </Component>
@@ -416,7 +416,7 @@
                   <Color blue="33" green="99" red="0" type="rgb"/>
                 </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="16" style="1"/>
+                  <Font name="Ubuntu" size="16" style="1"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -446,7 +446,7 @@
                   <Color blue="0" green="99" red="ff" type="rgb"/>
                 </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Ubuntu" size="20" style="1"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -461,7 +461,7 @@
             <Component class="javax.swing.JLabel" name="up_remtime_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="DejaVu Sans" size="20" style="1"/>
+                  <Font name="Ubuntu" size="20" style="1"/>
                 </Property>
               </Properties>
             </Component>

@@ -115,15 +115,15 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 4, true));
 
-        status_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        status_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         status_label.setText("status");
         status_label.setDoubleBuffered(true);
 
-        slots_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        slots_label.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         slots_label.setText("Slots");
         slots_label.setDoubleBuffered(true);
 
-        slots_spinner.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        slots_spinner.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
         slots_spinner.setToolTipText("Slots");
         slots_spinner.setDoubleBuffered(true);
         slots_spinner.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -132,16 +132,16 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
-        speed_label.setFont(new java.awt.Font("Verdana", 3, 26)); // NOI18N
+        speed_label.setFont(new java.awt.Font("Ubuntu", 3, 26)); // NOI18N
         speed_label.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         speed_label.setText("speed");
         speed_label.setDoubleBuffered(true);
 
-        progress_pbar.setFont(new java.awt.Font("Verdana", 1, 18)); // NOI18N
+        progress_pbar.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         progress_pbar.setDoubleBuffered(true);
 
         pause_button.setBackground(new java.awt.Color(255, 153, 0));
-        pause_button.setFont(new java.awt.Font("Verdana", 1, 16)); // NOI18N
+        pause_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         pause_button.setForeground(java.awt.Color.white);
         pause_button.setText("PAUSE UPLOAD");
         pause_button.setDoubleBuffered(true);
@@ -152,7 +152,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         });
 
         stop_button.setBackground(new java.awt.Color(255, 0, 0));
-        stop_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        stop_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         stop_button.setForeground(java.awt.Color.white);
         stop_button.setText("CANCEL UPLOAD");
         stop_button.setDoubleBuffered(true);
@@ -162,12 +162,12 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
-        file_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        file_name_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         file_name_label.setForeground(new java.awt.Color(51, 51, 255));
         file_name_label.setText("file_name");
         file_name_label.setDoubleBuffered(true);
 
-        close_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        close_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         close_button.setText("Close");
         close_button.setDoubleBuffered(true);
         close_button.addActionListener(new java.awt.event.ActionListener() {
@@ -177,7 +177,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         });
 
         restart_button.setBackground(new java.awt.Color(51, 51, 255));
-        restart_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        restart_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         restart_button.setForeground(new java.awt.Color(255, 255, 255));
         restart_button.setText("Restart");
         restart_button.setDoubleBuffered(true);
@@ -187,7 +187,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
-        file_size_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        file_size_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         file_size_label.setForeground(new java.awt.Color(51, 51, 255));
         file_size_label.setText("file_size");
         file_size_label.setDoubleBuffered(true);
@@ -195,7 +195,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         slot_status_label.setDoubleBuffered(true);
 
-        folder_link_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        folder_link_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         folder_link_button.setText("Copy folder link");
         folder_link_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -203,7 +203,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
-        file_link_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        file_link_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         file_link_button.setText("Copy file link");
         file_link_button.setEnabled(false);
         file_link_button.addActionListener(new java.awt.event.ActionListener() {
@@ -228,7 +228,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                     .addComponent(progress_pbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(speed_label, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 106, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 121, Short.MAX_VALUE)
                         .addComponent(pause_button))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(close_button)

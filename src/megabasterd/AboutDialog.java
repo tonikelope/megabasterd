@@ -51,7 +51,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         setIconImage(null);
         setResizable(false);
 
-        title_label.setFont(new java.awt.Font("Dialog", 1, 48)); // NOI18N
+        title_label.setFont(new java.awt.Font("Ubuntu", 1, 48)); // NOI18N
         title_label.setText("MegaBasterd X.X");
         title_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         title_label.setDoubleBuffered(true);
@@ -70,7 +70,7 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        subtitle_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        subtitle_label.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
         subtitle_label.setText("(Made with love by tonikelope)");
         subtitle_label.setDoubleBuffered(true);
@@ -84,7 +84,7 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        mcdown_url_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        mcdown_url_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         mcdown_url_button.setText("Copy MegaBasterd download URL");
         mcdown_url_button.setDoubleBuffered(true);
         mcdown_url_button.addActionListener(new java.awt.event.ActionListener() {
@@ -93,9 +93,9 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        author_webpage_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        author_webpage_label.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         author_webpage_label.setForeground(new java.awt.Color(102, 102, 102));
-        author_webpage_label.setText("http://t0ni.xyz");
+        author_webpage_label.setText("http://t0ni.world");
         author_webpage_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         author_webpage_label.setDoubleBuffered(true);
         author_webpage_label.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -113,7 +113,7 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        check_version_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        check_version_button.setFont(new java.awt.Font("Ubuntu", 1, 14)); // NOI18N
         check_version_button.setText("Check version");
         check_version_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

@@ -38,13 +38,13 @@
                               <Component id="skip_button" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
-                      <EmptySpace min="0" pref="121" max="32767" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                      <Component id="dance_button" min="-2" pref="300" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="245" max="32767" attributes="0"/>
                   </Group>
                   <Component id="total_file_size_label" alignment="0" max="32767" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                      <Component id="dance_button" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -91,7 +91,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="file_tree_scrollpane" alignment="0" pref="215" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" alignment="0" pref="216" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -106,7 +106,7 @@
             <Component class="javax.swing.JTree" name="file_tree">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="0"/>
+                  <Font name="Ubuntu" size="20" style="0"/>
                 </Property>
                 <Property name="model" type="javax.swing.tree.TreeModel" editor="org.netbeans.modules.form.editors2.TreeModelEditor">
                   <TreeModel code=""/>
@@ -175,7 +175,7 @@
         <Component class="javax.swing.JLabel" name="dir_name_label">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="20" style="1"/>
+              <Font name="Ubuntu" size="20" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Upload name:"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -185,7 +185,7 @@
         <Component class="javax.swing.JTextField" name="dir_name_textfield">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="20" style="0"/>
+              <Font name="Ubuntu" size="20" style="0"/>
             </Property>
             <Property name="doubleBuffered" type="boolean" value="true"/>
             <Property name="enabled" type="boolean" value="false"/>
@@ -194,7 +194,7 @@
         <Component class="javax.swing.JLabel" name="account_label">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="20" style="1"/>
+              <Font name="Ubuntu" size="20" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Account:"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -204,7 +204,7 @@
         <Component class="javax.swing.JComboBox" name="account_combobox">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="20" style="1"/>
+              <Font name="Ubuntu" size="20" style="0"/>
             </Property>
             <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
               <StringArray count="0"/>
@@ -222,7 +222,7 @@
         <Component class="javax.swing.JLabel" name="used_space_label">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="20" style="1"/>
+              <Font name="Ubuntu" size="20" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Used space: 0.00GB"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -231,7 +231,7 @@
         <Component class="javax.swing.JButton" name="add_folder_button">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="18" style="1"/>
+              <Font name="Ubuntu" size="18" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Add folder"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -244,7 +244,7 @@
         <Component class="javax.swing.JButton" name="add_files_button">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="18" style="1"/>
+              <Font name="Ubuntu" size="18" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Add files"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -262,7 +262,7 @@
           <Color blue="ff" green="cc" red="66" type="rgb"/>
         </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="24" style="1"/>
+          <Font name="Ubuntu" size="24" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -278,7 +278,7 @@
     <Component class="javax.swing.JLabel" name="total_file_size_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="28" style="1"/>
+          <Font name="Ubuntu" size="28" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="[0 B]"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -288,7 +288,7 @@
     <Component class="javax.swing.JLabel" name="warning_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="20" style="1"/>
+          <Font name="Ubuntu" size="20" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="If you DO NOT want to upload some folder or file you can REMOVE it."/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -298,7 +298,7 @@
     <Component class="javax.swing.JButton" name="skip_rest_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="18" style="1"/>
+          <Font name="Ubuntu" size="18" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="REMOVE ALL EXCEPT THIS"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -311,7 +311,7 @@
     <Component class="javax.swing.JButton" name="skip_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="18" style="1"/>
+          <Font name="Ubuntu" size="18" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="REMOVE THIS"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>

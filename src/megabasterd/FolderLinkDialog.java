@@ -101,14 +101,14 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("FolderLink");
 
-        file_tree.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        file_tree.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         file_tree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         file_tree.setDoubleBuffered(true);
         file_tree.setEnabled(false);
         file_tree_scrollpane.setViewportView(file_tree);
 
-        skip_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        skip_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         skip_button.setText("REMOVE THIS");
         skip_button.setDoubleBuffered(true);
         skip_button.setEnabled(false);
@@ -118,12 +118,12 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             }
         });
 
-        link_detected_label.setFont(new java.awt.Font("Dialog", 1, 30)); // NOI18N
+        link_detected_label.setFont(new java.awt.Font("Ubuntu", 1, 30)); // NOI18N
         link_detected_label.setText("Folder link detected!");
         link_detected_label.setDoubleBuffered(true);
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
-        dance_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        dance_button.setFont(new java.awt.Font("Ubuntu", 1, 24)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
@@ -134,16 +134,16 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             }
         });
 
-        folder_link_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        folder_link_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         folder_link_label.setText("jLabel2");
         folder_link_label.setDoubleBuffered(true);
 
-        warning_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        warning_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         warning_label.setText("If you DO NOT want to download some folder or file you can REMOVE it.");
         warning_label.setDoubleBuffered(true);
         warning_label.setEnabled(false);
 
-        skip_rest_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        skip_rest_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         skip_rest_button.setText("REMOVE ALL EXCEPT THIS");
         skip_rest_button.setDoubleBuffered(true);
         skip_rest_button.setEnabled(false);
@@ -153,7 +153,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             }
         });
 
-        restore_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        restore_button.setFont(new java.awt.Font("Ubuntu", 1, 14)); // NOI18N
         restore_button.setText("Restore folder data");
         restore_button.setDoubleBuffered(true);
         restore_button.addActionListener(new java.awt.event.ActionListener() {
@@ -162,7 +162,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             }
         });
 
-        total_space_label.setFont(new java.awt.Font("Dialog", 1, 28)); // NOI18N
+        total_space_label.setFont(new java.awt.Font("Ubuntu", 1, 28)); // NOI18N
         total_space_label.setText("[0 B]");
         total_space_label.setDoubleBuffered(true);
         total_space_label.setEnabled(false);
@@ -175,22 +175,23 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(file_tree_scrollpane)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(skip_rest_button)
-                        .addGap(18, 18, 18)
-                        .addComponent(skip_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 300, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(folder_link_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(restore_button))
                     .addComponent(total_space_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(skip_rest_button)
+                                .addGap(18, 18, 18)
+                                .addComponent(skip_button))
                             .addComponent(link_detected_label)
                             .addComponent(warning_label))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 87, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(dance_button))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(folder_link_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(restore_button)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -203,7 +204,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                     .addComponent(folder_link_label)
                     .addComponent(restore_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 368, Short.MAX_VALUE)
+                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 369, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(total_space_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
