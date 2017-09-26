@@ -38,7 +38,7 @@ public final class MegaAPI {
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
-    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16};
+    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17};
 
     public static int checkMEGAError(String data) {
         String error = findFirstRegex("^\\[?(\\-[0-9]+)\\]?$", data, 1);
@@ -296,7 +296,13 @@ public final class MegaAPI {
                     try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
 
                         if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                            System.out.println(request + " " + url_api.toString());
                             System.out.println("Failed : HTTP error code : " + httpresponse.getStatusLine().getStatusCode());
+
+                            if (httpresponse.getStatusLine().getStatusCode() == 509) {
+
+                                error = -17;
+                            }
 
                         } else {
 

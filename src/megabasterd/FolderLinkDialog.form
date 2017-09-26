@@ -39,7 +39,7 @@
                           <Component id="link_detected_label" min="-2" max="-2" attributes="0"/>
                           <Component id="warning_label" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="0" pref="87" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="250" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
@@ -47,7 +47,7 @@
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="folder_link_label" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="restore_button" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>

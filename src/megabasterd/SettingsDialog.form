@@ -153,7 +153,7 @@
                                       <Component id="use_mega_account_down_combobox" min="-2" pref="569" max="-2" attributes="0"/>
                                   </Group>
                               </Group>
-                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="5" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -210,7 +210,7 @@
                           <Component id="use_mega_account_down_combobox" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="use_mega_label" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="92" max="32767" attributes="0"/>
+                      <EmptySpace pref="91" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -339,7 +339,7 @@
             <Component class="javax.swing.JLabel" name="rec_download_slots_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Ubuntu" size="12" style="0"/>
+                  <Font name="Ubuntu" size="14" style="2"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Note: it is recommended not to enable MULTI SLOT (unless you want to download +5GB file without PRO account, in which case you will MUST USE multi slot). "/>
               </Properties>
@@ -422,7 +422,7 @@
                                   </Group>
                                   <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="451" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="406" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -545,9 +545,9 @@
             <Component class="javax.swing.JLabel" name="rec_upload_slots_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Ubuntu" size="16" style="0"/>
+                  <Font name="Ubuntu" size="16" style="2"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: it is recommended to enable MULTI SLOT with 4 slots."/>
+                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT it&apos;s more robust against upload errors but it might be slower."/>
               </Properties>
             </Component>
           </SubComponents>
@@ -1051,7 +1051,7 @@
     <Component class="javax.swing.JLabel" name="status">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="20" style="1"/>
+          <Font name="Ubuntu" size="20" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="eb" green="6d" red="9" type="rgb"/>

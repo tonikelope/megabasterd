@@ -13,7 +13,7 @@ import static megabasterd.MiscTools.swingReflectionInvoke;
 public final class AboutDialog extends javax.swing.JDialog {
 
     private static final String MEGA_URL = "https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A";
-    private static final String TONIKELOPE_URL = "http://t0ni.xyz";
+    private static final String TONIKELOPE_URL = "http://toni.world";
     private static final String MEGACRYPTER_URL = "https://megacrypter.com";
     private static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
     private static final String MEGABASTERD_GITHUB_URL = "https://github.com/tonikelope/megabasterd";
@@ -95,7 +95,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         author_webpage_label.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
         author_webpage_label.setForeground(new java.awt.Color(102, 102, 102));
-        author_webpage_label.setText("http://t0ni.world");
+        author_webpage_label.setText("http://toni.world");
         author_webpage_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         author_webpage_label.setDoubleBuffered(true);
         author_webpage_label.addMouseListener(new java.awt.event.MouseAdapter() {

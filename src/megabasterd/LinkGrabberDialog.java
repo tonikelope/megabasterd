@@ -153,7 +153,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         down_dir_to_label.setText("Download to: ");
         down_dir_to_label.setDoubleBuffered(true);
 
-        download_dir_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        download_dir_label.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
 
         dlc_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
         dlc_button.setText("Load DLC container");

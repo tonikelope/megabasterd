@@ -34,7 +34,7 @@ import static megabasterd.MiscTools.truncateText;
 public final class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean USE_SLOTS_DEFAULT = true;
-    public static final int WORKERS_DEFAULT = 4;
+    public static final int WORKERS_DEFAULT = 6;
     private final MainPanel _main_panel;
     private volatile UploadView _view = null; //lazy init
     private volatile ProgressMeter _progress_meter = null; //lazy init

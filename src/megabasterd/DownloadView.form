@@ -45,10 +45,10 @@
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="status_label" max="32767" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="slots_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="slots_spinner" min="-2" pref="49" max="-2" attributes="0"/>
+                      <Component id="slots_spinner" min="-2" pref="55" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="file_name_label" min="-2" max="-2" attributes="0"/>

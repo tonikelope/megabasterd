@@ -39,7 +39,7 @@ public final class SqliteSingleton {
 
                 Class.forName("org.sqlite.JDBC");
 
-                conn = DriverManager.getConnection("jdbc:sqlite:" + SQLITE_FILE);
+                conn = DriverManager.getConnection("jdbc:sqlite:" + SQLITE_FILE + "?journal_mode=WAL&synchronous=OFF&journal_size_limit=500");
 
                 _connections_map.put(Thread.currentThread(), conn);
             }

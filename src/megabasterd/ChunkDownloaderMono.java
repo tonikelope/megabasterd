@@ -74,6 +74,19 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     error = true;
 
+                    getDownload().rejectChunkId(chunk.getId());
+
+                    conta_error++;
+
+                    if (!isExit()) {
+
+                        setError_wait(true);
+
+                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+
+                        setError_wait(false);
+                    }
+
                 } else {
 
                     try {
@@ -162,6 +175,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             getDownload().emergencyStopDownloader(ex.getMessage());
 
         } catch (URISyntaxException ex) {
+            Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
             Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
         }
 

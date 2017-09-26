@@ -130,7 +130,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         new_pass_textfield.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
         new_pass_textfield.setDoubleBuffered(true);
 
-        status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        status_label.setFont(new java.awt.Font("Ubuntu", 1, 14)); // NOI18N
         status_label.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

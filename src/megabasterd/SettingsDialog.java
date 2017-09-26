@@ -575,7 +575,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         default_dir_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
 
-        rec_download_slots_label.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
+        rec_download_slots_label.setFont(new java.awt.Font("Ubuntu", 2, 14)); // NOI18N
         rec_download_slots_label.setText("Note: it is recommended not to enable MULTI SLOT (unless you want to download +5GB file without PRO account, in which case you will MUST USE multi slot). ");
 
         use_mega_account_down_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
@@ -635,7 +635,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addComponent(use_mega_label)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 569, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 5, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
@@ -683,7 +683,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(use_mega_label))
-                .addContainerGap(92, Short.MAX_VALUE))
+                .addContainerGap(91, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
@@ -725,8 +725,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        rec_upload_slots_label.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
-        rec_upload_slots_label.setText("Note: it is recommended to enable MULTI SLOT with 4 slots.");
+        rec_upload_slots_label.setFont(new java.awt.Font("Ubuntu", 2, 16)); // NOI18N
+        rec_upload_slots_label.setText("Note: MULTI-SLOT it's more robust against upload errors but it might be slower.");
 
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
@@ -757,7 +757,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addGap(98, 98, 98)
                                 .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(limit_upload_speed_checkbox))
-                        .addGap(0, 451, Short.MAX_VALUE)))
+                        .addGap(0, 406, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         uploads_panelLayout.setVerticalGroup(
@@ -1113,7 +1113,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         jTabbedPane1.addTab("Advanced", jPanel1);
 
-        status.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        status.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         status.setForeground(new java.awt.Color(9, 109, 235));
         status.setDoubleBuffered(true);
 
