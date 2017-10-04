@@ -557,7 +557,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         jTabbedPane1.setDoubleBuffered(true);
         jTabbedPane1.setFont(new java.awt.Font("Ubuntu", 1, 22)); // NOI18N
 
-        default_slots_down_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        default_slots_down_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         default_slots_down_spinner.setDoubleBuffered(true);
         default_slots_down_spinner.setValue(2);
 
@@ -565,7 +565,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_downloads_label.setText("Max parallel downloads:");
         max_downloads_label.setDoubleBuffered(true);
 
-        max_downloads_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        max_downloads_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         max_downloads_spinner.setDoubleBuffered(true);
 
         verify_file_down_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
@@ -609,7 +609,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_down_speed_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         max_down_speed_label.setText("Max speed (KB/s):");
 
-        max_down_speed_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        max_down_speed_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
 
         default_dir_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
 

@@ -235,7 +235,7 @@
             <Component class="javax.swing.JSpinner" name="default_slots_down_spinner">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="0"/>
+                  <Font name="Ubuntu" size="20" style="0"/>
                 </Property>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
                 <Property name="value" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
@@ -255,7 +255,7 @@
             <Component class="javax.swing.JSpinner" name="max_downloads_spinner">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="0"/>
+                  <Font name="Ubuntu" size="20" style="0"/>
                 </Property>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
@@ -333,7 +333,7 @@
             <Component class="javax.swing.JSpinner" name="max_down_speed_spinner">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="0"/>
+                  <Font name="Ubuntu" size="20" style="0"/>
                 </Property>
               </Properties>
             </Component>
