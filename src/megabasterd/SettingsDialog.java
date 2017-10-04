@@ -395,13 +395,17 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         String megacrypter_reverse = DBTools.selectSettingValueFromDB("megacrypter_reverse");
 
-        String megacrypter_reverse_p = null;
+        String megacrypter_reverse_p = String.valueOf(MainPanel.DEFAULT_MEGA_PROXY_PORT);
 
         if (megacrypter_reverse != null) {
 
             use_mc_reverse = megacrypter_reverse.equals("yes");
 
-            megacrypter_reverse_p = DBTools.selectSettingValueFromDB("megacrypter_reverse_port");
+            
+            if(megacrypter_reverse_p != null) {
+                
+                 megacrypter_reverse_p = DBTools.selectSettingValueFromDB("megacrypter_reverse_port");
+            }
         }
 
         if (use_mc_reverse) {
