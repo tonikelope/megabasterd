@@ -99,8 +99,8 @@ public final class MegaCrypterAPI {
 
     }
 
-    public static String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String sid) throws IOException, MegaCrypterAPIException {
-        String request = "{\"m\":\"dl\", \"link\": \"" + link + "\"" + (noexpire_token != null ? ", \"noexpire\": \"" + noexpire_token + "\"" : "") + (sid != null ? ", \"sid\": \"" + sid + "\"" : "") + "}";
+    public static String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String sid, String reverse) throws IOException, MegaCrypterAPIException {
+        String request = "{\"m\":\"dl\", \"link\": \"" + link + "\"" + (noexpire_token != null ? ", \"noexpire\": \"" + noexpire_token + "\"" : "") + (sid != null ? ", \"sid\": \"" + sid + "\"" : "") + (reverse != null ? ", \"reverse\": \"" + reverse + "\"" : "") + "}";
 
         System.out.println(request);
 
@@ -134,9 +134,9 @@ public final class MegaCrypterAPI {
         return dl_url;
     }
 
-    public static String[] getMegaFileMetadata(String link, MainPanelView panel) throws MegaCrypterAPIException, MalformedURLException, IOException {
-        String request = "{\"m\":\"info\", \"link\": \"" + link + "\"}";
-
+    public static String[] getMegaFileMetadata(String link, MainPanelView panel, String reverse) throws MegaCrypterAPIException, MalformedURLException, IOException {
+        String request = "{\"m\":\"info\", \"link\": \"" + link + "\"" + (reverse != null ? ", \"reverse\": \"" + reverse + "\"" : "") + "}";
+        System.out.println(request);
         URL url_api = new URL(findFirstRegex("https?://[^/]+", link, 0) + "/api");
 
         String res = MegaCrypterAPI._rawRequest(request, url_api);

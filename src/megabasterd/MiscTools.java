@@ -75,7 +75,6 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.RequestContent;
 import org.apache.http.protocol.RequestTargetHost;
-import static megabasterd.MainPanel.FONT_ZOOM_DEFAULT;
 
 public final class MiscTools {
 
@@ -259,10 +258,10 @@ public final class MiscTools {
         return matches;
     }
 
+    /*
     public static void updateFont(javax.swing.JComponent label, Font font, int layout) {
         label.setFont(font.deriveFont(layout, (float) Math.floor(label.getFont().getSize() * FONT_ZOOM_DEFAULT)));
-    }
-
+    }*/
     public static String HashString(String algo, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest md = MessageDigest.getInstance(algo);
 

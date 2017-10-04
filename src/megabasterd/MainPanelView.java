@@ -4,13 +4,17 @@ import java.awt.Color;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
+import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -701,6 +705,40 @@ public final class MainPanelView extends javax.swing.JFrame {
             if (_main_panel.isRestart()) {
 
                 MiscTools.restartApplication(1);
+            }
+
+            if (_main_panel.isMegacrypter_reverse()) {
+
+                if (_main_panel.getMega_proxy_server() == null) {
+
+                    _main_panel.setMega_proxy_server(new MegaProxyServer(UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
+                    _main_panel.getMega_proxy_server().start();
+
+                } else if (_main_panel.getMega_proxy_server().getPort() != _main_panel.getMegacrypter_reverse_port()) {
+
+                    try {
+
+                        _main_panel.getMega_proxy_server().stopServer();
+                        _main_panel.setMega_proxy_server(new MegaProxyServer(UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
+                        _main_panel.getMega_proxy_server().start();
+
+                    } catch (IOException ex) {
+                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+            } else {
+
+                if (_main_panel.getMega_proxy_server() != null) {
+
+                    try {
+                        _main_panel.getMega_proxy_server().stopServer();
+                    } catch (IOException ex) {
+                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                _main_panel.setMega_proxy_server(null);
             }
         }
 

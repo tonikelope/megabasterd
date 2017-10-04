@@ -23,6 +23,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.logging.Level;
@@ -58,15 +59,15 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.14";
+    public static final String VERSION = "2.15";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
+    public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0";
     public static final String ICON_FILE = "mbasterd_mini.png";
     public static final String ICON_FILE_MED = "mbasterd_med.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
-    public static final double FONT_ZOOM_DEFAULT = 1.04;
 
     public static void main(String args[]) {
 
@@ -115,6 +116,9 @@ public final class MainPanel {
     private static int _proxy_port;
     private static Credentials _proxy_credentials;
     private static boolean _use_proxy;
+    private MegaProxyServer _mega_proxy_server;
+    private int _megacrypter_reverse_port;
+    private boolean _megacrypter_reverse;
 
     public MainPanel() {
 
@@ -198,6 +202,28 @@ public final class MainPanel {
             }
         });
 
+        if (_megacrypter_reverse) {
+            _mega_proxy_server = new MegaProxyServer(UUID.randomUUID().toString(), this._megacrypter_reverse_port);
+            _mega_proxy_server.start();
+        } else {
+            _mega_proxy_server = null;
+        }
+    }
+
+    public MegaProxyServer getMega_proxy_server() {
+        return _mega_proxy_server;
+    }
+
+    public boolean isMegacrypter_reverse() {
+        return _megacrypter_reverse;
+    }
+
+    public int getMegacrypter_reverse_port() {
+        return _megacrypter_reverse_port;
+    }
+
+    public void setMega_proxy_server(MegaProxyServer _mega_proxy_server) {
+        this._mega_proxy_server = _mega_proxy_server;
     }
 
     public boolean isUse_mega_account_down() {
@@ -531,6 +557,22 @@ public final class MainPanel {
 
             }
         }
+
+        String use_megacrypter_reverse = selectSettingValueFromDB("megacrypter_reverse");
+
+        if (use_megacrypter_reverse != null) {
+            _megacrypter_reverse = use_megacrypter_reverse.equals("yes");
+        } else {
+            _megacrypter_reverse = false;
+        }
+
+        if (_megacrypter_reverse) {
+
+            String reverse_port = DBTools.selectSettingValueFromDB("megacrypter_reverse_port");
+
+            _megacrypter_reverse_port = (reverse_port == null || reverse_port.isEmpty()) ? DEFAULT_MEGA_PROXY_PORT : Integer.parseInt(reverse_port);
+        }
+
     }
 
     public void _byebye() {

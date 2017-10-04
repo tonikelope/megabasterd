@@ -179,7 +179,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 } else {
 
-                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel);
+                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPort()).getBytes())) : null);
 
                 }
 
@@ -251,7 +251,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                     dl_url = ma.getMegaFileDownloadUrl(link);
 
                 } else {
-                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, ma.getSid());
+                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, ma.getSid(), this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
                 }
             } catch (MegaAPIException | MegaCrypterAPIException e) {
                 error = true;

@@ -890,7 +890,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         download_url = _ma.getMegaFileDownloadUrl(_url);
 
                     } else {
-                        download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire, _ma.getSid());
+                        download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire, _ma.getSid(), this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
                     }
 
                     if (checkMegaDownloadUrl(download_url)) {
@@ -1193,7 +1193,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     file_info = _ma.getMegaFileMetadata(link);
 
                 } else {
-                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel);
+                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
                 }
 
             } catch (MegaAPIException | MegaCrypterAPIException ex) {
@@ -1296,7 +1296,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     dl_url = _ma.getMegaFileDownloadUrl(link);
 
                 } else {
-                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire, _ma.getSid());
+                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire, _ma.getSid(), this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
                 }
 
             } catch (MegaAPIException | MegaCrypterAPIException ex) {

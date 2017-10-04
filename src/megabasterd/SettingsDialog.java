@@ -391,6 +391,36 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         }
 
+        boolean use_mc_reverse = false;
+
+        String megacrypter_reverse = DBTools.selectSettingValueFromDB("megacrypter_reverse");
+
+        String megacrypter_reverse_p = null;
+
+        if (megacrypter_reverse != null) {
+
+            use_mc_reverse = megacrypter_reverse.equals("yes");
+
+            megacrypter_reverse_p = DBTools.selectSettingValueFromDB("megacrypter_reverse_port");
+        }
+
+        if (use_mc_reverse) {
+
+            swingReflectionInvoke("setSelected", megacrypter_reverse_checkbox, true);
+            swingReflectionInvokeAndWait("setModel", megacrypter_reverse_port_spinner, new SpinnerNumberModel(Integer.parseInt(megacrypter_reverse_p), 1024, 65535, 1));
+            swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor) megacrypter_reverse_port_spinner.getEditor()).getTextField(), true);
+            swingReflectionInvoke("setEnabled", megacrypter_reverse_port_spinner, true);
+            swingReflectionInvoke("setEnabled", megacrypter_reverse_warning_label, true);
+        } else {
+
+            swingReflectionInvoke("setSelected", megacrypter_reverse_checkbox, false);
+            swingReflectionInvokeAndWait("setModel", megacrypter_reverse_port_spinner, new SpinnerNumberModel(Integer.parseInt(megacrypter_reverse_p), 1024, 65535, 1));
+            swingReflectionInvoke("setEditable", ((JSpinner.DefaultEditor) megacrypter_reverse_port_spinner.getEditor()).getTextField(), true);
+            swingReflectionInvoke("setEnabled", megacrypter_reverse_port_label, false);
+            swingReflectionInvoke("setEnabled", megacrypter_reverse_port_spinner, false);
+            swingReflectionInvoke("setEnabled", megacrypter_reverse_warning_label, false);
+        }
+
         boolean use_proxy = false;
 
         String use_proxy_val = DBTools.selectSettingValueFromDB("use_proxy");
@@ -453,6 +483,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
         use_mega_account_down_combobox = new javax.swing.JComboBox<>();
         jSeparator7 = new javax.swing.JSeparator();
         use_mega_label = new javax.swing.JLabel();
+        megacrypter_reverse_checkbox = new javax.swing.JCheckBox();
+        megacrypter_reverse_port_label = new javax.swing.JLabel();
+        megacrypter_reverse_warning_label = new javax.swing.JLabel();
+        megacrypter_reverse_port_spinner = new javax.swing.JSpinner();
         uploads_panel = new javax.swing.JPanel();
         default_slots_up_label = new javax.swing.JLabel();
         max_uploads_label = new javax.swing.JLabel();
@@ -591,6 +625,22 @@ public final class SettingsDialog extends javax.swing.JDialog {
         use_mega_label.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
         use_mega_label.setText("Default account:");
 
+        megacrypter_reverse_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        megacrypter_reverse_checkbox.setText("Use Megacrypter reverse mode");
+        megacrypter_reverse_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                megacrypter_reverse_checkboxStateChanged(evt);
+            }
+        });
+
+        megacrypter_reverse_port_label.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
+        megacrypter_reverse_port_label.setText("TCP Port:");
+
+        megacrypter_reverse_warning_label.setFont(new java.awt.Font("Ubuntu", 2, 14)); // NOI18N
+        megacrypter_reverse_warning_label.setText("Note: you MUST OPEN this port in your router/firewall.");
+
+        megacrypter_reverse_port_spinner.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
+
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
         downloads_panelLayout.setHorizontalGroup(
@@ -634,7 +684,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             .addGroup(downloads_panelLayout.createSequentialGroup()
                                 .addComponent(use_mega_label)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 569, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 569, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(downloads_panelLayout.createSequentialGroup()
+                                .addComponent(megacrypter_reverse_port_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(megacrypter_reverse_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(megacrypter_reverse_warning_label))
+                            .addComponent(megacrypter_reverse_checkbox))
                         .addGap(0, 5, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -683,7 +740,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(use_mega_label))
-                .addContainerGap(91, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(megacrypter_reverse_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(megacrypter_reverse_port_label)
+                    .addComponent(megacrypter_reverse_warning_label)
+                    .addComponent(megacrypter_reverse_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(25, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
@@ -785,7 +849,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_up_speed_label)
                     .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(312, Short.MAX_VALUE))
+                .addContainerGap(314, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Uploads", uploads_panel);
@@ -1108,7 +1172,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(329, Short.MAX_VALUE))
+                .addContainerGap(331, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Advanced", jPanel1);
@@ -1199,6 +1263,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
             insertSettingValueInDB("max_upload_speed", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", max_up_speed_spinner)));
             insertSettingValueInDB("use_mega_account_down", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", use_mega_account_down_checkbox) ? "yes" : "no");
             insertSettingValueInDB("mega_account_down", (String) swingReflectionInvokeAndWaitForReturn("getSelectedItem", use_mega_account_down_combobox));
+            insertSettingValueInDB("megacrypter_reverse", (boolean) swingReflectionInvokeAndWaitForReturn("isSelected", megacrypter_reverse_checkbox) ? "yes" : "no");
+            insertSettingValueInDB("megacrypter_reverse_port", String.valueOf((int) swingReflectionInvokeAndWaitForReturn("getValue", megacrypter_reverse_port_spinner)));
 
             boolean old_use_proxy = false;
 
@@ -2031,6 +2097,22 @@ public final class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_use_mega_account_down_checkboxStateChanged
 
+    private void megacrypter_reverse_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_megacrypter_reverse_checkboxStateChanged
+        // TODO add your handling code here:
+
+        if (megacrypter_reverse_checkbox.isSelected()) {
+
+            megacrypter_reverse_port_label.setEnabled(true);
+            megacrypter_reverse_port_spinner.setEnabled(true);
+            megacrypter_reverse_warning_label.setEnabled(true);
+        } else {
+            megacrypter_reverse_port_label.setEnabled(false);
+            megacrypter_reverse_port_spinner.setEnabled(false);
+            megacrypter_reverse_warning_label.setEnabled(false);
+        }
+
+    }//GEN-LAST:event_megacrypter_reverse_checkboxStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -2071,6 +2153,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel mega_accounts_label;
     private javax.swing.JScrollPane mega_accounts_scrollpane;
     private javax.swing.JTable mega_accounts_table;
+    private javax.swing.JCheckBox megacrypter_reverse_checkbox;
+    private javax.swing.JLabel megacrypter_reverse_port_label;
+    private javax.swing.JSpinner megacrypter_reverse_port_spinner;
+    private javax.swing.JLabel megacrypter_reverse_warning_label;
     private javax.swing.JCheckBox multi_slot_down_checkbox;
     private javax.swing.JCheckBox multi_slot_up_checkbox;
     private javax.swing.JButton ok_button;
