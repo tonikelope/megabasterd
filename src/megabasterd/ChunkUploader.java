@@ -119,7 +119,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
             conta_error = 0;
 
             while (!_exit && !_upload.isStopped()) {
-                chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url);
+                chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url, Transference.CHUNK_SIZE_MULTI);
 
                 f.seek(chunk.getOffset());
 

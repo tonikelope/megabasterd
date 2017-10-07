@@ -9,7 +9,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * https://stackoverflow.com/users/6477541/sarvesh-agarwal
+ * Thanks to -> https://stackoverflow.com/users/6477541/sarvesh-agarwal
  */
 public class MegaProxyServer extends Thread {
 

@@ -15,8 +15,42 @@ public final class Chunk {
     private final long _size;
     private final ByteArrayOutputStream _data_os;
     private final String _url;
+    private final int _size_multi;
 
+    public int getSize_multi() {
+        return _size_multi;
+    }
+    
     public Chunk(long id, long file_size, String file_url) throws ChunkInvalidIdException {
+        _size_multi = 1;
+        
+        _id = id;
+
+        _offset = calculateOffset();
+
+        if (file_size > 0) {
+            if (_offset >= file_size) {
+                throw new ChunkInvalidIdException(valueOf(id));
+            }
+
+        } else {
+
+            if (id > 1) {
+
+                throw new ChunkInvalidIdException(valueOf(id));
+            }
+        }
+
+        _size = calculateSize(file_size);
+
+        _url = file_url != null ? file_url + "/" + _offset + "-" + (_offset + _size - 1) : null;
+
+        _data_os = new ByteArrayOutputStream((int) _size);
+    }
+    
+    public Chunk(long id, long file_size, String file_url, int size_multi) throws ChunkInvalidIdException {
+        _size_multi = size_multi;
+        
         _id = id;
 
         _offset = calculateOffset();
@@ -66,7 +100,7 @@ public final class Chunk {
     }
 
     private long calculateSize(long file_size) {
-        long chunk_size = (_id >= 1 && _id <= 7) ? _id * 128 * 1024 : 1024 * 1024;
+        long chunk_size = (_id >= 1 && _id <= 7) ? _id * 128 * 1024 : 1024 * 1024 * _size_multi;
 
         if (_offset + chunk_size > file_size) {
             chunk_size = file_size - _offset;
@@ -78,7 +112,7 @@ public final class Chunk {
     private long calculateOffset() {
         long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
 
-        return (_id <= 7 ? offs[(int) _id - 1] : (3584 + (_id - 8) * 1024)) * 1024;
+        return (_id <= 7 ? offs[(int) _id - 1] : (3584 + (_id - 8) * 1024 * _size_multi)) * 1024;
     }
 
 }

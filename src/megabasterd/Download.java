@@ -1162,7 +1162,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public long calculateMaxTempFileSize(long size) {
         if (size > 3584 * 1024) {
-            long reminder = (size - 3584 * 1024) % (1024 * 1024);
+            long reminder = (size - 3584 * 1024) % (1024 * 1024 * Transference.CHUNK_SIZE_MULTI);
 
             return reminder == 0 ? size : (size - reminder);
         } else {

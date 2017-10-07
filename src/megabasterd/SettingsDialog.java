@@ -585,7 +585,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        default_slots_down_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        default_slots_down_label.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         default_slots_down_label.setText("Default slots per file:");
         default_slots_down_label.setDoubleBuffered(true);
 
@@ -606,7 +606,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        max_down_speed_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        max_down_speed_label.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         max_down_speed_label.setText("Max speed (KB/s):");
 
         max_down_speed_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
@@ -641,7 +641,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_port_label.setText("TCP Port:");
 
         megacrypter_reverse_warning_label.setFont(new java.awt.Font("Ubuntu", 2, 14)); // NOI18N
-        megacrypter_reverse_warning_label.setText("Note: you MUST OPEN this port in your router/firewall.");
+        megacrypter_reverse_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
 
         megacrypter_reverse_port_spinner.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
 
@@ -756,7 +756,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
 
-        default_slots_up_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        default_slots_up_label.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         default_slots_up_label.setText("Default slots per file:");
         default_slots_up_label.setDoubleBuffered(true);
 
@@ -780,7 +780,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        max_up_speed_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        max_up_speed_label.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
         max_up_speed_label.setText("Max speed (KB/s):");
 
         max_up_speed_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N

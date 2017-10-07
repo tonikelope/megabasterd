@@ -152,7 +152,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
 
     private long calculateLastWrittenChunk(long temp_file_size) {
         if (temp_file_size > 3584 * 1024) {
-            return 7 + (long) Math.ceil((temp_file_size - 3584 * 1024) / (1024 * 1024));
+            return 7 + (long) Math.ceil((temp_file_size - 3584 * 1024) / (1024 * 1024 * Transference.CHUNK_SIZE_MULTI));
         } else {
             int i = 0, tot = 0;
 

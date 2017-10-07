@@ -110,7 +110,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     worker_url = _download.getDownloadUrlForWorker();
                 }
 
-                chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url);
+                chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url, Transference.CHUNK_SIZE_MULTI);
 
                 HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
 
