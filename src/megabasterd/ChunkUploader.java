@@ -273,8 +273,27 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     System.out.println(" Worker " + _id + " ha subido chunk " + chunk.getId());
 
-                                    _upload.getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
+                                    if(chunk.getId() <= 7) {
+                                        
+                                        _upload.getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
+                                        
+                                    } else {
+                                        
+                                        long chunk_id = chunk.getId();
+                                        
+                                        for(int i=0; i<Transference.CHUNK_SIZE_MULTI; i++) {
+                                            
+                                            Chunk mac_chunk = new Chunk(chunk_id++, _upload.getFile_size(), null);
+            
+                                            while ((reads = chunk.getInputStream().read(buffer)) != -1 && mac_chunk.getOutputStream().size() < mac_chunk.getSize()) {
 
+                                                mac_chunk.getOutputStream().write(buffer, 0, reads);
+                                            }
+                                            
+                                            _upload.getMac_generator().getChunk_queue().put(mac_chunk.getId(), mac_chunk);
+                                        }
+                                    }
+                              
                                     _upload.getMac_generator().secureNotify();
 
                                     conta_error = 0;
