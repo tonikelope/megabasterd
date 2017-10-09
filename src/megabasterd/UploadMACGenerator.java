@@ -125,37 +125,79 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                     }
 
                     chunk = _chunk_queue.get(_last_chunk_id_read + 1);
+                    
+                    InputStream chunk_is = chunk.getInputStream();
 
                     try {
-                        int[] chunk_mac = {file_iv[0], file_iv[1], file_iv[0], file_iv[1]};
+                        
+                        if(chunk.getId() <= 7){
+                            
+                            int[] chunk_mac = {file_iv[0], file_iv[1], file_iv[0], file_iv[1]};
+                            
+                            while ((reads = chunk_is.read(byte_block)) != -1) {
 
-                        InputStream chunk_is = chunk.getInputStream();
-
-                        while ((reads = chunk_is.read(byte_block)) != -1) {
-
-                            if (reads < byte_block.length) {
-                                for (int i = reads; i < byte_block.length; i++) {
-                                    byte_block[i] = 0;
+                                if (reads < byte_block.length) {
+                                    for (int i = reads; i < byte_block.length; i++) {
+                                        byte_block[i] = 0;
+                                    }
                                 }
+
+                                int_block = bin2i32a(byte_block);
+
+                                for (int i = 0; i < chunk_mac.length; i++) {
+                                    chunk_mac[i] ^= int_block[i];
+                                }
+
+                                chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
                             }
 
-                            int_block = bin2i32a(byte_block);
-
-                            for (int i = 0; i < chunk_mac.length; i++) {
-                                chunk_mac[i] ^= int_block[i];
+                            for (int i = 0; i < file_mac.length; i++) {
+                                file_mac[i] ^= chunk_mac[i];
                             }
 
-                            chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
+                            file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
+
+                            _bytes_read += chunk.getSize();
+                            
+                        } else {
+                                do{
+                                    int[] chunk_mac = {file_iv[0], file_iv[1], file_iv[0], file_iv[1]};
+
+                                    long chunk_size = 0;
+                                    
+                                    do {
+
+                                        if((reads = chunk_is.read(byte_block)) != -1)
+                                        {
+                                            if (reads < byte_block.length) {
+                                                for (int i = reads; i < byte_block.length; i++) {
+                                                    byte_block[i] = 0;
+                                                }
+                                            }
+
+                                            int_block = bin2i32a(byte_block);
+
+                                            for (int i = 0; i < chunk_mac.length; i++) {
+                                                chunk_mac[i] ^= int_block[i];
+                                            }
+
+                                            chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
+
+                                            chunk_size+=reads;
+                                        }
+                                    }while(reads != -1 && chunk_size<1024*1024);
+
+                                    for (int i = 0; i < file_mac.length; i++) {
+                                        file_mac[i] ^= chunk_mac[i];
+                                    }
+
+                                    file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
+
+                                    _bytes_read += chunk_size;
+                                    
+                            }while(reads != -1);
                         }
-
-                        for (int i = 0; i < file_mac.length; i++) {
-                            file_mac[i] ^= chunk_mac[i];
-                        }
-
-                        file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
-
-                        _bytes_read += chunk.getSize();
-
+                        
                     } catch (IOException | IllegalBlockSizeException | BadPaddingException ex) {
                         getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
                     }
