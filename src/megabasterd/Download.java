@@ -1091,7 +1091,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 }
 
-            } catch (ChunkInvalidIdException e) {
+            } catch (ChunkInvalidException e) {
             }
 
             int[] cbc = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};

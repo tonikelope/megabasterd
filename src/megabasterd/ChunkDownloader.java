@@ -215,7 +215,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 }
             }
 
-        } catch (ChunkInvalidIdException e) {
+        } catch (ChunkInvalidException e) {
 
         } catch (IOException ex) {
             _download.emergencyStopDownloader(ex.getMessage());

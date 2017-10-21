@@ -5,15 +5,20 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.awt.Color;
+import java.awt.Frame;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
@@ -21,12 +26,15 @@ import java.util.regex.Pattern;
 import javax.crypto.CipherInputStream;
 import static megabasterd.MainPanel.STREAMER_PORT;
 import static megabasterd.MainPanel.THREAD_POOL;
+import static megabasterd.MiscTools.BASE642Bin;
+import static megabasterd.MiscTools.Bin2BASE64;
+import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.checkMegaDownloadUrl;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
 import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
@@ -37,6 +45,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
     public static final int WORKER_STATUS_STREAM = 0x03;
     public static final int WORKER_STATUS_RETRY = 0x04;
     public static final int WORKER_STATUS_EXIT = 0x05;
+    public static final int WORKERS = 4;
 
     private final MainPanel _main_panel;
     private final ConcurrentHashMap<String, HashMap<String, Object>> _link_cache;
@@ -179,7 +188,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 } else {
 
-                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPort()).getBytes())) : null);
+                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
 
                 }
 
@@ -238,9 +247,81 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 MegaAPI ma = null;
 
-                if (mega_account != null && _main_panel.getMega_active_accounts().containsKey(mega_account)) {
+                if (mega_account != null) {
+
+                    HashMap<String, Object> account_info = (HashMap) _main_panel.getMega_accounts().get(mega_account);
 
                     ma = _main_panel.getMega_active_accounts().get(mega_account);
+
+                    if (ma == null) {
+
+                        ma = new MegaAPI();
+
+                        String password_aes, user_hash;
+                        boolean remember_master_pass = false;
+
+                        try {
+
+                            if (_main_panel.getMaster_pass_hash() != null) {
+
+                                if (_main_panel.getMaster_pass() == null) {
+
+                                    GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) _main_panel.getView(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt());
+
+                                    swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, _main_panel.getView());
+
+                                    swingReflectionInvokeAndWait("setVisible", dialog, true);
+
+                                    if (dialog.isPass_ok()) {
+
+                                        _main_panel.setMaster_pass(dialog.getPass());
+
+                                        dialog.deletePass();
+
+                                        remember_master_pass = dialog.getRemember_checkbox().isSelected();
+
+                                        dialog.dispose();
+
+                                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                    } else {
+
+                                        dialog.dispose();
+
+                                        throw new Exception();
+                                    }
+
+                                } else {
+
+                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                }
+
+                            } else {
+
+                                password_aes = (String) account_info.get("password_aes");
+
+                                user_hash = (String) account_info.get("user_hash");
+                            }
+
+                            ma.fastLogin(mega_account, bin2i32a(BASE642Bin(password_aes)), user_hash);
+
+                            _main_panel.getMega_active_accounts().put(mega_account, ma);
+
+                            if (!remember_master_pass) {
+                                _main_panel.setMaster_pass(null);
+                            }
+
+                        } catch (Exception ex) {
+
+                            getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                    }
 
                 } else {
 
@@ -288,7 +369,8 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
     }
 
     private long[] parseRangeHeader(String header) {
-        Pattern pattern = Pattern.compile("bytes\\=([0-9]+)\\-([0-9]+)?");
+        System.out.println(header);
+        Pattern pattern = Pattern.compile("bytes *\\= *([0-9]+) *\\- *([0-9]+)?");
 
         Matcher matcher = pattern.matcher(header);
 
@@ -308,11 +390,17 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
     }
 
     private String cookRangeUrl(String url, long[] ranges, int sync_bytes) {
+        System.out.println(url + "/" + String.valueOf(ranges[0] - sync_bytes) + (ranges[1] >= 0 ? "-" + String.valueOf(ranges[1]) : ""));
         return url + "/" + String.valueOf(ranges[0] - sync_bytes) + (ranges[1] >= 0 ? "-" + String.valueOf(ranges[1]) : "");
     }
 
     @Override
     public void handle(HttpExchange xchg) throws IOException {
+
+        StreamChunkWriter chunkwriter = null;
+        ArrayList<StreamChunkDownloader> chunkworkers = new ArrayList<>();
+        final PipedInputStream pipein = new PipedInputStream();
+        final PipedOutputStream pipeout = new PipedOutputStream(pipein);
 
         long clength;
 
@@ -479,43 +567,65 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                     xchg.sendResponseHeaders(HttpStatus.SC_PARTIAL_CONTENT, clength);
 
-                    url = new URL(cookRangeUrl(temp_url, ranges, sync_bytes));
+                    chunkwriter = new StreamChunkWriter(pipeout, ranges[0] - sync_bytes, ranges[1] >= 0 ? ranges[1] : file_size - 1);
 
                 } else {
 
                     xchg.sendResponseHeaders(HttpStatus.SC_OK, file_size);
 
-                    url = new URL(temp_url);
+                    chunkwriter = new StreamChunkWriter(pipeout, 0, file_size - 1);
                 }
 
                 updateStatus(WORKER_STATUS_CONNECT);
 
-                httpget = new HttpGet(url.toURI());
+                THREAD_POOL.execute(chunkwriter);
 
-                try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+                for (int i = 0; i < WORKERS; i++) {
 
-                    is = httpresponse.getEntity().getContent();
+                    StreamChunkDownloader worker = new StreamChunkDownloader(i + 1, temp_url, chunkwriter);
 
-                    byte[] iv = CryptTools.initMEGALinkKeyIV(file_key);
+                    chunkworkers.add(worker);
 
-                    cis = new CipherInputStream(is, CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", CryptTools.initMEGALinkKey(file_key), (header_range != null && (ranges[0] - sync_bytes) > 0) ? CryptTools.forwardMEGALinkKeyIV(iv, ranges[0] - sync_bytes) : iv));
+                    THREAD_POOL.execute(worker);
+                }
 
-                    os = xchg.getResponseBody();
+                is = pipein;
 
-                    cis.skip(sync_bytes);
+                byte[] iv = CryptTools.initMEGALinkKeyIV(file_key);
 
-                    updateStatus(WORKER_STATUS_STREAM);
+                cis = new CipherInputStream(is, CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", CryptTools.initMEGALinkKey(file_key), (header_range != null && (ranges[0] - sync_bytes) > 0) ? CryptTools.forwardMEGALinkKeyIV(iv, ranges[0] - sync_bytes) : iv));
 
-                    while ((reads = cis.read(buffer)) != -1) {
+                os = xchg.getResponseBody();
 
-                        os.write(buffer, 0, reads);
-                    }
+                cis.skip(sync_bytes);
+
+                updateStatus(WORKER_STATUS_STREAM);
+
+                while ((reads = cis.read(buffer)) != -1) {
+
+                    os.write(buffer, 0, reads);
                 }
             }
         } catch (Exception ex) {
             //Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
         } finally {
+            System.out.println("KissVideoStreamerHandle: bye bye");
+
             xchg.close();
+
+            if (chunkwriter != null) {
+
+                pipeout.close();
+
+                for (StreamChunkDownloader d : chunkworkers) {
+
+                    d.setExit(true);
+                }
+
+                chunkwriter.setExit(true);
+
+                chunkwriter.secureNotifyAll();
+            }
 
             updateStatus(WORKER_STATUS_EXIT);
         }

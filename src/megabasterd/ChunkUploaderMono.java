@@ -287,7 +287,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                 }
             }
 
-        } catch (ChunkInvalidIdException e) {
+        } catch (ChunkInvalidException e) {
 
         } catch (IOException ex) {
 

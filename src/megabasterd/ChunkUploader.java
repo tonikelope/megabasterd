@@ -272,7 +272,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                 } else if (!error) {
 
                                     System.out.println(" Worker " + _id + " ha subido chunk " + chunk.getId());
-                                    
+
                                     _upload.getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
 
                                     _upload.getMac_generator().secureNotify();
@@ -330,7 +330,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
             }
 
-        } catch (ChunkInvalidIdException e) {
+        } catch (ChunkInvalidException e) {
 
         } catch (IOException ex) {
 

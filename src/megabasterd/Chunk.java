@@ -20,24 +20,24 @@ public final class Chunk {
     public int getSize_multi() {
         return _size_multi;
     }
-    
-    public Chunk(long id, long file_size, String file_url) throws ChunkInvalidIdException {
+
+    public Chunk(long id, long file_size, String file_url) throws ChunkInvalidException {
         _size_multi = 1;
-        
+
         _id = id;
 
         _offset = calculateOffset();
 
         if (file_size > 0) {
             if (_offset >= file_size) {
-                throw new ChunkInvalidIdException(valueOf(id));
+                throw new ChunkInvalidException(valueOf(id));
             }
 
         } else {
 
             if (id > 1) {
 
-                throw new ChunkInvalidIdException(valueOf(id));
+                throw new ChunkInvalidException(valueOf(id));
             }
         }
 
@@ -47,24 +47,24 @@ public final class Chunk {
 
         _data_os = new ByteArrayOutputStream((int) _size);
     }
-    
-    public Chunk(long id, long file_size, String file_url, int size_multi) throws ChunkInvalidIdException {
+
+    public Chunk(long id, long file_size, String file_url, int size_multi) throws ChunkInvalidException {
         _size_multi = size_multi;
-        
+
         _id = id;
 
         _offset = calculateOffset();
 
         if (file_size > 0) {
             if (_offset >= file_size) {
-                throw new ChunkInvalidIdException(valueOf(id));
+                throw new ChunkInvalidException(valueOf(id));
             }
 
         } else {
 
             if (id > 1) {
 
-                throw new ChunkInvalidIdException(valueOf(id));
+                throw new ChunkInvalidException(valueOf(id));
             }
         }
 

@@ -166,7 +166,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                 }
             }
 
-        } catch (ChunkInvalidIdException e) {
+        } catch (ChunkInvalidException e) {
 
         } catch (IOException ex) {
 

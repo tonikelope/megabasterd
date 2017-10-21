@@ -401,10 +401,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             use_mc_reverse = megacrypter_reverse.equals("yes");
 
-            
-            if(megacrypter_reverse_p != null) {
-                
-                 megacrypter_reverse_p = DBTools.selectSettingValueFromDB("megacrypter_reverse_port");
+            if (megacrypter_reverse_p != null) {
+
+                megacrypter_reverse_p = DBTools.selectSettingValueFromDB("megacrypter_reverse_port");
             }
         }
 
@@ -1068,7 +1067,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         proxy_warning_label.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
-        proxy_warning_label.setText("Warning: Megabasterd will use this proxy for ALL connections.");
+        proxy_warning_label.setText("Warning: Megabasterd will use this proxy for ALL connections (megacrypter reverse mode might fail when using proxy).");
         proxy_warning_label.setEnabled(false);
 
         proxy_auth_panel.setBorder(javax.swing.BorderFactory.createTitledBorder("Authentication"));
