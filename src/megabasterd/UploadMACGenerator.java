@@ -130,7 +130,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                     try {
 
-                        if (chunk.getId() <= 7) {
+                        if (chunk.getId() <= 7 || !_upload.isUse_slots()) {
 
                             int[] chunk_mac = {file_iv[0], file_iv[1], file_iv[0], file_iv[1]};
 
