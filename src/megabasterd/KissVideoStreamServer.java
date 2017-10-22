@@ -233,7 +233,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         return file_info;
     }
 
-    private String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String mega_account) throws IOException, InterruptedException {
+    public String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String mega_account) throws IOException, InterruptedException {
         String dl_url = null;
         int retry = 0;
         boolean error;
@@ -387,11 +387,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         }
 
         return ranges;
-    }
-
-    private String cookRangeUrl(String url, long[] ranges, int sync_bytes) {
-        System.out.println(url + "/" + String.valueOf(ranges[0] - sync_bytes) + (ranges[1] >= 0 ? "-" + String.valueOf(ranges[1]) : ""));
-        return url + "/" + String.valueOf(ranges[0] - sync_bytes) + (ranges[1] >= 0 ? "-" + String.valueOf(ranges[1]) : "");
     }
 
     @Override
@@ -567,13 +562,13 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                     xchg.sendResponseHeaders(HttpStatus.SC_PARTIAL_CONTENT, clength);
 
-                    chunkwriter = new StreamChunkWriter(pipeout, ranges[0] - sync_bytes, ranges[1] >= 0 ? ranges[1] : file_size - 1);
+                    chunkwriter = new StreamChunkWriter(this, link, file_info, mega_account, pipeout, temp_url, ranges[0] - sync_bytes, ranges[1] >= 0 ? ranges[1] : file_size - 1);
 
                 } else {
 
                     xchg.sendResponseHeaders(HttpStatus.SC_OK, file_size);
 
-                    chunkwriter = new StreamChunkWriter(pipeout, 0, file_size - 1);
+                    chunkwriter = new StreamChunkWriter(this, link, file_info, mega_account, pipeout, temp_url, 0, file_size - 1);
                 }
 
                 updateStatus(WORKER_STATUS_CONNECT);
@@ -582,7 +577,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 for (int i = 0; i < WORKERS; i++) {
 
-                    StreamChunkDownloader worker = new StreamChunkDownloader(i + 1, temp_url, chunkwriter);
+                    StreamChunkDownloader worker = new StreamChunkDownloader(i + 1, chunkwriter);
 
                     chunkworkers.add(worker);
 

@@ -1,8 +1,4 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package megabasterd;
 
 import java.io.ByteArrayInputStream;
@@ -19,15 +15,15 @@ public final class StreamChunk {
     private final String _url;
     private final ByteArrayOutputStream _data_os;
 
-    public StreamChunk(long offset, long size, String file_url) throws ChunkInvalidException {
+    public StreamChunk(long offset, long size, String url) throws ChunkInvalidException {
 
-        if (offset < 0 || size < 0) {
+        if (offset < 0 || size < 0 || url == null) {
             throw new ChunkInvalidException("Offset: " + offset + " Size: " + size);
         }
 
         _offset = offset;
         _size = size;
-        _url = file_url != null ? file_url + "/" + _offset + "-" + (_offset + _size - 1) : null;
+        _url = url + "/" + _offset + "-" + (_offset + _size - 1);
         _data_os = new ByteArrayOutputStream((int) _size);
     }
 

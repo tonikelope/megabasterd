@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.io.PipedOutputStream;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,19 +22,28 @@ import static java.util.logging.Logger.getLogger;
 public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable {
 
     public static final int CHUNK_SIZE = 1048576;
-    public static final int BUFFER_CHUNKS_SIZE = 10;
+    public static final int BUFFER_CHUNKS_SIZE = 20;
     private long _next_offset_required;
     private long _bytes_written;
     private final long _start_offset;
     private final long _end_offset;
+    private final String _mega_account;
     private final ConcurrentHashMap<Long, StreamChunk> _chunk_queue;
     private final ConcurrentHashMap<Thread, Boolean> _notified_threads;
     private final PipedOutputStream _pipeos;
+    private String _url;
+    private final HashMap _file_info;
+    private final String _link;
     private final Object _secure_notify_lock;
     private final Object _chunk_offset_lock;
-    private volatile boolean _exit;
+    private final KissVideoStreamServer _server;
+    private volatile boolean _exit; 
 
-    public StreamChunkWriter(PipedOutputStream pipeos, long start_offset, long end_offset) {
+    public StreamChunkWriter(KissVideoStreamServer server, String link, HashMap file_info, String mega_account, PipedOutputStream pipeos, String url, long start_offset, long end_offset) {
+        _server=server;
+        _link=link;
+        _mega_account=mega_account;
+        _file_info=file_info;
         _bytes_written = start_offset;
         _pipeos = pipeos;
         _start_offset = start_offset;
@@ -43,9 +53,22 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
         _notified_threads = new ConcurrentHashMap<>();
         _secure_notify_lock = new Object();
         _chunk_offset_lock = new Object();
+        _url=url;
         _exit = false;
     }
 
+    public String getUrl() throws IOException, InterruptedException {
+        
+        if(!MiscTools.checkMegaDownloadUrl(_url)) {
+            
+            _url = _server.getMegaFileDownloadUrl(_link, (String)_file_info.get("pass_hash"), (String)_file_info.get("noexpiretoken"), _mega_account);
+            _file_info.put("url", _url);
+            _server.getLink_cache().put(_link, _file_info);
+        }
+            
+        return _url;
+    }
+    
     public boolean isExit() {
         return _exit;
     }

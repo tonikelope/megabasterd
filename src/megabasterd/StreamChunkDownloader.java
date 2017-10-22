@@ -26,12 +26,10 @@ public class StreamChunkDownloader implements Runnable {
 
     private final int _id;
     private final StreamChunkWriter _chunkwriter;
-    private final String _url;
     private volatile boolean _exit;
 
-    public StreamChunkDownloader(int id, String url, StreamChunkWriter chunkwriter) {
+    public StreamChunkDownloader(int id, StreamChunkWriter chunkwriter) {
         _id = id;
-        _url = url;
         _chunkwriter = chunkwriter;
         _exit = false;
     }
@@ -48,10 +46,12 @@ public class StreamChunkDownloader implements Runnable {
         byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
         InputStream is;
         boolean error;
-
+        
         System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "]: let's do some work!");
 
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+            
+            String url=_chunkwriter.getUrl();
 
             error = false;
 
@@ -69,11 +69,15 @@ public class StreamChunkDownloader implements Runnable {
                 if (!error) {
 
                     offset = _chunkwriter.nextOffset();
+                    
+                } else {
+                    
+                    url=_chunkwriter.getUrl();
                 }
 
                 if (offset >= 0) {
 
-                    chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), _url);
+                    chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
 
                     System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "]: offset: " + offset + " size: " + chunk_stream.getSize());
 
@@ -141,6 +145,8 @@ public class StreamChunkDownloader implements Runnable {
         } catch (IOException | URISyntaxException ex) {
             getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ChunkInvalidException ex) {
+            Logger.getLogger(StreamChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException ex) {
             Logger.getLogger(StreamChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
         }
 
