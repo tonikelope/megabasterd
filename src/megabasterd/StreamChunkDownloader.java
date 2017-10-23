@@ -41,19 +41,13 @@ public class StreamChunkDownloader implements Runnable {
     @Override
     public void run() {
 
-        StreamChunk chunk_stream;
-        int reads, http_status;
-        byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
-        InputStream is;
-        boolean error;
-        
         System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "]: let's do some work!");
 
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
-            
-            String url=_chunkwriter.getUrl();
 
-            error = false;
+            String url = _chunkwriter.getUrl();
+
+            boolean error = false;
 
             long offset = -1;
 
@@ -69,15 +63,19 @@ public class StreamChunkDownloader implements Runnable {
                 if (!error) {
 
                     offset = _chunkwriter.nextOffset();
-                    
+
                 } else {
-                    
-                    url=_chunkwriter.getUrl();
+
+                    url = _chunkwriter.getUrl();
                 }
 
                 if (offset >= 0) {
 
-                    chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
+                    int reads, http_status;
+
+                    byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
+
+                    StreamChunk chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
 
                     System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "]: offset: " + offset + " size: " + chunk_stream.getSize());
 
@@ -89,7 +87,7 @@ public class StreamChunkDownloader implements Runnable {
 
                         if (!_exit) {
 
-                            is = httpresponse.getEntity().getContent();
+                            InputStream is = httpresponse.getEntity().getContent();
 
                             http_status = httpresponse.getStatusLine().getStatusCode();
 
@@ -152,7 +150,7 @@ public class StreamChunkDownloader implements Runnable {
 
         _chunkwriter.secureNotifyAll();
 
-        System.out.println("Worker [" + _id + "]: bye bye");
+        System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "]: bye bye");
     }
 
 }

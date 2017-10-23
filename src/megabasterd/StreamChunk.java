@@ -1,4 +1,3 @@
-
 package megabasterd;
 
 import java.io.ByteArrayInputStream;

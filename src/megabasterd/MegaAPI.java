@@ -310,7 +310,7 @@ public final class MegaAPI {
 
                             try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                byte[] buffer = new byte[16 * 1024];
+                                byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
                                 int reads;
 

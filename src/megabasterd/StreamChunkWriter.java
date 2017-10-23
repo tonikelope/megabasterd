@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package megabasterd;
 
 import java.io.IOException;
@@ -37,13 +32,13 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
     private final Object _secure_notify_lock;
     private final Object _chunk_offset_lock;
     private final KissVideoStreamServer _server;
-    private volatile boolean _exit; 
+    private volatile boolean _exit;
 
     public StreamChunkWriter(KissVideoStreamServer server, String link, HashMap file_info, String mega_account, PipedOutputStream pipeos, String url, long start_offset, long end_offset) {
-        _server=server;
-        _link=link;
-        _mega_account=mega_account;
-        _file_info=file_info;
+        _server = server;
+        _link = link;
+        _mega_account = mega_account;
+        _file_info = file_info;
         _bytes_written = start_offset;
         _pipeos = pipeos;
         _start_offset = start_offset;
@@ -53,22 +48,22 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
         _notified_threads = new ConcurrentHashMap<>();
         _secure_notify_lock = new Object();
         _chunk_offset_lock = new Object();
-        _url=url;
+        _url = url;
         _exit = false;
     }
 
     public String getUrl() throws IOException, InterruptedException {
-        
-        if(!MiscTools.checkMegaDownloadUrl(_url)) {
-            
-            _url = _server.getMegaFileDownloadUrl(_link, (String)_file_info.get("pass_hash"), (String)_file_info.get("noexpiretoken"), _mega_account);
+
+        if (!MiscTools.checkMegaDownloadUrl(_url)) {
+
+            _url = _server.getMegaFileDownloadUrl(_link, (String) _file_info.get("pass_hash"), (String) _file_info.get("noexpiretoken"), _mega_account);
             _file_info.put("url", _url);
             _server.getLink_cache().put(_link, _file_info);
         }
-            
+
         return _url;
     }
-    
+
     public boolean isExit() {
         return _exit;
     }
@@ -80,10 +75,6 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
     @Override
     public void run() {
 
-        StreamChunk current_chunk;
-        byte[] buffer = new byte[16 * 1024];
-        int reads;
-
         try {
 
             System.out.println("StreamChunkWriter: let's do some work! Start: " + _start_offset + "   End: " + _end_offset);
@@ -92,9 +83,13 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
 
                 while (!_exit && _bytes_written < _end_offset && _chunk_queue.containsKey(_bytes_written)) {
 
-                    current_chunk = _chunk_queue.get(_bytes_written);
+                    StreamChunk current_chunk = _chunk_queue.get(_bytes_written);
 
                     InputStream is = current_chunk.getInputStream();
+
+                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                    int reads;
 
                     while (!_exit && (reads = is.read(buffer)) != -1) {
 
@@ -132,7 +127,9 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
 
         _exit = true;
 
-        System.out.println("StreamChunkWriter: bye bye");
+        secureNotifyAll();
+
+        System.out.println(Thread.currentThread().getName() + " StreamChunkWriter: bye bye");
     }
 
     public long nextOffset() {

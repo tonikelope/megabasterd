@@ -340,7 +340,7 @@ public final class CryptTools {
 
                     try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-                        byte[] buffer = new byte[16 * 1024];
+                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
                         int reads;
 
@@ -461,7 +461,7 @@ public final class CryptTools {
 
                         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-                            byte[] buffer = new byte[16 * 1024];
+                            byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
                             int reads;
 
@@ -569,7 +569,7 @@ public final class CryptTools {
                 String enc_dlc_key;
 
                 try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    byte[] buffer = new byte[16 * 1024];
+                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
                     int reads;
                     while ((reads = is.read(buffer)) != -1) {
 

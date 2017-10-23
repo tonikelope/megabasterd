@@ -101,7 +101,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
     @Override
     public void run() {
         Chunk current_chunk;
-        byte[] buffer = new byte[16 * 1024];
+        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
         int reads;
 
         try {

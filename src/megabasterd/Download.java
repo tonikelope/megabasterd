@@ -1042,7 +1042,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             long chunk_id = 1;
             long tot = 0L;
-            byte[] chunk_buffer = new byte[16 * 1024];
+            byte[] chunk_buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
             byte[] byte_block = new byte[16];
             int[] int_block;
             int re, reads, to_read;

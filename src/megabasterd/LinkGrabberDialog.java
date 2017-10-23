@@ -85,6 +85,9 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
                 swingReflectionInvoke("addItem", use_mega_account_down_combobox, o);
             }
+            
+            swingReflectionInvoke("addItem", use_mega_account_down_combobox, "");
+            
         } else {
             swingReflectionInvoke("setEnabled", use_mega_account_down_combobox, false);
             swingReflectionInvoke("setEnabled", use_mega_account_down_label, false);
@@ -282,7 +285,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
                         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-                            byte[] buffer = new byte[16 * 1024];
+                            byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
                             int reads;
 
@@ -352,7 +355,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     private void use_mega_account_down_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_use_mega_account_down_comboboxItemStateChanged
         String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
-        if (_main_panel.isUse_mega_account_down() && selected_item != null && !selected_item.equals(_last_selected_account)) {
+        if (_main_panel.isUse_mega_account_down() && !"".equals(selected_item) && selected_item != null && !selected_item.equals(_last_selected_account)) {
 
             use_mega_account_down_combobox.setEnabled(false);
 
@@ -444,6 +447,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     swingReflectionInvokeAndWait("setEnabled", ((LinkGrabberDialog) tthis).getDance_button(), true);
                 }
             });
+        } else if(!selected_item.equals(_last_selected_account)) {
+            _last_selected_account=null;
         }
     }//GEN-LAST:event_use_mega_account_down_comboboxItemStateChanged
 

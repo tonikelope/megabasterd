@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
+import java.util.logging.Logger;
 import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,10 +42,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
 public final class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNotifiable {
 
     public static final int WORKER_STATUS_FILE_INFO = 0x01;
-    public static final int WORKER_STATUS_CONNECT = 0x02;
-    public static final int WORKER_STATUS_STREAM = 0x03;
-    public static final int WORKER_STATUS_RETRY = 0x04;
-    public static final int WORKER_STATUS_EXIT = 0x05;
+    public static final int WORKER_STATUS_STREAM = 0x02;
+    public static final int WORKER_STATUS_RETRY = 0x03;
+    public static final int WORKER_STATUS_EXIT = 0x04;
     public static final int WORKERS = 4;
 
     private final MainPanel _main_panel;
@@ -109,7 +109,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
     public void start(int port, String context) throws IOException {
         swingReflectionInvoke("setForeground", _main_panel.getView().getKiss_server_status(), new Color(0, 128, 0));
 
-        swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), "Kissvideostreamer on localhost:" + STREAMER_PORT + " (Waiting for request...)");
+        swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), "Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)");
 
         HttpServer httpserver = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
 
@@ -141,10 +141,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                     conta_info++;
                     break;
 
-                case WORKER_STATUS_CONNECT:
-                    conta_connect++;
-                    break;
-
                 case WORKER_STATUS_STREAM:
                     conta_stream++;
                     break;
@@ -159,11 +155,11 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         if (conta_info > 0 || conta_connect > 0 || conta_stream > 0 || conta_retry > 0) {
 
-            status = "Kissvideostreamer on localhost:" + STREAMER_PORT + "  Info: " + conta_info + " / Conn: " + conta_connect + " / Stream: " + conta_stream + " / Retry: " + conta_retry;
+            status = "Stream server running on localhost:" + STREAMER_PORT + "  Info: " + conta_info + " / Stream: " + conta_stream + " / Retry: " + conta_retry;
 
         } else {
 
-            status = "Kissvideostreamer on localhost:" + STREAMER_PORT + " (Waiting for request...)";
+            status = "Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)";
         }
 
         swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), status);
@@ -419,7 +415,9 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
             String link;
 
-            String[] url_parts = url_path.substring(url_path.indexOf("/video/") + 7).split("#");
+            System.out.println(url_path.substring(url_path.indexOf("/video/") + 7));
+
+            String[] url_parts = new String(MiscTools.UrlBASE642Bin(url_path.substring(url_path.indexOf("/video/") + 7))).split("#");
 
             mega_account = url_parts[0];
 
@@ -427,7 +425,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                 mega_account = null;
             }
 
-            link = new String(MiscTools.UrlBASE642Bin(url_parts[1]));
+            link = new String(url_parts[1]);
 
             HashMap cache_info, file_info;
 
@@ -496,7 +494,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 resheaders.add("Connection", "close");
 
-                byte[] buffer = new byte[16 * 1024];
+                byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
                 int reads;
 
@@ -571,8 +569,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                     chunkwriter = new StreamChunkWriter(this, link, file_info, mega_account, pipeout, temp_url, 0, file_size - 1);
                 }
 
-                updateStatus(WORKER_STATUS_CONNECT);
-
                 THREAD_POOL.execute(chunkwriter);
 
                 for (int i = 0; i < WORKERS; i++) {
@@ -602,7 +598,11 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                 }
             }
         } catch (Exception ex) {
-            //Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
+
+            if (!(ex instanceof IOException)) {
+                Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
         } finally {
             System.out.println("KissVideoStreamerHandle: bye bye");
 
