@@ -486,7 +486,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         if (getMain_panel().isUse_mega_account_down()) {
             final String mega_account = (String) dialog.getUse_mega_account_down_combobox().getSelectedItem();
 
-            if (mega_account == null) {
+            if ("".equals(mega_account)) {
 
                 ma = new MegaAPI();
 
@@ -619,11 +619,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         } else {
 
             new_download_menu.setEnabled(true);
-        }
-
-        if (!dialog.isRemember_master_pass()) {
-
-            _main_panel.setMaster_pass(null);
         }
 
         dialog.dispose();
@@ -805,11 +800,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         dialog.setLocationRelativeTo(this);
 
         dialog.setVisible(true);
-
-        if (!dialog.isRemember_master_pass()) {
-
-            _main_panel.setMaster_pass(null);
-        }
 
         _main_panel.getClipboardspy().detachObserver(dialog);
     }//GEN-LAST:event_new_stream_menuActionPerformed

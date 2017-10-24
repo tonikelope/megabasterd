@@ -2,13 +2,11 @@ package megabasterd;
 
 import java.awt.Color;
 import java.awt.Dialog;
-import java.awt.Frame;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
@@ -17,9 +15,6 @@ import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.Bin2BASE64;
-import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
 import static megabasterd.MiscTools.deleteSelectedTreeItems;
 import static megabasterd.MiscTools.formatBytes;
@@ -536,79 +531,16 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 @Override
                 public void run() {
 
-                    HashMap<String, Object> account_info = (HashMap) _main_panel.getMega_accounts().get(email);
+                    MegaAPI ma = null;
+                    try {
+                        ma = MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
+                    } catch (Exception ex) {
+                        Logger.getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    }
 
                     Long[] quota = null;
 
-                    MegaAPI ma = _main_panel.getMega_active_accounts().get(account_combobox.getSelectedItem());
-
-                    if (ma == null) {
-
-                        ma = new MegaAPI();
-
-                        String password_aes, user_hash;
-
-                        try {
-
-                            if (_main_panel.getMaster_pass_hash() != null) {
-
-                                if (_main_panel.getMaster_pass() == null) {
-
-                                    GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt());
-
-                                    swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
-
-                                    swingReflectionInvokeAndWait("setVisible", dialog, true);
-
-                                    if (dialog.isPass_ok()) {
-
-                                        _main_panel.setMaster_pass(dialog.getPass());
-
-                                        dialog.deletePass();
-
-                                        _remember_master_pass = dialog.getRemember_checkbox().isSelected();
-
-                                        dialog.dispose();
-
-                                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                    } else {
-
-                                        dialog.dispose();
-
-                                        throw new Exception();
-                                    }
-
-                                } else {
-
-                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                }
-
-                            } else {
-
-                                password_aes = (String) account_info.get("password_aes");
-
-                                user_hash = (String) account_info.get("user_hash");
-                            }
-
-                            ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash);
-
-                            _main_panel.getMega_active_accounts().put(email, ma);
-
-                            quota = ma.getQuota();
-
-                        } catch (Exception ex) {
-
-                            getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-
-                    } else {
-
+                    if (ma != null) {
                         quota = ma.getQuota();
                     }
 

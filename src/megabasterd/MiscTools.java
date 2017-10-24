@@ -1,8 +1,10 @@
 package megabasterd;
 
+import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Font;
 import java.awt.FontFormatException;
+import java.awt.Frame;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
@@ -81,6 +83,7 @@ public final class MiscTools {
     public static final int EXP_BACKOFF_BASE = 2;
     public static final int EXP_BACKOFF_SECS_RETRY = 1;
     public static final int EXP_BACKOFF_MAX_WAIT_TIME = 64;
+    public static final Object _password_lock = new Object();
 
     private static final ConcurrentHashMap<String, Method> REFLECTION_METHOD_CACHE = new ConcurrentHashMap<>();
 
@@ -1080,6 +1083,83 @@ public final class MiscTools {
         }
 
         System.exit(0);
+    }
+
+    public static MegaAPI checkMegaAccountLoginAndShowMasterPassDialog(MainPanel main_panel, Container container, String email) throws Exception {
+
+        boolean remember_master_pass = true;
+
+        HashMap<String, Object> account_info = (HashMap) main_panel.getMega_accounts().get(email);
+
+        MegaAPI ma = main_panel.getMega_active_accounts().get(email);
+
+        if (ma == null) {
+
+            ma = new MegaAPI();
+
+            String password_aes, user_hash;
+            synchronized (_password_lock) {
+
+                if (main_panel.getMaster_pass_hash() != null) {
+
+                    if (main_panel.getMaster_pass() == null) {
+
+                        GetMasterPasswordDialog pdialog = new GetMasterPasswordDialog((Frame) container.getParent(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt());
+
+                        swingReflectionInvokeAndWait("setLocationRelativeTo", pdialog, container);
+
+                        swingReflectionInvokeAndWait("setVisible", pdialog, true);
+
+                        if (pdialog.isPass_ok()) {
+
+                            main_panel.setMaster_pass(pdialog.getPass());
+
+                            pdialog.deletePass();
+
+                            remember_master_pass = pdialog.getRemember_checkbox().isSelected();
+
+                            pdialog.dispose();
+
+                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                        } else {
+
+                            pdialog.dispose();
+
+                            throw new Exception();
+                        }
+
+                    } else {
+
+                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                    }
+
+                } else {
+
+                    password_aes = (String) account_info.get("password_aes");
+
+                    user_hash = (String) account_info.get("user_hash");
+                }
+
+                ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash);
+
+                main_panel.getMega_active_accounts().put(email, ma);
+
+            }
+        }
+
+        if (!remember_master_pass) {
+
+            main_panel.setMaster_pass(null);
+        }
+
+        return ma;
+
     }
 
 }

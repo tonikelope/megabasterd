@@ -1,10 +1,8 @@
 package megabasterd;
 
 import java.awt.Dialog;
-import java.awt.Frame;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.logging.Level;
 import static java.util.logging.Logger.getLogger;
@@ -12,9 +10,6 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
 import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.Bin2BASE64;
-import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.extractFirstMegaLinkFromString;
 import static megabasterd.MiscTools.extractStringFromClipboardContents;
 import static megabasterd.MiscTools.findFirstRegex;
@@ -32,10 +27,9 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     private final MainPanelView _mainPanelView;
     private final MainPanel _main_panel;
     private volatile String _last_selected_account;
-    private boolean _remember_master_pass;
 
-    public boolean isRemember_master_pass() {
-        return _remember_master_pass;
+    public String getLast_selected_account() {
+        return _last_selected_account;
     }
 
     public JButton getDance_button() {
@@ -44,6 +38,10 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
     public JComboBox<String> getUse_mega_account_down_combobox() {
         return use_mega_account_down_combobox;
+    }
+
+    public MainPanel getMain_panel() {
+        return _main_panel;
     }
 
     /**
@@ -56,20 +54,21 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         initComponents();
 
         _clipboardspy = clipboardspy;
+
         _mainPanelView = (MainPanelView) parent;
-        _last_selected_account = null;
-        _remember_master_pass = true;
 
         _main_panel = ((MainPanelView) parent).getMain_panel();
 
+        _last_selected_account = "";
+
         if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
 
-            for (Object o : _main_panel.getMega_accounts().keySet()) {
+            swingReflectionInvoke("addItem", use_mega_account_down_combobox, _main_panel.getMega_account_down());
 
-                swingReflectionInvoke("addItem", use_mega_account_down_combobox, o);
-            }
-            
             swingReflectionInvoke("addItem", use_mega_account_down_combobox, "");
+
+            swingReflectionInvoke("setSelectedIndex", use_mega_account_down_combobox, 0);
+
         } else {
             swingReflectionInvoke("setEnabled", use_mega_account_down_combobox, false);
             swingReflectionInvoke("setEnabled", use_mega_account_down_label, false);
@@ -247,9 +246,9 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void use_mega_account_down_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_use_mega_account_down_comboboxItemStateChanged
-        String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
+        final String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
-        if (_main_panel.isUse_mega_account_down() && !"".equals(selected_item) && selected_item != null && !selected_item.equals(_last_selected_account)) {
+        if (_main_panel.isUse_mega_account_down() && !selected_item.equals(_last_selected_account) && !"".equals(selected_item)) {
 
             use_mega_account_down_combobox.setEnabled(false);
 
@@ -259,90 +258,25 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
             final String email = selected_item;
 
-            final Dialog tthis = this;
+            final StreamerDialog tthis = this;
 
             THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
 
-                    HashMap<String, Object> account_info = (HashMap) _main_panel.getMega_accounts().get(email);
+                    try {
+                        MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
+                    } catch (Exception ex) {
 
-                    MegaAPI ma = _main_panel.getMega_active_accounts().get(use_mega_account_down_combobox.getSelectedItem());
-
-                    if (ma == null) {
-
-                        ma = new MegaAPI();
-
-                        String password_aes, user_hash;
-
-                        try {
-
-                            if (_main_panel.getMaster_pass_hash() != null) {
-
-                                if (_main_panel.getMaster_pass() == null) {
-
-                                    GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt());
-
-                                    swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, tthis);
-
-                                    swingReflectionInvokeAndWait("setVisible", dialog, true);
-
-                                    if (dialog.isPass_ok()) {
-
-                                        _main_panel.setMaster_pass(dialog.getPass());
-
-                                        dialog.deletePass();
-
-                                        _remember_master_pass = dialog.getRemember_checkbox().isSelected();
-
-                                        dialog.dispose();
-
-                                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                    } else {
-
-                                        dialog.dispose();
-
-                                        throw new Exception();
-                                    }
-
-                                } else {
-
-                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                }
-
-                            } else {
-
-                                password_aes = (String) account_info.get("password_aes");
-
-                                user_hash = (String) account_info.get("user_hash");
-                            }
-
-                            ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash);
-
-                            _main_panel.getMega_active_accounts().put(email, ma);
-
-                        } catch (Exception ex) {
-
-                            //getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
-                            _last_selected_account = null;
-
-                            swingReflectionInvoke("setSelectedIndex", ((StreamerDialog) tthis).getUse_mega_account_down_combobox(), -1);
-                        }
+                        _last_selected_account = "";
+                        swingReflectionInvoke("setSelectedIndex", use_mega_account_down_combobox, 1);
                     }
 
                     swingReflectionInvokeAndWait("setEnabled", ((StreamerDialog) tthis).getUse_mega_account_down_combobox(), true);
 
-                    swingReflectionInvokeAndWait("setEnabled", ((StreamerDialog) tthis).getDance_button(), true);
+                    swingReflectionInvokeAndWaitForReturn("setEnabled", ((StreamerDialog) tthis).getDance_button(), true);
                 }
             });
-        } else if(!selected_item.equals(_last_selected_account)) {
-            _last_selected_account=null;
         }
     }//GEN-LAST:event_use_mega_account_down_comboboxItemStateChanged
 

@@ -5,7 +5,6 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
 import java.awt.Color;
-import java.awt.Frame;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -27,14 +26,10 @@ import java.util.regex.Pattern;
 import javax.crypto.CipherInputStream;
 import static megabasterd.MainPanel.STREAMER_PORT;
 import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.Bin2BASE64;
-import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.checkMegaDownloadUrl;
 import static megabasterd.MiscTools.findFirstRegex;
 import static megabasterd.MiscTools.getWaitTimeExpBackOff;
 import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -243,83 +238,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 MegaAPI ma = null;
 
-                if (mega_account != null) {
-
-                    HashMap<String, Object> account_info = (HashMap) _main_panel.getMega_accounts().get(mega_account);
-
-                    ma = _main_panel.getMega_active_accounts().get(mega_account);
-
-                    if (ma == null) {
-
-                        ma = new MegaAPI();
-
-                        String password_aes, user_hash;
-                        boolean remember_master_pass = false;
-
-                        try {
-
-                            if (_main_panel.getMaster_pass_hash() != null) {
-
-                                if (_main_panel.getMaster_pass() == null) {
-
-                                    GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) _main_panel.getView(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt());
-
-                                    swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, _main_panel.getView());
-
-                                    swingReflectionInvokeAndWait("setVisible", dialog, true);
-
-                                    if (dialog.isPass_ok()) {
-
-                                        _main_panel.setMaster_pass(dialog.getPass());
-
-                                        dialog.deletePass();
-
-                                        remember_master_pass = dialog.getRemember_checkbox().isSelected();
-
-                                        dialog.dispose();
-
-                                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                    } else {
-
-                                        dialog.dispose();
-
-                                        throw new Exception();
-                                    }
-
-                                } else {
-
-                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                }
-
-                            } else {
-
-                                password_aes = (String) account_info.get("password_aes");
-
-                                user_hash = (String) account_info.get("user_hash");
-                            }
-
-                            ma.fastLogin(mega_account, bin2i32a(BASE642Bin(password_aes)), user_hash);
-
-                            _main_panel.getMega_active_accounts().put(mega_account, ma);
-
-                            if (!remember_master_pass) {
-                                _main_panel.setMaster_pass(null);
-                            }
-
-                        } catch (Exception ex) {
-
-                            getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-
-                    }
-
-                } else {
+                if (mega_account == null || (ma = MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, _main_panel.getView(), mega_account)) == null) {
 
                     ma = new MegaAPI();
                 }
@@ -357,6 +276,8 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                             }
                         }
                 }
+            } catch (Exception ex) {
+                Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         } while (error);

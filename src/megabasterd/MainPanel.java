@@ -42,11 +42,9 @@ import static megabasterd.DBTools.selectSettingValueFromDB;
 import static megabasterd.DBTools.selectUploads;
 import static megabasterd.DBTools.setupSqliteTables;
 import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.Bin2BASE64;
 import static megabasterd.MiscTools.bin2i32a;
 import static megabasterd.MiscTools.setNimbusLookAndFeel;
 import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
 import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
 import static megabasterd.Transference.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
@@ -59,7 +57,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.21";
+    public static final String VERSION = "2.22";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -705,76 +703,7 @@ public final class MainPanel {
 
                             MegaAPI ma;
 
-                            if (tthis.isUse_mega_account_down() && _mega_accounts.get(email) != null) {
-
-                                final HashMap<String, Object> account_info = (HashMap) _mega_accounts.get(email);
-
-                                ma = _mega_active_accounts.get(email);
-
-                                if (ma == null) {
-
-                                    ma = new MegaAPI();
-
-                                    String password_aes, user_hash;
-
-                                    if (getMaster_pass_hash() != null) {
-
-                                        if (getMaster_pass() == null) {
-
-                                            getView().getjTabbedPane1().setSelectedIndex(1);
-
-                                            GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(getView(), true, getMaster_pass_hash(), getMaster_pass_salt());
-
-                                            swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, getView());
-
-                                            swingReflectionInvokeAndWait("setVisible", dialog, true);
-
-                                            if (dialog.isPass_ok()) {
-
-                                                setMaster_pass(dialog.getPass());
-
-                                                dialog.deletePass();
-
-                                                remember_pass = dialog.getRemember_checkbox().isSelected();
-
-                                                dialog.dispose();
-
-                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                            } else {
-
-                                                dialog.dispose();
-
-                                                throw new Exception();
-                                            }
-
-                                        } else {
-
-                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                        }
-
-                                    } else {
-
-                                        password_aes = (String) account_info.get("password_aes");
-
-                                        user_hash = (String) account_info.get("user_hash");
-                                    }
-
-                                    ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash);
-
-                                    _mega_active_accounts.put(email, ma);
-
-                                } else {
-
-                                    ma = new MegaAPI();
-                                }
-
-                            } else {
+                            if (!tthis.isUse_mega_account_down() || _mega_accounts.get(email) == null || (ma = MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) == null) {
 
                                 ma = new MegaAPI();
                             }
@@ -894,8 +823,6 @@ public final class MainPanel {
 
                     int conta_uploads = 0;
 
-                    boolean remember_pass = true;
-
                     ArrayList<HashMap<String, Object>> res = selectUploads();
 
                     for (HashMap<String, Object> o : res) {
@@ -908,68 +835,8 @@ public final class MainPanel {
 
                             if (_mega_accounts.get(email) != null) {
 
-                                final HashMap<String, Object> account_info = (HashMap) _mega_accounts.get(email);
-
-                                ma = _mega_active_accounts.get(email);
-
-                                if (ma == null) {
-
+                                if ((ma = MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) == null) {
                                     ma = new MegaAPI();
-
-                                    String password_aes, user_hash;
-
-                                    if (getMaster_pass_hash() != null) {
-
-                                        if (getMaster_pass() == null) {
-
-                                            getView().getjTabbedPane1().setSelectedIndex(1);
-
-                                            GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(getView(), true, getMaster_pass_hash(), getMaster_pass_salt());
-
-                                            swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, getView());
-
-                                            swingReflectionInvokeAndWait("setVisible", dialog, true);
-
-                                            if (dialog.isPass_ok()) {
-
-                                                setMaster_pass(dialog.getPass());
-
-                                                dialog.deletePass();
-
-                                                remember_pass = dialog.getRemember_checkbox().isSelected();
-
-                                                dialog.dispose();
-
-                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                            } else {
-
-                                                dialog.dispose();
-
-                                                throw new Exception();
-                                            }
-
-                                        } else {
-
-                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                        }
-
-                                    } else {
-
-                                        password_aes = (String) account_info.get("password_aes");
-
-                                        user_hash = (String) account_info.get("user_hash");
-                                    }
-
-                                    ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash);
-
-                                    _mega_active_accounts.put(email, ma);
-
                                 }
 
                                 Upload upload = new Upload(tthis, ma, (String) o.get("filename"), (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), _use_slots_up, _default_slots_up, false);
@@ -994,11 +861,6 @@ public final class MainPanel {
 
                         getView().getjTabbedPane1().setSelectedIndex(1);
 
-                    }
-
-                    if (!remember_pass) {
-
-                        setMaster_pass(null);
                     }
 
                     swingReflectionInvoke("setText", getView().getStatus_up_label(), "");

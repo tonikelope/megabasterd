@@ -626,7 +626,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         use_mega_account_down_combobox.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
 
         use_mega_label.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
-        use_mega_label.setText("Default account:");
+        use_mega_label.setText("Mega account:");
 
         megacrypter_reverse_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
         megacrypter_reverse_checkbox.setText("Use Megacrypter reverse mode");
