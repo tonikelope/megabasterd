@@ -336,9 +336,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
             String link;
 
-            System.out.println(url_path.substring(url_path.indexOf("/video/") + 7));
-
-            String[] url_parts = new String(MiscTools.UrlBASE642Bin(url_path.substring(url_path.indexOf("/video/") + 7))).split("#");
+            String[] url_parts = new String(MiscTools.UrlBASE642Bin(url_path.substring(url_path.indexOf("/video/") + 7))).split("\\|");
 
             mega_account = url_parts[0];
 
@@ -347,6 +345,8 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
             }
 
             link = new String(url_parts[1]);
+
+            System.out.println(link + " " + mega_account);
 
             HashMap cache_info, file_info;
 

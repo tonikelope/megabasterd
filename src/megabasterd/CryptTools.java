@@ -579,13 +579,13 @@ public final class CryptTools {
                 }
 
                 String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt(MiscTools.BASE642Bin(enc_dlc_key), MiscTools.hex2bin(dlc_master_key))).trim();
-                
+
                 String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt(MiscTools.BASE642Bin(enc_dlc_data), MiscTools.BASE642Bin(dec_dlc_key), MiscTools.BASE642Bin(dec_dlc_key))).trim();
 
                 String dec_dlc_data_file = MiscTools.findFirstRegex("< *file *>(.+)< */ *file *>", new String(MiscTools.BASE642Bin(dec_dlc_data)), 1);
-                
+
                 ArrayList<String> urls = MiscTools.findAllRegex("< *url *>(.+)< */ *url *>", dec_dlc_data_file, 1);
-                
+
                 for (String s : urls) {
 
                     links.add(new String(MiscTools.BASE642Bin(s)));
