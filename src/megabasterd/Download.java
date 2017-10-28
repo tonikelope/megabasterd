@@ -59,6 +59,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public static final boolean USE_SLOTS_DEFAULT = false;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
+    public static final int CHUNK_SIZE_MULTI = 10;
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view = null; //lazy init
@@ -629,7 +630,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         } else {
                             getView().hideAllExceptStatus();
 
-                            exit_message = "OOOPS!! Something (bad) happened but... what?";
+                            exit_message = "OOOPS!! Something (bad) happened but... what? Progress: " + String.valueOf(_progress) + " File size: " + String.valueOf(_file_size);
 
                             getView().printStatusError(exit_message);
 
@@ -1162,7 +1163,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public long calculateMaxTempFileSize(long size) {
         if (size > 3584 * 1024) {
-            long reminder = (size - 3584 * 1024) % (1024 * 1024 * Transference.CHUNK_SIZE_MULTI);
+            long reminder = (size - 3584 * 1024) % (1024 * 1024 * (isUse_slots() ? Download.CHUNK_SIZE_MULTI : 1));
 
             return reminder == 0 ? size : (size - reminder);
         } else {

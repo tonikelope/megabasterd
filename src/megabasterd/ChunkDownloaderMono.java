@@ -28,8 +28,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     public void run() {
         String worker_url = null;
         Chunk chunk;
-        int reads, max_reads, conta_error, http_status = 200;
-        byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
+        int reads, conta_error, http_status = 200;
         boolean error;
         HttpGet httpget = null;
         CloseableHttpResponse httpresponse = null;
@@ -93,7 +92,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         if (!isExit() && !getDownload().isStopped() && is != null) {
 
-                            while (!getDownload().isStopped() && !getDownload().getChunkwriter().isExit() && chunk.getOutputStream().size() < chunk.getSize() && (reads = is.read(buffer, 0, (max_reads = (int) (chunk.getSize() - chunk.getOutputStream().size())) <= buffer.length ? max_reads : buffer.length)) != -1) {
+                            byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
+
+                            while (!getDownload().isStopped() && !getDownload().getChunkwriter().isExit() && chunk.getOutputStream().size() < chunk.getSize() && (reads = is.read(buffer, 0, Math.min((int) (chunk.getSize() - chunk.getOutputStream().size()), buffer.length))) != -1) {
                                 chunk.getOutputStream().write(buffer, 0, reads);
 
                                 getDownload().getPartialProgressQueue().add(reads);

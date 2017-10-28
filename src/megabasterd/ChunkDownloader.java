@@ -93,7 +93,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         String worker_url = null;
         Chunk chunk;
         int reads, conta_error, http_status;
-        byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
         InputStream is;
         boolean error;
 
@@ -110,7 +109,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     worker_url = _download.getDownloadUrlForWorker();
                 }
 
-                chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url, Transference.CHUNK_SIZE_MULTI);
+                chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url, Download.CHUNK_SIZE_MULTI);
 
                 HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
 
@@ -130,6 +129,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             error = true;
 
                         } else {
+
+                            byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
 
                             while (!_exit && !_download.isStopped() && !_download.getChunkwriter().isExit() && chunk.getOutputStream().size() < chunk.getSize() && (reads = is.read(buffer)) != -1) {
 

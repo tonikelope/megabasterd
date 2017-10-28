@@ -381,11 +381,11 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     String[] fdata = new String(data).split("\\|");
 
-                    _last_chunk_id_dispatched = Long.parseLong(fdata[0]);
+                    _progress = Long.parseLong(fdata[0]);
 
-                    _progress = Long.parseLong(fdata[1]);
+                    _last_chunk_id_dispatched = calculateLastUploadedChunk(_progress);
 
-                    _saved_file_mac = bin2i32a(BASE642Bin(fdata[2]));
+                    _saved_file_mac = bin2i32a(BASE642Bin(fdata[1]));
 
                 } else if (temp_file.exists()) {
 
@@ -1042,6 +1042,21 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     @Override
     public boolean isStatusError() {
         return _status_error;
+    }
+
+    public long calculateLastUploadedChunk(long bytes_read) {
+        if (bytes_read > 3584 * 1024) {
+            return 7 + (long) Math.ceil((bytes_read - 3584 * 1024) / (1024 * 1024));
+        } else {
+            int i = 0, tot = 0;
+
+            while (tot < bytes_read) {
+                i++;
+                tot += i * 128 * 1024;
+            }
+
+            return i;
+        }
     }
 
 }

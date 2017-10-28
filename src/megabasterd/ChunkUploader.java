@@ -109,8 +109,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         String worker_url = _upload.getUl_url();
         Chunk chunk;
-        int reads, to_read, conta_error, re, http_status, tot_bytes_up;
-        byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
+        int reads, conta_error, re, http_status, tot_bytes_up;
         boolean error;
         OutputStream out;
 
@@ -119,14 +118,15 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
             conta_error = 0;
 
             while (!_exit && !_upload.isStopped()) {
-                chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url, Transference.CHUNK_SIZE_MULTI);
+                chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url);
 
                 f.seek(chunk.getOffset());
 
-                do {
-                    to_read = chunk.getSize() - chunk.getOutputStream().size() >= buffer.length ? buffer.length : (int) (chunk.getSize() - chunk.getOutputStream().size());
+                byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
 
-                    re = f.read(buffer, 0, to_read);
+                do {
+
+                    re = f.read(buffer, 0, Math.min((int) (chunk.getSize() - chunk.getOutputStream().size()), buffer.length));
 
                     chunk.getOutputStream().write(buffer, 0, re);
 
@@ -164,6 +164,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                             THREAD_POOL.execute(futureTask);
                             out = new ThrottledOutputStream(pipeout, _upload.getMain_panel().getStream_supervisor());
                             System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + _id + "...");
+                            System.out.println(chunk.getUrl());
                             while (!_exit && !_upload.isStopped() && (reads = cis.read(buffer)) != -1) {
                                 out.write(buffer, 0, reads);
 

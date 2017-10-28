@@ -9,13 +9,12 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public interface Transference {
 
     int MIN_WORKERS = 2;
-    int MAX_WORKERS = 20;
+    int MAX_WORKERS = 30;
     int MAX_SIM_TRANSFERENCES = 20;
     int SIM_TRANSFERENCES_DEFAULT = 2;
     boolean LIMIT_TRANSFERENCE_SPEED_DEFAULT = false;
     int MAX_TRANSFERENCE_SPEED_DEFAULT = 5;
     int MAX_WAIT_WORKERS_SHUTDOWN = 15;
-    int CHUNK_SIZE_MULTI = 10;
     Integer[] FATAL_ERROR_API_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16, 22, 23, 24, 25};
 
     void start();

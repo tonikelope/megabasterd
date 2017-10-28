@@ -50,8 +50,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
         String worker_url = getUpload().getUl_url();
         Chunk chunk;
-        int reads, to_read, conta_error, re, http_status, tot_bytes_up = -1;
-        byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
+        int reads, conta_error, re, http_status, tot_bytes_up = -1;
         boolean error = false;
 
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(getUpload().getFile_name(), "r");) {
@@ -63,16 +62,18 @@ public class ChunkUploaderMono extends ChunkUploader {
             FutureTask<CloseableHttpResponse> futureTask = null;
 
             while (!isExit() && !getUpload().isStopped()) {
+
                 CloseableHttpResponse httpresponse = null;
 
                 chunk = new Chunk(getUpload().nextChunkId(), getUpload().getFile_size(), null);
 
                 f.seek(chunk.getOffset());
 
-                do {
-                    to_read = chunk.getSize() - chunk.getOutputStream().size() >= buffer.length ? buffer.length : (int) (chunk.getSize() - chunk.getOutputStream().size());
+                byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
 
-                    re = f.read(buffer, 0, to_read);
+                do {
+
+                    re = f.read(buffer, 0, Math.min((int) (chunk.getSize() - chunk.getOutputStream().size()), buffer.length));
 
                     chunk.getOutputStream().write(buffer, 0, re);
 
