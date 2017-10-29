@@ -7,8 +7,8 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
-import static megabasterd.MiscTools.HashString;
+import java.util.logging.Logger;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -89,7 +89,7 @@ public final class UploadManager extends TransferenceManager {
                     }
 
                 } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
-                    getLogger(UploadManager.class.getName()).log(SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                 }
             }
         }
@@ -97,7 +97,7 @@ public final class UploadManager extends TransferenceManager {
         try {
             DBTools.deleteUploads(delete_up.toArray(new String[delete_up.size()][]));
         } catch (SQLException ex) {
-            getLogger(UploadManager.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
         }
 
         secureNotify();

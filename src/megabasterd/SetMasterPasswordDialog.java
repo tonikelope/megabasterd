@@ -6,10 +6,8 @@ import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.Bin2BASE64;
-import static megabasterd.MiscTools.HashBin;
-import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -214,7 +212,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
                         if (new_pass_textfield.getPassword().length > 0) {
 
-                            _new_pass = CryptTools.PBKDF2HMACSHA256(new String(new_pass_textfield.getPassword()), MiscTools.BASE642Bin(_salt), CryptTools.PBKDF2_ITERATIONS);
+                            _new_pass = CryptTools.PBKDF2HMACSHA256(new String(new_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.PBKDF2_ITERATIONS);
 
                             _new_pass_hash = Bin2BASE64(HashBin("SHA-1", _new_pass));
                         }
@@ -237,7 +235,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(SetMasterPasswordDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });

@@ -26,28 +26,16 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import static megabasterd.CryptTools.genCrypter;
-import static megabasterd.DBTools.deleteDownload;
-import static megabasterd.DBTools.insertDownload;
-import static megabasterd.DBTools.selectSettingValueFromDB;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.UrlBASE642Bin;
-import static megabasterd.MiscTools.bin2i32a;
-import static megabasterd.MiscTools.checkMegaDownloadUrl;
-import static megabasterd.MiscTools.findFirstRegex;
-import static megabasterd.MiscTools.formatBytes;
-import static megabasterd.MiscTools.getWaitTimeExpBackOff;
-import static megabasterd.MiscTools.i32a2bin;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
-import static megabasterd.MiscTools.truncateText;
-import static megabasterd.Transference.MAX_WAIT_WORKERS_SHUTDOWN;
+import static megabasterd.MiscTools.*;
+import static megabasterd.CryptTools.*;
+import static megabasterd.DBTools.*;
+import static megabasterd.MainPanel.*;
+import static megabasterd.Transference.*;
 
 /**
  *
@@ -514,7 +502,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         _thread_pool.shutdown();
 
-                        System.out.println("Chunkdownloaders finished!");
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkdownloaders finished!", Thread.currentThread().getName());
 
                         getProgress_meter().setExit(true);
 
@@ -522,22 +510,22 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         try {
 
-                            System.out.println("Esperando a que todos los hilos terminen...");
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Waiting all threads to finish...", Thread.currentThread().getName());
 
                             _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
                         } catch (InterruptedException ex) {
-                            getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
 
                         if (!_thread_pool.isTerminated()) {
 
-                            System.out.println("Cerrando thread pool a lo mecagüen...");
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Closing thread pool ''mecag\u00fcen'' style...", Thread.currentThread().getName());
 
                             _thread_pool.shutdownNow();
                         }
 
-                        System.out.println("Downloader thread pool finished!");
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Downloader thread pool finished!", Thread.currentThread().getName());
 
                         getMain_panel().getGlobal_dl_speed().detachTransference(this);
 
@@ -697,10 +685,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             _status_error = true;
 
-            System.out.println(ex.getMessage());
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
         } catch (Exception ex) {
-            System.out.println(ex.getMessage());
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         if (!_exit) {
@@ -710,7 +698,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 try {
                     deleteDownload(_url);
                 } catch (SQLException ex) {
-                    getLogger(Download.class.getName()).log(SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                 }
 
             }
@@ -732,7 +720,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
         }
 
-        System.out.println(_file_name + " Downloader: bye bye");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
     }
 
     public void provisionIt(boolean retry) throws MegaAPIException, MegaCrypterAPIException {
@@ -776,7 +764,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     } catch (SQLException ex) {
 
-                        getLogger(Download.class.getName()).log(SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
 
                         exit_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading or megabasterd.db file is corrupted :()";
                     }
@@ -804,7 +792,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             throw ex;
 
-        } catch (Exception ex) {
+        } catch (NumberFormatException ex) {
 
             exit_message = ex.getMessage();
         }
@@ -891,7 +879,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         download_url = _ma.getMegaFileDownloadUrl(_url);
 
                     } else {
-                        download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire, _ma.getSid(), this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
+                        download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
                     }
 
                     if (checkMegaDownloadUrl(download_url)) {
@@ -939,7 +927,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     _thread_pool.execute(c);
 
                 } catch (java.util.concurrent.RejectedExecutionException e) {
-                    System.out.println(e.getMessage());
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, e.getMessage());
                 }
             }
         }
@@ -1111,7 +1099,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             try {
                 deleteDownload(_url);
             } catch (SQLException ex) {
-                getLogger(Download.class.getName()).log(SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
             }
 
             getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
@@ -1129,11 +1117,11 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             if (isRetrying_request()) {
 
-                getView().stop("Retrying cancelled! " + MiscTools.truncateText(_url, 80));
+                getView().stop("Retrying cancelled! " + truncateText(_url, 80));
 
             } else if (isChecking_cbc()) {
 
-                getView().stop("Verification cancelled! " + MiscTools.truncateText(_file_name, 80));
+                getView().stop("Verification cancelled! " + truncateText(_file_name, 80));
 
             } else {
 
@@ -1194,7 +1182,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     file_info = _ma.getMegaFileMetadata(link);
 
                 } else {
-                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
+                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
                 }
 
             } catch (MegaAPIException | MegaCrypterAPIException ex) {
@@ -1207,31 +1195,31 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     switch (error_code) {
 
                         case -2:
-                            emergencyStopDownloader("Mega link is not valid! " + MiscTools.truncateText(link, 80));
+                            emergencyStopDownloader("Mega link is not valid! " + truncateText(link, 80));
                             break;
 
                         case -14:
-                            emergencyStopDownloader("Mega link is not valid! " + MiscTools.truncateText(link, 80));
+                            emergencyStopDownloader("Mega link is not valid! " + truncateText(link, 80));
                             break;
 
                         case 22:
-                            emergencyStopDownloader("MegaCrypter link is not valid! " + MiscTools.truncateText(link, 80));
+                            emergencyStopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
                             break;
 
                         case 23:
-                            emergencyStopDownloader("MegaCrypter link is blocked! " + MiscTools.truncateText(link, 80));
+                            emergencyStopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
                             break;
 
                         case 24:
-                            emergencyStopDownloader("MegaCrypter link has expired! " + MiscTools.truncateText(link, 80));
+                            emergencyStopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
                             break;
 
                         case 25:
-                            emergencyStopDownloader("MegaCrypter link pass error! " + MiscTools.truncateText(link, 80));
+                            emergencyStopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
                             break;
 
                         default:
-                            emergencyStopDownloader("MEGA/MC API FATAL ERROR: " + ex.getMessage() + " " + MiscTools.truncateText(link, 80));
+                            emergencyStopDownloader("MEGA/MC API FATAL ERROR: " + ex.getMessage() + " " + truncateText(link, 80));
                             break;
                     }
 
@@ -1267,7 +1255,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             } catch (Exception ex) {
 
                 if (!(ex instanceof MegaAPIException || ex instanceof MegaCrypterAPIException)) {
-                    emergencyStopDownloader("Mega link is not valid! " + MiscTools.truncateText(link, 80));
+                    emergencyStopDownloader("Mega link is not valid! " + truncateText(link, 80));
                 }
             }
 
@@ -1297,7 +1285,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     dl_url = _ma.getMegaFileDownloadUrl(link);
 
                 } else {
-                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire, _ma.getSid(), this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
+                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
                 }
 
             } catch (MegaAPIException | MegaCrypterAPIException ex) {
@@ -1307,19 +1295,19 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 switch (error_code) {
                     case 22:
-                        emergencyStopDownloader("MegaCrypter link is not valid! " + MiscTools.truncateText(link, 80));
+                        emergencyStopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
                         break;
 
                     case 23:
-                        emergencyStopDownloader("MegaCrypter link is blocked! " + MiscTools.truncateText(link, 80));
+                        emergencyStopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
                         break;
 
                     case 24:
-                        emergencyStopDownloader("MegaCrypter link has expired! " + MiscTools.truncateText(link, 80));
+                        emergencyStopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
                         break;
 
                     case 25:
-                        emergencyStopDownloader("MegaCrypter link pass error! " + MiscTools.truncateText(link, 80));
+                        emergencyStopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
                         break;
 
                     default:
@@ -1394,7 +1382,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    getLogger(Download.class.getName()).log(SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                 }
             }
 

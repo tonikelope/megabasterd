@@ -14,18 +14,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.crypto.Cipher;
-import static megabasterd.MiscTools.Bin2UrlBASE64;
-import static megabasterd.MiscTools.UrlBASE642Bin;
-import static megabasterd.MiscTools.bin2i32a;
-import static megabasterd.MiscTools.cleanFilename;
-import static megabasterd.MiscTools.findFirstRegex;
-import static megabasterd.MiscTools.genID;
-import static megabasterd.MiscTools.genRandomByteArray;
-import static megabasterd.MiscTools.getWaitTimeExpBackOff;
-import static megabasterd.MiscTools.i32a2bin;
-import static megabasterd.MiscTools.mpi2big;
+import static megabasterd.MiscTools.*;
+import static megabasterd.CryptTools.*;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -151,7 +142,7 @@ public final class MegaAPI {
 
             _rsa_priv_key = _extractRSAPrivKey(privk_byte);
 
-            byte[] raw_sid = CryptTools.rsaDecrypt(mpi2big(UrlBASE642Bin(csid)), _rsa_priv_key[0], _rsa_priv_key[1], _rsa_priv_key[2]);
+            byte[] raw_sid = rsaDecrypt(mpi2big(UrlBASE642Bin(csid)), _rsa_priv_key[0], _rsa_priv_key[1], _rsa_priv_key[2]);
 
             _sid = Bin2UrlBASE64(Arrays.copyOfRange(raw_sid, 0, 43));
         }
@@ -163,9 +154,9 @@ public final class MegaAPI {
 
         _email = email;
 
-        _password_aes = CryptTools.MEGAPrepareMasterKey(bin2i32a(password.getBytes()));
+        _password_aes = MEGAPrepareMasterKey(bin2i32a(password.getBytes()));
 
-        _user_hash = CryptTools.MEGAUserHash(email.toLowerCase().getBytes(), _password_aes);
+        _user_hash = MEGAUserHash(email.toLowerCase().getBytes(), _password_aes);
 
         _realLogin();
     }
@@ -220,7 +211,7 @@ public final class MegaAPI {
 
         } catch (Exception ex) {
 
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return quota;
@@ -237,8 +228,6 @@ public final class MegaAPI {
             url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
             String res = _rawRequest(request, url_api);
-
-            System.out.println(res);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -267,7 +256,7 @@ public final class MegaAPI {
             }
 
         } catch (IOException | MegaAPIException ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
     }
@@ -276,7 +265,7 @@ public final class MegaAPI {
 
         String response = null;
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
             int error, conta_error = 0;
 
@@ -296,8 +285,10 @@ public final class MegaAPI {
                     try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
 
                         if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                            System.out.println(request + " " + url_api.toString());
-                            System.out.println("Failed : HTTP error code : " + httpresponse.getStatusLine().getStatusCode());
+
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
+
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), httpresponse.getStatusLine().getStatusCode()});
 
                             if (httpresponse.getStatusLine().getStatusCode() == 509) {
 
@@ -333,7 +324,7 @@ public final class MegaAPI {
                     }
 
                 } catch (IOException | URISyntaxException ex) {
-                    Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
                 if (error != 0) {
@@ -343,12 +334,12 @@ public final class MegaAPI {
                         throw new MegaAPIException(String.valueOf(error));
                     }
 
-                    System.out.println("MegaAPI ERROR " + String.valueOf(error) + " Waiting for retry...");
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(error)});
 
                     try {
                         Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
                 } else {
@@ -435,7 +426,7 @@ public final class MegaAPI {
 
         String[] file_data = null;
 
-        HashMap att_map = _decAttr(at, CryptTools.initMEGALinkKey(file_key));
+        HashMap att_map = _decAttr(at, initMEGALinkKey(file_key));
 
         if (att_map != null) {
 
@@ -463,10 +454,10 @@ public final class MegaAPI {
 
         try {
 
-            ret = CryptTools.aes_cbc_encrypt(new_attr_byte, key, CryptTools.AES_ZERO_IV);
+            ret = aes_cbc_encrypt(new_attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return ret;
@@ -476,11 +467,11 @@ public final class MegaAPI {
 
         HashMap res_map = null;
 
-        byte[] decrypted_at = null;
+        byte[] decrypted_at;
 
         try {
 
-            Cipher decrypter = CryptTools.genDecrypter("AES", "AES/CBC/NoPadding", key, CryptTools.AES_ZERO_IV);
+            Cipher decrypter = genDecrypter("AES", "AES/CBC/NoPadding", key, AES_ZERO_IV);
 
             decrypted_at = decrypter.doFinal(UrlBASE642Bin(encAttr));
 
@@ -491,7 +482,7 @@ public final class MegaAPI {
             res_map = objectMapper.readValue(att, HashMap.class);
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
         }
 
@@ -519,7 +510,7 @@ public final class MegaAPI {
             ul_url = (String) res_map[0].get("p");
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return ul_url;
@@ -544,7 +535,7 @@ public final class MegaAPI {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return res_map[0];
@@ -552,12 +543,12 @@ public final class MegaAPI {
 
     public byte[] encryptKey(byte[] a, byte[] key) throws Exception {
 
-        return CryptTools.aes_ecb_encrypt(a, key);
+        return aes_ecb_encrypt(a, key);
     }
 
     public byte[] decryptKey(byte[] a, byte[] key) throws Exception {
 
-        return CryptTools.aes_ecb_decrypt(a, key);
+        return aes_ecb_decrypt(a, key);
     }
 
     private BigInteger[] _extractRSAPrivKey(byte[] rsa_data) {
@@ -592,14 +583,12 @@ public final class MegaAPI {
 
             String res = _rawRequest(request, url_api);
 
-            System.out.println(res);
-
             ObjectMapper objectMapper = new ObjectMapper();
 
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return res_map[0];
@@ -624,14 +613,12 @@ public final class MegaAPI {
 
             String res = _rawRequest(request, url_api);
 
-            System.out.println(res);
-
             ObjectMapper objectMapper = new ObjectMapper();
 
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return res_map[0];
@@ -654,8 +641,6 @@ public final class MegaAPI {
 
             String res = _rawRequest(request, url_api);
 
-            System.out.println(res);
-
             ObjectMapper objectMapper = new ObjectMapper();
 
             res_map = objectMapper.readValue(res, List.class);
@@ -665,7 +650,7 @@ public final class MegaAPI {
             public_link = "https://mega.nz/#!" + file_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return public_link;
@@ -687,8 +672,6 @@ public final class MegaAPI {
 
             String res = _rawRequest(request, url_api);
 
-            System.out.println(res);
-
             ObjectMapper objectMapper = new ObjectMapper();
 
             res_map = objectMapper.readValue(res, List.class);
@@ -698,7 +681,7 @@ public final class MegaAPI {
             public_link = "https://mega.nz/#F!" + folder_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return public_link;
@@ -719,7 +702,7 @@ public final class MegaAPI {
         return genRandomByteArray(16);
     }
 
-    public void shareFolder(String node, byte[] node_key, byte[] share_key) {
+    public String shareFolder(String node, byte[] node_key, byte[] share_key) {
 
         try {
 
@@ -731,17 +714,15 @@ public final class MegaAPI {
 
             String request = "[{\"a\":\"s2\",\"n\":\"" + node + "\",\"s\":[{\"u\":\"EXP\",\"r\":0}],\"i\":\"" + _req_id + "\",\"ok\":\"" + ok + "\",\"ha\":\"" + ha + "\",\"cr\":[[\"" + node + "\"],[\"" + node + "\"],[0,0,\"" + enc_nk + "\"]]}]";
 
-            System.out.println(request);
-
             URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-            String res = _rawRequest(request, url_api);
-
-            System.out.println(res);
+            return _rawRequest(request, url_api);
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
+
+        return null;
     }
 
     public String cryptoHandleauth(String h) {
@@ -753,7 +734,7 @@ public final class MegaAPI {
             ch = Bin2UrlBASE64(encryptKey((h + h).getBytes(), i32a2bin(getMaster_key())));
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return ch;
@@ -768,8 +749,6 @@ public final class MegaAPI {
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
 
         String res = _rawRequest(request, url_api);
-
-        System.out.println(res);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -838,7 +817,7 @@ public final class MegaAPI {
             }
 
         } catch (Exception ex) {
-            getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return null;

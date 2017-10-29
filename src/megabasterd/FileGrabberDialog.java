@@ -5,8 +5,6 @@ import java.awt.Dialog;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
@@ -14,15 +12,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
-import static megabasterd.MiscTools.deleteSelectedTreeItems;
-import static megabasterd.MiscTools.formatBytes;
-import static megabasterd.MiscTools.genID;
-import static megabasterd.MiscTools.sortTree;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -36,7 +27,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private long _total_space;
     private volatile String _last_selected_account;
     private final MainPanel _main_panel;
-    private boolean _remember_master_pass;
+    private final boolean _remember_master_pass;
 
     public boolean isUpload() {
         return _upload;
@@ -351,8 +342,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             _base_path = files_selected[0].getParentFile().getAbsolutePath();
 
-            System.out.println(_base_path);
-
             dir_name_textfield.setText(files_selected[0].getParentFile().getName() + "_" + genID(10));
 
             dir_name_textfield.setEnabled(true);
@@ -436,8 +425,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             _base_path = filechooser.getSelectedFile().getAbsolutePath();
 
-            System.out.println(_base_path);
-
             dir_name_textfield.setText(filechooser.getSelectedFile().getName() + "_" + genID(10));
 
             dir_name_textfield.setEnabled(true);
@@ -496,7 +483,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         _upload = true;
 
-        this.setVisible(false);
+        setVisible(false);
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void account_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_account_comboboxItemStateChanged
@@ -533,9 +520,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                     MegaAPI ma = null;
                     try {
-                        ma = MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
+                        ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
                     } catch (Exception ex) {
-                        Logger.getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+
                     }
 
                     Long[] quota = null;

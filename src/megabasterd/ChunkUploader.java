@@ -18,11 +18,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.getWaitTimeExpBackOff;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
+import static megabasterd.CryptTools.*;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -79,7 +79,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -99,13 +99,13 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
         return _upload;
     }
 
-    public void setError_wait(boolean _error_wait) {
-        this._error_wait = _error_wait;
+    public void setError_wait(boolean error_wait) {
+        _error_wait = error_wait;
     }
 
     @Override
     public void run() {
-        System.out.println("ChunkUploader " + getId() + " hello! " + getUpload().getFile_name());
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploader {1} hello! {2}", new Object[]{Thread.currentThread().getName(), getId(), getUpload().getFile_name()});
 
         String worker_url = _upload.getUl_url();
         Chunk chunk;
@@ -113,7 +113,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
         boolean error;
         OutputStream out;
 
-        try (final CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");) {
+        try (final CloseableHttpClient httpclient = getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");) {
 
             conta_error = 0;
 
@@ -148,7 +148,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         final FutureTask<CloseableHttpResponse> futureTask;
 
-                        try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())))) {
+                        try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())))) {
 
                             final PipedInputStream pipein = new PipedInputStream();
                             final PipedOutputStream pipeout = new PipedOutputStream(pipein);
@@ -161,10 +161,12 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     return httpclient.execute(httppost);
                                 }
                             });
+
                             THREAD_POOL.execute(futureTask);
                             out = new ThrottledOutputStream(pipeout, _upload.getMain_panel().getStream_supervisor());
-                            System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + _id + "...");
-                            System.out.println(chunk.getUrl());
+
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploading chunk {1} from worker {2}...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
+
                             while (!_exit && !_upload.isStopped() && (reads = cis.read(buffer)) != -1) {
                                 out.write(buffer, 0, reads);
 
@@ -200,7 +202,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                 }
 
                                 if (httpresponse != null && (http_status = httpresponse.getStatusLine().getStatusCode()) != HttpStatus.SC_OK) {
-                                    System.out.println("Failed : HTTP error code : " + http_status);
+                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                                     error = true;
 
@@ -235,13 +237,13 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                                     if (MegaAPI.checkMEGAError(response) != 0) {
 
-                                                        System.out.println("UPLOAD FAILED! (MEGA ERROR: " + MegaAPI.checkMEGAError(response) + ")");
+                                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} UPLOAD FAILED! (MEGA ERROR: {1})", new Object[]{Thread.currentThread().getName(), MegaAPI.checkMEGAError(response)});
 
                                                         error = true;
 
                                                     } else {
 
-                                                        System.out.println("Completion handle -> " + response);
+                                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), response});
 
                                                         _upload.setCompletion_handle(response);
                                                     }
@@ -272,7 +274,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 } else if (!error) {
 
-                                    System.out.println(" Worker " + _id + " ha subido chunk " + chunk.getId());
+                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} has uploaded chunk {2}", new Object[]{Thread.currentThread().getName(), _id, chunk.getId()});
 
                                     _upload.getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
 
@@ -316,10 +318,10 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                         _upload.getProgress_meter().secureNotify();
                     }
 
-                    getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                    getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 } finally {
 
@@ -337,16 +339,16 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
             _upload.emergencyStopUploader(ex.getMessage());
 
-            getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (URISyntaxException ex) {
-            Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         _upload.stopThisSlot(this);
 
         _upload.getMac_generator().secureNotify();
 
-        System.out.println("ChunkUploader " + _id + " bye bye...");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploader {1} bye bye...", new Object[]{Thread.currentThread().getName(), _id});
     }
 
 }

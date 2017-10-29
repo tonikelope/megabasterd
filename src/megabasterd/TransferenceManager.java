@@ -6,11 +6,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 import javax.swing.JPanel;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -121,8 +120,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         }
     }
 
-    public void setMax_running_trans(int _max_running_trans) {
-        this._max_running_trans = _max_running_trans;
+    public void setMax_running_trans(int max_running_trans) {
+        _max_running_trans = max_running_trans;
     }
 
     @Override
@@ -144,7 +143,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 

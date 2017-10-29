@@ -14,18 +14,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.Bin2BASE64;
-import static megabasterd.MiscTools.HashString;
-import static megabasterd.MiscTools.bin2i32a;
-import static megabasterd.MiscTools.formatBytes;
-import static megabasterd.MiscTools.i32a2bin;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
-import static megabasterd.MiscTools.truncateText;
+import java.util.logging.Logger;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -340,7 +331,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -413,7 +404,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 }
 
             } catch (Exception ex) {
-                getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -578,12 +569,12 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 try {
 
-                    System.out.println("Lanzando chunkuploader desde startslot()...");
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Starting chunkuploader from startslot()...", Thread.currentThread().getName());
 
                     _thread_pool.execute(c);
 
                 } catch (java.util.concurrent.RejectedExecutionException e) {
-                    System.out.println(e.getMessage());
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, e.getMessage());
                 }
 
             }
@@ -640,7 +631,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     @Override
     public void run() {
 
-        System.out.println("Uploader hello!");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader hello!", Thread.currentThread().getName());
 
         swingReflectionInvoke("setVisible", getView().getClose_button(), false);
 
@@ -655,7 +646,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     DBTools.updateUploadUrl(_file_name, _ma.getEmail(), _ul_url);
                 } catch (SQLException ex) {
-                    getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -699,7 +690,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                             _chunkworkers.add(c);
 
-                            System.out.println("Lanzando chunkuploader" + t + " ...");
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Starting chunkuploader{1} ...", new Object[]{Thread.currentThread().getName(), t});
 
                             _thread_pool.execute(c);
                         }
@@ -736,11 +727,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 secureWait();
 
-                System.out.println("Uploader llamando a shutdown del pool...");
-
                 _thread_pool.shutdown();
 
-                System.out.println("Chunkuploaders finished!");
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkuploaders finished!", Thread.currentThread().getName());
 
                 getProgress_meter().setExit(true);
 
@@ -748,22 +737,22 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 try {
 
-                    System.out.println("Esperando a que todos los hilos terminen...");
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0}Waiting for all threads to finish...", Thread.currentThread().getName());
 
                     _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
                 } catch (InterruptedException ex) {
-                    getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
                 if (!_thread_pool.isTerminated()) {
 
-                    System.out.println("Cerrando thread pool a lo mecagüen...");
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Closing thread pool in ''mecag\u00fcen'' style...", Thread.currentThread().getName());
 
                     _thread_pool.shutdownNow();
                 }
 
-                System.out.println("Uploader thread pool finished!");
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader thread pool finished!", Thread.currentThread().getName());
 
                 getMain_panel().getGlobal_up_speed().detachTransference(this);
 
@@ -787,8 +776,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handle, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
 
-                        System.out.println(upload_res);
-
                         List files = (List) upload_res.get("f");
 
                         _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
@@ -802,7 +789,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                             swingReflectionInvoke("setEnabled", getView().getFile_link_button(), true);
 
                         } catch (Exception ex) {
-                            getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
 
                         printStatusOK(_exit_message);
@@ -879,7 +866,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 try {
                     DBTools.deleteUpload(_file_name, _ma.getEmail());
                 } catch (SQLException ex) {
-                    getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
             }
@@ -901,7 +888,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
         }
 
-        System.out.println("Uploader BYE BYE");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader BYE BYE", Thread.currentThread().getName());
     }
 
     public void pause_worker() {
@@ -988,7 +975,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             try {
                 DBTools.deleteUpload(_file_name, _ma.getEmail());
             } catch (SQLException ex) {
-                getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
 
             getMain_panel().getUpload_manager().getTransference_running_list().remove(this);

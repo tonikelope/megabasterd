@@ -2,13 +2,13 @@ package megabasterd;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.ConcurrentHashMap;
 import java.io.PipedOutputStream;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -54,7 +54,7 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
 
     public String getUrl() throws IOException, InterruptedException {
 
-        if (!MiscTools.checkMegaDownloadUrl(_url)) {
+        if (!checkMegaDownloadUrl(_url)) {
 
             _url = _server.getMegaFileDownloadUrl(_link, (String) _file_info.get("pass_hash"), (String) _file_info.get("noexpiretoken"), _mega_account);
             _file_info.put("url", _url);
@@ -77,7 +77,7 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
 
         try {
 
-            System.out.println("StreamChunkWriter: let's do some work! Start: " + _start_offset + "   End: " + _end_offset);
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter: let''s do some work! Start: {1}   End: {2}", new Object[]{Thread.currentThread().getName(), _start_offset, _end_offset});
 
             while (!_exit && _bytes_written < _end_offset) {
 
@@ -102,13 +102,13 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
 
                     secureNotifyAll();
 
-                    System.out.println(Thread.currentThread().getName() + " StreamChunkWriter ha escrito " + (_bytes_written) + " / " + _end_offset + " ...");
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter ha escrito {1} / {2} ...", new Object[]{Thread.currentThread().getName(), _bytes_written, _end_offset});
 
                 }
 
                 if (!_exit && _bytes_written < _end_offset) {
 
-                    System.out.println(Thread.currentThread().getName() + " StreamChunkWriter waiting for offset " + _bytes_written + "...");
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter waiting for offset {1}...", new Object[]{Thread.currentThread().getName(), _bytes_written});
 
                     secureWait();
                 }
@@ -116,20 +116,20 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
 
         } catch (Exception ex) {
 
-            System.out.println(ex.getMessage());
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         try {
             _pipeos.close();
         } catch (IOException ex) {
-            Logger.getLogger(StreamChunkWriter.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         _exit = true;
 
         secureNotifyAll();
 
-        System.out.println(Thread.currentThread().getName() + " StreamChunkWriter: bye bye");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter: bye bye", Thread.currentThread().getName());
     }
 
     public long nextOffset() {
@@ -149,8 +149,8 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
         return offset <= _end_offset ? (Math.min(CHUNK_SIZE, _end_offset - offset + 1)) : -1;
     }
 
-    public void setExit(boolean _exit) {
-        this._exit = _exit;
+    public void setExit(boolean exit) {
+        _exit = exit;
     }
 
     @Override
@@ -170,7 +170,7 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 

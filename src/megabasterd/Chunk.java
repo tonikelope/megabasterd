@@ -17,10 +17,6 @@ public final class Chunk {
     private final String _url;
     private final int _size_multi;
 
-    public int getSize_multi() {
-        return _size_multi;
-    }
-
     public Chunk(long id, long file_size, String file_url) throws ChunkInvalidException {
         _size_multi = 1;
 
@@ -73,6 +69,10 @@ public final class Chunk {
         _url = file_url != null ? file_url + "/" + _offset + "-" + (_offset + _size - 1) : null;
 
         _data_os = new ByteArrayOutputStream((int) _size);
+    }
+
+    public int getSize_multi() {
+        return _size_multi;
     }
 
     public long getOffset() {

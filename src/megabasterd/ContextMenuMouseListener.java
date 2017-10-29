@@ -90,7 +90,7 @@ public final class ContextMenuMouseListener extends MouseAdapter {
     public void mouseClicked(MouseEvent e) {
         if (e.getModifiers() == InputEvent.BUTTON3_MASK) {
             if (!(e.getSource() instanceof JTextComponent)) {
-                System.out.println(e.getSource().getClass());
+
                 return;
             }
 

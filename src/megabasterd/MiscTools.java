@@ -44,7 +44,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.swing.JTree;
@@ -83,7 +82,7 @@ public final class MiscTools {
     public static final int EXP_BACKOFF_BASE = 2;
     public static final int EXP_BACKOFF_SECS_RETRY = 1;
     public static final int EXP_BACKOFF_MAX_WAIT_TIME = 64;
-    public static final Object _password_lock = new Object();
+    public static final Object PASS_LOCK = new Object();
 
     private static final ConcurrentHashMap<String, Method> REFLECTION_METHOD_CACHE = new ConcurrentHashMap<>();
 
@@ -117,7 +116,7 @@ public final class MiscTools {
             ge.registerFont(font);
 
         } catch (FontFormatException | IOException ex) {
-            getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return font;
@@ -396,9 +395,9 @@ public final class MiscTools {
 
                     } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
 
-                        getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
 
-                        System.out.println("REFLECTION METHOD NOT FOUND -> " + method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length));
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} REFLECTION METHOD NOT FOUND -> {1}#{2}#{3}", new Object[]{Thread.currentThread().getName(), method_name, obj.getClass().toString(), String.valueOf(params.length)});
                     }
 
                 }
@@ -478,9 +477,9 @@ public final class MiscTools {
                         }
 
                     } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
-                        getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
 
-                        System.out.println("REFLECTION METHOD NOT FOUND -> " + method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length));
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} REFLECTION METHOD NOT FOUND -> {1}#{2}#{3}", new Object[]{Thread.currentThread().getName(), method_name, obj.getClass().toString(), String.valueOf(params.length)});
                     }
 
                 }
@@ -507,7 +506,7 @@ public final class MiscTools {
                     SwingUtilities.invokeAndWait(r);
 
                 } catch (InterruptedException | InvocationTargetException ex) {
-                    getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -525,7 +524,7 @@ public final class MiscTools {
             try {
                 ret = c.call();
             } catch (Exception ex) {
-                getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
 
         } else {
@@ -537,7 +536,7 @@ public final class MiscTools {
             try {
                 ret = futureTask.get();
             } catch (InterruptedException | ExecutionException ex) {
-                getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -567,7 +566,7 @@ public final class MiscTools {
 
         String response = null;
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
             HttpGet httpget = new HttpGet(new URI("http://tinyurl.com/api-create.php?url=" + URLEncoder.encode(link.trim(), "UTF-8")));
 
@@ -750,7 +749,7 @@ public final class MiscTools {
                 ((MutableTreeNode) new_root).setUserObject(((DefaultMutableTreeNode) tree_model.getRoot()).getUserObject());
 
             } catch (InstantiationException | IllegalAccessException ex) {
-                getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             for (TreePath path : paths) {
@@ -779,7 +778,7 @@ public final class MiscTools {
                                         ((MutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
 
                                     } catch (InstantiationException | IllegalAccessException ex) {
-                                        getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                                     }
                                 }
 
@@ -920,7 +919,7 @@ public final class MiscTools {
 
         boolean url_ok = false;
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
             HttpGet httpget = new HttpGet(new URI(string_url + "/0-0"));
 
@@ -932,14 +931,11 @@ public final class MiscTools {
         } catch (MalformedURLException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException | URISyntaxException ex) {
-            System.out.println(ex.getMessage());
+
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return url_ok;
-    }
-
-    private MiscTools() {
     }
 
     public static String checkNewVersion(String folder_node, String folder_key) {
@@ -957,7 +953,7 @@ public final class MiscTools {
 
                     HashMap<String, Object> current_node = (HashMap<String, Object>) o;
 
-                    new_version = MiscTools.findFirstRegex("([0-9\\.]+)\\.run", (String) current_node.get("name"), 1);
+                    new_version = findFirstRegex("([0-9\\.]+)\\.run", (String) current_node.get("name"), 1);
 
                     if (new_version != null && Double.parseDouble(new_version) > Double.parseDouble(VERSION)) {
 
@@ -971,7 +967,7 @@ public final class MiscTools {
             }
 
         } catch (Exception ex) {
-            getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
 
         return new_version;
@@ -1072,7 +1068,7 @@ public final class MiscTools {
 
         cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
 
-        cmd.append(MainPanel.class.getName()).append(" ");
+        cmd.append(MiscTools.class.getName()).append(" ");
 
         cmd.append(String.valueOf(delay));
 
@@ -1098,7 +1094,7 @@ public final class MiscTools {
             ma = new MegaAPI();
 
             String password_aes, user_hash;
-            synchronized (_password_lock) {
+            synchronized (PASS_LOCK) {
 
                 if (main_panel.getMaster_pass_hash() != null) {
 
@@ -1160,6 +1156,9 @@ public final class MiscTools {
 
         return ma;
 
+    }
+
+    private MiscTools() {
     }
 
 }

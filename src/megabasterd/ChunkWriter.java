@@ -1,10 +1,16 @@
 package megabasterd;
 
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
+import javax.crypto.NoSuchPaddingException;
+import static megabasterd.CryptTools.*;
 
 public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable {
 
@@ -26,8 +32,8 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
         _download = downloader;
         _secure_notify_lock = new Object();
         _file_size = _download.getFile_size();
-        _byte_file_key = CryptTools.initMEGALinkKey(_download.getFile_key());
-        _byte_iv = CryptTools.initMEGALinkKeyIV(_download.getFile_key());
+        _byte_file_key = initMEGALinkKey(_download.getFile_key());
+        _byte_iv = initMEGALinkKeyIV(_download.getFile_key());
         _chunk_queue = new ConcurrentHashMap();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
 
@@ -66,7 +72,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    getLogger(ChunkWriter.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -106,17 +112,19 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
 
         try {
 
-            System.out.println("Filewriter: let's do some work!");
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter: let''s do some work!", Thread.currentThread().getName());
 
             if (_file_size > 0) {
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
                     while (_chunk_queue.containsKey(_last_chunk_id_written + 1)) {
                         current_chunk = _chunk_queue.get(_last_chunk_id_written + 1);
 
-                        try (CipherInputStream cis = new CipherInputStream(current_chunk.getInputStream(), CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, CryptTools.forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
+                        try (CipherInputStream cis = new CipherInputStream(current_chunk.getInputStream(), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
                             while ((reads = cis.read(buffer)) != -1) {
                                 _download.getOutput_stream().write(buffer, 0, reads);
                             }
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
+                            Logger.getLogger(ChunkWriter.class.getName()).log(Level.SEVERE, null, ex);
                         }
 
                         _bytes_written += current_chunk.getSize();
@@ -129,17 +137,16 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
 
                     if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                        System.out.println("Filewriter waiting for chunk [" + (_last_chunk_id_written + 1) + "]...");
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter waiting for chunk [{1}{2}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, 1});
 
                         secureWait();
                     }
                 }
             }
 
-        } catch (Exception ex) {
+        } catch (IOException ex) {
 
-            System.out.println(ex.getMessage());
-
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             _download.emergencyStopDownloader(ex.getMessage());
         }
 
@@ -147,7 +154,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
 
         _download.secureNotify();
 
-        System.out.println("Filewriter: bye bye" + _download.getFile().getName());
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile().getName()});
     }
 
     private long calculateLastWrittenChunk(long temp_file_size) {

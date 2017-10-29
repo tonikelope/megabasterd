@@ -30,17 +30,7 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JOptionPane;
-import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.Bin2UrlBASE64;
-import static megabasterd.MiscTools.UrlBASE642Bin;
-import static megabasterd.MiscTools.bin2i32a;
-import static megabasterd.MiscTools.findFirstRegex;
-import static megabasterd.MiscTools.getApacheKissHttpClient;
-import static megabasterd.MiscTools.hex2bin;
-import static megabasterd.MiscTools.i32a2bin;
-import static megabasterd.MiscTools.long2bytearray;
-import static megabasterd.MiscTools.recReverseArray;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
+import static megabasterd.MiscTools.*;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -480,7 +470,7 @@ public final class CryptTools {
 
                                 dec_pass = (String) res_map.get("d");
 
-                                byte[] pass_dec_byte = MiscTools.BASE642Bin(dec_pass);
+                                byte[] pass_dec_byte = BASE642Bin(dec_pass);
 
                                 byte[] key = Arrays.copyOfRange(pass_dec_byte, 0, 16);
 
@@ -508,7 +498,7 @@ public final class CryptTools {
                 }
 
             } catch (Exception ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "ELC ERROR", JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -575,20 +565,20 @@ public final class CryptTools {
 
                         out.write(buffer, 0, reads);
                     }
-                    enc_dlc_key = MiscTools.findFirstRegex("< *rc *>(.+)< */ *rc *>", new String(out.toByteArray()), 1);
+                    enc_dlc_key = findFirstRegex("< *rc *>(.+)< */ *rc *>", new String(out.toByteArray()), 1);
                 }
 
-                String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt(MiscTools.BASE642Bin(enc_dlc_key), MiscTools.hex2bin(dlc_master_key))).trim();
+                String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key))).trim();
 
-                String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt(MiscTools.BASE642Bin(enc_dlc_data), MiscTools.BASE642Bin(dec_dlc_key), MiscTools.BASE642Bin(dec_dlc_key))).trim();
+                String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key))).trim();
 
-                String dec_dlc_data_file = MiscTools.findFirstRegex("< *file *>(.+)< */ *file *>", new String(MiscTools.BASE642Bin(dec_dlc_data)), 1);
+                String dec_dlc_data_file = findFirstRegex("< *file *>(.+)< */ *file *>", new String(BASE642Bin(dec_dlc_data)), 1);
 
-                ArrayList<String> urls = MiscTools.findAllRegex("< *url *>(.+)< */ *url *>", dec_dlc_data_file, 1);
+                ArrayList<String> urls = findAllRegex("< *url *>(.+)< */ *url *>", dec_dlc_data_file, 1);
 
                 for (String s : urls) {
 
-                    links.add(new String(MiscTools.BASE642Bin(s)));
+                    links.add(new String(BASE642Bin(s)));
                 }
             }
         } catch (Exception ex) {

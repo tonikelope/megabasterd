@@ -15,7 +15,6 @@ import java.util.UUID;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
@@ -25,17 +24,10 @@ import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import static megabasterd.CryptTools.decryptMegaDownloaderLink;
-import static megabasterd.DBTools.deleteELCAccount;
-import static megabasterd.DBTools.deleteMegaAccount;
-import static megabasterd.MainPanel.ICON_FILE_MED;
-import static megabasterd.MainPanel.VERSION;
-import static megabasterd.MiscTools.findAllRegex;
-import static megabasterd.MiscTools.findFirstRegex;
-import static megabasterd.MiscTools.genID;
-import static megabasterd.MiscTools.i32a2bin;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
+import static megabasterd.CryptTools.*;
+import static megabasterd.DBTools.*;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 public final class MainPanelView extends javax.swing.JFrame {
 
@@ -519,7 +511,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                             urls.add(decryptMegaDownloaderLink(link));
 
                         } catch (Exception ex) {
-                            getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                         }
                     }
 
@@ -532,7 +524,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                             urls.addAll(CryptTools.decryptELC(link, getMain_panel()));
 
                         } catch (Exception ex) {
-                            getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                         }
                     }
 
@@ -544,7 +536,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         for (String link : links) {
 
-                            if (MiscTools.findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) != null) {
+                            if (findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) != null) {
 
                                 urls.add(link);
                             }
@@ -640,7 +632,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 try {
                     deleteMegaAccount(email);
                 } catch (SQLException ex) {
-                    getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                 }
 
                 _main_panel.getMega_accounts().remove(email);
@@ -653,7 +645,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 try {
                     deleteELCAccount(host);
                 } catch (SQLException ex) {
-                    getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                 }
 
                 _main_panel.getElc_accounts().remove(host);
@@ -699,7 +691,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             if (_main_panel.isRestart()) {
 
-                MiscTools.restartApplication(1);
+                restartApplication(1);
             }
 
             if (_main_panel.isMegacrypter_reverse()) {
@@ -718,7 +710,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                         _main_panel.getMega_proxy_server().start();
 
                     } catch (IOException ex) {
-                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 }
 
@@ -729,7 +721,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     try {
                         _main_panel.getMega_proxy_server().stopServer();
                     } catch (IOException ex) {
-                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 }
 
@@ -846,7 +838,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
-                            System.out.println("Dir " + parent_node + " created");
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Dir {1} created", new Object[]{Thread.currentThread().getName(), parent_node});
 
                             ma.shareFolder(parent_node, parent_key, share_key);
 
@@ -860,8 +852,6 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
 
                                     String[] dirs = file_path.split("/");
-
-                                    System.out.println(file_path);
 
                                     MegaDirNode current_node = file_paths;
 
@@ -903,7 +893,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         } catch (Exception ex) {
 
-                            getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                         }
                     }
 

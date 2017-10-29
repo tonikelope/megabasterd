@@ -20,16 +20,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.crypto.CipherInputStream;
-import static megabasterd.MainPanel.STREAMER_PORT;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.checkMegaDownloadUrl;
-import static megabasterd.MiscTools.findFirstRegex;
-import static megabasterd.MiscTools.getWaitTimeExpBackOff;
-import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -93,7 +88,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    getLogger(Download.class.getName()).log(SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                 }
             }
 
@@ -179,7 +174,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 } else {
 
-                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
+                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
 
                 }
 
@@ -238,7 +233,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 MegaAPI ma = null;
 
-                if (mega_account == null || (ma = MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, _main_panel.getView(), mega_account)) == null) {
+                if (mega_account == null || (ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, _main_panel.getView(), mega_account)) == null) {
 
                     ma = new MegaAPI();
                 }
@@ -247,7 +242,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                     dl_url = ma.getMegaFileDownloadUrl(link);
 
                 } else {
-                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, ma.getSid(), this.getMain_panel().getMega_proxy_server() != null ? (this.getMain_panel().getMega_proxy_server().getPort() + ":" + MiscTools.Bin2BASE64(("megacrypter:" + this.getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
+                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
                 }
             } catch (MegaAPIException | MegaCrypterAPIException e) {
                 error = true;
@@ -277,7 +272,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                         }
                 }
             } catch (Exception ex) {
-                Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
 
         } while (error);
@@ -286,7 +281,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
     }
 
     private long[] parseRangeHeader(String header) {
-        System.out.println(header);
+
         Pattern pattern = Pattern.compile("bytes *\\= *([0-9]+) *\\- *([0-9]+)?");
 
         Matcher matcher = pattern.matcher(header);
@@ -324,7 +319,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         HttpGet httpget;
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
             Headers reqheaders = xchg.getRequestHeaders();
 
@@ -336,7 +331,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
             String link;
 
-            String[] url_parts = new String(MiscTools.UrlBASE642Bin(url_path.substring(url_path.indexOf("/video/") + 7))).split("\\|");
+            String[] url_parts = new String(UrlBASE642Bin(url_path.substring(url_path.indexOf("/video/") + 7))).split("\\|");
 
             mega_account = url_parts[0];
 
@@ -344,9 +339,9 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                 mega_account = null;
             }
 
-            link = new String(url_parts[1]);
+            link = url_parts[1];
 
-            System.out.println(link + " " + mega_account);
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), link, mega_account});
 
             HashMap cache_info, file_info;
 
@@ -521,11 +516,11 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         } catch (Exception ex) {
 
             if (!(ex instanceof IOException)) {
-                Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
 
         } finally {
-            System.out.println("KissVideoStreamerHandle: bye bye");
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} KissVideoStreamerHandle: bye bye", Thread.currentThread().getName());
 
             xchg.close();
 

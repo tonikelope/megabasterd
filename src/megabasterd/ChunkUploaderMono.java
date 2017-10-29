@@ -23,11 +23,11 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.getWaitTimeExpBackOff;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
+import static megabasterd.CryptTools.*;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -46,14 +46,14 @@ public class ChunkUploaderMono extends ChunkUploader {
 
     @Override
     public void run() {
-        System.out.println("ChunkUploaderMONO " + getId() + " hello! " + getUpload().getFile_name());
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploaderMONO {1} hello! {2}", new Object[]{Thread.currentThread().getName(), getId(), getUpload().getFile_name()});
 
         String worker_url = getUpload().getUl_url();
         Chunk chunk;
         int reads, conta_error, re, http_status, tot_bytes_up = -1;
         boolean error = false;
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(getUpload().getFile_name(), "r");) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(getUpload().getFile_name(), "r");) {
 
             conta_error = 0;
 
@@ -113,9 +113,9 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     if (!isExit() && !getUpload().isStopped()) {
 
-                        try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), CryptTools.genCrypter("AES", "AES/CTR/NoPadding", getUpload().getByte_file_key(), CryptTools.forwardMEGALinkKeyIV(getUpload().getByte_file_iv(), chunk.getOffset())))) {
+                        try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), genCrypter("AES", "AES/CTR/NoPadding", getUpload().getByte_file_key(), forwardMEGALinkKeyIV(getUpload().getByte_file_iv(), chunk.getOffset())))) {
 
-                            System.out.println(" Subiendo chunk " + chunk.getId() + " desde worker " + getId() + "...");
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploading chunk {1} from worker {2}...", new Object[]{Thread.currentThread().getName(), chunk.getId(), getId()});
 
                             while (!isExit() && !getUpload().isStopped() && (reads = cis.read(buffer)) != -1 && out != null) {
                                 out.write(buffer, 0, reads);
@@ -165,9 +165,9 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                             } else if (!error) {
 
-                                System.out.println(" Worker " + getId() + " ha subido chunk " + chunk.getId());
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} has uploaded chunk {2}", new Object[]{Thread.currentThread().getName(), getId(), chunk.getId()});
 
-                                System.out.println(chunk.getOffset() + " " + tot_bytes_up + " " + getUpload().getFile_size());
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1} {2}", new Object[]{chunk.getOffset(), tot_bytes_up, getUpload().getFile_size()});
 
                                 if (chunk.getOffset() + tot_bytes_up < getUpload().getFile_size()) {
 
@@ -198,10 +198,10 @@ public class ChunkUploaderMono extends ChunkUploader {
                         getUpload().getProgress_meter().secureNotify();
                     }
 
-                    getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | InterruptedException ex) {
-                    getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 }
 
@@ -236,7 +236,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                                     } else {
 
-                                        System.out.println("Completion handle -> " + response);
+                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), response});
 
                                         getUpload().setCompletion_handle(response);
 
@@ -294,17 +294,17 @@ public class ChunkUploaderMono extends ChunkUploader {
 
             getUpload().emergencyStopUploader(ex.getMessage());
 
-            getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
         } catch (URISyntaxException ex) {
-            Logger.getLogger(ChunkUploaderMono.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         getUpload().stopThisSlot(this);
 
         getUpload().getMac_generator().secureNotify();
 
-        System.out.println("ChunkUploaderMONO " + getId() + " bye bye...");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploaderMONO {1} bye bye...", new Object[]{Thread.currentThread().getName(), getId()});
     }
 
 }

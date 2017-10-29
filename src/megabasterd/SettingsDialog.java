@@ -8,13 +8,13 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -25,15 +25,9 @@ import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.table.DefaultTableModel;
-import static megabasterd.DBTools.insertSettingValueInDB;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.Bin2BASE64;
-import static megabasterd.MiscTools.i32a2bin;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
-import static megabasterd.MiscTools.truncateText;
+import static megabasterd.DBTools.*;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 public final class SettingsDialog extends javax.swing.JDialog {
 
@@ -49,11 +43,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
     }
 
     public Set<String> getDeleted_mega_accounts() {
-        return _deleted_mega_accounts;
+        return Collections.unmodifiableSet(_deleted_mega_accounts);
     }
 
     public Set<String> getDeleted_elc_accounts() {
-        return _deleted_elc_accounts;
+        return Collections.unmodifiableSet(_deleted_elc_accounts);
     }
 
     public boolean isRemember_master_pass() {
@@ -321,9 +315,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                     } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     } catch (Exception ex) {
-                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
                     String[] new_row_data = {(String) pair.getKey(), pass};
@@ -344,9 +338,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                     } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     } catch (Exception ex) {
-                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
                     String[] new_row_data = {(String) pair.getKey(), user, apikey};
@@ -1238,7 +1232,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     private void cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_buttonActionPerformed
 
-        this.setVisible(false);
+        setVisible(false);
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
     private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
@@ -1380,7 +1374,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                     apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(apikey), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                 } catch (Exception ex) {
-                                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                                 }
                             }
 
@@ -1462,7 +1456,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                             password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(MiscTools.UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
                                         }
 
                                         DBTools.insertMegaAccount(email, password, password_aes, user_hash);
@@ -1470,7 +1464,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                     } catch (Exception ex) {
 
                                         email_error.add(email);
-                                        getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                                     }
 
                                 } else {
@@ -1486,7 +1480,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                             password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(password), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                         } catch (Exception ex) {
-                                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                                         }
                                     }
 
@@ -1509,7 +1503,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                                 password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(MiscTools.UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
                                             }
 
                                             DBTools.insertMegaAccount(email, password, password_aes, user_hash);
@@ -1517,7 +1511,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         } catch (Exception ex) {
 
                                             email_error.add(email);
-                                            getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                                         }
                                     }
@@ -1561,15 +1555,15 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             } else {
 
-                this.setVisible(false);
+                setVisible(false);
             }
 
         } catch (SQLException ex) {
-            getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_ok_buttonActionPerformed
 
@@ -1763,7 +1757,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         }
 
                     } catch (Exception ex) {
-                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
                 }
@@ -1838,9 +1832,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         } catch (Exception ex) {
-                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
 
                         String[] new_row_data = {(String) pair.getKey(), pass};
@@ -1861,9 +1855,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         } catch (Exception ex) {
-                            Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
 
                         String[] new_row_data = {(String) pair.getKey(), user, apikey};
@@ -1930,7 +1924,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     try {
                         DBTools.deleteMegaAccount((String) pair.getKey());
                     } catch (SQLException ex) {
-                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 }
 
@@ -1939,7 +1933,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     try {
                         DBTools.deleteELCAccount((String) pair.getKey());
                     } catch (SQLException ex) {
-                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 }
 
@@ -1958,7 +1952,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 _main_panel.getElc_accounts().clear();
 
             } catch (SQLException ex) {
-                Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
 

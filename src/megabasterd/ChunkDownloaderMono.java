@@ -6,9 +6,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
-import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
-import static megabasterd.MiscTools.getWaitTimeExpBackOff;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -33,9 +32,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         HttpGet httpget = null;
         CloseableHttpResponse httpresponse = null;
 
-        System.out.println("Worker [" + getId() + "]: let's do some work!");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), getId()});
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
             conta_error = 0;
 
             error = false;
@@ -69,7 +68,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                 if (http_status != HttpStatus.SC_OK) {
 
-                    System.out.println("Failed : HTTP error code : " + http_status);
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                     error = true;
 
@@ -159,10 +158,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             getDownload().getProgress_meter().secureNotify();
                         }
 
-                        getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                     } catch (InterruptedException ex) {
-                        getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 }
             }
@@ -171,21 +170,19 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         } catch (IOException ex) {
 
-            getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
             getDownload().emergencyStopDownloader(ex.getMessage());
 
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (URISyntaxException | InterruptedException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         getDownload().stopThisSlot(this);
 
         getDownload().getChunkwriter().secureNotify();
 
-        System.out.println("Worker [" + getId() + "]: bye bye");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), getId()});
 
     }
 }

@@ -7,7 +7,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 
 /**
  *
@@ -98,7 +97,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -173,7 +172,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
                 try {
                     _timer_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(StreamThrottlerSupervisor.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }

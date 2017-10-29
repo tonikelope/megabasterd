@@ -11,9 +11,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 public final class DownloadView extends javax.swing.JPanel implements TransferenceView {
 
@@ -230,7 +229,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
+        setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -327,7 +326,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
     private void copy_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_link_buttonActionPerformed
 
-        MiscTools.copyTextToClipboard(_download.getUrl());
+        copyTextToClipboard(_download.getUrl());
 
         JOptionPane.showMessageDialog(_download.getMain_panel().getView(), "Link was copied to clipboard!");
     }//GEN-LAST:event_copy_link_buttonActionPerformed

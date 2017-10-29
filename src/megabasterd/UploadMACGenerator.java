@@ -6,16 +6,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import static megabasterd.CryptTools.genCrypter;
-import static megabasterd.MiscTools.Bin2BASE64;
-import static megabasterd.MiscTools.HashString;
-import static megabasterd.MiscTools.bin2i32a;
-import static megabasterd.MiscTools.i32a2bin;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
+import static megabasterd.CryptTools.*;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -61,7 +57,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -157,7 +153,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                         file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
 
                     } catch (IOException | IllegalBlockSizeException | BadPaddingException ex) {
-                        getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
                     _bytes_read += chunk.getSize();
@@ -173,7 +169,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                     temp_file_data = (String.valueOf(_bytes_read) + "|" + Bin2BASE64(i32a2bin(file_mac)));
 
-                    System.out.println("Macgenerator -> " + temp_file_data + " " + _upload.calculateLastUploadedChunk(_bytes_read) + " " + _last_chunk_id_read);
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Macgenerator -> {1} {2} {3}", new Object[]{Thread.currentThread().getName(), temp_file_data, _upload.calculateLastUploadedChunk(_bytes_read), _last_chunk_id_read});
 
                     temp_file_out = new FileOutputStream(temp_file);
 
@@ -185,7 +181,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                 }
 
                 if (!_exit && (!_upload.isStopped() || !_upload.getChunkworkers().isEmpty()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1))) {
-                    System.out.println(_bytes_read + "/" + _upload.getFile_size() + " METAMAC wait...");
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1}/{2} METAMAC wait...", new Object[]{Thread.currentThread().getName(), _bytes_read, _upload.getFile_size()});
                     secureWait();
                 }
             }
@@ -201,10 +197,10 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
             _upload.secureNotify();
 
-            System.out.println("MAC GENERATOR BYE BYE...");
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} MAC GENERATOR BYE BYE...", Thread.currentThread().getName());
 
         } catch (Exception ex) {
-            getLogger(UploadMACGenerator.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
     }

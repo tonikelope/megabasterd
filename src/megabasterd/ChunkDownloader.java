@@ -6,9 +6,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
-import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
-import static megabasterd.MiscTools.getWaitTimeExpBackOff;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -80,7 +79,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -96,9 +95,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         InputStream is;
         boolean error;
 
-        System.out.println("Worker [" + _id + "]: let's do some work!");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
             conta_error = 0;
 
             error = false;
@@ -124,7 +123,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         http_status = httpresponse.getStatusLine().getStatusCode();
 
                         if (http_status != HttpStatus.SC_OK) {
-                            System.out.println("Failed : HTTP error code : " + http_status);
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                             error = true;
 
@@ -184,7 +183,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         } else if (!error) {
 
-                            System.out.println("Worker [" + _id + "] has downloaded chunk [" + chunk.getId() + "]!");
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk.getId()});
 
                             _download.getChunkwriter().getChunk_queue().put(chunk.getId(), chunk);
 
@@ -208,10 +207,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         _download.getProgress_meter().secureNotify();
                     }
 
-                    getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 } catch (InterruptedException ex) {
-                    getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 }
             }
@@ -220,16 +219,16 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         } catch (IOException ex) {
             _download.emergencyStopDownloader(ex.getMessage());
-            getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (URISyntaxException ex) {
-            Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         _download.stopThisSlot(this);
 
         _download.getChunkwriter().secureNotify();
 
-        System.out.println("Worker [" + _id + "]: bye bye");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
     }
 
 }

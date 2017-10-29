@@ -1,24 +1,18 @@
 package megabasterd;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
-import static megabasterd.MiscTools.deleteSelectedTreeItems;
-import static megabasterd.MiscTools.findFirstRegex;
-import static megabasterd.MiscTools.formatBytes;
-import static megabasterd.MiscTools.sortTree;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -26,7 +20,7 @@ import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
  */
 public final class FolderLinkDialog extends javax.swing.JDialog {
 
-    private String _link;
+    private final String _link;
 
     private boolean _download;
 
@@ -37,7 +31,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
     private boolean _mega_error;
 
     public List<HashMap> getDownload_links() {
-        return _download_links;
+        return Collections.unmodifiableList(_download_links);
     }
 
     public boolean isDownload() {
@@ -247,7 +241,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
         _download = true;
 
-        this.setVisible(false);
+        setVisible(false);
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
@@ -376,7 +370,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
         } catch (Exception ex) {
 
-            getLogger(FolderLinkDialog.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
 
             _mega_error = true;
         }
@@ -418,7 +412,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
                 download_link.put("url", url);
 
-                download_link.put("filename", MiscTools.cleanFilePath(path));
+                download_link.put("filename", cleanFilePath(path));
 
                 download_link.put("filekey", ((Map<String, Object>) node.getUserObject()).get("key"));
 

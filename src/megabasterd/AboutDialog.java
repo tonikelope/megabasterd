@@ -2,9 +2,8 @@ package megabasterd;
 
 import java.awt.Dialog;
 import javax.swing.JOptionPane;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MainPanel.VERSION;
-import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -176,7 +175,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
     private void mcdown_url_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mcdown_url_buttonActionPerformed
 
-        MiscTools.copyTextToClipboard(MEGA_URL);
+        copyTextToClipboard(MEGA_URL);
 
         JOptionPane.showMessageDialog(this, "MEGA URL was copied to clipboard!");
     }//GEN-LAST:event_mcdown_url_buttonActionPerformed
@@ -193,7 +192,7 @@ public final class AboutDialog extends javax.swing.JDialog {
             @Override
             public void run() {
 
-                String new_version = MiscTools.checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A");
+                String new_version = checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A");
 
                 if (new_version != null) {
 
@@ -215,26 +214,26 @@ public final class AboutDialog extends javax.swing.JDialog {
 
     private void pica_roja_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_pica_roja_labelMouseReleased
 
-        MiscTools.openBrowserURL(TONIKELOPE_URL);
+        openBrowserURL(TONIKELOPE_URL);
     }//GEN-LAST:event_pica_roja_labelMouseReleased
 
     private void author_webpage_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_author_webpage_labelMouseReleased
 
-        MiscTools.openBrowserURL(TONIKELOPE_URL);
+        openBrowserURL(TONIKELOPE_URL);
     }//GEN-LAST:event_author_webpage_labelMouseReleased
 
     private void mc_logo_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mc_logo_labelMouseReleased
 
-        MiscTools.openBrowserURL(MEGACRYPTER_URL);
+        openBrowserURL(MEGACRYPTER_URL);
     }//GEN-LAST:event_mc_logo_labelMouseReleased
 
     private void made_in_spain_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_made_in_spain_labelMouseReleased
 
-        MiscTools.openBrowserURL(SPAIN_URL);
+        openBrowserURL(SPAIN_URL);
     }//GEN-LAST:event_made_in_spain_labelMouseReleased
 
     private void title_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_title_labelMouseReleased
-        MiscTools.openBrowserURL(MEGABASTERD_GITHUB_URL);
+        openBrowserURL(MEGABASTERD_GITHUB_URL);
     }//GEN-LAST:event_title_labelMouseReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

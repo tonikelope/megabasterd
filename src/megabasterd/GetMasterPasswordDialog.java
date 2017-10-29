@@ -8,10 +8,8 @@ import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.Bin2BASE64;
-import static megabasterd.MiscTools.HashBin;
-import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -182,7 +180,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
     private void cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_buttonActionPerformed
 
-        this.setVisible(false);
+        setVisible(false);
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
     private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
@@ -196,7 +194,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
             @Override
             public void run() {
                 try {
-                    byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), MiscTools.BASE642Bin(_salt), CryptTools.PBKDF2_ITERATIONS);
+                    byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.PBKDF2_ITERATIONS);
 
                     String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
 
@@ -222,7 +220,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(GetMasterPasswordDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
         });

@@ -14,12 +14,8 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.extractMegaLinksFromString;
-import static megabasterd.MiscTools.extractStringFromClipboardContents;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.truncateText;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 public final class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
 
@@ -225,7 +221,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         _download = true;
 
-        this.setVisible(false);
+        setVisible(false);
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void change_dir_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_change_dir_buttonActionPerformed
@@ -296,7 +292,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
                                 String link = i.next();
 
-                                if (MiscTools.findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) == null) {
+                                if (findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) == null) {
 
                                     i.remove();
                                 }
@@ -318,9 +314,9 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         }
 
                     } catch (FileNotFoundException ex) {
-                        Logger.getLogger(LinkGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     } catch (IOException ex) {
-                        Logger.getLogger(LinkGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
                     swingReflectionInvoke("setText", dlc_button, "Load DLC container");
@@ -366,16 +362,16 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                 public void run() {
 
                     try {
-                        MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
+                        checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
                     } catch (Exception ex) {
 
                         _last_selected_account = "";
                         swingReflectionInvoke("setSelectedIndex", use_mega_account_down_combobox, 1);
                     }
 
-                    swingReflectionInvokeAndWait("setEnabled", ((LinkGrabberDialog) tthis).getUse_mega_account_down_combobox(), true);
+                    swingReflectionInvokeAndWait("setEnabled", tthis.getUse_mega_account_down_combobox(), true);
 
-                    swingReflectionInvokeAndWait("setEnabled", ((LinkGrabberDialog) tthis).getDance_button(), true);
+                    swingReflectionInvokeAndWait("setEnabled", tthis.getDance_button(), true);
                 }
             });
         }

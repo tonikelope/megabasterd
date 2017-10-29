@@ -1,7 +1,8 @@
 package megabasterd;
 
+import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 
 public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
 
@@ -43,7 +44,7 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    getLogger(ProgressMeter.class.getName()).log(SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                 }
             }
 
@@ -53,7 +54,7 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
 
     @Override
     public void run() {
-        System.out.println("ProgressMeter hello!");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ProgressMeter hello!", Thread.currentThread().getName());
 
         while (!_exit || !_transference.getPartialProgress().isEmpty()) {
             Integer reads;

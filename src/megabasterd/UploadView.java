@@ -7,11 +7,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.Transference.MAX_WORKERS;
-import static megabasterd.Transference.MIN_WORKERS;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
+import static megabasterd.Transference.*;
 
 /**
  *
@@ -213,7 +211,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         });
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
-        this.setLayout(layout);
+        setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
@@ -329,7 +327,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         folder_link_button.setText("Please wait...");
 
-        MiscTools.copyTextToClipboard(_upload.getFolder_link());
+        copyTextToClipboard(_upload.getFolder_link());
 
         folder_link_button.setText("Copy folder link");
 
@@ -344,7 +342,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         file_link_button.setText("Please wait...");
 
-        MiscTools.copyTextToClipboard(_upload.getFile_link());
+        copyTextToClipboard(_upload.getFile_link());
 
         file_link_button.setText("Copy file link");
 

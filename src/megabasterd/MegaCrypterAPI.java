@@ -15,12 +15,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import javax.swing.JOptionPane;
-import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.Bin2BASE64;
-import static megabasterd.MiscTools.Bin2UrlBASE64;
-import static megabasterd.MiscTools.cleanFilePath;
-import static megabasterd.MiscTools.cleanFilename;
-import static megabasterd.MiscTools.findFirstRegex;
+import static megabasterd.MiscTools.*;
+import static megabasterd.CryptTools.*;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -41,7 +37,7 @@ public final class MegaCrypterAPI {
 
         String response = null;
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
             HttpPost httppost;
 
@@ -57,7 +53,7 @@ public final class MegaCrypterAPI {
                 try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
 
                     if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                        System.out.println("Failed : HTTP error code : " + httpresponse.getStatusLine().getStatusCode());
+                        Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), httpresponse.getStatusLine().getStatusCode()});
 
                     } else {
 
@@ -102,8 +98,6 @@ public final class MegaCrypterAPI {
     public static String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String sid, String reverse) throws IOException, MegaCrypterAPIException {
         String request = "{\"m\":\"dl\", \"link\": \"" + link + "\"" + (noexpire_token != null ? ", \"noexpire\": \"" + noexpire_token + "\"" : "") + (sid != null ? ", \"sid\": \"" + sid + "\"" : "") + (reverse != null ? ", \"reverse\": \"" + reverse + "\"" : "") + "}";
 
-        System.out.println(request);
-
         URL url_api = new URL(findFirstRegex("https?://[^/]+", link, 0) + "/api");
 
         String res = MegaCrypterAPI._rawRequest(request, url_api);
@@ -120,7 +114,7 @@ public final class MegaCrypterAPI {
 
                 byte[] iv = BASE642Bin(pass);
 
-                Cipher decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", BASE642Bin(pass_hash), iv);
+                Cipher decrypter = genDecrypter("AES", "AES/CBC/PKCS5Padding", BASE642Bin(pass_hash), iv);
 
                 byte[] decrypted_url = decrypter.doFinal(BASE642Bin(dl_url));
 
@@ -136,7 +130,7 @@ public final class MegaCrypterAPI {
 
     public static String[] getMegaFileMetadata(String link, MainPanelView panel, String reverse) throws MegaCrypterAPIException, MalformedURLException, IOException {
         String request = "{\"m\":\"info\", \"link\": \"" + link + "\"" + (reverse != null ? ", \"reverse\": \"" + reverse + "\"" : "") + "}";
-        System.out.println(request);
+
         URL url_api = new URL(findFirstRegex("https?://[^/]+", link, 0) + "/api");
 
         String res = MegaCrypterAPI._rawRequest(request, url_api);
@@ -201,10 +195,6 @@ public final class MegaCrypterAPI {
             pass = (String) pass_val;
         }
 
-        System.out.println("PASS: " + pass);
-
-        System.out.println(noexpire_token);
-
         if (pass != null) {
             String[] pass_items = pass.split("#");
 
@@ -244,9 +234,9 @@ public final class MegaCrypterAPI {
 
                         try {
 
-                            info_key = CryptTools.PBKDF2HMACSHA256(password, salt, (int) Math.pow(2, iterations));
+                            info_key = PBKDF2HMACSHA256(password, salt, (int) Math.pow(2, iterations));
 
-                            decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
+                            decrypter = genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
                             bad_pass = !Arrays.equals(info_key, decrypter.doFinal(key_check));
 
@@ -272,13 +262,13 @@ public final class MegaCrypterAPI {
 
                 try {
 
-                    decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
+                    decrypter = genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
                     byte[] decrypted_key = decrypter.doFinal(BASE642Bin(fkey));
 
                     fkey = Bin2UrlBASE64(decrypted_key);
 
-                    decrypter = CryptTools.genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
+                    decrypter = genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
                     byte[] decrypted_name = decrypter.doFinal(BASE642Bin(fname));
 

@@ -11,8 +11,8 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
-import static megabasterd.MainPanel.THROTTLE_SLICE_SIZE;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -34,16 +34,16 @@ public class StreamChunkDownloader implements Runnable {
         _exit = false;
     }
 
-    public void setExit(boolean _exit) {
-        this._exit = _exit;
+    public void setExit(boolean exit) {
+        _exit = exit;
     }
 
     @Override
     public void run() {
 
-        System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "]: let's do some work!");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
             String url = _chunkwriter.getUrl();
 
@@ -55,7 +55,7 @@ public class StreamChunkDownloader implements Runnable {
 
                 while (!_exit && !_chunkwriter.isExit() && _chunkwriter.getChunk_queue().size() >= StreamChunkWriter.BUFFER_CHUNKS_SIZE) {
 
-                    System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "]: El búffer de chunks está lleno. Me duermo.");
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: Chunk buffer is full. I pause myself.", new Object[]{Thread.currentThread().getName(), _id});
 
                     _chunkwriter.secureWait();
                 }
@@ -77,7 +77,7 @@ public class StreamChunkDownloader implements Runnable {
 
                     StreamChunk chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
 
-                    System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "]: offset: " + offset + " size: " + chunk_stream.getSize());
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: offset: {2} size: {3}", new Object[]{Thread.currentThread().getName(), _id, offset, chunk_stream.getSize()});
 
                     HttpGet httpget = new HttpGet(new URI(chunk_stream.getUrl()));
 
@@ -93,7 +93,7 @@ public class StreamChunkDownloader implements Runnable {
 
                             if (http_status != HttpStatus.SC_OK) {
 
-                                System.out.println("Failed : HTTP error code : " + http_status);
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                                 error = true;
 
@@ -118,7 +118,7 @@ public class StreamChunkDownloader implements Runnable {
 
                             if (!error) {
 
-                                System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "] has downloaded chunk [" + chunk_stream.getOffset() + "]!");
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
 
                                 _chunkwriter.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
 
@@ -131,7 +131,7 @@ public class StreamChunkDownloader implements Runnable {
 
                         error = true;
 
-                        getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
                 } else {
@@ -141,16 +141,14 @@ public class StreamChunkDownloader implements Runnable {
             }
 
         } catch (IOException | URISyntaxException ex) {
-            getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ChunkInvalidException ex) {
-            Logger.getLogger(StreamChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(StreamChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        } catch (ChunkInvalidException | InterruptedException ex) {
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         _chunkwriter.secureNotifyAll();
 
-        System.out.println(Thread.currentThread().getName() + " Worker [" + _id + "]: bye bye");
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
     }
 
 }

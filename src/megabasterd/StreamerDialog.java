@@ -5,17 +5,12 @@ import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.util.HashSet;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
-import static megabasterd.MainPanel.THREAD_POOL;
-import static megabasterd.MiscTools.extractFirstMegaLinkFromString;
-import static megabasterd.MiscTools.extractStringFromClipboardContents;
-import static megabasterd.MiscTools.findFirstRegex;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWait;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
+import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.*;
 
 /**
  *
@@ -183,11 +178,11 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                     try {
 
-                        if (MiscTools.findFirstRegex("://enc", link, 0) != null) {
+                        if (findFirstRegex("://enc", link, 0) != null) {
 
                             link = CryptTools.decryptMegaDownloaderLink(link);
 
-                        } else if (MiscTools.findFirstRegex("://elc", link, 0) != null) {
+                        } else if (findFirstRegex("://elc", link, 0) != null) {
 
                             HashSet links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
 
@@ -201,14 +196,14 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                         error = true;
 
-                        getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
                     String data;
 
                     if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
 
-                        data = MiscTools.Bin2UrlBASE64(((_last_selected_account != null ? _last_selected_account : "") + "|" + link).getBytes());
+                        data = Bin2UrlBASE64(((_last_selected_account != null ? _last_selected_account : "") + "|" + link).getBytes());
 
                         stream_link = "http://localhost:1337/video/" + data;
 
@@ -235,8 +230,8 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                 } else {
 
                     _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
-                    MiscTools.copyTextToClipboard(stream_link);
-                    JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\n(Remember to keep MegaBasterd running in background while playing)");
+                    copyTextToClipboard(stream_link);
+                    JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content. (I recommend to use MPLAYER)");
                     dispose();
                     getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
                 }
@@ -265,16 +260,16 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                 public void run() {
 
                     try {
-                        MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
+                        checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
                     } catch (Exception ex) {
 
                         _last_selected_account = "";
                         swingReflectionInvoke("setSelectedIndex", use_mega_account_down_combobox, 1);
                     }
 
-                    swingReflectionInvokeAndWait("setEnabled", ((StreamerDialog) tthis).getUse_mega_account_down_combobox(), true);
+                    swingReflectionInvokeAndWait("setEnabled", tthis.getUse_mega_account_down_combobox(), true);
 
-                    swingReflectionInvokeAndWaitForReturn("setEnabled", ((StreamerDialog) tthis).getDance_button(), true);
+                    swingReflectionInvokeAndWaitForReturn("setEnabled", tthis.getDance_button(), true);
                 }
             });
         }

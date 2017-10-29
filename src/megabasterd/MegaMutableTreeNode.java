@@ -2,7 +2,7 @@ package megabasterd;
 
 import java.util.HashMap;
 import javax.swing.tree.DefaultMutableTreeNode;
-import static megabasterd.MiscTools.formatBytes;
+import static megabasterd.MiscTools.*;
 
 /**
  *

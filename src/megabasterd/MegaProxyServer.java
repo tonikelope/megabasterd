@@ -7,23 +7,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static megabasterd.MiscTools.*;
 
 /**
  * Thanks to -> https://stackoverflow.com/users/6477541/sarvesh-agarwal
  */
 public class MegaProxyServer extends Thread {
 
-    private String _password;
-    private int _port;
+    private final String _password;
+    private final int _port;
     private ServerSocket _serverSocket;
-
-    public String getPassword() {
-        return _password;
-    }
-
-    public int getPort() {
-        return _port;
-    }
 
     public MegaProxyServer(String password, int port) {
 
@@ -33,9 +26,17 @@ public class MegaProxyServer extends Thread {
 
     }
 
+    public String getPassword() {
+        return _password;
+    }
+
+    public int getPort() {
+        return _port;
+    }
+
     public synchronized void stopServer() throws IOException {
 
-        this._serverSocket.close();
+        _serverSocket.close();
     }
 
     @Override
@@ -50,21 +51,22 @@ public class MegaProxyServer extends Thread {
             try {
 
                 while ((socket = _serverSocket.accept()) != null) {
-                    (new Handler(socket, this._password)).start();
+                    (new Handler(socket, _password)).start();
                 }
             } catch (IOException e) {
-                e.printStackTrace();  // TODO: implement catch
+                // TODO: implement catch
+
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(MegaProxyServer.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } finally {
 
             if (!_serverSocket.isClosed()) {
                 try {
                     _serverSocket.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(MegaProxyServer.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -74,127 +76,6 @@ public class MegaProxyServer extends Thread {
 
         public static final Pattern CONNECT_PATTERN = Pattern.compile("CONNECT (.*mega(?:\\.co)?\\.nz):(443) HTTP/(1\\.[01])", Pattern.CASE_INSENSITIVE);
         public static final Pattern AUTH_PATTERN = Pattern.compile("Proxy-Authorization: Basic +(.+)", Pattern.CASE_INSENSITIVE);
-
-        private final Socket clientSocket;
-        private boolean previousWasR = false;
-        private String _password;
-
-        public Handler(Socket clientSocket, String password) {
-            this.clientSocket = clientSocket;
-            this._password = password;
-        }
-
-        @Override
-        public void run() {
-            try {
-                String request = readLine(clientSocket);
-                System.out.println(request);
-                Matcher matcher = CONNECT_PATTERN.matcher(request);
-                boolean auth_ok = false;
-
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(clientSocket.getOutputStream(), "UTF-8");
-
-                if (matcher.matches()) {
-
-                    String header;
-                    String proxy_auth = null;
-
-                    do {
-                        header = readLine(clientSocket);
-
-                        Matcher matcher_auth = AUTH_PATTERN.matcher(header);
-
-                        if (matcher_auth.matches()) {
-
-                            proxy_auth = new String(MiscTools.BASE642Bin(matcher_auth.group(1).trim()));
-
-                            System.out.println(proxy_auth);
-                        }
-
-                    } while (!"".equals(header));
-
-                    if (proxy_auth != null && proxy_auth.equals("megacrypter:" + this._password)) {
-                        final Socket forwardSocket;
-
-                        try {
-                            forwardSocket = new Socket(matcher.group(1), Integer.parseInt(matcher.group(2)));
-                            System.out.println(forwardSocket);
-                        } catch (IOException | NumberFormatException e) {
-                            e.printStackTrace();  // TODO: implement catch
-                            outputStreamWriter.write("HTTP/" + matcher.group(3) + " 502 Bad Gateway\r\n");
-                            outputStreamWriter.write("Proxy-agent: MegaBasterd/0.1\r\n");
-                            outputStreamWriter.write("\r\n");
-                            outputStreamWriter.flush();
-                            return;
-                        }
-                        try {
-                            outputStreamWriter.write("HTTP/" + matcher.group(3) + " 200 Connection established\r\n");
-                            outputStreamWriter.write("Proxy-agent: MegaBasterd/0.1\r\n");
-                            outputStreamWriter.write("\r\n");
-                            outputStreamWriter.flush();
-
-                            Thread remoteToClient = new Thread() {
-                                @Override
-                                public void run() {
-                                    forwardData(forwardSocket, clientSocket);
-                                }
-                            };
-                            remoteToClient.start();
-                            try {
-                                if (previousWasR) {
-                                    int read = clientSocket.getInputStream().read();
-                                    if (read != -1) {
-                                        if (read != '\n') {
-                                            forwardSocket.getOutputStream().write(read);
-                                        }
-                                        forwardData(clientSocket, forwardSocket);
-                                    } else {
-                                        if (!forwardSocket.isOutputShutdown()) {
-                                            forwardSocket.shutdownOutput();
-                                        }
-                                        if (!clientSocket.isInputShutdown()) {
-                                            clientSocket.shutdownInput();
-                                        }
-                                    }
-                                } else {
-                                    forwardData(clientSocket, forwardSocket);
-                                }
-                            } finally {
-                                try {
-                                    remoteToClient.join();
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();  // TODO: implement catch
-                                }
-                            }
-                        } finally {
-                            forwardSocket.close();
-                        }
-
-                    } else {
-                        outputStreamWriter.write("HTTP/1.1 403 Unauthorized\r\n");
-                        outputStreamWriter.write("Proxy-agent: MegaBasterd/0.1\r\n");
-                        outputStreamWriter.write("\r\n");
-                        outputStreamWriter.flush();
-                        return;
-                    }
-
-                } else {
-                    outputStreamWriter.write("HTTP/1.1 403 Unauthorized\r\n");
-                    outputStreamWriter.write("Proxy-agent: MegaBasterd/0.1\r\n");
-                    outputStreamWriter.write("\r\n");
-                    outputStreamWriter.flush();
-                    return;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();  // TODO: implement catch
-            } finally {
-                try {
-                    clientSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();  // TODO: implement catch
-                }
-            }
-        }
 
         private static void forwardData(Socket inputSocket, Socket outputSocket) {
             try {
@@ -224,7 +105,132 @@ public class MegaProxyServer extends Thread {
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();  // TODO: implement catch
+                // TODO: implement catch
+
+            }
+        }
+
+        private final Socket _clientSocket;
+        private boolean _previousWasR = false;
+        private final String _password;
+
+        public Handler(Socket clientSocket, String password) {
+            _clientSocket = clientSocket;
+            _password = password;
+        }
+
+        @Override
+        public void run() {
+            try {
+                String request = readLine(_clientSocket);
+
+                Matcher matcher = CONNECT_PATTERN.matcher(request);
+
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(_clientSocket.getOutputStream(), "UTF-8");
+
+                if (matcher.matches()) {
+
+                    String header;
+                    String proxy_auth = null;
+
+                    do {
+                        header = readLine(_clientSocket);
+
+                        Matcher matcher_auth = AUTH_PATTERN.matcher(header);
+
+                        if (matcher_auth.matches()) {
+
+                            proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()));
+
+                        }
+
+                    } while (!"".equals(header));
+
+                    if (proxy_auth != null && proxy_auth.equals("megacrypter:" + _password)) {
+                        final Socket forwardSocket;
+
+                        try {
+                            forwardSocket = new Socket(matcher.group(1), Integer.parseInt(matcher.group(2)));
+
+                        } catch (IOException | NumberFormatException e) { // TODO: implement catch
+                            // TODO: implement catch
+                            outputStreamWriter.write("HTTP/" + matcher.group(3) + " 502 Bad Gateway\r\n");
+                            outputStreamWriter.write("Proxy-agent: MegaBasterd/0.1\r\n");
+                            outputStreamWriter.write("\r\n");
+                            outputStreamWriter.flush();
+                            return;
+                        }
+                        try {
+                            outputStreamWriter.write("HTTP/" + matcher.group(3) + " 200 Connection established\r\n");
+                            outputStreamWriter.write("Proxy-agent: MegaBasterd/0.1\r\n");
+                            outputStreamWriter.write("\r\n");
+                            outputStreamWriter.flush();
+
+                            Thread remoteToClient = new Thread() {
+                                @Override
+                                public void run() {
+                                    forwardData(forwardSocket, _clientSocket);
+                                }
+                            };
+                            remoteToClient.start();
+                            try {
+                                if (_previousWasR) {
+                                    int read = _clientSocket.getInputStream().read();
+                                    if (read != -1) {
+                                        if (read != '\n') {
+                                            forwardSocket.getOutputStream().write(read);
+                                        }
+                                        forwardData(_clientSocket, forwardSocket);
+                                    } else {
+                                        if (!forwardSocket.isOutputShutdown()) {
+                                            forwardSocket.shutdownOutput();
+                                        }
+                                        if (!_clientSocket.isInputShutdown()) {
+                                            _clientSocket.shutdownInput();
+                                        }
+                                    }
+                                } else {
+                                    forwardData(_clientSocket, forwardSocket);
+                                }
+                            } finally {
+                                try {
+                                    remoteToClient.join();
+                                } catch (InterruptedException e) {
+                                    // TODO: implement catch
+
+                                }
+                            }
+                        } finally {
+                            forwardSocket.close();
+                        }
+
+                    } else {
+                        outputStreamWriter.write("HTTP/1.1 403 Unauthorized\r\n");
+                        outputStreamWriter.write("Proxy-agent: MegaBasterd/0.1\r\n");
+                        outputStreamWriter.write("\r\n");
+                        outputStreamWriter.flush();
+
+                    }
+
+                } else {
+                    outputStreamWriter.write("HTTP/1.1 403 Unauthorized\r\n");
+                    outputStreamWriter.write("Proxy-agent: MegaBasterd/0.1\r\n");
+                    outputStreamWriter.write("\r\n");
+                    outputStreamWriter.flush();
+
+                }
+
+            } catch (IOException e) {
+                // TODO: implement catch
+
+            } finally {
+
+                try {
+                    _clientSocket.close();
+                } catch (IOException e) {
+                    // TODO: implement catch
+
+                }
             }
         }
 
@@ -233,14 +239,14 @@ public class MegaProxyServer extends Thread {
             int next;
             readerLoop:
             while ((next = socket.getInputStream().read()) != -1) {
-                if (previousWasR && next == '\n') {
-                    previousWasR = false;
+                if (_previousWasR && next == '\n') {
+                    _previousWasR = false;
                     continue;
                 }
-                previousWasR = false;
+                _previousWasR = false;
                 switch (next) {
                     case '\r':
-                        previousWasR = true;
+                        _previousWasR = true;
                         break readerLoop;
                     case '\n':
                         break readerLoop;

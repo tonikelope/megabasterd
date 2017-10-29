@@ -6,8 +6,9 @@ import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.Transferable;
 import static java.lang.Thread.sleep;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 
 public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThreadNotifiable, ClipboardChangeObservable {
 
@@ -51,10 +52,10 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
 
             gainOwnership(_contents);
 
-            System.out.println("Spying clipboard ON...");
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Monitoring clipboard ON...", Thread.currentThread().getName());
 
         } else {
-            System.out.println("Spying clipboard OFF...");
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Monitoring clipboard OFF...", Thread.currentThread().getName());
         }
     }
 
@@ -77,7 +78,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    getLogger(ClipboardSpy.class.getName()).log(SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
                 }
             }
 
@@ -124,7 +125,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    getLogger(ClipboardSpy.class.getName()).log(SEVERE, null, ex1);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex1);
                 }
             }
 
@@ -151,7 +152,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    getLogger(ClipboardSpy.class.getName()).log(SEVERE, null, ex1);
+                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex1);
                 }
             }
 

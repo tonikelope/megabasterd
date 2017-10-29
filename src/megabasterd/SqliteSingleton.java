@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
-import static java.util.logging.Logger.getLogger;
+import java.util.logging.Logger;
 
 /**
  *
@@ -17,12 +17,11 @@ public final class SqliteSingleton {
 
     public static final int VALIDATION_TIMEOUT = 15;
 
-    private final ConcurrentHashMap<Thread, Connection> _connections_map;
-
     public static SqliteSingleton getInstance() {
 
         return LazyHolder.INSTANCE;
     }
+    private final ConcurrentHashMap<Thread, Connection> _connections_map;
 
     private SqliteSingleton() {
 
@@ -45,7 +44,7 @@ public final class SqliteSingleton {
             }
 
         } catch (ClassNotFoundException | SQLException ex) {
-            getLogger(SqliteSingleton.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
         return conn;

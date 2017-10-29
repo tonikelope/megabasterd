@@ -3,10 +3,11 @@ package megabasterd;
 import java.awt.Component;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Logger.getLogger;
-import static megabasterd.DBTools.deleteDownloads;
-import static megabasterd.MainPanel.THREAD_POOL;
+import java.util.logging.Logger;
+import static megabasterd.DBTools.*;
+import static megabasterd.MainPanel.*;
 
 public final class DownloadManager extends TransferenceManager {
 
@@ -41,7 +42,7 @@ public final class DownloadManager extends TransferenceManager {
         try {
             deleteDownloads(delete_down.toArray(new String[delete_down.size()]));
         } catch (SQLException ex) {
-            getLogger(DownloadManager.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
         }
 
         secureNotify();
@@ -59,7 +60,7 @@ public final class DownloadManager extends TransferenceManager {
 
         } catch (MegaAPIException | MegaCrypterAPIException ex) {
 
-            System.out.println("Provision failed! Retrying in separated thread...");
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Provision failed! Retrying in separated thread...", Thread.currentThread().getName());
 
             THREAD_POOL.execute(new Runnable() {
                 @Override
@@ -71,7 +72,7 @@ public final class DownloadManager extends TransferenceManager {
 
                     } catch (MegaAPIException | MegaCrypterAPIException ex1) {
 
-                        getLogger(DownloadManager.class.getName()).log(SEVERE, null, ex1);
+                        Logger.getLogger(getClass().getName()).log(SEVERE, null, ex1);
                     }
 
                     secureNotify();

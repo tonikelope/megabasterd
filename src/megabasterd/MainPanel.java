@@ -29,25 +29,13 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
-import static java.util.logging.Logger.getLogger;
 import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
-import static megabasterd.DBTools.deleteUpload;
-import static megabasterd.DBTools.selectDownloads;
-import static megabasterd.DBTools.selectELCAccounts;
-import static megabasterd.DBTools.selectMegaAccounts;
-import static megabasterd.DBTools.selectSettingValueFromDB;
-import static megabasterd.DBTools.selectUploads;
-import static megabasterd.DBTools.setupSqliteTables;
-import static megabasterd.MiscTools.BASE642Bin;
-import static megabasterd.MiscTools.bin2i32a;
-import static megabasterd.MiscTools.setNimbusLookAndFeel;
-import static megabasterd.MiscTools.swingReflectionInvoke;
-import static megabasterd.MiscTools.swingReflectionInvokeAndWaitForReturn;
-import static megabasterd.Transference.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
-import static megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
+import static megabasterd.DBTools.*;
+import static megabasterd.MiscTools.*;
+import static megabasterd.Transference.*;
 import org.apache.http.auth.Credentials;
 import org.apache.http.auth.UsernamePasswordCredentials;
 
@@ -57,7 +45,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.25";
+    public static final String VERSION = "2.26";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -67,6 +55,10 @@ public final class MainPanel {
     public static final String ICON_FILE = "mbasterd_mini.png";
     public static final String ICON_FILE_MED = "mbasterd_med.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
+    private static String _proxy_host;
+    private static int _proxy_port;
+    private static Credentials _proxy_credentials;
+    private static boolean _use_proxy;
 
     public static void main(String args[]) {
 
@@ -75,7 +67,7 @@ public final class MainPanel {
         if (args.length > 0) {
 
             try {
-                System.out.println("Waiting " + args[0] + " seconds before start...");
+                Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "{0} Waiting {1} seconds before start...", new Object[]{Thread.currentThread().getName(), args[0]});
                 Thread.sleep(Long.parseLong(args[0]) * 1000);
             } catch (InterruptedException ex) {
                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -90,6 +82,22 @@ public final class MainPanel {
                 main_panel.getView().setVisible(true);
             }
         });
+    }
+
+    public static boolean isUse_proxy() {
+        return _use_proxy;
+    }
+
+    public static String getProxy_host() {
+        return _proxy_host;
+    }
+
+    public static int getProxy_port() {
+        return _proxy_port;
+    }
+
+    public static Credentials getProxy_credentials() {
+        return _proxy_credentials;
     }
 
     private volatile MainPanelView _view = null; //lazy init
@@ -111,10 +119,6 @@ public final class MainPanel {
     private String _master_pass_hash;
     private String _master_pass_salt;
     private boolean _restart;
-    private static String _proxy_host;
-    private static int _proxy_port;
-    private static Credentials _proxy_credentials;
-    private static boolean _use_proxy;
     private MegaProxyServer _mega_proxy_server;
     private int _megacrypter_reverse_port;
     private boolean _megacrypter_reverse;
@@ -131,7 +135,7 @@ public final class MainPanel {
             trayIcon();
 
         } catch (AWTException ex) {
-            getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
         try {
@@ -139,7 +143,7 @@ public final class MainPanel {
             setupSqliteTables();
 
         } catch (SQLException ex) {
-            getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
         _restart = false;
@@ -185,14 +189,14 @@ public final class MainPanel {
         try {
             _streamserver.start(STREAMER_PORT, "/video");
         } catch (IOException ex) {
-            getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
         THREAD_POOL.execute(new Runnable() {
             @Override
             public void run() {
 
-                String new_version = MiscTools.checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A");
+                String new_version = checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A");
 
                 if (new_version != null) {
 
@@ -202,7 +206,7 @@ public final class MainPanel {
         });
 
         if (_megacrypter_reverse) {
-            _mega_proxy_server = new MegaProxyServer(UUID.randomUUID().toString(), this._megacrypter_reverse_port);
+            _mega_proxy_server = new MegaProxyServer(UUID.randomUUID().toString(), _megacrypter_reverse_port);
             _mega_proxy_server.start();
         } else {
             _mega_proxy_server = null;
@@ -221,8 +225,8 @@ public final class MainPanel {
         return _megacrypter_reverse_port;
     }
 
-    public void setMega_proxy_server(MegaProxyServer _mega_proxy_server) {
-        this._mega_proxy_server = _mega_proxy_server;
+    public void setMega_proxy_server(MegaProxyServer mega_proxy_server) {
+        _mega_proxy_server = mega_proxy_server;
     }
 
     public boolean isUse_mega_account_down() {
@@ -237,24 +241,8 @@ public final class MainPanel {
         return _restart;
     }
 
-    public void setRestart(boolean _restart) {
-        this._restart = _restart;
-    }
-
-    public static boolean isUse_proxy() {
-        return _use_proxy;
-    }
-
-    public static String getProxy_host() {
-        return _proxy_host;
-    }
-
-    public static int getProxy_port() {
-        return _proxy_port;
-    }
-
-    public static Credentials getProxy_credentials() {
-        return _proxy_credentials;
+    public void setRestart(boolean restart) {
+        _restart = restart;
     }
 
     public HashMap<String, Object> getElc_accounts() {
@@ -500,7 +488,7 @@ public final class MainPanel {
             _mega_accounts = selectMegaAccounts();
             _elc_accounts = selectELCAccounts();
         } catch (SQLException ex) {
-            getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
         _mega_account_down = DBTools.selectSettingValueFromDB("mega_account_down");
@@ -517,11 +505,11 @@ public final class MainPanel {
 
             try {
 
-                _master_pass_salt = MiscTools.Bin2BASE64(MiscTools.genRandomByteArray(CryptTools.PBKDF2_SALT_BYTE_LENGTH));
+                _master_pass_salt = Bin2BASE64(genRandomByteArray(CryptTools.PBKDF2_SALT_BYTE_LENGTH));
 
                 DBTools.insertSettingValueInDB("master_pass_salt", _master_pass_salt);
 
-            } catch (Exception ex) {
+            } catch (SQLException ex) {
                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -650,7 +638,7 @@ public final class MainPanel {
                             swingReflectionInvoke("setVisible", getView(), true);
 
                         } catch (IOException ex) {
-                            getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     }
 
@@ -669,7 +657,7 @@ public final class MainPanel {
 
             } catch (IOException ex1) {
 
-                getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex1);
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex1);
             }
         }
 
@@ -696,14 +684,14 @@ public final class MainPanel {
                     ArrayList<HashMap<String, Object>> res = selectDownloads();
 
                     for (HashMap<String, Object> o : res) {
-                        System.out.println(o);
+
                         try {
 
                             String email = (String) o.get("email");
 
                             MegaAPI ma;
 
-                            if (!tthis.isUse_mega_account_down() || _mega_accounts.get(email) == null || (ma = MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) == null) {
+                            if (!tthis.isUse_mega_account_down() || _mega_accounts.get(email) == null || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) == null) {
 
                                 ma = new MegaAPI();
                             }
@@ -721,7 +709,7 @@ public final class MainPanel {
 
                 } catch (SQLException ex) {
 
-                    getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                 }
 
                 if (conta_downloads > 0) {
@@ -835,7 +823,7 @@ public final class MainPanel {
 
                             if (_mega_accounts.get(email) != null) {
 
-                                if ((ma = MiscTools.checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) == null) {
+                                if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) == null) {
                                     ma = new MegaAPI();
                                 }
 
@@ -851,7 +839,7 @@ public final class MainPanel {
                             }
 
                         } catch (Exception ex) {
-                            getLogger(MainPanelView.class.getName()).log(SEVERE, null, ex);
+                            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                         }
                     }
 
@@ -865,8 +853,8 @@ public final class MainPanel {
 
                     swingReflectionInvoke("setText", getView().getStatus_up_label(), "");
 
-                } catch (Exception ex) {
-                    getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                } catch (SQLException ex) {
+                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                 }
 
             }

@@ -7,8 +7,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JLabel;
-import static megabasterd.MiscTools.formatBytes;
-import static megabasterd.MiscTools.swingReflectionInvoke;
+import static megabasterd.MiscTools.*;
 
 public final class GlobalSpeedMeter implements Runnable {
 
@@ -165,7 +164,7 @@ public final class GlobalSpeedMeter implements Runnable {
                 Thread.sleep(SLEEP);
 
             } catch (InterruptedException ex) {
-                Logger.getLogger(GlobalSpeedMeter.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
 
         } while (true);
