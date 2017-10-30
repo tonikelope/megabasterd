@@ -102,7 +102,7 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
 
                     secureNotifyAll();
 
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter ha escrito {1} / {2} ...", new Object[]{Thread.currentThread().getName(), _bytes_written, _end_offset});
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter has written {1} / {2} ...", new Object[]{Thread.currentThread().getName(), _bytes_written, _end_offset});
 
                 }
 

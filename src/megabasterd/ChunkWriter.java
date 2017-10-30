@@ -137,7 +137,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
 
                     if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter waiting for chunk [{1}{2}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, 1});
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter waiting for chunk [{1}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written});
 
                         secureWait();
                     }
