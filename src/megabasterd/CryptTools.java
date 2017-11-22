@@ -565,16 +565,16 @@ public final class CryptTools {
 
                         out.write(buffer, 0, reads);
                     }
-                    enc_dlc_key = findFirstRegex("< *rc *>(.+)< */ *rc *>", new String(out.toByteArray()), 1);
+                    enc_dlc_key = findFirstRegex("< *rc *>(.+?)< */ *rc *>", new String(out.toByteArray()), 1);
                 }
 
                 String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key))).trim();
 
                 String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key))).trim();
 
-                String dec_dlc_data_file = findFirstRegex("< *file *>(.+)< */ *file *>", new String(BASE642Bin(dec_dlc_data)), 1);
+                String dec_dlc_data_file = findFirstRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), "UTF-8"), 1);
 
-                ArrayList<String> urls = findAllRegex("< *url *>(.+)< */ *url *>", dec_dlc_data_file, 1);
+                ArrayList<String> urls = findAllRegex("< *url *>(.+?)< */ *url *>", dec_dlc_data_file, 1);
 
                 for (String s : urls) {
 

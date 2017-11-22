@@ -62,6 +62,7 @@ import org.apache.http.HttpRequestInterceptor;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.client.CredentialsProvider;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.RequestAddCookies;
@@ -239,7 +240,7 @@ public final class MiscTools {
     }
 
     public static String findFirstRegex(String regex, String data, int group) {
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
 
         Matcher matcher = pattern.matcher(data);
 
@@ -247,7 +248,7 @@ public final class MiscTools {
     }
 
     public static ArrayList<String> findAllRegex(String regex, String data, int group) {
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile(regex, Pattern.DOTALL);
 
         Matcher matcher = pattern.matcher(data);
 
@@ -938,6 +939,42 @@ public final class MiscTools {
         return url_ok;
     }
 
+    public static String getMyPublicIP() {
+
+        String public_ip = null;
+
+        try (CloseableHttpClient httpclient = getApacheKissHttpClientNOProxy()) {
+
+            HttpGet httpget = new HttpGet(new URI("http://whatismyip.akamai.com/"));
+
+            try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+
+                InputStream is = httpresponse.getEntity().getContent();
+
+                try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                    int reads;
+
+                    while ((reads = is.read(buffer)) != -1) {
+
+                        byte_res.write(buffer, 0, reads);
+                    }
+
+                    public_ip = new String(byte_res.toByteArray());
+                }
+            }
+
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException | URISyntaxException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return public_ip;
+    }
+
     public static String checkNewVersion(String folder_node, String folder_key) {
 
         String new_version = null;
@@ -1039,6 +1076,42 @@ public final class MiscTools {
         return builder.build();
     }
 
+    public static CloseableHttpClient getApacheKissHttpClientSmartProxy() {
+
+        HttpClientBuilder builder = _getApacheKissHttpClientBuilder();
+
+        if (MainPanel.isUse_proxy() && MainPanel.getProxy_host() != null) {
+
+            HttpHost proxy = new HttpHost(MainPanel.getProxy_host(), MainPanel.getProxy_port());
+
+            builder = builder.setProxy(proxy);
+
+            if (MainPanel.getProxy_credentials() != null) {
+
+                CredentialsProvider credsProvider = new BasicCredentialsProvider();
+
+                AuthScope authScope = new AuthScope(MainPanel.getProxy_host(), MainPanel.getProxy_port());
+
+                credsProvider.setCredentials(authScope, MainPanel.getProxy_credentials());
+
+                builder = builder.setDefaultCredentialsProvider(credsProvider);
+            }
+        }
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(SmartMegaProxyManager.TIMEOUT * 1000)
+                .setConnectTimeout(SmartMegaProxyManager.TIMEOUT * 1000)
+                .setConnectionRequestTimeout(SmartMegaProxyManager.TIMEOUT * 1000)
+                .build();
+
+        return builder.setDefaultRequestConfig(requestConfig).build();
+    }
+
+    public static CloseableHttpClient getApacheKissHttpClientNOProxy() {
+
+        return _getApacheKissHttpClientBuilder().build();
+    }
+
     public static byte[] recReverseArray(byte[] arr, int start, int end) {
 
         byte temp;
@@ -1068,7 +1141,7 @@ public final class MiscTools {
 
         cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
 
-        cmd.append(MiscTools.class.getName()).append(" ");
+        cmd.append(MainPanel.class.getName()).append(" ");
 
         cmd.append(String.valueOf(delay));
 

@@ -152,18 +152,22 @@ public final class MegaAPI {
 
     public void login(String email, String password) throws Exception, MegaAPIException {
 
-        _email = email;
+        String[] email_split = email.split(" *# *");
+
+        _email = email_split[0];
 
         _password_aes = MEGAPrepareMasterKey(bin2i32a(password.getBytes()));
 
-        _user_hash = MEGAUserHash(email.toLowerCase().getBytes(), _password_aes);
+        _user_hash = MEGAUserHash(_email.toLowerCase().getBytes(), _password_aes);
 
         _realLogin();
     }
 
     public void fastLogin(String email, int[] password_aes, String user_hash) throws Exception, MegaAPIException {
 
-        _email = email;
+        String[] email_split = email.split(" *# *");
+
+        _email = email_split[0];
 
         _password_aes = password_aes;
 
