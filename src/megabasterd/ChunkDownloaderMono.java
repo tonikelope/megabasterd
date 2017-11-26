@@ -47,9 +47,13 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             while (!isExit() && !getDownload().isStopped()) {
 
-                if (httpclient == null || worker_url == null || error || MainPanel.isUse_smart_proxy()) {
+                if (httpclient == null || worker_url == null || error || (MainPanel.isUse_smart_proxy() && this.isError_no_proxy())) {
 
-                    if (MainPanel.isUse_smart_proxy()) {
+                    if (error) {
+                        this.setError_no_proxy(true);
+                    }
+
+                    if (MainPanel.isUse_smart_proxy() && this.isError_no_proxy()) {
 
                         if (error && current_proxy != null) {
 
@@ -68,7 +72,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             }
                         }
 
-                        httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+                        httpclient = current_proxy != null ? MiscTools.getApacheKissHttpClientSmartProxy(current_proxy) : MiscTools.getApacheKissHttpClient();
 
                     } else if (httpclient == null) {
 

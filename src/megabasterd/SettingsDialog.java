@@ -688,8 +688,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         smart_proxy_url_text.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
 
-        jLabel2.setFont(new java.awt.Font("Ubuntu", 2, 14)); // NOI18N
-        jLabel2.setText("Note: it is recomended to enable MULTI SLOT with enough slots and be patient while MegaBasterd filters down proxies.");
+        jLabel2.setFont(new java.awt.Font("Ubuntu", 2, 12)); // NOI18N
+        jLabel2.setText("Note: it is recomended to enable MULTI SLOT with enough slots and be patient while MegaBasterd filters down proxies. MegaBasterd will try first to download chunk without proxy. (Use CTRL+V in order to paste URL)");
 
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
@@ -746,7 +746,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(megacrypter_reverse_warning_label))
                             .addComponent(jLabel2))
-                        .addGap(0, 79, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(downloads_panelLayout.createSequentialGroup()
                         .addComponent(smart_proxy_url_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -891,7 +891,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addGap(98, 98, 98)
                                 .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(limit_upload_speed_checkbox))
-                        .addGap(0, 406, Short.MAX_VALUE)))
+                        .addGap(0, 590, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         uploads_panelLayout.setVerticalGroup(
@@ -1060,7 +1060,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addComponent(delete_all_accounts_button)
                         .addGap(18, 18, 18)
                         .addComponent(unlock_accounts_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 242, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 352, Short.MAX_VALUE)
                         .addComponent(encrypt_pass_checkbox))
                     .addGroup(accounts_panelLayout.createSequentialGroup()
                         .addComponent(remove_mega_account_button)

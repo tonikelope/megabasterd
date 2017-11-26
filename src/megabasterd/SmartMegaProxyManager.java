@@ -11,7 +11,7 @@ import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static megabasterd.MiscTools.getApacheKissHttpClientNOProxy;
+import static megabasterd.MiscTools.getApacheKissHttpClient;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -110,7 +110,7 @@ public class SmartMegaProxyManager implements Runnable {
 
         String data;
 
-        try (CloseableHttpClient httpclient = getApacheKissHttpClientNOProxy()) {
+        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
             HttpGet httpget = new HttpGet(new URI(this._proxy_list_url));
 

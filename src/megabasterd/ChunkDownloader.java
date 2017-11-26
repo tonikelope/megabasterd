@@ -26,6 +26,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private boolean _notified;
+    private boolean _error_no_proxy;
     private String _proxy;
 
     public ChunkDownloader(int id, Download download) {
@@ -35,6 +36,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _id = id;
         _download = download;
         _error_wait = false;
+        _error_no_proxy = false;
+    }
+
+    public boolean isError_no_proxy() {
+        return _error_no_proxy;
+    }
+
+    public void setError_no_proxy(boolean _error_no_proxy) {
+        this._error_no_proxy = _error_no_proxy;
     }
 
     public void setExit(boolean exit) {
@@ -110,9 +120,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             while (!_exit && !_download.isStopped()) {
 
-                if (httpclient == null || error || MainPanel.isUse_smart_proxy()) {
+                if (httpclient == null || error || (MainPanel.isUse_smart_proxy() && _error_no_proxy)) {
 
-                    if (MainPanel.isUse_smart_proxy()) {
+                    if (error) {
+                        _error_no_proxy = true;
+                    }
+
+                    if (MainPanel.isUse_smart_proxy() && _error_no_proxy) {
 
                         if (error && current_proxy != null) {
 
@@ -131,7 +145,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             }
                         }
 
-                        httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+                        httpclient = current_proxy != null ? MiscTools.getApacheKissHttpClientSmartProxy(current_proxy) : MiscTools.getApacheKissHttpClient();
 
                     } else if (httpclient == null) {
 

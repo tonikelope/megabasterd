@@ -165,7 +165,7 @@
                                   </Group>
                                   <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="79" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <Component id="smart_proxy_url_label" min="-2" max="-2" attributes="0"/>
@@ -483,9 +483,9 @@
             <Component class="javax.swing.JLabel" name="jLabel2">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Ubuntu" size="14" style="2"/>
+                  <Font name="Ubuntu" size="12" style="2"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: it is recomended to enable MULTI SLOT with enough slots and be patient while MegaBasterd filters down proxies."/>
+                <Property name="text" type="java.lang.String" value="Note: it is recomended to enable MULTI SLOT with enough slots and be patient while MegaBasterd filters down proxies. MegaBasterd will try first to download chunk without proxy. (Use CTRL+V in order to paste URL)"/>
               </Properties>
             </Component>
           </SubComponents>
@@ -532,7 +532,7 @@
                                   </Group>
                                   <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="406" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="590" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -684,7 +684,7 @@
                               <Component id="delete_all_accounts_button" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="unlock_accounts_button" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace pref="242" max="32767" attributes="0"/>
+                              <EmptySpace pref="352" max="32767" attributes="0"/>
                               <Component id="encrypt_pass_checkbox" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
