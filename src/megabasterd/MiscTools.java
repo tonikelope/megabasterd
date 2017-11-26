@@ -82,7 +82,7 @@ public final class MiscTools {
 
     public static final int EXP_BACKOFF_BASE = 2;
     public static final int EXP_BACKOFF_SECS_RETRY = 1;
-    public static final int EXP_BACKOFF_MAX_WAIT_TIME = 64;
+    public static final int EXP_BACKOFF_MAX_WAIT_TIME = 16;
     public static final Object PASS_LOCK = new Object();
 
     private static final ConcurrentHashMap<String, Method> REFLECTION_METHOD_CACHE = new ConcurrentHashMap<>();
@@ -1076,32 +1076,19 @@ public final class MiscTools {
         return builder.build();
     }
 
-    public static CloseableHttpClient getApacheKissHttpClientSmartProxy() {
+    public static CloseableHttpClient getApacheKissHttpClientSmartProxy(String current_proxy) throws Exception {
 
         HttpClientBuilder builder = _getApacheKissHttpClientBuilder();
 
-        if (MainPanel.isUse_proxy() && MainPanel.getProxy_host() != null) {
+        String[] proxy_parts = current_proxy.split(":");
 
-            HttpHost proxy = new HttpHost(MainPanel.getProxy_host(), MainPanel.getProxy_port());
+        HttpHost proxy = new HttpHost(proxy_parts[0], Integer.valueOf(proxy_parts[1]));
 
-            builder = builder.setProxy(proxy);
-
-            if (MainPanel.getProxy_credentials() != null) {
-
-                CredentialsProvider credsProvider = new BasicCredentialsProvider();
-
-                AuthScope authScope = new AuthScope(MainPanel.getProxy_host(), MainPanel.getProxy_port());
-
-                credsProvider.setCredentials(authScope, MainPanel.getProxy_credentials());
-
-                builder = builder.setDefaultCredentialsProvider(credsProvider);
-            }
-        }
+        builder = builder.setProxy(proxy);
 
         RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(SmartMegaProxyManager.TIMEOUT * 1000)
-                .setConnectTimeout(SmartMegaProxyManager.TIMEOUT * 1000)
-                .setConnectionRequestTimeout(SmartMegaProxyManager.TIMEOUT * 1000)
+                .setSocketTimeout(SmartMegaProxyManager.PROXY_TIMEOUT * 1000)
+                .setConnectTimeout(SmartMegaProxyManager.PROXY_TIMEOUT * 1000)
                 .build();
 
         return builder.setDefaultRequestConfig(requestConfig).build();

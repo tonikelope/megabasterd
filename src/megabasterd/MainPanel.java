@@ -45,7 +45,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.27";
+    public static final String VERSION = "2.28";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -59,6 +59,9 @@ public final class MainPanel {
     private static int _proxy_port;
     private static Credentials _proxy_credentials;
     private static boolean _use_proxy;
+    private static boolean _use_smart_proxy;
+    private static String _use_smart_proxy_url;
+    private static SmartMegaProxyManager _proxy_manager;
 
     public static void main(String args[]) {
 
@@ -98,6 +101,10 @@ public final class MainPanel {
 
     public static Credentials getProxy_credentials() {
         return _proxy_credentials;
+    }
+
+    public static String getUse_smart_proxy_url() {
+        return _use_smart_proxy_url;
     }
 
     private volatile MainPanelView _view = null; //lazy init
@@ -162,6 +169,12 @@ public final class MainPanel {
 
         _use_proxy = false;
 
+        _use_smart_proxy = false;
+
+        _use_smart_proxy_url = "";
+
+        _proxy_manager = null;
+
         loadUserSettings();
 
         THREAD_POOL.execute((_download_manager = new DownloadManager(this)));
@@ -212,6 +225,24 @@ public final class MainPanel {
             _mega_proxy_server = null;
         }
 
+        if (_use_smart_proxy) {
+
+            _proxy_manager = new SmartMegaProxyManager(_use_smart_proxy_url);
+
+            THREAD_POOL.execute(_proxy_manager);
+        }
+    }
+
+    public static boolean isUse_smart_proxy() {
+        return _use_smart_proxy;
+    }
+
+    public static SmartMegaProxyManager getProxy_manager() {
+        return _proxy_manager;
+    }
+
+    public static void setProxy_manager(SmartMegaProxyManager proxy_manager) {
+        _proxy_manager = proxy_manager;
     }
 
     public MegaProxyServer getMega_proxy_server() {
@@ -561,6 +592,18 @@ public final class MainPanel {
             _megacrypter_reverse_port = (reverse_port == null || reverse_port.isEmpty()) ? DEFAULT_MEGA_PROXY_PORT : Integer.parseInt(reverse_port);
         }
 
+        String use_smart_proxy = selectSettingValueFromDB("smart_proxy");
+
+        if (use_smart_proxy != null) {
+            _use_smart_proxy = use_smart_proxy.equals("yes");
+        } else {
+            _use_smart_proxy = false;
+        }
+
+        if (_use_smart_proxy) {
+
+            _use_smart_proxy_url = selectSettingValueFromDB("smart_proxy_url");
+        }
     }
 
     public void _byebye() {

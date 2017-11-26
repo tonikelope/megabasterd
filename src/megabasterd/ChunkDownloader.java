@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static megabasterd.MainPanel.*;
@@ -25,6 +26,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private boolean _notified;
+    private String _proxy;
 
     public ChunkDownloader(int id, Download download) {
         _notified = false;
@@ -94,15 +96,49 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         int reads, conta_error, http_status;
         InputStream is;
         boolean error;
+        String current_proxy = null;
+        ArrayList<String> excluded = new ArrayList<>();
+        CloseableHttpClient httpclient = null;
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 
-        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+        try {
+
             conta_error = 0;
 
             error = false;
 
             while (!_exit && !_download.isStopped()) {
+
+                if (httpclient == null || error || MainPanel.isUse_smart_proxy()) {
+
+                    if (MainPanel.isUse_smart_proxy()) {
+
+                        if (error && current_proxy != null) {
+
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
+
+                            excluded.add(current_proxy);
+                        }
+
+                        current_proxy = MainPanel.getProxy_manager().getRandomProxy(excluded);
+
+                        if (httpclient != null) {
+                            try {
+                                httpclient.close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+
+                        httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+
+                    } else if (httpclient == null) {
+
+                        httpclient = MiscTools.getApacheKissHttpClient();
+                    }
+                }
+
                 if (worker_url == null || error) {
 
                     worker_url = _download.getDownloadUrlForWorker();
@@ -174,7 +210,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 _download.getView().updateSlotsStatus();
 
-                                Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                                if (!MainPanel.isUse_smart_proxy()) {
+                                    Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                                }
 
                                 _error_wait = false;
 
@@ -197,6 +235,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         _download.rejectChunkId(chunk.getId());
                     }
                 } catch (IOException ex) {
+
                     error = true;
 
                     _download.rejectChunkId(chunk.getId());
@@ -222,6 +261,17 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (URISyntaxException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+
+            if (httpclient != null) {
+                try {
+                    httpclient.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
 
         _download.stopThisSlot(this);

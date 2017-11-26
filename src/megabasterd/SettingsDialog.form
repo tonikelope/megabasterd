@@ -107,6 +107,7 @@
                   <Group type="102" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jSeparator8" alignment="1" max="32767" attributes="0"/>
                           <Component id="jSeparator3" alignment="1" max="32767" attributes="0"/>
                           <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
                           <Group type="102" alignment="0" attributes="0">
@@ -117,8 +118,11 @@
                           <Component id="jSeparator2" alignment="0" max="32767" attributes="0"/>
                           <Component id="jSeparator4" alignment="0" max="32767" attributes="0"/>
                           <Component id="jSeparator7" alignment="0" max="32767" attributes="0"/>
+                          <Component id="jSeparator10" alignment="0" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="smart_proxy_checkbox" min="-2" max="-2" attributes="0"/>
+                                  <Component id="megacrypter_reverse_checkbox" min="-2" max="-2" attributes="0"/>
                                   <Component id="down_dir_label" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="multi_slot_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                   <Component id="rec_download_slots_label" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -159,9 +163,14 @@
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="megacrypter_reverse_warning_label" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <Component id="megacrypter_reverse_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  <Component id="jLabel2" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="0" pref="5" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="79" max="32767" attributes="0"/>
+                          </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="smart_proxy_url_label" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="smart_proxy_url_text" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -219,6 +228,8 @@
                           <Component id="use_mega_label" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="jSeparator8" min="-2" pref="8" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="megacrypter_reverse_checkbox" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
@@ -226,7 +237,18 @@
                           <Component id="megacrypter_reverse_warning_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="megacrypter_reverse_port_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="25" max="32767" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="jSeparator10" min="-2" pref="10" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="smart_proxy_checkbox" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="11" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="smart_proxy_url_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="smart_proxy_url_text" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -428,6 +450,44 @@
                 </Property>
               </Properties>
             </Component>
+            <Component class="javax.swing.JSeparator" name="jSeparator8">
+            </Component>
+            <Component class="javax.swing.JSeparator" name="jSeparator10">
+            </Component>
+            <Component class="javax.swing.JCheckBox" name="smart_proxy_checkbox">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Ubuntu" size="20" style="1"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Use SmartProxy (experimental)"/>
+              </Properties>
+              <Events>
+                <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="smart_proxy_checkboxStateChanged"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JLabel" name="smart_proxy_url_label">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Ubuntu" size="16" style="0"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="URL:"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JTextField" name="smart_proxy_url_text">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Ubuntu" size="16" style="0"/>
+                </Property>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JLabel" name="jLabel2">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Ubuntu" size="14" style="2"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Note: it is recomended to enable MULTI SLOT with enough slots and be patient while MegaBasterd filters down proxies."/>
+              </Properties>
+            </Component>
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="uploads_panel">
@@ -507,7 +567,7 @@
                           <Component id="max_up_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="max_up_speed_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="314" max="32767" attributes="0"/>
+                      <EmptySpace pref="427" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -614,16 +674,17 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" attributes="0">
+                  <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="jSeparator9" max="32767" attributes="0"/>
                           <Component id="mega_accounts_scrollpane" alignment="0" max="32767" attributes="0"/>
                           <Component id="elc_accounts_scrollpane" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Component id="delete_all_accounts_button" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="unlock_accounts_button" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace pref="242" max="32767" attributes="0"/>
                               <Component id="encrypt_pass_checkbox" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
@@ -631,17 +692,18 @@
                               <EmptySpace max="32767" attributes="0"/>
                               <Component id="add_mega_account_button" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Component id="remove_elc_account_button" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
+                              <Component id="add_elc_account_button" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="mega_accounts_label" min="-2" max="-2" attributes="0"/>
                                   <Component id="elc_accounts_label" alignment="0" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                          </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <Component id="remove_elc_account_button" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
-                              <Component id="add_elc_account_button" min="-2" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
@@ -660,6 +722,8 @@
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="mega_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="mega_accounts_scrollpane" min="-2" pref="140" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
@@ -667,6 +731,8 @@
                           <Component id="add_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                      <Component id="jSeparator9" min="-2" pref="7" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="elc_accounts_scrollpane" min="-2" pref="140" max="-2" attributes="0"/>
@@ -675,7 +741,7 @@
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="add_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace pref="131" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -848,6 +914,16 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="add_elc_account_buttonActionPerformed"/>
               </Events>
             </Component>
+            <Component class="javax.swing.JLabel" name="jLabel1">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Ubuntu" size="16" style="2"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="Note: you can use a (optional) alias for your email addresses -&gt; bob@supermail.com#bob_mail"/>
+              </Properties>
+            </Component>
+            <Component class="javax.swing.JSeparator" name="jSeparator9">
+            </Component>
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="jPanel1">
@@ -874,7 +950,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="proxy_panel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="331" max="32767" attributes="0"/>
+                      <EmptySpace pref="444" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1005,7 +1081,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Ubuntu" size="16" style="0"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Warning: Megabasterd will use this proxy for ALL connections (megacrypter reverse mode might fail when using proxy)."/>
+                    <Property name="text" type="java.lang.String" value="Warning: Megabasterd will use this proxy for ALL connections."/>
                     <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>

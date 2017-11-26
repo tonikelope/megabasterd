@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static megabasterd.MainPanel.*;
@@ -26,15 +27,18 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
         String worker_url = null;
+        String current_proxy = null;
         Chunk chunk;
         int reads, conta_error, http_status = 200;
         boolean error;
+        ArrayList<String> excluded = new ArrayList<>();
         HttpGet httpget = null;
         CloseableHttpResponse httpresponse = null;
+        CloseableHttpClient httpclient = null;
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), getId()});
 
-        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+        try {
             conta_error = 0;
 
             error = false;
@@ -42,7 +46,34 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             InputStream is = null;
 
             while (!isExit() && !getDownload().isStopped()) {
-                if (worker_url == null || error) {
+
+                if (httpclient == null || worker_url == null || error || MainPanel.isUse_smart_proxy()) {
+
+                    if (MainPanel.isUse_smart_proxy()) {
+
+                        if (error && current_proxy != null) {
+
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker mono: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
+
+                            excluded.add(current_proxy);
+                        }
+
+                        current_proxy = MainPanel.getProxy_manager().getRandomProxy(excluded);
+
+                        if (httpclient != null) {
+                            try {
+                                httpclient.close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+
+                        httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+
+                    } else if (httpclient == null) {
+
+                        httpclient = MiscTools.getApacheKissHttpClient();
+                    }
 
                     worker_url = getDownload().getDownloadUrlForWorker();
 
@@ -50,44 +81,45 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                         httpresponse.close();
                     }
                 }
-
                 chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), null);
 
-                if (httpget == null || error) {
+                try {
 
-                    httpget = new HttpGet(new URI(worker_url + "/" + chunk.getOffset()));
+                    if (httpget == null || error) {
 
-                    httpresponse = httpclient.execute(httpget);
+                        httpget = new HttpGet(new URI(worker_url + "/" + chunk.getOffset()));
 
-                    is = new ThrottledInputStream(httpresponse.getEntity().getContent(), getDownload().getMain_panel().getStream_supervisor());
+                        httpresponse = httpclient.execute(httpget);
 
-                    http_status = httpresponse.getStatusLine().getStatusCode();
-                }
+                        is = new ThrottledInputStream(httpresponse.getEntity().getContent(), getDownload().getMain_panel().getStream_supervisor());
 
-                error = false;
-
-                if (http_status != HttpStatus.SC_OK) {
-
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
-
-                    error = true;
-
-                    getDownload().rejectChunkId(chunk.getId());
-
-                    conta_error++;
-
-                    if (!isExit()) {
-
-                        setError_wait(true);
-
-                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-
-                        setError_wait(false);
+                        http_status = httpresponse.getStatusLine().getStatusCode();
                     }
 
-                } else {
+                    error = false;
 
-                    try {
+                    if (http_status != HttpStatus.SC_OK) {
+
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+
+                        error = true;
+
+                        getDownload().rejectChunkId(chunk.getId());
+
+                        conta_error++;
+
+                        if (!isExit()) {
+
+                            setError_wait(true);
+
+                            if (!MainPanel.isUse_smart_proxy()) {
+                                Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                            }
+
+                            setError_wait(false);
+                        }
+
+                    } else {
 
                         if (!isExit() && !getDownload().isStopped() && is != null) {
 
@@ -129,7 +161,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                     setError_wait(true);
 
-                                    Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                                    if (!MainPanel.isUse_smart_proxy()) {
+                                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                                    }
 
                                     setError_wait(false);
                                 }
@@ -147,22 +181,24 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             getDownload().rejectChunkId(chunk.getId());
                         }
-                    } catch (IOException ex) {
-                        error = true;
 
-                        getDownload().rejectChunkId(chunk.getId());
-
-                        if (chunk.getOutputStream().size() > 0) {
-                            getDownload().getPartialProgressQueue().add(-1 * chunk.getOutputStream().size());
-
-                            getDownload().getProgress_meter().secureNotify();
-                        }
-
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
+
+                } catch (IOException ex) {
+                    error = true;
+
+                    getDownload().rejectChunkId(chunk.getId());
+
+                    if (chunk.getOutputStream().size() > 0) {
+                        getDownload().getPartialProgressQueue().add(-1 * chunk.getOutputStream().size());
+
+                        getDownload().getProgress_meter().secureNotify();
+                    }
+
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -176,6 +212,17 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         } catch (URISyntaxException | InterruptedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        } catch (Exception ex) {
+            Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+
+            if (httpclient != null) {
+                try {
+                    httpclient.close();
+                } catch (IOException ex) {
+                    Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
 
         getDownload().stopThisSlot(this);
