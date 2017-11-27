@@ -26,6 +26,24 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
     @Override
     public void run() {
+
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                while (!isExit()) {
+
+                    try {
+                        setUse_smart_proxy(false);
+                        Thread.sleep(ChunkDownloader.DISABLE_SMART_PROXY_TIMEOUT * 1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
+
         String worker_url = null;
         String current_proxy = null;
         Chunk chunk;
@@ -47,13 +65,18 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             while (!isExit() && !getDownload().isStopped()) {
 
-                if (httpclient == null || worker_url == null || error || (MainPanel.isUse_smart_proxy() && this.isError_no_proxy())) {
+                if (this.isUse_smart_proxy() && !MainPanel.isUse_smart_proxy()) {
 
-                    if (error) {
-                        this.setError_no_proxy(true);
+                    this.setUse_smart_proxy(false);
+                }
+
+                if (httpclient == null || worker_url == null || error || (MainPanel.isUse_smart_proxy() && this.isUse_smart_proxy())) {
+
+                    if (error && !this.isUse_smart_proxy()) {
+                        this.setUse_smart_proxy(true);
                     }
 
-                    if (MainPanel.isUse_smart_proxy() && this.isError_no_proxy()) {
+                    if (this.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                         if (error && current_proxy != null) {
 
@@ -84,7 +107,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     if (httpresponse != null) {
                         httpresponse.close();
                     }
+
                 }
+
                 chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), null);
 
                 try {

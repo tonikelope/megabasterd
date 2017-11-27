@@ -20,14 +20,14 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
+    public static final int DISABLE_SMART_PROXY_TIMEOUT = 3600;
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private boolean _notified;
-    private boolean _error_no_proxy;
-    private String _proxy;
+    private volatile boolean _use_smart_proxy;
 
     public ChunkDownloader(int id, Download download) {
         _notified = false;
@@ -36,15 +36,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _id = id;
         _download = download;
         _error_wait = false;
-        _error_no_proxy = false;
+        _use_smart_proxy = false;
     }
 
-    public boolean isError_no_proxy() {
-        return _error_no_proxy;
+    public boolean isUse_smart_proxy() {
+        return _use_smart_proxy;
     }
 
-    public void setError_no_proxy(boolean _error_no_proxy) {
-        this._error_no_proxy = _error_no_proxy;
+    public void setUse_smart_proxy(boolean value) {
+        _use_smart_proxy = value;
     }
 
     public void setExit(boolean exit) {
@@ -101,6 +101,24 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     @Override
     public void run() {
+
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                while (!_exit) {
+
+                    try {
+                        _use_smart_proxy = false;
+                        Thread.sleep(DISABLE_SMART_PROXY_TIMEOUT * 1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
+
         String worker_url = null;
         Chunk chunk;
         int reads, conta_error, http_status;
@@ -120,13 +138,18 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             while (!_exit && !_download.isStopped()) {
 
-                if (httpclient == null || error || (MainPanel.isUse_smart_proxy() && _error_no_proxy)) {
+                if (_use_smart_proxy && !MainPanel.isUse_smart_proxy()) {
 
-                    if (error) {
-                        _error_no_proxy = true;
+                    _use_smart_proxy = false;
+                }
+
+                if (httpclient == null || error || (MainPanel.isUse_smart_proxy() && _use_smart_proxy)) {
+
+                    if (error && !_use_smart_proxy) {
+                        _use_smart_proxy = true;
                     }
 
-                    if (MainPanel.isUse_smart_proxy() && _error_no_proxy) {
+                    if (_use_smart_proxy && !MainPanel.isUse_proxy()) {
 
                         if (error && current_proxy != null) {
 
