@@ -389,7 +389,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         _ul_key = _ma.genUploadKey();
 
-                        DBTools.insertUpload(_file_name, _ma.getEmail(), _parent_node, Bin2BASE64(i32a2bin(_ul_key)), _root_node, Bin2BASE64(_share_key), _folder_link);
+                        DBTools.insertUpload(_file_name, _ma.getFull_email(), _parent_node, Bin2BASE64(i32a2bin(_ul_key)), _root_node, Bin2BASE64(_share_key), _folder_link);
 
                         _provision_ok = true;
 
@@ -427,7 +427,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         } else {
 
-            printStatus("Waiting to start (" + _ma.getEmail() + ") ...");
+            printStatus("Waiting to start (" + _ma.getFull_email() + ") ...");
 
             swingReflectionInvoke("setVisible", getView().getFile_name_label(), true);
 
@@ -644,7 +644,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 try {
 
-                    DBTools.updateUploadUrl(_file_name, _ma.getEmail(), _ul_url);
+                    DBTools.updateUploadUrl(_file_name, _ma.getFull_email(), _ul_url);
                 } catch (SQLException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
@@ -717,7 +717,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     }
                 }
 
-                printStatus("Uploading file to mega (" + _ma.getEmail() + ") ...");
+                printStatus("Uploading file to mega (" + _ma.getFull_email() + ") ...");
 
                 getMain_panel().getUpload_manager().secureNotify();
 
@@ -780,7 +780,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
 
-                        _exit_message = "File successfully uploaded! (" + _ma.getEmail() + ")";
+                        _exit_message = "File successfully uploaded! (" + _ma.getFull_email() + ")";
 
                         try {
 
@@ -864,7 +864,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             if (!_status_error) {
 
                 try {
-                    DBTools.deleteUpload(_file_name, _ma.getEmail());
+                    DBTools.deleteUpload(_file_name, _ma.getFull_email());
                 } catch (SQLException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
@@ -973,7 +973,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             _exit = true;
 
             try {
-                DBTools.deleteUpload(_file_name, _ma.getEmail());
+                DBTools.deleteUpload(_file_name, _ma.getFull_email());
             } catch (SQLException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }

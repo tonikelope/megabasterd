@@ -77,7 +77,7 @@ public final class UploadManager extends TransferenceManager {
 
                 _total_transferences_size -= u.getFile_size();
 
-                delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getEmail()});
+                delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
 
                 try {
 

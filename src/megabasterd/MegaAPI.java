@@ -55,6 +55,8 @@ public final class MegaAPI {
 
     private String _email;
 
+    private String _full_email;
+
     private String _trashbin_id;
 
     private String _req_id;
@@ -78,8 +80,8 @@ public final class MegaAPI {
 
     }
 
-    public String getEmail() {
-        return _email;
+    public String getFull_email() {
+        return _full_email;
     }
 
     public int[] getPassword_aes() {
@@ -152,6 +154,8 @@ public final class MegaAPI {
 
     public void login(String email, String password) throws Exception, MegaAPIException {
 
+        _full_email = email;
+
         String[] email_split = email.split(" *# *");
 
         _email = email_split[0];
@@ -164,6 +168,8 @@ public final class MegaAPI {
     }
 
     public void fastLogin(String email, int[] password_aes, String user_hash) throws Exception, MegaAPIException {
+
+        _full_email = email;
 
         String[] email_split = email.split(" *# *");
 

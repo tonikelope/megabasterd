@@ -491,7 +491,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                             }
                         }
 
-                        getView().printStatusNormal("Downloading file from mega " + (_ma.getEmail() != null ? "(" + _ma.getEmail() + ")" : "") + " ...");
+                        getView().printStatusNormal("Downloading file from mega " + (_ma.getFull_email() != null ? "(" + _ma.getFull_email() + ")" : "") + " ...");
 
                         getMain_panel().getDownload_manager().secureNotify();
 
@@ -758,7 +758,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     try {
 
-                        insertDownload(_url, _ma.getEmail(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
+                        insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
 
                         _provision_ok = true;
 
@@ -775,7 +775,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 try {
 
-                    insertDownload(_url, _ma.getEmail(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
+                    insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
 
                     _provision_ok = true;
 
