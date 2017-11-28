@@ -27,8 +27,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
 
-        this._start_smart_proxy_watchdog();
-
         String worker_url = null;
         String current_proxy = null;
         Chunk chunk;
@@ -50,18 +48,18 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             while (!isExit() && !getDownload().isStopped()) {
 
-                if (this.isUse_smart_proxy() && !MainPanel.isUse_smart_proxy()) {
+                if (this.getDownload().isUse_smart_proxy() && !MainPanel.isUse_smart_proxy()) {
 
-                    this.setUse_smart_proxy(false);
+                    this.getDownload().setUse_smart_proxy(false);
                 }
 
-                if (httpclient == null || worker_url == null || error || (MainPanel.isUse_smart_proxy() && this.isUse_smart_proxy())) {
+                if (httpclient == null || worker_url == null || error || (MainPanel.isUse_smart_proxy() && this.getDownload().isUse_smart_proxy())) {
 
-                    if (error && !this.isUse_smart_proxy()) {
-                        this.setUse_smart_proxy(true);
+                    if (error && !this.getDownload().isUse_smart_proxy()) {
+                        this.getDownload().setUse_smart_proxy(true);
                     }
 
-                    if (this.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    if (this.getDownload().isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                         if (error && current_proxy != null) {
 

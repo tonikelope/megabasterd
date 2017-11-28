@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static megabasterd.MainPanel.*;
@@ -20,17 +19,12 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int WATCHDOG_SMART_PROXY_TIMEOUT = 3600;
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private boolean _notified;
-    private volatile boolean _use_smart_proxy;
-    private volatile int _last_proxy_list_hashcode;
-    private final ArrayList<String> _excluded_proxies;
-    private final Object _watchdog_lock;
 
     public ChunkDownloader(int id, Download download) {
         _notified = false;
@@ -39,18 +33,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _id = id;
         _download = download;
         _error_wait = false;
-        _use_smart_proxy = false;
-        _watchdog_lock = new Object();
-        _excluded_proxies = new ArrayList<>();
-        _last_proxy_list_hashcode = -1;
-    }
 
-    public boolean isUse_smart_proxy() {
-        return _use_smart_proxy;
-    }
-
-    public void setUse_smart_proxy(boolean value) {
-        _use_smart_proxy = value;
     }
 
     public void setExit(boolean exit) {
@@ -108,8 +91,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     @Override
     public void run() {
 
-        _start_smart_proxy_watchdog();
-
         String worker_url = null;
         Chunk chunk;
         int reads, conta_error, http_status;
@@ -128,27 +109,27 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             while (!_exit && !_download.isStopped()) {
 
-                if (_use_smart_proxy && !MainPanel.isUse_smart_proxy()) {
+                if (_download.isUse_smart_proxy() && !MainPanel.isUse_smart_proxy()) {
 
-                    _use_smart_proxy = false;
+                    _download.setUse_smart_proxy(false);
                 }
 
-                if (httpclient == null || error || (MainPanel.isUse_smart_proxy() && _use_smart_proxy)) {
+                if (httpclient == null || error || (MainPanel.isUse_smart_proxy() && _download.isUse_smart_proxy())) {
 
-                    if (error && !_use_smart_proxy) {
-                        _use_smart_proxy = true;
+                    if (error && !_download.isUse_smart_proxy()) {
+                        _download.setUse_smart_proxy(true);
                     }
 
-                    if (_use_smart_proxy && !MainPanel.isUse_proxy()) {
+                    if (_download.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                         if (error && current_proxy != null) {
 
                             Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
 
-                            _excluded_proxies.add(current_proxy);
+                            _download.getExcluded_proxies().add(current_proxy);
                         }
 
-                        current_proxy = MainPanel.getProxy_manager().getRandomProxy(_excluded_proxies);
+                        current_proxy = MainPanel.getProxy_manager().getRandomProxy(_download.getExcluded_proxies());
 
                         if (httpclient != null) {
                             try {
@@ -300,58 +281,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 }
             }
         }
-        
-        synchronized(_watchdog_lock) {
-                            
-            _watchdog_lock.notify();
-        }
 
         _download.stopThisSlot(this);
 
         _download.getChunkwriter().secureNotify();
-        
+
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
     }
-
-    protected void _start_smart_proxy_watchdog() {
-
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                while (!_exit && !_download.isStopped()) {
-
-                    try {
-                        
-                        if(_use_smart_proxy) {
-                            
-                            _use_smart_proxy = false;
-
-                            int proxy_list_hashcode = MainPanel.getProxy_manager().getProxy_list().hashCode();
-
-                            if (_last_proxy_list_hashcode != proxy_list_hashcode) {
-
-                                _last_proxy_list_hashcode = proxy_list_hashcode;
-                                _excluded_proxies.clear();
-                                Logger.getLogger(ChunkDownloader.class.getName()).log(Level.INFO, "{0} Worker [{1}]: SmartProxy excluded list cleared!", new Object[]{Thread.currentThread().getName(), _id});
-
-                            }
-                        }
-                        
-                        synchronized(_watchdog_lock) {
-
-                            if(!_exit) {
-                                _watchdog_lock.wait(WATCHDOG_SMART_PROXY_TIMEOUT * 1000);
-                            }
-                        }
-                        
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        });
-    }
-
 }
