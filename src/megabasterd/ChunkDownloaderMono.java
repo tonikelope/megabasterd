@@ -27,22 +27,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
 
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                while (!isExit()) {
-
-                    try {
-                        setUse_smart_proxy(false);
-                        Thread.sleep(ChunkDownloader.DISABLE_SMART_PROXY_TIMEOUT * 1000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        });
+        this._start_smart_proxy_watchdog();
 
         String worker_url = null;
         String current_proxy = null;

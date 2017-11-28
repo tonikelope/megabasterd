@@ -20,7 +20,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int DISABLE_SMART_PROXY_TIMEOUT = 3600;
+    public static final int WATCHDOG_SMART_PROXY_TIMEOUT = 3600;
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
@@ -28,6 +28,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private volatile boolean _error_wait;
     private boolean _notified;
     private volatile boolean _use_smart_proxy;
+    private volatile int _last_proxy_list_hashcode;
+    private final ArrayList<String> _excluded_proxies;
 
     public ChunkDownloader(int id, Download download) {
         _notified = false;
@@ -37,6 +39,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _download = download;
         _error_wait = false;
         _use_smart_proxy = false;
+        _excluded_proxies = new ArrayList<>();
+        _last_proxy_list_hashcode = -1;
     }
 
     public boolean isUse_smart_proxy() {
@@ -102,22 +106,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     @Override
     public void run() {
 
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                while (!_exit) {
-
-                    try {
-                        _use_smart_proxy = false;
-                        Thread.sleep(DISABLE_SMART_PROXY_TIMEOUT * 1000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        });
+        _start_smart_proxy_watchdog();
 
         String worker_url = null;
         Chunk chunk;
@@ -125,7 +114,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         InputStream is;
         boolean error;
         String current_proxy = null;
-        ArrayList<String> excluded = new ArrayList<>();
         CloseableHttpClient httpclient = null;
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
@@ -155,10 +143,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
 
-                            excluded.add(current_proxy);
+                            _excluded_proxies.add(current_proxy);
                         }
 
-                        current_proxy = MainPanel.getProxy_manager().getRandomProxy(excluded);
+                        current_proxy = MainPanel.getProxy_manager().getRandomProxy(_excluded_proxies);
 
                         if (httpclient != null) {
                             try {
@@ -316,6 +304,41 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _download.getChunkwriter().secureNotify();
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
+    }
+
+    protected void _start_smart_proxy_watchdog() {
+
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                while (!_exit) {
+
+                    try {
+                        
+                        if(_use_smart_proxy) {
+                            
+                            _use_smart_proxy = false;
+
+                            int proxy_list_hashcode = MainPanel.getProxy_manager().getProxy_list().hashCode();
+
+                            if (_last_proxy_list_hashcode != proxy_list_hashcode) {
+
+                                _last_proxy_list_hashcode = proxy_list_hashcode;
+                                _excluded_proxies.clear();
+                                Logger.getLogger(ChunkDownloader.class.getName()).log(Level.INFO, "{0} Worker [{1}]: SmartProxy excluded list cleared!", new Object[]{Thread.currentThread().getName(), _id});
+
+                            }
+                        }
+                        
+                        Thread.sleep(WATCHDOG_SMART_PROXY_TIMEOUT * 1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+        });
     }
 
 }
