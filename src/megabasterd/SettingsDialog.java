@@ -587,6 +587,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         jTabbedPane1.setDoubleBuffered(true);
         jTabbedPane1.setFont(new java.awt.Font("Ubuntu", 1, 22)); // NOI18N
 
+        jScrollPane2.setBorder(null);
+
         megacrypter_reverse_warning_label.setFont(new java.awt.Font("Ubuntu", 2, 14)); // NOI18N
         megacrypter_reverse_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
 
@@ -742,7 +744,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addComponent(megacrypter_reverse_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(megacrypter_reverse_warning_label)))
-                        .addGap(0, 539, Short.MAX_VALUE))
+                        .addGap(0, 542, Short.MAX_VALUE))
                     .addComponent(jSeparator2)
                     .addComponent(jSeparator3)
                     .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)

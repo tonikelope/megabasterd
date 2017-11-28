@@ -122,6 +122,11 @@
           </Layout>
           <SubComponents>
             <Container class="javax.swing.JScrollPane" name="jScrollPane2">
+              <Properties>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="null"/>
+                </Property>
+              </Properties>
 
               <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
               <SubComponents>
@@ -187,7 +192,7 @@
                                               <Component id="megacrypter_reverse_warning_label" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
-                                      <EmptySpace min="0" pref="539" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="542" max="32767" attributes="0"/>
                                   </Group>
                                   <Component id="jSeparator2" alignment="0" max="32767" attributes="0"/>
                                   <Component id="jSeparator3" alignment="0" max="32767" attributes="0"/>
