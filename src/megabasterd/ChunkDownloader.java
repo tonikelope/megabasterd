@@ -30,6 +30,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private volatile boolean _use_smart_proxy;
     private volatile int _last_proxy_list_hashcode;
     private final ArrayList<String> _excluded_proxies;
+    private final Object _watchdog_lock;
 
     public ChunkDownloader(int id, Download download) {
         _notified = false;
@@ -39,6 +40,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _download = download;
         _error_wait = false;
         _use_smart_proxy = false;
+        _watchdog_lock = new Object();
         _excluded_proxies = new ArrayList<>();
         _last_proxy_list_hashcode = -1;
     }
@@ -298,11 +300,16 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 }
             }
         }
+        
+        synchronized(_watchdog_lock) {
+                            
+            _watchdog_lock.notify();
+        }
 
         _download.stopThisSlot(this);
 
         _download.getChunkwriter().secureNotify();
-
+        
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
     }
 
@@ -332,7 +339,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             }
                         }
                         
-                        Thread.sleep(WATCHDOG_SMART_PROXY_TIMEOUT * 1000);
+                        synchronized(_watchdog_lock) {
+
+                            if(!_exit) {
+                                _watchdog_lock.wait(WATCHDOG_SMART_PROXY_TIMEOUT * 1000);
+                            }
+                        }
+                        
                     } catch (InterruptedException ex) {
                         Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
                     }
