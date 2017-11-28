@@ -320,7 +320,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
             @Override
             public void run() {
 
-                while (!_exit) {
+                while (!_exit && !_download.isStopped()) {
 
                     try {
                         
