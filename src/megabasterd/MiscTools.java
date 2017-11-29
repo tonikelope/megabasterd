@@ -23,6 +23,7 @@ import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
@@ -884,13 +885,17 @@ public final class MiscTools {
 
         if (data != null) {
 
-            ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", data, 0);
+            try {
+                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0);
 
-            links.addAll(findAllRegex("mega://e(n|l)c.*?[^\r\n]+", data, 0));
+                links.addAll(findAllRegex("mega://e(n|l)c.*?[^\r\n]+", data, 0));
 
-            for (String s : links) {
+                for (String s : links) {
 
-                res += s + "\n";
+                    res += s + "\n";
+                }
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -903,13 +908,17 @@ public final class MiscTools {
 
         if (data != null) {
 
-            ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", data, 0);
+            try {
+                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0);
 
-            links.addAll(findAllRegex("mega://e(n|l)c.*?[^\r\n]+", data, 0));
+                links.addAll(findAllRegex("mega://e(n|l)c.*?[^\r\n]+", data, 0));
 
-            if (links.size() > 0) {
+                if (links.size() > 0) {
 
-                res = links.get(0);
+                    res = links.get(0);
+                }
+            } catch (UnsupportedEncodingException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
