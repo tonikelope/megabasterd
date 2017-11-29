@@ -52,8 +52,7 @@ public final class MainPanel {
     public static final int WATCHDOG_PORT = 1338;
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:49.0) Gecko/20100101 Firefox/49.0";
-    public static final String ICON_FILE = "mbasterd_mini.png";
-    public static final String ICON_FILE_MED = "mbasterd_med.png";
+    public static final String ICON_FILE = "mbasterd_med.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
     private static String _proxy_host;
     private static int _proxy_port;
@@ -818,13 +817,11 @@ public final class MainPanel {
 
                 if (!(boolean) swingReflectionInvokeAndWaitForReturn("isVisible", getView())) {
                     swingReflectionInvoke("setExtendedState", getView(), NORMAL);
-
                     swingReflectionInvoke("setVisible", getView(), true);
                 } else {
                     swingReflectionInvoke("dispatchEvent", getView(), new WindowEvent(getView(), WINDOW_CLOSING));
                 }
             }
-
         };
 
         _trayicon = new TrayIcon(getDefaultToolkit().getImage(getClass().getResource(ICON_FILE)), "MegaBasterd", menu);

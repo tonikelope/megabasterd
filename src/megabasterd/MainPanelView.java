@@ -119,7 +119,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         setTitle("MegaBasterd " + VERSION);
 
-        setIconImage(new ImageIcon(getClass().getResource(ICON_FILE_MED)).getImage());
+        setIconImage(new ImageIcon(getClass().getResource(ICON_FILE)).getImage());
 
         swingReflectionInvoke("setVisible", global_speed_down_label, false);
         swingReflectionInvoke("setVisible", global_speed_up_label, false);
