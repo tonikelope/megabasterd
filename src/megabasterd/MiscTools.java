@@ -886,9 +886,9 @@ public final class MiscTools {
         if (data != null) {
 
             try {
-                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0);
+                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0);
 
-                links.addAll(findAllRegex("mega://e(n|l)c.*?[^\r\n]+", data, 0));
+                links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0));
 
                 for (String s : links) {
 
@@ -898,6 +898,8 @@ public final class MiscTools {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+
+        System.out.println(res);
 
         return res.trim();
     }
@@ -909,9 +911,9 @@ public final class MiscTools {
         if (data != null) {
 
             try {
-                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0);
+                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0);
 
-                links.addAll(findAllRegex("mega://e(n|l)c.*?[^\r\n]+", data, 0));
+                links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0));
 
                 if (links.size() > 0) {
 

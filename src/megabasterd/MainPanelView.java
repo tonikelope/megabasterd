@@ -502,9 +502,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                 @Override
                 public void run() {
 
-                    Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                    Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", dialog.getLinks_textarea().getText(), 0));
 
-                    Set<String> megadownloader = new HashSet(findAllRegex("mega://enc.*?[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                    Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
 
                     for (String link : megadownloader) {
 
@@ -517,7 +517,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                         }
                     }
 
-                    Set<String> elc = new HashSet(findAllRegex("mega://elc.*?[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                    Set<String> elc = new HashSet(findAllRegex("mega://elc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
 
                     for (String link : elc) {
 
@@ -538,7 +538,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         for (String link : links) {
 
-                            if (findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) != null) {
+                            if (findFirstRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", link, 0) != null) {
 
                                 urls.add(link);
                             }
@@ -555,7 +555,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             if (getMain_panel().getDownload_manager().getPre_count() > 0) {
                                 try {
-                                    url = URLDecoder.decode(url.replaceAll("^mega://", "https://mega.nz"), "UTF-8").trim();
+                                    url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
 
                                     Download download;
 

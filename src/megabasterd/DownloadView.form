@@ -34,8 +34,8 @@
                       <Component id="restart_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="keep_temp_checkbox" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="stop_button" min="-2" pref="199" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="stop_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="progress_pbar" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">

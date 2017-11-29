@@ -621,11 +621,10 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                         Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 } while (_ul_url == null && !_exit);
-                
-                
-                if(_ul_url != null) {
-                 
-                        try {
+
+                if (_ul_url != null) {
+
+                    try {
 
                         DBTools.updateUploadUrl(_file_name, _ma.getFull_email(), _ul_url);
                     } catch (SQLException ex) {
@@ -635,7 +634,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             }
 
             if (!_exit && _ul_url != null) {
-                
+
                 int[] file_iv = {_ul_key[4], _ul_key[5], 0, 0};
 
                 _byte_file_key = i32a2bin(Arrays.copyOfRange(_ul_key, 0, 4));
