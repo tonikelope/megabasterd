@@ -620,23 +620,27 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     } catch (InterruptedException ex) {
                         Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                } while (_ul_url == null);
+                } while (_ul_url == null && !_exit);
+                
+                
+                if(_ul_url != null) {
+                 
+                        try {
 
-                try {
-
-                    DBTools.updateUploadUrl(_file_name, _ma.getFull_email(), _ul_url);
-                } catch (SQLException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        DBTools.updateUploadUrl(_file_name, _ma.getFull_email(), _ul_url);
+                    } catch (SQLException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             }
 
-            int[] file_iv = {_ul_key[4], _ul_key[5], 0, 0};
+            if (!_exit && _ul_url != null) {
+                
+                int[] file_iv = {_ul_key[4], _ul_key[5], 0, 0};
 
-            _byte_file_key = i32a2bin(Arrays.copyOfRange(_ul_key, 0, 4));
+                _byte_file_key = i32a2bin(Arrays.copyOfRange(_ul_key, 0, 4));
 
-            _byte_file_iv = i32a2bin(file_iv);
-
-            if (!_exit) {
+                _byte_file_iv = i32a2bin(file_iv);
 
                 swingReflectionInvoke("setMinimum", getView().getProgress_pbar(), 0);
                 swingReflectionInvoke("setMaximum", getView().getProgress_pbar(), Integer.MAX_VALUE);
