@@ -115,6 +115,8 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                         _upload.getView().printStatusNormal("Finishing FILE MAC calculation... ***DO NOT EXIT MEGABASTERD NOW***");
 
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Macgenerator {1} Finishing FILE MAC calculation...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
+
                         swingReflectionInvokeAndWait("setEnabled", _upload.getView().getPause_button(), false);
 
                         upload_workers_finish = true;
@@ -169,7 +171,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                     temp_file_data = (String.valueOf(_bytes_read) + "|" + Bin2BASE64(i32a2bin(file_mac)));
 
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Macgenerator -> {1} {2} {3}", new Object[]{Thread.currentThread().getName(), temp_file_data, _upload.calculateLastUploadedChunk(_bytes_read), _last_chunk_id_read});
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Macgenerator -> {1} {2} {3} {4}", new Object[]{Thread.currentThread().getName(), temp_file_data, _upload.calculateLastUploadedChunk(_bytes_read), _last_chunk_id_read, this.getUpload().getFile_name()});
 
                     temp_file_out = new FileOutputStream(temp_file);
 
@@ -181,7 +183,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                 }
 
                 if (!_exit && (!_upload.isStopped() || !_upload.getChunkworkers().isEmpty()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1))) {
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1}/{2} METAMAC wait...", new Object[]{Thread.currentThread().getName(), _bytes_read, _upload.getFile_size()});
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1}/{2} METAMAC wait {3}...", new Object[]{Thread.currentThread().getName(), _bytes_read, _upload.getFile_size(), this.getUpload().getFile_name()});
                     secureWait();
                 }
             }
@@ -197,7 +199,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
             _upload.secureNotify();
 
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} MAC GENERATOR BYE BYE...", Thread.currentThread().getName());
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} MAC GENERATOR {1} BYE BYE...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
 
         } catch (Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);

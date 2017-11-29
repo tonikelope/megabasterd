@@ -1,5 +1,6 @@
 package megabasterd;
 
+import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -51,8 +52,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public static final int WATCHDOG_SMART_PROXY_TIMEOUT = 3600;
 
     private final MainPanel _main_panel;
-    private volatile DownloadView _view = null; //lazy init
-    private volatile ProgressMeter _progress_meter = null; //lazy init;
+    private volatile DownloadView _view;
+    private volatile ProgressMeter _progress_meter;
     private final Object _secure_notify_lock;
     private final Object _workers_lock;
     private final Object _chunkid_lock;
@@ -133,6 +134,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
+        _view = new DownloadView(this);
+        _progress_meter = new ProgressMeter(this);
     }
 
     public boolean isUse_smart_proxy() {
@@ -140,6 +143,13 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     }
 
     public void setUse_smart_proxy(boolean _use_smart_proxy) {
+
+        if (_use_smart_proxy) {
+            swingReflectionInvoke("setForeground", this.getView().getSpeed_label(), Color.ORANGE);
+        } else {
+            swingReflectionInvoke("setForeground", this.getView().getSpeed_label(), new Color(0, 128, 255));
+        }
+
         this._use_smart_proxy = _use_smart_proxy;
     }
 
@@ -251,45 +261,13 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     @Override
     public ProgressMeter getProgress_meter() {
 
-        ProgressMeter result = _progress_meter;
-
-        if (result == null) {
-
-            synchronized (this) {
-
-                result = _progress_meter;
-
-                if (result == null) {
-
-                    _progress_meter = result = new ProgressMeter(this);
-
-                }
-            }
-        }
-
-        return result;
+        return this._progress_meter;
     }
 
     @Override
     public DownloadView getView() {
 
-        DownloadView result = _view;
-
-        if (result == null) {
-
-            synchronized (this) {
-
-                result = _view;
-
-                if (result == null) {
-
-                    _view = result = new DownloadView(this);
-
-                }
-            }
-        }
-
-        return result;
+        return this._view;
     }
 
     @Override

@@ -125,15 +125,15 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 4, true));
 
-        status_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        status_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         status_label.setText("status");
         status_label.setDoubleBuffered(true);
 
-        slots_label.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        slots_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         slots_label.setText("Slots");
         slots_label.setDoubleBuffered(true);
 
-        slots_spinner.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
+        slots_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         slots_spinner.setToolTipText("Slots");
         slots_spinner.setDoubleBuffered(true);
         slots_spinner.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -142,16 +142,16 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             }
         });
 
-        speed_label.setFont(new java.awt.Font("Ubuntu", 3, 26)); // NOI18N
+        speed_label.setFont(new java.awt.Font("Dialog", 3, 26)); // NOI18N
         speed_label.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         speed_label.setText("speed");
         speed_label.setDoubleBuffered(true);
 
-        progress_pbar.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        progress_pbar.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         progress_pbar.setDoubleBuffered(true);
 
         pause_button.setBackground(new java.awt.Color(255, 153, 0));
-        pause_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        pause_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         pause_button.setForeground(java.awt.Color.white);
         pause_button.setText("PAUSE DOWNLOAD");
         pause_button.setDoubleBuffered(true);
@@ -162,7 +162,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         });
 
         stop_button.setBackground(new java.awt.Color(255, 0, 0));
-        stop_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        stop_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         stop_button.setForeground(java.awt.Color.white);
         stop_button.setText("CANCEL DOWNLOAD");
         stop_button.setDoubleBuffered(true);
@@ -172,17 +172,17 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             }
         });
 
-        keep_temp_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        keep_temp_checkbox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         keep_temp_checkbox.setSelected(true);
         keep_temp_checkbox.setText("Keep temp file");
         keep_temp_checkbox.setDoubleBuffered(true);
 
-        file_name_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        file_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         file_name_label.setForeground(new java.awt.Color(51, 51, 255));
         file_name_label.setText("file_name");
         file_name_label.setDoubleBuffered(true);
 
-        close_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        close_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         close_button.setText("Close");
         close_button.setDoubleBuffered(true);
         close_button.addActionListener(new java.awt.event.ActionListener() {
@@ -191,7 +191,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             }
         });
 
-        copy_link_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        copy_link_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         copy_link_button.setText("Copy link");
         copy_link_button.setDoubleBuffered(true);
         copy_link_button.addActionListener(new java.awt.event.ActionListener() {
@@ -201,7 +201,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         });
 
         restart_button.setBackground(new java.awt.Color(51, 51, 255));
-        restart_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        restart_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         restart_button.setForeground(new java.awt.Color(255, 255, 255));
         restart_button.setText("Restart");
         restart_button.setDoubleBuffered(true);
@@ -211,7 +211,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             }
         });
 
-        file_size_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        file_size_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         file_size_label.setForeground(new java.awt.Color(51, 51, 255));
         file_size_label.setText("file_size");
         file_size_label.setDoubleBuffered(true);
@@ -219,7 +219,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         slot_status_label.setDoubleBuffered(true);
 
-        open_folder_button.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        open_folder_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         open_folder_button.setText("Open folder");
         open_folder_button.setDoubleBuffered(true);
         open_folder_button.addActionListener(new java.awt.event.ActionListener() {

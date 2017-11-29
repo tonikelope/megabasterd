@@ -3,6 +3,8 @@ package megabasterd;
 import java.awt.Dialog;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -91,12 +93,12 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Streamer");
 
-        put_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        put_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         put_label.setText("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:");
         put_label.setDoubleBuffered(true);
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
-        dance_button.setFont(new java.awt.Font("Ubuntu", 1, 24)); // NOI18N
+        dance_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
@@ -106,13 +108,13 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
             }
         });
 
-        original_link_textfield.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
+        original_link_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         original_link_textfield.setDoubleBuffered(true);
 
-        use_mega_account_down_label.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        use_mega_account_down_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         use_mega_account_down_label.setText("Use this account for streaming:");
 
-        use_mega_account_down_combobox.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         use_mega_account_down_combobox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 use_mega_account_down_comboboxItemStateChanged(evt);
@@ -168,72 +170,76 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
             @Override
             public void run() {
 
-                boolean error = false;
+                try {
+                    boolean error = false;
 
-                String stream_link = null;
+                    String stream_link = null;
 
-                String link = ((String) swingReflectionInvokeAndWaitForReturn("getText", original_link_textfield)).trim();
+                    String link = URLDecoder.decode((String) swingReflectionInvokeAndWaitForReturn("getText", original_link_textfield), "UTF-8").trim();
 
-                if (link.length() > 0) {
+                    if (link.length() > 0) {
 
-                    try {
+                        try {
 
-                        if (findFirstRegex("://enc", link, 0) != null) {
+                            if (findFirstRegex("://enc", link, 0) != null) {
 
-                            link = CryptTools.decryptMegaDownloaderLink(link);
+                                link = CryptTools.decryptMegaDownloaderLink(link);
 
-                        } else if (findFirstRegex("://elc", link, 0) != null) {
+                            } else if (findFirstRegex("://elc", link, 0) != null) {
 
-                            HashSet links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
+                                HashSet links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
 
-                            if (links != null) {
+                                if (links != null) {
 
-                                link = (String) links.iterator().next();
+                                    link = (String) links.iterator().next();
+                                }
                             }
+
+                        } catch (Exception ex) {
+
+                            error = true;
+
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
 
-                    } catch (Exception ex) {
+                        String data;
 
-                        error = true;
+                        if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
 
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
+                            data = Bin2UrlBASE64(((_last_selected_account != null ? _last_selected_account : "") + "|" + link).getBytes());
 
-                    String data;
+                            stream_link = "http://localhost:1337/video/" + data;
 
-                    if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
+                        } else {
 
-                        data = Bin2UrlBASE64(((_last_selected_account != null ? _last_selected_account : "") + "|" + link).getBytes());
-
-                        stream_link = "http://localhost:1337/video/" + data;
+                            error = true;
+                        }
 
                     } else {
 
                         error = true;
                     }
 
-                } else {
+                    if (error) {
 
-                    error = true;
-                }
+                        JOptionPane.showMessageDialog(tthis, "Please, paste a Mega/MegaCrypter/ELC link!", "Error", JOptionPane.ERROR_MESSAGE);
 
-                if (error) {
+                        swingReflectionInvoke("setText", original_link_textfield, "");
 
-                    JOptionPane.showMessageDialog(tthis, "Please, paste a Mega/MegaCrypter/ELC link!", "Error", JOptionPane.ERROR_MESSAGE);
+                        swingReflectionInvoke("setEnabled", dance_button, true);
 
-                    swingReflectionInvoke("setText", original_link_textfield, "");
+                        swingReflectionInvoke("setEnabled", original_link_textfield, true);
 
-                    swingReflectionInvoke("setEnabled", dance_button, true);
+                    } else {
 
-                    swingReflectionInvoke("setEnabled", original_link_textfield, true);
-
-                } else {
-
-                    _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
-                    copyTextToClipboard(stream_link);
-                    JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content. (I recommend to use MPLAYER)");
-                    dispose();
-                    getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
+                        _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
+                        copyTextToClipboard(stream_link);
+                        JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content. (I recommend to use MPLAYER)");
+                        dispose();
+                        getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
+                    }
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(StreamerDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
             }

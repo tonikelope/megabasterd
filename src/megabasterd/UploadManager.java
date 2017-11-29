@@ -73,25 +73,23 @@ public final class UploadManager extends TransferenceManager {
 
             getTransference_finished_queue().remove(u);
 
-            if (((Upload) u).isProvision_ok()) {
+            _total_transferences_size -= u.getFile_size();
 
-                _total_transferences_size -= u.getFile_size();
+            delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
 
-                delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
+            try {
 
-                try {
+                File temp_file = new File("." + HashString("SHA-1", u.getFile_name()));
 
-                    File temp_file = new File("." + HashString("SHA-1", u.getFile_name()));
+                if (temp_file.exists()) {
 
-                    if (temp_file.exists()) {
-
-                        temp_file.delete();
-                    }
-
-                } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                    temp_file.delete();
                 }
+
+            } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
+                Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
             }
+
         }
 
         try {

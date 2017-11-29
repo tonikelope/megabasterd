@@ -566,7 +566,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Settings");
 
-        ok_button.setFont(new java.awt.Font("Ubuntu", 1, 22)); // NOI18N
+        ok_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
         ok_button.setText("OK");
         ok_button.setDoubleBuffered(true);
         ok_button.addActionListener(new java.awt.event.ActionListener() {
@@ -575,7 +575,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        cancel_button.setFont(new java.awt.Font("Ubuntu", 1, 22)); // NOI18N
+        cancel_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
         cancel_button.setText("CANCEL");
         cancel_button.setDoubleBuffered(true);
         cancel_button.addActionListener(new java.awt.event.ActionListener() {
@@ -585,17 +585,17 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         jTabbedPane1.setDoubleBuffered(true);
-        jTabbedPane1.setFont(new java.awt.Font("Ubuntu", 1, 22)); // NOI18N
+        jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
 
         jScrollPane2.setBorder(null);
 
-        megacrypter_reverse_warning_label.setFont(new java.awt.Font("Ubuntu", 2, 14)); // NOI18N
+        megacrypter_reverse_warning_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         megacrypter_reverse_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
 
-        rec_download_slots_label.setFont(new java.awt.Font("Ubuntu", 2, 14)); // NOI18N
+        rec_download_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         rec_download_slots_label.setText("Note: it is recommended not to enable MULTI SLOT (unless you want to download +5GB file without PRO account, in which case you will MUST USE multi slot). ");
 
-        megacrypter_reverse_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        megacrypter_reverse_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         megacrypter_reverse_checkbox.setText("Use Megacrypter reverse mode");
         megacrypter_reverse_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -603,7 +603,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        limit_download_speed_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        limit_download_speed_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         limit_download_speed_checkbox.setText("Limit download speed");
         limit_download_speed_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -611,11 +611,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        max_downloads_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        max_downloads_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         max_downloads_label.setText("Max parallel downloads:");
         max_downloads_label.setDoubleBuffered(true);
 
-        smart_proxy_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        smart_proxy_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         smart_proxy_checkbox.setText("Use SmartProxy (experimental)");
         smart_proxy_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -623,13 +623,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        max_down_speed_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        max_down_speed_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
 
-        verify_file_down_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        verify_file_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         verify_file_down_checkbox.setText("Verify file integrity (when download is finished)");
         verify_file_down_checkbox.setDoubleBuffered(true);
 
-        use_mega_account_down_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        use_mega_account_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         use_mega_account_down_checkbox.setText("Use MEGA account for download/stream");
         use_mega_account_down_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -637,15 +637,15 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        smart_proxy_url_label.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
+        smart_proxy_url_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         smart_proxy_url_label.setText("URL:");
 
-        max_downloads_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        max_downloads_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         max_downloads_spinner.setDoubleBuffered(true);
 
-        use_mega_account_down_combobox.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
 
-        change_download_dir_button.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        change_download_dir_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         change_download_dir_button.setText("Change it");
         change_download_dir_button.setDoubleBuffered(true);
         change_download_dir_button.addActionListener(new java.awt.event.ActionListener() {
@@ -654,24 +654,24 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        max_down_speed_label.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        max_down_speed_label.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         max_down_speed_label.setText("Max speed (KB/s):");
 
-        megacrypter_reverse_port_label.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
+        megacrypter_reverse_port_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         megacrypter_reverse_port_label.setText("TCP Port:");
 
-        default_dir_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        default_dir_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
 
-        smart_proxy_url_text.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
+        smart_proxy_url_text.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
 
-        default_slots_down_label.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        default_slots_down_label.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         default_slots_down_label.setText("Default slots per file:");
         default_slots_down_label.setDoubleBuffered(true);
 
-        use_mega_label.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
+        use_mega_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         use_mega_label.setText("Mega account:");
 
-        multi_slot_down_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        multi_slot_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         multi_slot_down_checkbox.setText("Use multi slot download mode (download restart needed)");
         multi_slot_down_checkbox.setDoubleBuffered(true);
         multi_slot_down_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -680,17 +680,17 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        default_slots_down_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        default_slots_down_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         default_slots_down_spinner.setDoubleBuffered(true);
         default_slots_down_spinner.setValue(2);
 
-        megacrypter_reverse_port_spinner.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
+        megacrypter_reverse_port_spinner.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
 
-        down_dir_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        down_dir_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         down_dir_label.setText("Default downloads directory:");
         down_dir_label.setDoubleBuffered(true);
 
-        jLabel2.setFont(new java.awt.Font("Ubuntu", 2, 14)); // NOI18N
+        jLabel2.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         jLabel2.setText("Note: it is recomended to enable MULTI SLOT and be patient while MegaBasterd filters down proxies. MegaBasterd will try first to download chunk without proxy. (Use CTRL+V in order to paste URL)");
 
         javax.swing.GroupLayout jPanel3Layout = new javax.swing.GroupLayout(jPanel3);
@@ -845,22 +845,22 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         jTabbedPane1.addTab("Downloads", downloads_panel);
 
-        default_slots_up_label.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        default_slots_up_label.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         default_slots_up_label.setText("Default slots per file:");
         default_slots_up_label.setDoubleBuffered(true);
 
-        max_uploads_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        max_uploads_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         max_uploads_label.setText("Max parallel uploads:");
         max_uploads_label.setDoubleBuffered(true);
 
-        default_slots_up_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        default_slots_up_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         default_slots_up_spinner.setDoubleBuffered(true);
         default_slots_up_spinner.setValue(2);
 
-        max_uploads_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        max_uploads_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         max_uploads_spinner.setDoubleBuffered(true);
 
-        multi_slot_up_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        multi_slot_up_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         multi_slot_up_checkbox.setText("Use multi slot upload mode (upload restart needed)");
         multi_slot_up_checkbox.setDoubleBuffered(true);
         multi_slot_up_checkbox.addActionListener(new java.awt.event.ActionListener() {
@@ -869,12 +869,12 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        max_up_speed_label.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        max_up_speed_label.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         max_up_speed_label.setText("Max speed (KB/s):");
 
-        max_up_speed_spinner.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        max_up_speed_spinner.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
 
-        limit_upload_speed_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        limit_upload_speed_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         limit_upload_speed_checkbox.setText("Limit upload speed");
         limit_upload_speed_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -882,7 +882,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        rec_upload_slots_label.setFont(new java.awt.Font("Ubuntu", 2, 16)); // NOI18N
+        rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
         rec_upload_slots_label.setText("Note: MULTI-SLOT it's more robust against upload errors but it might be slower.");
 
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
@@ -947,7 +947,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         jTabbedPane1.addTab("Uploads", uploads_panel);
 
-        mega_accounts_table.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
+        mega_accounts_table.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         mega_accounts_table.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -969,11 +969,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
         mega_accounts_table.setRowHeight(24);
         mega_accounts_scrollpane.setViewportView(mega_accounts_table);
 
-        mega_accounts_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        mega_accounts_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         mega_accounts_label.setText("Your MEGA accounts:");
         mega_accounts_label.setDoubleBuffered(true);
 
-        remove_mega_account_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        remove_mega_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         remove_mega_account_button.setText("Remove selected");
         remove_mega_account_button.setDoubleBuffered(true);
         remove_mega_account_button.setEnabled(false);
@@ -983,7 +983,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        add_mega_account_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        add_mega_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         add_mega_account_button.setText("Add account");
         add_mega_account_button.setDoubleBuffered(true);
         add_mega_account_button.addActionListener(new java.awt.event.ActionListener() {
@@ -992,7 +992,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        encrypt_pass_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        encrypt_pass_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         encrypt_pass_checkbox.setText("Encrypt on disk sensitive information");
         encrypt_pass_checkbox.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1001,7 +1001,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         delete_all_accounts_button.setBackground(new java.awt.Color(255, 51, 0));
-        delete_all_accounts_button.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        delete_all_accounts_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         delete_all_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
         delete_all_accounts_button.setText("RESET ACCOUNTS");
         delete_all_accounts_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1011,7 +1011,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         unlock_accounts_button.setBackground(new java.awt.Color(0, 153, 51));
-        unlock_accounts_button.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        unlock_accounts_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         unlock_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
         unlock_accounts_button.setText("Unlock accounts");
         unlock_accounts_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1021,9 +1021,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         elc_accounts_scrollpane.setDoubleBuffered(true);
-        elc_accounts_scrollpane.setFont(new java.awt.Font("Ubuntu", 0, 12)); // NOI18N
+        elc_accounts_scrollpane.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
 
-        elc_accounts_table.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
+        elc_accounts_table.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         elc_accounts_table.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
 
@@ -1043,11 +1043,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
         elc_accounts_table.setRowHeight(24);
         elc_accounts_scrollpane.setViewportView(elc_accounts_table);
 
-        elc_accounts_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        elc_accounts_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         elc_accounts_label.setText("Your ELC accounts:");
         elc_accounts_label.setDoubleBuffered(true);
 
-        remove_elc_account_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        remove_elc_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         remove_elc_account_button.setText("Remove selected");
         remove_elc_account_button.setDoubleBuffered(true);
         remove_elc_account_button.setEnabled(false);
@@ -1057,7 +1057,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        add_elc_account_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        add_elc_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         add_elc_account_button.setText("Add account");
         add_elc_account_button.setDoubleBuffered(true);
         add_elc_account_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1066,7 +1066,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Ubuntu", 2, 16)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
         jLabel1.setText("Note: you can use a (optional) alias for your email addresses -> bob@supermail.com#bob_mail");
 
         javax.swing.GroupLayout accounts_panelLayout = new javax.swing.GroupLayout(accounts_panel);
@@ -1133,27 +1133,27 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         proxy_panel.setBorder(javax.swing.BorderFactory.createTitledBorder("Proxy settings"));
 
-        proxy_host_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        proxy_host_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         proxy_host_label.setText("Host:");
         proxy_host_label.setDoubleBuffered(true);
         proxy_host_label.setEnabled(false);
 
-        proxy_host_textfield.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        proxy_host_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         proxy_host_textfield.setDoubleBuffered(true);
         proxy_host_textfield.setEnabled(false);
         proxy_host_textfield.addMouseListener(new ContextMenuMouseListener());
 
-        proxy_port_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        proxy_port_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         proxy_port_label.setText("Port:");
         proxy_port_label.setDoubleBuffered(true);
         proxy_port_label.setEnabled(false);
 
-        proxy_port_textfield.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        proxy_port_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         proxy_port_textfield.setDoubleBuffered(true);
         proxy_port_textfield.setEnabled(false);
         proxy_port_textfield.addMouseListener(new ContextMenuMouseListener());
 
-        use_proxy_checkbox.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        use_proxy_checkbox.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         use_proxy_checkbox.setText("Use HTTP(S) PROXY (app restart required)");
         use_proxy_checkbox.setDoubleBuffered(true);
         use_proxy_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -1162,28 +1162,28 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        proxy_warning_label.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
+        proxy_warning_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         proxy_warning_label.setText("Warning: Megabasterd will use this proxy for ALL connections.");
         proxy_warning_label.setEnabled(false);
 
         proxy_auth_panel.setBorder(javax.swing.BorderFactory.createTitledBorder("Authentication"));
 
-        proxy_user_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        proxy_user_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         proxy_user_label.setText("Username:");
         proxy_user_label.setDoubleBuffered(true);
         proxy_user_label.setEnabled(false);
 
-        proxy_user_textfield.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        proxy_user_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         proxy_user_textfield.setDoubleBuffered(true);
         proxy_user_textfield.setEnabled(false);
         proxy_user_textfield.addMouseListener(new ContextMenuMouseListener());
 
-        proxy_pass_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        proxy_pass_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         proxy_pass_label.setText("Password:");
         proxy_pass_label.setDoubleBuffered(true);
         proxy_pass_label.setEnabled(false);
 
-        proxy_pass_textfield.setFont(new java.awt.Font("Ubuntu", 0, 20)); // NOI18N
+        proxy_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
         proxy_pass_textfield.setText("jPasswordField1");
         proxy_pass_textfield.setEnabled(false);
 
@@ -1276,7 +1276,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         jTabbedPane1.addTab("Advanced", jPanel1);
 
-        status.setFont(new java.awt.Font("Ubuntu", 3, 18)); // NOI18N
+        status.setFont(new java.awt.Font("Dialog", 3, 18)); // NOI18N
         status.setForeground(new java.awt.Color(51, 153, 255));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

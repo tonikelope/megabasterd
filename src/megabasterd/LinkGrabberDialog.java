@@ -112,14 +112,14 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         setModal(true);
 
         links_textarea.setColumns(20);
-        links_textarea.setFont(new java.awt.Font("Ubuntu", 0, 18)); // NOI18N
+        links_textarea.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         links_textarea.setRows(5);
         links_textarea.setDoubleBuffered(true);
         links_scrollpane.setViewportView(links_textarea);
         links_textarea.addMouseListener(new ContextMenuMouseListener());
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
-        dance_button.setFont(new java.awt.Font("Ubuntu", 1, 24)); // NOI18N
+        dance_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
@@ -129,11 +129,11 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             }
         });
 
-        links_label.setFont(new java.awt.Font("Ubuntu", 1, 20)); // NOI18N
+        links_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         links_label.setText("Put your MEGA/MegaCrypter/ELC link/s here (one per line):");
         links_label.setDoubleBuffered(true);
 
-        change_dir_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        change_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         change_dir_button.setText("Change it");
         change_dir_button.setDoubleBuffered(true);
         change_dir_button.addActionListener(new java.awt.event.ActionListener() {
@@ -142,13 +142,13 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             }
         });
 
-        down_dir_to_label.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        down_dir_to_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         down_dir_to_label.setText("Download to: ");
         down_dir_to_label.setDoubleBuffered(true);
 
-        download_dir_label.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        download_dir_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
 
-        dlc_button.setFont(new java.awt.Font("Ubuntu", 1, 18)); // NOI18N
+        dlc_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         dlc_button.setText("Load DLC container");
         dlc_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -156,10 +156,10 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             }
         });
 
-        use_mega_account_down_label.setFont(new java.awt.Font("Ubuntu", 1, 16)); // NOI18N
+        use_mega_account_down_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         use_mega_account_down_label.setText("Use this account for download:");
 
-        use_mega_account_down_combobox.setFont(new java.awt.Font("Ubuntu", 0, 16)); // NOI18N
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         use_mega_account_down_combobox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 use_mega_account_down_comboboxItemStateChanged(evt);

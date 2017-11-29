@@ -92,7 +92,7 @@
           <Properties>
             <Property name="columns" type="int" value="20"/>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Ubuntu" size="18" style="0"/>
+              <Font name="Dialog" size="18" style="0"/>
             </Property>
             <Property name="rows" type="int" value="5"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -109,7 +109,7 @@
           <Color blue="ff" green="cc" red="66" type="rgb"/>
         </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Ubuntu" size="24" style="1"/>
+          <Font name="Dialog" size="24" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -124,7 +124,7 @@
     <Component class="javax.swing.JLabel" name="links_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Ubuntu" size="20" style="1"/>
+          <Font name="Dialog" size="20" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Put your MEGA/MegaCrypter/ELC link/s here (one per line):"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -133,7 +133,7 @@
     <Component class="javax.swing.JButton" name="change_dir_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Ubuntu" size="18" style="1"/>
+          <Font name="Dialog" size="18" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Change it"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -145,7 +145,7 @@
     <Component class="javax.swing.JLabel" name="down_dir_to_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Ubuntu" size="16" style="1"/>
+          <Font name="Dialog" size="16" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Download to: "/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -154,14 +154,14 @@
     <Component class="javax.swing.JLabel" name="download_dir_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Ubuntu" size="16" style="1"/>
+          <Font name="Dialog" size="16" style="1"/>
         </Property>
       </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="dlc_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Ubuntu" size="18" style="1"/>
+          <Font name="Dialog" size="18" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Load DLC container"/>
       </Properties>
@@ -172,7 +172,7 @@
     <Component class="javax.swing.JLabel" name="use_mega_account_down_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Ubuntu" size="16" style="1"/>
+          <Font name="Dialog" size="16" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Use this account for download:"/>
       </Properties>
@@ -180,7 +180,7 @@
     <Component class="javax.swing.JComboBox" name="use_mega_account_down_combobox">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Ubuntu" size="16" style="0"/>
+          <Font name="Dialog" size="16" style="0"/>
         </Property>
         <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
           <StringArray count="0"/>
