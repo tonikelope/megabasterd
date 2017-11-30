@@ -97,6 +97,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
 
+        _view = new DownloadView(this);
+        _progress_meter = new ProgressMeter(this);
         _paused_workers = 0;
         _ma = ma;
         _last_chunk_id_dispatched = 0L;
@@ -134,8 +136,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
-        _view = new DownloadView(this);
-        _progress_meter = new ProgressMeter(this);
     }
 
     public boolean isUse_smart_proxy() {

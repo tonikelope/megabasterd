@@ -105,7 +105,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" pref="947" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" pref="925" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -141,7 +141,7 @@
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="change_download_dir_button" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="default_dir_label" max="32767" attributes="0"/>
+                                      <Component id="default_dir_label" pref="810" max="32767" attributes="0"/>
                                   </Group>
                                   <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
                                   <Component id="jSeparator4" alignment="0" max="32767" attributes="0"/>
@@ -150,8 +150,8 @@
                                   <Component id="jSeparator10" alignment="1" max="32767" attributes="0"/>
                                   <Component id="jSeparator2" alignment="0" max="32767" attributes="0"/>
                                   <Component id="jSeparator3" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="jLabel2" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="rec_download_slots_label" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="jLabel2" alignment="0" pref="0" max="32767" attributes="0"/>
+                                  <Component id="rec_download_slots_label" alignment="0" pref="0" max="32767" attributes="0"/>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Component id="smart_proxy_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -220,12 +220,9 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="down_dir_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="1" attributes="0">
-                                  <Component id="change_download_dir_button" min="-2" max="-2" attributes="0"/>
-                                  <Group type="102" alignment="1" attributes="0">
-                                      <Component id="default_dir_label" min="-2" pref="0" max="-2" attributes="0"/>
-                                      <EmptySpace min="34" pref="34" max="-2" attributes="0"/>
-                                  </Group>
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Component id="change_download_dir_button" max="32767" attributes="0"/>
+                                  <Component id="default_dir_label" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
                               <Component id="jSeparator1" min="-2" pref="10" max="-2" attributes="0"/>
@@ -455,8 +452,9 @@
                     <Component class="javax.swing.JLabel" name="default_dir_label">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="2"/>
                         </Property>
+                        <Property name="text" type="java.lang.String" value="default dir"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JTextField" name="smart_proxy_url_text">
@@ -579,7 +577,7 @@
                                           </Group>
                                           <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="330" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="308" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -1029,7 +1027,7 @@
                                           <Component id="proxy_port_label" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
                                           <Component id="proxy_port_textfield" min="-2" pref="90" max="-2" attributes="0"/>
-                                          <EmptySpace min="0" pref="363" max="32767" attributes="0"/>
+                                          <EmptySpace min="0" pref="341" max="32767" attributes="0"/>
                                       </Group>
                                       <Component id="proxy_auth_panel" alignment="0" max="32767" attributes="0"/>
                                   </Group>
@@ -1146,7 +1144,7 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="proxy_pass_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_pass_textfield" pref="599" max="32767" attributes="0"/>
+                              <Component id="proxy_pass_textfield" pref="577" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>

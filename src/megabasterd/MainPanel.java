@@ -45,7 +45,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.39";
+    public static final String VERSION = "2.40";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -106,7 +106,7 @@ public final class MainPanel {
         return _use_smart_proxy_url;
     }
 
-    private volatile MainPanelView _view = null; //lazy init
+    private volatile MainPanelView _view; //lazy init
     private final GlobalSpeedMeter _global_dl_speed, _global_up_speed;
     private final DownloadManager _download_manager;
     private final UploadManager _upload_manager;
@@ -130,6 +130,8 @@ public final class MainPanel {
     private boolean _megacrypter_reverse;
 
     public MainPanel() {
+
+        _view = new MainPanelView(this);
 
         if (checkAppIsRunning()) {
 
@@ -319,23 +321,7 @@ public final class MainPanel {
 
     public MainPanelView getView() {
 
-        MainPanelView result = _view;
-
-        if (result == null) {
-
-            synchronized (this) {
-
-                result = _view;
-
-                if (result == null) {
-
-                    _view = result = new MainPanelView(this);
-
-                }
-            }
-        }
-
-        return result;
+        return _view;
     }
 
     public GlobalSpeedMeter getGlobal_dl_speed() {
