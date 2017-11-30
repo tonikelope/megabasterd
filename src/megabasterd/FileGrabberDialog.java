@@ -136,7 +136,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 222, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
         );
 
         dir_name_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
@@ -144,7 +144,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         dir_name_label.setDoubleBuffered(true);
         dir_name_label.setEnabled(false);
 
-        dir_name_textfield.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        dir_name_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         dir_name_textfield.setDoubleBuffered(true);
         dir_name_textfield.setEnabled(false);
 
@@ -153,7 +153,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         account_label.setDoubleBuffered(true);
         account_label.setEnabled(false);
 
-        account_combobox.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        account_combobox.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         account_combobox.setDoubleBuffered(true);
         account_combobox.setEnabled(false);
         account_combobox.addItemListener(new java.awt.event.ItemListener() {
