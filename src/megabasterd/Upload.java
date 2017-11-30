@@ -73,8 +73,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean use_slots, int slots, boolean restart) {
 
-        _view = new UploadView(this);
-        _progress_meter = new ProgressMeter(this);
+        
         _saved_file_mac = new int[]{0, 0, 0, 0};
         _notified = false;
         _provision_ok = true;
@@ -99,6 +98,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = Executors.newCachedThreadPool();
+        _view = new UploadView(this);
+        _progress_meter = new ProgressMeter(this);
     }
 
     public Object getWorkers_lock() {
