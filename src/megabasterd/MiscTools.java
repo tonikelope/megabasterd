@@ -85,6 +85,7 @@ public final class MiscTools {
     public static final int EXP_BACKOFF_SECS_RETRY = 1;
     public static final int EXP_BACKOFF_MAX_WAIT_TIME = 16;
     public static final Object PASS_LOCK = new Object();
+    public static final int HTTP_TIMEOUT = 30;
 
     private static final ConcurrentHashMap<String, Method> REFLECTION_METHOD_CACHE = new ConcurrentHashMap<>();
 
@@ -1084,7 +1085,12 @@ public final class MiscTools {
             }
         }
 
-        return builder.build();
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(HTTP_TIMEOUT * 1000)
+                .setConnectTimeout(HTTP_TIMEOUT * 1000)
+                .build();
+
+        return builder.setDefaultRequestConfig(requestConfig).build();
     }
 
     public static CloseableHttpClient getApacheKissHttpClientSmartProxy(String current_proxy) throws Exception {
@@ -1107,7 +1113,14 @@ public final class MiscTools {
 
     public static CloseableHttpClient getApacheKissHttpClientNOProxy() {
 
-        return _getApacheKissHttpClientBuilder().build();
+        HttpClientBuilder builder = _getApacheKissHttpClientBuilder();
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(HTTP_TIMEOUT * 1000)
+                .setConnectTimeout(HTTP_TIMEOUT * 1000)
+                .build();
+
+        return builder.setDefaultRequestConfig(requestConfig).build();
     }
 
     public static byte[] recReverseArray(byte[] arr, int start, int end) {

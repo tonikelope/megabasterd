@@ -188,7 +188,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         kiss_server_status.setDoubleBuffered(true);
 
         jTabbedPane1.setDoubleBuffered(true);
-        jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
+        jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
 
         global_speed_down_label.setFont(new java.awt.Font("Dialog", 1, 54)); // NOI18N
         global_speed_down_label.setText("Speed");
@@ -198,7 +198,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_down_label.setDoubleBuffered(true);
 
         close_all_finished_down_button.setBackground(new java.awt.Color(0, 153, 51));
-        close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         close_all_finished_down_button.setForeground(new java.awt.Color(255, 255, 255));
         close_all_finished_down_button.setText("Close all OK finished");
         close_all_finished_down_button.setDoubleBuffered(true);
@@ -212,7 +212,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         jScrollPane_down.setViewportView(jPanel_scroll_down);
 
         pause_all_down_button.setBackground(new java.awt.Color(255, 153, 0));
-        pause_all_down_button.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        pause_all_down_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         pause_all_down_button.setForeground(new java.awt.Color(255, 255, 255));
         pause_all_down_button.setText("PAUSE ALL");
         pause_all_down_button.setDoubleBuffered(true);
@@ -234,7 +234,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addComponent(pause_all_down_button))
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 683, Short.MAX_VALUE)
+                .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 704, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_down_button))
             .addComponent(jScrollPane_down)
@@ -248,7 +248,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 316, Short.MAX_VALUE)
+                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(down_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -316,7 +316,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 316, Short.MAX_VALUE)
+                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 317, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(up_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

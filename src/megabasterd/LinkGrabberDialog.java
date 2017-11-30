@@ -119,7 +119,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         links_textarea.addMouseListener(new ContextMenuMouseListener());
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
-        dance_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        dance_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
@@ -129,7 +129,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             }
         });
 
-        links_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        links_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         links_label.setText("Put your MEGA/MegaCrypter/ELC link/s here (one per line):");
         links_label.setDoubleBuffered(true);
 
@@ -143,12 +143,13 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         });
 
         down_dir_to_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        down_dir_to_label.setText("Download to: ");
+        down_dir_to_label.setText("Download to -> ");
         down_dir_to_label.setDoubleBuffered(true);
 
-        download_dir_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        download_dir_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
+        download_dir_label.setText("default dir");
 
-        dlc_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        dlc_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         dlc_button.setText("Load DLC container");
         dlc_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -179,12 +180,12 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(down_dir_to_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(download_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, 464, Short.MAX_VALUE)
+                        .addComponent(download_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(dance_button))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(links_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(links_label, javax.swing.GroupLayout.DEFAULT_SIZE, 669, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(dlc_button))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(use_mega_account_down_label)
@@ -200,7 +201,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     .addComponent(links_label)
                     .addComponent(dlc_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(links_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 344, Short.MAX_VALUE)
+                .addComponent(links_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(use_mega_account_down_label)

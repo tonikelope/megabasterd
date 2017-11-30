@@ -44,7 +44,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" max="32767" attributes="0"/>
+              <Component id="jTabbedPane1" pref="558" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="ok_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -60,7 +60,7 @@
     <Component class="javax.swing.JButton" name="ok_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="22" style="1"/>
+          <Font name="Dialog" size="18" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="OK"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -72,7 +72,7 @@
     <Component class="javax.swing.JButton" name="cancel_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="22" style="1"/>
+          <Font name="Dialog" size="18" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="CANCEL"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -85,7 +85,7 @@
       <Properties>
         <Property name="doubleBuffered" type="boolean" value="true"/>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="22" style="1"/>
+          <Font name="Dialog" size="20" style="1"/>
         </Property>
       </Properties>
 
@@ -105,7 +105,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" pref="925" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" pref="909" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -114,7 +114,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" pref="502" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" pref="498" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -135,13 +135,14 @@
                   <Layout>
                     <DimensionLayout dim="0">
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Group type="102" attributes="0">
+                          <Group type="102" alignment="1" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="103" groupAlignment="1" attributes="0">
+                                  <Component id="jLabel2" max="32767" attributes="0"/>
                                   <Group type="102" alignment="0" attributes="0">
                                       <Component id="change_download_dir_button" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="default_dir_label" pref="810" max="32767" attributes="0"/>
+                                      <Component id="default_dir_label" max="32767" attributes="0"/>
                                   </Group>
                                   <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
                                   <Component id="jSeparator4" alignment="0" max="32767" attributes="0"/>
@@ -150,62 +151,58 @@
                                   <Component id="jSeparator10" alignment="1" max="32767" attributes="0"/>
                                   <Component id="jSeparator2" alignment="0" max="32767" attributes="0"/>
                                   <Component id="jSeparator3" alignment="0" max="32767" attributes="0"/>
-                                  <Component id="jLabel2" alignment="0" pref="0" max="32767" attributes="0"/>
-                                  <Component id="rec_download_slots_label" alignment="0" pref="0" max="32767" attributes="0"/>
-                                  <Group type="102" attributes="0">
-                                      <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="rec_download_slots_label" alignment="0" pref="1240" max="32767" attributes="0"/>
+                                  <Group type="102" alignment="0" attributes="0">
+                                      <Group type="103" groupAlignment="1" attributes="0">
                                           <Component id="smart_proxy_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="megacrypter_reverse_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="down_dir_label" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="multi_slot_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Component id="limit_download_speed_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                                              <Group type="102" alignment="1" attributes="0">
-                                                  <Component id="max_downloads_label" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace min="-2" pref="120" max="-2" attributes="0"/>
-                                                  <Component id="max_downloads_spinner" min="-2" max="-2" attributes="0"/>
-                                              </Group>
-                                              <Group type="102" alignment="1" attributes="0">
-                                                  <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
-                                                  <Group type="103" groupAlignment="1" attributes="0">
-                                                      <Group type="102" alignment="1" attributes="0">
-                                                          <Component id="max_down_speed_label" min="-2" max="-2" attributes="0"/>
-                                                          <EmptySpace max="32767" attributes="0"/>
-                                                          <Component id="max_down_speed_spinner" min="-2" pref="100" max="-2" attributes="0"/>
-                                                      </Group>
-                                                      <Group type="102" alignment="1" attributes="0">
-                                                          <Component id="default_slots_down_label" min="-2" max="-2" attributes="0"/>
-                                                          <EmptySpace max="32767" attributes="0"/>
-                                                          <Component id="default_slots_down_spinner" min="-2" max="-2" attributes="0"/>
-                                                      </Group>
-                                                  </Group>
-                                              </Group>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                                              <Component id="max_downloads_label" min="-2" pref="341" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="max_downloads_spinner" min="-2" pref="100" max="-2" attributes="0"/>
                                           </Group>
                                           <Component id="use_mega_account_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="verify_file_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Group type="102" attributes="0">
-                                              <EmptySpace min="21" pref="21" max="-2" attributes="0"/>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                                              <Component id="use_mega_label" min="-2" pref="138" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="use_mega_account_down_combobox" min="-2" pref="569" max="-2" attributes="0"/>
+                                          </Group>
+                                          <Group type="102" alignment="0" attributes="0">
                                               <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="use_mega_label" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="use_mega_account_down_combobox" min="-2" pref="569" max="-2" attributes="0"/>
-                                                  </Group>
-                                                  <Group type="102" alignment="0" attributes="0">
-                                                      <Component id="megacrypter_reverse_port_label" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="megacrypter_reverse_port_spinner" min="-2" pref="93" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="megacrypter_reverse_warning_label" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="limit_download_speed_checkbox" min="-2" max="-2" attributes="0"/>
+                                                  <Group type="102" attributes="0">
+                                                      <EmptySpace min="15" pref="15" max="-2" attributes="0"/>
+                                                      <Component id="max_down_speed_label" min="-2" pref="294" max="-2" attributes="0"/>
                                                   </Group>
                                               </Group>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="max_down_speed_spinner" min="-2" pref="151" max="-2" attributes="0"/>
+                                          </Group>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                                              <Component id="default_slots_down_label" min="-2" pref="346" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="default_slots_down_spinner" min="-2" pref="100" max="-2" attributes="0"/>
+                                          </Group>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <EmptySpace min="-2" pref="15" max="-2" attributes="0"/>
+                                              <Component id="megacrypter_reverse_port_label" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                              <Component id="megacrypter_reverse_port_spinner" min="-2" pref="120" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="megacrypter_reverse_warning_label" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                       </Group>
                                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
-                                      <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
-                                      <Component id="smart_proxy_url_label" min="-2" max="-2" attributes="0"/>
+                                      <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
+                                      <Component id="smart_proxy_url_label" min="-2" pref="42" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
                                       <Component id="smart_proxy_url_text" max="32767" attributes="0"/>
                                   </Group>
@@ -269,12 +266,12 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="megacrypter_reverse_checkbox" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Group type="103" groupAlignment="0" attributes="0">
-                                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                  <Group type="103" groupAlignment="3" attributes="0">
                                       <Component id="megacrypter_reverse_port_spinner" alignment="3" min="-2" pref="24" max="-2" attributes="0"/>
                                       <Component id="megacrypter_reverse_port_label" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <Component id="megacrypter_reverse_warning_label" min="-2" max="-2" attributes="0"/>
+                                  <Component id="megacrypter_reverse_warning_label" max="32767" attributes="0"/>
                               </Group>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="jSeparator10" min="-2" pref="10" max="-2" attributes="0"/>
@@ -316,7 +313,7 @@
                     <Component class="javax.swing.JCheckBox" name="megacrypter_reverse_checkbox">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Use Megacrypter reverse mode"/>
                       </Properties>
@@ -327,7 +324,7 @@
                     <Component class="javax.swing.JCheckBox" name="limit_download_speed_checkbox">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Limit download speed"/>
                       </Properties>
@@ -340,7 +337,7 @@
                     <Component class="javax.swing.JLabel" name="max_downloads_label">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Max parallel downloads:"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -349,7 +346,7 @@
                     <Component class="javax.swing.JCheckBox" name="smart_proxy_checkbox">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Use SmartProxy (experimental)"/>
                       </Properties>
@@ -367,7 +364,7 @@
                     <Component class="javax.swing.JCheckBox" name="verify_file_down_checkbox">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Verify file integrity (when download is finished)"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -376,7 +373,7 @@
                     <Component class="javax.swing.JCheckBox" name="use_mega_account_down_checkbox">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Use MEGA account for download/stream"/>
                       </Properties>
@@ -424,7 +421,7 @@
                     <Component class="javax.swing.JButton" name="change_download_dir_button">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Change it"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -460,7 +457,7 @@
                     <Component class="javax.swing.JTextField" name="smart_proxy_url_text">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="16" style="0"/>
+                          <Font name="Dialog" size="18" style="0"/>
                         </Property>
                       </Properties>
                     </Component>
@@ -484,7 +481,7 @@
                     <Component class="javax.swing.JCheckBox" name="multi_slot_down_checkbox">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Use multi slot download mode (download restart needed)"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -514,7 +511,7 @@
                     <Component class="javax.swing.JLabel" name="down_dir_label">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Default downloads directory:"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -525,7 +522,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="14" style="2"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Note: it is recomended to enable MULTI SLOT and be patient while MegaBasterd filters down proxies. MegaBasterd will try first to download chunk without proxy. (Use CTRL+V in order to paste URL)"/>
+                        <Property name="text" type="java.lang.String" value="Note: it is recomended to enable MULTI SLOT and be patient while MegaBasterd filters down proxies. MegaBasterd will try first to download chunk without proxy."/>
                       </Properties>
                     </Component>
                   </SubComponents>
@@ -550,10 +547,10 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
-                              <Component id="default_slots_up_label" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="164" max="-2" attributes="0"/>
-                              <Component id="default_slots_up_spinner" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                              <Component id="default_slots_up_label" min="-2" pref="292" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="default_slots_up_spinner" min="-2" pref="100" max="-2" attributes="0"/>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
@@ -563,21 +560,21 @@
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
-                                              <Component id="max_uploads_label" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace min="-2" pref="116" max="-2" attributes="0"/>
-                                              <Component id="max_uploads_spinner" min="-2" max="-2" attributes="0"/>
+                                              <Component id="max_uploads_label" min="-2" pref="303" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="max_uploads_spinner" min="-2" pref="100" max="-2" attributes="0"/>
                                           </Group>
                                           <Component id="rec_upload_slots_label" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="multi_slot_up_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Group type="102" alignment="0" attributes="0">
-                                              <EmptySpace min="12" pref="12" max="-2" attributes="0"/>
-                                              <Component id="max_up_speed_label" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace min="-2" pref="116" max="-2" attributes="0"/>
-                                              <Component id="max_up_speed_spinner" min="-2" pref="100" max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
+                                              <Component id="max_up_speed_label" min="-2" pref="243" max="-2" attributes="0"/>
+                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="max_up_speed_spinner" min="-2" pref="150" max="-2" attributes="0"/>
                                           </Group>
                                           <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="308" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="350" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -632,7 +629,7 @@
             <Component class="javax.swing.JLabel" name="max_uploads_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Max parallel uploads:"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -660,7 +657,7 @@
             <Component class="javax.swing.JCheckBox" name="multi_slot_up_checkbox">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Use multi slot upload mode (upload restart needed)"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -687,7 +684,7 @@
             <Component class="javax.swing.JCheckBox" name="limit_upload_speed_checkbox">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Limit upload speed"/>
               </Properties>
@@ -770,7 +767,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="145" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="142" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -779,7 +776,7 @@
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="144" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="141" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -821,7 +818,7 @@
             <Component class="javax.swing.JLabel" name="mega_accounts_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Your MEGA accounts:"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -855,7 +852,7 @@
             <Component class="javax.swing.JCheckBox" name="encrypt_pass_checkbox">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Encrypt on disk sensitive information"/>
               </Properties>
@@ -869,7 +866,7 @@
                   <Color blue="0" green="33" red="ff" type="rgb"/>
                 </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -886,7 +883,7 @@
                   <Color blue="33" green="99" red="0" type="rgb"/>
                 </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
@@ -924,7 +921,7 @@
             <Component class="javax.swing.JLabel" name="elc_accounts_label">
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                  <Font name="Dialog" size="20" style="1"/>
+                  <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Your ELC accounts:"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -989,7 +986,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="proxy_panel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="319" max="32767" attributes="0"/>
+                      <EmptySpace pref="321" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1012,26 +1009,25 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="use_proxy_checkbox" min="-2" max="-2" attributes="0"/>
-                                      <Component id="proxy_warning_label" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                              </Group>
-                              <Group type="102" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
                                       <Group type="102" alignment="1" attributes="0">
                                           <Component id="proxy_host_label" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="proxy_host_textfield" min="-2" pref="300" max="-2" attributes="0"/>
-                                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                          <Component id="proxy_host_textfield" min="-2" pref="699" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
                                           <Component id="proxy_port_label" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="proxy_port_textfield" min="-2" pref="90" max="-2" attributes="0"/>
-                                          <EmptySpace min="0" pref="341" max="32767" attributes="0"/>
+                                          <Component id="proxy_port_textfield" max="32767" attributes="0"/>
                                       </Group>
                                       <Component id="proxy_auth_panel" alignment="0" max="32767" attributes="0"/>
                                   </Group>
                                   <EmptySpace max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="use_proxy_checkbox" min="-2" max="-2" attributes="0"/>
+                                      <Component id="proxy_warning_label" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                       </Group>
@@ -1062,7 +1058,7 @@
                 <Component class="javax.swing.JLabel" name="proxy_host_label">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Dialog" size="20" style="1"/>
+                      <Font name="Dialog" size="18" style="1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Host:"/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -1072,7 +1068,7 @@
                 <Component class="javax.swing.JTextField" name="proxy_host_textfield">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Dialog" size="20" style="0"/>
+                      <Font name="Dialog" size="18" style="0"/>
                     </Property>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                     <Property name="enabled" type="boolean" value="false"/>
@@ -1084,7 +1080,7 @@
                 <Component class="javax.swing.JLabel" name="proxy_port_label">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Dialog" size="20" style="1"/>
+                      <Font name="Dialog" size="18" style="1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Port:"/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -1094,7 +1090,7 @@
                 <Component class="javax.swing.JTextField" name="proxy_port_textfield">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Dialog" size="20" style="0"/>
+                      <Font name="Dialog" size="18" style="0"/>
                     </Property>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                     <Property name="enabled" type="boolean" value="false"/>
@@ -1106,7 +1102,7 @@
                 <Component class="javax.swing.JCheckBox" name="use_proxy_checkbox">
                   <Properties>
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                      <Font name="Dialog" size="20" style="1"/>
+                      <Font name="Dialog" size="18" style="1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Use HTTP(S) PROXY (app restart required)"/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -1140,11 +1136,11 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="proxy_user_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_user_textfield" max="32767" attributes="0"/>
+                              <Component id="proxy_user_textfield" min="-2" pref="218" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="proxy_pass_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_pass_textfield" pref="577" max="32767" attributes="0"/>
+                              <Component id="proxy_pass_textfield" pref="372" max="32767" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -1167,7 +1163,7 @@
                     <Component class="javax.swing.JLabel" name="proxy_user_label">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Username:"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -1177,7 +1173,7 @@
                     <Component class="javax.swing.JTextField" name="proxy_user_textfield">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="0"/>
+                          <Font name="Dialog" size="18" style="0"/>
                         </Property>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
                         <Property name="enabled" type="boolean" value="false"/>
@@ -1189,7 +1185,7 @@
                     <Component class="javax.swing.JLabel" name="proxy_pass_label">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="1"/>
+                          <Font name="Dialog" size="18" style="1"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Password:"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -1199,7 +1195,7 @@
                     <Component class="javax.swing.JPasswordField" name="proxy_pass_textfield">
                       <Properties>
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-                          <Font name="Dialog" size="20" style="0"/>
+                          <Font name="Dialog" size="18" style="0"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="jPasswordField1"/>
                         <Property name="enabled" type="boolean" value="false"/>

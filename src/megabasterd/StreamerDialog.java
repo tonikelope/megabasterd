@@ -93,7 +93,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Streamer");
 
-        put_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        put_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         put_label.setText("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:");
         put_label.setDoubleBuffered(true);
 

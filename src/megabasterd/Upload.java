@@ -73,7 +73,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean use_slots, int slots, boolean restart) {
 
-        
         _saved_file_mac = new int[]{0, 0, 0, 0};
         _notified = false;
         _provision_ok = true;
@@ -272,11 +271,27 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     @Override
     public ProgressMeter getProgress_meter() {
 
-        return this._progress_meter;
+        while (_progress_meter == null) {
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return _progress_meter;
     }
 
     @Override
     public UploadView getView() {
+
+        while (_view == null) {
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
 
         return this._view;
     }

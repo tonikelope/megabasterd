@@ -32,7 +32,7 @@
                       <Component id="close_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="restart_button" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace pref="51" max="32767" attributes="0"/>
                       <Component id="keep_temp_checkbox" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="stop_button" min="-2" max="-2" attributes="0"/>
@@ -40,7 +40,7 @@
                   <Component id="progress_pbar" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="speed_label" min="-2" pref="340" max="-2" attributes="0"/>
-                      <EmptySpace pref="91" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                       <Component id="pause_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
@@ -48,7 +48,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="slots_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="slots_spinner" min="-2" pref="55" max="-2" attributes="0"/>
+                      <Component id="slots_spinner" min="-2" pref="70" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="file_name_label" min="-2" max="-2" attributes="0"/>
@@ -57,7 +57,7 @@
                   </Group>
                   <Group type="102" attributes="0">
                       <Component id="file_size_label" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="539" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
