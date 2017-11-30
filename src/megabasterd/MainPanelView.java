@@ -360,7 +360,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(jSeparator4);
 
         clean_all_down_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        clean_all_down_menu.setText("Remove all pre/pro/wait downloads");
+        clean_all_down_menu.setText("Remove all no running downloads");
         clean_all_down_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clean_all_down_menuActionPerformed(evt);
@@ -369,7 +369,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(clean_all_down_menu);
 
         clean_all_up_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        clean_all_up_menu.setText("Remove all pre/pro/wait uploads");
+        clean_all_up_menu.setText("Remove all no running uploads");
         clean_all_up_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 clean_all_up_menuActionPerformed(evt);
@@ -388,7 +388,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(hide_tray_menu);
 
         exit_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        exit_menu.setText("EXIT");
+        exit_menu.setText("Exit");
         exit_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 exit_menuActionPerformed(evt);
@@ -448,7 +448,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 482, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(logo_label)

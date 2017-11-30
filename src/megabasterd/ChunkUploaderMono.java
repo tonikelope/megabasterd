@@ -150,6 +150,8 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                             if (error && !getUpload().isStopped()) {
 
+                                Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId()});
+
                                 getUpload().rejectChunkId(chunk.getId());
 
                                 conta_error++;
@@ -187,6 +189,9 @@ public class ChunkUploaderMono extends ChunkUploader {
                     }
 
                 } catch (IOException ex) {
+
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId()});
+
                     error = true;
 
                     getUpload().rejectChunkId(chunk.getId());
@@ -255,13 +260,18 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     } catch (ExecutionException | InterruptedException | CancellationException exception) {
 
+                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId()});
+
                         error = true;
 
                         getUpload().rejectChunkId(chunk.getId());
 
-                        getUpload().getPartialProgress().add(-1 * tot_bytes_up);
+                        if (tot_bytes_up > 0) {
 
-                        getUpload().getProgress_meter().secureNotify();
+                            getUpload().getPartialProgress().add(-1 * tot_bytes_up);
+
+                            getUpload().getProgress_meter().secureNotify();
+                        }
 
                     } finally {
 

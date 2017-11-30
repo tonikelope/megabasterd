@@ -394,6 +394,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     @Override
     public void notifyClipboardChange() {
 
-        swingReflectionInvoke("setText", links_textarea, extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
+        String current_text = (String) swingReflectionInvokeAndWaitForReturn("getText", links_textarea);
+
+        swingReflectionInvoke("append", links_textarea, (current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
     }
 }

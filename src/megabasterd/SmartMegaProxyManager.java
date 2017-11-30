@@ -7,6 +7,7 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
@@ -135,9 +136,11 @@ public class SmartMegaProxyManager implements Runnable {
 
             String[] proxy_list = data.split("\n");
 
-            for (String proxy : proxy_list) {
+            if (proxy_list.length > 0) {
 
-                this._proxy_list.add(proxy);
+                _proxy_list.clear();
+
+                this._proxy_list.addAll(Arrays.asList(proxy_list));
             }
 
         } catch (MalformedURLException ex) {

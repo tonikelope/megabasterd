@@ -71,7 +71,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         subtitle_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
-        subtitle_label.setText("(Made with love by tonikelope)");
+        subtitle_label.setText("Made with love (and with no warranty)  by tonikelope.");
         subtitle_label.setDoubleBuffered(true);
 
         mc_logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/mega_crypter.png"))); // NOI18N
@@ -83,7 +83,7 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        mcdown_url_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        mcdown_url_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         mcdown_url_button.setText("Copy MegaBasterd download URL");
         mcdown_url_button.setDoubleBuffered(true);
         mcdown_url_button.addActionListener(new java.awt.event.ActionListener() {
@@ -127,14 +127,6 @@ public final class AboutDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(subtitle_label)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(mcdown_url_button, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(check_version_button, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(made_in_spain_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -144,7 +136,14 @@ public final class AboutDialog extends javax.swing.JDialog {
                                 .addComponent(pica_roja_label)
                                 .addGap(18, 18, 18)
                                 .addComponent(mc_logo_label))))
-                    .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, 546, Short.MAX_VALUE))
+                    .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(subtitle_label)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(mcdown_url_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(check_version_button)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -155,9 +154,9 @@ public final class AboutDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(subtitle_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(mcdown_url_button)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(check_version_button)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(mcdown_url_button)
+                    .addComponent(check_version_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(made_in_spain_label)

@@ -31,17 +31,6 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="1" attributes="0">
-                      <Component id="subtitle_label" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="mcdown_url_button" alignment="1" min="-2" max="-2" attributes="0"/>
-                          <Component id="check_version_button" alignment="1" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                  </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="made_in_spain_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
@@ -54,7 +43,16 @@
                           </Group>
                       </Group>
                   </Group>
-                  <Component id="title_label" pref="546" max="32767" attributes="0"/>
+                  <Component id="title_label" max="32767" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Component id="subtitle_label" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="mcdown_url_button" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                      <Component id="check_version_button" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
@@ -68,10 +66,11 @@
               <EmptySpace max="-2" attributes="0"/>
               <Component id="subtitle_label" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="mcdown_url_button" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="check_version_button" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="mcdown_url_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="check_version_button" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="made_in_spain_label" min="-2" max="-2" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
@@ -126,7 +125,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="(Made with love by tonikelope)"/>
+        <Property name="text" type="java.lang.String" value="Made with love (and with no warranty)  by tonikelope."/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
@@ -147,7 +146,7 @@
     <Component class="javax.swing.JButton" name="mcdown_url_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="18" style="1"/>
+          <Font name="Dialog" size="14" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Copy MegaBasterd download URL"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
