@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static megabasterd.MainPanel.*;
@@ -31,8 +30,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         String current_proxy = null;
         Chunk chunk;
         int reads, conta_error, http_status = 200;
-        boolean error;
-        ArrayList<String> excluded = new ArrayList<>();
+        boolean error,error509;
         HttpGet httpget = null;
         CloseableHttpResponse httpresponse = null;
         CloseableHttpClient httpclient = null;
@@ -43,19 +41,21 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             conta_error = 0;
 
             error = false;
+            
+            error509 = false;
 
             InputStream is = null;
 
             while (!isExit() && !getDownload().isStopped()) {
 
-                if (this.getDownload().isUse_smart_proxy() && !MainPanel.isUse_smart_proxy()) {
+                if (this.getDownload().isUse_smart_proxy() && !this.getDownload().getMain_panel().isUse_smart_proxy()) {
 
                     this.getDownload().setUse_smart_proxy(false);
                 }
 
-                if (httpclient == null || worker_url == null || error || (MainPanel.isUse_smart_proxy() && this.getDownload().isUse_smart_proxy())) {
+                if (httpclient == null || worker_url == null || error || (this.getDownload().getMain_panel().isUse_smart_proxy() && this.getDownload().isUse_smart_proxy())) {
 
-                    if (error && !this.getDownload().isUse_smart_proxy()) {
+                    if (error509 && !this.getDownload().isUse_smart_proxy()) {
                         this.getDownload().setUse_smart_proxy(true);
                     }
 
@@ -65,10 +65,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker mono: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
 
-                            excluded.add(current_proxy);
+                            this.getDownload().getExcluded_proxies().add(current_proxy);
                         }
 
-                        current_proxy = MainPanel.getProxy_manager().getRandomProxy(excluded);
+                        current_proxy = this.getDownload().getMain_panel().getProxy_manager().getRandomProxy(this.getDownload().getExcluded_proxies());
 
                         if (httpclient != null) {
                             try {
@@ -115,6 +115,11 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                         error = true;
+                        
+                        if(http_status == 509)
+                        {
+                            error509 = true;
+                        }
 
                         getDownload().rejectChunkId(chunk.getId());
 
@@ -124,7 +129,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             setError_wait(true);
 
-                            if (!MainPanel.isUse_smart_proxy()) {
+                            if (!this.getDownload().getMain_panel().isUse_smart_proxy()) {
                                 Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
                             }
 
@@ -173,7 +178,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                     setError_wait(true);
 
-                                    if (!MainPanel.isUse_smart_proxy()) {
+                                    if (!this.getDownload().getMain_panel().isUse_smart_proxy()) {
                                         Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
                                     }
 

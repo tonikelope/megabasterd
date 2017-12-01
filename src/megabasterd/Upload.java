@@ -623,7 +623,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         printStatus("Starting upload, please wait...");
 
         if (!_exit) {
-            if (_ul_url == null) {
+            if (_ul_url == null || _restart) {
 
                 int conta_error = 0;
 

@@ -45,7 +45,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.42";
+    public static final String VERSION = "2.43";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -58,9 +58,7 @@ public final class MainPanel {
     private static int _proxy_port;
     private static Credentials _proxy_credentials;
     private static boolean _use_proxy;
-    private static boolean _use_smart_proxy;
-    private static String _use_smart_proxy_url;
-    private static SmartMegaProxyManager _proxy_manager;
+    
 
     public static void main(String args[]) {
 
@@ -86,27 +84,12 @@ public final class MainPanel {
         });
     }
 
-    public static boolean isUse_proxy() {
-        return _use_proxy;
-    }
-
-    public static String getProxy_host() {
-        return _proxy_host;
-    }
-
-    public static int getProxy_port() {
-        return _proxy_port;
-    }
-
-    public static Credentials getProxy_credentials() {
-        return _proxy_credentials;
-    }
-
-    public static String getUse_smart_proxy_url() {
-        return _use_smart_proxy_url;
-    }
-
-    private volatile MainPanelView _view; //lazy init
+    
+    
+    private volatile boolean _use_smart_proxy;
+    private volatile String _use_smart_proxy_url;
+    private volatile SmartMegaProxyManager _proxy_manager;
+    private volatile MainPanelView _view; 
     private final GlobalSpeedMeter _global_dl_speed, _global_up_speed;
     private final DownloadManager _download_manager;
     private final UploadManager _upload_manager;
@@ -172,9 +155,7 @@ public final class MainPanel {
 
         _use_smart_proxy = false;
 
-        _use_smart_proxy_url = "";
-
-        _proxy_manager = null;
+        _use_smart_proxy_url = null;
 
         loadUserSettings();
 
@@ -226,24 +207,45 @@ public final class MainPanel {
             _mega_proxy_server = null;
         }
 
+        
         if (_use_smart_proxy) {
-
+            
             _proxy_manager = new SmartMegaProxyManager(_use_smart_proxy_url);
-
             THREAD_POOL.execute(_proxy_manager);
         }
     }
 
-    public static boolean isUse_smart_proxy() {
+    public void setProxy_manager(SmartMegaProxyManager _proxy_manager) {
+        this._proxy_manager = _proxy_manager;
+    }
+
+    
+    public static String getProxy_host() {
+        return _proxy_host;
+    }
+
+    public static  int getProxy_port() {
+        return _proxy_port;
+    }
+
+    public static Credentials getProxy_credentials() {
+        return _proxy_credentials;
+    }
+
+    public static boolean isUse_proxy() {
+        return _use_proxy;
+    }
+
+    public boolean isUse_smart_proxy() {
         return _use_smart_proxy;
     }
 
-    public static SmartMegaProxyManager getProxy_manager() {
-        return _proxy_manager;
+    public String getUse_smart_proxy_url() {
+        return _use_smart_proxy_url;
     }
 
-    public static void setProxy_manager(SmartMegaProxyManager proxy_manager) {
-        _proxy_manager = proxy_manager;
+    public SmartMegaProxyManager getProxy_manager() {
+        return _proxy_manager;
     }
 
     public MegaProxyServer getMega_proxy_server() {
@@ -321,7 +323,15 @@ public final class MainPanel {
 
     public MainPanelView getView() {
 
-        return _view;
+         while (_view == null) {
+            try {
+                Thread.sleep(250);
+            } catch (InterruptedException ex) {
+                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+         
+         return _view;
     }
 
     public GlobalSpeedMeter getGlobal_dl_speed() {

@@ -95,7 +95,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         Chunk chunk;
         int reads, conta_error, http_status;
         InputStream is;
-        boolean error;
+        boolean error, error509;
         String current_proxy = null;
         CloseableHttpClient httpclient = null;
 
@@ -106,17 +106,18 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
             conta_error = 0;
 
             error = false;
+            error509 = false;
 
             while (!_exit && !_download.isStopped()) {
 
-                if (_download.isUse_smart_proxy() && !MainPanel.isUse_smart_proxy()) {
+                if (_download.isUse_smart_proxy() && !_download.getMain_panel().isUse_smart_proxy()) {
 
                     _download.setUse_smart_proxy(false);
                 }
 
-                if (httpclient == null || error || (MainPanel.isUse_smart_proxy() && _download.isUse_smart_proxy())) {
+                if (httpclient == null || error || (_download.getMain_panel().isUse_smart_proxy() && _download.isUse_smart_proxy())) {
 
-                    if (error && !_download.isUse_smart_proxy()) {
+                    if (error509 && !_download.isUse_smart_proxy()) {
                         _download.setUse_smart_proxy(true);
                     }
 
@@ -129,7 +130,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getExcluded_proxies().add(current_proxy);
                         }
 
-                        current_proxy = MainPanel.getProxy_manager().getRandomProxy(_download.getExcluded_proxies());
+                        current_proxy = _download.getMain_panel().getProxy_manager().getRandomProxy(_download.getExcluded_proxies());
 
                         if (httpclient != null) {
                             try {
@@ -157,6 +158,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
 
                 error = false;
+                
+                error509 = false;
 
                 try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
 
@@ -168,8 +171,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (http_status != HttpStatus.SC_OK) {
                             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
-
+                            
                             error = true;
+                            
+                            if(http_status == 509)
+                            {
+                                error509 = true;
+                            }
 
                         } else {
 
@@ -218,7 +226,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 _download.getView().updateSlotsStatus();
 
-                                if (!MainPanel.isUse_smart_proxy()) {
+                                if (!_download.getMain_panel().isUse_smart_proxy()) {
                                     Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
                                 }
 

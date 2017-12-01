@@ -333,7 +333,7 @@ public final class MegaAPI {
 
                     }
 
-                } catch (IOException | URISyntaxException ex) {
+                } catch (URISyntaxException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
@@ -358,10 +358,6 @@ public final class MegaAPI {
                 }
 
             } while (error != 0);
-
-        } catch (MegaAPIException | IOException exception) {
-
-            throw exception;
         }
 
         _seqno++;

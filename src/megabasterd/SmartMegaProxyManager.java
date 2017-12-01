@@ -47,15 +47,18 @@ public class SmartMegaProxyManager implements Runnable {
 
     public synchronized String getRandomProxy() {
 
-        if (_proxy_list.size() > 0) {
+        synchronized (_refresh_lock) {
+         
+            if (_proxy_list.size() > 0) {
 
-            Random random = new Random();
+                Random random = new Random();
 
-            return (String) _proxy_list.toArray()[random.nextInt(_proxy_list.size())];
+                return (String) _proxy_list.toArray()[random.nextInt(_proxy_list.size())];
 
-        } else {
+            } else {
 
-            return null;
+                return null;
+            }
         }
     }
 
@@ -63,9 +66,11 @@ public class SmartMegaProxyManager implements Runnable {
         _proxy_list_url = proxy_list_url;
     }
 
-    public synchronized String getRandomProxy(ArrayList<String> excluded) {
+    public String getRandomProxy(ConcurrentLinkedQueue<String> excluded) {
 
-        if (_proxy_list.size() > 0) {
+        synchronized (_refresh_lock) {
+         
+            if (_proxy_list.size() > 0) {
 
             if (excluded.size() > 0) {
 
@@ -101,48 +106,52 @@ public class SmartMegaProxyManager implements Runnable {
 
             return null;
         }
+        }
     }
 
     public ConcurrentLinkedQueue<String> getProxy_list() {
         return _proxy_list;
     }
 
-    private synchronized void _refreshProxyList() {
+    private void _refreshProxyList() {
 
         String data;
 
         try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+            
+            if(this._proxy_list_url!=null && this._proxy_list_url.length()>0)
+            {
+                HttpGet httpget = new HttpGet(new URI(this._proxy_list_url));
 
-            HttpGet httpget = new HttpGet(new URI(this._proxy_list_url));
+                try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
 
-            try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+                    InputStream is = httpresponse.getEntity().getContent();
 
-                InputStream is = httpresponse.getEntity().getContent();
+                    try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
-                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+                        int reads;
 
-                    int reads;
+                        while ((reads = is.read(buffer)) != -1) {
 
-                    while ((reads = is.read(buffer)) != -1) {
+                            byte_res.write(buffer, 0, reads);
+                        }
 
-                        byte_res.write(buffer, 0, reads);
+                        data = new String(byte_res.toByteArray());
                     }
+                }
 
-                    data = new String(byte_res.toByteArray());
+                String[] proxy_list = data.split("\n");
+
+                if (proxy_list.length > 0) {
+
+                    _proxy_list.clear();
+
+                    this._proxy_list.addAll(Arrays.asList(proxy_list));
                 }
             }
-
-            String[] proxy_list = data.split("\n");
-
-            if (proxy_list.length > 0) {
-
-                _proxy_list.clear();
-
-                this._proxy_list.addAll(Arrays.asList(proxy_list));
-            }
-
+            
         } catch (MalformedURLException ex) {
             Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException | URISyntaxException ex) {
@@ -156,12 +165,12 @@ public class SmartMegaProxyManager implements Runnable {
         Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: hello!", new Object[]{Thread.currentThread().getName()});
 
         while (!_exit) {
-
-            this._refreshProxyList();
-
-            Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
-
+            
             synchronized (_refresh_lock) {
+
+                this._refreshProxyList();
+
+                Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
 
                 try {
                     _refresh_lock.wait(1000 * REFRESH_PROXY_LIST_TIMEOUT);

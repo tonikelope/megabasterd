@@ -92,7 +92,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private final MegaAPI _ma;
     private volatile boolean _use_smart_proxy;
     private volatile int _last_proxy_list_hashcode;
-    private final ArrayList<String> _excluded_proxies;
+    private final ConcurrentLinkedQueue<String> _excluded_proxies;
     private final Object _watchdog_lock;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
@@ -122,7 +122,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _use_slots = use_slots;
         _use_smart_proxy = false;
         _watchdog_lock = new Object();
-        _excluded_proxies = new ArrayList<>();
+        _excluded_proxies = new ConcurrentLinkedQueue<>();
         _last_proxy_list_hashcode = -1;
         _slots = slots;
         _restart = restart;
@@ -134,7 +134,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
-
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
     }
@@ -146,7 +145,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public void setUse_smart_proxy(boolean _use_smart_proxy) {
 
         if (_use_smart_proxy) {
-            swingReflectionInvoke("setForeground", this.getView().getSpeed_label(), Color.ORANGE);
+            swingReflectionInvoke("setForeground", this.getView().getSpeed_label(), Color.DARK_GRAY);
         } else {
             swingReflectionInvoke("setForeground", this.getView().getSpeed_label(), new Color(0, 128, 255));
         }
@@ -154,7 +153,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         this._use_smart_proxy = _use_smart_proxy;
     }
 
-    public ArrayList<String> getExcluded_proxies() {
+    public ConcurrentLinkedQueue<String> getExcluded_proxies() {
         return _excluded_proxies;
     }
 
@@ -1380,7 +1379,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                             _use_smart_proxy = false;
 
-                            int proxy_list_hashcode = MainPanel.getProxy_manager().getProxy_list().hashCode();
+                            int proxy_list_hashcode = getMain_panel().getProxy_manager().getProxy_list().hashCode();
 
                             if (_last_proxy_list_hashcode != proxy_list_hashcode) {
 

@@ -86,9 +86,7 @@ public final class MiscTools {
     public static final int EXP_BACKOFF_MAX_WAIT_TIME = 16;
     public static final Object PASS_LOCK = new Object();
     public static final int HTTP_TIMEOUT = 30;
-
     private static final ConcurrentHashMap<String, Method> REFLECTION_METHOD_CACHE = new ConcurrentHashMap<>();
-
     private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = new Comparator< DefaultMutableTreeNode>() {
 
         @Override

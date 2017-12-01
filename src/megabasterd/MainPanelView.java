@@ -734,27 +734,27 @@ public final class MainPanelView extends javax.swing.JFrame {
                 _main_panel.setMega_proxy_server(null);
             }
 
-            if (MainPanel.isUse_smart_proxy()) {
+            if (this.getMain_panel().isUse_smart_proxy()) {
 
-                if (MainPanel.getProxy_manager() == null) {
+                if (this.getMain_panel().getProxy_manager() == null) {
 
-                    MainPanel.setProxy_manager(new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url()));
+                    this.getMain_panel().setProxy_manager(new SmartMegaProxyManager(this.getMain_panel().getUse_smart_proxy_url()));
 
-                    THREAD_POOL.execute(MainPanel.getProxy_manager());
+                    THREAD_POOL.execute(this.getMain_panel().getProxy_manager());
 
                 } else {
-                    MainPanel.getProxy_manager().setProxy_list_url(MainPanel.getUse_smart_proxy_url());
+                    this.getMain_panel().getProxy_manager().setProxy_list_url(this.getMain_panel().getUse_smart_proxy_url());
                 }
 
-            } else if (MainPanel.getProxy_manager() != null) {
+            } else if (this.getMain_panel().getProxy_manager() != null) {
 
-                MainPanel.getProxy_manager().setExit(true);
+                this.getMain_panel().getProxy_manager().setExit(true);
 
-                synchronized (MainPanel.getProxy_manager().getRefresh_lock()) {
-                    MainPanel.getProxy_manager().getRefresh_lock().notify();
+                synchronized (this.getMain_panel().getProxy_manager().getRefresh_lock()) {
+                    this.getMain_panel().getProxy_manager().getRefresh_lock().notify();
                 }
 
-                MainPanel.setProxy_manager(null);
+                this.getMain_panel().setProxy_manager(null);
             }
         }
 
