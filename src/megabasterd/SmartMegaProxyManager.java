@@ -48,7 +48,7 @@ public class SmartMegaProxyManager implements Runnable {
     public synchronized String getRandomProxy() {
 
         synchronized (_refresh_lock) {
-         
+
             if (_proxy_list.size() > 0) {
 
                 Random random = new Random();
@@ -69,43 +69,43 @@ public class SmartMegaProxyManager implements Runnable {
     public String getRandomProxy(ConcurrentLinkedQueue<String> excluded) {
 
         synchronized (_refresh_lock) {
-         
+
             if (_proxy_list.size() > 0) {
 
-            if (excluded.size() > 0) {
+                if (excluded.size() > 0) {
 
-                ArrayList<String> available_proxys = new ArrayList<>();
+                    ArrayList<String> available_proxys = new ArrayList<>();
 
-                for (String proxy : _proxy_list) {
+                    for (String proxy : _proxy_list) {
 
-                    if (!excluded.contains(proxy)) {
+                        if (!excluded.contains(proxy)) {
 
-                        available_proxys.add(proxy);
+                            available_proxys.add(proxy);
+                        }
                     }
-                }
 
-                if (available_proxys.size() > 0) {
+                    if (available_proxys.size() > 0) {
 
-                    Random random = new Random();
+                        Random random = new Random();
 
-                    return (String) available_proxys.toArray()[random.nextInt(available_proxys.size())];
+                        return (String) available_proxys.toArray()[random.nextInt(available_proxys.size())];
+
+                    } else {
+
+                        return null;
+                    }
 
                 } else {
 
-                    return null;
+                    Random random = new Random();
+
+                    return (String) _proxy_list.toArray()[random.nextInt(_proxy_list.size())];
                 }
 
             } else {
 
-                Random random = new Random();
-
-                return (String) _proxy_list.toArray()[random.nextInt(_proxy_list.size())];
+                return null;
             }
-
-        } else {
-
-            return null;
-        }
         }
     }
 
@@ -118,9 +118,8 @@ public class SmartMegaProxyManager implements Runnable {
         String data;
 
         try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
-            
-            if(this._proxy_list_url!=null && this._proxy_list_url.length()>0)
-            {
+
+            if (this._proxy_list_url != null && this._proxy_list_url.length() > 0) {
                 HttpGet httpget = new HttpGet(new URI(this._proxy_list_url));
 
                 try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
@@ -151,7 +150,7 @@ public class SmartMegaProxyManager implements Runnable {
                     this._proxy_list.addAll(Arrays.asList(proxy_list));
                 }
             }
-            
+
         } catch (MalformedURLException ex) {
             Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException | URISyntaxException ex) {
@@ -165,7 +164,7 @@ public class SmartMegaProxyManager implements Runnable {
         Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: hello!", new Object[]{Thread.currentThread().getName()});
 
         while (!_exit) {
-            
+
             synchronized (_refresh_lock) {
 
                 this._refreshProxyList();

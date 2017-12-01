@@ -158,7 +158,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
 
                 error = false;
-                
+
                 error509 = false;
 
                 try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
@@ -171,11 +171,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (http_status != HttpStatus.SC_OK) {
                             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
-                            
+
                             error = true;
-                            
-                            if(http_status == 509)
-                            {
+
+                            if (http_status == 509) {
                                 error509 = true;
                             }
 

@@ -30,7 +30,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         String current_proxy = null;
         Chunk chunk;
         int reads, conta_error, http_status = 200;
-        boolean error,error509;
+        boolean error, error509;
         HttpGet httpget = null;
         CloseableHttpResponse httpresponse = null;
         CloseableHttpClient httpclient = null;
@@ -41,7 +41,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             conta_error = 0;
 
             error = false;
-            
+
             error509 = false;
 
             InputStream is = null;
@@ -115,9 +115,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                         error = true;
-                        
-                        if(http_status == 509)
-                        {
+
+                        if (http_status == 509) {
                             error509 = true;
                         }
 
