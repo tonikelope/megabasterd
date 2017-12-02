@@ -27,70 +27,31 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     public void run() {
 
         String worker_url = null;
-        String current_proxy = null;
         Chunk chunk;
         int reads, conta_error, http_status = 200;
-        boolean error, error509;
+        boolean error;
         HttpGet httpget = null;
         CloseableHttpResponse httpresponse = null;
-        CloseableHttpClient httpclient = null;
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), getId()});
 
-        try {
+        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
             conta_error = 0;
 
             error = false;
-
-            error509 = false;
 
             InputStream is = null;
 
             while (!isExit() && !getDownload().isStopped()) {
 
-                if (this.getDownload().isUse_smart_proxy() && !this.getDownload().getMain_panel().isUse_smart_proxy()) {
-
-                    this.getDownload().setUse_smart_proxy(false);
-                }
-
-                if (httpclient == null || worker_url == null || error || (this.getDownload().getMain_panel().isUse_smart_proxy() && this.getDownload().isUse_smart_proxy())) {
-
-                    if (error509 && !this.getDownload().isUse_smart_proxy()) {
-                        this.getDownload().setUse_smart_proxy(true);
-                    }
-
-                    if (this.getDownload().isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
-
-                        if (error && current_proxy != null) {
-
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker mono: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
-
-                            this.getDownload().getExcluded_proxies().add(current_proxy);
-                        }
-
-                        current_proxy = this.getDownload().getMain_panel().getProxy_manager().getRandomProxy(this.getDownload().getExcluded_proxies());
-
-                        if (httpclient != null) {
-                            try {
-                                httpclient.close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-
-                        httpclient = current_proxy != null ? MiscTools.getApacheKissHttpClientSmartProxy(current_proxy) : MiscTools.getApacheKissHttpClient();
-
-                    } else if (httpclient == null) {
-
-                        httpclient = MiscTools.getApacheKissHttpClient();
-                    }
+                if (worker_url == null || error) {
 
                     worker_url = getDownload().getDownloadUrlForWorker();
 
                     if (httpresponse != null) {
+
                         httpresponse.close();
                     }
-
                 }
 
                 chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), null);
@@ -116,10 +77,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         error = true;
 
-                        if (http_status == 509) {
-                            error509 = true;
-                        }
-
                         getDownload().rejectChunkId(chunk.getId());
 
                         conta_error++;
@@ -128,9 +85,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             setError_wait(true);
 
-                            if (!this.getDownload().getMain_panel().isUse_smart_proxy()) {
-                                Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-                            }
+                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
 
                             setError_wait(false);
                         }
@@ -177,9 +132,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                     setError_wait(true);
 
-                                    if (!this.getDownload().getMain_panel().isUse_smart_proxy()) {
-                                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-                                    }
+                                    Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
 
                                     setError_wait(false);
                                 }
@@ -226,19 +179,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             getDownload().emergencyStopDownloader(ex.getMessage());
 
-        } catch (URISyntaxException | InterruptedException ex) {
+        } catch (URISyntaxException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(ChunkDownloaderMono.class.getName()).log(Level.SEVERE, null, ex);
-        } finally {
-
-            if (httpclient != null) {
-                try {
-                    httpclient.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
         }
 
         getDownload().stopThisSlot(this);

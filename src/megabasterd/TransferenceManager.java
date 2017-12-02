@@ -331,6 +331,32 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public void run() {
 
         while (true) {
+
+            if (!isRemoving_transferences() && !getTransference_remove_queue().isEmpty()) {
+
+                setRemoving_transferences(true);
+
+                THREAD_POOL.execute(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        if (!getTransference_remove_queue().isEmpty()) {
+
+                            ArrayList<Transference> transferences = new ArrayList(getTransference_remove_queue());
+
+                            getTransference_remove_queue().clear();
+
+                            remove(transferences.toArray(new Transference[transferences.size()]));
+                        }
+
+                        setRemoving_transferences(false);
+
+                        secureNotify();
+
+                    }
+                });
+            }
+
             if (!isPreprocessing_transferences() && !getTransference_preprocess_queue().isEmpty()) {
 
                 setPreprocessing_transferences(true);
@@ -366,6 +392,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     @Override
                     public void run() {
 
+                        while (isRemoving_transferences()) {
+
+                            secureWait();
+                        }
+
                         while (!getTransference_provision_queue().isEmpty()) {
                             Transference transference = getTransference_provision_queue().poll();
 
@@ -385,37 +416,17 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             }
 
-            if (!isRemoving_transferences() && !getTransference_remove_queue().isEmpty()) {
-
-                setRemoving_transferences(true);
-
-                THREAD_POOL.execute(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        if (!getTransference_remove_queue().isEmpty()) {
-
-                            ArrayList<Transference> transferences = new ArrayList(getTransference_remove_queue());
-
-                            getTransference_remove_queue().clear();
-
-                            remove(transferences.toArray(new Transference[transferences.size()]));
-                        }
-
-                        setRemoving_transferences(false);
-
-                        secureNotify();
-
-                    }
-                });
-            }
-
             if (!isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
                 setStarting_transferences(true);
 
                 THREAD_POOL.execute(new Runnable() {
                     @Override
                     public void run() {
+
+                        while (isRemoving_transferences()) {
+
+                            secureWait();
+                        }
 
                         while (!getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
 

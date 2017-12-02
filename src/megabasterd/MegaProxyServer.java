@@ -124,6 +124,8 @@ public class MegaProxyServer extends Thread {
             try {
                 String request = readLine(_clientSocket);
 
+                Logger.getLogger(getClass().getName()).log(Level.INFO, request);
+
                 Matcher matcher = CONNECT_PATTERN.matcher(request);
 
                 OutputStreamWriter outputStreamWriter = new OutputStreamWriter(_clientSocket.getOutputStream(), "UTF-8");
@@ -143,6 +145,8 @@ public class MegaProxyServer extends Thread {
                             proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()));
 
                         }
+
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, header);
 
                     } while (!"".equals(header));
 

@@ -898,8 +898,6 @@ public final class MiscTools {
             }
         }
 
-        System.out.println(res);
-
         return res.trim();
     }
 
