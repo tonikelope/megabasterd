@@ -72,6 +72,10 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
         return _chunk_queue;
     }
 
+    public KissVideoStreamServer getServer() {
+        return _server;
+    }
+
     @Override
     public void run() {
 

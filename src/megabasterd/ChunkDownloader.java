@@ -115,7 +115,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     _download.setUse_smart_proxy(false);
                 }
 
-                if (httpclient == null || error || (_download.getMain_panel().isUse_smart_proxy() && _download.isUse_smart_proxy())) {
+                if (httpclient == null || error || _download.getMain_panel().isUse_smart_proxy()) {
 
                     if (error509 && !_download.isUse_smart_proxy()) {
                         _download.setUse_smart_proxy(true);
