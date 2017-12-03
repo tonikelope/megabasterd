@@ -11,7 +11,7 @@ public interface Transference {
     int MIN_WORKERS = 2;
     int MAX_WORKERS = 30;
     int MAX_SIM_TRANSFERENCES = 30;
-    int SIM_TRANSFERENCES_DEFAULT = 2;
+    int SIM_TRANSFERENCES_DEFAULT = 4;
     boolean LIMIT_TRANSFERENCE_SPEED_DEFAULT = false;
     int MAX_TRANSFERENCE_SPEED_DEFAULT = 5;
     int MAX_WAIT_WORKERS_SHUTDOWN = 15;

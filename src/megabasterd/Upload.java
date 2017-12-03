@@ -25,7 +25,7 @@ import static megabasterd.MiscTools.*;
 public final class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean USE_SLOTS_DEFAULT = false;
-    public static final int WORKERS_DEFAULT = 8;
+    public static final int WORKERS_DEFAULT = 6;
     private final MainPanel _main_panel;
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;

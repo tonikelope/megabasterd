@@ -123,6 +123,8 @@ public class StreamChunkDownloader implements Runnable {
                     HttpGet httpget = new HttpGet(new URI(chunk_stream.getUrl()));
 
                     error = false;
+                    
+                    error509=false;
 
                     try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
 
