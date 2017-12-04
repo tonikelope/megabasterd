@@ -382,7 +382,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 });
             }
 
-            if (!isProvisioning_transferences() && !getTransference_provision_queue().isEmpty()) {
+            if (!isRemoving_transferences() && !isProvisioning_transferences() && !getTransference_provision_queue().isEmpty()) {
 
                 setProvisioning_transferences(true);
 
@@ -391,11 +391,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 THREAD_POOL.execute(new Runnable() {
                     @Override
                     public void run() {
-
-                        while (isRemoving_transferences()) {
-
-                            secureWait();
-                        }
 
                         while (!getTransference_provision_queue().isEmpty()) {
                             Transference transference = getTransference_provision_queue().poll();
@@ -416,17 +411,12 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             }
 
-            if (!isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
+            if (!isRemoving_transferences() && !isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
                 setStarting_transferences(true);
 
                 THREAD_POOL.execute(new Runnable() {
                     @Override
                     public void run() {
-
-                        while (isRemoving_transferences()) {
-
-                            secureWait();
-                        }
 
                         while (!getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
 

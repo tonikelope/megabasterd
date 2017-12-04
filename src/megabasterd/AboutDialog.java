@@ -69,7 +69,7 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        subtitle_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        subtitle_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
         subtitle_label.setText("Made with love (and with no warranty)  by tonikelope.");
         subtitle_label.setDoubleBuffered(true);
