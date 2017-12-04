@@ -51,7 +51,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         setResizable(false);
 
         title_label.setFont(new java.awt.Font("Dialog", 1, 48)); // NOI18N
-        title_label.setText("MegaBasterd X.X");
+        title_label.setText("MegaBasterd XX.XX");
         title_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         title_label.setDoubleBuffered(true);
         title_label.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -136,14 +136,12 @@ public final class AboutDialog extends javax.swing.JDialog {
                                 .addComponent(pica_roja_label)
                                 .addGap(18, 18, 18)
                                 .addComponent(mc_logo_label))))
-                    .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(subtitle_label)
-                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(mcdown_url_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(check_version_button)))
+                        .addComponent(check_version_button))
+                    .addComponent(subtitle_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -157,7 +155,7 @@ public final class AboutDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(mcdown_url_button)
                     .addComponent(check_version_button))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(made_in_spain_label)
                     .addGroup(layout.createSequentialGroup()
@@ -166,7 +164,7 @@ public final class AboutDialog extends javax.swing.JDialog {
                             .addComponent(mc_logo_label, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(author_webpage_label)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         pack();
