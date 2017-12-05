@@ -45,7 +45,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.48";
+    public static final String VERSION = "2.49";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -206,7 +206,7 @@ public final class MainPanel {
 
         if (_use_smart_proxy) {
 
-            _proxy_manager = new SmartMegaProxyManager(_use_smart_proxy_url);
+            _proxy_manager = new SmartMegaProxyManager(this, _use_smart_proxy_url);
             THREAD_POOL.execute(_proxy_manager);
         }
     }

@@ -63,27 +63,27 @@ public class StreamChunkDownloader implements Runnable {
                     _chunkwriter.secureWait();
                 }
 
-                if (_chunkwriter.getServer().isUse_smart_proxy() && !_chunkwriter.getServer().getMain_panel().isUse_smart_proxy()) {
+                if (_chunkwriter.getServer().getMain_panel().getProxy_manager().isUse_smart_proxy() && !_chunkwriter.getServer().getMain_panel().isUse_smart_proxy()) {
 
-                    _chunkwriter.getServer().setUse_smart_proxy(false);
+                    _chunkwriter.getServer().getMain_panel().getProxy_manager().setUse_smart_proxy(false);
                 }
 
-                if (httpclient == null || error || _chunkwriter.getServer().isUse_smart_proxy()) {
+                if (httpclient == null || error || _chunkwriter.getServer().getMain_panel().getProxy_manager().isUse_smart_proxy()) {
 
-                    if (error509 && !_chunkwriter.getServer().isUse_smart_proxy()) {
-                        _chunkwriter.getServer().setUse_smart_proxy(true);
+                    if (error509 && !_chunkwriter.getServer().getMain_panel().getProxy_manager().isUse_smart_proxy()) {
+                        _chunkwriter.getServer().getMain_panel().getProxy_manager().setUse_smart_proxy(true);
                     }
 
-                    if (_chunkwriter.getServer().isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    if (_chunkwriter.getServer().getMain_panel().getProxy_manager().isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                         if (error && current_proxy != null) {
 
                             Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
 
-                            _chunkwriter.getServer().getExcluded_proxies().add(current_proxy);
+                            _chunkwriter.getServer().getMain_panel().getProxy_manager().excludeProxy(current_proxy);
                         }
 
-                        current_proxy = _chunkwriter.getServer().getMain_panel().getProxy_manager().getRandomProxy(_chunkwriter.getServer().getExcluded_proxies());
+                        current_proxy = _chunkwriter.getServer().getMain_panel().getProxy_manager().getRandomProxy(true);
 
                         if (httpclient != null) {
                             try {
@@ -93,7 +93,15 @@ public class StreamChunkDownloader implements Runnable {
                             }
                         }
 
-                        httpclient = current_proxy != null ? MiscTools.getApacheKissHttpClientSmartProxy(current_proxy) : MiscTools.getApacheKissHttpClient();
+                        if (current_proxy != null) {
+
+                            httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+
+                        } else {
+
+                            httpclient = MiscTools.getApacheKissHttpClient();
+                            _chunkwriter.getServer().getMain_panel().getProxy_manager().setUse_smart_proxy(false);
+                        }
 
                     } else if (httpclient == null) {
 
@@ -123,8 +131,8 @@ public class StreamChunkDownloader implements Runnable {
                     HttpGet httpget = new HttpGet(new URI(chunk_stream.getUrl()));
 
                     error = false;
-                    
-                    error509=false;
+
+                    error509 = false;
 
                     try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
 

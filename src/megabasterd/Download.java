@@ -1,6 +1,5 @@
 package megabasterd;
 
-import java.awt.Color;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -90,10 +89,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private long _last_chunk_id_dispatched;
     private final MegaAPI _ma;
-    private volatile boolean _use_smart_proxy;
-    private volatile int _last_proxy_list_hashcode;
-    private final ConcurrentLinkedQueue<String> _excluded_proxies;
-    private final Object _watchdog_lock;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
 
@@ -120,10 +115,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _file_pass = file_pass;
         _file_noexpire = file_noexpire;
         _use_slots = use_slots;
-        _use_smart_proxy = false;
-        _watchdog_lock = new Object();
-        _excluded_proxies = new ConcurrentLinkedQueue<>();
-        _last_proxy_list_hashcode = -1;
         _slots = slots;
         _restart = restart;
         _secure_notify_lock = new Object();
@@ -136,25 +127,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _thread_pool = newCachedThreadPool();
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
-    }
-
-    public boolean isUse_smart_proxy() {
-        return _use_smart_proxy;
-    }
-
-    public void setUse_smart_proxy(boolean _use_smart_proxy) {
-
-        if (_use_smart_proxy) {
-            swingReflectionInvoke("setForeground", this.getView().getSpeed_label(), Color.DARK_GRAY);
-        } else {
-            swingReflectionInvoke("setForeground", this.getView().getSpeed_label(), new Color(0, 128, 255));
-        }
-
-        this._use_smart_proxy = _use_smart_proxy;
-    }
-
-    public ConcurrentLinkedQueue<String> getExcluded_proxies() {
-        return _excluded_proxies;
     }
 
     public Object getWorkers_lock() {
@@ -411,8 +383,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         String exit_message;
 
         getView().printStatusNormal("Starting download, please wait...");
-
-        _start_smart_proxy_watchdog();
 
         try {
 
@@ -735,10 +705,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         if (_status_error) {
             swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
-        }
-
-        synchronized (_watchdog_lock) {
-            _watchdog_lock.notify();
         }
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
@@ -1362,47 +1328,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         }
 
         return dl_url;
-    }
-
-    private void _start_smart_proxy_watchdog() {
-
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                while (!isStopped()) {
-
-                    try {
-
-                        if (_use_smart_proxy) {
-
-                            _use_smart_proxy = false;
-
-                            int proxy_list_hashcode = getMain_panel().getProxy_manager().getProxy_list().hashCode();
-
-                            if (_last_proxy_list_hashcode != proxy_list_hashcode) {
-
-                                _last_proxy_list_hashcode = proxy_list_hashcode;
-                                _excluded_proxies.clear();
-                                Logger.getLogger(ChunkDownloader.class.getName()).log(Level.INFO, "{0} SmartProxy excluded list cleared!", new Object[]{Thread.currentThread().getName()});
-
-                            }
-                        }
-
-                        synchronized (_watchdog_lock) {
-
-                            if (!isStopped()) {
-                                _watchdog_lock.wait(WATCHDOG_SMART_PROXY_TIMEOUT * 1000);
-                            }
-                        }
-
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        });
     }
 
     public long nextChunkId() {

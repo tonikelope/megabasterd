@@ -17,14 +17,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.crypto.CipherInputStream;
-import static megabasterd.Download.WATCHDOG_SMART_PROXY_TIMEOUT;
 import static megabasterd.MainPanel.*;
 import static megabasterd.MiscTools.*;
 import org.apache.http.HttpStatus;
@@ -45,10 +43,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
     private final ContentType _ctype;
     private boolean _notified;
     private final Object _secure_notify_lock;
-    private volatile boolean _use_smart_proxy;
-    private volatile int _last_proxy_list_hashcode;
-    private final ConcurrentLinkedQueue<String> _excluded_proxies;
-    private final Object _watchdog_lock;
 
     public KissVideoStreamServer(MainPanel panel) {
         _main_panel = panel;
@@ -57,60 +51,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         _ctype = new ContentType();
         _notified = false;
         _secure_notify_lock = new Object();
-        _use_smart_proxy = false;
-        _watchdog_lock = new Object();
-        _excluded_proxies = new ConcurrentLinkedQueue<>();
-        _last_proxy_list_hashcode = -1;
-    }
 
-    private void _start_smart_proxy_watchdog() {
-
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                while (true) {
-
-                    try {
-
-                        if (_use_smart_proxy) {
-
-                            _use_smart_proxy = false;
-
-                            int proxy_list_hashcode = getMain_panel().getProxy_manager().getProxy_list().hashCode();
-
-                            if (_last_proxy_list_hashcode != proxy_list_hashcode) {
-
-                                _last_proxy_list_hashcode = proxy_list_hashcode;
-                                _excluded_proxies.clear();
-                                Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.INFO, "{0} SmartProxy excluded list cleared!", new Object[]{Thread.currentThread().getName()});
-
-                            }
-                        }
-
-                        synchronized (_watchdog_lock) {
-                            _watchdog_lock.wait(WATCHDOG_SMART_PROXY_TIMEOUT * 1000);
-                        }
-
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(KissVideoStreamServer.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            }
-        });
-    }
-
-    public ConcurrentLinkedQueue<String> getExcluded_proxies() {
-        return _excluded_proxies;
-    }
-
-    public boolean isUse_smart_proxy() {
-        return _use_smart_proxy;
-    }
-
-    public void setUse_smart_proxy(boolean _use_smart_proxy) {
-        this._use_smart_proxy = _use_smart_proxy;
     }
 
     public MainPanel getMain_panel() {
@@ -157,8 +98,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
     }
 
     public void start(int port, String context) throws IOException {
-
-        _start_smart_proxy_watchdog();
 
         swingReflectionInvoke("setForeground", _main_panel.getView().getKiss_server_status(), new Color(0, 128, 0));
 
