@@ -66,7 +66,7 @@
                   <Component id="restore_button" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="file_tree_scrollpane" pref="383" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" pref="381" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="total_space_label" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -186,6 +186,9 @@
     </Component>
     <Component class="javax.swing.JButton" name="restore_button">
       <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="14" style="1"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Restore folder data"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>

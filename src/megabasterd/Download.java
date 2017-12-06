@@ -48,7 +48,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
     public static final int CHUNK_SIZE_MULTI = 10;
-    public static final int WATCHDOG_SMART_PROXY_TIMEOUT = 3600;
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view;

@@ -574,7 +574,7 @@
                                           </Group>
                                           <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="321" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="255" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -701,7 +701,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="14" style="2"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT it&apos;s more robust against upload errors but it might be slower."/>
+                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT seems to be more robust against upload errors but it might be slower."/>
               </Properties>
             </Component>
           </SubComponents>

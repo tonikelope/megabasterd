@@ -77,14 +77,14 @@ public final class GlobalSpeedMeter implements Runnable {
 
             double current_speed = (progress - last_progress) / sleep_time;
 
-            last_progress = progress;
-
-            sp = Math.round(current_speed);
+            sp = last_progress > 0 ? Math.round(current_speed) : 0;
 
             if (sp > 0) {
 
                 transference.getView().updateSpeed(formatBytes(sp) + "/s", true);
             }
+
+            last_progress = progress;
 
             no_data_count = 0;
 

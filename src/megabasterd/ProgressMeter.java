@@ -16,7 +16,7 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
         _notified = false;
         _secure_notify_lock = new Object();
         _transference = transference;
-        _progress = transference.getProgress();
+        _progress = 0;
         _exit = false;
     }
 
@@ -55,6 +55,8 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
     @Override
     public void run() {
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ProgressMeter hello!", Thread.currentThread().getName());
+
+        _progress = _transference.getProgress();
 
         while (!_exit || !_transference.getPartialProgress().isEmpty()) {
             Integer reads;

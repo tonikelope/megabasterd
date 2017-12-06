@@ -147,6 +147,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             }
         });
 
+        restore_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         restore_button.setText("Restore folder data");
         restore_button.setDoubleBuffered(true);
         restore_button.addActionListener(new java.awt.event.ActionListener() {
@@ -197,7 +198,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                     .addComponent(folder_link_label)
                     .addComponent(restore_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 383, Short.MAX_VALUE)
+                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(total_space_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
