@@ -8,11 +8,11 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.getApacheKissHttpClient;
 import static megabasterd.MiscTools.swingReflectionInvoke;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -71,6 +71,17 @@ public class SmartMegaProxyManager implements Runnable {
 
     public void setProxy_list_url(String proxy_list_url) {
         _proxy_list_url = proxy_list_url;
+
+        THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                synchronized (_refresh_lock) {
+
+                    _refreshProxyList();
+                }
+            }
+        });
     }
 
     public Object getRefresh_lock() {
@@ -172,8 +183,12 @@ public class SmartMegaProxyManager implements Runnable {
 
                     _proxy_list.clear();
 
-                    this._proxy_list.addAll(Arrays.asList(proxy_list));
+                    for (String proxy : proxy_list) {
 
+                        if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
+                            this._proxy_list.add(proxy);
+                        }
+                    }
                 }
 
                 Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
