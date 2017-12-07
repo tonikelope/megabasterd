@@ -150,7 +150,7 @@ public class MegaProxyServer extends Thread {
 
                     } while (!"".equals(header));
 
-                    if (proxy_auth != null && proxy_auth.equals("megacrypter:" + _password)) {
+                    if (proxy_auth != null && proxy_auth.matches(".*?: *?" + _password)) {
                         final Socket forwardSocket;
 
                         try {

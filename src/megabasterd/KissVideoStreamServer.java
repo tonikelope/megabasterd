@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -31,15 +32,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 
 public final class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNotifiable {
 
-    public static final int WORKER_STATUS_FILE_INFO = 0x01;
-    public static final int WORKER_STATUS_STREAM = 0x02;
-    public static final int WORKER_STATUS_RETRY = 0x03;
-    public static final int WORKER_STATUS_EXIT = 0x04;
-    public static final int WORKERS = 8;
+    public static final int THREAD_START = 0x01;
+    public static final int THREAD_STOP = 0x02;
+    public static final int CHUNK_WORKERS = 8;
 
     private final MainPanel _main_panel;
     private final ConcurrentHashMap<String, HashMap<String, Object>> _link_cache;
-    private final ConcurrentHashMap<Thread, Integer> _working_threads;
+    private final ConcurrentLinkedQueue<Thread> _working_threads;
     private final ContentType _ctype;
     private boolean _notified;
     private final Object _secure_notify_lock;
@@ -47,7 +46,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
     public KissVideoStreamServer(MainPanel panel) {
         _main_panel = panel;
         _link_cache = new ConcurrentHashMap();
-        _working_threads = new ConcurrentHashMap();
+        _working_threads = new ConcurrentLinkedQueue<>();
         _ctype = new ContentType();
         _notified = false;
         _secure_notify_lock = new Object();
@@ -62,7 +61,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         return _link_cache;
     }
 
-    public ConcurrentHashMap<Thread, Integer> getWorking_threads() {
+    public ConcurrentLinkedQueue<Thread> getWorking_threads() {
         return _working_threads;
     }
 
@@ -112,58 +111,39 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         httpserver.start();
     }
 
-    private void updateStatus(Integer new_status) {
+    private void _updateStatus(Integer status) {
 
-        if (new_status != WORKER_STATUS_EXIT) {
-
-            getWorking_threads().put(Thread.currentThread(), new_status);
-
+        if (status == THREAD_START && !getWorking_threads().contains(Thread.currentThread())) {
+            getWorking_threads().add(Thread.currentThread());
         } else {
-
             getWorking_threads().remove(Thread.currentThread());
         }
 
-        int conta_info = 0, conta_connect = 0, conta_stream = 0, conta_retry = 0;
+        _updateStatusView();
+    }
 
-        for (Integer thread_status : getWorking_threads().values()) {
-
-            switch (thread_status) {
-
-                case WORKER_STATUS_FILE_INFO:
-                    conta_info++;
-                    break;
-
-                case WORKER_STATUS_STREAM:
-                    conta_stream++;
-                    break;
-
-                case WORKER_STATUS_RETRY:
-                    conta_retry++;
-                    break;
-            }
-        }
+    private void _updateStatusView() {
 
         String status;
 
-        if (conta_info > 0 || conta_connect > 0 || conta_stream > 0 || conta_retry > 0) {
+        if (getWorking_threads().size() > 0) {
 
-            status = "Stream server running on localhost:" + STREAMER_PORT + "  Info: " + conta_info + " / Stream: " + conta_stream + " / Retry: " + conta_retry;
+            status = "Stream server running on localhost:" + STREAMER_PORT + "  Connections: " + getWorking_threads().size();
 
         } else {
 
             status = "Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)";
         }
 
-        swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), status);
+        swingReflectionInvokeAndWait("setText", _main_panel.getView().getKiss_server_status(), status);
     }
 
-    private String[] getMegaFileMetadata(String link, MainPanelView panel) throws IOException, InterruptedException {
+    private String[] _getMegaFileMetadata(String link, MainPanelView panel) throws IOException, InterruptedException {
         String[] file_info = null;
         int retry = 0;
         boolean error;
 
         do {
-            updateStatus(WORKER_STATUS_FILE_INFO);
 
             error = false;
 
@@ -204,8 +184,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                     default:
 
-                        updateStatus(WORKER_STATUS_RETRY);
-
                         for (long i = getWaitTimeExpBackOff(retry++); i > 0; i--) {
                             try {
                                 Thread.sleep(1000);
@@ -227,7 +205,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         boolean error;
 
         do {
-            updateStatus(WORKER_STATUS_FILE_INFO);
 
             error = false;
 
@@ -264,8 +241,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                     default:
 
-                        updateStatus(WORKER_STATUS_RETRY);
-
                         for (long i = getWaitTimeExpBackOff(retry++); i > 0; i--) {
                             try {
                                 Thread.sleep(1000);
@@ -282,7 +257,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         return dl_url;
     }
 
-    private long[] parseRangeHeader(String header) {
+    private long[] _parseRangeHeader(String header) {
 
         Pattern pattern = Pattern.compile("bytes *\\= *([0-9]+) *\\- *([0-9]+)?");
 
@@ -305,6 +280,8 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
     @Override
     public void handle(HttpExchange xchg) throws IOException {
+
+        _updateStatus(THREAD_START);
 
         StreamChunkWriter chunkwriter = null;
         ArrayList<StreamChunkDownloader> chunkworkers = new ArrayList<>();
@@ -355,7 +332,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
             } else {
 
-                String[] finfo = getMegaFileMetadata(link, _main_panel.getView());
+                String[] finfo = _getMegaFileMetadata(link, _main_panel.getView());
 
                 file_info = new HashMap<>();
 
@@ -461,7 +438,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                     String range_header = ranges_raw.get(0);
 
-                    ranges = parseRangeHeader(range_header);
+                    ranges = _parseRangeHeader(range_header);
 
                     sync_bytes = (int) ranges[0] % 16;
 
@@ -489,7 +466,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 THREAD_POOL.execute(chunkwriter);
 
-                for (int i = 0; i < WORKERS; i++) {
+                for (int i = 0; i < CHUNK_WORKERS; i++) {
 
                     StreamChunkDownloader worker = new StreamChunkDownloader(i + 1, chunkwriter);
 
@@ -508,8 +485,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 cis.skip(sync_bytes);
 
-                updateStatus(WORKER_STATUS_STREAM);
-
                 while ((reads = cis.read(buffer)) != -1) {
 
                     os.write(buffer, 0, reads);
@@ -523,8 +498,6 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         } finally {
             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} KissVideoStreamerHandle: bye bye", Thread.currentThread().getName());
-
-            xchg.close();
 
             if (chunkwriter != null) {
 
@@ -540,8 +513,9 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                 chunkwriter.secureNotifyAll();
             }
 
-            updateStatus(WORKER_STATUS_EXIT);
+            xchg.close();
         }
-    }
 
+        _updateStatus(THREAD_STOP);
+    }
 }
