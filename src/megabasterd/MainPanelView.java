@@ -111,6 +111,10 @@ public final class MainPanelView extends javax.swing.JFrame {
         return jTabbedPane1;
     }
 
+    public JLabel getSmart_proxy_status() {
+        return smart_proxy_status;
+    }
+
     public MainPanelView(MainPanel main_panel) {
 
         _main_panel = main_panel;
@@ -146,6 +150,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         logo_label = new javax.swing.JLabel();
         kiss_server_status = new javax.swing.JLabel();
+        smart_proxy_status = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         downloads_panel = new javax.swing.JPanel();
         global_speed_down_label = new javax.swing.JLabel();
@@ -186,6 +191,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         kiss_server_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         kiss_server_status.setDoubleBuffered(true);
+
+        smart_proxy_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
+        smart_proxy_status.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
 
         jTabbedPane1.setDoubleBuffered(true);
         jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -234,7 +242,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addComponent(pause_all_down_button))
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 704, Short.MAX_VALUE)
+                .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 679, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_down_button))
             .addComponent(jScrollPane_down)
@@ -302,7 +310,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addComponent(pause_all_up_button))
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, 683, Short.MAX_VALUE)
+                .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, 658, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_up_button))
             .addComponent(jScrollPane_up)
@@ -441,6 +449,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(logo_label)))
                 .addContainerGap())
         );
@@ -452,7 +462,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(logo_label)
-                    .addComponent(kiss_server_status, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(kiss_server_status, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(2, 2, 2))
         );
 
@@ -695,11 +707,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             _main_panel.getUpload_manager().secureNotify();
 
-            if (_main_panel.isRestart()) {
-
-                restartApplication(1);
-            }
-
             if (_main_panel.isMegacrypter_reverse()) {
 
                 if (_main_panel.getMega_proxy_server() == null) {
@@ -756,6 +763,11 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 this.getMain_panel().setProxy_manager(null);
             }
+        }
+
+        if (_main_panel.isRestart()) {
+
+            restartApplication(1);
         }
 
         if (!dialog.isRemember_master_pass()) {
@@ -1008,6 +1020,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JButton pause_all_down_button;
     private javax.swing.JButton pause_all_up_button;
     private javax.swing.JMenuItem settings_menu;
+    private javax.swing.JLabel smart_proxy_status;
     private javax.swing.JLabel status_down_label;
     private javax.swing.JLabel status_up_label;
     private javax.swing.JLabel up_remtime_label;

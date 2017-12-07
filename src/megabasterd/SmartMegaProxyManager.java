@@ -128,6 +128,8 @@ public class SmartMegaProxyManager implements Runnable {
 
                 _excluded_proxies.add(proxy);
 
+                swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + (_proxy_list.size() - _excluded_proxies.size()) + "/" + _proxy_list.size());
+
                 if (_proxy_list.size() == _excluded_proxies.size()) {
 
                     _refreshProxyList();
@@ -171,6 +173,7 @@ public class SmartMegaProxyManager implements Runnable {
                     _proxy_list.clear();
 
                     this._proxy_list.addAll(Arrays.asList(proxy_list));
+
                 }
 
                 Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
@@ -191,6 +194,8 @@ public class SmartMegaProxyManager implements Runnable {
                     }
                 }
 
+                swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + (_proxy_list.size() - _excluded_proxies.size()) + "/" + _proxy_list.size());
+
             }
 
         } catch (MalformedURLException ex) {
@@ -204,6 +209,8 @@ public class SmartMegaProxyManager implements Runnable {
     public void run() {
 
         Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: hello!", new Object[]{Thread.currentThread().getName()});
+
+        swingReflectionInvoke("setVisible", _main_panel.getView().getSmart_proxy_status(), true);
 
         while (!_exit) {
 
@@ -219,7 +226,12 @@ public class SmartMegaProxyManager implements Runnable {
             }
         }
 
+        swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "");
+
+        swingReflectionInvoke("setVisible", _main_panel.getView().getSmart_proxy_status(), false);
+
         Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: bye bye", new Object[]{Thread.currentThread().getName()});
+
     }
 
 }
