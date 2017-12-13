@@ -6,8 +6,7 @@ dist/
 nbdist/
 nbactions.xml
 nb-configuration.xml
-megabasterd.db
-
+*.db
 *.class
 *.jar
 *.war
