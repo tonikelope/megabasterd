@@ -83,7 +83,7 @@ public class StreamChunkDownloader implements Runnable {
                             _chunkwriter.getServer().getMain_panel().getProxy_manager().excludeProxy(current_proxy);
                         }
 
-                        current_proxy = _chunkwriter.getServer().getMain_panel().getProxy_manager().getRandomProxy(true);
+                        current_proxy = _chunkwriter.getServer().getMain_panel().getProxy_manager().getFastestProxy(true);
 
                         if (httpclient != null) {
                             try {

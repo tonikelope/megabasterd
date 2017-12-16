@@ -33,7 +33,6 @@ public class SmartMegaProxyManager implements Runnable {
     private final MainPanel _main_panel;
     private volatile boolean _exit;
     private volatile boolean _use_smart_proxy;
-    private volatile Integer _last_list_hash;
     private final Object _refresh_lock;
 
     public SmartMegaProxyManager(MainPanel main_panel, String proxy_list_url) {
@@ -43,7 +42,6 @@ public class SmartMegaProxyManager implements Runnable {
         _excluded_proxies = new ConcurrentLinkedQueue<>();
         _exit = false;
         _use_smart_proxy = false;
-        _last_list_hash = null;
         _refresh_lock = new Object();
     }
 
@@ -131,6 +129,36 @@ public class SmartMegaProxyManager implements Runnable {
         }
     }
 
+    public String getFastestProxy(boolean skip_excluded) {
+
+        synchronized (_refresh_lock) {
+
+            if (_proxy_list.size() > 0) {
+
+                if (skip_excluded && _excluded_proxies.size() > 0) {
+
+                    for (String proxy : _proxy_list) {
+
+                        if (!_excluded_proxies.contains(proxy)) {
+
+                            return proxy;
+                        }
+                    }
+
+                    return null;
+
+                } else {
+
+                    return _proxy_list.peek();
+                }
+
+            } else {
+
+                return null;
+            }
+        }
+    }
+
     public void excludeProxy(String proxy) {
 
         synchronized (_refresh_lock) {
@@ -143,7 +171,18 @@ public class SmartMegaProxyManager implements Runnable {
 
                 if (_proxy_list.size() == _excluded_proxies.size()) {
 
-                    _refreshProxyList();
+                    _excluded_proxies.clear();
+
+                    THREAD_POOL.execute(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            synchronized (_refresh_lock) {
+
+                                _refreshProxyList();
+                            }
+                        }
+                    });
                 }
             }
         }
@@ -197,16 +236,7 @@ public class SmartMegaProxyManager implements Runnable {
 
                     _use_smart_proxy = false;
 
-                    int proxy_list_hashcode = _proxy_list.hashCode();
-
-                    if (_last_list_hash != proxy_list_hashcode) {
-
-                        _last_list_hash = proxy_list_hashcode;
-
-                        _excluded_proxies.clear();
-
-                        Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: excluded list cleared!", new Object[]{Thread.currentThread().getName()});
-                    }
+                    _excluded_proxies.clear();
                 }
 
                 swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + (_proxy_list.size() - _excluded_proxies.size()) + "/" + _proxy_list.size());
