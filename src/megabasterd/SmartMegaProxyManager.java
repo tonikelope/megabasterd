@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,7 +27,6 @@ public class SmartMegaProxyManager implements Runnable {
     public static final int REFRESH_PROXY_LIST_TIMEOUT = 1800;
     private volatile String _proxy_list_url;
     private final ConcurrentLinkedQueue<String> _proxy_list;
-    private final ConcurrentLinkedQueue<String> _excluded_proxies;
     private final MainPanel _main_panel;
     private volatile boolean _exit;
     private volatile boolean _use_smart_proxy;
@@ -39,7 +36,6 @@ public class SmartMegaProxyManager implements Runnable {
         _main_panel = main_panel;
         _proxy_list_url = proxy_list_url;
         _proxy_list = new ConcurrentLinkedQueue<>();
-        _excluded_proxies = new ConcurrentLinkedQueue<>();
         _exit = false;
         _use_smart_proxy = false;
         _refresh_lock = new Object();
@@ -68,6 +64,7 @@ public class SmartMegaProxyManager implements Runnable {
     }
 
     public void setProxy_list_url(String proxy_list_url) {
+
         _proxy_list_url = proxy_list_url;
 
         THREAD_POOL.execute(new Runnable() {
@@ -86,104 +83,31 @@ public class SmartMegaProxyManager implements Runnable {
         return _refresh_lock;
     }
 
-    public String getRandomProxy(boolean skip_excluded) {
+    public String getFastestProxy() {
 
-        synchronized (_refresh_lock) {
-
-            if (_proxy_list.size() > 0) {
-
-                if (skip_excluded && _excluded_proxies.size() > 0) {
-
-                    ArrayList<String> available_proxys = new ArrayList<>();
-
-                    for (String proxy : _proxy_list) {
-
-                        if (!_excluded_proxies.contains(proxy)) {
-
-                            available_proxys.add(proxy);
-                        }
-                    }
-
-                    if (available_proxys.size() > 0) {
-
-                        Random random = new Random();
-
-                        return (String) available_proxys.toArray()[random.nextInt(available_proxys.size())];
-
-                    } else {
-
-                        return null;
-                    }
-
-                } else {
-
-                    Random random = new Random();
-
-                    return (String) _proxy_list.toArray()[random.nextInt(_proxy_list.size())];
-                }
-
-            } else {
-
-                return null;
-            }
-        }
-    }
-
-    public String getFastestProxy(boolean skip_excluded) {
-
-        synchronized (_refresh_lock) {
-
-            if (_proxy_list.size() > 0) {
-
-                if (skip_excluded && _excluded_proxies.size() > 0) {
-
-                    for (String proxy : _proxy_list) {
-
-                        if (!_excluded_proxies.contains(proxy)) {
-
-                            return proxy;
-                        }
-                    }
-
-                    return null;
-
-                } else {
-
-                    return _proxy_list.peek();
-                }
-
-            } else {
-
-                return null;
-            }
-        }
+        return _proxy_list.peek();
     }
 
     public void excludeProxy(String proxy) {
 
-        synchronized (_refresh_lock) {
+        if (_proxy_list.contains(proxy)) {
 
-            if (!_excluded_proxies.contains(proxy)) {
+            _proxy_list.remove(proxy);
 
-                _excluded_proxies.add(proxy);
+            swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + _proxy_list.size());
 
-                swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + (_proxy_list.size() - _excluded_proxies.size()) + "/" + _proxy_list.size());
+            if (_proxy_list.isEmpty()) {
 
-                if (_proxy_list.size() == _excluded_proxies.size()) {
+                THREAD_POOL.execute(new Runnable() {
+                    @Override
+                    public void run() {
 
-                    _excluded_proxies.clear();
+                        synchronized (_refresh_lock) {
 
-                    THREAD_POOL.execute(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            synchronized (_refresh_lock) {
-
-                                _refreshProxyList();
-                            }
+                            _refreshProxyList();
                         }
-                    });
-                }
+                    }
+                });
             }
         }
     }
@@ -195,6 +119,7 @@ public class SmartMegaProxyManager implements Runnable {
         try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
 
             if (this._proxy_list_url != null && this._proxy_list_url.length() > 0) {
+
                 HttpGet httpget = new HttpGet(new URI(this._proxy_list_url));
 
                 try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
@@ -235,12 +160,9 @@ public class SmartMegaProxyManager implements Runnable {
                 if (_use_smart_proxy) {
 
                     _use_smart_proxy = false;
-
-                    _excluded_proxies.clear();
                 }
 
-                swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + (_proxy_list.size() - _excluded_proxies.size()) + "/" + _proxy_list.size());
-
+                swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + _proxy_list.size());
             }
 
         } catch (MalformedURLException ex) {

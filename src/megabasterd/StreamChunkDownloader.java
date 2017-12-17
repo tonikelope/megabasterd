@@ -83,7 +83,7 @@ public class StreamChunkDownloader implements Runnable {
                             _chunkwriter.getServer().getMain_panel().getProxy_manager().excludeProxy(current_proxy);
                         }
 
-                        current_proxy = _chunkwriter.getServer().getMain_panel().getProxy_manager().getFastestProxy(true);
+                        current_proxy = _chunkwriter.getServer().getMain_panel().getProxy_manager().getFastestProxy();
 
                         if (httpclient != null) {
                             try {
@@ -191,9 +191,7 @@ public class StreamChunkDownloader implements Runnable {
                 }
             }
 
-        } catch (IOException | URISyntaxException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } catch (ChunkInvalidException | InterruptedException ex) {
+        } catch (IOException | URISyntaxException | ChunkInvalidException | InterruptedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(StreamChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
