@@ -100,7 +100,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         swingReflectionInvoke("setForeground", _main_panel.getView().getKiss_server_status(), new Color(0, 128, 0));
 
-        swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), "Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)");
+        swingReflectionInvokeAndWait("setText", _main_panel.getView().getKiss_server_status(), "Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)");
 
         HttpServer httpserver = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
 
