@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -88,11 +89,21 @@ public class SmartMegaProxyManager implements Runnable {
         return _proxy_list.peek();
     }
 
+    public String getRandomProxy() {
+
+        synchronized (_refresh_lock) {
+            return _proxy_list.toArray(new String[_proxy_list.size()])[(new Random()).nextInt(_proxy_list.size())];
+        }
+    }
+
     public void excludeProxy(String proxy) {
 
         if (_proxy_list.contains(proxy)) {
 
-            _proxy_list.remove(proxy);
+            synchronized (_refresh_lock) {
+
+                _proxy_list.remove(proxy);
+            }
 
             swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + _proxy_list.size());
 

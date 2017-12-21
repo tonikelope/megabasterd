@@ -130,7 +130,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getMain_panel().getProxy_manager().excludeProxy(current_proxy);
                         }
 
-                        current_proxy = _download.getMain_panel().getProxy_manager().getFastestProxy();
+                        current_proxy = _download.getMain_panel().getProxy_manager().getRandomProxy();
 
                         if (httpclient != null) {
                             try {
