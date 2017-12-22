@@ -44,7 +44,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" max="32767" attributes="0"/>
+              <Component id="jTabbedPane1" pref="538" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -118,7 +118,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="jScrollPane2" pref="485" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" pref="478" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -206,7 +206,7 @@
                           <Component id="jSeparator1" alignment="1" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <EmptySpace min="-2" pref="33" max="-2" attributes="0"/>
-                              <Component id="smart_proxy_url_label" min="-2" pref="42" max="-2" attributes="0"/>
+                              <Component id="smart_proxy_url_label" min="-2" pref="70" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="smart_proxy_url_text" max="32767" attributes="0"/>
                           </Group>
@@ -615,7 +615,7 @@
                           <Component id="max_up_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="max_up_speed_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="289" max="32767" attributes="0"/>
+                      <EmptySpace pref="282" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -771,7 +771,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="140" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="137" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -780,7 +780,7 @@
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="140" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="136" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -990,7 +990,7 @@
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="proxy_panel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="308" max="32767" attributes="0"/>
+                      <EmptySpace pref="301" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>

@@ -767,7 +767,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.TRAILING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGap(33, 33, 33)
-                .addComponent(smart_proxy_url_label, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(smart_proxy_url_label, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(smart_proxy_url_text))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
@@ -857,7 +857,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 485, Short.MAX_VALUE)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 478, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -962,7 +962,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_up_speed_label)
                     .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(289, Short.MAX_VALUE))
+                .addContainerGap(282, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Uploads", uploads_panel);
@@ -1132,7 +1132,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 137, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1140,7 +1140,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 140, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 136, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1289,7 +1289,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(308, Short.MAX_VALUE))
+                .addContainerGap(301, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Advanced", jPanel1);
@@ -1317,7 +1317,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 538, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
