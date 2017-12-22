@@ -48,7 +48,7 @@
               <Component id="put_label" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="original_link_textfield" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="20" max="32767" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="dance_button" alignment="3" min="-2" pref="37" max="-2" attributes="0"/>
                   <Component id="use_mega_account_down_combobox" alignment="3" min="-2" max="-2" attributes="0"/>

@@ -190,8 +190,8 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="logo_label" min="-2" max="-2" attributes="0"/>
-                  <Component id="smart_proxy_status" alignment="1" min="-2" pref="18" max="-2" attributes="0"/>
-                  <Component id="kiss_server_status" alignment="1" min="-2" pref="18" max="-2" attributes="0"/>
+                  <Component id="smart_proxy_status" alignment="1" min="-2" pref="24" max="-2" attributes="0"/>
+                  <Component id="kiss_server_status" alignment="1" min="-2" pref="24" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
           </Group>
