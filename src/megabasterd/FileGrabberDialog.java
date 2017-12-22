@@ -65,6 +65,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         initComponents();
 
+        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
+
         _last_selected_account = null;
         _total_space = 0L;
         _base_path = null;

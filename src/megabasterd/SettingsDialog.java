@@ -64,6 +64,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
 
+        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
+
         swingReflectionInvokeAndWait("addMouseListener", smart_proxy_url_text, new ContextMenuMouseListener());
 
         swingReflectionInvoke("setUnitIncrement", this.jScrollPane2.getVerticalScrollBar(), 20);

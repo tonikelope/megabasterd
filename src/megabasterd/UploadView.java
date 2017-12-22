@@ -75,6 +75,8 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         initComponents();
 
+        updateFonts(this, DEFAULT_FONT, ZOOM_FACTOR);
+
         _upload = upload;
 
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_upload.getMain_panel().getDefault_slots_up(), MIN_WORKERS, MAX_WORKERS, 1));

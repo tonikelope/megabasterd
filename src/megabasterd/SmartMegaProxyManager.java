@@ -105,7 +105,7 @@ public class SmartMegaProxyManager implements Runnable {
                 _proxy_list.remove(proxy);
             }
 
-            swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + _proxy_list.size());
+            swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + _proxy_list.size() + " ");
 
             if (_proxy_list.isEmpty()) {
 
@@ -173,7 +173,7 @@ public class SmartMegaProxyManager implements Runnable {
                     _use_smart_proxy = false;
                 }
 
-                swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + _proxy_list.size());
+                swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + _proxy_list.size() + " ");
             }
 
         } catch (MalformedURLException ex) {

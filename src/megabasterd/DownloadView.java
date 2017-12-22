@@ -82,6 +82,8 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         initComponents();
 
+        updateFonts(this, DEFAULT_FONT, ZOOM_FACTOR);
+
         _download = download;
 
         swingReflectionInvokeAndWait("setModel", slots_spinner, new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));

@@ -1,5 +1,6 @@
 package megabasterd;
 
+import java.awt.Component;
 import java.awt.Container;
 import java.awt.Desktop;
 import java.awt.Font;
@@ -265,6 +266,37 @@ public final class MiscTools {
     public static void updateFont(javax.swing.JComponent label, Font font, int layout) {
         label.setFont(font.deriveFont(layout, (float) Math.floor(label.getFont().getSize() * FONT_ZOOM_DEFAULT)));
     }*/
+    public static void updateFonts(Component component, Font font, float zoom_factor) {
+
+        if (component != null) {
+
+            if (component instanceof javax.swing.JMenu) {
+
+                for (Component child : ((javax.swing.JMenu) component).getMenuComponents()) {
+                    if (child instanceof Container) {
+
+                        updateFonts(child, font, zoom_factor);
+                    }
+                }
+
+            } else if (component instanceof Container) {
+
+                for (Component child : ((Container) component).getComponents()) {
+                    if (child instanceof Container) {
+
+                        updateFonts(child, font, zoom_factor);
+                    }
+                }
+            }
+
+            Font old_font = component.getFont();
+
+            Font new_font = font.deriveFont(old_font.getStyle(), (float) Math.floor(old_font.getSize() * zoom_factor));
+
+            component.setFont(new_font);
+        }
+    }
+
     public static String HashString(String algo, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         MessageDigest md = MessageDigest.getInstance(algo);
 

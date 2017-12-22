@@ -49,6 +49,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     public StreamerDialog(java.awt.Frame parent, boolean modal, ClipboardSpy clipboardspy) {
         super(parent, modal);
         initComponents();
+        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
 
         _clipboardspy = clipboardspy;
 

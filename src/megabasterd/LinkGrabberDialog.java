@@ -60,6 +60,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         initComponents();
 
+        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
+
         _download_path = download_path;
 
         _clipboardspy = clipboardspy;

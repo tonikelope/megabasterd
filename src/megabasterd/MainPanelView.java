@@ -121,6 +121,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         initComponents();
 
+        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
+
         setTitle("MegaBasterd " + VERSION);
 
         setIconImage(new ImageIcon(getClass().getResource(ICON_FILE)).getImage());
@@ -194,6 +196,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         smart_proxy_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         smart_proxy_status.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        smart_proxy_status.setDoubleBuffered(true);
 
         jTabbedPane1.setDoubleBuffered(true);
         jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -462,9 +465,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(logo_label)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(kiss_server_status, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(smart_proxy_status, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(kiss_server_status, javax.swing.GroupLayout.PREFERRED_SIZE, 18, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(2, 2, 2))
         );
 
