@@ -134,8 +134,8 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         folder_link_label.setText("jLabel2");
         folder_link_label.setDoubleBuffered(true);
 
-        warning_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        warning_label.setText("If you DO NOT want to download some folder or file you can REMOVE it.");
+        warning_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        warning_label.setText("If you DO NOT want to upload some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).");
         warning_label.setDoubleBuffered(true);
         warning_label.setEnabled(false);
 
@@ -172,21 +172,19 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(file_tree_scrollpane)
                     .addComponent(total_space_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(warning_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(skip_rest_button)
-                                .addGap(18, 18, 18)
-                                .addComponent(skip_button))
-                            .addComponent(link_detected_label)
-                            .addComponent(warning_label))
-                        .addGap(0, 342, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(link_detected_label)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(skip_rest_button)
+                        .addGap(18, 18, 18)
+                        .addComponent(skip_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(dance_button))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(folder_link_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(restore_button)))
                 .addContainerGap())
         );
@@ -200,7 +198,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                     .addComponent(folder_link_label)
                     .addComponent(restore_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 381, Short.MAX_VALUE)
+                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(total_space_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

@@ -32,7 +32,7 @@
                       <Component id="close_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="restart_button" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="51" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                       <Component id="keep_temp_checkbox" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="stop_button" min="-2" max="-2" attributes="0"/>
@@ -88,13 +88,13 @@
                       <Component id="file_name_label" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace min="-2" pref="1" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="copy_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="open_folder_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="copy_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="file_size_label" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace min="-2" pref="35" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="24" max="-2" attributes="0"/>
               <Component id="progress_pbar" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -216,7 +216,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="33" red="33" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="file_name"/>
+        <Property name="text" type="java.lang.String" value="Archivo de prueba xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
@@ -270,7 +270,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="33" red="33" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="file_size"/>
+        <Property name="text" type="java.lang.String" value="500 MB"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>

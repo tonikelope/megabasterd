@@ -138,7 +138,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 226, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
         );
 
         dir_name_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
@@ -245,8 +245,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         total_file_size_label.setDoubleBuffered(true);
         total_file_size_label.setEnabled(false);
 
-        warning_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        warning_label.setText("If you DO NOT want to upload some folder or file you can REMOVE it.");
+        warning_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        warning_label.setText("If you DO NOT want to upload some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).");
         warning_label.setDoubleBuffered(true);
         warning_label.setEnabled(false);
 
@@ -286,7 +286,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                                 .addComponent(skip_rest_button)
                                 .addGap(18, 18, 18)
                                 .addComponent(skip_button)))
-                        .addGap(0, 334, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(total_file_size_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
@@ -302,7 +302,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(total_file_size_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(warning_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)

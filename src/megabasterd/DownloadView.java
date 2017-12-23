@@ -181,7 +181,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         file_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         file_name_label.setForeground(new java.awt.Color(51, 51, 255));
-        file_name_label.setText("file_name");
+        file_name_label.setText("Archivo de prueba xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         file_name_label.setDoubleBuffered(true);
 
         close_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
@@ -215,7 +215,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         file_size_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         file_size_label.setForeground(new java.awt.Color(51, 51, 255));
-        file_size_label.setText("file_size");
+        file_size_label.setText("500 MB");
         file_size_label.setDoubleBuffered(true);
 
         slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
@@ -241,7 +241,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                         .addComponent(close_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(restart_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 51, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(keep_temp_checkbox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(stop_button))
@@ -284,12 +284,12 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                     .addGroup(layout.createSequentialGroup()
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(file_name_label)))
-                .addGap(1, 1, 1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(copy_link_button)
                     .addComponent(open_folder_button)
+                    .addComponent(copy_link_button)
                     .addComponent(file_size_label))
-                .addGap(35, 35, 35)
+                .addGap(24, 24, 24)
                 .addComponent(progress_pbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
