@@ -84,6 +84,10 @@ public final class MegaAPI {
         return _full_email;
     }
 
+    public String getEmail() {
+        return _email;
+    }
+
     public int[] getPassword_aes() {
         return _password_aes;
     }

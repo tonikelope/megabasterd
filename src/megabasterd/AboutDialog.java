@@ -24,9 +24,6 @@ public final class AboutDialog extends javax.swing.JDialog {
         initComponents();
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
-
-        swingReflectionInvoke("setText", title_label, "MegaBasterd " + VERSION);
-
     }
 
     /**
@@ -52,7 +49,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         setIconImage(null);
 
         title_label.setFont(new java.awt.Font("Dialog", 1, 48)); // NOI18N
-        title_label.setText("MegaBasterd XX.XX");
+        title_label.setText("MegaBasterd " + VERSION);
         title_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         title_label.setDoubleBuffered(true);
         title_label.addMouseListener(new java.awt.event.MouseAdapter() {

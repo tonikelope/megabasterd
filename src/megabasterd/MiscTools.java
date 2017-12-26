@@ -262,10 +262,6 @@ public final class MiscTools {
         return matches;
     }
 
-    /*
-    public static void updateFont(javax.swing.JComponent label, Font font, int layout) {
-        label.setFont(font.deriveFont(layout, (float) Math.floor(label.getFont().getSize() * FONT_ZOOM_DEFAULT)));
-    }*/
     public static void updateFonts(Component component, Font font, float zoom_factor) {
 
         if (component != null) {
@@ -372,72 +368,9 @@ public final class MiscTools {
         }
     }
 
-    private static void _swingReflectionInvoke(final String method_name, final Object obj, final boolean wait, final Object... params) {
+    public static Object swingReflectionInvokeAndWaitForReturn(final String method_name, final Object obj, final Object... params) {
 
-        Runnable r = new Runnable() {
-
-            @Override
-            public void run() {
-
-                if (obj != null) {
-
-                    Method method;
-
-                    try {
-
-                        if ((method = REFLECTION_METHOD_CACHE.get(method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length))) != null) {
-
-                            try {
-
-                                method.invoke(obj, params);
-
-                            } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-
-                                method = null;
-                            }
-                        }
-
-                        if (method == null) {
-
-                            for (Method m : obj.getClass().getMethods()) {
-
-                                if (m.getName().equals(method_name) && m.getParameterCount() == params.length) {
-
-                                    try {
-
-                                        m.invoke(obj, params);
-
-                                        REFLECTION_METHOD_CACHE.put(method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length), m);
-
-                                        method = m;
-
-                                        break;
-
-                                    } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex2) {
-
-                                    }
-                                }
-                            }
-
-                            if (method == null) {
-
-                                throw new NoSuchMethodException();
-
-                            }
-                        }
-
-                    } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
-
-                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} REFLECTION METHOD NOT FOUND -> {1}#{2}#{3}", new Object[]{Thread.currentThread().getName(), method_name, obj.getClass().toString(), String.valueOf(params.length)});
-                    }
-
-                }
-            }
-        };
-
-        swingInvokeIt(r, wait);
+        return _swingReflectionInvokeAndWaitForReturn(method_name, obj, params);
     }
 
     public static Object[] swingReflectionInvokeAndWaitForReturn(final String method_name, final Object[] obj, final Object... params) {
@@ -448,13 +381,13 @@ public final class MiscTools {
 
         for (Object o : obj) {
 
-            ret[i++] = swingReflectionInvokeAndWaitForReturn(method_name, o, params);
+            ret[i++] = _swingReflectionInvokeAndWaitForReturn(method_name, o, params);
         }
 
         return ret;
     }
 
-    public static Object swingReflectionInvokeAndWaitForReturn(final String method_name, final Object obj, final Object... params) {
+    private static Object _swingReflectionInvokeAndWaitForReturn(final String method_name, final Object obj, final Object... params) {
 
         Callable c = new Callable() {
 
@@ -521,10 +454,78 @@ public final class MiscTools {
             }
         };
 
-        return swingInvokeItAndWaitForReturn(c);
+        return _swingInvokeItAndWaitForReturn(c);
     }
 
-    public static void swingInvokeIt(Runnable r, boolean wait) {
+    private static void _swingReflectionInvoke(final String method_name, final Object obj, final boolean wait, final Object... params) {
+
+        Runnable r = new Runnable() {
+
+            @Override
+            public void run() {
+
+                if (obj != null) {
+
+                    Method method;
+
+                    try {
+
+                        if ((method = REFLECTION_METHOD_CACHE.get(method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length))) != null) {
+
+                            try {
+
+                                method.invoke(obj, params);
+
+                            } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+
+                                method = null;
+                            }
+                        }
+
+                        if (method == null) {
+
+                            for (Method m : obj.getClass().getMethods()) {
+
+                                if (m.getName().equals(method_name) && m.getParameterCount() == params.length) {
+
+                                    try {
+
+                                        m.invoke(obj, params);
+
+                                        REFLECTION_METHOD_CACHE.put(method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length), m);
+
+                                        method = m;
+
+                                        break;
+
+                                    } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex2) {
+
+                                    }
+                                }
+                            }
+
+                            if (method == null) {
+
+                                throw new NoSuchMethodException();
+
+                            }
+                        }
+
+                    } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
+
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} REFLECTION METHOD NOT FOUND -> {1}#{2}#{3}", new Object[]{Thread.currentThread().getName(), method_name, obj.getClass().toString(), String.valueOf(params.length)});
+                    }
+
+                }
+            }
+        };
+
+        _swingInvokeIt(r, wait);
+    }
+
+    private static void _swingInvokeIt(Runnable r, boolean wait) {
 
         if (wait) {
 
@@ -549,7 +550,7 @@ public final class MiscTools {
         }
     }
 
-    public static Object swingInvokeItAndWaitForReturn(Callable c) {
+    private static Object _swingInvokeItAndWaitForReturn(Callable c) {
         Object ret = null;
 
         if (SwingUtilities.isEventDispatchThread()) {

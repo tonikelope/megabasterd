@@ -2,7 +2,6 @@ package megabasterd;
 
 import java.awt.Color;
 import java.io.File;
-import java.io.FileInputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -343,29 +342,14 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             try {
                 _file_size = the_file.length();
 
-                File temp_file;
+                if (_ul_key != null) {
 
-                temp_file = new File("." + HashString("SHA-1", _file_name));
+                    HashMap upload_progress = DBTools.selectUploadProgress(getFile_name(), getMa().getEmail());
 
-                if (_ul_key != null && temp_file.exists() && temp_file.length() > 0) {
+                    _last_chunk_id_dispatched = calculateLastUploadedChunk((long) upload_progress.get("bytes_uploaded"));
 
-                    FileInputStream fis = new FileInputStream(temp_file);
+                    _saved_file_mac = bin2i32a(((String) upload_progress.get("temp_mac")).getBytes());
 
-                    byte[] data = new byte[(int) temp_file.length()];
-
-                    fis.read(data);
-
-                    String[] fdata = new String(data).split("\\|");
-
-                    _progress = Long.parseLong(fdata[0]);
-
-                    _last_chunk_id_dispatched = calculateLastUploadedChunk(_progress);
-
-                    _saved_file_mac = bin2i32a(BASE642Bin(fdata[1]));
-
-                } else if (temp_file.exists()) {
-
-                    temp_file.delete();
                 }
 
                 if (_ul_key == null || _restart) {
@@ -919,7 +903,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     if (_use_slots) {
 
-                        swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+                        swingReflectionInvokeAndWait("setEnabled", getView().getSlots_spinner(), false);
 
                         swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner()) - 1);
                     }

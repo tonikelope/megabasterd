@@ -967,7 +967,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     if (_use_slots) {
 
-                        swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+                        swingReflectionInvokeAndWait("setEnabled", getView().getSlots_spinner(), false);
 
                         swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner()) - 1);
                     }

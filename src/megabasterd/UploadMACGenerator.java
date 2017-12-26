@@ -1,7 +1,5 @@
 package megabasterd;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.ConcurrentHashMap;
@@ -94,10 +92,6 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
         try {
 
-            File temp_file = new File("." + HashString("SHA-1", _upload.getFile_name()));
-
-            FileOutputStream temp_file_out;
-
             Chunk chunk;
             int[] file_iv = bin2i32a(_upload.getByte_file_iv()), int_block, file_mac = _upload.getSaved_file_mac(), mac_iv = CryptTools.AES_ZERO_IV_I32A;
             int reads;
@@ -173,11 +167,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Macgenerator -> {1} {2} {3} {4}", new Object[]{Thread.currentThread().getName(), temp_file_data, _upload.calculateLastUploadedChunk(_bytes_read), _last_chunk_id_read, this.getUpload().getFile_name()});
 
-                    temp_file_out = new FileOutputStream(temp_file);
-
-                    temp_file_out.write(temp_file_data.getBytes());
-
-                    temp_file_out.close();
+                    DBTools.updateUploadProgres(_upload.getFile_name(), _upload.getMa().getEmail(), _bytes_read, Bin2BASE64(i32a2bin(file_mac)));
 
                     new_chunk = false;
                 }
@@ -194,8 +184,6 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                 _upload.setFile_meta_mac(meta_mac);
             }
-
-            temp_file.delete();
 
             _upload.secureNotify();
 

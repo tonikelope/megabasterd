@@ -290,6 +290,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         }
 
         swingReflectionInvoke("setText", _status, genStatus());
+
+        swingReflectionInvoke("revalidate", _main_panel.getView());
+
+        swingReflectionInvoke("repaint", _main_panel.getView());
     }
 
     private String genStatus() {
@@ -352,7 +356,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                         setRemoving_transferences(false);
 
                         secureNotify();
-
                     }
                 });
             }

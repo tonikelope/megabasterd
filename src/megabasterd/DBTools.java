@@ -21,7 +21,7 @@ public final class DBTools {
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
 
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS downloads(url TEXT, email TEXT, path TEXT, filename TEXT, filekey TEXT, filesize UNSIGNED BIG INT, filepass VARCHAR(64), filenoexpire VARCHAR(64), PRIMARY KEY ('url'), UNIQUE(path, filename));");
-            stat.executeUpdate("CREATE TABLE IF NOT EXISTS uploads(filename TEXT, email TEXT, url TEXT, ul_key TEXT, parent_node TEXT, root_node TEXT, share_key TEXT, folder_link TEXT, PRIMARY KEY ('filename'), UNIQUE(filename, email));");
+            stat.executeUpdate("CREATE TABLE IF NOT EXISTS uploads(filename TEXT, email TEXT, url TEXT, ul_key TEXT, parent_node TEXT, root_node TEXT, share_key TEXT, folder_link TEXT, bytes_uploaded UNSIGNED BIG INT, temp_mac TEXT, PRIMARY KEY ('filename'), UNIQUE(filename, email));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS settings(key VARCHAR(255), value TEXT, PRIMARY KEY('key'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS mega_accounts(email TEXT, password TEXT, password_aes TEXT, user_hash TEXT, PRIMARY KEY('email'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS elc_accounts(host TEXT, user TEXT, apikey TEXT, PRIMARY KEY('host'));");
@@ -81,7 +81,7 @@ public final class DBTools {
 
     public static synchronized void insertUpload(String filename, String email, String parent_node, String ul_key, String root_node, String share_key, String folder_link) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link) VALUES (?,?,?,?,?,?,?)")) {
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link, bytes_uploaded) VALUES (?,?,?,?,?,?,?,?)")) {
 
             ps.setString(1, filename);
             ps.setString(2, email);
@@ -90,6 +90,7 @@ public final class DBTools {
             ps.setString(5, root_node);
             ps.setString(6, share_key);
             ps.setString(7, folder_link);
+            ps.setLong(8, 0L);
 
             ps.executeUpdate();
         }
@@ -104,8 +105,41 @@ public final class DBTools {
             ps.setString(3, email);
 
             ps.executeUpdate();
-
         }
+    }
+
+    public static synchronized void updateUploadProgres(String filename, String email, Long bytes_uploaded, String temp_mac) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("UPDATE uploads SET bytes_uploaded=?,temp_mac=? WHERE filename=? AND email=?")) {
+
+            ps.setLong(1, bytes_uploaded);
+            ps.setString(2, temp_mac);
+            ps.setString(3, filename);
+            ps.setString(4, email);
+
+            ps.executeUpdate();
+        }
+    }
+
+    public static synchronized HashMap<String, Object> selectUploadProgress(String filename, String email) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT bytes_uploaded,temp_mac FROM uploads WHERE filename=? AND email=?")) {
+
+            ps.setString(1, filename);
+            ps.setString(2, email);
+
+            ResultSet res = ps.executeQuery();
+
+            HashMap<String, Object> map = new HashMap<>();
+
+            if (res.next()) {
+                map.put("bytes_uploaded", res.getLong(1));
+                map.put("temp_mac", res.getString(2));
+                return map;
+            }
+        }
+
+        return null;
     }
 
     public static synchronized void deleteUpload(String filename, String email) throws SQLException {
