@@ -19,7 +19,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -41,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
@@ -87,7 +85,6 @@ public final class MiscTools {
     public static final int EXP_BACKOFF_MAX_WAIT_TIME = 16;
     public static final Object PASS_LOCK = new Object();
     public static final int HTTP_TIMEOUT = 30;
-    private static final ConcurrentHashMap<String, Method> REFLECTION_METHOD_CACHE = new ConcurrentHashMap<>();
     private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = new Comparator< DefaultMutableTreeNode>() {
 
         @Override
@@ -262,7 +259,7 @@ public final class MiscTools {
         return matches;
     }
 
-    public static void updateFonts(Component component, Font font, float zoom_factor) {
+    public static void updateFonts(final Component component, final Font font, final float zoom_factor) {
 
         if (component != null) {
 
@@ -344,185 +341,19 @@ public final class MiscTools {
         return Math.min(waitTime, EXP_BACKOFF_MAX_WAIT_TIME);
     }
 
-    public static void swingReflectionInvoke(final String method_name, final Object obj, final Object... params) {
+    public static void swingInvoke(Runnable r) {
 
-        _swingReflectionInvoke(method_name, obj, false, params);
+        _swingInvokeIt(r, false);
     }
 
-    public static void swingReflectionInvoke(final String method_name, final Object[] obj, final Object... params) {
+    public static void swingInvokeAndWait(Runnable r) {
 
-        for (Object o : obj) {
-            _swingReflectionInvoke(method_name, o, false, params);
-        }
+        _swingInvokeIt(r, true);
     }
 
-    public static void swingReflectionInvokeAndWait(final String method_name, final Object obj, final Object... params) {
-
-        _swingReflectionInvoke(method_name, obj, true, params);
-    }
-
-    public static void swingReflectionInvokeAndWait(final String method_name, final Object[] obj, final Object... params) {
-
-        for (Object o : obj) {
-            _swingReflectionInvoke(method_name, o, true, params);
-        }
-    }
-
-    public static Object swingReflectionInvokeAndWaitForReturn(final String method_name, final Object obj, final Object... params) {
-
-        return _swingReflectionInvokeAndWaitForReturn(method_name, obj, params);
-    }
-
-    public static Object[] swingReflectionInvokeAndWaitForReturn(final String method_name, final Object[] obj, final Object... params) {
-
-        Object[] ret = new Object[obj.length];
-
-        int i = 0;
-
-        for (Object o : obj) {
-
-            ret[i++] = _swingReflectionInvokeAndWaitForReturn(method_name, o, params);
-        }
-
-        return ret;
-    }
-
-    private static Object _swingReflectionInvokeAndWaitForReturn(final String method_name, final Object obj, final Object... params) {
-
-        Callable c = new Callable() {
-
-            @Override
-            public Object call() {
-
-                Object ret = null;
-
-                if (obj != null) {
-
-                    Method method;
-
-                    try {
-
-                        if ((method = REFLECTION_METHOD_CACHE.get(method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length))) != null) {
-
-                            try {
-
-                                ret = method.invoke(obj, params);
-
-                            } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-
-                                method = null;
-                            }
-                        }
-
-                        if (method == null) {
-
-                            for (Method m : obj.getClass().getMethods()) {
-
-                                if (m.getName().equals(method_name) && m.getParameterCount() == params.length) {
-
-                                    try {
-
-                                        ret = m.invoke(obj, params);
-
-                                        REFLECTION_METHOD_CACHE.put(method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length), m);
-
-                                        method = m;
-
-                                        break;
-
-                                    } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex2) {
-
-                                    }
-                                }
-                            }
-
-                            if (method == null) {
-
-                                throw new NoSuchMethodException();
-                            }
-                        }
-
-                    } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
-                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} REFLECTION METHOD NOT FOUND -> {1}#{2}#{3}", new Object[]{Thread.currentThread().getName(), method_name, obj.getClass().toString(), String.valueOf(params.length)});
-                    }
-
-                }
-
-                return ret;
-            }
-        };
+    public static Object swingInvokeAndWaitForReturn(Callable c) {
 
         return _swingInvokeItAndWaitForReturn(c);
-    }
-
-    private static void _swingReflectionInvoke(final String method_name, final Object obj, final boolean wait, final Object... params) {
-
-        Runnable r = new Runnable() {
-
-            @Override
-            public void run() {
-
-                if (obj != null) {
-
-                    Method method;
-
-                    try {
-
-                        if ((method = REFLECTION_METHOD_CACHE.get(method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length))) != null) {
-
-                            try {
-
-                                method.invoke(obj, params);
-
-                            } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
-
-                                method = null;
-                            }
-                        }
-
-                        if (method == null) {
-
-                            for (Method m : obj.getClass().getMethods()) {
-
-                                if (m.getName().equals(method_name) && m.getParameterCount() == params.length) {
-
-                                    try {
-
-                                        m.invoke(obj, params);
-
-                                        REFLECTION_METHOD_CACHE.put(method_name + "#" + obj.getClass().toString() + "#" + String.valueOf(params.length), m);
-
-                                        method = m;
-
-                                        break;
-
-                                    } catch (SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex2) {
-
-                                    }
-                                }
-                            }
-
-                            if (method == null) {
-
-                                throw new NoSuchMethodException();
-
-                            }
-                        }
-
-                    } catch (SecurityException | IllegalArgumentException | NoSuchMethodException ex) {
-
-                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} REFLECTION METHOD NOT FOUND -> {1}#{2}#{3}", new Object[]{Thread.currentThread().getName(), method_name, obj.getClass().toString(), String.valueOf(params.length)});
-                    }
-
-                }
-            }
-        };
-
-        _swingInvokeIt(r, wait);
     }
 
     private static void _swingInvokeIt(Runnable r, boolean wait) {
@@ -693,11 +524,11 @@ public final class MiscTools {
 
     public static boolean deleteSelectedTreeItems(JTree tree) {
 
-        TreePath[] paths = (TreePath[]) swingReflectionInvokeAndWaitForReturn("getSelectionPaths", tree);
+        TreePath[] paths = tree.getSelectionPaths();
 
         if (paths != null) {
 
-            DefaultTreeModel tree_model = (DefaultTreeModel) swingReflectionInvokeAndWaitForReturn("getModel", tree);
+            DefaultTreeModel tree_model = (DefaultTreeModel) tree.getModel();
 
             MutableTreeNode node;
 
@@ -737,11 +568,11 @@ public final class MiscTools {
 
                             new_root = (MutableTreeNode) tree_model.getRoot().getClass().newInstance();
 
-                            swingReflectionInvokeAndWait("setModel", tree, new DefaultTreeModel(new_root));
+                            tree.setModel(new DefaultTreeModel(new_root));
 
-                            swingReflectionInvoke("setRootVisible", tree, new_root.getChildCount() > 0);
+                            tree.setRootVisible(new_root.getChildCount() > 0);
 
-                            swingReflectionInvoke("setEnabled", tree, true);
+                            tree.setEnabled(true);
 
                         } catch (InstantiationException | IllegalAccessException ex) {
                             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
@@ -752,9 +583,8 @@ public final class MiscTools {
                 }
             }
 
-            swingReflectionInvoke("setRootVisible", tree, ((TreeNode) tree_model.getRoot()).getChildCount() > 0);
-
-            swingReflectionInvoke("setEnabled", tree, true);
+            tree.setRootVisible(((TreeNode) tree_model.getRoot()).getChildCount() > 0);
+            tree.setEnabled(true);
 
             return true;
         }
@@ -764,11 +594,11 @@ public final class MiscTools {
 
     public static boolean deleteAllExceptSelectedTreeItems(JTree tree) {
 
-        TreePath[] paths = (TreePath[]) swingReflectionInvokeAndWaitForReturn("getSelectionPaths", tree);
+        TreePath[] paths = tree.getSelectionPaths();
 
         HashMap<MutableTreeNode, MutableTreeNode> hashmap_old = new HashMap<>();
 
-        DefaultTreeModel tree_model = (DefaultTreeModel) swingReflectionInvokeAndWaitForReturn("getModel", tree);
+        DefaultTreeModel tree_model = (DefaultTreeModel) tree.getModel();
 
         if (paths != null) {
 
@@ -841,11 +671,11 @@ public final class MiscTools {
                 }
             }
 
-            swingReflectionInvokeAndWait("setModel", tree, new DefaultTreeModel(sortTree((DefaultMutableTreeNode) new_root)));
+            tree.setModel(new DefaultTreeModel(sortTree((DefaultMutableTreeNode) new_root)));
 
-            swingReflectionInvoke("setRootVisible", tree, new_root != null ? ((TreeNode) new_root).getChildCount() > 0 : false);
+            tree.setRootVisible(new_root != null ? ((TreeNode) new_root).getChildCount() > 0 : false);
 
-            swingReflectionInvoke("setEnabled", tree, true);
+            tree.setEnabled(true);
 
             return true;
         }
@@ -1215,9 +1045,9 @@ public final class MiscTools {
 
                         GetMasterPasswordDialog pdialog = new GetMasterPasswordDialog((Frame) container.getParent(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt());
 
-                        swingReflectionInvokeAndWait("setLocationRelativeTo", pdialog, container);
+                        pdialog.setLocationRelativeTo(container);
 
-                        swingReflectionInvokeAndWait("setVisible", pdialog, true);
+                        pdialog.setVisible(true);
 
                         if (pdialog.isPass_ok()) {
 

@@ -1,7 +1,7 @@
 package megabasterd;
 
-import java.awt.Color;
 import java.io.File;
+import static java.lang.Integer.MAX_VALUE;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,6 +14,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JComponent;
 import static megabasterd.MainPanel.*;
 import static megabasterd.MiscTools.*;
 
@@ -325,7 +326,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public void provisionIt() {
 
-        printStatus("Provisioning upload, please wait...");
+        getView().printStatusNormal("Provisioning upload, please wait...");
 
         String exit_msg = null;
 
@@ -385,33 +386,56 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             if (_fatal_error != null) {
 
-                printStatusError(_fatal_error);
+                getView().printStatusError(_fatal_error);
 
             } else if (exit_msg != null) {
 
-                printStatusError(exit_msg);
+                getView().printStatusError(exit_msg);
             }
 
-            swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+
+                    getView().getRestart_button().setVisible(true);
+                }
+            });
 
         } else {
 
-            printStatus("Waiting to start (" + _ma.getFull_email() + ") ...");
+            getView().printStatusNormal("Waiting to start (" + _ma.getFull_email() + ") ...");
 
-            swingReflectionInvoke("setVisible", getView().getFile_name_label(), true);
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
 
-            swingReflectionInvoke("setText", getView().getFile_name_label(), _file_name);
+                    getView().getFile_name_label().setVisible(true);
 
-            swingReflectionInvoke("setText", getView().getFile_name_label(), truncateText(_file_name, 100));
+                    getView().getFile_name_label().setText(_file_name);
 
-            swingReflectionInvoke("setToolTipText", getView().getFile_name_label(), _file_name);
+                    getView().getFile_name_label().setText(truncateText(_file_name, 100));
 
-            swingReflectionInvoke("setVisible", getView().getFile_size_label(), true);
+                    getView().getFile_name_label().setToolTipText(_file_name);
 
-            swingReflectionInvoke("setText", getView().getFile_size_label(), formatBytes(_file_size));
+                    getView().getFile_size_label().setVisible(true);
+
+                    getView().getFile_size_label().setText(formatBytes(_file_size));
+                }
+            });
+
         }
 
-        swingReflectionInvoke("setVisible", getView().getClose_button(), true);
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+
+                getView().getClose_button().setVisible(true);
+            }
+        });
+
     }
 
     @Override
@@ -493,7 +517,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             synchronized (_workers_lock) {
 
-                int sl = (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner());
+                int sl = getView().getSlots();
 
                 int cworkers = getChunkworkers().size();
 
@@ -563,7 +587,14 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 if (!_chunkworkers.isEmpty()) {
 
-                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), false);
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+
+                            getView().getSlots_spinner().setEnabled(false);
+                        }
+                    });
 
                     int i = _chunkworkers.size() - 1;
 
@@ -602,9 +633,16 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader hello! {1}", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
-        swingReflectionInvoke("setVisible", getView().getClose_button(), false);
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
 
-        printStatus("Starting upload, please wait...");
+                getView().getClose_button().setVisible(false);
+            }
+        });
+
+        getView().printStatusNormal("Starting upload, please wait...");
 
         if (!_exit) {
             if (_ul_url == null || _restart) {
@@ -641,19 +679,24 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 _byte_file_iv = i32a2bin(file_iv);
 
-                swingReflectionInvoke("setMinimum", getView().getProgress_pbar(), 0);
-                swingReflectionInvoke("setMaximum", getView().getProgress_pbar(), Integer.MAX_VALUE);
-                swingReflectionInvoke("setStringPainted", getView().getProgress_pbar(), true);
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+
+                        getView().getClose_button().setVisible(false);
+                    }
+                });
 
                 if (_file_size > 0) {
 
                     _progress_bar_rate = Integer.MAX_VALUE / (double) _file_size;
 
-                    swingReflectionInvoke("setValue", getView().getProgress_pbar(), 0);
+                    getView().updateProgressBar(0);
 
                 } else {
 
-                    swingReflectionInvoke("setValue", getView().getProgress_pbar(), Integer.MAX_VALUE);
+                    getView().updateProgressBar(MAX_VALUE);
                 }
 
                 _thread_pool.execute(getProgress_meter());
@@ -678,11 +721,18 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                             _thread_pool.execute(c);
                         }
 
-                        swingReflectionInvoke("setVisible", getView().getSlots_label(), true);
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
 
-                        swingReflectionInvoke("setVisible", getView().getSlots_spinner(), true);
+                                getView().getSlots_label().setVisible(true);
 
-                        swingReflectionInvoke("setVisible", getView().getSlot_status_label(), true);
+                                getView().getSlots_spinner().setVisible(true);
+
+                                getView().getSlot_status_label().setVisible(true);
+                            }
+                        });
 
                     } else {
 
@@ -692,21 +742,36 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         _thread_pool.execute(c);
 
-                        swingReflectionInvoke("setVisible", getView().getSlots_label(), false);
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
 
-                        swingReflectionInvoke("setVisible", getView().getSlots_spinner(), false);
+                                getView().getSlots_label().setVisible(false);
 
-                        swingReflectionInvoke("setVisible", getView().getSlot_status_label(), false);
+                                getView().getSlots_spinner().setVisible(false);
+
+                                getView().getSlot_status_label().setVisible(false);
+                            }
+                        });
+
                     }
                 }
 
-                printStatus("Uploading file to mega (" + _ma.getFull_email() + ") ...");
+                getView().printStatusNormal("Uploading file to mega (" + _ma.getFull_email() + ") ...");
 
                 getMain_panel().getUpload_manager().secureNotify();
 
-                swingReflectionInvoke("setVisible", getView().getPause_button(), true);
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
 
-                swingReflectionInvoke("setVisible", getView().getProgress_pbar(), true);
+                        getView().getPause_button().setVisible(true);
+
+                        getView().getProgress_pbar().setVisible(true);
+                    }
+                });
 
                 secureWait();
 
@@ -739,7 +804,16 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 getMain_panel().getGlobal_up_speed().detachTransference(this);
 
-                swingReflectionInvoke("setVisible", new Object[]{getView().getSpeed_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner()}, false);
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+
+                        for (JComponent c : new JComponent[]{getView().getSpeed_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner()}) {
+                            c.setVisible(false);
+                        }
+                    }
+                });
 
                 getMain_panel().getUpload_manager().secureNotify();
 
@@ -749,7 +823,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader creating NEW MEGA NODE {1}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
-                        printStatus("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***");
+                        getView().printStatusNormal("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***");
 
                         File f = new File(_file_name);
 
@@ -771,13 +845,20 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                             _file_link = _ma.getPublicFileLink(_fid, i32a2bin(node_key));
 
-                            swingReflectionInvoke("setEnabled", getView().getFile_link_button(), true);
+                            swingInvoke(
+                                    new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    getView().getFile_link_button().setEnabled(true);
+                                }
+                            });
 
                         } catch (Exception ex) {
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
 
-                        printStatusOK(_exit_message);
+                        getView().printStatusOK(_exit_message);
 
                     } else {
 
@@ -785,7 +866,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         _exit_message = "UPLOAD FAILED! (Empty completion handle!)";
 
-                        printStatusError(_exit_message);
+                        getView().printStatusError(_exit_message);
 
                         _status_error = true;
                     }
@@ -794,7 +875,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     getView().hideAllExceptStatus();
 
-                    printStatusError(_fatal_error);
+                    getView().printStatusError(_fatal_error);
 
                     _status_error = true;
 
@@ -804,7 +885,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     _exit_message = "Upload CANCELED!";
 
-                    printStatusError(_exit_message);
+                    getView().printStatusError(_exit_message);
 
                     _status_error = true;
                 }
@@ -812,7 +893,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             } else if (_fatal_error != null) {
                 getView().hideAllExceptStatus();
 
-                printStatusError(_fatal_error);
+                getView().printStatusError(_fatal_error);
 
                 _status_error = true;
             } else {
@@ -820,7 +901,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 _exit_message = "Upload CANCELED!";
 
-                printStatusError(_exit_message);
+                getView().printStatusError(_exit_message);
 
                 _status_error = true;
             }
@@ -830,7 +911,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             _exit_message = _fatal_error;
 
-            printStatusError(_fatal_error);
+            getView().printStatusError(_fatal_error);
 
             _status_error = true;
         } else {
@@ -838,7 +919,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             _exit_message = "Upload CANCELED!";
 
-            printStatusError(_exit_message);
+            getView().printStatusError(_exit_message);
 
             _status_error = true;
 
@@ -866,11 +947,18 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             getMain_panel().getUpload_manager().secureNotify();
         }
 
-        swingReflectionInvoke("setVisible", getView().getClose_button(), true);
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                getView().getClose_button().setVisible(true);
 
-        if (_status_error) {
-            swingReflectionInvoke("setVisible", getView().getRestart_button(), true);
-        }
+                if (_status_error) {
+                    getView().getRestart_button().setVisible(true);
+                }
+
+            }
+        });
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader finished with message ->  {1} {2}...", new Object[]{Thread.currentThread().getName(), _exit_message, this.getFile_name()});
 
@@ -883,9 +971,18 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             if (++_paused_workers >= _chunkworkers.size() && !_exit) {
 
-                printStatus("Upload paused!");
-                swingReflectionInvoke("setText", getView().getPause_button(), "RESUME UPLOAD");
-                swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
+                getView().printStatusNormal("Upload paused!");
+
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+                        getView().getPause_button().setText("RESUME UPLOAD");
+                        getView().getPause_button().setEnabled(true);
+
+                    }
+                });
+
             }
         }
 
@@ -903,21 +1000,42 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     if (_use_slots) {
 
-                        swingReflectionInvokeAndWait("setEnabled", getView().getSlots_spinner(), false);
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                getView().getSlots_spinner().setEnabled(false);
 
-                        swingReflectionInvokeAndWait("setValue", getView().getSlots_spinner(), (int) swingReflectionInvokeAndWaitForReturn("getValue", getView().getSlots_spinner()) - 1);
+                                getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
+                            }
+                        });
                     }
 
                 } else if (!_finishing_upload && _use_slots) {
 
-                    swingReflectionInvoke("setEnabled", getView().getSlots_spinner(), true);
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+                            getView().getSlots_spinner().setEnabled(true);
+                        }
+                    });
+
                 }
 
                 if (!_exit && _pause && _paused_workers == _chunkworkers.size()) {
 
-                    printStatus("Upload paused!");
-                    swingReflectionInvoke("setText", getView().getPause_button(), "RESUME UPLOAD");
-                    swingReflectionInvoke("setEnabled", getView().getPause_button(), true);
+                    getView().printStatusNormal("Upload paused!");
+
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+                            getView().getPause_button().setText("RESUME UPLOAD");
+                            getView().getPause_button().setEnabled(true);
+                        }
+                    });
+
                 }
 
                 if (_use_slots) {
@@ -989,21 +1107,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             secureNotify();
         }
-    }
-
-    private void printStatusError(String message) {
-        swingReflectionInvoke("setForeground", getView().getStatus_label(), Color.red);
-        swingReflectionInvoke("setText", getView().getStatus_label(), message);
-    }
-
-    private void printStatusOK(String message) {
-        swingReflectionInvoke("setForeground", getView().getStatus_label(), new Color(0, 128, 0));
-        swingReflectionInvoke("setText", getView().getStatus_label(), message);
-    }
-
-    private void printStatus(String message) {
-        swingReflectionInvoke("setForeground", getView().getStatus_label(), Color.BLACK);
-        swingReflectionInvoke("setText", getView().getStatus_label(), message);
     }
 
     @Override

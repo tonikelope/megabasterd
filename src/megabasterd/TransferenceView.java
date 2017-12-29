@@ -16,7 +16,11 @@ public interface TransferenceView {
 
     void updateProgressBar(long progress, double bar_rate);
 
+    void updateProgressBar(int value);
+
     void updateSlotsStatus();
+
+    int getSlots();
 
     void printStatusNormal(String msg);
 

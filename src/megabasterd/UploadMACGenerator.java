@@ -111,7 +111,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Macgenerator {1} Finishing FILE MAC calculation...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
 
-                        swingReflectionInvokeAndWait("setEnabled", _upload.getView().getPause_button(), false);
+                        _upload.getView().getPause_button().setEnabled(false);
 
                         upload_workers_finish = true;
                     }

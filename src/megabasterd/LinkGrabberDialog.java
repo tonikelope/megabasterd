@@ -56,37 +56,33 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     public LinkGrabberDialog(java.awt.Frame parent, boolean modal, String download_path, ClipboardSpy clipboardspy) {
 
         super(parent, modal);
-        _download = false;
 
         initComponents();
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
 
+        _main_panel = ((MainPanelView) parent).getMain_panel();
+
+        _download = false;
+
         _download_path = download_path;
 
         _clipboardspy = clipboardspy;
 
-        swingReflectionInvoke("setText", download_dir_label, truncateText(download_path, 80));
-
-        _main_panel = ((MainPanelView) parent).getMain_panel();
+        download_dir_label.setText(truncateText(download_path, 80));
 
         _last_selected_account = "";
 
         if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
-
-            swingReflectionInvoke("addItem", use_mega_account_down_combobox, _main_panel.getMega_account_down());
-
-            swingReflectionInvoke("addItem", use_mega_account_down_combobox, "");
-
-            swingReflectionInvoke("setSelectedIndex", use_mega_account_down_combobox, 0);
-
+            use_mega_account_down_combobox.addItem(_main_panel.getMega_account_down());
+            use_mega_account_down_combobox.addItem("");
+            use_mega_account_down_combobox.setSelectedIndex(0);
         } else {
-            swingReflectionInvoke("setEnabled", use_mega_account_down_combobox, false);
-            swingReflectionInvoke("setEnabled", use_mega_account_down_label, false);
-            swingReflectionInvoke("setVisible", use_mega_account_down_combobox, false);
-            swingReflectionInvoke("setVisible", use_mega_account_down_label, false);
+            use_mega_account_down_combobox.setEnabled(false);
+            use_mega_account_down_combobox.setVisible(false);
+            use_mega_account_down_label.setEnabled(false);
+            use_mega_account_down_label.setVisible(false);
         }
-
     }
 
     /**
@@ -186,7 +182,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(dance_button))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(links_label, javax.swing.GroupLayout.DEFAULT_SIZE, 764, Short.MAX_VALUE)
+                        .addComponent(links_label, javax.swing.GroupLayout.DEFAULT_SIZE, 775, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(dlc_button))
                     .addGroup(layout.createSequentialGroup()
@@ -270,7 +266,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
             final File file = filechooser.getSelectedFile();
 
-            THREAD_POOL.execute(new Runnable() {
+            swingInvoke(new Runnable() {
                 @Override
                 public void run() {
 
@@ -303,14 +299,15 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
                             if (!links.isEmpty()) {
 
-                                swingReflectionInvoke("setText", links_textarea, "");
+                                links_textarea.setText("");
 
                                 for (Iterator<String> i = links.iterator(); i.hasNext();) {
 
-                                    swingReflectionInvoke("append", links_textarea, i.next());
+                                    links_textarea.append(i.next());
 
                                     if (i.hasNext()) {
-                                        swingReflectionInvoke("append", links_textarea, "\r\n");
+
+                                        links_textarea.append("\r\n");
                                     }
                                 }
                             }
@@ -322,14 +319,13 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
-                    swingReflectionInvoke("setText", dlc_button, "Load DLC container");
+                    dlc_button.setText("Load DLC container");
 
-                    swingReflectionInvoke("setEnabled", dlc_button, true);
+                    dlc_button.setEnabled(true);
 
-                    swingReflectionInvoke("setEnabled", links_textarea, true);
+                    links_textarea.setEnabled(true);
 
-                    swingReflectionInvoke("setEnabled", dance_button, true);
-
+                    dance_button.setEnabled(true);
                 }
             });
 
@@ -360,7 +356,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
             final LinkGrabberDialog tthis = this;
 
-            THREAD_POOL.execute(new Runnable() {
+            swingInvoke(new Runnable() {
                 @Override
                 public void run() {
 
@@ -369,12 +365,13 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     } catch (Exception ex) {
 
                         _last_selected_account = "";
-                        swingReflectionInvoke("setSelectedIndex", use_mega_account_down_combobox, 1);
+
+                        use_mega_account_down_combobox.setSelectedIndex(1);
                     }
 
-                    swingReflectionInvokeAndWait("setEnabled", tthis.getUse_mega_account_down_combobox(), true);
+                    getUse_mega_account_down_combobox().setEnabled(true);
 
-                    swingReflectionInvokeAndWait("setEnabled", tthis.getDance_button(), true);
+                    getDance_button().setEnabled(true);
                 }
             });
         }
@@ -396,8 +393,14 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     @Override
     public void notifyClipboardChange() {
 
-        String current_text = (String) swingReflectionInvokeAndWaitForReturn("getText", links_textarea);
+        swingInvoke(new Runnable() {
+            @Override
+            public void run() {
 
-        swingReflectionInvoke("append", links_textarea, (current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
+                String current_text = links_textarea.getText();
+
+                links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
+            }
+        });
     }
 }

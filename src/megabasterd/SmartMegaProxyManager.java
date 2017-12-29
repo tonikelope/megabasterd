@@ -13,7 +13,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static megabasterd.MainPanel.THREAD_POOL;
 import static megabasterd.MiscTools.getApacheKissHttpClient;
-import static megabasterd.MiscTools.swingReflectionInvoke;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -51,9 +50,9 @@ public class SmartMegaProxyManager implements Runnable {
         if (!_main_panel.isLimit_download_speed()) {
 
             if (!_use_smart_proxy && use_smart_proxy) {
-                swingReflectionInvoke("setForeground", _main_panel.getView().getGlobal_speed_down_label(), Color.BLACK);
+                _main_panel.getView().getGlobal_speed_down_label().setForeground(Color.BLACK);
             } else if (_use_smart_proxy && !use_smart_proxy) {
-                swingReflectionInvoke("setForeground", _main_panel.getView().getGlobal_speed_down_label(), new Color(0, 128, 255));
+                _main_panel.getView().getGlobal_speed_down_label().setForeground(new Color(0, 128, 255));
             }
         }
 
@@ -105,7 +104,7 @@ public class SmartMegaProxyManager implements Runnable {
                 _proxy_list.remove(proxy);
             }
 
-            swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + _proxy_list.size() + " ");
+            _main_panel.getView().getSmart_proxy_status().setText("SmartProxy: " + _proxy_list.size() + " ");
 
             if (_proxy_list.isEmpty()) {
 
@@ -173,7 +172,7 @@ public class SmartMegaProxyManager implements Runnable {
                     _use_smart_proxy = false;
                 }
 
-                swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "SmartProxy: " + _proxy_list.size() + " ");
+                _main_panel.getView().getSmart_proxy_status().setText("SmartProxy: " + _proxy_list.size() + " ");
             }
 
         } catch (MalformedURLException ex) {
@@ -188,7 +187,7 @@ public class SmartMegaProxyManager implements Runnable {
 
         Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: hello!", new Object[]{Thread.currentThread().getName()});
 
-        swingReflectionInvoke("setVisible", _main_panel.getView().getSmart_proxy_status(), true);
+        _main_panel.getView().getSmart_proxy_status().setVisible(true);
 
         while (!_exit) {
 
@@ -204,9 +203,9 @@ public class SmartMegaProxyManager implements Runnable {
             }
         }
 
-        swingReflectionInvoke("setText", _main_panel.getView().getSmart_proxy_status(), "");
+        _main_panel.getView().getSmart_proxy_status().setText("");
 
-        swingReflectionInvoke("setVisible", _main_panel.getView().getSmart_proxy_status(), false);
+        _main_panel.getView().getSmart_proxy_status().setVisible(false);
 
         Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: bye bye", new Object[]{Thread.currentThread().getName()});
 

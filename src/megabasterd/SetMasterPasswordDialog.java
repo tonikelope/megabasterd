@@ -190,16 +190,16 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
     private void cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_buttonActionPerformed
 
-        swingReflectionInvoke("setVisible", this, false);
+        this.setVisible(false);
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
     private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
 
-        swingReflectionInvoke("setText", status_label, "Verifying your password, please wait...");
+        status_label.setText("Verifying your password, please wait...");
 
         final Dialog tthis = this;
 
-        THREAD_POOL.execute(new Runnable() {
+        swingInvoke(new Runnable() {
 
             @Override
             public void run() {
@@ -208,7 +208,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
                     if (Arrays.equals(new_pass_textfield.getPassword(), confirm_pass_textfield.getPassword())) {
 
-                        swingReflectionInvoke("setText", status_label, "Processing your password, please wait...");
+                        status_label.setText("Processing your password, please wait...");
 
                         if (new_pass_textfield.getPassword().length > 0) {
 
@@ -219,19 +219,19 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
                         _pass_ok = true;
 
-                        swingReflectionInvoke("setVisible", tthis, false);
+                        tthis.setVisible(false);
 
                     } else {
 
                         JOptionPane.showMessageDialog(tthis, "Passwords does not match!", "Error", JOptionPane.ERROR_MESSAGE);
 
-                        swingReflectionInvoke("setText", status_label, "");
+                        status_label.setText("");
 
-                        swingReflectionInvoke("setText", new_pass_textfield, "");
+                        new_pass_textfield.setText("");
 
-                        swingReflectionInvoke("setText", confirm_pass_textfield, "");
+                        confirm_pass_textfield.setText("");
 
-                        swingReflectionInvoke("grabFocus", new_pass_textfield);
+                        new_pass_textfield.grabFocus();
                     }
 
                 } catch (Exception ex) {

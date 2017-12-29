@@ -1,7 +1,10 @@
 package megabasterd;
 
 import java.awt.Dialog;
+import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
+import java.security.NoSuchAlgorithmException;
+import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -190,7 +193,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
         final Dialog tthis = this;
 
-        THREAD_POOL.execute(new Runnable() {
+        swingInvoke(new Runnable() {
 
             @Override
             public void run() {
@@ -203,11 +206,11 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
                         JOptionPane.showMessageDialog(tthis, "BAD PASSWORD!", "Error", JOptionPane.ERROR_MESSAGE);
 
-                        swingReflectionInvoke("setText", status_label, "");
+                        status_label.setText("");
 
-                        swingReflectionInvoke("setText", current_pass_textfield, "");
+                        current_pass_textfield.setText("");
 
-                        swingReflectionInvoke("grabFocus", current_pass_textfield);
+                        current_pass_textfield.grabFocus();
 
                     } else {
 
@@ -217,10 +220,10 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
                         _pass_ok = true;
 
-                        swingReflectionInvoke("setVisible", tthis, false);
+                        tthis.setVisible(false);
                     }
 
-                } catch (Exception ex) {
+                } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }

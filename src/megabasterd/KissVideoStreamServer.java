@@ -98,9 +98,15 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
     public void start(int port, String context) throws IOException {
 
-        swingReflectionInvoke("setForeground", _main_panel.getView().getKiss_server_status(), new Color(0, 128, 0));
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                _main_panel.getView().getKiss_server_status().setForeground(new Color(0, 128, 0));
 
-        swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), "Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)");
+                _main_panel.getView().getKiss_server_status().setText("Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)");
+            }
+        });
 
         HttpServer httpserver = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
 
@@ -124,18 +130,25 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
     private void _updateStatusView() {
 
-        String status;
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                String status;
 
-        if (getWorking_threads().size() > 0) {
+                if (getWorking_threads().size() > 0) {
 
-            status = "Stream server running on localhost:" + STREAMER_PORT + "  Connections: " + getWorking_threads().size();
+                    status = "Stream server running on localhost:" + STREAMER_PORT + "  Connections: " + getWorking_threads().size();
 
-        } else {
+                } else {
 
-            status = "Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)";
-        }
+                    status = "Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)";
+                }
 
-        swingReflectionInvoke("setText", _main_panel.getView().getKiss_server_status(), status);
+                _main_panel.getView().getKiss_server_status().setText(status);
+            }
+        });
+
     }
 
     private String[] _getMegaFileMetadata(String link, MainPanelView panel) throws IOException, InterruptedException {

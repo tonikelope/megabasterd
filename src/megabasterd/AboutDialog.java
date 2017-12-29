@@ -183,11 +183,13 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         final Dialog tthis = this;
 
-        THREAD_POOL.execute(new Runnable() {
+        swingInvoke(new Runnable() {
             @Override
             public void run() {
 
-                String new_version = checkNewVersion("lYsRWaQB", "uVhntmyKcVECRaOxAbcL4A");
+                String[] mega_url_parts = MEGA_URL.split("!");
+
+                String new_version = checkNewVersion(mega_url_parts[1], mega_url_parts[2]);
 
                 if (new_version != null) {
 
@@ -198,9 +200,9 @@ public final class AboutDialog extends javax.swing.JDialog {
                     JOptionPane.showMessageDialog(tthis, "You have the latest version ;)");
                 }
 
-                swingReflectionInvoke("setText", check_version_button, "Check version");
+                check_version_button.setText("Check version");
 
-                swingReflectionInvoke("setEnabled", check_version_button, true);
+                check_version_button.setEnabled(true);
 
             }
         });

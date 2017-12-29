@@ -111,10 +111,10 @@ public final class GlobalSpeedMeter implements Runnable {
         long sp, progress;
         boolean visible = false;
 
-        swingReflectionInvoke("setVisible", _speed_label, true);
-        swingReflectionInvoke("setVisible", _rem_label, true);
-        swingReflectionInvoke("setText", _speed_label, "");
-        swingReflectionInvoke("setText", _rem_label, "");
+        _speed_label.setVisible(true);
+        _rem_label.setVisible(true);
+        _speed_label.setText("");
+        _rem_label.setText("");
 
         do {
 
@@ -144,20 +144,20 @@ public final class GlobalSpeedMeter implements Runnable {
 
                     if (sp > 0) {
 
-                        swingReflectionInvoke("setText", _speed_label, formatBytes(sp) + "/s");
-                        swingReflectionInvoke("setText", _rem_label, formatBytes(progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ " + calculateRemTime((long) Math.floor((_trans_manager.getTotal_transferences_size() - progress) / sp)));
+                        _speed_label.setText(formatBytes(sp) + "/s");
+                        _rem_label.setText(formatBytes(progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ " + calculateRemTime((long) Math.floor((_trans_manager.getTotal_transferences_size() - progress) / sp)));
 
                     } else {
 
-                        swingReflectionInvoke("setText", _speed_label, "------");
-                        swingReflectionInvoke("setText", _rem_label, formatBytes(progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ --d --:--:--");
+                        _speed_label.setText("------");
+                        _rem_label.setText(formatBytes(progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ --d --:--:--");
 
                     }
 
                 } else if (visible) {
 
-                    swingReflectionInvoke("setText", _speed_label, "");
-                    swingReflectionInvoke("setText", _rem_label, "");
+                    _speed_label.setText("");
+                    _rem_label.setText("");
                     visible = false;
                 }
 

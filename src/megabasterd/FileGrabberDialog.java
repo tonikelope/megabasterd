@@ -6,11 +6,11 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreeNode;
 import static megabasterd.MainPanel.*;
 import static megabasterd.MiscTools.*;
@@ -74,7 +74,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         _remember_master_pass = true;
         _files = new ArrayList<>();
 
-        swingReflectionInvokeAndWait("addMouseListener", dir_name_textfield, new ContextMenuMouseListener());
+        dir_name_textfield.addMouseListener(new ContextMenuMouseListener());
 
         _main_panel = ((MainPanelView) parent).getMain_panel();
 
@@ -82,12 +82,13 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             for (Object o : _main_panel.getMega_accounts().keySet()) {
 
-                swingReflectionInvoke("addItem", account_combobox, o);
+                account_combobox.addItem((String) o);
             }
 
         } else {
-            swingReflectionInvoke("setForeground", used_space_label, Color.red);
-            swingReflectionInvoke("setText", used_space_label, "No MEGA accounts available (Go to Settings > Accounts)");
+
+            used_space_label.setForeground(Color.red);
+            used_space_label.setText("No MEGA accounts available (Go to Settings > Accounts)");
         }
     }
 
@@ -516,7 +517,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             warning_label.setEnabled(false);
             file_tree.setEnabled(false);
 
-            THREAD_POOL.execute(new Runnable() {
+            swingInvoke(new Runnable() {
                 @Override
                 public void run() {
 
@@ -535,45 +536,54 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                     if (quota != null) {
 
+                        final Color used_space_color;
+
                         if (quota[0] <= Math.round((double) quota[1] / 2)) {
 
-                            swingReflectionInvoke("setForeground", used_space_label, new Color(0, 128, 0));
+                            used_space_color = new Color(0, 128, 0);
 
                         } else if (quota[0] < quota[1]) {
 
-                            swingReflectionInvoke("setForeground", used_space_label, new Color(230, 115, 0));
+                            used_space_color = new Color(230, 115, 0);
 
                         } else {
 
-                            swingReflectionInvoke("setForeground", used_space_label, Color.red);
+                            used_space_color = Color.red;
                         }
 
-                        boolean root_childs = ((TreeNode) ((TreeModel) swingReflectionInvokeAndWaitForReturn("getModel", file_tree)).getRoot()).getChildCount() > 0;
+                        boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
-                        swingReflectionInvoke("setText", used_space_label, formatBytes(quota[0]) + " / " + formatBytes(quota[1]));
+                        used_space_label.setText("Quota used: " + formatBytes(quota[0]) + "/" + formatBytes(quota[1]));
 
-                        swingReflectionInvoke("setEnabled", new Object[]{add_files_button, add_folder_button, account_combobox, account_label}, true);
+                        used_space_label.setForeground(used_space_color);
 
-                        swingReflectionInvoke("setEnabled", new Object[]{dir_name_textfield, dir_name_label, warning_label, dance_button, file_tree, total_file_size_label, skip_button, skip_rest_button}, root_childs);
+                        for (JComponent c : new JComponent[]{add_files_button, add_folder_button, account_combobox, account_label}) {
+
+                            c.setEnabled(true);
+                        }
+
+                        for (JComponent c : new JComponent[]{dir_name_textfield, dir_name_label, warning_label, dance_button, file_tree, total_file_size_label, skip_button, skip_rest_button}) {
+
+                            c.setEnabled(root_childs);
+                        }
 
                     } else {
 
                         _last_selected_account = null;
 
-                        swingReflectionInvoke("setEnabled", account_combobox, true);
+                        account_combobox.setEnabled(true);
 
-                        swingReflectionInvoke("setEnabled", account_label, true);
+                        account_label.setEnabled(true);
 
-                        swingReflectionInvoke("setSelectedIndex", account_combobox, -1);
+                        account_combobox.setSelectedIndex(-1);
 
-                        swingReflectionInvoke("setForeground", used_space_label, Color.red);
+                        used_space_label.setForeground(Color.red);
 
-                        swingReflectionInvoke("setText", used_space_label, "ERROR checking account quota!");
+                        used_space_label.setText("ERROR checking account quota!");
                     }
 
                 }
             });
-
         }
 
     }//GEN-LAST:event_account_comboboxItemStateChanged

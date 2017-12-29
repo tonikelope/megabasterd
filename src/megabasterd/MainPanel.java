@@ -46,7 +46,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.61";
+    public static final String VERSION = "2.62";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -171,14 +171,6 @@ public final class MainPanel {
 
         THREAD_POOL.execute((_clipboardspy = new ClipboardSpy()));
 
-        swingReflectionInvoke("setForeground", getView().getGlobal_speed_down_label(), _limit_download_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
-
-        swingReflectionInvoke("setForeground", getView().getGlobal_speed_up_label(), _limit_upload_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
-
-        resumeDownloads();
-
-        resumeUploads();
-
         _streamserver = new KissVideoStreamServer(this);
 
         try {
@@ -212,6 +204,20 @@ public final class MainPanel {
             _proxy_manager = new SmartMegaProxyManager(this, _use_smart_proxy_url);
             THREAD_POOL.execute(_proxy_manager);
         }
+
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                getView().getGlobal_speed_down_label().setForeground(_limit_download_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
+
+                getView().getGlobal_speed_up_label().setForeground(_limit_upload_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
+            }
+        });
+
+        resumeDownloads();
+
+        resumeUploads();
     }
 
     public void setProxy_manager(SmartMegaProxyManager _proxy_manager) {
@@ -670,9 +676,15 @@ public final class MainPanel {
                         try {
                             socket.accept();
 
-                            swingReflectionInvoke("setExtendedState", getView(), NORMAL);
+                            swingInvoke(
+                                    new Runnable() {
+                                @Override
+                                public void run() {
+                                    getView().setExtendedState(NORMAL);
 
-                            swingReflectionInvoke("setVisible", getView(), true);
+                                    getView().setVisible(true);
+                                }
+                            });
 
                         } catch (IOException ex) {
                             Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -703,7 +715,13 @@ public final class MainPanel {
 
     private void resumeDownloads() {
 
-        swingReflectionInvoke("setText", getView().getStatus_down_label(), "Resuming previous downloads, please wait...");
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                getView().getStatus_down_label().setText("Checking it there are previous downloads, please wait...");
+            }
+        });
 
         final MainPanel tthis = this;
 
@@ -753,11 +771,23 @@ public final class MainPanel {
 
                     getDownload_manager().secureNotify();
 
-                    getView().getjTabbedPane1().setSelectedIndex(0);
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+                            getView().getjTabbedPane1().setSelectedIndex(0);
+                        }
+                    });
 
                 }
 
-                swingReflectionInvoke("setText", getView().getStatus_down_label(), "");
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+                        getView().getStatus_down_label().setText("");
+                    }
+                });
 
             }
         });
@@ -780,13 +810,20 @@ public final class MainPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                swingReflectionInvoke("setExtendedState", getView(), NORMAL);
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
 
-                swingReflectionInvoke("setVisible", getView(), true);
+                        getView().setExtendedState(NORMAL);
 
-                swingReflectionInvoke("revalidate", getView());
+                        getView().setVisible(true);
 
-                swingReflectionInvoke("repaint", getView());
+                        getView().revalidate();
+
+                        getView().repaint();
+                    }
+                });
 
             }
         });
@@ -813,15 +850,24 @@ public final class MainPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                if (!(boolean) swingReflectionInvokeAndWaitForReturn("isVisible", getView())) {
-                    swingReflectionInvoke("setExtendedState", getView(), NORMAL);
-                    swingReflectionInvoke("setVisible", getView(), true);
-                    swingReflectionInvoke("revalidate", getView());
-                    swingReflectionInvoke("repaint", getView());
-                } else {
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
 
-                    swingReflectionInvoke("dispatchEvent", getView(), new WindowEvent(getView(), WINDOW_CLOSING));
-                }
+                        if (!getView().isVisible()) {
+                            getView().setExtendedState(NORMAL);
+                            getView().setVisible(true);
+                            getView().revalidate();
+                            getView().repaint();
+
+                        } else {
+
+                            getView().dispatchEvent(new WindowEvent(getView(), WINDOW_CLOSING));
+                        }
+                    }
+                });
+
             }
         };
 
@@ -841,7 +887,13 @@ public final class MainPanel {
 
     private void resumeUploads() {
 
-        swingReflectionInvoke("setText", getView().getStatus_up_label(), "Resuming previous uploads, please wait...");
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                getView().getStatus_up_label().setText("Checking it there are previous uploads, please wait...");
+            }
+        });
 
         final MainPanel tthis = this;
 
@@ -889,11 +941,23 @@ public final class MainPanel {
 
                         getUpload_manager().secureNotify();
 
-                        getView().getjTabbedPane1().setSelectedIndex(1);
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                getView().getjTabbedPane1().setSelectedIndex(1);
+                            }
+                        });
 
                     }
 
-                    swingReflectionInvoke("setText", getView().getStatus_up_label(), "");
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+                            getView().getStatus_up_label().setText("");
+                        }
+                    });
 
                 } catch (SQLException ex) {
                     Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);

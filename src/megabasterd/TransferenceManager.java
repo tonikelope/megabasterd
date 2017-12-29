@@ -255,48 +255,56 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_waitstart_queue.addAll(trans_list);
     }
 
-    private void updateView() {
+    private void _updateView() {
 
-        if (!_transference_running_list.isEmpty()) {
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                if (!_transference_running_list.isEmpty()) {
 
-            boolean show_pause_all = false;
+                    boolean show_pause_all = false;
 
-            for (Transference trans : _transference_running_list) {
+                    for (Transference trans : _transference_running_list) {
 
-                if ((show_pause_all = !trans.isPaused())) {
+                        if ((show_pause_all = !trans.isPaused())) {
 
-                    break;
+                            break;
+                        }
+                    }
+
+                    _pause_all_button.setVisible(show_pause_all);
+
+                } else {
+
+                    _pause_all_button.setVisible(false);
                 }
+
+                _clean_all_menu.getComponent().setEnabled(!_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty() || !_transference_waitstart_queue.isEmpty());
+
+                if (!_transference_finished_queue.isEmpty() && _isOKFinishedInQueue()) {
+
+                    _close_all_button.setText("Close all OK finished");
+
+                    _close_all_button.setVisible(true);
+
+                } else {
+
+                    _close_all_button.setVisible(false);
+                }
+
+                _status.setText(_genStatus());
+
+                _main_panel.getView().revalidate();
+
+                _main_panel.getView().repaint();
+
             }
+        });
 
-            swingReflectionInvoke("setVisible", _pause_all_button, show_pause_all);
-
-        } else {
-
-            swingReflectionInvoke("setVisible", _pause_all_button, false);
-        }
-
-        swingReflectionInvoke("setEnabled", _clean_all_menu, !_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty() || !_transference_waitstart_queue.isEmpty());
-
-        if (!_transference_finished_queue.isEmpty() && _isOKFinishedInQueue()) {
-
-            swingReflectionInvoke("setText", _close_all_button, "Close all OK finished");
-
-            swingReflectionInvoke("setVisible", _close_all_button, true);
-
-        } else {
-
-            swingReflectionInvoke("setVisible", _close_all_button, false);
-        }
-
-        swingReflectionInvoke("setText", _status, genStatus());
-
-        swingReflectionInvoke("revalidate", _main_panel.getView());
-
-        swingReflectionInvoke("repaint", _main_panel.getView());
     }
 
-    private String genStatus() {
+    private String _genStatus() {
 
         int prov = _transference_provision_queue.size();
 
@@ -308,11 +316,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         int finish = _transference_finished_queue.size();
 
-        if (!_tray_icon_finish && finish > 0 && _pre_count + prov + wait + run == 0 && !(boolean) swingReflectionInvokeAndWaitForReturn("isVisible", _main_panel.getView())) {
+        if (!_tray_icon_finish && finish > 0 && _pre_count + prov + wait + run == 0 && !_main_panel.getView().isVisible()) {
 
             _tray_icon_finish = true;
 
-            swingReflectionInvoke("displayMessage", _main_panel.getTrayicon(), "MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
+            _main_panel.getTrayicon().displayMessage("MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
         }
 
         return (_pre_count + prov + rem + wait + run + finish > 0) ? "Pre: " + _pre_count + " / Pro: " + prov + " / Wait: " + wait + " / Run: " + run + " / Finish: " + finish + " / Rem: " + rem : "";
@@ -439,7 +447,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 });
             }
 
-            updateView();
+            _updateView();
 
             secureWait();
         }

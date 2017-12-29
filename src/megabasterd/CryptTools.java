@@ -389,9 +389,9 @@ public final class CryptTools {
 
                                 GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(main_panel.getView(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt());
 
-                                swingReflectionInvokeAndWait("setLocationRelativeTo", dialog, main_panel.getView());
+                                dialog.setLocationRelativeTo(main_panel.getView());
 
-                                swingReflectionInvokeAndWait("setVisible", dialog, true);
+                                dialog.setVisible(true);
 
                                 if (dialog.isPass_ok()) {
 

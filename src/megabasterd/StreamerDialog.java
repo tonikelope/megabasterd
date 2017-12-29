@@ -48,30 +48,31 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
      */
     public StreamerDialog(java.awt.Frame parent, boolean modal, ClipboardSpy clipboardspy) {
         super(parent, modal);
+
         initComponents();
+
         updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
+
+        _main_panel = ((MainPanelView) parent).getMain_panel();
 
         _clipboardspy = clipboardspy;
 
         _mainPanelView = (MainPanelView) parent;
 
-        _main_panel = ((MainPanelView) parent).getMain_panel();
-
         _last_selected_account = "";
 
         if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
 
-            swingReflectionInvoke("addItem", use_mega_account_down_combobox, _main_panel.getMega_account_down());
-
-            swingReflectionInvoke("addItem", use_mega_account_down_combobox, "");
-
-            swingReflectionInvoke("setSelectedIndex", use_mega_account_down_combobox, 0);
+            use_mega_account_down_combobox.addItem(_main_panel.getMega_account_down());
+            use_mega_account_down_combobox.addItem("");
+            use_mega_account_down_combobox.setSelectedIndex(0);
 
         } else {
-            swingReflectionInvoke("setEnabled", use_mega_account_down_combobox, false);
-            swingReflectionInvoke("setEnabled", use_mega_account_down_label, false);
-            swingReflectionInvoke("setVisible", use_mega_account_down_combobox, false);
-            swingReflectionInvoke("setVisible", use_mega_account_down_label, false);
+
+            use_mega_account_down_combobox.setEnabled(false);
+            use_mega_account_down_combobox.setVisible(false);
+            use_mega_account_down_label.setEnabled(false);
+            use_mega_account_down_label.setVisible(false);
         }
 
     }
@@ -167,7 +168,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
         final Dialog tthis = this;
 
-        THREAD_POOL.execute(new Runnable() {
+        swingInvoke(new Runnable() {
             @Override
             public void run() {
 
@@ -176,7 +177,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                     String stream_link = null;
 
-                    String link = URLDecoder.decode((String) swingReflectionInvokeAndWaitForReturn("getText", original_link_textfield), "UTF-8").trim();
+                    String link = URLDecoder.decode(original_link_textfield.getText(), "UTF-8").trim();
 
                     if (link.length() > 0) {
 
@@ -225,11 +226,11 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                         JOptionPane.showMessageDialog(tthis, "Please, paste a Mega/MegaCrypter/ELC link!", "Error", JOptionPane.ERROR_MESSAGE);
 
-                        swingReflectionInvoke("setText", original_link_textfield, "");
+                        original_link_textfield.setText("");
 
-                        swingReflectionInvoke("setEnabled", dance_button, true);
+                        dance_button.setEnabled(true);
 
-                        swingReflectionInvoke("setEnabled", original_link_textfield, true);
+                        original_link_textfield.setEnabled(true);
 
                     } else {
 
@@ -262,7 +263,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
             final StreamerDialog tthis = this;
 
-            THREAD_POOL.execute(new Runnable() {
+            swingInvoke(new Runnable() {
                 @Override
                 public void run() {
 
@@ -271,12 +272,13 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                     } catch (Exception ex) {
 
                         _last_selected_account = "";
-                        swingReflectionInvoke("setSelectedIndex", use_mega_account_down_combobox, 1);
+                        use_mega_account_down_combobox.setSelectedIndex(1);
+
                     }
 
-                    swingReflectionInvokeAndWait("setEnabled", tthis.getUse_mega_account_down_combobox(), true);
+                    getUse_mega_account_down_combobox().setEnabled(true);
 
-                    swingReflectionInvokeAndWaitForReturn("setEnabled", tthis.getDance_button(), true);
+                    getDance_button().setEnabled(true);
                 }
             });
         }
@@ -285,12 +287,19 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     @Override
     public void notifyClipboardChange() {
 
-        String link = extractFirstMegaLinkFromString(extractStringFromClipboardContents(_clipboardspy.getContents()));
+        swingInvoke(new Runnable() {
+            @Override
+            public void run() {
 
-        if (!link.contains("/#F!")) {
+                String link = extractFirstMegaLinkFromString(extractStringFromClipboardContents(_clipboardspy.getContents()));
 
-            swingReflectionInvoke("setText", original_link_textfield, link);
-        }
+                if (!link.contains("/#F!")) {
+
+                    original_link_textfield.setText(link);
+                }
+
+            }
+        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -127,18 +127,18 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         setIconImage(new ImageIcon(getClass().getResource(ICON_FILE)).getImage());
 
-        swingReflectionInvoke("setVisible", global_speed_down_label, false);
-        swingReflectionInvoke("setVisible", global_speed_up_label, false);
-        swingReflectionInvoke("setVisible", down_remtime_label, false);
-        swingReflectionInvoke("setVisible", up_remtime_label, false);
-        swingReflectionInvoke("setVisible", close_all_finished_down_button, false);
-        swingReflectionInvoke("setVisible", close_all_finished_up_button, false);
-        swingReflectionInvoke("setVisible", pause_all_down_button, false);
-        swingReflectionInvoke("setVisible", pause_all_up_button, false);
-        swingReflectionInvoke("setEnabled", clean_all_down_menu, false);
-        swingReflectionInvoke("setEnabled", clean_all_up_menu, false);
-        swingReflectionInvoke("setUnitIncrement", jScrollPane_down.getVerticalScrollBar(), 20);
-        swingReflectionInvoke("setUnitIncrement", jScrollPane_up.getVerticalScrollBar(), 20);
+        global_speed_down_label.setVisible(false);
+        global_speed_up_label.setVisible(false);
+        down_remtime_label.setVisible(false);
+        up_remtime_label.setVisible(false);
+        close_all_finished_down_button.setVisible(false);
+        close_all_finished_up_button.setVisible(false);
+        pause_all_down_button.setVisible(false);
+        pause_all_up_button.setVisible(false);
+        clean_all_down_menu.setEnabled(false);
+        clean_all_up_menu.setEnabled(false);
+        jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
+        jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
     }
 
     /**
@@ -579,9 +579,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                         if (!fdialog.isMega_error()) {
 
-                                            swingReflectionInvokeAndWait("setLocationRelativeTo", fdialog, _main_panel.getView());
+                                            fdialog.setLocationRelativeTo(_main_panel.getView());
 
-                                            swingReflectionInvokeAndWait("setVisible", fdialog, true);
+                                            fdialog.setVisible(true);
 
                                             if (fdialog.isDownload()) {
 
