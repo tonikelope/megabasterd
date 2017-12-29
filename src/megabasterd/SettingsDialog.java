@@ -1599,6 +1599,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 encrypt_pass_checkbox.setEnabled(false);
 
+                mega_account_export_button.setEnabled(false);
+
+                mega_account_import_button.setEnabled(false);
+
                 final Dialog tthis = this;
 
                 swingInvoke(new Runnable() {
@@ -1714,7 +1718,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                             cancel_button.setEnabled(true);
 
-                            remove_mega_account_button.setEnabled(true);
+                            remove_mega_account_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
 
                             add_mega_account_button.setEnabled(true);
 
@@ -1723,6 +1727,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             delete_all_accounts_button.setEnabled(true);
 
                             encrypt_pass_checkbox.setEnabled(true);
+
+                            mega_account_export_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
+
+                            mega_account_import_button.setEnabled(true);
 
                         } else {
                             tthis.setVisible(false);
