@@ -1579,8 +1579,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             if (mega_accounts_table.isEnabled()) {
 
-                mega_accounts_table.setEnabled(false);
-
                 final DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
 
                 status.setText("Checking your MEGA accounts, please wait...");
@@ -1590,18 +1588,28 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 cancel_button.setEnabled(false);
 
                 remove_mega_account_button.setEnabled(false);
+                
+                remove_elc_account_button.setEnabled(false);
 
                 add_mega_account_button.setEnabled(false);
+                
+                add_elc_account_button.setEnabled(false);
 
                 delete_all_accounts_button.setEnabled(false);
 
                 mega_accounts_table.setEnabled(false);
+                
+                elc_accounts_table.setEnabled(false);
 
                 encrypt_pass_checkbox.setEnabled(false);
 
                 mega_account_export_button.setEnabled(false);
 
                 mega_account_import_button.setEnabled(false);
+                
+                elc_account_export_button.setEnabled(false);
+
+                elc_account_import_button.setEnabled(false);
 
                 final Dialog tthis = this;
 
@@ -1719,18 +1727,28 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             cancel_button.setEnabled(true);
 
                             remove_mega_account_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
+                            
+                            remove_elc_account_button.setEnabled(elc_accounts_table.getModel().getRowCount() > 0);
 
                             add_mega_account_button.setEnabled(true);
+                            
+                            add_elc_account_button.setEnabled(true);
 
                             mega_accounts_table.setEnabled(true);
+                            
+                            elc_accounts_table.setEnabled(true);
 
                             delete_all_accounts_button.setEnabled(true);
 
                             encrypt_pass_checkbox.setEnabled(true);
 
                             mega_account_export_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
+                            
+                            elc_account_export_button.setEnabled(elc_accounts_table.getModel().getRowCount() > 0);
 
                             mega_account_import_button.setEnabled(true);
+                            
+                            elc_account_import_button.setEnabled(true);
 
                         } else {
                             tthis.setVisible(false);
