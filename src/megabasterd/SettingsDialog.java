@@ -2137,6 +2137,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 mega_accounts_table.setModel(new_mega_model);
 
                 elc_accounts_table.setModel(new_elc_model);
+                
+                mega_account_export_button.setEnabled(false);
+
+                mega_account_import_button.setEnabled(true);
+
+                elc_account_export_button.setEnabled(false);
+
+                elc_account_import_button.setEnabled(true);
 
                 for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
 
