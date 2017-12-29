@@ -350,9 +350,17 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 elc_model = (DefaultTableModel) elc_accounts_table.getModel();
 
-                remove_mega_account_button.setEnabled((mega_model.getRowCount() > 0));
+                remove_mega_account_button.setEnabled(mega_model.getRowCount() > 0);
 
-                remove_elc_account_button.setEnabled((elc_model.getRowCount() > 0));
+                remove_elc_account_button.setEnabled(elc_model.getRowCount() > 0);
+
+                mega_account_export_button.setEnabled(mega_model.getRowCount() > 0);
+
+                mega_account_import_button.setEnabled(true);
+
+                elc_account_export_button.setEnabled(elc_model.getRowCount() > 0);
+
+                elc_account_import_button.setEnabled(true);
             }
 
         } else {
@@ -381,6 +389,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             remove_elc_account_button.setEnabled((elc_model.getRowCount() > 0));
 
+            mega_account_export_button.setEnabled(mega_model.getRowCount() > 0);
+
+            mega_account_import_button.setEnabled(true);
+
+            elc_account_export_button.setEnabled(elc_model.getRowCount() > 0);
+
+            elc_account_import_button.setEnabled(true);
         }
 
         boolean use_mc_reverse = false;
@@ -1769,6 +1784,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         if (model.getRowCount() == 0) {
 
             remove_mega_account_button.setEnabled(false);
+
+            mega_account_export_button.setEnabled(false);
         }
     }//GEN-LAST:event_remove_mega_account_buttonActionPerformed
 
@@ -1781,6 +1798,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         mega_accounts_table.clearSelection();
 
         remove_mega_account_button.setEnabled(true);
+
+        mega_account_export_button.setEnabled(true);
     }//GEN-LAST:event_add_mega_account_buttonActionPerformed
 
     private void limit_download_speed_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_limit_download_speed_checkboxStateChanged
@@ -2153,6 +2172,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         if (model.getRowCount() == 0) {
 
             remove_elc_account_button.setEnabled(false);
+
+            elc_account_export_button.setEnabled(false);
         }
     }//GEN-LAST:event_remove_elc_account_buttonActionPerformed
 
@@ -2165,6 +2186,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         elc_accounts_table.clearSelection();
 
         remove_elc_account_button.setEnabled(true);
+
+        elc_account_export_button.setEnabled(true);
 
     }//GEN-LAST:event_add_elc_account_buttonActionPerformed
 
