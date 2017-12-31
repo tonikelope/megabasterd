@@ -567,7 +567,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                             _file.renameTo(new File(filename));
 
-                            String verify_file = selectSettingValueFromDB("verify_down_file");
+                            String verify_file = selectSettingValue("verify_down_file");
 
                             if (verify_file != null && verify_file.equals("yes")) {
                                 _checking_cbc = true;

@@ -7,6 +7,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -162,7 +163,6 @@ public final class DBTools {
 
                 ps.setString(1, upload[0]);
                 ps.setString(2, upload[1]);
-
                 ps.addBatch();
             }
 
@@ -170,7 +170,7 @@ public final class DBTools {
         }
     }
 
-    public static synchronized String selectSettingValueFromDB(String key) {
+    public static synchronized String selectSettingValue(String key) {
 
         String value = null;
 
@@ -190,7 +190,7 @@ public final class DBTools {
         return value;
     }
 
-    public static synchronized void insertSettingValueInDB(String key, String value) throws SQLException {
+    public static synchronized void insertSettingValue(String key, String value) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO settings (key,value) VALUES (?, ?)")) {
 
@@ -199,6 +199,40 @@ public final class DBTools {
             ps.setString(2, value);
 
             ps.executeUpdate();
+        }
+    }
+
+    public static synchronized HashMap<String, Object> selectSettingsValues() throws SQLException {
+
+        HashMap<String, Object> settings = new HashMap<>();
+
+        ResultSet res;
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+
+            res = stat.executeQuery("SELECT * FROM settings");
+
+            while (res.next()) {
+
+                settings.put(res.getString("key"), res.getString("value"));
+            }
+        }
+
+        return settings;
+    }
+
+    public static synchronized void insertSettingsValues(HashMap<String, Object> settings) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO settings (key,value) VALUES (?, ?)")) {
+
+            for (Map.Entry<String, Object> entry : settings.entrySet()) {
+
+                ps.setString(1, entry.getKey());
+                ps.setString(2, (String) entry.getValue());
+                ps.addBatch();
+            }
+
+            ps.executeBatch();
         }
     }
 
@@ -284,6 +318,53 @@ public final class DBTools {
         }
 
         return accounts;
+    }
+
+    public static synchronized void insertMegaAccounts(HashMap<String, Object> accounts) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO mega_accounts (email,password,password_aes,user_hash) VALUES (?, ?, ?, ?)")) {
+
+            if (!accounts.isEmpty()) {
+
+                for (Map.Entry<String, Object> entry : accounts.entrySet()) {
+
+                    ps.setString(1, (String) entry.getKey());
+
+                    ps.setString(2, (String) ((HashMap<String, Object>) entry.getValue()).get("password"));
+
+                    ps.setString(3, (String) ((HashMap<String, Object>) entry.getValue()).get("password_aes"));
+
+                    ps.setString(4, (String) ((HashMap<String, Object>) entry.getValue()).get("user_hash"));
+
+                    ps.addBatch();
+                }
+
+                ps.executeBatch();
+            }
+        }
+    }
+
+    public static synchronized void insertELCAccounts(HashMap<String, Object> accounts) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO elc_accounts (host,user,apikey) VALUES (?, ?, ?)")) {
+
+            if (!accounts.isEmpty()) {
+
+                for (Map.Entry<String, Object> entry : accounts.entrySet()) {
+
+                    ps.setString(1, (String) entry.getKey());
+
+                    ps.setString(2, (String) ((HashMap<String, Object>) entry.getValue()).get("user"));
+
+                    ps.setString(3, (String) ((HashMap<String, Object>) entry.getValue()).get("apikey"));
+
+                    ps.addBatch();
+                }
+
+                ps.executeBatch();
+
+            }
+        }
     }
 
     public static synchronized HashMap<String, Object> selectELCAccounts() throws SQLException {

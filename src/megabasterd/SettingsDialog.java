@@ -2,11 +2,12 @@ package megabasterd;
 
 import java.awt.Dialog;
 import java.awt.Frame;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -17,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
@@ -74,7 +74,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         downloads_scroll_pane.getHorizontalScrollBar().setUnitIncrement(20);
 
-        String default_download_dir = DBTools.selectSettingValueFromDB("default_down_dir");
+        String default_download_dir = DBTools.selectSettingValue("default_down_dir");
 
         if (default_download_dir == null) {
             default_download_dir = ".";
@@ -84,7 +84,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         default_dir_label.setText(truncateText(_download_path, 80));
 
-        String slots = DBTools.selectSettingValueFromDB("default_slots_down");
+        String slots = DBTools.selectSettingValue("default_slots_down");
 
         int default_slots = Download.WORKERS_DEFAULT;
 
@@ -96,7 +96,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         ((JSpinner.DefaultEditor) default_slots_down_spinner.getEditor()).getTextField().setEditable(false);
 
-        slots = DBTools.selectSettingValueFromDB("default_slots_up");
+        slots = DBTools.selectSettingValue("default_slots_up");
 
         default_slots = Upload.WORKERS_DEFAULT;
 
@@ -107,7 +107,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         default_slots_up_spinner.setModel(new SpinnerNumberModel(default_slots, Upload.MIN_WORKERS, Upload.MAX_WORKERS, 1));
         ((JSpinner.DefaultEditor) default_slots_up_spinner.getEditor()).getTextField().setEditable(false);
 
-        String max_down = DBTools.selectSettingValueFromDB("max_downloads");
+        String max_down = DBTools.selectSettingValue("max_downloads");
 
         int max_dl = Download.SIM_TRANSFERENCES_DEFAULT;
 
@@ -118,7 +118,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_downloads_spinner.setModel(new SpinnerNumberModel(max_dl, 1, Download.MAX_SIM_TRANSFERENCES, 1));
         ((JSpinner.DefaultEditor) max_downloads_spinner.getEditor()).getTextField().setEditable(false);
 
-        String max_up = DBTools.selectSettingValueFromDB("max_uploads");
+        String max_up = DBTools.selectSettingValue("max_uploads");
 
         int max_ul = Upload.SIM_TRANSFERENCES_DEFAULT;
 
@@ -131,7 +131,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         boolean limit_dl_speed = Download.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 
-        String limit_download_speed = DBTools.selectSettingValueFromDB("limit_download_speed");
+        String limit_download_speed = DBTools.selectSettingValue("limit_download_speed");
 
         if (limit_download_speed != null) {
             limit_dl_speed = limit_download_speed.equals("yes");
@@ -143,7 +143,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         max_down_speed_spinner.setEnabled(limit_dl_speed);
 
-        String max_dl_speed = DBTools.selectSettingValueFromDB("max_download_speed");
+        String max_dl_speed = DBTools.selectSettingValue("max_download_speed");
 
         int max_download_speed = Download.MAX_TRANSFERENCE_SPEED_DEFAULT;
 
@@ -157,7 +157,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         boolean limit_ul_speed = Upload.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 
-        String limit_upload_speed = DBTools.selectSettingValueFromDB("limit_upload_speed");
+        String limit_upload_speed = DBTools.selectSettingValue("limit_upload_speed");
 
         if (limit_upload_speed != null) {
             limit_ul_speed = limit_upload_speed.equals("yes");
@@ -169,7 +169,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         max_up_speed_spinner.setEnabled(limit_ul_speed);
 
-        String max_ul_speed = DBTools.selectSettingValueFromDB("max_upload_speed");
+        String max_ul_speed = DBTools.selectSettingValue("max_upload_speed");
 
         int max_upload_speed = Upload.MAX_TRANSFERENCE_SPEED_DEFAULT;
 
@@ -183,7 +183,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         boolean cbc_mac = Download.VERIFY_CBC_MAC_DEFAULT;
 
-        String verify_file = DBTools.selectSettingValueFromDB("verify_down_file");
+        String verify_file = DBTools.selectSettingValue("verify_down_file");
 
         if (verify_file != null) {
             cbc_mac = (verify_file.equals("yes"));
@@ -193,7 +193,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         boolean use_slots = Download.USE_SLOTS_DEFAULT;
 
-        String use_slots_val = DBTools.selectSettingValueFromDB("use_slots_down");
+        String use_slots_val = DBTools.selectSettingValue("use_slots_down");
 
         if (use_slots_val != null) {
             use_slots = use_slots_val.equals("yes");
@@ -207,7 +207,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         use_slots = Upload.USE_SLOTS_DEFAULT;
 
-        use_slots_val = DBTools.selectSettingValueFromDB("use_slots_up");
+        use_slots_val = DBTools.selectSettingValue("use_slots_up");
 
         if (use_slots_val != null) {
             use_slots = use_slots_val.equals("yes");
@@ -221,7 +221,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         boolean use_mega_account = Download.USE_MEGA_ACCOUNT_DOWN;
 
-        String use_mega_acc = DBTools.selectSettingValueFromDB("use_mega_account_down");
+        String use_mega_acc = DBTools.selectSettingValue("use_mega_account_down");
 
         String mega_account = null;
 
@@ -229,7 +229,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             use_mega_account = use_mega_acc.equals("yes");
 
-            mega_account = DBTools.selectSettingValueFromDB("mega_account_down");
+            mega_account = DBTools.selectSettingValue("mega_account_down");
         }
 
         if (use_mega_account) {
@@ -269,14 +269,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 add_mega_account_button.setEnabled(false);
 
                 add_elc_account_button.setEnabled(false);
-
-                mega_account_export_button.setEnabled(false);
-
-                mega_account_import_button.setEnabled(false);
-
-                elc_account_export_button.setEnabled(false);
-
-                elc_account_import_button.setEnabled(false);
 
                 unlock_accounts_button.setVisible(true);
 
@@ -354,13 +346,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 remove_elc_account_button.setEnabled(elc_model.getRowCount() > 0);
 
-                mega_account_export_button.setEnabled(mega_model.getRowCount() > 0);
-
-                mega_account_import_button.setEnabled(true);
-
-                elc_account_export_button.setEnabled(elc_model.getRowCount() > 0);
-
-                elc_account_import_button.setEnabled(true);
             }
 
         } else {
@@ -389,18 +374,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             remove_elc_account_button.setEnabled((elc_model.getRowCount() > 0));
 
-            mega_account_export_button.setEnabled(mega_model.getRowCount() > 0);
-
-            mega_account_import_button.setEnabled(true);
-
-            elc_account_export_button.setEnabled(elc_model.getRowCount() > 0);
-
-            elc_account_import_button.setEnabled(true);
         }
 
         boolean use_mc_reverse = false;
 
-        String megacrypter_reverse = DBTools.selectSettingValueFromDB("megacrypter_reverse");
+        String megacrypter_reverse = DBTools.selectSettingValue("megacrypter_reverse");
 
         String megacrypter_reverse_p = String.valueOf(MainPanel.DEFAULT_MEGA_PROXY_PORT);
 
@@ -410,7 +388,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             if (megacrypter_reverse_p != null) {
 
-                megacrypter_reverse_p = DBTools.selectSettingValueFromDB("megacrypter_reverse_port");
+                megacrypter_reverse_p = DBTools.selectSettingValue("megacrypter_reverse_port");
             }
         }
 
@@ -435,7 +413,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         boolean use_smart_proxy = false;
 
-        String smart_proxy = DBTools.selectSettingValueFromDB("smart_proxy");
+        String smart_proxy = DBTools.selectSettingValue("smart_proxy");
 
         String smart_proxy_url = "";
 
@@ -443,7 +421,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             use_smart_proxy = smart_proxy.equals("yes");
 
-            smart_proxy_url = DBTools.selectSettingValueFromDB("smart_proxy_url");
+            smart_proxy_url = DBTools.selectSettingValue("smart_proxy_url");
         }
 
         if (use_smart_proxy) {
@@ -467,7 +445,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         boolean use_proxy = false;
 
-        String use_proxy_val = DBTools.selectSettingValueFromDB("use_proxy");
+        String use_proxy_val = DBTools.selectSettingValue("use_proxy");
 
         if (use_proxy_val != null) {
             use_proxy = (use_proxy_val.equals("yes"));
@@ -475,13 +453,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         use_proxy_checkbox.setSelected(use_proxy);
 
-        proxy_host_textfield.setText(DBTools.selectSettingValueFromDB("proxy_host"));
+        proxy_host_textfield.setText(DBTools.selectSettingValue("proxy_host"));
 
-        proxy_port_textfield.setText(DBTools.selectSettingValueFromDB("proxy_port"));
+        proxy_port_textfield.setText(DBTools.selectSettingValue("proxy_port"));
 
-        proxy_user_textfield.setText(DBTools.selectSettingValueFromDB("proxy_user"));
+        proxy_user_textfield.setText(DBTools.selectSettingValue("proxy_user"));
 
-        proxy_pass_textfield.setText(DBTools.selectSettingValueFromDB("proxy_pass"));
+        proxy_pass_textfield.setText(DBTools.selectSettingValue("proxy_pass"));
 
         _remember_master_pass = true;
 
@@ -502,7 +480,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        ok_button = new javax.swing.JButton();
+        save_button = new javax.swing.JButton();
         cancel_button = new javax.swing.JButton();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         downloads_panel = new javax.swing.JPanel();
@@ -566,10 +544,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         remove_elc_account_button = new javax.swing.JButton();
         add_elc_account_button = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
-        mega_account_export_button = new javax.swing.JButton();
-        mega_account_import_button = new javax.swing.JButton();
-        elc_account_export_button = new javax.swing.JButton();
-        elc_account_import_button = new javax.swing.JButton();
         jPanel1 = new javax.swing.JPanel();
         proxy_panel = new javax.swing.JPanel();
         proxy_host_label = new javax.swing.JLabel();
@@ -583,17 +557,19 @@ public final class SettingsDialog extends javax.swing.JDialog {
         proxy_user_textfield = new javax.swing.JTextField();
         proxy_pass_label = new javax.swing.JLabel();
         proxy_pass_textfield = new javax.swing.JPasswordField();
+        import_settings_button = new javax.swing.JButton();
+        export_settings_button = new javax.swing.JButton();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Settings");
 
-        ok_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        ok_button.setText("OK");
-        ok_button.setDoubleBuffered(true);
-        ok_button.addActionListener(new java.awt.event.ActionListener() {
+        save_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        save_button.setText("SAVE");
+        save_button.setDoubleBuffered(true);
+        save_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                ok_buttonActionPerformed(evt);
+                save_buttonActionPerformed(evt);
             }
         });
 
@@ -858,7 +834,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 905, Short.MAX_VALUE)
+                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 986, Short.MAX_VALUE)
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
@@ -942,7 +918,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addGap(3, 3, 3)
                                         .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 150, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(limit_upload_speed_checkbox))
-                                .addGap(0, 280, Short.MAX_VALUE)))
+                                .addGap(0, 361, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         uploads_panelLayout.setVerticalGroup(
@@ -1096,38 +1072,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         jLabel1.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         jLabel1.setText("Note: you can use a (optional) alias for your email addresses -> bob@supermail.com#bob_mail");
 
-        mega_account_export_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        mega_account_export_button.setText("Export");
-        mega_account_export_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mega_account_export_buttonActionPerformed(evt);
-            }
-        });
-
-        mega_account_import_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        mega_account_import_button.setText("Import");
-        mega_account_import_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                mega_account_import_buttonActionPerformed(evt);
-            }
-        });
-
-        elc_account_export_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        elc_account_export_button.setText("Export");
-        elc_account_export_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                elc_account_export_buttonActionPerformed(evt);
-            }
-        });
-
-        elc_account_import_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        elc_account_import_button.setText("Import");
-        elc_account_import_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                elc_account_import_buttonActionPerformed(evt);
-            }
-        });
-
         javax.swing.GroupLayout accounts_panelLayout = new javax.swing.GroupLayout(accounts_panel);
         accounts_panel.setLayout(accounts_panelLayout);
         accounts_panelLayout.setHorizontalGroup(
@@ -1143,11 +1087,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(encrypt_pass_checkbox))
                     .addGroup(accounts_panelLayout.createSequentialGroup()
-                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 712, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(mega_account_import_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(mega_account_export_button))
+                        .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 793, Short.MAX_VALUE)
+                        .addGap(193, 193, 193))
                     .addGroup(accounts_panelLayout.createSequentialGroup()
                         .addComponent(remove_mega_account_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -1158,14 +1099,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(add_elc_account_button))
                     .addGroup(accounts_panelLayout.createSequentialGroup()
-                        .addComponent(mega_accounts_label)
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(accounts_panelLayout.createSequentialGroup()
-                        .addComponent(elc_accounts_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(elc_account_import_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(elc_account_export_button)))
+                        .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(mega_accounts_label)
+                            .addComponent(elc_accounts_label))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         accounts_panelLayout.setVerticalGroup(
@@ -1179,23 +1116,17 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(mega_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel1)
-                    .addComponent(mega_account_export_button)
-                    .addComponent(mega_account_import_button))
+                .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
                     .addComponent(add_mega_account_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(elc_accounts_label)
-                    .addComponent(elc_account_export_button)
-                    .addComponent(elc_account_import_button))
+                .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 127, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 133, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1270,11 +1201,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(proxy_user_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE)
+                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 257, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(proxy_pass_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 304, Short.MAX_VALUE))
+                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 422, Short.MAX_VALUE))
         );
         proxy_auth_panelLayout.setVerticalGroup(
             proxy_auth_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1330,13 +1261,34 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
+        import_settings_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
+        import_settings_button.setText("IMPORT SETTINGS");
+        import_settings_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                import_settings_buttonActionPerformed(evt);
+            }
+        });
+
+        export_settings_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
+        export_settings_button.setText("EXPORT SETTINGS");
+        export_settings_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                export_settings_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(proxy_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(proxy_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                        .addComponent(import_settings_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(export_settings_button)))
                 .addContainerGap())
         );
         jPanel1Layout.setVerticalGroup(
@@ -1344,7 +1296,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(297, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 248, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(export_settings_button)
+                    .addComponent(import_settings_button))
+                .addContainerGap())
         );
 
         jTabbedPane1.addTab("Advanced", jPanel1);
@@ -1363,7 +1319,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(ok_button, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(save_button, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addComponent(cancel_button, javax.swing.GroupLayout.PREFERRED_SIZE, 130, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
@@ -1379,7 +1335,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addComponent(cancel_button)
                         .addComponent(status))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(ok_button)
+                        .addComponent(save_button)
                         .addContainerGap())))
         );
 
@@ -1411,7 +1367,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         setVisible(false);
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
-    private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
+    private void save_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_save_buttonActionPerformed
 
         try {
 
@@ -1422,28 +1378,30 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 use_proxy_checkbox.setSelected(false);
             }
 
-            insertSettingValueInDB("default_down_dir", _download_path);
-            insertSettingValueInDB("default_slots_down", String.valueOf(default_slots_down_spinner.getValue()));
-            insertSettingValueInDB("default_slots_up", String.valueOf(default_slots_up_spinner.getValue()));
-            insertSettingValueInDB("use_slots_down", multi_slot_down_checkbox.isSelected() ? "yes" : "no");
-            insertSettingValueInDB("use_slots_up", multi_slot_up_checkbox.isSelected() ? "yes" : "no");
-            insertSettingValueInDB("max_downloads", String.valueOf(max_downloads_spinner.getValue()));
-            insertSettingValueInDB("max_uploads", String.valueOf(max_uploads_spinner.getValue()));
-            insertSettingValueInDB("verify_down_file", verify_file_down_checkbox.isSelected() ? "yes" : "no");
-            insertSettingValueInDB("limit_download_speed", limit_download_speed_checkbox.isSelected() ? "yes" : "no");
-            insertSettingValueInDB("max_download_speed", String.valueOf(max_down_speed_spinner.getValue()));
-            insertSettingValueInDB("limit_upload_speed", limit_upload_speed_checkbox.isSelected() ? "yes" : "no");
-            insertSettingValueInDB("max_upload_speed", String.valueOf(max_up_speed_spinner.getValue()));
-            insertSettingValueInDB("use_mega_account_down", use_mega_account_down_checkbox.isSelected() ? "yes" : "no");
-            insertSettingValueInDB("mega_account_down", (String) use_mega_account_down_combobox.getSelectedItem());
-            insertSettingValueInDB("megacrypter_reverse", megacrypter_reverse_checkbox.isSelected() ? "yes" : "no");
-            insertSettingValueInDB("megacrypter_reverse_port", String.valueOf(megacrypter_reverse_port_spinner.getValue()));
-            insertSettingValueInDB("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
-            insertSettingValueInDB("smart_proxy_url", (String) smart_proxy_url_text.getText());
+            HashMap<String, Object> settings = new HashMap<>();
+
+            settings.put("default_down_dir", _download_path);
+            settings.put("default_slots_down", String.valueOf(default_slots_down_spinner.getValue()));
+            settings.put("default_slots_up", String.valueOf(default_slots_up_spinner.getValue()));
+            settings.put("use_slots_down", multi_slot_down_checkbox.isSelected() ? "yes" : "no");
+            settings.put("use_slots_up", multi_slot_up_checkbox.isSelected() ? "yes" : "no");
+            settings.put("max_downloads", String.valueOf(max_downloads_spinner.getValue()));
+            settings.put("max_uploads", String.valueOf(max_uploads_spinner.getValue()));
+            settings.put("verify_down_file", verify_file_down_checkbox.isSelected() ? "yes" : "no");
+            settings.put("limit_download_speed", limit_download_speed_checkbox.isSelected() ? "yes" : "no");
+            settings.put("max_download_speed", String.valueOf(max_down_speed_spinner.getValue()));
+            settings.put("limit_upload_speed", limit_upload_speed_checkbox.isSelected() ? "yes" : "no");
+            settings.put("max_upload_speed", String.valueOf(max_up_speed_spinner.getValue()));
+            settings.put("use_mega_account_down", use_mega_account_down_checkbox.isSelected() ? "yes" : "no");
+            settings.put("mega_account_down", (String) use_mega_account_down_combobox.getSelectedItem());
+            settings.put("megacrypter_reverse", megacrypter_reverse_checkbox.isSelected() ? "yes" : "no");
+            settings.put("megacrypter_reverse_port", String.valueOf(megacrypter_reverse_port_spinner.getValue()));
+            settings.put("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
+            settings.put("smart_proxy_url", (String) smart_proxy_url_text.getText());
 
             boolean old_use_proxy = false;
 
-            String use_proxy_val = DBTools.selectSettingValueFromDB("use_proxy");
+            String use_proxy_val = DBTools.selectSettingValue("use_proxy");
 
             if (use_proxy_val != null) {
                 old_use_proxy = (use_proxy_val.equals("yes"));
@@ -1451,7 +1409,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             boolean use_proxy = (boolean) use_proxy_checkbox.isSelected();
 
-            String old_proxy_host = DBTools.selectSettingValueFromDB("proxy_host");
+            String old_proxy_host = DBTools.selectSettingValue("proxy_host");
 
             if (old_proxy_host == null) {
 
@@ -1460,7 +1418,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             String proxy_host = proxy_host_textfield.getText().trim();
 
-            String old_proxy_port = DBTools.selectSettingValueFromDB("proxy_port");
+            String old_proxy_port = DBTools.selectSettingValue("proxy_port");
 
             if (old_proxy_port == null) {
 
@@ -1469,7 +1427,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             String proxy_port = proxy_port_textfield.getText().trim();
 
-            String old_proxy_user = DBTools.selectSettingValueFromDB("proxy_user");
+            String old_proxy_user = DBTools.selectSettingValue("proxy_user");
 
             if (old_proxy_user == null) {
 
@@ -1478,7 +1436,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             String proxy_user = proxy_user_textfield.getText().trim();
 
-            String old_proxy_pass = DBTools.selectSettingValueFromDB("proxy_pass");
+            String old_proxy_pass = DBTools.selectSettingValue("proxy_pass");
 
             if (old_proxy_pass == null) {
 
@@ -1487,18 +1445,20 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             String proxy_pass = new String(proxy_pass_textfield.getPassword());
 
-            insertSettingValueInDB("use_proxy", use_proxy ? "yes" : "no");
-            insertSettingValueInDB("proxy_host", proxy_host);
-            insertSettingValueInDB("proxy_port", proxy_port);
-            insertSettingValueInDB("proxy_user", proxy_user);
-            insertSettingValueInDB("proxy_pass", proxy_pass);
+            settings.put("use_proxy", use_proxy ? "yes" : "no");
+            settings.put("proxy_host", proxy_host);
+            settings.put("proxy_port", proxy_port);
+            settings.put("proxy_user", proxy_user);
+            settings.put("proxy_pass", proxy_pass);
+
+            insertSettingsValues(settings);
 
             if (use_proxy != old_use_proxy || !proxy_host.equals(old_proxy_host) || !proxy_port.equals(old_proxy_port) || !proxy_user.equals(old_proxy_user) || !proxy_pass.equals(old_proxy_pass)) {
 
                 _main_panel.setRestart(true);
             }
 
-            ok_button.setEnabled(false);
+            save_button.setEnabled(false);
 
             cancel_button.setEnabled(false);
 
@@ -1583,33 +1543,25 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 status.setText("Checking your MEGA accounts, please wait...");
 
-                ok_button.setEnabled(false);
+                save_button.setEnabled(false);
 
                 cancel_button.setEnabled(false);
 
                 remove_mega_account_button.setEnabled(false);
-                
+
                 remove_elc_account_button.setEnabled(false);
 
                 add_mega_account_button.setEnabled(false);
-                
+
                 add_elc_account_button.setEnabled(false);
 
                 delete_all_accounts_button.setEnabled(false);
 
                 mega_accounts_table.setEnabled(false);
-                
+
                 elc_accounts_table.setEnabled(false);
 
                 encrypt_pass_checkbox.setEnabled(false);
-
-                mega_account_export_button.setEnabled(false);
-
-                mega_account_import_button.setEnabled(false);
-                
-                elc_account_export_button.setEnabled(false);
-
-                elc_account_import_button.setEnabled(false);
 
                 final Dialog tthis = this;
 
@@ -1722,43 +1674,37 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                             JOptionPane.showMessageDialog(tthis, "There were errors with some accounts. Please, check them:\n\n" + email_error_s, "Error", JOptionPane.ERROR_MESSAGE);
 
-                            ok_button.setEnabled(true);
+                            save_button.setEnabled(true);
 
                             cancel_button.setEnabled(true);
 
                             remove_mega_account_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
-                            
+
                             remove_elc_account_button.setEnabled(elc_accounts_table.getModel().getRowCount() > 0);
 
                             add_mega_account_button.setEnabled(true);
-                            
+
                             add_elc_account_button.setEnabled(true);
 
                             mega_accounts_table.setEnabled(true);
-                            
+
                             elc_accounts_table.setEnabled(true);
 
                             delete_all_accounts_button.setEnabled(true);
 
                             encrypt_pass_checkbox.setEnabled(true);
 
-                            mega_account_export_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
-                            
-                            elc_account_export_button.setEnabled(elc_accounts_table.getModel().getRowCount() > 0);
-
-                            mega_account_import_button.setEnabled(true);
-                            
-                            elc_account_import_button.setEnabled(true);
-
                         } else {
-                            tthis.setVisible(false);
+                            status.setText("");
+                            JOptionPane.showMessageDialog(tthis, "Settings successfully saved!", "Settings saved", JOptionPane.INFORMATION_MESSAGE);
+                            setVisible(false);
                         }
-
                     }
                 });
 
             } else {
 
+                JOptionPane.showMessageDialog(this, "Settings successfully saved!", "Settings saved", JOptionPane.INFORMATION_MESSAGE);
                 setVisible(false);
             }
 
@@ -1769,7 +1715,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         } catch (Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
-    }//GEN-LAST:event_ok_buttonActionPerformed
+    }//GEN-LAST:event_save_buttonActionPerformed
 
     private void multi_slot_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multi_slot_down_checkboxStateChanged
 
@@ -1810,8 +1756,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         if (model.getRowCount() == 0) {
 
             remove_mega_account_button.setEnabled(false);
-
-            mega_account_export_button.setEnabled(false);
         }
     }//GEN-LAST:event_remove_mega_account_buttonActionPerformed
 
@@ -1824,8 +1768,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         mega_accounts_table.clearSelection();
 
         remove_mega_account_button.setEnabled(true);
-
-        mega_account_export_button.setEnabled(true);
     }//GEN-LAST:event_add_mega_account_buttonActionPerformed
 
     private void limit_download_speed_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_limit_download_speed_checkboxStateChanged
@@ -1886,7 +1828,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         dialog.deleteNewPass();
 
-                        insertSettingValueInDB("master_pass_hash", _main_panel.getMaster_pass_hash());
+                        insertSettingValue("master_pass_hash", _main_panel.getMaster_pass_hash());
 
                         for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
 
@@ -2028,14 +1970,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     add_elc_account_button.setEnabled(true);
 
-                    mega_account_export_button.setEnabled(true);
-
-                    mega_account_import_button.setEnabled(true);
-
-                    elc_account_export_button.setEnabled(true);
-
-                    elc_account_import_button.setEnabled(true);
-
                     unlock_accounts_button.setVisible(false);
 
                     delete_all_accounts_button.setEnabled(true);
@@ -2137,14 +2071,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 mega_accounts_table.setModel(new_mega_model);
 
                 elc_accounts_table.setModel(new_elc_model);
-                
-                mega_account_export_button.setEnabled(false);
-
-                mega_account_import_button.setEnabled(true);
-
-                elc_account_export_button.setEnabled(false);
-
-                elc_account_import_button.setEnabled(true);
 
                 for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
 
@@ -2168,7 +2094,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 _main_panel.setMaster_pass(null);
 
-                insertSettingValueInDB("master_pass_hash", null);
+                insertSettingValue("master_pass_hash", null);
 
                 encrypt_pass_checkbox.setSelected(false);
 
@@ -2206,8 +2132,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         if (model.getRowCount() == 0) {
 
             remove_elc_account_button.setEnabled(false);
-
-            elc_account_export_button.setEnabled(false);
         }
     }//GEN-LAST:event_remove_elc_account_buttonActionPerformed
 
@@ -2220,8 +2144,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         elc_accounts_table.clearSelection();
 
         remove_elc_account_button.setEnabled(true);
-
-        elc_account_export_button.setEnabled(true);
 
     }//GEN-LAST:event_add_elc_account_buttonActionPerformed
 
@@ -2268,7 +2190,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 }
 
-                String use_mega_account_down = DBTools.selectSettingValueFromDB("mega_account_down");
+                String use_mega_account_down = DBTools.selectSettingValue("mega_account_down");
 
                 if (use_mega_account_down != null) {
 
@@ -2327,67 +2249,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_multi_slot_up_checkboxStateChanged
 
-    private void mega_account_export_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mega_account_export_buttonActionPerformed
-
-        Object[] options = {"No",
-            "Yes"};
-
-        int n = showOptionDialog(this,
-                "Passwords will be exported in plain text.\n\nDo you want to continue?",
-                "Warning!", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
-                null,
-                options,
-                options[0]);
-
-        if (n == 1) {
-
-            JFileChooser filechooser = new JFileChooser();
-            filechooser.setCurrentDirectory(new File(_download_path));
-            filechooser.setDialogTitle("Save as");
-
-            if (filechooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-                File file = filechooser.getSelectedFile();
-
-                try {
-
-                    if (file.exists()) {
-                        file.delete();
-                    }
-
-                    file.createNewFile();
-
-                    try (FileWriter out = new FileWriter(file)) {
-                        DefaultTableModel mega_model = (DefaultTableModel) mega_accounts_table.getModel();
-
-                        for (Object row : mega_model.getDataVector()) {
-
-                            String[] out_row = new String[((Vector) row).size()];
-
-                            int i = 0;
-
-                            for (Object o : (Vector) row) {
-
-                                out_row[i++] = MiscTools.Bin2BASE64(((String) o).getBytes());
-                            }
-
-                            out.write(String.join("|", out_row) + "\r\n");
-                        }
-                    }
-
-                } catch (IOException ex) {
-                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-
-    }//GEN-LAST:event_mega_account_export_buttonActionPerformed
-
-    private void mega_account_import_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mega_account_import_buttonActionPerformed
+    private void import_settings_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_settings_buttonActionPerformed
 
         JFileChooser filechooser = new JFileChooser();
         filechooser.setCurrentDirectory(new File(_download_path));
-        filechooser.setDialogTitle("Select accounts file");
+        filechooser.setDialogTitle("Select settings file");
 
         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
@@ -2395,117 +2261,78 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             try {
 
-                try (BufferedReader input = new BufferedReader(new FileReader(file))) {
+                try (FileInputStream fis = new FileInputStream(file); ObjectInputStream ois = new ObjectInputStream(fis)) {
 
-                    DefaultTableModel mega_model = (DefaultTableModel) mega_accounts_table.getModel();
+                    HashMap<String, Object> settings = (HashMap<String, Object>) ois.readObject();
 
-                    String s;
+                    insertSettingsValues((HashMap<String, Object>) settings.get("settings"));
 
-                    while ((s = input.readLine()) != null) {
+                    insertMegaAccounts((HashMap<String, Object>) settings.get("mega_accounts"));
 
-                        String[] parts = s.trim().split("\\|");
+                    insertELCAccounts((HashMap<String, Object>) settings.get("elc_accounts"));
 
-                        if (parts.length == 2) {
+                    _main_panel.loadUserSettings();
 
-                            mega_model.addRow(new String[]{new String(MiscTools.BASE642Bin(parts[0])), new String(MiscTools.BASE642Bin(parts[1]))});
-                        }
-                    }
+                    JOptionPane.showMessageDialog(this, "Settings successfully imported!", "Settings imported", JOptionPane.INFORMATION_MESSAGE);
+
+                    setVisible(false);
+
+                } catch (SQLException | ClassNotFoundException ex) {
+                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
             } catch (IOException ex) {
                 Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }//GEN-LAST:event_mega_account_import_buttonActionPerformed
 
-    private void elc_account_export_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_elc_account_export_buttonActionPerformed
-        Object[] options = {"No",
-            "Yes"};
+    }//GEN-LAST:event_import_settings_buttonActionPerformed
 
-        int n = showOptionDialog(this,
-                "Passwords will be exported in plain text.\n\nDo you want to continue?",
-                "Warning!", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
-                null,
-                options,
-                options[0]);
+    private void export_settings_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_export_settings_buttonActionPerformed
 
-        if (n == 1) {
+        JOptionPane.showMessageDialog(this, "Only SAVED settings will be exported!", "Warning", JOptionPane.WARNING_MESSAGE);
 
-            JFileChooser filechooser = new JFileChooser();
-            filechooser.setCurrentDirectory(new File(_download_path));
-            filechooser.setDialogTitle("Save as");
-
-            if (filechooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-                File file = filechooser.getSelectedFile();
-
-                try {
-
-                    if (file.exists()) {
-                        file.delete();
-                    }
-
-                    file.createNewFile();
-
-                    try (FileWriter out = new FileWriter(file)) {
-                        DefaultTableModel elc_model = (DefaultTableModel) elc_accounts_table.getModel();
-
-                        for (Object row : elc_model.getDataVector()) {
-
-                            String[] out_row = new String[((Vector) row).size()];
-
-                            int i = 0;
-
-                            for (Object o : (Vector) row) {
-
-                                out_row[i++] = MiscTools.Bin2BASE64(((String) o).getBytes());
-                            }
-
-                            out.write(String.join("|", out_row) + "\r\n");
-                        }
-                    }
-
-                } catch (IOException ex) {
-                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-
-    }//GEN-LAST:event_elc_account_export_buttonActionPerformed
-
-    private void elc_account_import_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_elc_account_import_buttonActionPerformed
         JFileChooser filechooser = new JFileChooser();
         filechooser.setCurrentDirectory(new File(_download_path));
-        filechooser.setDialogTitle("Select accounts file");
+        filechooser.setDialogTitle("Save as");
 
-        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (filechooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 
             File file = filechooser.getSelectedFile();
 
             try {
 
-                try (BufferedReader input = new BufferedReader(new FileReader(file))) {
+                if (file.exists()) {
+                    file.delete();
+                }
 
-                    DefaultTableModel elc_model = (DefaultTableModel) elc_accounts_table.getModel();
+                file.createNewFile();
 
-                    String s;
+                try (FileOutputStream fos = new FileOutputStream(file); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 
-                    while ((s = input.readLine()) != null) {
+                    HashMap<String, Object> settings = new HashMap<>();
 
-                        String[] parts = s.trim().split("\\|");
+                    settings.put("settings", selectSettingsValues());
 
-                        if (parts.length == 3) {
+                    settings.put("mega_accounts", selectMegaAccounts());
 
-                            elc_model.addRow(new String[]{new String(MiscTools.BASE642Bin(parts[0])), new String(MiscTools.BASE642Bin(parts[1])), new String(MiscTools.BASE642Bin(parts[2]))});
-                        }
-                    }
+                    settings.put("elc_accounts", selectELCAccounts());
+
+                    oos.writeObject(settings);
+
+                    JOptionPane.showMessageDialog(this, "Settings successfully exported!", "Settings exported", JOptionPane.INFORMATION_MESSAGE);
+
+                    setVisible(false);
+
+                } catch (SQLException ex) {
+                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
                 }
 
             } catch (IOException ex) {
                 Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-    }//GEN-LAST:event_elc_account_import_buttonActionPerformed
+    }//GEN-LAST:event_export_settings_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
@@ -2522,12 +2349,12 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel down_dir_label;
     private javax.swing.JPanel downloads_panel;
     private javax.swing.JScrollPane downloads_scroll_pane;
-    private javax.swing.JButton elc_account_export_button;
-    private javax.swing.JButton elc_account_import_button;
     private javax.swing.JLabel elc_accounts_label;
     private javax.swing.JScrollPane elc_accounts_scrollpane;
     private javax.swing.JTable elc_accounts_table;
     private javax.swing.JCheckBox encrypt_pass_checkbox;
+    private javax.swing.JButton export_settings_button;
+    private javax.swing.JButton import_settings_button;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel3;
@@ -2551,8 +2378,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JSpinner max_up_speed_spinner;
     private javax.swing.JLabel max_uploads_label;
     private javax.swing.JSpinner max_uploads_spinner;
-    private javax.swing.JButton mega_account_export_button;
-    private javax.swing.JButton mega_account_import_button;
     private javax.swing.JLabel mega_accounts_label;
     private javax.swing.JScrollPane mega_accounts_scrollpane;
     private javax.swing.JTable mega_accounts_table;
@@ -2562,7 +2387,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel megacrypter_reverse_warning_label;
     private javax.swing.JCheckBox multi_slot_down_checkbox;
     private javax.swing.JCheckBox multi_slot_up_checkbox;
-    private javax.swing.JButton ok_button;
     private javax.swing.JPanel proxy_auth_panel;
     private javax.swing.JLabel proxy_host_label;
     private javax.swing.JTextField proxy_host_textfield;
@@ -2579,6 +2403,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel rec_upload_slots_label;
     private javax.swing.JButton remove_elc_account_button;
     private javax.swing.JButton remove_mega_account_button;
+    private javax.swing.JButton save_button;
     private javax.swing.JCheckBox smart_proxy_checkbox;
     private javax.swing.JLabel smart_proxy_url_label;
     private javax.swing.JTextField smart_proxy_url_text;
