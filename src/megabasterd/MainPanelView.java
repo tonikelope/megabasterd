@@ -923,7 +923,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                         }
                                     }
 
-                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, getMain_panel().isUse_slots_up(), getMain_panel().getDefault_slots_up(), false);
+                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, getMain_panel().isUse_slots_up(), getMain_panel().getDefault_slots_up());
 
                                     getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
 

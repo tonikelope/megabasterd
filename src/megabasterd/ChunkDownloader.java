@@ -110,18 +110,18 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             while (!_exit && !_download.isStopped()) {
 
-                if (_download.getMain_panel().getProxy_manager().isUse_smart_proxy() && !_download.getMain_panel().isUse_smart_proxy()) {
+                if (_download.getMain_panel().isUse_smart_proxy() && _download.getMain_panel().getProxy_manager().isEnabled() && !_download.getMain_panel().isUse_smart_proxy()) {
 
                     _download.getMain_panel().getProxy_manager().setUse_smart_proxy(false);
                 }
 
                 if (httpclient == null || error || _download.getMain_panel().isUse_smart_proxy()) {
 
-                    if (error509 && !_download.getMain_panel().getProxy_manager().isUse_smart_proxy()) {
+                    if (error509 && _download.getMain_panel().isUse_smart_proxy() && !_download.getMain_panel().getProxy_manager().isEnabled()) {
                         _download.getMain_panel().getProxy_manager().setUse_smart_proxy(true);
                     }
 
-                    if (_download.getMain_panel().getProxy_manager().isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    if (_download.getMain_panel().isUse_smart_proxy() && _download.getMain_panel().getProxy_manager().isEnabled() && !MainPanel.isUse_proxy()) {
 
                         if (error && current_proxy != null) {
 

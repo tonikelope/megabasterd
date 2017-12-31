@@ -82,7 +82,7 @@ public final class DBTools {
 
     public static synchronized void insertUpload(String filename, String email, String parent_node, String ul_key, String root_node, String share_key, String folder_link) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link, bytes_uploaded) VALUES (?,?,?,?,?,?,?,?)")) {
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link, bytes_uploaded, temp_mac) VALUES (?,?,?,?,?,?,?,?,?)")) {
 
             ps.setString(1, filename);
             ps.setString(2, email);
@@ -131,12 +131,11 @@ public final class DBTools {
 
             ResultSet res = ps.executeQuery();
 
-            HashMap<String, Object> map = new HashMap<>();
-
             if (res.next()) {
-                map.put("bytes_uploaded", res.getLong(1));
-                map.put("temp_mac", res.getString(2));
-                return map;
+                HashMap<String, Object> upload = new HashMap<>();
+                upload.put("bytes_uploaded", res.getLong("bytes_uploaded"));
+                upload.put("temp_mac", res.getString("temp_mac"));
+                return upload;
             }
         }
 
@@ -288,6 +287,8 @@ public final class DBTools {
                 upload.put("root_node", res.getString("root_node"));
                 upload.put("share_key", res.getString("share_key"));
                 upload.put("folder_link", res.getString("folder_link"));
+                upload.put("bytes_uploaded", res.getLong("bytes_uploaded"));
+                upload.put("temp_mac", res.getString("temp_mac"));
                 uploads.add(upload);
             }
         }
@@ -328,13 +329,13 @@ public final class DBTools {
 
                 for (Map.Entry<String, Object> entry : accounts.entrySet()) {
 
-                    ps.setString(1, (String) entry.getKey());
+                    ps.setString(1, entry.getKey());
 
-                    ps.setString(2, (String) ((HashMap<String, Object>) entry.getValue()).get("password"));
+                    ps.setString(2, (String) ((Map<String, Object>) entry.getValue()).get("password"));
 
-                    ps.setString(3, (String) ((HashMap<String, Object>) entry.getValue()).get("password_aes"));
+                    ps.setString(3, (String) ((Map<String, Object>) entry.getValue()).get("password_aes"));
 
-                    ps.setString(4, (String) ((HashMap<String, Object>) entry.getValue()).get("user_hash"));
+                    ps.setString(4, (String) ((Map<String, Object>) entry.getValue()).get("user_hash"));
 
                     ps.addBatch();
                 }
@@ -352,11 +353,11 @@ public final class DBTools {
 
                 for (Map.Entry<String, Object> entry : accounts.entrySet()) {
 
-                    ps.setString(1, (String) entry.getKey());
+                    ps.setString(1, entry.getKey());
 
-                    ps.setString(2, (String) ((HashMap<String, Object>) entry.getValue()).get("user"));
+                    ps.setString(2, (String) ((Map<String, Object>) entry.getValue()).get("user"));
 
-                    ps.setString(3, (String) ((HashMap<String, Object>) entry.getValue()).get("apikey"));
+                    ps.setString(3, (String) ((Map<String, Object>) entry.getValue()).get("apikey"));
 
                     ps.addBatch();
                 }

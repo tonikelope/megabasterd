@@ -1393,11 +1393,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
             settings.put("limit_upload_speed", limit_upload_speed_checkbox.isSelected() ? "yes" : "no");
             settings.put("max_upload_speed", String.valueOf(max_up_speed_spinner.getValue()));
             settings.put("use_mega_account_down", use_mega_account_down_checkbox.isSelected() ? "yes" : "no");
-            settings.put("mega_account_down", (String) use_mega_account_down_combobox.getSelectedItem());
+            settings.put("mega_account_down", use_mega_account_down_combobox.getSelectedItem());
             settings.put("megacrypter_reverse", megacrypter_reverse_checkbox.isSelected() ? "yes" : "no");
             settings.put("megacrypter_reverse_port", String.valueOf(megacrypter_reverse_port_spinner.getValue()));
             settings.put("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
-            settings.put("smart_proxy_url", (String) smart_proxy_url_text.getText());
+            settings.put("smart_proxy_url", smart_proxy_url_text.getText());
 
             boolean old_use_proxy = false;
 
@@ -1407,7 +1407,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 old_use_proxy = (use_proxy_val.equals("yes"));
             }
 
-            boolean use_proxy = (boolean) use_proxy_checkbox.isSelected();
+            boolean use_proxy = use_proxy_checkbox.isSelected();
 
             String old_proxy_host = DBTools.selectSettingValue("proxy_host");
 

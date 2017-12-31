@@ -29,7 +29,7 @@ public class SmartMegaProxyManager implements Runnable {
     private final ConcurrentLinkedQueue<String> _proxy_list;
     private final MainPanel _main_panel;
     private volatile boolean _exit;
-    private volatile boolean _use_smart_proxy;
+    private volatile boolean _enabled;
     private final Object _refresh_lock;
 
     public SmartMegaProxyManager(MainPanel main_panel, String proxy_list_url) {
@@ -37,26 +37,26 @@ public class SmartMegaProxyManager implements Runnable {
         _proxy_list_url = proxy_list_url;
         _proxy_list = new ConcurrentLinkedQueue<>();
         _exit = false;
-        _use_smart_proxy = false;
+        _enabled = false;
         _refresh_lock = new Object();
     }
 
-    public boolean isUse_smart_proxy() {
-        return _use_smart_proxy;
+    public boolean isEnabled() {
+        return _enabled;
     }
 
     public void setUse_smart_proxy(boolean use_smart_proxy) {
 
         if (!_main_panel.isLimit_download_speed()) {
 
-            if (!_use_smart_proxy && use_smart_proxy) {
+            if (!_enabled && use_smart_proxy) {
                 _main_panel.getView().getGlobal_speed_down_label().setForeground(Color.BLACK);
-            } else if (_use_smart_proxy && !use_smart_proxy) {
+            } else if (_enabled && !use_smart_proxy) {
                 _main_panel.getView().getGlobal_speed_down_label().setForeground(new Color(0, 128, 255));
             }
         }
 
-        _use_smart_proxy = use_smart_proxy;
+        _enabled = use_smart_proxy;
     }
 
     public void setExit(boolean exit) {
@@ -167,9 +167,9 @@ public class SmartMegaProxyManager implements Runnable {
 
                 Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
 
-                if (_use_smart_proxy) {
+                if (_enabled) {
 
-                    _use_smart_proxy = false;
+                    _enabled = false;
                 }
 
                 _main_panel.getView().getSmart_proxy_status().setText("SmartProxy: " + _proxy_list.size() + " ");

@@ -63,18 +63,18 @@ public class StreamChunkDownloader implements Runnable {
                     _chunkwriter.secureWait();
                 }
 
-                if (_chunkwriter.getServer().getMain_panel().getProxy_manager().isUse_smart_proxy() && !_chunkwriter.getServer().getMain_panel().isUse_smart_proxy()) {
+                if (_chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled() && !_chunkwriter.getServer().getMain_panel().isUse_smart_proxy()) {
 
                     _chunkwriter.getServer().getMain_panel().getProxy_manager().setUse_smart_proxy(false);
                 }
 
-                if (httpclient == null || error || _chunkwriter.getServer().getMain_panel().getProxy_manager().isUse_smart_proxy()) {
+                if (httpclient == null || error || _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled()) {
 
-                    if (error509 && !_chunkwriter.getServer().getMain_panel().getProxy_manager().isUse_smart_proxy()) {
+                    if (error509 && _chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && !_chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled()) {
                         _chunkwriter.getServer().getMain_panel().getProxy_manager().setUse_smart_proxy(true);
                     }
 
-                    if (_chunkwriter.getServer().getMain_panel().getProxy_manager().isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    if (_chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled() && !MainPanel.isUse_proxy()) {
 
                         if (error && current_proxy != null) {
 

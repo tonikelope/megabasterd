@@ -2,6 +2,7 @@ package megabasterd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -93,7 +94,21 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
         try {
 
             Chunk chunk;
-            int[] file_iv = bin2i32a(_upload.getByte_file_iv()), int_block, file_mac = _upload.getSaved_file_mac(), mac_iv = CryptTools.AES_ZERO_IV_I32A;
+
+            HashMap upload_progress = DBTools.selectUploadProgress(_upload.getFile_name(), _upload.getMa().getEmail());
+
+            int[] file_mac = new int[]{0, 0, 0, 0};
+
+            if (upload_progress != null) {
+
+                if ((String) upload_progress.get("temp_mac") != null) {
+
+                    file_mac = bin2i32a(BASE642Bin((String) upload_progress.get("temp_mac")));
+                }
+            }
+
+            int[] file_iv = bin2i32a(_upload.getByte_file_iv()), int_block, mac_iv = CryptTools.AES_ZERO_IV_I32A;
+
             int reads;
 
             String temp_file_data;

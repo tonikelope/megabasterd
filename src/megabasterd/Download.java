@@ -128,6 +128,46 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _progress_meter = new ProgressMeter(this);
     }
 
+    public Download(Download download) {
+
+        _paused_workers = 0;
+        _ma = download.getMa();
+        _last_chunk_id_dispatched = 0L;
+        _status_error = false;
+        _fatal_error = null;
+        _retrying_request = false;
+        _checking_cbc = false;
+        _finishing_download = false;
+        _pause = false;
+        _exit = false;
+        _last_download_url = null;
+        _provision_ok = true;
+        _progress = 0L;
+        _notified = false;
+        _main_panel = download.getMain_panel();
+        _url = download.getUrl();
+        _download_path = download.getDownload_path();
+        _file_name = download.getFile_name();
+        _file_key = download.getFile_key();
+        _file_size = download.getFile_size();
+        _file_pass = download.getFile_pass();
+        _file_noexpire = download.getFile_noexpire();
+        _use_slots = download.isUse_slots();
+        _slots = download.getSlots();
+        _restart = true;
+        _secure_notify_lock = new Object();
+        _workers_lock = new Object();
+        _chunkid_lock = new Object();
+        _dl_url_lock = new Object();
+        _chunkworkers = new ArrayList<>();
+        _partialProgressQueue = new ConcurrentLinkedQueue<>();
+        _rejectedChunkIds = new ConcurrentLinkedQueue<>();
+        _thread_pool = newCachedThreadPool();
+        _view = new DownloadView(this);
+        _progress_meter = new ProgressMeter(this);
+
+    }
+
     public Object getWorkers_lock() {
         return _workers_lock;
     }
@@ -312,7 +352,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     @Override
     public void restart() {
 
-        Download new_download = new Download(getMain_panel(), getMa(), getUrl(), getDownload_path(), getFile_name(), getFile_key(), getFile_size(), getFile_pass(), getFile_noexpire(), getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
+        Download new_download = new Download(this);
 
         getMain_panel().getDownload_manager().getTransference_remove_queue().add(this);
 

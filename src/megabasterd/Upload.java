@@ -59,7 +59,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private boolean _provision_ok;
     private boolean _status_error;
     private String _file_link;
-    private int[] _saved_file_mac;
     private final MegaAPI _ma;
     private final String _file_name;
     private final String _parent_node;
@@ -71,9 +70,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final boolean _use_slots;
     private final boolean _restart;
 
-    public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean use_slots, int slots, boolean restart) {
+    public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean use_slots, int slots) {
 
-        _saved_file_mac = new int[]{0, 0, 0, 0};
         _notified = false;
         _provision_ok = true;
         _status_error = false;
@@ -88,7 +86,40 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _folder_link = folder_link;
         _use_slots = use_slots;
         _slots = slots;
-        _restart = restart;
+        _restart = false;
+        _progress = 0L;
+        _last_chunk_id_dispatched = 0L;
+        _completion_handle = null;
+        _secure_notify_lock = new Object();
+        _workers_lock = new Object();
+        _chunkid_lock = new Object();
+        _chunkworkers = new ArrayList<>();
+        _partialProgressQueue = new ConcurrentLinkedQueue<>();
+        _rejectedChunkIds = new ConcurrentLinkedQueue<>();
+        _thread_pool = Executors.newCachedThreadPool();
+        _view = new UploadView(this);
+        _progress_meter = new ProgressMeter(this);
+    }
+
+    public Upload(Upload upload) {
+
+        _notified = false;
+        _provision_ok = true;
+        _status_error = false;
+        _restart = true;
+        _main_panel = upload.getMain_panel();
+        _ma = upload.getMa();
+        _file_name = upload.getFile_name();
+        _parent_node = upload.getParent_node();
+        _ul_key = upload.getUl_key();
+        _ul_url = null;
+        _root_node = upload.getRoot_node();
+        _share_key = upload.getShare_key();
+        _folder_link = upload.getFolder_link();
+        _use_slots = upload.isUse_slots();
+        _slots = upload.getSlots();
+        _progress = 0L;
+        _last_chunk_id_dispatched = 0L;
         _completion_handle = null;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
@@ -209,10 +240,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public String getFile_link() {
         return _file_link;
-    }
-
-    public int[] getSaved_file_mac() {
-        return _saved_file_mac;
     }
 
     public MegaAPI getMa() {
@@ -343,21 +370,16 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             try {
                 _file_size = the_file.length();
 
-                if (_ul_key != null) {
+                HashMap upload_progress = DBTools.selectUploadProgress(getFile_name(), getMa().getEmail());
 
-                    HashMap upload_progress = DBTools.selectUploadProgress(getFile_name(), getMa().getEmail());
-
-                    _last_chunk_id_dispatched = calculateLastUploadedChunk((long) upload_progress.get("bytes_uploaded"));
-
-                    _saved_file_mac = bin2i32a(((String) upload_progress.get("temp_mac")).getBytes());
-
-                }
-
-                if (_ul_key == null || _restart) {
+                if (upload_progress == null) {
 
                     try {
 
-                        _ul_key = _ma.genUploadKey();
+                        if (_ul_key == null) {
+
+                            _ul_key = _ma.genUploadKey();
+                        }
 
                         DBTools.insertUpload(_file_name, _ma.getFull_email(), _parent_node, Bin2BASE64(i32a2bin(_ul_key)), _root_node, Bin2BASE64(_share_key), _folder_link);
 
@@ -369,6 +391,10 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     }
 
                 } else {
+
+                    _last_chunk_id_dispatched = calculateLastUploadedChunk((long) upload_progress.get("bytes_uploaded"));
+
+                    _progress = (long) upload_progress.get("bytes_uploaded");
 
                     _provision_ok = true;
                 }
@@ -483,7 +509,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     @Override
     public void restart() {
 
-        Upload new_upload = new Upload(getMain_panel(), getMa(), getFile_name(), getParent_node(), getUl_key(), getUl_url(), getRoot_node(), getShare_key(), getFolder_link(), getMain_panel().isUse_slots_up(), getMain_panel().getDefault_slots_up(), true);
+        Upload new_upload = new Upload(this);
 
         getMain_panel().getUpload_manager().getTransference_remove_queue().add(this);
 
