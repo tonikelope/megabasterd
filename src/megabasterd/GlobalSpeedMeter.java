@@ -9,6 +9,10 @@ import java.util.logging.Logger;
 import javax.swing.JLabel;
 import static megabasterd.MiscTools.*;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class GlobalSpeedMeter implements Runnable {
 
     public static final int SLEEP = 3000;

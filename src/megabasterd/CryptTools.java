@@ -39,6 +39,10 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.codehaus.jackson.map.ObjectMapper;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class CryptTools {
 
     public static final int[] AES_ZERO_IV_I32A = {0, 0, 0, 0};

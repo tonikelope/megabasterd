@@ -34,6 +34,10 @@ import static megabasterd.DBTools.*;
 import static megabasterd.MainPanel.*;
 import static megabasterd.MiscTools.*;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class SettingsDialog extends javax.swing.JDialog {
 
     private String _download_path;

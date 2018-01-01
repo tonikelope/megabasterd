@@ -4,6 +4,10 @@ import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
 
     private final Transference _transference;

@@ -78,6 +78,10 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.RequestContent;
 import org.apache.http.protocol.RequestTargetHost;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class MiscTools {
 
     public static final int EXP_BACKOFF_BASE = 2;

@@ -34,6 +34,7 @@ import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
+import javax.swing.UIManager;
 import static megabasterd.DBTools.*;
 import static megabasterd.MiscTools.*;
 import static megabasterd.Transference.*;
@@ -46,7 +47,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.64";
+    public static final String VERSION = "2.65";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -65,6 +66,9 @@ public final class MainPanel {
     public static void main(String args[]) {
 
         setNimbusLookAndFeel();
+
+        UIManager.put("OptionPane.messageFont", DEFAULT_FONT.deriveFont(15f * ZOOM_FACTOR));
+        UIManager.put("OptionPane.buttonFont", DEFAULT_FONT.deriveFont(13f * ZOOM_FACTOR));
 
         if (args.length > 0) {
 
@@ -193,8 +197,8 @@ public final class MainPanel {
         });
 
         if (_megacrypter_reverse) {
-            _mega_proxy_server = new MegaProxyServer(UUID.randomUUID().toString(), _megacrypter_reverse_port);
-            _mega_proxy_server.start();
+            _mega_proxy_server = new MegaProxyServer(this, UUID.randomUUID().toString(), _megacrypter_reverse_port);
+            THREAD_POOL.execute(_mega_proxy_server);
         } else {
             _mega_proxy_server = null;
         }

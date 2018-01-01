@@ -12,6 +12,10 @@ import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 import static megabasterd.CryptTools.*;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable {
 
     private long _last_chunk_id_written;

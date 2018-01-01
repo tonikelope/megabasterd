@@ -11,6 +11,10 @@ import javax.swing.Action;
 import javax.swing.JPopupMenu;
 import javax.swing.text.JTextComponent;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class ContextMenuMouseListener extends MouseAdapter {
 
     private final JPopupMenu _popup;

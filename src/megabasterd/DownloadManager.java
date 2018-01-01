@@ -9,6 +9,10 @@ import java.util.logging.Logger;
 import static megabasterd.DBTools.*;
 import static megabasterd.MainPanel.*;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class DownloadManager extends TransferenceManager {
 
     public DownloadManager(MainPanel main_panel) {

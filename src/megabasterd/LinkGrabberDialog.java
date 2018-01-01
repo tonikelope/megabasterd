@@ -17,6 +17,10 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import static megabasterd.MainPanel.*;
 import static megabasterd.MiscTools.*;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
 
     private boolean _download;

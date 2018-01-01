@@ -10,17 +10,22 @@ import java.util.regex.Pattern;
 import static megabasterd.MiscTools.*;
 
 /**
+ *
+ * @author tonikelope
+ */
+/**
  * Thanks to -> https://stackoverflow.com/users/6477541/sarvesh-agarwal
  */
-public class MegaProxyServer extends Thread {
+public class MegaProxyServer implements Runnable {
 
     private final String _password;
     private final int _port;
     private ServerSocket _serverSocket;
+    private final MainPanel _main_panel;
 
-    public MegaProxyServer(String password, int port) {
+    public MegaProxyServer(MainPanel main_panel, String password, int port) {
 
-        super("Server Thread");
+        _main_panel = main_panel;
         _password = password;
         _port = port;
 
@@ -42,6 +47,8 @@ public class MegaProxyServer extends Thread {
     @Override
     public void run() {
 
+        _main_panel.getView().updateMCReverseStatus("MCReverse running on port: " + _port);
+
         try {
 
             _serverSocket = new ServerSocket(_port);
@@ -54,7 +61,6 @@ public class MegaProxyServer extends Thread {
                     (new Handler(socket, _password)).start();
                 }
             } catch (IOException e) {
-                // TODO: implement catch
 
             }
 
@@ -70,6 +76,8 @@ public class MegaProxyServer extends Thread {
                 }
             }
         }
+
+        _main_panel.getView().updateMCReverseStatus("");
     }
 
     public static class Handler extends Thread {
@@ -105,7 +113,6 @@ public class MegaProxyServer extends Thread {
                     }
                 }
             } catch (IOException e) {
-                // TODO: implement catch
 
             }
         }
@@ -156,8 +163,8 @@ public class MegaProxyServer extends Thread {
                         try {
                             forwardSocket = new Socket(matcher.group(1), Integer.parseInt(matcher.group(2)));
 
-                        } catch (IOException | NumberFormatException e) { // TODO: implement catch
-                            // TODO: implement catch
+                        } catch (IOException | NumberFormatException e) {
+
                             outputStreamWriter.write("HTTP/" + matcher.group(3) + " 502 Bad Gateway\r\n");
                             outputStreamWriter.write("Proxy-agent: MegaBasterd/0.1\r\n");
                             outputStreamWriter.write("\r\n");
@@ -200,7 +207,6 @@ public class MegaProxyServer extends Thread {
                                 try {
                                     remoteToClient.join();
                                 } catch (InterruptedException e) {
-                                    // TODO: implement catch
 
                                 }
                             }
@@ -225,14 +231,12 @@ public class MegaProxyServer extends Thread {
                 }
 
             } catch (IOException e) {
-                // TODO: implement catch
 
             } finally {
 
                 try {
                     _clientSocket.close();
                 } catch (IOException e) {
-                    // TODO: implement catch
 
                 }
             }

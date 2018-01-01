@@ -24,6 +24,10 @@ import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.codehaus.jackson.map.ObjectMapper;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class MegaAPI {
 
     public static final String API_URL = "https://g.api.mega.co.nz";

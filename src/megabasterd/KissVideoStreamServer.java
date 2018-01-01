@@ -4,7 +4,6 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import java.awt.Color;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -30,6 +29,10 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNotifiable {
 
     public static final int THREAD_START = 0x01;
@@ -98,15 +101,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
     public void start(int port, String context) throws IOException {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-                _main_panel.getView().getKiss_server_status().setForeground(new Color(0, 128, 0));
-
-                _main_panel.getView().getKiss_server_status().setText("Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)");
-            }
-        });
+        _main_panel.getView().updateKissStreamServerStatus("Stream server running on port: " + STREAMER_PORT);
 
         HttpServer httpserver = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
 
@@ -130,24 +125,18 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
     private void _updateStatusView() {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-                String status;
+        String status;
 
-                if (getWorking_threads().size() > 0) {
+        if (getWorking_threads().size() > 0) {
 
-                    status = "Stream server running on localhost:" + STREAMER_PORT + "  Connections: " + getWorking_threads().size();
+            status = "Stream server running on port: " + STREAMER_PORT + " (" + getWorking_threads().size() + ")";
 
-                } else {
+        } else {
 
-                    status = "Stream server running on localhost:" + STREAMER_PORT + " (Waiting for request...)";
-                }
+            status = "Stream server running on port: " + STREAMER_PORT;
+        }
 
-                _main_panel.getView().getKiss_server_status().setText(status);
-            }
-        });
+        _main_panel.getView().updateKissStreamServerStatus(status);
 
     }
 

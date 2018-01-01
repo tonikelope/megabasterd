@@ -17,6 +17,10 @@ import javax.swing.SpinnerNumberModel;
 import static megabasterd.MainPanel.*;
 import static megabasterd.MiscTools.*;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class DownloadView extends javax.swing.JPanel implements TransferenceView {
 
     private final Download _download;

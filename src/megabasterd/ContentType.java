@@ -2,6 +2,10 @@ package megabasterd;
 
 import java.util.HashMap;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class ContentType {
 
     private final HashMap<String, String> _content_type;

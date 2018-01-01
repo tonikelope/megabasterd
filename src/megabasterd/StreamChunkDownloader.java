@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package megabasterd;
 
 import java.io.IOException;
@@ -63,15 +58,10 @@ public class StreamChunkDownloader implements Runnable {
                     _chunkwriter.secureWait();
                 }
 
-                if (_chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled() && !_chunkwriter.getServer().getMain_panel().isUse_smart_proxy()) {
-
-                    _chunkwriter.getServer().getMain_panel().getProxy_manager().setUse_smart_proxy(false);
-                }
-
                 if (httpclient == null || error || _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled()) {
 
                     if (error509 && _chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && !_chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled()) {
-                        _chunkwriter.getServer().getMain_panel().getProxy_manager().setUse_smart_proxy(true);
+                        _chunkwriter.getServer().getMain_panel().getProxy_manager().setEnabled(true);
                     }
 
                     if (_chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled() && !MainPanel.isUse_proxy()) {
@@ -100,7 +90,7 @@ public class StreamChunkDownloader implements Runnable {
                         } else {
 
                             httpclient = MiscTools.getApacheKissHttpClient();
-                            _chunkwriter.getServer().getMain_panel().getProxy_manager().setUse_smart_proxy(false);
+                            _chunkwriter.getServer().getMain_panel().getProxy_manager().setEnabled(false);
                         }
 
                     } else if (httpclient == null) {

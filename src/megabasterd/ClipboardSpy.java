@@ -10,6 +10,10 @@ import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThreadNotifiable, ClipboardChangeObservable {
 
     private static final int SLEEP = 250;

@@ -110,15 +110,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             while (!_exit && !_download.isStopped()) {
 
-                if (_download.getMain_panel().isUse_smart_proxy() && _download.getMain_panel().getProxy_manager().isEnabled() && !_download.getMain_panel().isUse_smart_proxy()) {
-
-                    _download.getMain_panel().getProxy_manager().setUse_smart_proxy(false);
-                }
-
                 if (httpclient == null || error || _download.getMain_panel().isUse_smart_proxy()) {
 
                     if (error509 && _download.getMain_panel().isUse_smart_proxy() && !_download.getMain_panel().getProxy_manager().isEnabled()) {
-                        _download.getMain_panel().getProxy_manager().setUse_smart_proxy(true);
+                        _download.getMain_panel().getProxy_manager().setEnabled(true);
                     }
 
                     if (_download.getMain_panel().isUse_smart_proxy() && _download.getMain_panel().getProxy_manager().isEnabled() && !MainPanel.isUse_proxy()) {
@@ -147,7 +142,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         } else {
 
                             httpclient = MiscTools.getApacheKissHttpClient();
-                            _download.getMain_panel().getProxy_manager().setUse_smart_proxy(false);
+                            _download.getMain_panel().getProxy_manager().setEnabled(false);
                         }
 
                     } else if (httpclient == null) {

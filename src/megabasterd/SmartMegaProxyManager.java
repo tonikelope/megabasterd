@@ -45,18 +45,18 @@ public class SmartMegaProxyManager implements Runnable {
         return _enabled;
     }
 
-    public void setUse_smart_proxy(boolean use_smart_proxy) {
+    public void setEnabled(boolean enabled) {
 
         if (!_main_panel.isLimit_download_speed()) {
 
-            if (!_enabled && use_smart_proxy) {
+            if (!_enabled && enabled) {
                 _main_panel.getView().getGlobal_speed_down_label().setForeground(Color.BLACK);
-            } else if (_enabled && !use_smart_proxy) {
+            } else if (_enabled && !enabled) {
                 _main_panel.getView().getGlobal_speed_down_label().setForeground(new Color(0, 128, 255));
             }
         }
 
-        _enabled = use_smart_proxy;
+        _enabled = enabled;
     }
 
     public void setExit(boolean exit) {
@@ -104,7 +104,7 @@ public class SmartMegaProxyManager implements Runnable {
                 _proxy_list.remove(proxy);
             }
 
-            _main_panel.getView().getSmart_proxy_status().setText("SmartProxy: " + _proxy_list.size() + " ");
+            _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
 
             if (_proxy_list.isEmpty()) {
 
@@ -172,7 +172,7 @@ public class SmartMegaProxyManager implements Runnable {
                     _enabled = false;
                 }
 
-                _main_panel.getView().getSmart_proxy_status().setText("SmartProxy: " + _proxy_list.size() + " ");
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
             }
 
         } catch (MalformedURLException ex) {
@@ -187,7 +187,7 @@ public class SmartMegaProxyManager implements Runnable {
 
         Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: hello!", new Object[]{Thread.currentThread().getName()});
 
-        _main_panel.getView().getSmart_proxy_status().setVisible(true);
+        _main_panel.getView().updateSmartProxyStatus("");
 
         while (!_exit) {
 
@@ -203,9 +203,7 @@ public class SmartMegaProxyManager implements Runnable {
             }
         }
 
-        _main_panel.getView().getSmart_proxy_status().setText("");
-
-        _main_panel.getView().getSmart_proxy_status().setVisible(false);
+        _main_panel.getView().updateSmartProxyStatus("");
 
         Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: bye bye", new Object[]{Thread.currentThread().getName()});
 

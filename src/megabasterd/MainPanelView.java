@@ -31,6 +31,10 @@ import static megabasterd.DBTools.*;
 import static megabasterd.MainPanel.*;
 import static megabasterd.MiscTools.*;
 
+/**
+ *
+ * @author tonikelope
+ */
 public final class MainPanelView extends javax.swing.JFrame {
 
     private final MainPanel _main_panel;
@@ -115,6 +119,49 @@ public final class MainPanelView extends javax.swing.JFrame {
         return smart_proxy_status;
     }
 
+    public JLabel getMc_reverse_status() {
+        return mc_reverse_status;
+    }
+
+    public void updateKissStreamServerStatus(final String status) {
+
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+
+                getKiss_server_status().setText(status);
+            }
+        });
+
+    }
+
+    public void updateSmartProxyStatus(final String status) {
+
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+
+                getSmart_proxy_status().setText(status);
+            }
+        });
+
+    }
+
+    public void updateMCReverseStatus(final String status) {
+
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+
+                getMc_reverse_status().setText(status);
+            }
+        });
+
+    }
+
     public MainPanelView(MainPanel main_panel) {
 
         _main_panel = main_panel;
@@ -152,6 +199,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         logo_label = new javax.swing.JLabel();
         kiss_server_status = new javax.swing.JLabel();
+        mc_reverse_status = new javax.swing.JLabel();
         smart_proxy_status = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         downloads_panel = new javax.swing.JPanel();
@@ -192,10 +240,14 @@ public final class MainPanelView extends javax.swing.JFrame {
         logo_label.setDoubleBuffered(true);
 
         kiss_server_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
+        kiss_server_status.setForeground(new java.awt.Color(102, 102, 102));
         kiss_server_status.setDoubleBuffered(true);
 
+        mc_reverse_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
+        mc_reverse_status.setForeground(new java.awt.Color(102, 102, 102));
+
         smart_proxy_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        smart_proxy_status.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        smart_proxy_status.setForeground(new java.awt.Color(102, 102, 102));
         smart_proxy_status.setDoubleBuffered(true);
 
         jTabbedPane1.setDoubleBuffered(true);
@@ -206,6 +258,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         global_speed_down_label.setDoubleBuffered(true);
 
         status_down_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
+        status_down_label.setForeground(new java.awt.Color(102, 102, 102));
         status_down_label.setDoubleBuffered(true);
 
         close_all_finished_down_button.setBackground(new java.awt.Color(0, 153, 51));
@@ -245,7 +298,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addComponent(pause_all_down_button))
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 679, Short.MAX_VALUE)
+                .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 699, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_down_button))
             .addComponent(jScrollPane_down)
@@ -275,6 +328,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         global_speed_up_label.setDoubleBuffered(true);
 
         status_up_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
+        status_up_label.setForeground(new java.awt.Color(102, 102, 102));
 
         close_all_finished_up_button.setBackground(new java.awt.Color(0, 153, 51));
         close_all_finished_up_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
@@ -313,7 +367,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addComponent(pause_all_up_button))
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, 679, Short.MAX_VALUE)
+                .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, 699, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_up_button))
             .addComponent(jScrollPane_up)
@@ -452,6 +506,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(logo_label)))
@@ -466,7 +522,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(logo_label)
                     .addComponent(smart_proxy_status, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(kiss_server_status, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(kiss_server_status, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(2, 2, 2))
         );
 
@@ -713,16 +771,17 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 if (_main_panel.getMega_proxy_server() == null) {
 
-                    _main_panel.setMega_proxy_server(new MegaProxyServer(UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
-                    _main_panel.getMega_proxy_server().start();
+                    _main_panel.setMega_proxy_server(new MegaProxyServer(_main_panel, UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
+
+                    THREAD_POOL.execute(_main_panel.getMega_proxy_server());
 
                 } else if (_main_panel.getMega_proxy_server().getPort() != _main_panel.getMegacrypter_reverse_port()) {
 
                     try {
 
                         _main_panel.getMega_proxy_server().stopServer();
-                        _main_panel.setMega_proxy_server(new MegaProxyServer(UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
-                        _main_panel.getMega_proxy_server().start();
+                        _main_panel.setMega_proxy_server(new MegaProxyServer(_main_panel, UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
+                        THREAD_POOL.execute(_main_panel.getMega_proxy_server());
 
                     } catch (IOException ex) {
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -1016,6 +1075,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JLabel kiss_server_status;
     private javax.swing.JLabel logo_label;
     private javax.swing.JMenuBar main_menubar;
+    private javax.swing.JLabel mc_reverse_status;
     private javax.swing.JMenuItem new_download_menu;
     private javax.swing.JMenuItem new_stream_menu;
     private javax.swing.JMenuItem new_upload_menu;
