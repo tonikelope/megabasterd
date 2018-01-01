@@ -47,14 +47,14 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.65";
+    public static final String VERSION = "2.66";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
     public static final Font DEFAULT_FONT = createAndRegisterFont("Itim-Regular.ttf");
-    public static final float ZOOM_FACTOR = 1.2f;
+    public static final float ZOOM_FACTOR = 1.1f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:57.0) Gecko/20100101 Firefox/57.0";
     public static final String ICON_FILE = "mbasterd_med.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
