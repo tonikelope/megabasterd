@@ -63,6 +63,7 @@ public final class MainPanel {
     private static Credentials _proxy_credentials;
     private static boolean _use_proxy;
 
+    
     public static void main(String args[]) {
 
         setNimbusLookAndFeel();
