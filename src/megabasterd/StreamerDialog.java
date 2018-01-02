@@ -47,13 +47,14 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
      * @param clipboardspy
      */
     public StreamerDialog(java.awt.Frame parent, boolean modal, ClipboardSpy clipboardspy) {
+
         super(parent, modal);
+
+        _main_panel = ((MainPanelView) parent).getMain_panel();
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
-
-        _main_panel = ((MainPanelView) parent).getMain_panel();
+        updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
         _clipboardspy = clipboardspy;
 
@@ -75,6 +76,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
             use_mega_account_down_label.setVisible(false);
         }
 
+        pack();
     }
 
     /**
@@ -149,7 +151,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                 .addComponent(original_link_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 20, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(dance_button)
                     .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(use_mega_account_down_label))
                 .addContainerGap())

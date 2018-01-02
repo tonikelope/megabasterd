@@ -73,7 +73,7 @@
                   <Component id="change_dir_button" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="down_dir_to_label" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="download_dir_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="dance_button" alignment="3" min="-2" pref="37" max="-2" attributes="0"/>
+                  <Component id="dance_button" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>

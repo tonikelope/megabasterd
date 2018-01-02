@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 
-<Form version="1.3" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
+<Form version="1.9" maxVersion="1.9" type="org.netbeans.modules.form.forminfo.JFrameFormInfo">
   <NonVisualComponents>
     <Menu class="javax.swing.JMenuBar" name="main_menubar">
       <SubComponents>
@@ -171,11 +171,11 @@
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="jTabbedPane1" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
-                      <Component id="kiss_server_status" max="32767" attributes="0"/>
+                      <Component id="kiss_server_status" pref="206" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="mc_reverse_status" max="32767" attributes="0"/>
+                      <Component id="mc_reverse_status" pref="210" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="smart_proxy_status" max="32767" attributes="0"/>
+                      <Component id="smart_proxy_status" pref="215" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="logo_label" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -192,10 +192,10 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="logo_label" min="-2" max="-2" attributes="0"/>
-                  <Component id="smart_proxy_status" alignment="1" min="-2" pref="24" max="-2" attributes="0"/>
+                  <Component id="smart_proxy_status" alignment="1" min="-2" max="-2" attributes="0"/>
                   <Group type="103" alignment="1" groupAlignment="0" attributes="0">
-                      <Component id="mc_reverse_status" min="-2" pref="24" max="-2" attributes="0"/>
-                      <Component id="kiss_server_status" min="-2" pref="24" max="-2" attributes="0"/>
+                      <Component id="mc_reverse_status" min="-2" max="-2" attributes="0"/>
+                      <Component id="kiss_server_status" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
@@ -220,6 +220,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
+        <Property name="text" type="java.lang.String" value="kiss server"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
@@ -231,6 +232,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
+        <Property name="text" type="java.lang.String" value="mc reverse"/>
       </Properties>
     </Component>
     <Component class="javax.swing.JLabel" name="smart_proxy_status">
@@ -241,6 +243,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
+        <Property name="text" type="java.lang.String" value="smart proxy"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
@@ -273,7 +276,7 @@
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="status_down_label" pref="699" max="32767" attributes="0"/>
+                      <Component id="status_down_label" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="close_all_finished_down_button" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -290,7 +293,7 @@
                           <Component id="status_down_label" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="jScrollPane_down" pref="319" max="32767" attributes="0"/>
+                      <Component id="jScrollPane_down" pref="355" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                       <Component id="down_remtime_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -399,7 +402,7 @@
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="status_up_label" pref="699" max="32767" attributes="0"/>
+                      <Component id="status_up_label" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="close_all_finished_up_button" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -416,7 +419,7 @@
                           <Component id="status_up_label" alignment="0" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="jScrollPane_up" pref="319" max="32767" attributes="0"/>
+                      <Component id="jScrollPane_up" pref="355" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                       <Component id="up_remtime_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>

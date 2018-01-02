@@ -21,6 +21,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
@@ -130,7 +131,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             @Override
             public void run() {
 
-                getKiss_server_status().setText(status);
+                getKiss_server_status().setText(status + " ");
+                pack();
             }
         });
 
@@ -143,7 +145,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             @Override
             public void run() {
 
-                getSmart_proxy_status().setText(status);
+                getSmart_proxy_status().setText(status + " ");
+                pack();
             }
         });
 
@@ -156,7 +159,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             @Override
             public void run() {
 
-                getMc_reverse_status().setText(status);
+                getMc_reverse_status().setText(status + " ");
+                pack();
             }
         });
 
@@ -168,7 +172,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
+        updateFonts(getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
         setTitle("MegaBasterd " + VERSION);
 
@@ -186,6 +190,8 @@ public final class MainPanelView extends javax.swing.JFrame {
         clean_all_up_menu.setEnabled(false);
         jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
         jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
+
+        pack();
     }
 
     /**
@@ -241,13 +247,16 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         kiss_server_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         kiss_server_status.setForeground(new java.awt.Color(102, 102, 102));
+        kiss_server_status.setText("kiss server");
         kiss_server_status.setDoubleBuffered(true);
 
         mc_reverse_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         mc_reverse_status.setForeground(new java.awt.Color(102, 102, 102));
+        mc_reverse_status.setText("mc reverse");
 
         smart_proxy_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         smart_proxy_status.setForeground(new java.awt.Color(102, 102, 102));
+        smart_proxy_status.setText("smart proxy");
         smart_proxy_status.setDoubleBuffered(true);
 
         jTabbedPane1.setDoubleBuffered(true);
@@ -298,7 +307,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addComponent(pause_all_down_button))
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 699, Short.MAX_VALUE)
+                .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_down_button))
             .addComponent(jScrollPane_down)
@@ -312,7 +321,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
+                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(down_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -367,7 +376,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addComponent(pause_all_up_button))
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, 699, Short.MAX_VALUE)
+                .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_up_button))
             .addComponent(jScrollPane_up)
@@ -381,7 +390,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 319, Short.MAX_VALUE)
+                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(up_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -504,11 +513,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jTabbedPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(logo_label)))
                 .addContainerGap())
@@ -521,10 +530,10 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(logo_label)
-                    .addComponent(smart_proxy_status, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(smart_proxy_status)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(kiss_server_status, javax.swing.GroupLayout.PREFERRED_SIZE, 24, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(mc_reverse_status)
+                        .addComponent(kiss_server_status)))
                 .addGap(2, 2, 2))
         );
 
@@ -827,6 +836,8 @@ public final class MainPanelView extends javax.swing.JFrame {
         }
 
         if (_main_panel.isRestart()) {
+
+            JOptionPane.showMessageDialog(this, "MegaBasterd will restart", "Restart required", JOptionPane.WARNING_MESSAGE);
 
             restartApplication(1);
         }

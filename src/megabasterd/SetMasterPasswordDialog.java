@@ -49,9 +49,12 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
      * Creates new form MegaPassDialog
      */
     public SetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String salt) {
+
         super(parent, modal);
+
         initComponents();
-        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
+
+        updateFonts(this.getRootPane(), DEFAULT_FONT, ((MainPanelView) parent).getMain_panel().getZoom_factor());
 
         _pass_ok = false;
 
@@ -60,6 +63,8 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         _new_pass_hash = null;
 
         _salt = salt;
+
+        pack();
     }
 
     /**

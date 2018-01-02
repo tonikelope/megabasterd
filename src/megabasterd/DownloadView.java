@@ -89,7 +89,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, ZOOM_FACTOR);
+        updateFonts(this, DEFAULT_FONT, download.getMain_panel().getZoom_factor());
 
         _download = download;
 
@@ -98,15 +98,17 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         ((JSpinner.DefaultEditor) slots_spinner.getEditor()).getTextField().setEditable(false);
 
         speed_label.setForeground(new Color(0, 128, 255));
-
         progress_pbar.setMinimum(0);
         progress_pbar.setMaximum(MAX_VALUE);
         progress_pbar.setStringPainted(true);
+
+        status_label.setText("");
 
         for (JComponent c : new JComponent[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label, open_folder_button}) {
 
             c.setVisible(false);
         }
+
     }
 
     public void hideAllExceptStatus() {

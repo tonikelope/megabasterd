@@ -78,7 +78,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, ZOOM_FACTOR);
+        updateFonts(this, DEFAULT_FONT, upload.getMain_panel().getZoom_factor());
 
         _upload = upload;
 
@@ -86,17 +86,18 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         ((JSpinner.DefaultEditor) slots_spinner.getEditor()).getTextField().setEditable(false);
 
-        for (JComponent c : new JComponent[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, file_name_label, close_button, restart_button, file_size_label}) {
-
-            c.setVisible(false);
-        }
-
         speed_label.setForeground(new Color(0, 128, 255));
 
         progress_pbar.setMinimum(0);
         progress_pbar.setMaximum(MAX_VALUE);
         progress_pbar.setStringPainted(true);
 
+        status_label.setText("");
+
+        for (JComponent c : new JComponent[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, file_name_label, close_button, restart_button, file_size_label}) {
+
+            c.setVisible(false);
+        }
     }
 
     /**

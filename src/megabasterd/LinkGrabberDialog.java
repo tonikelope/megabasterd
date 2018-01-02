@@ -61,11 +61,11 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         super(parent, modal);
 
+        _main_panel = ((MainPanelView) parent).getMain_panel();
+
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
-
-        _main_panel = ((MainPanelView) parent).getMain_panel();
+        updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
         _download = false;
 
@@ -87,6 +87,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             use_mega_account_down_label.setEnabled(false);
             use_mega_account_down_label.setVisible(false);
         }
+
+        pack();
     }
 
     /**
@@ -213,7 +215,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     .addComponent(change_dir_button)
                     .addComponent(down_dir_to_label)
                     .addComponent(download_dir_label)
-                    .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(dance_button))
                 .addContainerGap())
         );
 
@@ -243,6 +245,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             _download_path = file.getAbsolutePath();
 
             download_dir_label.setText(truncateText(_download_path, 80));
+
+            pack();
         }
     }//GEN-LAST:event_change_dir_buttonActionPerformed
 
@@ -255,6 +259,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         links_textarea.setEnabled(false);
 
         dance_button.setEnabled(false);
+
+        pack();
 
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -330,6 +336,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     links_textarea.setEnabled(true);
 
                     dance_button.setEnabled(true);
+
+                    pack();
                 }
             });
 
@@ -342,6 +350,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             links_textarea.setEnabled(true);
 
             dance_button.setEnabled(true);
+
+            pack();
         }
     }//GEN-LAST:event_dlc_buttonActionPerformed
 

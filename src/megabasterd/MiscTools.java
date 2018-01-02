@@ -288,7 +288,7 @@ public final class MiscTools {
 
             Font old_font = component.getFont();
 
-            Font new_font = font.deriveFont(old_font.getStyle(), (float) Math.floor(old_font.getSize() * zoom_factor));
+            Font new_font = font.deriveFont(old_font.getStyle(), (float) Math.round(old_font.getSize() * zoom_factor));
 
             component.setFont(new_font);
         }

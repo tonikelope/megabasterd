@@ -63,9 +63,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         super(parent, modal);
 
+        _main_panel = ((MainPanelView) parent).getMain_panel();
+
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
+        updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
         _last_selected_account = null;
         _total_space = 0L;
@@ -75,8 +77,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         _files = new ArrayList<>();
 
         dir_name_textfield.addMouseListener(new ContextMenuMouseListener());
-
-        _main_panel = ((MainPanelView) parent).getMain_panel();
 
         if (_main_panel.getMega_accounts().size() > 0) {
 
@@ -90,6 +90,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             used_space_label.setForeground(Color.red);
             used_space_label.setText("No MEGA accounts available (Go to Settings > Accounts)");
         }
+
+        pack();
     }
 
     /**

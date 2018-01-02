@@ -1166,34 +1166,27 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     }
 
     private boolean verifyFileCBCMAC(String filename) throws FileNotFoundException, Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+
         int[] int_key = bin2i32a(UrlBASE642Bin(_file_key));
-
-        int[] iv = new int[2];
-
-        iv[0] = int_key[4];
-        iv[1] = int_key[5];
-
-        int[] meta_mac = new int[2];
-
-        meta_mac[0] = int_key[6];
-        meta_mac[1] = int_key[7];
-
+        int[] iv = new int[]{int_key[4], int_key[5]};
+        int[] meta_mac = new int[]{int_key[6], int_key[7]};
         int[] file_mac = {0, 0, 0, 0};
-
         int[] cbc_iv = {0, 0, 0, 0};
 
         Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", _chunkwriter.getByte_file_key(), i32a2bin(cbc_iv));
 
         try (FileInputStream is = new FileInputStream(new File(filename))) {
 
-            long chunk_id = 1;
+            long chunk_id = 1L;
             long tot = 0L;
             byte[] chunk_buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
             byte[] byte_block = new byte[16];
             int[] int_block;
-            int re, reads, to_read;
+            int reads;
+
             try {
                 while (!_exit) {
+
                     Chunk chunk = new Chunk(chunk_id++, _file_size, null);
 
                     tot += chunk.getSize();
@@ -1201,18 +1194,16 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     int[] chunk_mac = {iv[0], iv[1], iv[0], iv[1]};
 
                     do {
-                        to_read = chunk.getSize() - chunk.getOutputStream().size() >= chunk_buffer.length ? chunk_buffer.length : (int) (chunk.getSize() - chunk.getOutputStream().size());
-
-                        re = is.read(chunk_buffer, 0, to_read);
-
-                        chunk.getOutputStream().write(chunk_buffer, 0, re);
+                        chunk.getOutputStream().write(chunk_buffer, 0, is.read(chunk_buffer, 0, Math.min((int) (chunk.getSize() - chunk.getOutputStream().size()), chunk_buffer.length)));
 
                     } while (!_exit && chunk.getOutputStream().size() < chunk.getSize());
 
                     InputStream chunk_is = chunk.getInputStream();
 
                     while (!_exit && (reads = chunk_is.read(byte_block)) != -1) {
+
                         if (reads < byte_block.length) {
+
                             for (int i = reads; i < byte_block.length; i++) {
                                 byte_block[i] = 0;
                             }
@@ -1234,7 +1225,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
 
                     setProgress(tot);
-
                 }
 
             } catch (ChunkInvalidException e) {
@@ -1244,7 +1234,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             return (cbc[0] == meta_mac[0] && cbc[1] == meta_mac[1]);
         }
-
     }
 
     public void stopDownloader() {

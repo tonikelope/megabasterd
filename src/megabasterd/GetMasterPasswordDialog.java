@@ -59,9 +59,10 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
      */
     public GetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String current_pass_hash, String salt) {
         super(parent, modal);
+
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, ZOOM_FACTOR);
+        updateFonts(this.getRootPane(), DEFAULT_FONT, ((MainPanelView) parent).getMain_panel().getZoom_factor());
 
         _current_pass_hash = current_pass_hash;
 
@@ -70,6 +71,8 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
         _pass = null;
 
         _salt = salt;
+
+        pack();
 
     }
 

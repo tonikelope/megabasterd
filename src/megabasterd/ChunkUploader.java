@@ -109,7 +109,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         String worker_url = _upload.getUl_url();
         Chunk chunk;
-        int reads, conta_error, re, http_status, tot_bytes_up;
+        int reads, conta_error, http_status, tot_bytes_up;
         boolean error;
         OutputStream out;
 
@@ -126,9 +126,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 do {
 
-                    re = f.read(buffer, 0, Math.min((int) (chunk.getSize() - chunk.getOutputStream().size()), buffer.length));
-
-                    chunk.getOutputStream().write(buffer, 0, re);
+                    chunk.getOutputStream().write(buffer, 0, f.read(buffer, 0, Math.min((int) (chunk.getSize() - chunk.getOutputStream().size()), buffer.length)));
 
                 } while (!_exit && !_upload.isStopped() && chunk.getOutputStream().size() < chunk.getSize());
 

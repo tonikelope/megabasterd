@@ -47,14 +47,14 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.66";
+    public static final String VERSION = "2.67";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
     public static final Font DEFAULT_FONT = createAndRegisterFont("Itim-Regular.ttf");
-    public static final float ZOOM_FACTOR = 1.1f;
+    public static final float ZOOM_FACTOR = 1.0f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:57.0) Gecko/20100101 Firefox/57.0";
     public static final String ICON_FILE = "mbasterd_med.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
@@ -63,13 +63,9 @@ public final class MainPanel {
     private static Credentials _proxy_credentials;
     private static boolean _use_proxy;
 
-    
     public static void main(String args[]) {
 
         setNimbusLookAndFeel();
-
-        UIManager.put("OptionPane.messageFont", DEFAULT_FONT.deriveFont(15f * ZOOM_FACTOR));
-        UIManager.put("OptionPane.buttonFont", DEFAULT_FONT.deriveFont(13f * ZOOM_FACTOR));
 
         if (args.length > 0) {
 
@@ -116,8 +112,35 @@ public final class MainPanel {
     private MegaProxyServer _mega_proxy_server;
     private int _megacrypter_reverse_port;
     private boolean _megacrypter_reverse;
+    private float _zoom_factor;
 
     public MainPanel() {
+
+        _restart = false;
+
+        _elc_accounts = new HashMap<>();
+
+        _master_pass = null;
+
+        _mega_active_accounts = new HashMap<>();
+
+        _proxy_host = null;
+
+        _proxy_port = 3128;
+
+        _proxy_credentials = null;
+
+        _use_proxy = false;
+
+        _use_smart_proxy = false;
+
+        _use_smart_proxy_url = null;
+
+        loadUserSettings();
+
+        UIManager.put("OptionPane.messageFont", DEFAULT_FONT.deriveFont(15f * getZoom_factor()));
+
+        UIManager.put("OptionPane.buttonFont", DEFAULT_FONT.deriveFont(13f * getZoom_factor()));
 
         _view = new MainPanelView(this);
 
@@ -142,28 +165,6 @@ public final class MainPanel {
             Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
-        _restart = false;
-
-        _elc_accounts = new HashMap<>();
-
-        _master_pass = null;
-
-        _mega_active_accounts = new HashMap<>();
-
-        _proxy_host = null;
-
-        _proxy_port = 3128;
-
-        _proxy_credentials = null;
-
-        _use_proxy = false;
-
-        _use_smart_proxy = false;
-
-        _use_smart_proxy_url = null;
-
-        loadUserSettings();
-
         THREAD_POOL.execute((_download_manager = new DownloadManager(this)));
 
         THREAD_POOL.execute((_upload_manager = new UploadManager(this)));
@@ -176,9 +177,8 @@ public final class MainPanel {
 
         THREAD_POOL.execute((_clipboardspy = new ClipboardSpy()));
 
-        _streamserver = new KissVideoStreamServer(this);
-
         try {
+            _streamserver = new KissVideoStreamServer(this);
             _streamserver.start(STREAMER_PORT, "/video");
         } catch (IOException ex) {
             Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
@@ -198,8 +198,11 @@ public final class MainPanel {
         });
 
         if (_megacrypter_reverse) {
+
             _mega_proxy_server = new MegaProxyServer(this, UUID.randomUUID().toString(), _megacrypter_reverse_port);
+
             THREAD_POOL.execute(_mega_proxy_server);
+
         } else {
             _mega_proxy_server = null;
         }
@@ -207,6 +210,7 @@ public final class MainPanel {
         if (_use_smart_proxy) {
 
             _proxy_manager = new SmartMegaProxyManager(this, _use_smart_proxy_url);
+
             THREAD_POOL.execute(_proxy_manager);
         }
 
@@ -223,6 +227,10 @@ public final class MainPanel {
         resumeDownloads();
 
         resumeUploads();
+    }
+
+    public float getZoom_factor() {
+        return _zoom_factor;
     }
 
     public void setProxy_manager(SmartMegaProxyManager _proxy_manager) {
@@ -428,6 +436,15 @@ public final class MainPanel {
     }
 
     public void loadUserSettings() {
+
+        String zoom_factor = selectSettingValue("font_zoom");
+
+        if (zoom_factor != null) {
+            _zoom_factor = Float.parseFloat(zoom_factor) / 100;
+        } else {
+            _zoom_factor = ZOOM_FACTOR;
+        }
+
         String def_slots = selectSettingValue("default_slots_down");
 
         if (def_slots != null) {
