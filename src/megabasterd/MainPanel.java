@@ -47,7 +47,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.67";
+    public static final String VERSION = "2.68";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -136,6 +136,14 @@ public final class MainPanel {
 
         _use_smart_proxy_url = null;
 
+        try {
+
+            setupSqliteTables();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+        }
+
         loadUserSettings();
 
         UIManager.put("OptionPane.messageFont", DEFAULT_FONT.deriveFont(15f * getZoom_factor()));
@@ -154,14 +162,6 @@ public final class MainPanel {
             trayIcon();
 
         } catch (AWTException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
-        }
-
-        try {
-
-            setupSqliteTables();
-
-        } catch (SQLException ex) {
             Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 

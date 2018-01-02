@@ -19,6 +19,7 @@ import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -174,20 +175,14 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         updateFonts(getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
-        setTitle("MegaBasterd " + VERSION);
+        for (JComponent c : new JComponent[]{global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
 
-        setIconImage(new ImageIcon(getClass().getResource(ICON_FILE)).getImage());
+            c.setVisible(false);
+        }
 
-        global_speed_down_label.setVisible(false);
-        global_speed_up_label.setVisible(false);
-        down_remtime_label.setVisible(false);
-        up_remtime_label.setVisible(false);
-        close_all_finished_down_button.setVisible(false);
-        close_all_finished_up_button.setVisible(false);
-        pause_all_down_button.setVisible(false);
-        pause_all_up_button.setVisible(false);
         clean_all_down_menu.setEnabled(false);
         clean_all_up_menu.setEnabled(false);
+
         jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
         jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
 
@@ -240,23 +235,21 @@ public final class MainPanelView extends javax.swing.JFrame {
         help_menu = new javax.swing.JMenu();
         about_menu = new javax.swing.JMenuItem();
 
-        setTitle("MegaBasterd");
+        setTitle("MegaBasterd " + VERSION);
+        setIconImage(new ImageIcon(getClass().getResource(ICON_FILE)).getImage());
 
         logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/mbasterd_logo_nuevo.png"))); // NOI18N
         logo_label.setDoubleBuffered(true);
 
         kiss_server_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         kiss_server_status.setForeground(new java.awt.Color(102, 102, 102));
-        kiss_server_status.setText("kiss server");
         kiss_server_status.setDoubleBuffered(true);
 
         mc_reverse_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         mc_reverse_status.setForeground(new java.awt.Color(102, 102, 102));
-        mc_reverse_status.setText("mc reverse");
 
         smart_proxy_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         smart_proxy_status.setForeground(new java.awt.Color(102, 102, 102));
-        smart_proxy_status.setText("smart proxy");
         smart_proxy_status.setDoubleBuffered(true);
 
         jTabbedPane1.setDoubleBuffered(true);
