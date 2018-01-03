@@ -831,9 +831,9 @@ public final class MainPanelView extends javax.swing.JFrame {
         if (_main_panel.isRestart()) {
 
             JOptionPane.showMessageDialog(this, "MegaBasterd will restart", "Restart required", JOptionPane.WARNING_MESSAGE);
-            
-            if(_main_panel.checkByeBye()) {
-                
+
+            if (_main_panel.checkByeBye()) {
+
                 restartApplication(1);
             }
         }
