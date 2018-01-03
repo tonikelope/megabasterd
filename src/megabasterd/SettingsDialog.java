@@ -1443,7 +1443,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             if (old_zoom == null) {
 
-                old_zoom = String.valueOf(zoom_spinner.getValue());
+                old_zoom = "100";
             }
 
             String zoom = String.valueOf(zoom_spinner.getValue());
