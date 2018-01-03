@@ -627,9 +627,9 @@ public final class MainPanel {
             _use_smart_proxy_url = selectSettingValue("smart_proxy_url");
         }
     }
-
-    public void _byebye() {
-
+    
+    public boolean checkByeBye() {
+        
         boolean exit = true;
 
         if (!_streamserver.getWorking_threads().isEmpty()) {
@@ -683,8 +683,13 @@ public final class MainPanel {
                 exit = false;
             }
         }
+        
+        return exit;
+    }
 
-        if (exit) {
+    public void byebye() {
+
+        if (checkByeBye()) {
 
             try {
                 DBTools.vaccum();
@@ -876,7 +881,7 @@ public final class MainPanel {
             @Override
             public void actionPerformed(ActionEvent e) {
 
-                _byebye();
+                byebye();
 
             }
 
