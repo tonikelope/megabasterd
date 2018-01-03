@@ -131,7 +131,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             try {
                                 httpclient.close();
                             } catch (IOException ex) {
-                                Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             }
                         }
 
@@ -280,14 +280,14 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         } catch (URISyntaxException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } finally {
 
             if (httpclient != null) {
                 try {
                     httpclient.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }

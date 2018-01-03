@@ -37,7 +37,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final Object _workers_lock;
     private final Object _chunkid_lock;
     private byte[] _byte_file_key;
-    private String _fatal_error;
     private volatile long _progress;
     private byte[] _byte_file_iv;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
@@ -154,10 +153,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public byte[] getByte_file_key() {
         return _byte_file_key;
-    }
-
-    public String getFatal_error() {
-        return _fatal_error;
     }
 
     @Override
@@ -302,7 +297,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -316,7 +311,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -410,11 +405,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             getView().hideAllExceptStatus();
 
-            if (_fatal_error != null) {
-
-                getView().printStatusError(_fatal_error);
-
-            } else if (exit_msg != null) {
+            if (exit_msg != null) {
 
                 getView().printStatusError(exit_msg);
             }
@@ -682,7 +673,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     try {
                         Thread.sleep(wait_time * 1000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
                 } while (_ul_url == null && !_exit);
 
@@ -851,6 +842,10 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         getView().printStatusNormal("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***");
 
+                        if (!getMain_panel().getUpload_manager().getFinishing_uploads_queue().contains(this)) {
+                            getMain_panel().getUpload_manager().getFinishing_uploads_queue().add(this);
+                        }
+
                         File f = new File(_file_name);
 
                         HashMap<String, Object> upload_res;
@@ -897,14 +892,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                         _status_error = true;
                     }
 
-                } else if (_fatal_error != null) {
-
-                    getView().hideAllExceptStatus();
-
-                    getView().printStatusError(_fatal_error);
-
-                    _status_error = true;
-
                 } else {
 
                     getView().hideAllExceptStatus();
@@ -916,12 +903,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     _status_error = true;
                 }
 
-            } else if (_fatal_error != null) {
-                getView().hideAllExceptStatus();
-
-                getView().printStatusError(_fatal_error);
-
-                _status_error = true;
             } else {
                 getView().hideAllExceptStatus();
 
@@ -932,14 +913,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 _status_error = true;
             }
 
-        } else if (_fatal_error != null) {
-            getView().hideAllExceptStatus();
-
-            _exit_message = _fatal_error;
-
-            getView().printStatusError(_fatal_error);
-
-            _status_error = true;
         } else {
             getView().hideAllExceptStatus();
 
@@ -948,7 +921,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             getView().printStatusError(_exit_message);
 
             _status_error = true;
-
         }
 
         if (!_exit) {
@@ -985,6 +957,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             }
         });
+
+        getMain_panel().getUpload_manager().getFinishing_uploads_queue().remove(this);
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader finished with message ->  {1} {2}...", new Object[]{Thread.currentThread().getName(), _exit_message, this.getFile_name()});
 
@@ -1071,14 +1045,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         }
     }
 
-    public void emergencyStopUploader(String reason) {
-        if (!_exit && _fatal_error == null) {
-            _fatal_error = reason != null ? reason : "FATAL ERROR!";
-
-            stopUploader();
-        }
-    }
-
     public long nextChunkId() {
 
         synchronized (_chunkid_lock) {
@@ -1100,6 +1066,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     public void stopUploader() {
 
         if (!_exit) {
+
             _exit = true;
 
             try {
@@ -1147,8 +1114,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     }
 
     public long calculateLastUploadedChunk(long bytes_read) {
+
         if (bytes_read > 3584 * 1024) {
-            return 7 + (long) Math.ceil((bytes_read - 3584 * 1024) / (1024 * 1024));
+            return 7 + (long) Math.ceil((float) (bytes_read - 3584 * 1024) / (1024 * 1024));
         } else {
             int i = 0, tot = 0;
 

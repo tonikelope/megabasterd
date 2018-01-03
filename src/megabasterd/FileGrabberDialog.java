@@ -141,8 +141,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 237, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
         );
+
+        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Upload info"));
 
         dir_name_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         dir_name_label.setText("Upload name:");
@@ -203,9 +205,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(add_files_button, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(add_files_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(add_folder_button, javax.swing.GroupLayout.PREFERRED_SIZE, 250, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(add_folder_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addComponent(dir_name_textfield)
                     .addComponent(account_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(used_space_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -519,7 +521,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             warning_label.setEnabled(false);
             file_tree.setEnabled(false);
 
-            swingInvoke(new Runnable() {
+            THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
 
@@ -553,37 +555,50 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                             used_space_color = Color.red;
                         }
 
-                        boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
+                        final String quota_message = "Quota used: " + formatBytes(quota[0]) + "/" + formatBytes(quota[1]);
 
-                        used_space_label.setText("Quota used: " + formatBytes(quota[0]) + "/" + formatBytes(quota[1]));
+                        swingInvoke(new Runnable() {
+                            @Override
+                            public void run() {
 
-                        used_space_label.setForeground(used_space_color);
+                                boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
-                        for (JComponent c : new JComponent[]{add_files_button, add_folder_button, account_combobox, account_label}) {
+                                used_space_label.setText(quota_message);
 
-                            c.setEnabled(true);
-                        }
+                                used_space_label.setForeground(used_space_color);
 
-                        for (JComponent c : new JComponent[]{dir_name_textfield, dir_name_label, warning_label, dance_button, file_tree, total_file_size_label, skip_button, skip_rest_button}) {
+                                for (JComponent c : new JComponent[]{add_files_button, add_folder_button, account_combobox, account_label}) {
 
-                            c.setEnabled(root_childs);
-                        }
+                                    c.setEnabled(true);
+                                }
+
+                                for (JComponent c : new JComponent[]{dir_name_textfield, dir_name_label, warning_label, dance_button, file_tree, total_file_size_label, skip_button, skip_rest_button}) {
+
+                                    c.setEnabled(root_childs);
+                                }
+                            }
+                        });
 
                     } else {
 
                         _last_selected_account = null;
 
-                        account_combobox.setEnabled(true);
+                        swingInvoke(new Runnable() {
+                            @Override
+                            public void run() {
 
-                        account_label.setEnabled(true);
+                                account_combobox.setEnabled(true);
 
-                        account_combobox.setSelectedIndex(-1);
+                                account_label.setEnabled(true);
 
-                        used_space_label.setForeground(Color.red);
+                                account_combobox.setSelectedIndex(-1);
 
-                        used_space_label.setText("ERROR checking account quota!");
+                                used_space_label.setForeground(Color.red);
+
+                                used_space_label.setText("ERROR checking account quota!");
+                            }
+                        });
                     }
-
                 }
             });
         }

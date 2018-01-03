@@ -128,6 +128,10 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                         _upload.getView().getPause_button().setEnabled(false);
 
+                        if (!_upload.getMain_panel().getUpload_manager().getFinishing_uploads_queue().contains(_upload)) {
+                            _upload.getMain_panel().getUpload_manager().getFinishing_uploads_queue().add(_upload);
+                        }
+
                         upload_workers_finish = true;
                     }
 
@@ -174,13 +178,14 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                     _chunk_queue.remove(chunk.getId());
 
                     new_chunk = true;
-                }
-
-                if (!upload_workers_finish && new_chunk) {
 
                     temp_file_data = (String.valueOf(_bytes_read) + "|" + Bin2BASE64(i32a2bin(file_mac)));
 
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Macgenerator -> {1} {2} {3} {4}", new Object[]{Thread.currentThread().getName(), temp_file_data, _upload.calculateLastUploadedChunk(_bytes_read), _last_chunk_id_read, this.getUpload().getFile_name()});
+
+                }
+
+                if (!upload_workers_finish && new_chunk) {
 
                     DBTools.updateUploadProgres(_upload.getFile_name(), _upload.getMa().getEmail(), _bytes_read, Bin2BASE64(i32a2bin(file_mac)));
 

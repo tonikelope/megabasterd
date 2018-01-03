@@ -32,6 +32,7 @@ import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
+import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.UIManager;
@@ -47,7 +48,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.70";
+    public static final String VERSION = "2.71";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -344,7 +345,7 @@ public final class MainPanel {
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -654,8 +655,8 @@ public final class MainPanel {
                 "Yes"};
 
             int n = showOptionDialog(getView(),
-                    "It seems MegaBasterd is provisioning down/uploads.\nIf you exit now, unprovisioned down/uploads will be lost.\nDo you want to continue?",
-                    "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
+                    "It seems MegaBasterd is provisioning down/uploads.\n\nIf you exit now, unprovisioned down/uploads will be lost.\n\nDo you want to continue?",
+                    "Warning!", YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
                     null,
                     options,
                     options[0]);
@@ -665,6 +666,22 @@ public final class MainPanel {
                 exit = false;
             }
 
+        } else if (!getUpload_manager().getFinishing_uploads_queue().isEmpty()) {
+
+            Object[] options = {"No",
+                "Yes"};
+
+            int n = showOptionDialog(getView(),
+                    "It seems MegaBasterd is just finishing uploading some files.\n\nIF YOU EXIT NOW, THOSE UPLOADS WILL FAIL.\n\nDo you want to continue?",
+                    "Warning!", YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
+                    null,
+                    options,
+                    options[0]);
+
+            if (n == 0) {
+
+                exit = false;
+            }
         }
 
         if (exit) {
@@ -741,7 +758,7 @@ public final class MainPanel {
                 new Runnable() {
             @Override
             public void run() {
-                getView().getStatus_down_label().setText("Checking it there are previous downloads, please wait...");
+                getView().getStatus_down_label().setText("Checking if there are previous downloads, please wait...");
             }
         });
 
@@ -913,7 +930,7 @@ public final class MainPanel {
                 new Runnable() {
             @Override
             public void run() {
-                getView().getStatus_up_label().setText("Checking it there are previous uploads, please wait...");
+                getView().getStatus_up_label().setText("Checking if there are previous uploads, please wait...");
             }
         });
 

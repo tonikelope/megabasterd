@@ -131,6 +131,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                         if (!getUpload().isStopped()) {
 
                             if (tot_bytes_up < chunk.getSize()) {
+
                                 if (tot_bytes_up > 0) {
 
                                     getUpload().getPartialProgress().add(-1 * tot_bytes_up);
@@ -164,16 +165,12 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1} {2}", new Object[]{chunk.getOffset(), tot_bytes_up, getUpload().getFile_size()});
 
-                                if (chunk.getOffset() + tot_bytes_up < getUpload().getFile_size()) {
+                                getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
 
-                                    getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
+                                getUpload().getMac_generator().secureNotify();
 
-                                    getUpload().getMac_generator().secureNotify();
-
-                                    conta_error = 0;
-                                }
+                                conta_error = 0;
                             }
-
                         }
 
                     } else if (isExit()) {
@@ -205,6 +202,8 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                 if (!error && chunk.getOffset() + tot_bytes_up == getUpload().getFile_size() && futureTask != null) {
 
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} has finished uploading all chunks. Waiting for completion handle...", new Object[]{Thread.currentThread().getName()});
+
                     try {
 
                         httpresponse = futureTask.get();
@@ -212,6 +211,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                         http_status = httpresponse.getStatusLine().getStatusCode();
 
                         if (http_status != HttpStatus.SC_OK) {
+
                             throw new IOException("UPLOAD FAILED! (HTTP STATUS: " + http_status + ")");
 
                         } else {
@@ -230,6 +230,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                                 if (response.length() > 0) {
 
                                     if (MegaAPI.checkMEGAError(response) != 0) {
+
                                         throw new IOException("UPLOAD FAILED! (MEGA ERROR: " + MegaAPI.checkMEGAError(response) + ")");
 
                                     } else {
@@ -237,34 +238,18 @@ public class ChunkUploaderMono extends ChunkUploader {
                                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), response});
 
                                         getUpload().setCompletion_handle(response);
-
-                                        conta_error = 0;
-
-                                        getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
-
-                                        getUpload().getMac_generator().secureNotify();
                                     }
+
                                 } else {
 
-                                    throw new IOException("UPLOAD FAILED! (UPLOAD RESPONSE IS EMPTY)");
+                                    throw new IOException("UPLOAD FAILED! (Completion handle is empty)");
                                 }
                             }
                         }
 
                     } catch (ExecutionException | InterruptedException | CancellationException exception) {
 
-                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId()});
-
-                        error = true;
-
-                        getUpload().rejectChunkId(chunk.getId());
-
-                        if (tot_bytes_up > 0) {
-
-                            getUpload().getPartialProgress().add(-1 * tot_bytes_up);
-
-                            getUpload().getProgress_meter().secureNotify();
-                        }
+                        throw new IOException("UPLOAD FAILED! (Completion handle is empty)");
 
                     } finally {
 
@@ -273,7 +258,6 @@ public class ChunkUploaderMono extends ChunkUploader {
                         }
 
                         if (httpresponse != null) {
-
                             httpresponse.close();
                         }
                     }
@@ -293,13 +277,8 @@ public class ChunkUploaderMono extends ChunkUploader {
 
         } catch (ChunkInvalidException e) {
 
-        } catch (IOException ex) {
+        } catch (URISyntaxException | IOException ex) {
 
-            getUpload().emergencyStopUploader(ex.getMessage());
-
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-
-        } catch (URISyntaxException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 

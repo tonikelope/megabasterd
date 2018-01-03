@@ -672,7 +672,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                     getMain_panel().getDownload_manager().secureNotify();
                                 } catch (UnsupportedEncodingException ex) {
-                                    Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                                 }
 
                             }

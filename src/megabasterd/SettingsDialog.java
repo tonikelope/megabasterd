@@ -1599,6 +1599,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 final DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
 
+                final int model_row_count = model.getRowCount();
+
                 status.setText("Checking your MEGA accounts, please wait...");
 
                 pack();
@@ -1625,13 +1627,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 final Dialog tthis = this;
 
-                swingInvoke(new Runnable() {
+                THREAD_POOL.execute(new Runnable() {
                     @Override
                     public void run() {
 
                         ArrayList<String> email_error = new ArrayList<>();
 
-                        for (int i = 0; i < model.getRowCount(); i++) {
+                        for (int i = 0; i < model_row_count; i++) {
 
                             String email = (String) model.getValueAt(i, 0);
 
@@ -1730,36 +1732,50 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 email_error_s += s + "\n";
                             }
 
-                            status.setText("");
+                            final String final_email_error = email_error_s;
 
-                            pack();
+                            swingInvoke(new Runnable() {
+                                @Override
+                                public void run() {
 
-                            JOptionPane.showMessageDialog(tthis, "There were errors with some accounts. Please, check them:\n\n" + email_error_s, "Error", JOptionPane.ERROR_MESSAGE);
+                                    status.setText("");
 
-                            save_button.setEnabled(true);
+                                    pack();
 
-                            cancel_button.setEnabled(true);
+                                    JOptionPane.showMessageDialog(tthis, "There were errors with some accounts. Please, check them:\n\n" + final_email_error, "Error", JOptionPane.ERROR_MESSAGE);
 
-                            remove_mega_account_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
+                                    save_button.setEnabled(true);
 
-                            remove_elc_account_button.setEnabled(elc_accounts_table.getModel().getRowCount() > 0);
+                                    cancel_button.setEnabled(true);
 
-                            add_mega_account_button.setEnabled(true);
+                                    remove_mega_account_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
 
-                            add_elc_account_button.setEnabled(true);
+                                    remove_elc_account_button.setEnabled(elc_accounts_table.getModel().getRowCount() > 0);
 
-                            mega_accounts_table.setEnabled(true);
+                                    add_mega_account_button.setEnabled(true);
 
-                            elc_accounts_table.setEnabled(true);
+                                    add_elc_account_button.setEnabled(true);
 
-                            delete_all_accounts_button.setEnabled(true);
+                                    mega_accounts_table.setEnabled(true);
 
-                            encrypt_pass_checkbox.setEnabled(true);
+                                    elc_accounts_table.setEnabled(true);
+
+                                    delete_all_accounts_button.setEnabled(true);
+
+                                    encrypt_pass_checkbox.setEnabled(true);
+
+                                }
+                            });
 
                         } else {
-                            status.setText("");
-                            JOptionPane.showMessageDialog(tthis, "Settings successfully saved!", "Settings saved", JOptionPane.INFORMATION_MESSAGE);
-                            setVisible(false);
+                            swingInvoke(new Runnable() {
+                                @Override
+                                public void run() {
+                                    status.setText("");
+                                    JOptionPane.showMessageDialog(tthis, "Settings successfully saved!", "Settings saved", JOptionPane.INFORMATION_MESSAGE);
+                                    setVisible(false);
+                                }
+                            });
                         }
                     }
                 });
@@ -2245,11 +2261,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     setVisible(false);
 
                 } catch (SQLException | ClassNotFoundException ex) {
-                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
             } catch (IOException ex) {
-                Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -2292,11 +2308,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     setVisible(false);
 
                 } catch (SQLException ex) {
-                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
             } catch (IOException ex) {
-                Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
     }//GEN-LAST:event_export_settings_buttonActionPerformed

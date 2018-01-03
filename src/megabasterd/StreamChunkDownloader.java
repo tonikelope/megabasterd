@@ -79,7 +79,7 @@ public class StreamChunkDownloader implements Runnable {
                             try {
                                 httpclient.close();
                             } catch (IOException ex) {
-                                Logger.getLogger(StreamChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             }
                         }
 
@@ -184,13 +184,13 @@ public class StreamChunkDownloader implements Runnable {
         } catch (IOException | URISyntaxException | ChunkInvalidException | InterruptedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(StreamChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } finally {
             if (httpclient != null) {
                 try {
                     httpclient.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(StreamChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }

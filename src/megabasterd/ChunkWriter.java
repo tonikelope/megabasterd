@@ -128,7 +128,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
                                 _download.getOutput_stream().write(buffer, 0, reads);
                             }
                         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                            Logger.getLogger(ChunkWriter.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
 
                         _bytes_written += current_chunk.getSize();
@@ -163,7 +163,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
 
     private long calculateLastWrittenChunk(long temp_file_size) {
         if (temp_file_size > 3584 * 1024) {
-            return 7 + (long) Math.ceil((temp_file_size - 3584 * 1024) / (1024 * 1024 * (_download.isUse_slots() ? Download.CHUNK_SIZE_MULTI : 1)));
+            return 7 + (long) Math.ceil((float) (temp_file_size - 3584 * 1024) / (1024 * 1024 * (_download.isUse_slots() ? Download.CHUNK_SIZE_MULTI : 1)));
         } else {
             int i = 0, tot = 0;
 

@@ -13,7 +13,7 @@ public final class ThrottledOutputStream extends OutputStream {
 
     private final StreamThrottlerSupervisor _stream_supervisor;
 
-    private Integer slice_size;
+    private Integer _slice_size;
 
     public ThrottledOutputStream(OutputStream rawStream, StreamThrottlerSupervisor stream_supervisor) {
 
@@ -21,8 +21,7 @@ public final class ThrottledOutputStream extends OutputStream {
 
         _stream_supervisor = stream_supervisor;
 
-        slice_size = null;
-
+        _slice_size = null;
     }
 
     @Override
@@ -30,31 +29,10 @@ public final class ThrottledOutputStream extends OutputStream {
 
         if (_stream_supervisor.getMaxBytesPerSecOutput() > 0) {
 
-            int writeLen = 0;
-
-            do {
-
-                throttle(len - writeLen);
-
-                if (slice_size != null) {
-
-                    _rawStream.write(b, off + writeLen, slice_size);
-
-                    writeLen += slice_size;
-
-                } else {
-
-                    _rawStream.write(b, off + writeLen, len - writeLen);
-
-                    writeLen = len;
-                }
-
-            } while (writeLen < len);
-
-        } else {
-
-            _rawStream.write(b, off, len);
+            throttle(len);
         }
+
+        _rawStream.write(b, off, _slice_size != null ? _slice_size : len);
     }
 
     @Override
@@ -63,34 +41,30 @@ public final class ThrottledOutputStream extends OutputStream {
         if (_stream_supervisor.getMaxBytesPerSecOutput() > 0) {
 
             throttle(1);
-
-            _rawStream.write(i);
-
-        } else {
-
-            _rawStream.write(i);
         }
+
+        _rawStream.write(i);
     }
 
-    private void throttle(int size) throws IOException {
+    private void throttle(int req_slice_size) throws IOException {
 
-        slice_size = null;
+        _slice_size = null;
 
-        while (_stream_supervisor.getMaxBytesPerSecOutput() > 0 && (_stream_supervisor.isQueue_swapping() || (slice_size = _stream_supervisor.getOutput_slice_queue().poll()) == null)) {
+        while (_stream_supervisor.getMaxBytesPerSecOutput() > 0 && (_stream_supervisor.isQueue_swapping() || (_slice_size = _stream_supervisor.getOutput_slice_queue().poll()) == null)) {
 
             _stream_supervisor.secureWait();
         }
 
-        if (slice_size != null && size < slice_size) {
+        if (_slice_size != null && req_slice_size < _slice_size) {
 
             if (!_stream_supervisor.isQueue_swapping()) {
 
-                _stream_supervisor.getOutput_slice_queue().add(slice_size - size);
+                _stream_supervisor.getOutput_slice_queue().add(_slice_size - req_slice_size);
 
                 _stream_supervisor.secureNotifyAll();
             }
 
-            slice_size = size;
+            _slice_size = req_slice_size;
         }
     }
 

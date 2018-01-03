@@ -165,7 +165,7 @@ public class SmartMegaProxyManager implements Runnable {
                     }
                 }
 
-                Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
 
                 if (_enabled) {
 
@@ -176,16 +176,16 @@ public class SmartMegaProxyManager implements Runnable {
             }
 
         } catch (MalformedURLException ex) {
-            Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (IOException | URISyntaxException ex) {
-            Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
 
     @Override
     public void run() {
 
-        Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: hello!", new Object[]{Thread.currentThread().getName()});
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: hello!", new Object[]{Thread.currentThread().getName()});
 
         _main_panel.getView().updateSmartProxyStatus("");
 
@@ -198,14 +198,14 @@ public class SmartMegaProxyManager implements Runnable {
                 try {
                     _refresh_lock.wait(1000 * REFRESH_PROXY_LIST_TIMEOUT);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
             }
         }
 
         _main_panel.getView().updateSmartProxyStatus("");
 
-        Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.INFO, "{0} Smart Proxy Manager: bye bye", new Object[]{Thread.currentThread().getName()});
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: bye bye", new Object[]{Thread.currentThread().getName()});
 
     }
 

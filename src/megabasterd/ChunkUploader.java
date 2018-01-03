@@ -207,6 +207,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                 } else {
 
                                     if (tot_bytes_up < chunk.getSize()) {
+
                                         if (tot_bytes_up > 0) {
 
                                             _upload.getPartialProgress().add(-1 * tot_bytes_up);
@@ -219,6 +220,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     } else {
 
                                         if (httpresponse != null && _upload.getCompletion_handle() == null) {
+
+                                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} all chunks uploaded. Waiting for completion handle...", new Object[]{Thread.currentThread().getName()});
 
                                             InputStream is = httpresponse.getEntity().getContent();
 
@@ -319,6 +322,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         _upload.rejectChunkId(chunk.getId());
                     }
+
                 } catch (IOException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
 
@@ -348,15 +352,12 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         } catch (ChunkInvalidException e) {
 
-        } catch (IOException ex) {
+        } catch (IOException | URISyntaxException ex) {
 
-            _upload.emergencyStopUploader(ex.getMessage());
-
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-
-        } catch (URISyntaxException ex) {
+            _upload.stopUploader();
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+
         }
 
         _upload.stopThisSlot(this);
