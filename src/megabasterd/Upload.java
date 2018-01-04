@@ -847,10 +847,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         getView().printStatusNormal("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***");
 
-                        if (!getMain_panel().getUpload_manager().getFinishing_uploads_queue().contains(this)) {
-                            getMain_panel().getUpload_manager().getFinishing_uploads_queue().add(this);
-                        }
-
                         File f = new File(_file_name);
 
                         HashMap<String, Object> upload_res;
@@ -944,24 +940,24 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             getMain_panel().getUpload_manager().secureNotify();
         }
 
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                getView().getClose_button().setVisible(true);
+                getView().getRestart_button().setVisible(true);
+
+                if (_status_error) {
+
+                    getView().getRestart_button().setEnabled(false);
+                }
+            }
+        });
+
         THREAD_POOL.execute(
                 new Runnable() {
             @Override
             public void run() {
-
-                swingInvoke(
-                        new Runnable() {
-                    @Override
-                    public void run() {
-                        getView().getClose_button().setVisible(true);
-                        getView().getRestart_button().setVisible(true);
-
-                        if (_status_error) {
-
-                            getView().getRestart_button().setEnabled(false);
-                        }
-                    }
-                });
 
                 if (_status_error) {
 
@@ -989,7 +985,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                         restart();
                     }
                 }
-
             }
         });
 

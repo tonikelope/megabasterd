@@ -17,13 +17,14 @@ import static megabasterd.MiscTools.*;
  */
 abstract public class TransferenceManager implements Runnable, SecureSingleThreadNotifiable {
 
-    private final ConcurrentLinkedQueue<Object> _transference_pre_queue;
+    private final ConcurrentLinkedQueue<Object> _transference_preprocess_global_queue;
+    private final ConcurrentLinkedQueue<Runnable> _transference_preprocess_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_provision_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_waitstart_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_remove_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_finished_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_running_list;
-    private final ConcurrentLinkedQueue<Runnable> _transference_preprocess_queue;
+
     private final javax.swing.JPanel _scroll_panel;
     private final javax.swing.JLabel _status;
     private final javax.swing.JButton _close_all_button;
@@ -58,7 +59,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _total_transferences_size = 0L;
         _secure_notify_lock = new Object();
         _queue_process_lock = new Object();
-        _transference_pre_queue = new ConcurrentLinkedQueue<>();
+        _transference_preprocess_global_queue = new ConcurrentLinkedQueue<>();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
         _transference_provision_queue = new ConcurrentLinkedQueue<>();
         _transference_remove_queue = new ConcurrentLinkedQueue<>();
@@ -67,8 +68,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_preprocess_queue = new ConcurrentLinkedQueue<>();
     }
 
-    public ConcurrentLinkedQueue<Object> getTransference_pre_queue() {
-        return _transference_pre_queue;
+    public ConcurrentLinkedQueue<Object> getTransference_preprocess_global_queue() {
+        return _transference_preprocess_global_queue;
     }
 
     abstract public void provision(Transference transference);
@@ -219,7 +220,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public void closeAllPreProWaiting() {
         _transference_preprocess_queue.clear();
 
-        _transference_pre_queue.clear();
+        _transference_preprocess_global_queue.clear();
 
         _transference_provision_queue.clear();
 
@@ -316,7 +317,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     private String _genStatus() {
 
-        int pre = _transference_pre_queue.size();
+        int pre = _transference_preprocess_global_queue.size();
 
         int prov = _transference_provision_queue.size();
 

@@ -87,7 +87,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             int_zoom_factor = Integer.parseInt(zoom_factor);
         }
 
-        zoom_spinner.setModel(new SpinnerNumberModel(int_zoom_factor, 50, 200, 10));
+        zoom_spinner.setModel(new SpinnerNumberModel(int_zoom_factor, 50, 250, 10));
         ((JSpinner.DefaultEditor) zoom_spinner.getEditor()).getTextField().setEditable(false);
 
         String default_download_dir = DBTools.selectSettingValue("default_down_dir");
@@ -913,7 +913,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_upload_slots_label.setText("Note: MULTI-SLOT seems to be more robust against upload errors but it might be slower.");
+        rec_upload_slots_label.setText("Note: MULTI-SLOT seems to be more robust against upload errors but it might be slower and consume more CPU/RAM.");
 
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
@@ -946,7 +946,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(limit_upload_speed_checkbox))
-                                .addGap(0, 322, Short.MAX_VALUE)))
+                                .addGap(0, 111, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         uploads_panelLayout.setVerticalGroup(
@@ -1199,7 +1199,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         proxy_warning_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        proxy_warning_label.setText("Note: Megabasterd will use this proxy for ALL connections (restart required).");
+        proxy_warning_label.setText("Note: MegaBasterd will use this proxy for ALL connections (restart required).");
         proxy_warning_label.setEnabled(false);
 
         proxy_auth_panel.setBorder(javax.swing.BorderFactory.createTitledBorder("Authentication"));

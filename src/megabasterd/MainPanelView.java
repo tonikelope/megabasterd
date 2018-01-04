@@ -621,7 +621,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     if (!urls.isEmpty()) {
 
-                        getMain_panel().getDownload_manager().getTransference_pre_queue().addAll(urls);
+                        getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(urls);
 
                         getMain_panel().getDownload_manager().secureNotify();
 
@@ -667,7 +667,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
                                 }
 
-                                getMain_panel().getDownload_manager().getTransference_pre_queue().remove(url);
+                                getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().remove(url);
 
                                 getMain_panel().getDownload_manager().secureNotify();
 
@@ -918,7 +918,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             if (dialog.isUpload() && dialog.getFiles().size() > 0) {
 
-                getMain_panel().getUpload_manager().getTransference_pre_queue().addAll(dialog.getFiles());
+                getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().addAll(dialog.getFiles());
 
                 getMain_panel().getUpload_manager().secureNotify();
 
@@ -991,7 +991,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                getMain_panel().getUpload_manager().getTransference_pre_queue().remove(f);
+                                getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
 
                                 getMain_panel().getUpload_manager().secureNotify();
 
