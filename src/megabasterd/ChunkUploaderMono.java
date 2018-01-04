@@ -159,7 +159,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                                     setError_wait(false);
                                 }
 
-                            } else if (!error) {
+                            } else if (!error && chunk.getOffset() + tot_bytes_up < getUpload().getFile_size()) {
 
                                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} has uploaded chunk {2}", new Object[]{Thread.currentThread().getName(), getId(), chunk.getId()});
 
@@ -201,6 +201,14 @@ public class ChunkUploaderMono extends ChunkUploader {
                 }
 
                 if (!error && chunk.getOffset() + tot_bytes_up == getUpload().getFile_size() && futureTask != null) {
+
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} has uploaded chunk {2}", new Object[]{Thread.currentThread().getName(), getId(), chunk.getId()});
+
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1} {2}", new Object[]{chunk.getOffset(), tot_bytes_up, getUpload().getFile_size()});
+
+                    getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
+
+                    getUpload().getMac_generator().secureNotify();
 
                     Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} has finished uploading all chunks. Waiting for completion handle...", new Object[]{Thread.currentThread().getName()});
 

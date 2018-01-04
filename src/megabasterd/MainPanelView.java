@@ -621,61 +621,60 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     if (!urls.isEmpty()) {
 
-                        getMain_panel().getDownload_manager().addPre_count(urls.size());
+                        getMain_panel().getDownload_manager().getTransference_pre_queue().addAll(urls);
 
                         getMain_panel().getDownload_manager().secureNotify();
 
                         for (String url : urls) {
 
-                            if (getMain_panel().getDownload_manager().getPre_count() > 0) {
-                                try {
-                                    url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
+                            try {
+                                url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
 
-                                    Download download;
+                                Download download;
 
-                                    if (findFirstRegex("#F!", url, 0) != null) {
+                                if (findFirstRegex("#F!", url, 0) != null) {
 
-                                        FolderLinkDialog fdialog = new FolderLinkDialog(_main_panel.getView(), true, url);
+                                    FolderLinkDialog fdialog = new FolderLinkDialog(_main_panel.getView(), true, url);
 
-                                        if (!fdialog.isMega_error()) {
+                                    if (!fdialog.isMega_error()) {
 
-                                            fdialog.setLocationRelativeTo(_main_panel.getView());
+                                        fdialog.setLocationRelativeTo(_main_panel.getView());
 
-                                            fdialog.setVisible(true);
+                                        fdialog.setVisible(true);
 
-                                            if (fdialog.isDownload()) {
+                                        if (fdialog.isDownload()) {
 
-                                                List<HashMap> folder_links = fdialog.getDownload_links();
+                                            List<HashMap> folder_links = fdialog.getDownload_links();
 
-                                                fdialog.dispose();
+                                            fdialog.dispose();
 
-                                                for (HashMap folder_link : folder_links) {
+                                            for (HashMap folder_link : folder_links) {
 
-                                                    download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
+                                                download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
 
-                                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-                                                }
+                                                getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
                                             }
-
                                         }
 
-                                        fdialog.dispose();
-
-                                    } else {
-
-                                        download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
-
-                                        getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
                                     }
 
-                                    getMain_panel().getDownload_manager().addPre_count(-1);
+                                    fdialog.dispose();
 
-                                    getMain_panel().getDownload_manager().secureNotify();
-                                } catch (UnsupportedEncodingException ex) {
-                                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                } else {
+
+                                    download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
+
+                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
                                 }
 
+                                getMain_panel().getDownload_manager().getTransference_pre_queue().remove(url);
+
+                                getMain_panel().getDownload_manager().secureNotify();
+
+                            } catch (UnsupportedEncodingException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             }
+
                         }
                     }
 
@@ -919,7 +918,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             if (dialog.isUpload() && dialog.getFiles().size() > 0) {
 
-                getMain_panel().getUpload_manager().addPre_count(dialog.getFiles().size());
+                getMain_panel().getUpload_manager().getTransference_pre_queue().addAll(dialog.getFiles());
 
                 getMain_panel().getUpload_manager().secureNotify();
 
@@ -957,46 +956,44 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             for (File f : dialog.getFiles()) {
 
-                                if (getMain_panel().getUpload_manager().getPre_count() > 0) {
-                                    String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
+                                String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
 
-                                    String[] dirs = file_path.split("/");
+                                String[] dirs = file_path.split("/");
 
-                                    MegaDirNode current_node = file_paths;
+                                MegaDirNode current_node = file_paths;
 
-                                    String file_parent = current_node.getNode_id();
+                                String file_parent = current_node.getNode_id();
 
-                                    for (String d : dirs) {
+                                for (String d : dirs) {
 
-                                        if (!d.isEmpty()) {
+                                    if (!d.isEmpty()) {
 
-                                            if (current_node.getChildren().get(d) != null) {
+                                        if (current_node.getChildren().get(d) != null) {
 
-                                                current_node = current_node.getChildren().get(d);
+                                            current_node = current_node.getChildren().get(d);
 
-                                                file_parent = current_node.getNode_id();
+                                            file_parent = current_node.getNode_id();
 
-                                            } else {
+                                        } else {
 
-                                                res = ma.createDirInsideAnotherSharedDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
+                                            res = ma.createDirInsideAnotherSharedDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
 
-                                                file_parent = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
+                                            file_parent = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
-                                                current_node.getChildren().put(d, new MegaDirNode(file_parent));
+                                            current_node.getChildren().put(d, new MegaDirNode(file_parent));
 
-                                                current_node = current_node.getChildren().get(d);
-                                            }
+                                            current_node = current_node.getChildren().get(d);
                                         }
                                     }
-
-                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, getMain_panel().isUse_slots_up(), getMain_panel().getDefault_slots_up());
-
-                                    getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
-
-                                    getMain_panel().getUpload_manager().addPre_count(-1);
-
-                                    getMain_panel().getUpload_manager().secureNotify();
                                 }
+
+                                Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, getMain_panel().isUse_slots_up(), getMain_panel().getDefault_slots_up());
+
+                                getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+
+                                getMain_panel().getUpload_manager().getTransference_pre_queue().remove(f);
+
+                                getMain_panel().getUpload_manager().secureNotify();
 
                             }
 

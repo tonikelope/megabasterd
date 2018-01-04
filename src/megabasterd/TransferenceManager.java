@@ -17,6 +17,7 @@ import static megabasterd.MiscTools.*;
  */
 abstract public class TransferenceManager implements Runnable, SecureSingleThreadNotifiable {
 
+    private final ConcurrentLinkedQueue<Object> _transference_pre_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_provision_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_waitstart_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_remove_queue;
@@ -31,14 +32,12 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private int _max_running_trans;
     private final MainPanel _main_panel;
     private final Object _secure_notify_lock;
-    private final Object _pre_count_lock;
     private final Object _queue_flag_lock;
     private boolean _notified;
     private volatile boolean _removing_transferences;
     private volatile boolean _provisioning_transferences;
     private volatile boolean _starting_transferences;
     private volatile boolean _preprocessing_transferences;
-    private volatile int _pre_count;
     private boolean _tray_icon_finish;
     protected long _total_transferences_size;
 
@@ -49,7 +48,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _starting_transferences = false;
         _preprocessing_transferences = false;
         _tray_icon_finish = false;
-        _pre_count = 0;
         _main_panel = main_panel;
         _max_running_trans = max_running_trans;
         _scroll_panel = scroll_panel;
@@ -59,14 +57,18 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _clean_all_menu = clean_all_menu;
         _total_transferences_size = 0L;
         _secure_notify_lock = new Object();
-        _pre_count_lock = new Object();
         _queue_flag_lock = new Object();
+        _transference_pre_queue = new ConcurrentLinkedQueue<>();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
         _transference_provision_queue = new ConcurrentLinkedQueue<>();
         _transference_remove_queue = new ConcurrentLinkedQueue<>();
         _transference_finished_queue = new ConcurrentLinkedQueue<>();
         _transference_running_list = new ConcurrentLinkedQueue<>();
         _transference_preprocess_queue = new ConcurrentLinkedQueue<>();
+    }
+
+    public ConcurrentLinkedQueue<Object> getTransference_pre_queue() {
+        return _transference_pre_queue;
     }
 
     abstract public void provision(Transference transference);
@@ -133,19 +135,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         return _transference_preprocess_queue;
     }
 
-    public void addPre_count(int pre_count) {
-
-        synchronized (_pre_count_lock) {
-
-            _pre_count += pre_count;
-
-            if (_pre_count < 0) {
-
-                _pre_count = 0;
-            }
-        }
-    }
-
     public void setMax_running_trans(int max_running_trans) {
         _max_running_trans = max_running_trans;
     }
@@ -179,10 +168,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public MainPanel getMain_panel() {
         return _main_panel;
-    }
-
-    public int getPre_count() {
-        return _pre_count;
     }
 
     public boolean isPreprocessing_transferences() {
@@ -234,7 +219,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public void closeAllPreProWaiting() {
         _transference_preprocess_queue.clear();
 
-        _pre_count = 0;
+        _transference_pre_queue.clear();
 
         _transference_provision_queue.clear();
 
@@ -336,6 +321,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     private String _genStatus() {
 
+        int pre = _transference_pre_queue.size();
+
         int prov = _transference_provision_queue.size();
 
         int rem = _transference_remove_queue.size();
@@ -346,14 +333,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         int finish = _transference_finished_queue.size();
 
-        if (!_tray_icon_finish && finish > 0 && _pre_count + prov + wait + run == 0 && !_main_panel.getView().isVisible()) {
+        if (!_tray_icon_finish && finish > 0 && pre + prov + wait + run == 0 && !_main_panel.getView().isVisible()) {
 
             _tray_icon_finish = true;
 
             _main_panel.getTrayicon().displayMessage("MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
         }
 
-        return (_pre_count + prov + rem + wait + run + finish > 0) ? "Pre: " + _pre_count + " / Pro: " + prov + " / Wait: " + wait + " / Run: " + run + " / Finish: " + finish + " / Rem: " + rem : "";
+        return (pre + prov + rem + wait + run + finish > 0) ? "Pre: " + pre + " / Pro: " + prov + " / Wait: " + wait + " / Run: " + run + " / Finish: " + finish + " / Rem: " + rem : "";
     }
 
     private boolean _isOKFinishedInQueue() {
