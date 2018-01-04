@@ -83,8 +83,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private boolean _retrying_request;
     private Double _progress_bar_rate;
     private OutputStream _output_stream;
-    private String _fatal_error;
-    private boolean _status_error;
+    private String _exit_message;
+    private boolean _error;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private long _last_chunk_id_dispatched;
     private final MegaAPI _ma;
@@ -94,8 +94,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _paused_workers = 0;
         _ma = ma;
         _last_chunk_id_dispatched = 0L;
-        _status_error = false;
-        _fatal_error = null;
+        _error = false;
+        _exit_message = null;
         _retrying_request = false;
         _checking_cbc = false;
         _finishing_download = false;
@@ -133,8 +133,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _paused_workers = 0;
         _ma = download.getMa();
         _last_chunk_id_dispatched = 0L;
-        _status_error = false;
-        _fatal_error = null;
+        _error = false;
+        _exit_message = null;
         _retrying_request = false;
         _checking_cbc = false;
         _finishing_download = false;
@@ -426,13 +426,12 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             }
         });
 
-        String exit_message;
-
         getView().printStatusNormal("Starting download, please wait...");
 
         try {
 
             if (!_exit) {
+
                 String filename = _download_path + "/" + _file_name;
 
                 _file = new File(filename);
@@ -444,6 +443,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 }
 
                 if (!_file.exists()) {
+
                     getView().printStatusNormal("Starting download (retrieving MEGA temp link), please wait...");
 
                     _last_download_url = getMegaFileDownloadUrl(_url);
@@ -636,21 +636,20 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                 getMain_panel().getDownload_manager().secureNotify();
 
                                 if (verifyFileCBCMAC(filename)) {
-                                    exit_message = "File successfully downloaded! (Integrity check PASSED)";
 
-                                    getView().printStatusOK(exit_message);
+                                    getView().printStatusOK("File successfully downloaded! (Integrity check PASSED)");
+
                                 } else if (!_exit) {
-                                    exit_message = "BAD NEWS :( File is DAMAGED!";
 
-                                    getView().printStatusError(exit_message);
+                                    getView().printStatusError("BAD NEWS :( File is DAMAGED!");
 
-                                    _status_error = true;
+                                    _error = true;
+
                                 } else {
-                                    exit_message = "File successfully downloaded! (but integrity check CANCELED)";
 
-                                    getView().printStatusOK(exit_message);
+                                    getView().printStatusOK("File successfully downloaded! (but integrity check CANCELED)");
 
-                                    _status_error = true;
+                                    _error = true;
 
                                 }
 
@@ -666,99 +665,70 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                 getView().updateProgressBar(MAX_VALUE);
 
                             } else {
-                                exit_message = "File successfully downloaded!";
 
-                                getView().printStatusOK(exit_message);
+                                getView().printStatusOK("File successfully downloaded!");
 
                             }
-                        } else if (_exit && _fatal_error == null) {
+
+                        } else if (_error) {
 
                             getView().hideAllExceptStatus();
 
-                            exit_message = "Download CANCELED!";
-
-                            getView().printStatusError(exit_message);
-
-                            _status_error = true;
-
-                            if (_file != null && !getView().isKeepTempFileSelected()) {
-                                _file.delete();
-                            }
-
-                        } else if (_fatal_error != null) {
-                            getView().hideAllExceptStatus();
-
-                            getView().printStatusError(_fatal_error);
-
-                            _status_error = true;
+                            getView().printStatusError(_exit_message != null ? _exit_message : "ERROR");
 
                         } else {
+
                             getView().hideAllExceptStatus();
 
-                            exit_message = "OOOPS!! Something (bad) happened but... what? Progress: " + String.valueOf(_progress) + " File size: " + String.valueOf(_file_size);
-
-                            getView().printStatusError(exit_message);
-
-                            _status_error = true;
-
+                            getView().printStatusError("Download CANCELED!");
                         }
 
-                    } else if (_fatal_error != null) {
+                    } else if (_error) {
+
                         getView().hideAllExceptStatus();
 
-                        getView().printStatusError(_fatal_error);
+                        getView().printStatusError(_exit_message != null ? _exit_message : "ERROR");
 
-                        _status_error = true;
                     } else {
+
                         getView().hideAllExceptStatus();
 
-                        exit_message = "Download CANCELED!";
-
-                        getView().printStatusError(exit_message);
-
-                        _status_error = true;
-
-                        if (_file != null && !getView().isKeepTempFileSelected()) {
-                            _file.delete();
-                        }
+                        getView().printStatusError("Download CANCELED!");
                     }
+
+                } else if (_error) {
+
+                    getView().hideAllExceptStatus();
+
+                    getView().printStatusError(_exit_message != null ? _exit_message : "ERROR");
 
                 } else {
 
                     getView().hideAllExceptStatus();
 
-                    exit_message = "File already exists!";
+                    getView().printStatusError("File already exists!");
 
-                    getView().printStatusError(exit_message);
-
-                    _status_error = true;
+                    _error = true;
                 }
 
-            } else if (_fatal_error != null) {
+            } else if (_error) {
+
                 getView().hideAllExceptStatus();
 
-                getView().printStatusError(_fatal_error);
+                getView().printStatusError(_exit_message != null ? _exit_message : "ERROR");
 
-                _status_error = true;
             } else {
+
                 getView().hideAllExceptStatus();
 
-                exit_message = "Download CANCELED!";
-
-                getView().printStatusError(exit_message);
-
-                _status_error = true;
-
-                if (_file != null && !getView().isKeepTempFileSelected()) {
-                    _file.delete();
-                }
+                getView().printStatusError("Download CANCELED!");
             }
+
         } catch (IOException ex) {
-            exit_message = "I/O ERROR " + ex.getMessage();
 
-            getView().printStatusError(exit_message);
+            getView().printStatusError("I/O ERROR " + ex.getMessage());
 
-            _status_error = true;
+            _error = true;
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
@@ -766,28 +736,36 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
-        if (!_exit) {
+        if (_file != null && !getView().isKeepTempFileSelected()) {
+            _file.delete();
+        }
 
-            if (!_status_error) {
+        if (!_error) {
 
-                try {
-                    deleteDownload(_url);
-                } catch (SQLException ex) {
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
-                }
-
+            try {
+                deleteDownload(_url);
+            } catch (SQLException ex) {
+                Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
             }
 
-            getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
-
-            getMain_panel().getDownload_manager().getTransference_finished_queue().add(this);
-
-            getMain_panel().getDownload_manager().getScroll_panel().remove(getView());
-
-            getMain_panel().getDownload_manager().getScroll_panel().add(getView());
-
-            getMain_panel().getDownload_manager().secureNotify();
         }
+
+        getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
+
+        getMain_panel().getDownload_manager().getTransference_finished_queue().add(this);
+
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+
+                getMain_panel().getDownload_manager().getScroll_panel().remove(getView());
+
+                getMain_panel().getDownload_manager().getScroll_panel().add(getView());
+            }
+        });
+
+        getMain_panel().getDownload_manager().secureNotify();
 
         swingInvoke(
                 new Runnable() {
@@ -796,11 +774,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 getView().getClose_button().setVisible(true);
 
-                if (_status_error) {
-                    getView().getRestart_button().setVisible(true);
-                }
+                getView().getRestart_button().setVisible(true);
             }
         });
+
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
     }
 
@@ -887,13 +864,13 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         if (!_provision_ok) {
 
-            _status_error = true;
+            _error = true;
 
             getView().hideAllExceptStatus();
 
-            if (_fatal_error != null) {
+            if (_exit_message != null) {
 
-                getView().printStatusError(_fatal_error);
+                getView().printStatusError(_exit_message);
 
             } else if (exit_message != null) {
 
@@ -1242,25 +1219,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             _exit = true;
 
-            try {
-                deleteDownload(_url);
-            } catch (SQLException ex) {
-                Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
-            }
-
-            getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
-
-            if (_provision_ok) {
-
-                getMain_panel().getDownload_manager().getTransference_finished_queue().add(this);
-            }
-
-            getMain_panel().getDownload_manager().getScroll_panel().remove(getView());
-
-            getMain_panel().getDownload_manager().getScroll_panel().add(getView());
-
-            getMain_panel().getDownload_manager().secureNotify();
-
             if (isRetrying_request()) {
 
                 getView().stop("Retrying cancelled! " + truncateText(_url, 80));
@@ -1286,13 +1244,11 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         }
     }
 
-    public void emergencyStopDownloader(String reason) {
+    public void StopDownloader(String reason) {
 
-        if (!_exit && _fatal_error == null) {
-            _fatal_error = reason != null ? reason : "FATAL ERROR!";
+        _exit_message = reason != null ? reason : "FATAL ERROR!";
 
-            stopDownloader();
-        }
+        stopDownloader();
     }
 
     public long calculateMaxTempFileSize(long size) {
@@ -1332,7 +1288,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 }
 
             } catch (MegaAPIException | MegaCrypterAPIException ex) {
+
                 error = true;
+
+                _error = true;
 
                 error_code = parseInt(ex.getMessage());
 
@@ -1341,31 +1300,31 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     switch (error_code) {
 
                         case -2:
-                            emergencyStopDownloader("Mega link is not valid! " + truncateText(link, 80));
+                            StopDownloader("Mega link is not valid! " + truncateText(link, 80));
                             break;
 
                         case -14:
-                            emergencyStopDownloader("Mega link is not valid! " + truncateText(link, 80));
+                            StopDownloader("Mega link is not valid! " + truncateText(link, 80));
                             break;
 
                         case 22:
-                            emergencyStopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
+                            StopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
                             break;
 
                         case 23:
-                            emergencyStopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
+                            StopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
                             break;
 
                         case 24:
-                            emergencyStopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
+                            StopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
                             break;
 
                         case 25:
-                            emergencyStopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
+                            StopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
                             break;
 
                         default:
-                            emergencyStopDownloader("MEGA/MC API FATAL ERROR: " + ex.getMessage() + " " + truncateText(link, 80));
+                            StopDownloader("MEGA/MC API FATAL ERROR: " + ex.getMessage() + " " + truncateText(link, 80));
                             break;
                     }
 
@@ -1408,7 +1367,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             } catch (Exception ex) {
 
                 if (!(ex instanceof MegaAPIException || ex instanceof MegaCrypterAPIException)) {
-                    emergencyStopDownloader("Mega link is not valid! " + truncateText(link, 80));
+                    StopDownloader("Mega link is not valid! " + truncateText(link, 80));
                 }
             }
 
@@ -1457,19 +1416,19 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 switch (error_code) {
                     case 22:
-                        emergencyStopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
+                        StopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
                         break;
 
                     case 23:
-                        emergencyStopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
+                        StopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
                         break;
 
                     case 24:
-                        emergencyStopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
+                        StopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
                         break;
 
                     case 25:
-                        emergencyStopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
+                        StopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
                         break;
 
                     default:
@@ -1578,7 +1537,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     @Override
     public boolean isStatusError() {
-        return _status_error;
+        return _error;
     }
 
 }

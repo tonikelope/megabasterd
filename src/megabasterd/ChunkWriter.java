@@ -151,7 +151,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
         } catch (IOException ex) {
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            _download.emergencyStopDownloader(ex.getMessage());
+            _download.StopDownloader(ex.getMessage());
         }
 
         _exit = true;

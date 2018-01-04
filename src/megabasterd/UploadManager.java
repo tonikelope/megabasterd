@@ -1,9 +1,6 @@
 package megabasterd;
 
 import java.awt.Component;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -43,18 +40,35 @@ public final class UploadManager extends TransferenceManager {
 
             if (getTransference_provision_queue().isEmpty()) {
 
-                sortTransferenceStartQueue();
+                synchronized (getQueue_process_lock()) {
 
-                for (Transference up : getTransference_waitstart_queue()) {
+                    sortTransferenceStartQueue();
 
-                    getScroll_panel().remove((Component) up.getView());
-                    getScroll_panel().add((Component) up.getView());
-                }
+                    for (final Transference up : getTransference_waitstart_queue()) {
 
-                for (Transference up : getTransference_finished_queue()) {
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                getScroll_panel().remove((Component) up.getView());
+                                getScroll_panel().add((Component) up.getView());
+                            }
+                        });
 
-                    getScroll_panel().remove((Component) up.getView());
-                    getScroll_panel().add((Component) up.getView());
+                    }
+
+                    for (final Transference up : getTransference_finished_queue()) {
+
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                getScroll_panel().remove((Component) up.getView());
+                                getScroll_panel().add((Component) up.getView());
+                            }
+                        });
+
+                    }
                 }
             }
         } else {
@@ -70,9 +84,15 @@ public final class UploadManager extends TransferenceManager {
 
         ArrayList<String[]> delete_up = new ArrayList<>();
 
-        for (Transference u : uploads) {
+        for (final Transference u : uploads) {
 
-            getScroll_panel().remove(((Upload) u).getView());
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+                    getScroll_panel().remove(((Upload) u).getView());
+                }
+            });
 
             getTransference_waitstart_queue().remove(u);
 
@@ -83,20 +103,6 @@ public final class UploadManager extends TransferenceManager {
             _total_transferences_size -= u.getFile_size();
 
             delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
-
-            try {
-
-                File temp_file = new File("." + HashString("SHA-1", u.getFile_name()));
-
-                if (temp_file.exists()) {
-
-                    temp_file.delete();
-                }
-
-            } catch (UnsupportedEncodingException | NoSuchAlgorithmException ex) {
-                Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
-            }
-
         }
 
         try {

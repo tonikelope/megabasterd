@@ -58,7 +58,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
         _clipboardspy = clipboardspy;
 
-        _mainPanelView = (MainPanelView) parent;
+        _mainPanelView = parent;
 
         _last_selected_account = "";
 

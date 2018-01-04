@@ -8,6 +8,7 @@ import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import static megabasterd.DBTools.*;
 import static megabasterd.MainPanel.*;
+import static megabasterd.MiscTools.swingInvoke;
 
 /**
  *
@@ -25,9 +26,15 @@ public final class DownloadManager extends TransferenceManager {
 
         ArrayList<String> delete_down = new ArrayList<>();
 
-        for (Transference d : downloads) {
+        for (final Transference d : downloads) {
 
-            getScroll_panel().remove(((Download) d).getView());
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+                    getScroll_panel().remove(((Download) d).getView());
+                }
+            });
 
             getTransference_waitstart_queue().remove(d);
 
@@ -54,7 +61,13 @@ public final class DownloadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference download) {
-        getScroll_panel().add(((Download) download).getView());
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                getScroll_panel().add(((Download) download).getView());
+            }
+        });
 
         try {
 
@@ -99,18 +112,34 @@ public final class DownloadManager extends TransferenceManager {
 
             if (getTransference_provision_queue().isEmpty()) {
 
-                sortTransferenceStartQueue();
+                synchronized (getQueue_process_lock()) {
 
-                for (Transference down : getTransference_waitstart_queue()) {
+                    sortTransferenceStartQueue();
 
-                    getScroll_panel().remove((Component) down.getView());
-                    getScroll_panel().add((Component) down.getView());
-                }
+                    for (final Transference down : getTransference_waitstart_queue()) {
 
-                for (Transference down : getTransference_finished_queue()) {
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                getScroll_panel().remove((Component) down.getView());
+                                getScroll_panel().add((Component) down.getView());
+                            }
+                        });
 
-                    getScroll_panel().remove((Component) down.getView());
-                    getScroll_panel().add((Component) down.getView());
+                    }
+
+                    for (final Transference down : getTransference_finished_queue()) {
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                getScroll_panel().remove((Component) down.getView());
+                                getScroll_panel().add((Component) down.getView());
+                            }
+                        });
+
+                    }
                 }
             }
 
