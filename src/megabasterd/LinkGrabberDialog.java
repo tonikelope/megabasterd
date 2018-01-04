@@ -113,7 +113,6 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("LinkGrabber");
-        setModal(true);
 
         links_textarea.setColumns(20);
         links_textarea.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N

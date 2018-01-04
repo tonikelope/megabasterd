@@ -1603,8 +1603,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 status.setText("Checking your MEGA accounts, please wait...");
 
-                pack();
-
                 save_button.setEnabled(false);
 
                 cancel_button.setEnabled(false);
@@ -1624,6 +1622,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 elc_accounts_table.setEnabled(false);
 
                 encrypt_pass_checkbox.setEnabled(false);
+
+                pack();
 
                 final Dialog tthis = this;
 

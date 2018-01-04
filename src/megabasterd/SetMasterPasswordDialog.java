@@ -88,6 +88,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("MasterPassword");
+        setModalExclusionType(java.awt.Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
         setResizable(false);
 
         confirm_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
@@ -181,7 +182,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                             .addComponent(confirm_pass_label))))
                 .addGap(18, 18, 18)
                 .addComponent(warning_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 31, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(ok_button)
