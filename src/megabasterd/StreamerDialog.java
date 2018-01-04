@@ -46,11 +46,11 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
      *
      * @param clipboardspy
      */
-    public StreamerDialog(java.awt.Frame parent, boolean modal, ClipboardSpy clipboardspy) {
+    public StreamerDialog(MainPanelView parent, boolean modal, ClipboardSpy clipboardspy) {
 
         super(parent, modal);
 
-        _main_panel = ((MainPanelView) parent).getMain_panel();
+        _main_panel = parent.getMain_panel();
 
         initComponents();
 

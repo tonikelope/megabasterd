@@ -59,11 +59,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
      * @param parent
      * @param modal
      */
-    public FileGrabberDialog(java.awt.Frame parent, boolean modal) {
+    public FileGrabberDialog(MainPanelView parent, boolean modal) {
 
         super(parent, modal);
 
-        _main_panel = ((MainPanelView) parent).getMain_panel();
+        _main_panel = parent.getMain_panel();
 
         initComponents();
 

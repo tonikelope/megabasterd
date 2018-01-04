@@ -32,7 +32,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private int _max_running_trans;
     private final MainPanel _main_panel;
     private final Object _secure_notify_lock;
-    private final Object _queue_flag_lock;
+    private final Object _queue_process_lock;
     private boolean _notified;
     private volatile boolean _removing_transferences;
     private volatile boolean _provisioning_transferences;
@@ -57,7 +57,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _clean_all_menu = clean_all_menu;
         _total_transferences_size = 0L;
         _secure_notify_lock = new Object();
-        _queue_flag_lock = new Object();
+        _queue_process_lock = new Object();
         _transference_pre_queue = new ConcurrentLinkedQueue<>();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
         _transference_provision_queue = new ConcurrentLinkedQueue<>();
@@ -77,14 +77,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public boolean isRemoving_transferences() {
 
-        synchronized (_queue_flag_lock) {
+        synchronized (_queue_process_lock) {
             return _removing_transferences;
         }
     }
 
     public void setRemoving_transferences(boolean removing) {
 
-        synchronized (_queue_flag_lock) {
+        synchronized (_queue_process_lock) {
             _removing_transferences = removing;
         }
     }
@@ -95,7 +95,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public boolean isProvisioning_transferences() {
 
-        synchronized (_queue_flag_lock) {
+        synchronized (_queue_process_lock) {
             return _provisioning_transferences;
         }
 
@@ -103,7 +103,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void setProvisioning_transferences(boolean provisioning) {
 
-        synchronized (_queue_flag_lock) {
+        synchronized (_queue_process_lock) {
             _provisioning_transferences = provisioning;
         }
 
@@ -111,21 +111,21 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public boolean isStarting_transferences() {
 
-        synchronized (_queue_flag_lock) {
+        synchronized (_queue_process_lock) {
             return _starting_transferences;
         }
     }
 
     public void setStarting_transferences(boolean starting) {
 
-        synchronized (_queue_flag_lock) {
+        synchronized (_queue_process_lock) {
             _starting_transferences = starting;
         }
     }
 
     public void setPreprocessing_transferences(boolean preprocessing) {
 
-        synchronized (_queue_flag_lock) {
+        synchronized (_queue_process_lock) {
             _preprocessing_transferences = preprocessing;
         }
 
@@ -172,7 +172,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public boolean isPreprocessing_transferences() {
 
-        synchronized (_queue_flag_lock) {
+        synchronized (_queue_process_lock) {
             return _preprocessing_transferences;
         }
 
@@ -309,11 +309,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 }
 
                 _status.setText(_genStatus());
-
-                _main_panel.getView().revalidate();
-
-                _main_panel.getView().repaint();
-
             }
         });
 

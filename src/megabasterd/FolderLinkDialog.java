@@ -48,13 +48,13 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
      * @param parent
      * @param link
      */
-    public FolderLinkDialog(java.awt.Frame parent, boolean modal, String link) {
+    public FolderLinkDialog(MainPanelView parent, boolean modal, String link) {
 
         super(parent, modal);
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, ((MainPanelView) parent).getMain_panel().getZoom_factor());
+        updateFonts(this.getRootPane(), DEFAULT_FONT, parent.getMain_panel().getZoom_factor());
 
         _mega_error = false;
         _total_space = 0L;

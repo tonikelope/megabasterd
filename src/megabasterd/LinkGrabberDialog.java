@@ -57,11 +57,11 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         return links_textarea;
     }
 
-    public LinkGrabberDialog(java.awt.Frame parent, boolean modal, String download_path, ClipboardSpy clipboardspy) {
+    public LinkGrabberDialog(MainPanelView parent, boolean modal, String download_path, ClipboardSpy clipboardspy) {
 
         super(parent, modal);
 
-        _main_panel = ((MainPanelView) parent).getMain_panel();
+        _main_panel = parent.getMain_panel();
 
         initComponents();
 

@@ -1047,7 +1047,7 @@ public final class MiscTools {
 
                     if (main_panel.getMaster_pass() == null) {
 
-                        GetMasterPasswordDialog pdialog = new GetMasterPasswordDialog((Frame) container.getParent(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt());
+                        GetMasterPasswordDialog pdialog = new GetMasterPasswordDialog((Frame) container.getParent(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt(), main_panel);
 
                         pdialog.setLocationRelativeTo(container);
 

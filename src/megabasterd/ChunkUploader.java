@@ -357,7 +357,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
             _upload.stopUploader();
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-
         }
 
         _upload.stopThisSlot(this);

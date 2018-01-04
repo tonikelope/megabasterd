@@ -48,13 +48,13 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
     /**
      * Creates new form MegaPassDialog
      */
-    public SetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String salt) {
+    public SetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String salt, MainPanel main_panel) {
 
         super(parent, modal);
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, ((MainPanelView) parent).getMain_panel().getZoom_factor());
+        updateFonts(this.getRootPane(), DEFAULT_FONT, main_panel.getZoom_factor());
 
         _pass_ok = false;
 
@@ -124,6 +124,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         lock_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/lock_medium.png"))); // NOI18N
         lock_label.setDoubleBuffered(true);
 
+        warning_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         warning_label.setText("WARNING: if you forget this password, you will have to insert all your accounts again.");
         warning_label.setDoubleBuffered(true);
 

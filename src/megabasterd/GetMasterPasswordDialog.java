@@ -57,12 +57,12 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
     /**
      * Creates new form MegaPassDialog
      */
-    public GetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String current_pass_hash, String salt) {
+    public GetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String current_pass_hash, String salt, MainPanel main_panel) {
         super(parent, modal);
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, ((MainPanelView) parent).getMain_panel().getZoom_factor());
+        updateFonts(this.getRootPane(), DEFAULT_FONT, main_panel.getZoom_factor());
 
         _current_pass_hash = current_pass_hash;
 

@@ -391,7 +391,7 @@ public final class CryptTools {
 
                             if (main_panel.getMaster_pass() == null) {
 
-                                GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(main_panel.getView(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt());
+                                GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(main_panel.getView(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt(), main_panel);
 
                                 dialog.setLocationRelativeTo(main_panel.getView());
 

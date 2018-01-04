@@ -63,11 +63,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
         return _remember_master_pass;
     }
 
-    public SettingsDialog(javax.swing.JFrame parent, boolean modal) {
+    public SettingsDialog(MainPanelView parent, boolean modal) {
 
         super(parent, modal);
 
-        _main_panel = ((MainPanelView) parent).getMain_panel();
+        _main_panel = parent.getMain_panel();
 
         initComponents();
 
@@ -1841,7 +1841,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             @Override
             public void run() {
 
-                SetMasterPasswordDialog dialog = new SetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_salt());
+                SetMasterPasswordDialog dialog = new SetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_salt(), _main_panel);
 
                 dialog.setLocationRelativeTo(tthis);
 
@@ -1985,7 +1985,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             @Override
             public void run() {
 
-                GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt());
+                GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt(), _main_panel);
 
                 dialog.setLocationRelativeTo(tthis);
 
