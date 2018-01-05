@@ -206,10 +206,6 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1} {2}", new Object[]{chunk.getOffset(), tot_bytes_up, getUpload().getFile_size()});
 
-                    getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
-
-                    getUpload().getMac_generator().secureNotify();
-
                     Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} has finished uploading all chunks. Waiting for completion handle...", new Object[]{Thread.currentThread().getName()});
 
                     try {
@@ -260,6 +256,10 @@ public class ChunkUploaderMono extends ChunkUploader {
                         throw new IOException("UPLOAD FAILED! (Completion handle is empty)");
 
                     } finally {
+
+                        getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
+
+                        getUpload().getMac_generator().secureNotify();
 
                         if (out != null) {
                             out.close();
