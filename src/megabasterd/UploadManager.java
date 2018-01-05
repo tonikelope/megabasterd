@@ -27,8 +27,14 @@ public final class UploadManager extends TransferenceManager {
     }
 
     @Override
-    public void provision(Transference upload) {
-        getScroll_panel().add(((Upload) upload).getView());
+    public void provision(final Transference upload) {
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                getScroll_panel().add(((Upload) upload).getView());
+            }
+        });
 
         ((Upload) upload).provisionIt();
 
@@ -38,39 +44,35 @@ public final class UploadManager extends TransferenceManager {
 
             getTransference_waitstart_queue().add(upload);
 
-            if (getTransference_provision_queue().isEmpty()) {
+            synchronized (getQueue_sort_lock()) {
 
-                synchronized (getQueue_process_lock()) {
+                if (!isPreprocessing_transferences() && !isProvisioning_transferences()) {
 
                     sortTransferenceStartQueue();
 
-                    for (final Transference up : getTransference_waitstart_queue()) {
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
 
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
+                            for (Transference up : getTransference_waitstart_queue()) {
+
                                 getScroll_panel().remove((Component) up.getView());
                                 getScroll_panel().add((Component) up.getView());
                             }
-                        });
 
-                    }
+                            for (Transference up : getTransference_finished_queue()) {
 
-                    for (final Transference up : getTransference_finished_queue()) {
-
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
                                 getScroll_panel().remove((Component) up.getView());
                                 getScroll_panel().add((Component) up.getView());
                             }
-                        });
+                        }
+                    });
 
-                    }
                 }
+
             }
+
         } else {
 
             getTransference_finished_queue().add(upload);

@@ -918,27 +918,32 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             getView().printStatusError(_exit_message);
         }
 
-        if (!_exit) {
+        if (!_status_error) {
 
-            if (!_status_error) {
-
-                try {
-                    DBTools.deleteUpload(_file_name, _ma.getFull_email());
-                } catch (SQLException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                }
+            try {
+                DBTools.deleteUpload(_file_name, _ma.getFull_email());
+            } catch (SQLException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
-
-            getMain_panel().getUpload_manager().getTransference_running_list().remove(this);
-
-            getMain_panel().getUpload_manager().getTransference_finished_queue().add(this);
-
-            getMain_panel().getUpload_manager().getScroll_panel().remove(getView());
-
-            getMain_panel().getUpload_manager().getScroll_panel().add(getView());
-
-            getMain_panel().getUpload_manager().secureNotify();
         }
+
+        getMain_panel().getUpload_manager().getTransference_running_list().remove(this);
+
+        getMain_panel().getUpload_manager().getTransference_finished_queue().add(this);
+
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+
+                getMain_panel().getUpload_manager().getScroll_panel().remove(getView());
+
+                getMain_panel().getUpload_manager().getScroll_panel().add(getView());
+
+                getMain_panel().getUpload_manager().secureNotify();
+
+            }
+        });
 
         swingInvoke(
                 new Runnable() {
@@ -1098,25 +1103,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         if (!_exit) {
 
             _exit = true;
-
-            try {
-                DBTools.deleteUpload(_file_name, _ma.getFull_email());
-            } catch (SQLException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            }
-
-            getMain_panel().getUpload_manager().getTransference_running_list().remove(this);
-
-            if (_provision_ok) {
-
-                getMain_panel().getUpload_manager().getTransference_finished_queue().add(this);
-            }
-
-            getMain_panel().getUpload_manager().getScroll_panel().remove(getView());
-
-            getMain_panel().getUpload_manager().getScroll_panel().add(getView());
-
-            getMain_panel().getUpload_manager().secureNotify();
 
             getView().stop("Stopping upload safely, please wait...");
 

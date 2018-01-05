@@ -110,36 +110,31 @@ public final class DownloadManager extends TransferenceManager {
 
             getTransference_waitstart_queue().add(download);
 
-            if (getTransference_provision_queue().isEmpty()) {
+            synchronized (getQueue_sort_lock()) {
 
-                synchronized (getQueue_process_lock()) {
+                if (!isPreprocessing_transferences() && !isProvisioning_transferences()) {
 
                     sortTransferenceStartQueue();
 
-                    for (final Transference down : getTransference_waitstart_queue()) {
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
 
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
+                            for (final Transference down : getTransference_waitstart_queue()) {
+
                                 getScroll_panel().remove((Component) down.getView());
                                 getScroll_panel().add((Component) down.getView());
                             }
-                        });
 
-                    }
+                            for (final Transference down : getTransference_finished_queue()) {
 
-                    for (final Transference down : getTransference_finished_queue()) {
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
                                 getScroll_panel().remove((Component) down.getView());
                                 getScroll_panel().add((Component) down.getView());
                             }
-                        });
 
-                    }
+                        }
+                    });
                 }
             }
 
