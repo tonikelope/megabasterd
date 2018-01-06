@@ -16,8 +16,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
@@ -37,7 +35,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int FUTURE_TIMEOUT = 120;
     private final int _id;
     private final Upload _upload;
     private volatile boolean _exit;
@@ -195,7 +192,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 if (!_exit) {
 
-                                    httpresponse = futureTask.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
+                                    httpresponse = futureTask.get();
 
                                 } else {
 
@@ -297,7 +294,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     conta_error = 0;
                                 }
 
-                            } catch (ExecutionException | InterruptedException | CancellationException | TimeoutException exception) {
+                            } catch (ExecutionException | InterruptedException | CancellationException exception) {
 
                                 Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
 
