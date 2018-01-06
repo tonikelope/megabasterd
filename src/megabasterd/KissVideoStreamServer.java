@@ -287,8 +287,8 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         StreamChunkWriter chunkwriter = null;
         ArrayList<StreamChunkDownloader> chunkworkers = new ArrayList<>();
-        final PipedInputStream pipein = new PipedInputStream();
-        final PipedOutputStream pipeout = new PipedOutputStream(pipein);
+        final PipedOutputStream pipeout = new PipedOutputStream();
+        final PipedInputStream pipein = new PipedInputStream(pipeout);
 
         long clength;
 

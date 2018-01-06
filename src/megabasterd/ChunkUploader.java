@@ -151,8 +151,10 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())))) {
 
-                            final PipedInputStream pipein = new PipedInputStream();
-                            final PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                            final PipedOutputStream pipeout = new PipedOutputStream();
+
+                            final PipedInputStream pipein = new PipedInputStream(pipeout);
+
                             futureTask = new FutureTask<>(new Callable() {
                                 @Override
                                 public CloseableHttpResponse call() throws IOException {
@@ -202,7 +204,12 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     httpresponse = null;
                                 }
 
-                                if (httpresponse != null && (http_status = httpresponse.getStatusLine().getStatusCode()) != HttpStatus.SC_OK) {
+                                if (httpresponse == null) {
+
+                                    error = true;
+
+                                } else if ((http_status = httpresponse.getStatusLine().getStatusCode()) != HttpStatus.SC_OK) {
+
                                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                                     error = true;
@@ -211,45 +218,39 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     if (tot_bytes_up < chunk.getSize()) {
 
-                                        if (tot_bytes_up > 0) {
-
-                                            _upload.getPartialProgress().add(-1 * tot_bytes_up);
-
-                                            _upload.getProgress_meter().secureNotify();
-                                        }
-
                                         error = true;
 
                                     } else {
 
                                         if (httpresponse != null && _upload.getCompletion_handle() == null) {
 
-                                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} all chunks uploaded. Waiting for completion handle...", new Object[]{Thread.currentThread().getName()});
-
                                             InputStream is = httpresponse.getEntity().getContent();
 
                                             try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                                while ((reads = is.read(buffer)) != -1) {
+                                                while (_upload.getCompletion_handle() == null && (reads = is.read(buffer)) != -1) {
 
                                                     byte_res.write(buffer, 0, reads);
                                                 }
 
-                                                String response = new String(byte_res.toByteArray());
+                                                if (_upload.getCompletion_handle() == null) {
 
-                                                if (response.length() > 0) {
+                                                    String response = new String(byte_res.toByteArray());
 
-                                                    if (MegaAPI.checkMEGAError(response) != 0) {
+                                                    if (response.length() > 0) {
 
-                                                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} UPLOAD FAILED! (MEGA ERROR: {1})", new Object[]{Thread.currentThread().getName(), MegaAPI.checkMEGAError(response)});
+                                                        if (MegaAPI.checkMEGAError(response) != 0) {
 
-                                                        error = true;
+                                                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} UPLOAD FAILED! (MEGA ERROR: {1})", new Object[]{Thread.currentThread().getName(), MegaAPI.checkMEGAError(response)});
 
-                                                    } else {
+                                                            error = true;
 
-                                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), response});
+                                                        } else {
 
-                                                        _upload.setCompletion_handle(response);
+                                                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), response});
+
+                                                            _upload.setCompletion_handle(response);
+                                                        }
                                                     }
                                                 }
                                             }
@@ -296,7 +297,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     conta_error = 0;
                                 }
 
-                            } catch (ExecutionException | InterruptedException | CancellationException exception) {
+                            } catch (ExecutionException | InterruptedException | CancellationException | TimeoutException exception) {
 
                                 Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
 
@@ -309,10 +310,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     _upload.getProgress_meter().secureNotify();
                                 }
 
-                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, exception);
-
-                            } catch (TimeoutException ex) {
-                                Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                             } finally {
 
                                 if (httpresponse != null) {

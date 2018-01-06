@@ -29,10 +29,21 @@ public final class ThrottledOutputStream extends OutputStream {
 
         if (_stream_supervisor.getMaxBytesPerSecOutput() > 0) {
 
-            throttle(len);
-        }
+            int written = 0;
 
-        _rawStream.write(b, off, _slice_size != null ? _slice_size : len);
+            do {
+
+                throttle(len - written);
+
+                _rawStream.write(b, off + written, _slice_size != null ? _slice_size : len - written);
+
+                written += _slice_size != null ? _slice_size : len - written;
+
+            } while (written < len);
+
+        } else {
+            _rawStream.write(b, off, len);
+        }
     }
 
     @Override

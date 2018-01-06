@@ -80,9 +80,9 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     final long postdata_length = getUpload().getFile_size() - chunk.getOffset();
 
-                    final PipedInputStream pipein = new PipedInputStream();
+                    final PipedOutputStream pipeout = new PipedOutputStream();
 
-                    final PipedOutputStream pipeout = new PipedOutputStream(pipein);
+                    final PipedInputStream pipein = new PipedInputStream(pipeout);
 
                     futureTask = new FutureTask<>(new Callable() {
                         @Override
