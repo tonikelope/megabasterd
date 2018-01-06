@@ -16,6 +16,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
@@ -190,7 +192,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 if (!_exit) {
 
-                                    httpresponse = futureTask.get();
+                                    httpresponse = futureTask.get(HTTP_TIMEOUT + 5, TimeUnit.SECONDS);
 
                                 } else {
 
@@ -308,6 +310,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, exception);
 
+                            } catch (TimeoutException ex) {
+                                Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
                             } finally {
 
                                 if (httpresponse != null) {

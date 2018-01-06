@@ -16,6 +16,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
@@ -210,7 +212,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     try {
 
-                        httpresponse = futureTask.get();
+                        httpresponse = futureTask.get(HTTP_TIMEOUT + 5, TimeUnit.SECONDS);
 
                         http_status = httpresponse.getStatusLine().getStatusCode();
 
@@ -251,7 +253,7 @@ public class ChunkUploaderMono extends ChunkUploader {
                             }
                         }
 
-                    } catch (ExecutionException | InterruptedException | CancellationException exception) {
+                    } catch (ExecutionException | InterruptedException | CancellationException | TimeoutException exception) {
 
                         throw new IOException("UPLOAD FAILED! (Completion handle is empty)");
 

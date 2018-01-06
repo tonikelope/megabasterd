@@ -950,9 +950,10 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             @Override
             public void run() {
                 getView().getClose_button().setVisible(true);
-                getView().getRestart_button().setVisible(true);
 
                 if (_status_error) {
+
+                    getView().getRestart_button().setVisible(true);
 
                     getView().getRestart_button().setEnabled(false);
                 }

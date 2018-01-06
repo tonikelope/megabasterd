@@ -84,7 +84,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private Double _progress_bar_rate;
     private OutputStream _output_stream;
     private String _exit_message;
-    private boolean _error;
+    private boolean _status_error;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private long _last_chunk_id_dispatched;
     private final MegaAPI _ma;
@@ -94,7 +94,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _paused_workers = 0;
         _ma = ma;
         _last_chunk_id_dispatched = 0L;
-        _error = false;
+        _status_error = false;
         _exit_message = null;
         _retrying_request = false;
         _checking_cbc = false;
@@ -133,7 +133,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _paused_workers = 0;
         _ma = download.getMa();
         _last_chunk_id_dispatched = 0L;
-        _error = false;
+        _status_error = false;
         _exit_message = null;
         _retrying_request = false;
         _checking_cbc = false;
@@ -643,13 +643,13 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                                     getView().printStatusError("BAD NEWS :( File is DAMAGED!");
 
-                                    _error = true;
+                                    _status_error = true;
 
                                 } else {
 
                                     getView().printStatusOK("File successfully downloaded! (but integrity check CANCELED)");
 
-                                    _error = true;
+                                    _status_error = true;
 
                                 }
 
@@ -670,7 +670,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                             }
 
-                        } else if (_error) {
+                        } else if (_status_error) {
 
                             getView().hideAllExceptStatus();
 
@@ -683,7 +683,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                             getView().printStatusError("Download CANCELED!");
                         }
 
-                    } else if (_error) {
+                    } else if (_status_error) {
 
                         getView().hideAllExceptStatus();
 
@@ -696,7 +696,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         getView().printStatusError("Download CANCELED!");
                     }
 
-                } else if (_error) {
+                } else if (_status_error) {
 
                     getView().hideAllExceptStatus();
 
@@ -708,10 +708,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     getView().printStatusError("File already exists!");
 
-                    _error = true;
+                    _status_error = true;
                 }
 
-            } else if (_error) {
+            } else if (_status_error) {
 
                 getView().hideAllExceptStatus();
 
@@ -728,7 +728,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             getView().printStatusError("I/O ERROR " + ex.getMessage());
 
-            _error = true;
+            _status_error = true;
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
@@ -740,7 +740,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             _file.delete();
         }
 
-        if (!_error) {
+        if (!_status_error) {
 
             try {
                 deleteDownload(_url);
@@ -774,7 +774,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 getView().getClose_button().setVisible(true);
 
-                getView().getRestart_button().setVisible(true);
+                if (_status_error) {
+
+                    getView().getRestart_button().setVisible(true);
+                }
             }
         });
 
@@ -864,7 +867,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         if (!_provision_ok) {
 
-            _error = true;
+            _status_error = true;
 
             getView().hideAllExceptStatus();
 
@@ -1291,7 +1294,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 error = true;
 
-                _error = true;
+                _status_error = true;
 
                 error_code = parseInt(ex.getMessage());
 
@@ -1537,7 +1540,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     @Override
     public boolean isStatusError() {
-        return _error;
+        return _status_error;
     }
 
 }
