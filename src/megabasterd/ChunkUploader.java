@@ -37,6 +37,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
+    public static final int FUTURE_TIMEOUT = 120;
     private final int _id;
     private final Upload _upload;
     private volatile boolean _exit;
@@ -192,7 +193,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 if (!_exit) {
 
-                                    httpresponse = futureTask.get(HTTP_TIMEOUT + 5, TimeUnit.SECONDS);
+                                    httpresponse = futureTask.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
 
                                 } else {
 

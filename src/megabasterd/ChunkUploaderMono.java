@@ -212,7 +212,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     try {
 
-                        httpresponse = futureTask.get(HTTP_TIMEOUT + 5, TimeUnit.SECONDS);
+                        httpresponse = futureTask.get(FUTURE_TIMEOUT, TimeUnit.SECONDS);
 
                         http_status = httpresponse.getStatusLine().getStatusCode();
 
