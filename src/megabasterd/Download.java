@@ -83,7 +83,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private boolean _retrying_request;
     private Double _progress_bar_rate;
     private OutputStream _output_stream;
-    private String _exit_message;
+    private String _status_error_message;
     private boolean _status_error;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private long _last_chunk_id_dispatched;
@@ -95,7 +95,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _ma = ma;
         _last_chunk_id_dispatched = 0L;
         _status_error = false;
-        _exit_message = null;
+        _status_error_message = null;
         _retrying_request = false;
         _checking_cbc = false;
         _finishing_download = false;
@@ -134,7 +134,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _ma = download.getMa();
         _last_chunk_id_dispatched = 0L;
         _status_error = false;
-        _exit_message = null;
+        _status_error_message = null;
         _retrying_request = false;
         _checking_cbc = false;
         _finishing_download = false;
@@ -674,33 +674,33 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                             getView().hideAllExceptStatus();
 
-                            getView().printStatusError(_exit_message != null ? _exit_message : "ERROR");
+                            getView().printStatusError(_status_error_message != null ? _status_error_message : "ERROR");
 
                         } else {
 
                             getView().hideAllExceptStatus();
 
-                            getView().printStatusError("Download CANCELED!");
+                            getView().printStatusNormal("Download CANCELED!");
                         }
 
                     } else if (_status_error) {
 
                         getView().hideAllExceptStatus();
 
-                        getView().printStatusError(_exit_message != null ? _exit_message : "ERROR");
+                        getView().printStatusError(_status_error_message != null ? _status_error_message : "ERROR");
 
                     } else {
 
                         getView().hideAllExceptStatus();
 
-                        getView().printStatusError("Download CANCELED!");
+                        getView().printStatusNormal("Download CANCELED!");
                     }
 
                 } else if (_status_error) {
 
                     getView().hideAllExceptStatus();
 
-                    getView().printStatusError(_exit_message != null ? _exit_message : "ERROR");
+                    getView().printStatusError(_status_error_message != null ? _status_error_message : "ERROR");
 
                 } else {
 
@@ -715,13 +715,13 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 getView().hideAllExceptStatus();
 
-                getView().printStatusError(_exit_message != null ? _exit_message : "ERROR");
+                getView().printStatusError(_status_error_message != null ? _status_error_message : "ERROR");
 
             } else {
 
                 getView().hideAllExceptStatus();
 
-                getView().printStatusError("Download CANCELED!");
+                getView().printStatusNormal("Download CANCELED!");
             }
 
         } catch (IOException ex) {
@@ -774,10 +774,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 getView().getClose_button().setVisible(true);
 
-                if (_status_error) {
-
-                    getView().getRestart_button().setVisible(true);
-                }
+                getView().getRestart_button().setVisible(true);
             }
         });
 
@@ -799,8 +796,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         });
 
         String[] file_info;
-
-        String exit_message = null;
 
         _provision_ok = false;
 
@@ -834,7 +829,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
 
-                        exit_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading or megabasterd.db file is corrupted :()";
+                        _status_error_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading or megabasterd.db file is corrupted :()";
                     }
 
                 }
@@ -849,7 +844,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 } catch (SQLException ex) {
 
-                    exit_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading)";
+                    _status_error_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading)";
                 }
             } else {
 
@@ -862,7 +857,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         } catch (NumberFormatException ex) {
 
-            exit_message = ex.getMessage();
+            _status_error_message = ex.getMessage();
         }
 
         if (!_provision_ok) {
@@ -871,14 +866,12 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             getView().hideAllExceptStatus();
 
-            if (_exit_message != null) {
+            if (_status_error_message == null) {
 
-                getView().printStatusError(_exit_message);
-
-            } else if (exit_message != null) {
-
-                getView().printStatusError(exit_message);
+                _status_error_message = "PROVISION FAILED";
             }
+
+            getView().printStatusError(_status_error_message);
 
             swingInvoke(
                     new Runnable() {
@@ -1249,7 +1242,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public void StopDownloader(String reason) {
 
-        _exit_message = reason != null ? reason : "FATAL ERROR!";
+        _status_error_message = reason != null ? reason : "FATAL ERROR!";
 
         stopDownloader();
     }

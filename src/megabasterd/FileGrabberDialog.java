@@ -53,12 +53,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         return _remember_master_pass;
     }
 
-    /**
-     * Creates new form FileGrabber
-     *
-     * @param parent
-     * @param modal
-     */
     public FileGrabberDialog(MainPanelView parent, boolean modal) {
 
         super(parent, modal);
@@ -342,7 +336,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         filechooser.setMultiSelectionEnabled(true);
 
-        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION && filechooser.getSelectedFile().canRead()) {
 
             total_file_size_label.setText("[0 B]");
 
@@ -427,7 +421,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         filechooser.setAcceptAllFileFilterUsed(false);
 
-        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION && filechooser.getSelectedFile().canRead()) {
 
             total_file_size_label.setText("[0 B]");
 
@@ -650,13 +644,13 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             for (File file : fList) {
 
-                if (file.isFile()) {
+                if (file.isFile() && file.canRead()) {
 
                     DefaultMutableTreeNode current_file = new DefaultMutableTreeNode(file.getName() + " [" + formatBytes(file.length()) + "]");
 
                     root.add(current_file);
 
-                } else if (file.isDirectory() && file.listFiles().length > 0) {
+                } else if (file.isDirectory() && file.canRead() && file.listFiles().length > 0) {
 
                     DefaultMutableTreeNode current_dir = new DefaultMutableTreeNode(file.getName());
 

@@ -41,6 +41,10 @@ public class SmartMegaProxyManager implements Runnable {
         _refresh_lock = new Object();
     }
 
+    public String getProxy_list_url() {
+        return _proxy_list_url;
+    }
+
     public boolean isEnabled() {
         return _enabled;
     }

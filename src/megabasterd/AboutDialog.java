@@ -45,6 +45,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         author_webpage_label = new javax.swing.JLabel();
         pica_roja_label = new javax.swing.JLabel();
         check_version_button = new javax.swing.JButton();
+        jLabel1 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("About");
@@ -70,9 +71,9 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        subtitle_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        subtitle_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
-        subtitle_label.setText("Made with love (and with no warranty)  by tonikelope.");
+        subtitle_label.setText("Yet another Java (1.8+) cross-platform mega.nz/megacrypter/ELC downloader/uploader/streamer suite. ");
         subtitle_label.setDoubleBuffered(true);
 
         mc_logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/mega_crypter.png"))); // NOI18N
@@ -93,9 +94,9 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        author_webpage_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        author_webpage_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
         author_webpage_label.setForeground(new java.awt.Color(102, 102, 102));
-        author_webpage_label.setText("http://toni.world");
+        author_webpage_label.setText("Made with love (and with no warranty) by tonikelope");
         author_webpage_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         author_webpage_label.setDoubleBuffered(true);
         author_webpage_label.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -122,6 +123,8 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/dot_com2.png"))); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -129,8 +132,14 @@ public final class AboutDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(mcdown_url_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(check_version_button))
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(made_in_spain_label)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -138,10 +147,6 @@ public final class AboutDialog extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(mc_logo_label))
                             .addComponent(author_webpage_label, javax.swing.GroupLayout.Alignment.TRAILING)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(mcdown_url_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(check_version_button))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(title_label)
@@ -156,20 +161,21 @@ public final class AboutDialog extends javax.swing.JDialog {
                 .addComponent(title_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(subtitle_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(mcdown_url_button)
                     .addComponent(check_version_button))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(made_in_spain_label)
+                    .addComponent(jLabel1)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(pica_roja_label, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(mc_logo_label, javax.swing.GroupLayout.Alignment.TRAILING))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(author_webpage_label)))
-                .addContainerGap())
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -243,6 +249,7 @@ public final class AboutDialog extends javax.swing.JDialog {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel author_webpage_label;
     private javax.swing.JButton check_version_button;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel made_in_spain_label;
     private javax.swing.JLabel mc_logo_label;
     private javax.swing.JButton mcdown_url_button;

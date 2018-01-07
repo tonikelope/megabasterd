@@ -188,7 +188,7 @@
                                       <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
                                       <Component id="use_mega_label" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="use_mega_account_down_combobox" min="-2" max="-2" attributes="0"/>
+                                      <Component id="use_mega_account_down_combobox" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
                                       <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
@@ -316,7 +316,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="14" style="2"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Note: if you want to download +5GB file with a FREE account you MUST enable MULTI SLOT. "/>
+                        <Property name="text" type="java.lang.String" value="Note: if you want to download without using a MEGA account (or using a FREE one) you SHOULD enable MULTI SLOT. "/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JSeparator" name="jSeparator3">
@@ -486,7 +486,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="18" style="0"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Mega account:"/>
+                        <Property name="text" type="java.lang.String" value="Mega account (default):"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JCheckBox" name="multi_slot_down_checkbox">
@@ -494,7 +494,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="18" style="1"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Use multi slot download mode (download restart needed)"/>
+                        <Property name="text" type="java.lang.String" value="Use multi slot download mode (download restart required)"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
                       </Properties>
                       <Events>
@@ -670,7 +670,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="1"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Use multi slot upload mode (upload restart needed)"/>
+                <Property name="text" type="java.lang.String" value="Use multi slot upload mode (upload restart required)"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
               <Events>

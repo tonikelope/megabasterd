@@ -38,9 +38,9 @@
                       <Component id="dance_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="links_label" pref="775" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="dlc_button" min="-2" max="-2" attributes="0"/>
+                      <Component id="links_label" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="118" max="-2" attributes="0"/>
+                      <Component id="dlc_button" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="use_mega_account_down_label" min="-2" max="-2" attributes="0"/>

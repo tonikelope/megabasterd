@@ -614,7 +614,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
 
         rec_download_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_download_slots_label.setText("Note: if you want to download +5GB file with a FREE account you MUST enable MULTI SLOT. ");
+        rec_download_slots_label.setText("Note: if you want to download without using a MEGA account (or using a FREE one) you SHOULD enable MULTI SLOT. ");
 
         megacrypter_reverse_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         megacrypter_reverse_checkbox.setText("Use Megacrypter reverse mode");
@@ -691,10 +691,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
         default_slots_down_label.setDoubleBuffered(true);
 
         use_mega_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        use_mega_label.setText("Mega account:");
+        use_mega_label.setText("Mega account (default):");
 
         multi_slot_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        multi_slot_down_checkbox.setText("Use multi slot download mode (download restart needed)");
+        multi_slot_down_checkbox.setText("Use multi slot download mode (download restart required)");
         multi_slot_down_checkbox.setDoubleBuffered(true);
         multi_slot_down_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -760,7 +760,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addGap(27, 27, 27)
                         .addComponent(use_mega_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(use_mega_account_down_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(27, 27, 27)
                         .addComponent(megacrypter_reverse_port_label)
@@ -891,7 +891,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_uploads_spinner.setDoubleBuffered(true);
 
         multi_slot_up_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        multi_slot_up_checkbox.setText("Use multi slot upload mode (upload restart needed)");
+        multi_slot_up_checkbox.setText("Use multi slot upload mode (upload restart required)");
         multi_slot_up_checkbox.setDoubleBuffered(true);
         multi_slot_up_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {

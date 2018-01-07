@@ -206,7 +206,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1} {2}", new Object[]{chunk.getOffset(), tot_bytes_up, getUpload().getFile_size()});
 
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} has finished uploading all chunks. Waiting for completion handle...", new Object[]{Thread.currentThread().getName()});
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} has finished uploading all chunks. Waiting for completion handle...", new Object[]{Thread.currentThread().getName()});
 
                     try {
 

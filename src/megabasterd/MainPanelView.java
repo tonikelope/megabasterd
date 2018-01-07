@@ -811,7 +811,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     THREAD_POOL.execute(this.getMain_panel().getProxy_manager());
 
-                } else {
+                } else if (!this.getMain_panel().getProxy_manager().getProxy_list_url().equals(this.getMain_panel().getUse_smart_proxy_url())) {
                     this.getMain_panel().getProxy_manager().setProxy_list_url(this.getMain_panel().getUse_smart_proxy_url());
                 }
 

@@ -187,8 +187,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(dance_button))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(links_label, javax.swing.GroupLayout.DEFAULT_SIZE, 775, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(links_label)
+                        .addGap(118, 118, 118)
                         .addComponent(dlc_button))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(use_mega_account_down_label)
@@ -351,6 +351,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             dance_button.setEnabled(true);
 
             pack();
+
         }
     }//GEN-LAST:event_dlc_buttonActionPerformed
 

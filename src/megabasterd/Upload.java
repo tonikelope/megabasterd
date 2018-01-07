@@ -29,7 +29,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final MainPanel _main_panel;
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
-    private String _exit_message;
+    private String _status_error_message;
     private String _dir_name;
     private volatile boolean _exit;
     private final int _slots;
@@ -353,15 +353,13 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         getView().printStatusNormal("Provisioning upload, please wait...");
 
-        String exit_msg = null;
-
         File the_file = new File(_file_name);
 
         _provision_ok = false;
 
         if (!the_file.exists()) {
 
-            exit_msg = "ERROR: FILE NOT FOUND -> " + _file_name;
+            _status_error_message = "ERROR: FILE NOT FOUND -> " + _file_name;
 
         } else {
 
@@ -385,7 +383,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     } catch (SQLException ex) {
 
-                        exit_msg = ex.getMessage();
+                        _status_error_message = ex.getMessage();
                     }
 
                 } else {
@@ -408,10 +406,12 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             getView().hideAllExceptStatus();
 
-            if (exit_msg != null) {
+            if (_status_error_message == null) {
 
-                getView().printStatusError(exit_msg);
+                _status_error_message = "PROVISION FAILED";
             }
+
+            getView().printStatusError(_status_error_message);
 
             swingInvoke(
                     new Runnable() {
@@ -861,8 +861,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
 
-                        _exit_message = "File successfully uploaded! (" + _ma.getFull_email() + ")";
-
                         try {
 
                             _file_link = _ma.getPublicFileLink(_fid, i32a2bin(node_key));
@@ -880,15 +878,13 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
 
-                        getView().printStatusOK(_exit_message);
+                        getView().printStatusOK("File successfully uploaded! (" + _ma.getFull_email() + ")");
 
                     } else {
 
                         getView().hideAllExceptStatus();
 
-                        _exit_message = "UPLOAD FAILED! (Empty completion handle!)";
-
-                        getView().printStatusError(_exit_message);
+                        getView().printStatusError("UPLOAD FAILED! (Empty completion handle!)");
 
                         _status_error = true;
                     }
@@ -897,25 +893,19 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     getView().hideAllExceptStatus();
 
-                    _exit_message = "Upload CANCELED!";
-
-                    getView().printStatusError(_exit_message);
+                    getView().printStatusNormal("Upload CANCELED!");
                 }
 
             } else {
                 getView().hideAllExceptStatus();
 
-                _exit_message = "Upload CANCELED!";
-
-                getView().printStatusError(_exit_message);
+                getView().printStatusNormal("Upload CANCELED!");
             }
 
         } else {
             getView().hideAllExceptStatus();
 
-            _exit_message = "Upload CANCELED!";
-
-            getView().printStatusError(_exit_message);
+            getView().printStatusNormal("Upload CANCELED!");
         }
 
         if (!_status_error) {
@@ -996,7 +986,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         getMain_panel().getUpload_manager().getFinishing_uploads_queue().remove(this);
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader finished with message ->  {1} {2}...", new Object[]{Thread.currentThread().getName(), _exit_message, this.getFile_name()});
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader finished with message ->  {1} {2}...", new Object[]{Thread.currentThread().getName(), _status_error_message, this.getFile_name()});
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader {1} BYE BYE", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
     }
