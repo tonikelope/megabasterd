@@ -23,11 +23,6 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     private final ClipboardSpy _clipboardspy;
     private final MainPanelView _mainPanelView;
     private final MainPanel _main_panel;
-    private volatile String _last_selected_account;
-
-    public String getLast_selected_account() {
-        return _last_selected_account;
-    }
 
     public JButton getDance_button() {
         return dance_button;
@@ -60,13 +55,23 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
         _mainPanelView = parent;
 
-        _last_selected_account = "";
-
         if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
 
-            use_mega_account_down_combobox.addItem(_main_panel.getMega_account_down());
-            use_mega_account_down_combobox.addItem("");
-            use_mega_account_down_combobox.setSelectedIndex(0);
+            THREAD_POOL.execute(new Runnable() {
+                @Override
+                public void run() {
+
+                    swingInvoke(new Runnable() {
+                        @Override
+                        public void run() {
+                            use_mega_account_down_combobox.addItem(_main_panel.getMega_account_down());
+                            use_mega_account_down_combobox.addItem("");
+                            use_mega_account_down_combobox.setSelectedIndex(0);
+                        }
+                    });
+
+                }
+            });
 
         } else {
 
@@ -210,7 +215,9 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                         if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
 
-                            data = Bin2UrlBASE64(((_last_selected_account != null ? _last_selected_account : "") + "|" + link).getBytes());
+                            String selected_account = (String) use_mega_account_down_combobox.getSelectedItem();
+
+                            data = Bin2UrlBASE64(((selected_account != null ? selected_account : "") + "|" + link).getBytes());
 
                             stream_link = "http://localhost:1337/video/" + data;
 
@@ -253,19 +260,21 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     private void use_mega_account_down_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_use_mega_account_down_comboboxItemStateChanged
         final String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
-        if (_main_panel.isUse_mega_account_down() && !selected_item.equals(_last_selected_account) && !"".equals(selected_item)) {
+        if (_main_panel.isUse_mega_account_down() && !"".equals(selected_item)) {
 
             use_mega_account_down_combobox.setEnabled(false);
 
             dance_button.setEnabled(false);
 
-            _last_selected_account = selected_item;
+            dance_button.setText("Checking MEGA account...");
+
+            pack();
 
             final String email = selected_item;
 
             final StreamerDialog tthis = this;
 
-            swingInvoke(new Runnable() {
+            THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
 
@@ -273,14 +282,29 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                         checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
                     } catch (Exception ex) {
 
-                        _last_selected_account = "";
-                        use_mega_account_down_combobox.setSelectedIndex(1);
+                        swingInvoke(new Runnable() {
+                            @Override
+                            public void run() {
+                                use_mega_account_down_combobox.setSelectedIndex(1);
 
+                            }
+                        });
                     }
 
-                    getUse_mega_account_down_combobox().setEnabled(true);
+                    swingInvoke(new Runnable() {
+                        @Override
+                        public void run() {
+                            getUse_mega_account_down_combobox().setEnabled(true);
 
-                    getDance_button().setEnabled(true);
+                            getDance_button().setText("Let's dance, baby");
+
+                            getDance_button().setEnabled(true);
+
+                            pack();
+
+                        }
+                    });
+
                 }
             });
         }

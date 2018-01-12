@@ -399,6 +399,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
         new_download_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        new_download_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-download-from-ftp-30.png"))); // NOI18N
         new_download_menu.setText("New download");
         new_download_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -408,6 +409,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(new_download_menu);
 
         new_upload_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        new_upload_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-upload-to-ftp-30.png"))); // NOI18N
         new_upload_menu.setText("New upload");
         new_upload_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -417,6 +419,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(new_upload_menu);
 
         new_stream_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        new_stream_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-video-playlist-30.png"))); // NOI18N
         new_stream_menu.setText("New stream");
         new_stream_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -427,6 +430,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(jSeparator4);
 
         clean_all_down_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        clean_all_down_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-trash-can-30.png"))); // NOI18N
         clean_all_down_menu.setText("Remove all no running downloads");
         clean_all_down_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -436,6 +440,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(clean_all_down_menu);
 
         clean_all_up_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        clean_all_up_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-trash-can-30.png"))); // NOI18N
         clean_all_up_menu.setText("Remove all no running uploads");
         clean_all_up_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -455,6 +460,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(hide_tray_menu);
 
         exit_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        exit_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-shutdown-30.png"))); // NOI18N
         exit_menu.setText("Exit");
         exit_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -470,6 +476,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         edit_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
         settings_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        settings_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-services-30.png"))); // NOI18N
         settings_menu.setText("Settings");
         settings_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

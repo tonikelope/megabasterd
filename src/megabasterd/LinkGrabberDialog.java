@@ -27,14 +27,9 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     private String _download_path;
     private final ClipboardSpy _clipboardspy;
     private final MainPanel _main_panel;
-    private volatile String _last_selected_account;
 
     public MainPanel getMain_panel() {
         return _main_panel;
-    }
-
-    public String getLast_selected_account() {
-        return _last_selected_account;
     }
 
     public JComboBox<String> getUse_mega_account_down_combobox() {
@@ -75,12 +70,24 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         download_dir_label.setText(truncateText(download_path, 80));
 
-        _last_selected_account = "";
-
         if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
-            use_mega_account_down_combobox.addItem(_main_panel.getMega_account_down());
-            use_mega_account_down_combobox.addItem("");
-            use_mega_account_down_combobox.setSelectedIndex(0);
+
+            THREAD_POOL.execute(new Runnable() {
+                @Override
+                public void run() {
+
+                    swingInvoke(new Runnable() {
+                        @Override
+                        public void run() {
+                            use_mega_account_down_combobox.addItem(_main_panel.getMega_account_down());
+                            use_mega_account_down_combobox.addItem("");
+                            use_mega_account_down_combobox.setSelectedIndex(0);
+                        }
+                    });
+
+                }
+            });
+
         } else {
             use_mega_account_down_combobox.setEnabled(false);
             use_mega_account_down_combobox.setVisible(false);
@@ -356,21 +363,24 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
     }//GEN-LAST:event_dlc_buttonActionPerformed
 
     private void use_mega_account_down_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_use_mega_account_down_comboboxItemStateChanged
+
         String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
-        if (_main_panel.isUse_mega_account_down() && !"".equals(selected_item) && !selected_item.equals(_last_selected_account)) {
+        if (_main_panel.isUse_mega_account_down() && !"".equals(selected_item)) {
 
             use_mega_account_down_combobox.setEnabled(false);
 
             dance_button.setEnabled(false);
 
-            _last_selected_account = selected_item;
+            dance_button.setText("Checking MEGA account...");
+
+            pack();
 
             final String email = selected_item;
 
             final LinkGrabberDialog tthis = this;
 
-            swingInvoke(new Runnable() {
+            THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
 
@@ -378,16 +388,32 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
                     } catch (Exception ex) {
 
-                        _last_selected_account = "";
+                        swingInvoke(new Runnable() {
+                            @Override
+                            public void run() {
+                                use_mega_account_down_combobox.setSelectedIndex(1);
 
-                        use_mega_account_down_combobox.setSelectedIndex(1);
+                            }
+                        });
                     }
 
-                    getUse_mega_account_down_combobox().setEnabled(true);
+                    swingInvoke(new Runnable() {
+                        @Override
+                        public void run() {
+                            getUse_mega_account_down_combobox().setEnabled(true);
 
-                    getDance_button().setEnabled(true);
+                            getDance_button().setText("Let's dance, baby");
+
+                            getDance_button().setEnabled(true);
+
+                            pack();
+
+                        }
+                    });
+
                 }
             });
+
         }
     }//GEN-LAST:event_use_mega_account_down_comboboxItemStateChanged
 
