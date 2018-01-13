@@ -88,6 +88,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private long _last_chunk_id_dispatched;
     private final MegaAPI _ma;
+    private volatile boolean _canceled;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
 
@@ -95,6 +96,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _ma = ma;
         _last_chunk_id_dispatched = 0L;
         _status_error = false;
+        _canceled = false;
         _status_error_message = null;
         _retrying_request = false;
         _checking_cbc = false;
@@ -134,6 +136,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _ma = download.getMa();
         _last_chunk_id_dispatched = 0L;
         _status_error = false;
+        _canceled = false;
         _status_error_message = null;
         _retrying_request = false;
         _checking_cbc = false;
@@ -312,7 +315,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public void stop() {
 
         if (!isExit()) {
-            stopDownloader();
+            getMain_panel().getDownload_manager().setPaused_all(false);
+            Download.this.stopDownloader();
         }
     }
 
@@ -678,6 +682,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         } else {
 
+                            _canceled = true;
+
                             getView().hideAllExceptStatus();
 
                             getView().printStatusNormal("Download CANCELED!");
@@ -690,6 +696,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         getView().printStatusError(_status_error_message != null ? _status_error_message : "ERROR");
 
                     } else {
+
+                        _canceled = true;
 
                         getView().hideAllExceptStatus();
 
@@ -718,6 +726,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 getView().printStatusError(_status_error_message != null ? _status_error_message : "ERROR");
 
             } else {
+
+                _canceled = true;
 
                 getView().hideAllExceptStatus();
 
@@ -772,9 +782,12 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             @Override
             public void run() {
 
-                getView().getClose_button().setVisible(true);
+                if (_status_error || _canceled) {
 
-                getView().getRestart_button().setVisible(true);
+                    getView().getClose_button().setVisible(true);
+
+                    getView().getRestart_button().setVisible(true);
+                }
             }
         });
 
@@ -1227,8 +1240,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 getView().stop("Stopping download safely, please wait...");
 
-                _main_panel.getDownload_manager().setPaused_all(false);
-
                 synchronized (_workers_lock) {
 
                     for (ChunkDownloader downloader : _chunkworkers) {
@@ -1242,7 +1253,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         }
     }
 
-    public void StopDownloader(String reason) {
+    public void stopDownloader(String reason) {
 
         _status_error_message = reason != null ? reason : "FATAL ERROR!";
 
@@ -1298,31 +1309,31 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     switch (error_code) {
 
                         case -2:
-                            StopDownloader("Mega link is not valid! " + truncateText(link, 80));
+                            stopDownloader("Mega link is not valid! " + truncateText(link, 80));
                             break;
 
                         case -14:
-                            StopDownloader("Mega link is not valid! " + truncateText(link, 80));
+                            stopDownloader("Mega link is not valid! " + truncateText(link, 80));
                             break;
 
                         case 22:
-                            StopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
+                            stopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
                             break;
 
                         case 23:
-                            StopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
+                            stopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
                             break;
 
                         case 24:
-                            StopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
+                            stopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
                             break;
 
                         case 25:
-                            StopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
+                            stopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
                             break;
 
                         default:
-                            StopDownloader("MEGA/MC API FATAL ERROR: " + ex.getMessage() + " " + truncateText(link, 80));
+                            stopDownloader("MEGA/MC API FATAL ERROR: " + ex.getMessage() + " " + truncateText(link, 80));
                             break;
                     }
 
@@ -1365,7 +1376,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             } catch (Exception ex) {
 
                 if (!(ex instanceof MegaAPIException || ex instanceof MegaCrypterAPIException)) {
-                    StopDownloader("Mega link is not valid! " + truncateText(link, 80));
+                    stopDownloader("Mega link is not valid! " + truncateText(link, 80));
                 }
             }
 
@@ -1414,19 +1425,19 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 switch (error_code) {
                     case 22:
-                        StopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
+                        stopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
                         break;
 
                     case 23:
-                        StopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
+                        stopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
                         break;
 
                     case 24:
-                        StopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
+                        stopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
                         break;
 
                     case 25:
-                        StopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
+                        stopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
                         break;
 
                     default:
@@ -1491,6 +1502,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             }
         }
 
+    }
+
+    public void setStatus_error(boolean status_error) {
+        _status_error = status_error;
     }
 
     public void rejectChunkId(long chunk_id) {

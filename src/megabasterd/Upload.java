@@ -69,12 +69,14 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final boolean _use_slots;
     private final boolean _restart;
     private volatile boolean _closed;
+    private volatile boolean _canceled;
 
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean use_slots, int slots) {
 
         _notified = false;
         _provision_ok = true;
         _status_error = false;
+        _canceled = false;
         _closed = false;
         _main_panel = main_panel;
         _ma = ma;
@@ -107,6 +109,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _notified = false;
         _provision_ok = true;
         _status_error = false;
+        _canceled = false;
         _closed = false;
         _restart = true;
         _main_panel = upload.getMain_panel();
@@ -460,6 +463,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     @Override
     public void stop() {
         if (!isExit()) {
+            getMain_panel().getUpload_manager().setPaused_all(false);
             stopUploader();
         }
     }
@@ -877,12 +881,14 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         getView().hideAllExceptStatus();
 
-                        getView().printStatusError("UPLOAD FAILED! (Empty completion handle!)");
+                        getView().printStatusError(_status_error_message != null ? _status_error_message : "UPLOAD FAILED! (Empty completion handle!)");
 
                         _status_error = true;
                     }
 
                 } else {
+
+                    _canceled = true;
 
                     getView().hideAllExceptStatus();
 
@@ -890,12 +896,18 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 }
 
             } else {
+
+                _canceled = true;
+
                 getView().hideAllExceptStatus();
 
                 getView().printStatusNormal("Upload CANCELED!");
             }
 
         } else {
+
+            _canceled = true;
+
             getView().hideAllExceptStatus();
 
             getView().printStatusNormal("Upload CANCELED!");
@@ -932,11 +944,14 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 new Runnable() {
             @Override
             public void run() {
+
                 getView().getClose_button().setVisible(true);
 
-                if (_status_error) {
-
+                if (_canceled) {
                     getView().getRestart_button().setVisible(true);
+                }
+
+                if (_status_error) {
 
                     getView().getRestart_button().setEnabled(false);
                 }
@@ -1098,6 +1113,10 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _exit = exit;
     }
 
+    public void setStatus_error(boolean status_error) {
+        _status_error = status_error;
+    }
+
     public void stopUploader() {
 
         if (!_exit) {
@@ -1105,8 +1124,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             _exit = true;
 
             getView().stop("Stopping upload safely, please wait...");
-
-            _main_panel.getUpload_manager().setPaused_all(false);
 
             synchronized (_workers_lock) {
 
@@ -1118,6 +1135,13 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             secureNotify();
         }
+    }
+
+    public void stopUploader(String reason) {
+
+        _status_error_message = reason != null ? reason : "FATAL ERROR!";
+
+        stopUploader();
     }
 
     @Override

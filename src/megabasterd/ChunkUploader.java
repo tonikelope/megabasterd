@@ -35,6 +35,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
+    public static final int MAX_SLOT_ERROR = 3;
     private final int _id;
     private final Upload _upload;
     private volatile boolean _exit;
@@ -117,7 +118,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
             conta_error = 0;
 
-            while (!_exit && !_upload.isStopped()) {
+            while (!_exit && !_upload.isStopped() && conta_error < MAX_SLOT_ERROR) {
                 chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url);
 
                 f.seek(chunk.getOffset());
@@ -227,7 +228,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     } else {
 
-                                        if (httpresponse != null && _upload.getCompletion_handle() == null) {
+                                        if (_upload.getCompletion_handle() == null) {
 
                                             InputStream is = httpresponse.getEntity().getContent();
 
@@ -304,6 +305,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                             } catch (ExecutionException | InterruptedException | CancellationException exception) {
 
+                                error = true;
+
                                 Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
 
                                 _upload.rejectChunkId(chunk.getId());
@@ -315,13 +318,31 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     _upload.getProgress_meter().secureNotify();
                                 }
 
+                                conta_error++;
+
+                                if (!_exit) {
+
+                                    _error_wait = true;
+
+                                    _upload.getView().updateSlotsStatus();
+
+                                    try {
+                                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                                    } catch (InterruptedException ex) {
+                                        Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+
+                                    _error_wait = false;
+
+                                    _upload.getView().updateSlotsStatus();
+                                }
+
                             } finally {
 
                                 if (httpresponse != null) {
 
                                     httpresponse.close();
                                 }
-
                             }
                         }
 
@@ -331,6 +352,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                     }
 
                 } catch (IOException ex) {
+
                     Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
 
                     _upload.rejectChunkId(chunk.getId());
@@ -340,6 +362,25 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                         _upload.getPartialProgress().add(-1 * tot_bytes_up);
 
                         _upload.getProgress_meter().secureNotify();
+                    }
+
+                    conta_error++;
+
+                    if (!_exit) {
+
+                        _error_wait = true;
+
+                        _upload.getView().updateSlotsStatus();
+
+                        try {
+                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                        } catch (InterruptedException exception) {
+                            Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, exception);
+                        }
+
+                        _error_wait = false;
+
+                        _upload.getView().updateSlotsStatus();
                     }
 
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -352,9 +393,16 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                     if (httpresponse != null) {
                         httpresponse.close();
                     }
-
                 }
+            }
 
+            if (conta_error == MAX_SLOT_ERROR) {
+
+                _upload.setStatus_error(true);
+
+                _upload.stopUploader("UPLOAD FAILED: too many errors");
+
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, "UPLOAD FAILED: too many errors");
             }
 
         } catch (ChunkInvalidException e) {

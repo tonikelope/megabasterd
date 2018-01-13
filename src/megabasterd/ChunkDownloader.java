@@ -19,6 +19,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
+    public static final int MAX_SLOT_ERROR = 3;
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
@@ -108,7 +109,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
             error = false;
             error509 = false;
 
-            while (!_exit && !_download.isStopped()) {
+            while (!_exit && !_download.isStopped() && conta_error < MAX_SLOT_ERROR) {
 
                 if (httpclient == null || error || _download.getMain_panel().isUse_smart_proxy()) {
 
@@ -272,6 +273,23 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         _download.getProgress_meter().secureNotify();
                     }
 
+                    conta_error++;
+
+                    if (!_exit) {
+
+                        _error_wait = true;
+
+                        _download.getView().updateSlotsStatus();
+
+                        if (!_download.getMain_panel().isUse_smart_proxy()) {
+                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                        }
+
+                        _error_wait = false;
+
+                        _download.getView().updateSlotsStatus();
+                    }
+
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 } catch (InterruptedException ex) {
@@ -280,10 +298,17 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 }
             }
 
+            if (conta_error == MAX_SLOT_ERROR) {
+
+                _download.setStatus_error(true);
+
+                _download.stopDownloader("DOWNLOAD FAILED: too many errors");
+            }
+
         } catch (ChunkInvalidException e) {
 
         } catch (IOException ex) {
-            _download.StopDownloader(ex.getMessage());
+            _download.stopDownloader(ex.getMessage());
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (URISyntaxException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);

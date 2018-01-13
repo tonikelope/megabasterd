@@ -185,7 +185,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
-            getDownload().StopDownloader(ex.getMessage());
+            getDownload().stopDownloader(ex.getMessage());
 
         } catch (URISyntaxException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
