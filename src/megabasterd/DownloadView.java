@@ -246,7 +246,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         slot_status_label.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        slot_status_label.setText("slot_status");
         slot_status_label.setDoubleBuffered(true);
 
         open_folder_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
