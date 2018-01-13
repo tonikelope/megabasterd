@@ -108,6 +108,14 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                                     getDownload().pause_worker_mono();
 
                                     secureWait();
+
+                                } else if (!getDownload().isPaused() && getDownload().getMain_panel().getDownload_manager().isPaused_all()) {
+
+                                    getDownload().pause();
+
+                                    getDownload().pause_worker_mono();
+
+                                    secureWait();
                                 }
                             }
 

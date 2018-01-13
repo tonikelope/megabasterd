@@ -39,11 +39,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private volatile boolean _provisioning_transferences;
     private volatile boolean _starting_transferences;
     private volatile boolean _preprocessing_transferences;
+    private volatile boolean _paused_all;
     private boolean _tray_icon_finish;
     protected long _total_transferences_size;
 
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
+        _paused_all = false;
         _removing_transferences = false;
         _provisioning_transferences = false;
         _starting_transferences = false;
@@ -66,6 +68,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_finished_queue = new ConcurrentLinkedQueue<>();
         _transference_running_list = new ConcurrentLinkedQueue<>();
         _transference_preprocess_queue = new ConcurrentLinkedQueue<>();
+    }
+
+    public boolean isPaused_all() {
+        return _paused_all;
+    }
+
+    public void setPaused_all(boolean paused_all) {
+        _paused_all = paused_all;
     }
 
     public ConcurrentLinkedQueue<Object> getTransference_preprocess_global_queue() {
@@ -280,6 +290,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     }
 
                     _pause_all_button.setVisible(show_pause_all);
+
+                    _paused_all = !show_pause_all;
 
                 } else {
 

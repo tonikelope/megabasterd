@@ -124,6 +124,14 @@ public class ChunkUploaderMono extends ChunkUploader {
                                     getUpload().pause_worker();
 
                                     secureWait();
+
+                                } else if (!getUpload().isPaused() && getUpload().getMain_panel().getUpload_manager().isPaused_all()) {
+
+                                    getUpload().pause();
+
+                                    getUpload().pause_worker_mono();
+
+                                    secureWait();
                                 }
                             }
                         }

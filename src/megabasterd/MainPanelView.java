@@ -314,7 +314,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE)
+                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(down_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -323,7 +323,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(pause_all_down_button)))
         );
 
-        jTabbedPane1.addTab("Downloads", downloads_panel);
+        jTabbedPane1.addTab("Downloads", new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-download-from-ftp-30.png")), downloads_panel); // NOI18N
 
         global_speed_up_label.setFont(new java.awt.Font("Dialog", 1, 54)); // NOI18N
         global_speed_up_label.setText("Speed");
@@ -383,7 +383,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 355, Short.MAX_VALUE)
+                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(up_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -392,7 +392,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(pause_all_up_button)))
         );
 
-        jTabbedPane1.addTab("Uploads", uploads_panel);
+        jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-upload-to-ftp-30.png")), uploads_panel); // NOI18N
 
         file_menu.setText("File");
         file_menu.setDoubleBuffered(true);

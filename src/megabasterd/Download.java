@@ -152,8 +152,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _file_size = download.getFile_size();
         _file_pass = download.getFile_pass();
         _file_noexpire = download.getFile_noexpire();
-        _use_slots = download.isUse_slots();
-        _slots = download.getSlots();
+        _use_slots = download.getMain_panel().isUse_slots_down();
+        _slots = download.getMain_panel().getDefault_slots_down();
         _restart = true;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
@@ -1226,6 +1226,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             } else {
 
                 getView().stop("Stopping download safely, please wait...");
+
+                _main_panel.getDownload_manager().setPaused_all(false);
 
                 synchronized (_workers_lock) {
 

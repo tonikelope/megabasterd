@@ -118,8 +118,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _root_node = upload.getRoot_node();
         _share_key = upload.getShare_key();
         _folder_link = upload.getFolder_link();
-        _use_slots = upload.isUse_slots();
-        _slots = upload.getSlots();
+        _use_slots = upload.getMain_panel().isUse_slots_up();
+        _slots = upload.getMain_panel().getDefault_slots_up();
         _progress = 0L;
         _last_chunk_id_dispatched = 0L;
         _completion_handle = null;
@@ -370,21 +370,14 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 if (upload_progress == null) {
 
-                    try {
+                    if (_ul_key == null) {
 
-                        if (_ul_key == null) {
-
-                            _ul_key = _ma.genUploadKey();
-                        }
+                        _ul_key = _ma.genUploadKey();
 
                         DBTools.insertUpload(_file_name, _ma.getFull_email(), _parent_node, Bin2BASE64(i32a2bin(_ul_key)), _root_node, Bin2BASE64(_share_key), _folder_link);
-
-                        _provision_ok = true;
-
-                    } catch (SQLException ex) {
-
-                        _status_error_message = ex.getMessage();
                     }
+
+                    _provision_ok = true;
 
                 } else {
 
@@ -395,7 +388,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     _provision_ok = true;
                 }
 
-            } catch (Exception ex) {
+            } catch (SQLException ex) {
                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
@@ -1014,6 +1007,22 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     }
 
+    public void pause_worker_mono() {
+
+        getView().printStatusNormal("Upload paused!");
+
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+
+                getView().getPause_button().setText("RESUME UPLOAD");
+                getView().getPause_button().setEnabled(true);
+            }
+        });
+
+    }
+
     public void stopThisSlot(ChunkUploader chunkuploader) {
 
         synchronized (_workers_lock) {
@@ -1096,6 +1105,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             _exit = true;
 
             getView().stop("Stopping upload safely, please wait...");
+
+            _main_panel.getUpload_manager().setPaused_all(false);
 
             synchronized (_workers_lock) {
 

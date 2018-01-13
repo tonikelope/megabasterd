@@ -198,6 +198,14 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                     _download.pause_worker();
 
                                     secureWait();
+
+                                } else if (!_download.isPaused() && _download.getMain_panel().getDownload_manager().isPaused_all()) {
+
+                                    _download.pause();
+
+                                    _download.pause_worker();
+
+                                    secureWait();
                                 }
                             }
 
