@@ -109,7 +109,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
             error = false;
             error509 = false;
 
-            while (!_exit && !_download.isStopped() && conta_error < MAX_SLOT_ERROR) {
+            while (!_exit && !_download.isStopped() && (conta_error < MAX_SLOT_ERROR || _download.getMain_panel().isUse_smart_proxy())) {
 
                 if (httpclient == null || error || _download.getMain_panel().isUse_smart_proxy()) {
 

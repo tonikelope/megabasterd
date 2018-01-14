@@ -651,7 +651,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         verify_file_down_checkbox.setDoubleBuffered(true);
 
         use_mega_account_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        use_mega_account_down_checkbox.setText("Use MEGA account for download/stream");
+        use_mega_account_down_checkbox.setText("Use MEGA accounts for download/stream");
         use_mega_account_down_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
                 use_mega_account_down_checkboxStateChanged(evt);

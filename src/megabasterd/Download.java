@@ -782,9 +782,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             @Override
             public void run() {
 
-                if (_status_error || _canceled) {
+                getView().getClose_button().setVisible(true);
 
-                    getView().getClose_button().setVisible(true);
+                if (_status_error || _canceled) {
 
                     getView().getRestart_button().setVisible(true);
                 }
