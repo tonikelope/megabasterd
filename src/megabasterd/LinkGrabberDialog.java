@@ -144,6 +144,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         links_label.setDoubleBuffered(true);
 
         change_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        change_dir_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-folder-30.png"))); // NOI18N
         change_dir_button.setText("Change it");
         change_dir_button.setDoubleBuffered(true);
         change_dir_button.addActionListener(new java.awt.event.ActionListener() {
@@ -160,6 +161,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         download_dir_label.setText("default dir");
 
         dlc_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        dlc_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-add-file-30.png"))); // NOI18N
         dlc_button.setText("Load DLC container");
         dlc_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -190,7 +192,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(down_dir_to_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(download_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, 366, Short.MAX_VALUE)
+                        .addComponent(download_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, 329, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(dance_button))
                     .addGroup(layout.createSequentialGroup()
@@ -211,18 +213,18 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     .addComponent(links_label)
                     .addComponent(dlc_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(links_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 349, Short.MAX_VALUE)
+                .addComponent(links_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 330, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(use_mega_account_down_label)
                     .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(change_dir_button)
                     .addComponent(down_dir_to_label)
                     .addComponent(download_dir_label)
                     .addComponent(dance_button))
-                .addContainerGap())
+                .addGap(6, 6, 6))
         );
 
         pack();

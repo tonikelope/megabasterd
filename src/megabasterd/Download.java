@@ -327,6 +327,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             setPause(false);
 
+            getMain_panel().getDownload_manager().setPaused_all(false);
+
             setPaused_workers(0);
 
             synchronized (_workers_lock) {

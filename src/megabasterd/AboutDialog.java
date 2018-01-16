@@ -71,9 +71,9 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        subtitle_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        subtitle_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
-        subtitle_label.setText("Yet another Java (1.8+) cross-platform mega.nz/megacrypter/ELC downloader/uploader/streamer suite. ");
+        subtitle_label.setText("Yet another cross-platform MEGA.NZ downloader/uploader/streamer suite. ");
         subtitle_label.setDoubleBuffered(true);
 
         mc_logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/mega_crypter.png"))); // NOI18N

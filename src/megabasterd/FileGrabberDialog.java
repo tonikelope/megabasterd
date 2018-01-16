@@ -179,6 +179,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         used_space_label.setDoubleBuffered(true);
 
         add_folder_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        add_folder_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-add-folder-30.png"))); // NOI18N
         add_folder_button.setText("Add folder");
         add_folder_button.setDoubleBuffered(true);
         add_folder_button.setEnabled(false);
@@ -189,6 +190,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         });
 
         add_files_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        add_files_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-add-file-30.png"))); // NOI18N
         add_files_button.setText("Add files");
         add_files_button.setDoubleBuffered(true);
         add_files_button.setEnabled(false);

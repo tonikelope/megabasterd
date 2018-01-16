@@ -66,6 +66,9 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="18" style="1"/>
         </Property>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/megabasterd/icons/icons8-save-all-30.png"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="SAVE"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
@@ -77,6 +80,9 @@
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="18" style="1"/>
+        </Property>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/megabasterd/icons/icons8-cancel-30.png"/>
         </Property>
         <Property name="text" type="java.lang.String" value="CANCEL"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -437,6 +443,9 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="18" style="1"/>
                         </Property>
+                        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                          <Image iconType="3" name="/megabasterd/icons/icons8-folder-30.png"/>
+                        </Property>
                         <Property name="text" type="java.lang.String" value="Change it"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
                       </Properties>
@@ -790,7 +799,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="134" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="122" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -799,7 +808,7 @@
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="134" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="122" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -854,6 +863,9 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="1"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/megabasterd/icons/icons8-minus-30.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Remove selected"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
                 <Property name="enabled" type="boolean" value="false"/>
@@ -866,6 +878,9 @@
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="1"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/megabasterd/icons/icons8-plus-30.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Add account"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -897,6 +912,9 @@
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/megabasterd/icons/icons8-trash-can-30.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="RESET ACCOUNTS"/>
               </Properties>
               <Events>
@@ -913,6 +931,9 @@
                 </Property>
                 <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/megabasterd/icons/icons8-key-2-30.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Unlock accounts"/>
               </Properties>
@@ -960,6 +981,9 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="1"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/megabasterd/icons/icons8-minus-30.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="Remove selected"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
                 <Property name="enabled" type="boolean" value="false"/>
@@ -972,6 +996,9 @@
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="1"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/megabasterd/icons/icons8-plus-30.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Add account"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>

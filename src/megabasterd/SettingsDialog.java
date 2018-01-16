@@ -588,6 +588,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         setTitle("Settings");
 
         save_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        save_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-save-all-30.png"))); // NOI18N
         save_button.setText("SAVE");
         save_button.setDoubleBuffered(true);
         save_button.addActionListener(new java.awt.event.ActionListener() {
@@ -597,6 +598,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         cancel_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        cancel_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-cancel-30.png"))); // NOI18N
         cancel_button.setText("CANCEL");
         cancel_button.setDoubleBuffered(true);
         cancel_button.addActionListener(new java.awt.event.ActionListener() {
@@ -667,6 +669,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
 
         change_download_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        change_download_dir_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-folder-30.png"))); // NOI18N
         change_download_dir_button.setText("Change it");
         change_download_dir_button.setDoubleBuffered(true);
         change_download_dir_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1006,6 +1009,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         mega_accounts_label.setDoubleBuffered(true);
 
         remove_mega_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        remove_mega_account_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-minus-30.png"))); // NOI18N
         remove_mega_account_button.setText("Remove selected");
         remove_mega_account_button.setDoubleBuffered(true);
         remove_mega_account_button.setEnabled(false);
@@ -1016,6 +1020,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         add_mega_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        add_mega_account_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-plus-30.png"))); // NOI18N
         add_mega_account_button.setText("Add account");
         add_mega_account_button.setDoubleBuffered(true);
         add_mega_account_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1036,6 +1041,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         delete_all_accounts_button.setBackground(new java.awt.Color(255, 51, 0));
         delete_all_accounts_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         delete_all_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
+        delete_all_accounts_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-trash-can-30.png"))); // NOI18N
         delete_all_accounts_button.setText("RESET ACCOUNTS");
         delete_all_accounts_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1046,6 +1052,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         unlock_accounts_button.setBackground(new java.awt.Color(0, 153, 51));
         unlock_accounts_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         unlock_accounts_button.setForeground(new java.awt.Color(255, 255, 255));
+        unlock_accounts_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-key-2-30.png"))); // NOI18N
         unlock_accounts_button.setText("Unlock accounts");
         unlock_accounts_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -1080,6 +1087,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         elc_accounts_label.setDoubleBuffered(true);
 
         remove_elc_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        remove_elc_account_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-minus-30.png"))); // NOI18N
         remove_elc_account_button.setText("Remove selected");
         remove_elc_account_button.setDoubleBuffered(true);
         remove_elc_account_button.setEnabled(false);
@@ -1090,6 +1098,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         add_elc_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        add_elc_account_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-plus-30.png"))); // NOI18N
         add_elc_account_button.setText("Add account");
         add_elc_account_button.setDoubleBuffered(true);
         add_elc_account_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1148,7 +1157,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1156,7 +1165,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 134, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)

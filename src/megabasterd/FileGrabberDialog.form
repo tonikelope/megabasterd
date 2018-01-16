@@ -240,6 +240,9 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Dialog" size="18" style="1"/>
             </Property>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/megabasterd/icons/icons8-add-folder-30.png"/>
+            </Property>
             <Property name="text" type="java.lang.String" value="Add folder"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
             <Property name="enabled" type="boolean" value="false"/>
@@ -252,6 +255,9 @@
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Dialog" size="18" style="1"/>
+            </Property>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/megabasterd/icons/icons8-add-file-30.png"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Add files"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>

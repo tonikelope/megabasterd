@@ -475,6 +475,10 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             setPause(false);
 
+            getMain_panel().getUpload_manager().setPaused_all(false);
+
+            setPaused_workers(0);
+
             synchronized (_workers_lock) {
 
                 for (ChunkUploader uploader : getChunkworkers()) {
@@ -482,8 +486,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     uploader.secureNotify();
                 }
             }
-
-            setPaused_workers(0);
 
             getView().resume();
 
