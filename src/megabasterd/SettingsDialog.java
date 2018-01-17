@@ -999,7 +999,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 return types [columnIndex];
             }
         });
-        mega_accounts_table.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
         mega_accounts_table.setDoubleBuffered(true);
         mega_accounts_table.setRowHeight((int)(24*_main_panel.getZoom_factor()));
         mega_accounts_scrollpane.setViewportView(mega_accounts_table);
@@ -1009,7 +1008,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         mega_accounts_label.setDoubleBuffered(true);
 
         remove_mega_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        remove_mega_account_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-minus-30.png"))); // NOI18N
+        remove_mega_account_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-trash-can-30.png"))); // NOI18N
         remove_mega_account_button.setText("Remove selected");
         remove_mega_account_button.setDoubleBuffered(true);
         remove_mega_account_button.setEnabled(false);
@@ -1079,6 +1078,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 return types [columnIndex];
             }
         });
+        elc_accounts_table.setCursor(new java.awt.Cursor(java.awt.Cursor.DEFAULT_CURSOR));
+        elc_accounts_table.setDoubleBuffered(true);
         elc_accounts_table.setRowHeight((int)(24*_main_panel.getZoom_factor()));
         elc_accounts_scrollpane.setViewportView(elc_accounts_table);
 
@@ -1087,7 +1088,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         elc_accounts_label.setDoubleBuffered(true);
 
         remove_elc_account_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        remove_elc_account_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-minus-30.png"))); // NOI18N
+        remove_elc_account_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-trash-can-30.png"))); // NOI18N
         remove_elc_account_button.setText("Remove selected");
         remove_elc_account_button.setDoubleBuffered(true);
         remove_elc_account_button.setEnabled(false);
@@ -1155,7 +1156,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1163,7 +1164,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 122, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 121, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1804,407 +1805,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_save_buttonActionPerformed
 
-    private void remove_mega_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_mega_account_buttonActionPerformed
-
-        DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
-
-        int selected = mega_accounts_table.getSelectedRow();
-
-        while (selected >= 0) {
-
-            String email = (String) model.getValueAt(mega_accounts_table.convertRowIndexToModel(selected), 0);
-
-            _deleted_mega_accounts.add(email);
-
-            model.removeRow(mega_accounts_table.convertRowIndexToModel(selected));
-
-            selected = mega_accounts_table.getSelectedRow();
-        }
-
-        mega_accounts_table.clearSelection();
-
-        if (model.getRowCount() == 0) {
-
-            remove_mega_account_button.setEnabled(false);
-        }
-    }//GEN-LAST:event_remove_mega_account_buttonActionPerformed
-
-    private void add_mega_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_mega_account_buttonActionPerformed
-
-        DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
-
-        model.addRow(new Object[]{"", ""});
-
-        mega_accounts_table.clearSelection();
-
-        remove_mega_account_button.setEnabled(true);
-    }//GEN-LAST:event_add_mega_account_buttonActionPerformed
-
-    private void encrypt_pass_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encrypt_pass_checkboxActionPerformed
-
-        encrypt_pass_checkbox.setEnabled(false);
-
-        final Dialog tthis = this;
-
-        swingInvoke(new Runnable() {
-            @Override
-            public void run() {
-
-                SetMasterPasswordDialog dialog = new SetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_salt(), _main_panel);
-
-                dialog.setLocationRelativeTo(tthis);
-
-                dialog.setVisible(true);
-
-                byte[] old_master_pass = null;
-
-                if (_main_panel.getMaster_pass() != null) {
-
-                    old_master_pass = new byte[_main_panel.getMaster_pass().length];
-
-                    System.arraycopy(_main_panel.getMaster_pass(), 0, old_master_pass, 0, _main_panel.getMaster_pass().length);
-                }
-
-                String old_master_pass_hash = _main_panel.getMaster_pass_hash();
-
-                if (dialog.isPass_ok()) {
-
-                    try {
-
-                        if (dialog.getNew_pass() != null && dialog.getNew_pass().length > 0) {
-
-                            _main_panel.setMaster_pass_hash(dialog.getNew_pass_hash());
-
-                            _main_panel.setMaster_pass(dialog.getNew_pass());
-
-                        } else {
-
-                            _main_panel.setMaster_pass_hash(null);
-
-                            _main_panel.setMaster_pass(null);
-                        }
-
-                        dialog.deleteNewPass();
-
-                        insertSettingValue("master_pass_hash", _main_panel.getMaster_pass_hash());
-
-                        for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
-
-                            HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                            String email, password, password_aes, user_hash;
-
-                            email = (String) pair.getKey();
-
-                            if (old_master_pass_hash != null) {
-
-                                password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), old_master_pass, CryptTools.AES_ZERO_IV));
-
-                                password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password_aes")), old_master_pass, CryptTools.AES_ZERO_IV));
-
-                                user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user_hash")), old_master_pass, CryptTools.AES_ZERO_IV));
-
-                            } else {
-
-                                password = (String) data.get("password");
-
-                                password_aes = (String) data.get("password_aes");
-
-                                user_hash = (String) data.get("user_hash");
-                            }
-
-                            if (_main_panel.getMaster_pass() != null) {
-
-                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(password.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(password_aes), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(user_hash), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-                            }
-
-                            data.put("password", password);
-
-                            data.put("password_aes", password_aes);
-
-                            data.put("user_hash", user_hash);
-
-                            DBTools.insertMegaAccount(email, password, password_aes, user_hash);
-                        }
-
-                        for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
-
-                            HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                            String host, user, apikey;
-
-                            host = (String) pair.getKey();
-
-                            if (old_master_pass_hash != null) {
-
-                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), old_master_pass, CryptTools.AES_ZERO_IV));
-
-                                apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), old_master_pass, CryptTools.AES_ZERO_IV));
-
-                            } else {
-
-                                user = (String) data.get("user");
-
-                                apikey = (String) data.get("apikey");
-
-                            }
-
-                            if (_main_panel.getMaster_pass() != null) {
-
-                                user = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(user.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                apikey = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(apikey.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-                            }
-
-                            data.put("user", user);
-
-                            data.put("apikey", apikey);
-
-                            DBTools.insertELCAccount(host, user, apikey);
-                        }
-
-                    } catch (Exception ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
-
-                }
-
-                encrypt_pass_checkbox.setSelected((_main_panel.getMaster_pass_hash() != null));
-
-                dialog.dispose();
-
-                encrypt_pass_checkbox.setEnabled(true);
-
-            }
-        });
-
-    }//GEN-LAST:event_encrypt_pass_checkboxActionPerformed
-
-    private void unlock_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlock_accounts_buttonActionPerformed
-
-        unlock_accounts_button.setEnabled(false);
-
-        final Dialog tthis = this;
-
-        swingInvoke(new Runnable() {
-            @Override
-            public void run() {
-
-                GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt(), _main_panel);
-
-                dialog.setLocationRelativeTo(tthis);
-
-                dialog.setVisible(true);
-
-                if (dialog.isPass_ok()) {
-
-                    _main_panel.setMaster_pass(dialog.getPass());
-
-                    dialog.deletePass();
-
-                    DefaultTableModel mega_model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
-
-                    DefaultTableModel elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API KEY"});
-
-                    mega_accounts_table.setModel(mega_model);
-
-                    elc_accounts_table.setModel(elc_model);
-
-                    encrypt_pass_checkbox.setEnabled(true);
-
-                    mega_accounts_table.setEnabled(true);
-
-                    elc_accounts_table.setEnabled(true);
-
-                    remove_mega_account_button.setEnabled(true);
-
-                    remove_elc_account_button.setEnabled(true);
-
-                    add_mega_account_button.setEnabled(true);
-
-                    add_elc_account_button.setEnabled(true);
-
-                    unlock_accounts_button.setVisible(false);
-
-                    delete_all_accounts_button.setEnabled(true);
-
-                    for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
-
-                        HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                        String pass = null;
-
-                        try {
-
-                            pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                        } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                        }
-
-                        String[] new_row_data = {(String) pair.getKey(), pass};
-
-                        mega_model.addRow(new_row_data);
-                    }
-
-                    for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
-
-                        HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                        String user = null, apikey = null;
-
-                        try {
-
-                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                            apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                        } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                        }
-
-                        String[] new_row_data = {(String) pair.getKey(), user, apikey};
-
-                        elc_model.addRow(new_row_data);
-                    }
-
-                }
-
-                _remember_master_pass = dialog.getRemember_checkbox().isSelected();
-
-                dialog.dispose();
-
-                unlock_accounts_button.setEnabled(true);
-
-            }
-        });
-
-    }//GEN-LAST:event_unlock_accounts_buttonActionPerformed
-
-    private void delete_all_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delete_all_accounts_buttonActionPerformed
-
-        Object[] options = {"No",
-            "Yes"};
-
-        int n = showOptionDialog(this,
-                "Master password will be reset and all your accounts will be removed. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?",
-                "Warning!", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
-                null,
-                options,
-                options[0]);
-
-        if (n == 1) {
-
-            try {
-                encrypt_pass_checkbox.setEnabled(true);
-
-                mega_accounts_table.setEnabled(true);
-
-                elc_accounts_table.setEnabled(true);
-
-                remove_mega_account_button.setEnabled(true);
-
-                remove_elc_account_button.setEnabled(true);
-
-                add_mega_account_button.setEnabled(true);
-
-                add_elc_account_button.setEnabled(true);
-
-                unlock_accounts_button.setVisible(false);
-
-                delete_all_accounts_button.setVisible(true);
-
-                DefaultTableModel new_mega_model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
-
-                DefaultTableModel new_elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API KEY"});
-
-                mega_accounts_table.setModel(new_mega_model);
-
-                elc_accounts_table.setModel(new_elc_model);
-
-                for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
-
-                    try {
-                        DBTools.deleteMegaAccount((String) pair.getKey());
-                    } catch (SQLException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-                for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
-
-                    try {
-                        DBTools.deleteELCAccount((String) pair.getKey());
-                    } catch (SQLException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-                _main_panel.setMaster_pass_hash(null);
-
-                _main_panel.setMaster_pass(null);
-
-                insertSettingValue("master_pass_hash", null);
-
-                encrypt_pass_checkbox.setSelected(false);
-
-                _main_panel.getMega_accounts().clear();
-
-                _main_panel.getMega_active_accounts().clear();
-
-                _main_panel.getElc_accounts().clear();
-
-            } catch (SQLException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-    }//GEN-LAST:event_delete_all_accounts_buttonActionPerformed
-
-    private void remove_elc_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_elc_account_buttonActionPerformed
-        DefaultTableModel model = (DefaultTableModel) elc_accounts_table.getModel();
-
-        int selected = elc_accounts_table.getSelectedRow();
-
-        while (selected >= 0) {
-
-            String host = (String) model.getValueAt(elc_accounts_table.convertRowIndexToModel(selected), 0);
-
-            _deleted_elc_accounts.add(host);
-
-            model.removeRow(elc_accounts_table.convertRowIndexToModel(selected));
-
-            selected = elc_accounts_table.getSelectedRow();
-        }
-
-        elc_accounts_table.clearSelection();
-
-        if (model.getRowCount() == 0) {
-
-            remove_elc_account_button.setEnabled(false);
-        }
-    }//GEN-LAST:event_remove_elc_account_buttonActionPerformed
-
-    private void add_elc_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_elc_account_buttonActionPerformed
-
-        DefaultTableModel model = (DefaultTableModel) elc_accounts_table.getModel();
-
-        model.addRow(new Object[]{"", "", ""});
-
-        elc_accounts_table.clearSelection();
-
-        remove_elc_account_button.setEnabled(true);
-
-    }//GEN-LAST:event_add_elc_account_buttonActionPerformed
-
     private void use_proxy_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_use_proxy_checkboxStateChanged
 
         proxy_host_label.setEnabled(use_proxy_checkbox.isSelected());
@@ -2351,7 +1951,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         filechooser.setDialogTitle("Default download directory");
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         filechooser.setAcceptAllFileFilterUsed(false);
-        
+
         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
             File file = filechooser.getSelectedFile();
@@ -2359,7 +1959,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             _download_path = file.getAbsolutePath();
 
             default_dir_label.setText(truncateText(_download_path, 80));
-            
+
             pack();
         }
     }//GEN-LAST:event_change_download_dir_buttonActionPerformed
@@ -2440,6 +2040,407 @@ public final class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_port_spinner.setEnabled(megacrypter_reverse_checkbox.isSelected());
         megacrypter_reverse_warning_label.setEnabled(megacrypter_reverse_checkbox.isSelected());
     }//GEN-LAST:event_megacrypter_reverse_checkboxStateChanged
+
+    private void add_elc_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_elc_account_buttonActionPerformed
+
+        DefaultTableModel model = (DefaultTableModel) elc_accounts_table.getModel();
+
+        model.addRow(new Object[]{"", "", ""});
+
+        elc_accounts_table.clearSelection();
+
+        remove_elc_account_button.setEnabled(true);
+    }//GEN-LAST:event_add_elc_account_buttonActionPerformed
+
+    private void remove_elc_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_elc_account_buttonActionPerformed
+        DefaultTableModel model = (DefaultTableModel) elc_accounts_table.getModel();
+
+        int selected = elc_accounts_table.getSelectedRow();
+
+        while (selected >= 0) {
+
+            String host = (String) model.getValueAt(elc_accounts_table.convertRowIndexToModel(selected), 0);
+
+            _deleted_elc_accounts.add(host);
+
+            model.removeRow(elc_accounts_table.convertRowIndexToModel(selected));
+
+            selected = elc_accounts_table.getSelectedRow();
+        }
+
+        elc_accounts_table.clearSelection();
+
+        if (model.getRowCount() == 0) {
+
+            remove_elc_account_button.setEnabled(false);
+        }
+    }//GEN-LAST:event_remove_elc_account_buttonActionPerformed
+
+    private void unlock_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unlock_accounts_buttonActionPerformed
+
+        unlock_accounts_button.setEnabled(false);
+
+        final Dialog tthis = this;
+
+        swingInvoke(new Runnable() {
+            @Override
+            public void run() {
+
+                GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt(), _main_panel);
+
+                dialog.setLocationRelativeTo(tthis);
+
+                dialog.setVisible(true);
+
+                if (dialog.isPass_ok()) {
+
+                    _main_panel.setMaster_pass(dialog.getPass());
+
+                    dialog.deletePass();
+
+                    DefaultTableModel mega_model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
+
+                    DefaultTableModel elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API KEY"});
+
+                    mega_accounts_table.setModel(mega_model);
+
+                    elc_accounts_table.setModel(elc_model);
+
+                    encrypt_pass_checkbox.setEnabled(true);
+
+                    mega_accounts_table.setEnabled(true);
+
+                    elc_accounts_table.setEnabled(true);
+
+                    remove_mega_account_button.setEnabled(true);
+
+                    remove_elc_account_button.setEnabled(true);
+
+                    add_mega_account_button.setEnabled(true);
+
+                    add_elc_account_button.setEnabled(true);
+
+                    unlock_accounts_button.setVisible(false);
+
+                    delete_all_accounts_button.setEnabled(true);
+
+                    for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+
+                        HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                        String pass = null;
+
+                        try {
+
+                            pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        String[] new_row_data = {(String) pair.getKey(), pass};
+
+                        mega_model.addRow(new_row_data);
+                    }
+
+                    for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+
+                        HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                        String user = null, apikey = null;
+
+                        try {
+
+                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                            apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        } catch (Exception ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        String[] new_row_data = {(String) pair.getKey(), user, apikey};
+
+                        elc_model.addRow(new_row_data);
+                    }
+
+                }
+
+                _remember_master_pass = dialog.getRemember_checkbox().isSelected();
+
+                dialog.dispose();
+
+                unlock_accounts_button.setEnabled(true);
+
+            }
+        });
+    }//GEN-LAST:event_unlock_accounts_buttonActionPerformed
+
+    private void delete_all_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delete_all_accounts_buttonActionPerformed
+
+        Object[] options = {"No",
+            "Yes"};
+
+        int n = showOptionDialog(this,
+                "Master password will be reset and all your accounts will be removed. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?",
+                "Warning!", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+                null,
+                options,
+                options[0]);
+
+        if (n == 1) {
+
+            try {
+                encrypt_pass_checkbox.setEnabled(true);
+
+                mega_accounts_table.setEnabled(true);
+
+                elc_accounts_table.setEnabled(true);
+
+                remove_mega_account_button.setEnabled(true);
+
+                remove_elc_account_button.setEnabled(true);
+
+                add_mega_account_button.setEnabled(true);
+
+                add_elc_account_button.setEnabled(true);
+
+                unlock_accounts_button.setVisible(false);
+
+                delete_all_accounts_button.setVisible(true);
+
+                DefaultTableModel new_mega_model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
+
+                DefaultTableModel new_elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API KEY"});
+
+                mega_accounts_table.setModel(new_mega_model);
+
+                elc_accounts_table.setModel(new_elc_model);
+
+                for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+
+                    try {
+                        DBTools.deleteMegaAccount((String) pair.getKey());
+                    } catch (SQLException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+
+                    try {
+                        DBTools.deleteELCAccount((String) pair.getKey());
+                    } catch (SQLException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                _main_panel.setMaster_pass_hash(null);
+
+                _main_panel.setMaster_pass(null);
+
+                insertSettingValue("master_pass_hash", null);
+
+                encrypt_pass_checkbox.setSelected(false);
+
+                _main_panel.getMega_accounts().clear();
+
+                _main_panel.getMega_active_accounts().clear();
+
+                _main_panel.getElc_accounts().clear();
+
+                JOptionPane.showMessageDialog(this, "Accounts successfully reset!", "Accounts reset", JOptionPane.INFORMATION_MESSAGE);
+
+                setVisible(false);
+
+            } catch (SQLException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }//GEN-LAST:event_delete_all_accounts_buttonActionPerformed
+
+    private void encrypt_pass_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_encrypt_pass_checkboxActionPerformed
+
+        encrypt_pass_checkbox.setEnabled(false);
+
+        final Dialog tthis = this;
+
+        swingInvoke(new Runnable() {
+            @Override
+            public void run() {
+
+                SetMasterPasswordDialog dialog = new SetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_salt(), _main_panel);
+
+                dialog.setLocationRelativeTo(tthis);
+
+                dialog.setVisible(true);
+
+                byte[] old_master_pass = null;
+
+                if (_main_panel.getMaster_pass() != null) {
+
+                    old_master_pass = new byte[_main_panel.getMaster_pass().length];
+
+                    System.arraycopy(_main_panel.getMaster_pass(), 0, old_master_pass, 0, _main_panel.getMaster_pass().length);
+                }
+
+                String old_master_pass_hash = _main_panel.getMaster_pass_hash();
+
+                if (dialog.isPass_ok()) {
+
+                    try {
+
+                        if (dialog.getNew_pass() != null && dialog.getNew_pass().length > 0) {
+
+                            _main_panel.setMaster_pass_hash(dialog.getNew_pass_hash());
+
+                            _main_panel.setMaster_pass(dialog.getNew_pass());
+
+                        } else {
+
+                            _main_panel.setMaster_pass_hash(null);
+
+                            _main_panel.setMaster_pass(null);
+                        }
+
+                        dialog.deleteNewPass();
+
+                        insertSettingValue("master_pass_hash", _main_panel.getMaster_pass_hash());
+
+                        for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+
+                            HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                            String email, password, password_aes, user_hash;
+
+                            email = (String) pair.getKey();
+
+                            if (old_master_pass_hash != null) {
+
+                                password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), old_master_pass, CryptTools.AES_ZERO_IV));
+
+                                password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password_aes")), old_master_pass, CryptTools.AES_ZERO_IV));
+
+                                user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user_hash")), old_master_pass, CryptTools.AES_ZERO_IV));
+
+                            } else {
+
+                                password = (String) data.get("password");
+
+                                password_aes = (String) data.get("password_aes");
+
+                                user_hash = (String) data.get("user_hash");
+                            }
+
+                            if (_main_panel.getMaster_pass() != null) {
+
+                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(password.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(password_aes), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(user_hash), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            }
+
+                            data.put("password", password);
+
+                            data.put("password_aes", password_aes);
+
+                            data.put("user_hash", user_hash);
+
+                            DBTools.insertMegaAccount(email, password, password_aes, user_hash);
+                        }
+
+                        for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+
+                            HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                            String host, user, apikey;
+
+                            host = (String) pair.getKey();
+
+                            if (old_master_pass_hash != null) {
+
+                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), old_master_pass, CryptTools.AES_ZERO_IV));
+
+                                apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), old_master_pass, CryptTools.AES_ZERO_IV));
+
+                            } else {
+
+                                user = (String) data.get("user");
+
+                                apikey = (String) data.get("apikey");
+
+                            }
+
+                            if (_main_panel.getMaster_pass() != null) {
+
+                                user = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(user.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                apikey = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(apikey.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            }
+
+                            data.put("user", user);
+
+                            data.put("apikey", apikey);
+
+                            DBTools.insertELCAccount(host, user, apikey);
+                        }
+
+                    } catch (Exception ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
+
+                }
+
+                encrypt_pass_checkbox.setSelected((_main_panel.getMaster_pass_hash() != null));
+
+                dialog.dispose();
+
+                encrypt_pass_checkbox.setEnabled(true);
+
+            }
+        });
+    }//GEN-LAST:event_encrypt_pass_checkboxActionPerformed
+
+    private void add_mega_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_mega_account_buttonActionPerformed
+
+        DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
+
+        model.addRow(new Object[]{"", ""});
+
+        mega_accounts_table.clearSelection();
+
+        remove_mega_account_button.setEnabled(true);
+    }//GEN-LAST:event_add_mega_account_buttonActionPerformed
+
+    private void remove_mega_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_mega_account_buttonActionPerformed
+
+        DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
+
+        int selected = mega_accounts_table.getSelectedRow();
+
+        while (selected >= 0) {
+
+            String email = (String) model.getValueAt(mega_accounts_table.convertRowIndexToModel(selected), 0);
+
+            _deleted_mega_accounts.add(email);
+
+            model.removeRow(mega_accounts_table.convertRowIndexToModel(selected));
+
+            selected = mega_accounts_table.getSelectedRow();
+        }
+
+        mega_accounts_table.clearSelection();
+
+        if (model.getRowCount() == 0) {
+
+            remove_mega_account_button.setEnabled(false);
+        }
+    }//GEN-LAST:event_remove_mega_account_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;

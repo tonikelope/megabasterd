@@ -73,7 +73,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         subtitle_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
-        subtitle_label.setText("Yet another cross-platform MEGA.NZ downloader/uploader/streamer suite. ");
+        subtitle_label.setText("Yet another (unofficial) cross-platform MEGA.NZ downloader/uploader/streamer suite. ");
         subtitle_label.setDoubleBuffered(true);
 
         mc_logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/mega_crypter.png"))); // NOI18N
@@ -86,6 +86,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         });
 
         mcdown_url_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        mcdown_url_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-copy-to-clipboard-30.png"))); // NOI18N
         mcdown_url_button.setText("Copy MegaBasterd download URL");
         mcdown_url_button.setDoubleBuffered(true);
         mcdown_url_button.addActionListener(new java.awt.event.ActionListener() {
@@ -115,6 +116,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         });
 
         check_version_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        check_version_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-restart-30.png"))); // NOI18N
         check_version_button.setText("Check version");
         check_version_button.setDoubleBuffered(true);
         check_version_button.addActionListener(new java.awt.event.ActionListener() {

@@ -796,7 +796,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="122" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="121" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -805,7 +805,7 @@
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="122" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="121" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -835,9 +835,6 @@
                         <Column editable="true" title="Password" type="java.lang.String"/>
                       </Table>
                     </Property>
-                    <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-                      <Color id="Cursor Por defecto"/>
-                    </Property>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                     <Property name="rowHeight" type="int" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                       <Connection code="(int)(24*_main_panel.getZoom_factor())" type="code"/>
@@ -861,7 +858,7 @@
                   <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/megabasterd/icons/icons8-minus-30.png"/>
+                  <Image iconType="3" name="/megabasterd/icons/icons8-trash-can-30.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Remove selected"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -957,6 +954,10 @@
                         <Column editable="true" title="API-KEY" type="java.lang.String"/>
                       </Table>
                     </Property>
+                    <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
+                      <Color id="Cursor Por defecto"/>
+                    </Property>
+                    <Property name="doubleBuffered" type="boolean" value="true"/>
                     <Property name="rowHeight" type="int" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                       <Connection code="(int)(24*_main_panel.getZoom_factor())" type="code"/>
                     </Property>
@@ -979,7 +980,7 @@
                   <Font name="Dialog" size="18" style="1"/>
                 </Property>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/megabasterd/icons/icons8-minus-30.png"/>
+                  <Image iconType="3" name="/megabasterd/icons/icons8-trash-can-30.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="Remove selected"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>

@@ -787,11 +787,11 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 getView().getClose_button().setVisible(true);
 
                 if (_status_error || _canceled) {
-                    
+
                     getView().getRestart_button().setVisible(true);
-                    
+
                 } else {
-                    
+
                     getView().getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-ok-30.png")));
                 }
             }

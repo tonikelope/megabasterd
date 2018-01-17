@@ -950,13 +950,13 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 getView().getClose_button().setVisible(true);
 
                 if (!_status_error && !_canceled) {
-                    
+
                     getView().getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-ok-30.png")));
-                    
+
                 }
-                
+
                 if (_canceled) {
-                    
+
                     getView().getRestart_button().setVisible(true);
                 }
 
