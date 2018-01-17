@@ -82,10 +82,12 @@
                   <Component id="file_name_label" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="open_folder_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="copy_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="file_size_label" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="copy_link_button" alignment="1" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="open_folder_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="file_size_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="progress_pbar" min="-2" max="-2" attributes="0"/>
@@ -101,7 +103,7 @@
                   <Component id="close_button" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="restart_button" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -218,6 +220,9 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="16" style="1"/>
         </Property>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/megabasterd/icons/icons8-cancel-30.png"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Close"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
@@ -230,6 +235,9 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="16" style="1"/>
         </Property>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/megabasterd/icons/icons8-copy-to-clipboard-30.png"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="Copy link"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
@@ -239,14 +247,11 @@
     </Component>
     <Component class="javax.swing.JButton" name="restart_button">
       <Properties>
-        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ff" green="33" red="33" type="rgb"/>
-        </Property>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="16" style="1"/>
         </Property>
-        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ff" green="ff" red="ff" type="rgb"/>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/megabasterd/icons/icons8-restart-30.png"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Restart"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -280,6 +285,9 @@
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="16" style="1"/>
+        </Property>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/megabasterd/icons/icons8-folder-30.png"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Open folder"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>

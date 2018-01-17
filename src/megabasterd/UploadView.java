@@ -179,6 +179,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         file_name_label.setDoubleBuffered(true);
 
         close_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        close_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-cancel-30.png"))); // NOI18N
         close_button.setText("Close");
         close_button.setDoubleBuffered(true);
         close_button.addActionListener(new java.awt.event.ActionListener() {
@@ -187,9 +188,8 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
-        restart_button.setBackground(new java.awt.Color(51, 51, 255));
         restart_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        restart_button.setForeground(new java.awt.Color(255, 255, 255));
+        restart_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-restart-30.png"))); // NOI18N
         restart_button.setText("Restart");
         restart_button.setDoubleBuffered(true);
         restart_button.addActionListener(new java.awt.event.ActionListener() {
@@ -208,6 +208,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         slot_status_label.setDoubleBuffered(true);
 
         folder_link_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        folder_link_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-copy-to-clipboard-30.png"))); // NOI18N
         folder_link_button.setText("Copy folder link");
         folder_link_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -216,6 +217,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         });
 
         file_link_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        file_link_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-copy-to-clipboard-30.png"))); // NOI18N
         file_link_button.setText("Copy file link");
         file_link_button.setEnabled(false);
         file_link_button.addActionListener(new java.awt.event.ActionListener() {

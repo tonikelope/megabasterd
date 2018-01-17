@@ -107,6 +107,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         file_tree_scrollpane.setViewportView(file_tree);
 
         skip_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        skip_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-trash-can-30.png"))); // NOI18N
         skip_button.setText("REMOVE THIS");
         skip_button.setDoubleBuffered(true);
         skip_button.setEnabled(false);
@@ -117,6 +118,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         });
 
         link_detected_label.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        link_detected_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-folder-30.png"))); // NOI18N
         link_detected_label.setText("Folder link detected!");
         link_detected_label.setDoubleBuffered(true);
 
@@ -142,6 +144,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         warning_label.setEnabled(false);
 
         skip_rest_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        skip_rest_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-trash-can-30.png"))); // NOI18N
         skip_rest_button.setText("REMOVE ALL EXCEPT THIS");
         skip_rest_button.setDoubleBuffered(true);
         skip_rest_button.setEnabled(false);
@@ -152,6 +155,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         });
 
         restore_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        restore_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-undelete-30.png"))); // NOI18N
         restore_button.setText("Restore folder data");
         restore_button.setDoubleBuffered(true);
         restore_button.addActionListener(new java.awt.event.ActionListener() {
@@ -175,45 +179,45 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                     .addComponent(file_tree_scrollpane)
                     .addComponent(total_space_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(warning_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addComponent(folder_link_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(restore_button))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(link_detected_label)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(skip_rest_button)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(skip_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(dance_button))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(folder_link_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(restore_button)))
+                        .addComponent(dance_button)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(link_detected_label)
-                .addGap(8, 8, 8)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(folder_link_label)
-                    .addComponent(restore_button))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 335, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(total_space_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(warning_label)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(22, 22, 22)
-                        .addComponent(dance_button))
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(skip_rest_button)
-                            .addComponent(skip_button))))
+                            .addComponent(skip_button)
+                            .addComponent(dance_button)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(link_detected_label)
+                        .addGap(8, 8, 8)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(folder_link_label)
+                            .addComponent(restore_button))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 331, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(total_space_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(warning_label)
+                        .addGap(49, 49, 49)))
                 .addContainerGap())
         );
 

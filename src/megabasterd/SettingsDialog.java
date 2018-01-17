@@ -865,7 +865,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 947, Short.MAX_VALUE)
+                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 1040, Short.MAX_VALUE)
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
@@ -949,7 +949,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(limit_upload_speed_checkbox))
-                                .addGap(0, 298, Short.MAX_VALUE)))
+                                .addGap(0, 391, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         uploads_panelLayout.setVerticalGroup(
@@ -1108,7 +1108,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         jLabel1.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        jLabel1.setText("Note: you can use a (optional) alias for your email addresses -> bob@supermail.com#bob_mail");
+        jLabel1.setText("Note: you can use a (optional) alias for your email addresses -> bob@supermail.com#bob_mail (don't forget to save after entering your accounts).");
         jLabel1.setDoubleBuffered(true);
 
         javax.swing.GroupLayout accounts_panelLayout = new javax.swing.GroupLayout(accounts_panel);
@@ -1126,9 +1126,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(encrypt_pass_checkbox))
                     .addGroup(accounts_panelLayout.createSequentialGroup()
-                        .addComponent(jLabel1)
-                        .addGap(193, 193, 193))
-                    .addGroup(accounts_panelLayout.createSequentialGroup()
                         .addComponent(remove_mega_account_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(add_mega_account_button))
@@ -1141,7 +1138,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(mega_accounts_label)
                             .addComponent(elc_accounts_label))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         accounts_panelLayout.setVerticalGroup(
@@ -1240,11 +1238,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(proxy_user_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 239, Short.MAX_VALUE)
+                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 287, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(proxy_pass_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 401, Short.MAX_VALUE))
+                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 446, Short.MAX_VALUE))
         );
         proxy_auth_panelLayout.setVerticalGroup(
             proxy_auth_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1301,6 +1299,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         );
 
         import_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        import_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-import-30.png"))); // NOI18N
         import_settings_button.setText("IMPORT SETTINGS");
         import_settings_button.setDoubleBuffered(true);
         import_settings_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1310,6 +1309,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         export_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        export_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-export-30.png"))); // NOI18N
         export_settings_button.setText("EXPORT SETTINGS");
         export_settings_button.setDoubleBuffered(true);
         export_settings_button.addActionListener(new java.awt.event.ActionListener() {
@@ -1372,7 +1372,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(import_settings_button)
                     .addComponent(export_settings_button))
-                .addContainerGap(160, Short.MAX_VALUE))
+                .addContainerGap(152, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Advanced", new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-administrative-tools-30.png")), advanced_panel); // NOI18N
@@ -2351,7 +2351,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         filechooser.setDialogTitle("Default download directory");
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         filechooser.setAcceptAllFileFilterUsed(false);
-
+        
         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
             File file = filechooser.getSelectedFile();
@@ -2359,10 +2359,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
             _download_path = file.getAbsolutePath();
 
             default_dir_label.setText(truncateText(_download_path, 80));
-
+            
+            pack();
         }
-
-        pack();
     }//GEN-LAST:event_change_download_dir_buttonActionPerformed
 
     private void use_mega_account_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_use_mega_account_down_checkboxStateChanged

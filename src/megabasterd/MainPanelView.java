@@ -263,9 +263,8 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_down_label.setForeground(new java.awt.Color(102, 102, 102));
         status_down_label.setDoubleBuffered(true);
 
-        close_all_finished_down_button.setBackground(new java.awt.Color(0, 153, 51));
-        close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        close_all_finished_down_button.setForeground(new java.awt.Color(255, 255, 255));
+        close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        close_all_finished_down_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-ok-30.png"))); // NOI18N
         close_all_finished_down_button.setText("Close all OK finished");
         close_all_finished_down_button.setDoubleBuffered(true);
         close_all_finished_down_button.addActionListener(new java.awt.event.ActionListener() {
@@ -314,7 +313,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 337, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(down_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -332,9 +331,8 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_up_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
         status_up_label.setForeground(new java.awt.Color(102, 102, 102));
 
-        close_all_finished_up_button.setBackground(new java.awt.Color(0, 153, 51));
-        close_all_finished_up_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        close_all_finished_up_button.setForeground(new java.awt.Color(255, 255, 255));
+        close_all_finished_up_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        close_all_finished_up_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-ok-30.png"))); // NOI18N
         close_all_finished_up_button.setText("Close all OK finished");
         close_all_finished_up_button.setDoubleBuffered(true);
         close_all_finished_up_button.addActionListener(new java.awt.event.ActionListener() {
@@ -383,7 +381,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 350, Short.MAX_VALUE)
+                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 337, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(up_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

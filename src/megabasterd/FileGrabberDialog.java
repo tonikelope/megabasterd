@@ -146,7 +146,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 227, Short.MAX_VALUE)
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Upload info"));
@@ -263,6 +263,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         warning_label.setEnabled(false);
 
         skip_rest_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        skip_rest_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-trash-can-30.png"))); // NOI18N
         skip_rest_button.setText("REMOVE ALL EXCEPT THIS");
         skip_rest_button.setDoubleBuffered(true);
         skip_rest_button.setEnabled(false);
@@ -273,6 +274,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         });
 
         skip_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        skip_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/icons/icons8-trash-can-30.png"))); // NOI18N
         skip_button.setText("REMOVE THIS");
         skip_button.setDoubleBuffered(true);
         skip_button.setEnabled(false);
@@ -292,16 +294,14 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                     .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(warning_label)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(skip_rest_button)
-                                .addGap(18, 18, 18)
-                                .addComponent(skip_button)))
+                        .addComponent(warning_label)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(total_file_size_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(skip_rest_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(skip_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(dance_button)))
                 .addContainerGap())
         );
@@ -316,12 +316,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 .addComponent(total_file_size_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(warning_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(dance_button)
                     .addComponent(skip_rest_button)
                     .addComponent(skip_button))
-                .addGap(18, 18, 18)
-                .addComponent(dance_button)
                 .addContainerGap())
         );
 

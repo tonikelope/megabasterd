@@ -118,7 +118,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="downloads_scroll_pane" pref="947" max="32767" attributes="0"/>
+                      <Component id="downloads_scroll_pane" pref="1040" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -600,7 +600,7 @@
                                           </Group>
                                           <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="298" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="391" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -759,10 +759,6 @@
                               <Component id="encrypt_pass_checkbox" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
-                              <Component id="jLabel1" max="-2" attributes="0"/>
-                              <EmptySpace min="-2" pref="193" max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" alignment="0" attributes="0">
                               <Component id="remove_mega_account_button" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="32767" attributes="0"/>
                               <Component id="add_mega_account_button" min="-2" max="-2" attributes="0"/>
@@ -780,6 +776,7 @@
                               </Group>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
+                          <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
@@ -1012,7 +1009,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="14" style="2"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: you can use a (optional) alias for your email addresses -&gt; bob@supermail.com#bob_mail"/>
+                <Property name="text" type="java.lang.String" value="Note: you can use a (optional) alias for your email addresses -&gt; bob@supermail.com#bob_mail (don&apos;t forget to save after entering your accounts)."/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
             </Component>
@@ -1081,7 +1078,7 @@
                           <Component id="import_settings_button" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="export_settings_button" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="160" max="32767" attributes="0"/>
+                      <EmptySpace pref="152" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1232,11 +1229,11 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="proxy_user_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_user_textfield" pref="239" max="32767" attributes="0"/>
+                              <Component id="proxy_user_textfield" pref="287" max="32767" attributes="0"/>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Component id="proxy_pass_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_pass_textfield" pref="401" max="32767" attributes="0"/>
+                              <Component id="proxy_pass_textfield" pref="446" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -1305,6 +1302,9 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="1"/>
                 </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/megabasterd/icons/icons8-import-30.png"/>
+                </Property>
                 <Property name="text" type="java.lang.String" value="IMPORT SETTINGS"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
@@ -1316,6 +1316,9 @@
               <Properties>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="1"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/megabasterd/icons/icons8-export-30.png"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="EXPORT SETTINGS"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
