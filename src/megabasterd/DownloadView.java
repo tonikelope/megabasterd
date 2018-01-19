@@ -322,13 +322,14 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                     .addComponent(speed_label)
                     .addComponent(pause_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(stop_button)
-                    .addComponent(keep_temp_checkbox)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(close_button)
-                        .addComponent(restart_button)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(restart_button))
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(stop_button)
+                        .addComponent(keep_temp_checkbox)))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 

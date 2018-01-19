@@ -286,12 +286,12 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                     .addComponent(speed_label)
                     .addComponent(pause_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(stop_button)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(close_button)
-                        .addComponent(restart_button)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(restart_button))
+                    .addComponent(stop_button))
+                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
