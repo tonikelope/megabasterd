@@ -58,7 +58,7 @@ public class StreamChunkDownloader implements Runnable {
                     _chunkwriter.secureWait();
                 }
 
-                if (httpclient == null || error || _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled()) {
+                if (httpclient == null || error || (_chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled())) {
 
                     if (error509 && _chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && !_chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled()) {
                         _chunkwriter.getServer().getMain_panel().getProxy_manager().setEnabled(true);
