@@ -7,6 +7,7 @@ import java.io.OutputStream;
 import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.RandomAccessFile;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
@@ -364,7 +365,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                         _upload.getProgress_meter().secureNotify();
                     }
 
-                    conta_error++;
+                    if (!(ex instanceof SocketTimeoutException)) {
+                        conta_error++;
+                    }
 
                     if (!_exit) {
 

@@ -151,7 +151,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         slot_status_label = new javax.swing.JLabel();
         open_folder_button = new javax.swing.JButton();
 
-        setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 4, true));
+        setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 3, true));
 
         status_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         status_label.setText("status");

@@ -273,6 +273,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
 
+        jScrollPane_down.setBorder(null);
+
         jPanel_scroll_down.setLayout(new javax.swing.BoxLayout(jPanel_scroll_down, javax.swing.BoxLayout.Y_AXIS));
         jScrollPane_down.setViewportView(jPanel_scroll_down);
 
@@ -340,6 +342,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                 close_all_finished_up_buttonActionPerformed(evt);
             }
         });
+
+        jScrollPane_up.setBorder(null);
 
         jPanel_scroll_up.setLayout(new javax.swing.BoxLayout(jPanel_scroll_up, javax.swing.BoxLayout.Y_AXIS));
         jScrollPane_up.setViewportView(jPanel_scroll_up);

@@ -124,7 +124,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         folder_link_button = new javax.swing.JButton();
         file_link_button = new javax.swing.JButton();
 
-        setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 4, true));
+        setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 3, true));
 
         status_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         status_label.setText("status");

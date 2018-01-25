@@ -2,6 +2,7 @@ package megabasterd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
@@ -273,7 +274,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         _download.getProgress_meter().secureNotify();
                     }
 
-                    conta_error++;
+                    if (!(ex instanceof SocketTimeoutException)) {
+                        conta_error++;
+                    }
 
                     if (!_exit) {
 
