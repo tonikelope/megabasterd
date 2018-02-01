@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-SplashScreen-Image: megabasterd/dot_com.png
-X-COMMENT: Main-Class will be added automatically by build
-
