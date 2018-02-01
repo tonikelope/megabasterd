@@ -104,6 +104,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         confirm_pass_label.setDoubleBuffered(true);
 
         cancel_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        cancel_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
         cancel_button.setText("CANCEL");
         cancel_button.setDoubleBuffered(true);
         cancel_button.addActionListener(new java.awt.event.ActionListener() {
@@ -113,6 +114,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         });
 
         ok_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        ok_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
         ok_button.setText("OK");
         ok_button.setDoubleBuffered(true);
         ok_button.addActionListener(new java.awt.event.ActionListener() {
@@ -121,7 +123,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
             }
         });
 
-        lock_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/megabasterd/lock_medium.png"))); // NOI18N
+        lock_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock_medium.png"))); // NOI18N
         lock_label.setDoubleBuffered(true);
 
         warning_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N

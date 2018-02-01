@@ -161,7 +161,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(remember_checkbox)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(please_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(please_label, javax.swing.GroupLayout.DEFAULT_SIZE, 584, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -196,6 +196,8 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
     private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
 
         status_label.setText("Verifying your password, please wait...");
+        
+        pack();
 
         final Dialog tthis = this;
 
@@ -213,6 +215,8 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                         JOptionPane.showMessageDialog(tthis, "BAD PASSWORD!", "Error", JOptionPane.ERROR_MESSAGE);
 
                         status_label.setText("");
+                        
+                        pack();
 
                         current_pass_textfield.setText("");
 
@@ -232,6 +236,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                 } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
+                
             }
         });
 
