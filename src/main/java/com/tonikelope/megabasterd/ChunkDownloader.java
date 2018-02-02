@@ -108,9 +108,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
             conta_error = 0;
 
             error = false;
+
             error509 = false;
 
-            while (!_exit && !_download.isStopped() && (conta_error < MAX_SLOT_ERROR || _download.getMain_panel().isUse_smart_proxy())) {
+            while (!_exit && !_download.isStopped() && (error509 || conta_error < MAX_SLOT_ERROR || _download.getMain_panel().isUse_smart_proxy())) {
 
                 if (httpclient == null || error || _download.getMain_panel().isUse_smart_proxy()) {
 
@@ -164,6 +165,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 error = false;
 
+                if (error509) {
+                    getDownload().getView().set509Error(false);
+                }
+
                 error509 = false;
 
                 try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
@@ -180,7 +185,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             error = true;
 
                             if (http_status == 509) {
+
                                 error509 = true;
+
+                                getDownload().getView().set509Error(true);
                             }
 
                         } else {

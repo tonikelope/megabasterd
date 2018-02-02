@@ -284,7 +284,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(copy_link_button))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(speed_label, javax.swing.GroupLayout.PREFERRED_SIZE, 340, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(speed_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(pause_button))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
@@ -610,6 +610,13 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             }
 
         });
+    }
+
+    public void set509Error(boolean error) {
+
+        _download.setError509(error);
+
+        speed_label.setIcon(error ? new javax.swing.ImageIcon(getClass().getResource("/images/icons8-error-40.png")) : null);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

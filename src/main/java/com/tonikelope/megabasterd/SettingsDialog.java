@@ -616,7 +616,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
 
         rec_download_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_download_slots_label.setText("Note: if you want to download without using a MEGA account (or using a FREE one) you SHOULD enable MULTI SLOT. ");
+        rec_download_slots_label.setText("Note: if you want to download without using a MEGA account (or using a FREE one) you MUST enable MULTI SLOT. ");
 
         megacrypter_reverse_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         megacrypter_reverse_checkbox.setText("Use Megacrypter reverse mode");

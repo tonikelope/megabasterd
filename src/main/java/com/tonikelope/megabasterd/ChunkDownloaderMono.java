@@ -29,7 +29,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         String worker_url = null;
         Chunk chunk;
         int reads, conta_error, http_status = 200;
-        boolean error;
+        boolean error, error509;
         HttpGet httpget = null;
         CloseableHttpResponse httpresponse = null;
 
@@ -40,9 +40,13 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             error = false;
 
+            error509 = false;
+
+            getDownload().getView().set509Error(false);
+
             InputStream is = null;
 
-            while (!isExit() && !getDownload().isStopped()) {
+            while (!isExit() && !getDownload().isStopped() && (error509 || conta_error < MAX_SLOT_ERROR)) {
 
                 if (worker_url == null || error) {
 
@@ -71,11 +75,25 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     error = false;
 
+                    if (error509) {
+
+                        getDownload().getView().set509Error(false);
+                    }
+
+                    error509 = false;
+
                     if (http_status != HttpStatus.SC_OK) {
 
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                         error = true;
+
+                        if (http_status == 509) {
+
+                            error509 = true;
+
+                            getDownload().getView().set509Error(true);
+                        }
 
                         getDownload().rejectChunkId(chunk.getId());
 

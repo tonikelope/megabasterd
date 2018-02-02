@@ -88,6 +88,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private long _last_chunk_id_dispatched;
     private final MegaAPI _ma;
     private volatile boolean _canceled;
+    private volatile boolean _error509;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
 
@@ -116,6 +117,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _file_noexpire = file_noexpire;
         _use_slots = use_slots;
         _slots = slots;
+        _error509 = false;
         _restart = restart;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
@@ -168,6 +170,14 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
 
+    }
+
+    public boolean isError509() {
+        return _error509;
+    }
+
+    public void setError509(boolean error509) {
+        _error509 = error509;
     }
 
     public Object getWorkers_lock() {

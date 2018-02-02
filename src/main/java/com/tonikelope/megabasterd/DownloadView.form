@@ -49,7 +49,7 @@
                       <Component id="copy_link_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="speed_label" min="-2" pref="340" max="-2" attributes="0"/>
+                      <Component id="speed_label" max="32767" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="pause_button" min="-2" max="-2" attributes="0"/>
                   </Group>

@@ -92,9 +92,17 @@ public final class GlobalSpeedMeter implements Runnable {
 
             no_data_count = 0;
 
+        } else if (transference instanceof Download && ((Download) transference).isError509()) {
+
+            transference.getView().updateSpeed("BANDWIDTH LIMIT ERROR!", true);
+
+            sp = 0L;
+
+            no_data_count++;
+
         } else {
 
-            transference.getView().updateSpeed("------ *", true);
+            transference.getView().updateSpeed("------", true);
 
             sp = 0L;
 
