@@ -24,7 +24,7 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 public final class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
 
     private boolean _download;
-    private String _download_path;
+    private String _download_path, _selected_item;
     private final ClipboardSpy _clipboardspy;
     private final MainPanel _main_panel;
 
@@ -66,6 +66,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         _download_path = download_path;
 
+        _selected_item = null;
+
         _clipboardspy = clipboardspy;
 
         download_dir_label.setText(truncateText(download_path, 80));
@@ -79,7 +81,19 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     swingInvoke(new Runnable() {
                         @Override
                         public void run() {
-                            use_mega_account_down_combobox.addItem(_main_panel.getMega_account_down());
+
+                            String mega_default_down = _main_panel.getMega_account_down();
+
+                            use_mega_account_down_combobox.addItem(mega_default_down);
+
+                            for (Object k : _main_panel.getMega_accounts().keySet()) {
+
+                                if (!mega_default_down.equals(k)) {
+                                    use_mega_account_down_combobox.addItem((String) k);
+                                }
+
+                            }
+
                             use_mega_account_down_combobox.addItem("");
                             use_mega_account_down_combobox.setSelectedIndex(0);
                         }
@@ -366,56 +380,56 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
     private void use_mega_account_down_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_use_mega_account_down_comboboxItemStateChanged
 
-        String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
+        if (_selected_item == null || !((String) use_mega_account_down_combobox.getSelectedItem()).equals(_selected_item)) {
+            _selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
-        if (_main_panel.isUse_mega_account_down() && !"".equals(selected_item)) {
+            if (_main_panel.isUse_mega_account_down() && !"".equals(_selected_item)) {
 
-            use_mega_account_down_combobox.setEnabled(false);
+                use_mega_account_down_combobox.setEnabled(false);
 
-            dance_button.setEnabled(false);
+                dance_button.setEnabled(false);
 
-            dance_button.setText("Checking MEGA account...");
+                dance_button.setText("Checking MEGA account...");
 
-            pack();
+                pack();
 
-            final String email = selected_item;
+                final LinkGrabberDialog tthis = this;
 
-            final LinkGrabberDialog tthis = this;
+                THREAD_POOL.execute(new Runnable() {
+                    @Override
+                    public void run() {
 
-            THREAD_POOL.execute(new Runnable() {
-                @Override
-                public void run() {
+                        try {
+                            checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item);
+                        } catch (Exception ex) {
 
-                    try {
-                        checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
-                    } catch (Exception ex) {
+                            swingInvoke(new Runnable() {
+                                @Override
+                                public void run() {
+                                    use_mega_account_down_combobox.setSelectedIndex(_main_panel.getMega_accounts().size());
+
+                                }
+                            });
+                        }
 
                         swingInvoke(new Runnable() {
                             @Override
                             public void run() {
-                                use_mega_account_down_combobox.setSelectedIndex(1);
+                                getUse_mega_account_down_combobox().setEnabled(true);
+
+                                getDance_button().setText("Let's dance, baby");
+
+                                getDance_button().setEnabled(true);
+
+                                pack();
 
                             }
                         });
+
                     }
+                });
 
-                    swingInvoke(new Runnable() {
-                        @Override
-                        public void run() {
-                            getUse_mega_account_down_combobox().setEnabled(true);
-
-                            getDance_button().setText("Let's dance, baby");
-
-                            getDance_button().setEnabled(true);
-
-                            pack();
-
-                        }
-                    });
-
-                }
-            });
-
+            }
         }
     }//GEN-LAST:event_use_mega_account_down_comboboxItemStateChanged
 

@@ -23,6 +23,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     private final ClipboardSpy _clipboardspy;
     private final MainPanelView _mainPanelView;
     private final MainPanel _main_panel;
+    private String _selected_item;
 
     public JButton getDance_button() {
         return dance_button;
@@ -53,6 +54,8 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
         _clipboardspy = clipboardspy;
 
+        _selected_item = null;
+
         _mainPanelView = parent;
 
         if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
@@ -64,7 +67,17 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                     swingInvoke(new Runnable() {
                         @Override
                         public void run() {
-                            use_mega_account_down_combobox.addItem(_main_panel.getMega_account_down());
+                            String mega_default_down = _main_panel.getMega_account_down();
+
+                            use_mega_account_down_combobox.addItem(mega_default_down);
+
+                            for (Object k : _main_panel.getMega_accounts().keySet()) {
+
+                                if (!mega_default_down.equals(k)) {
+                                    use_mega_account_down_combobox.addItem((String) k);
+                                }
+
+                            }
                             use_mega_account_down_combobox.addItem("");
                             use_mega_account_down_combobox.setSelectedIndex(0);
                         }
@@ -123,7 +136,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
         use_mega_account_down_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         use_mega_account_down_label.setText("Use this account for streaming:");
 
-        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         use_mega_account_down_combobox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 use_mega_account_down_comboboxItemStateChanged(evt);
@@ -258,55 +271,57 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void use_mega_account_down_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_use_mega_account_down_comboboxItemStateChanged
-        final String selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
-        if (_main_panel.isUse_mega_account_down() && !"".equals(selected_item)) {
+        if (_selected_item == null || !((String) use_mega_account_down_combobox.getSelectedItem()).equals(_selected_item)) {
+            _selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
-            use_mega_account_down_combobox.setEnabled(false);
+            if (_main_panel.isUse_mega_account_down() && !"".equals(_selected_item)) {
 
-            dance_button.setEnabled(false);
+                use_mega_account_down_combobox.setEnabled(false);
 
-            dance_button.setText("Checking MEGA account...");
+                dance_button.setEnabled(false);
 
-            pack();
+                dance_button.setText("Checking MEGA account...");
 
-            final String email = selected_item;
+                pack();
 
-            final StreamerDialog tthis = this;
+                final StreamerDialog tthis = this;
 
-            THREAD_POOL.execute(new Runnable() {
-                @Override
-                public void run() {
+                THREAD_POOL.execute(new Runnable() {
+                    @Override
+                    public void run() {
 
-                    try {
-                        checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
-                    } catch (Exception ex) {
+                        try {
+                            checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item);
+                        } catch (Exception ex) {
+
+                            swingInvoke(new Runnable() {
+                                @Override
+                                public void run() {
+                                    use_mega_account_down_combobox.setSelectedIndex(_main_panel.getMega_accounts().size());
+
+                                }
+                            });
+                        }
 
                         swingInvoke(new Runnable() {
                             @Override
                             public void run() {
-                                use_mega_account_down_combobox.setSelectedIndex(1);
+                                getUse_mega_account_down_combobox().setEnabled(true);
+
+                                getDance_button().setText("Let's dance, baby");
+
+                                getDance_button().setEnabled(true);
+
+                                pack();
 
                             }
                         });
+
                     }
+                });
 
-                    swingInvoke(new Runnable() {
-                        @Override
-                        public void run() {
-                            getUse_mega_account_down_combobox().setEnabled(true);
-
-                            getDance_button().setText("Let's dance, baby");
-
-                            getDance_button().setEnabled(true);
-
-                            pack();
-
-                        }
-                    });
-
-                }
-            });
+            }
         }
     }//GEN-LAST:event_use_mega_account_down_comboboxItemStateChanged
 

@@ -273,7 +273,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
 
-        jScrollPane_down.setBorder(null);
+        jScrollPane_down.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
         jPanel_scroll_down.setLayout(new javax.swing.BoxLayout(jPanel_scroll_down, javax.swing.BoxLayout.Y_AXIS));
         jScrollPane_down.setViewportView(jPanel_scroll_down);
@@ -343,7 +343,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
 
-        jScrollPane_up.setBorder(null);
+        jScrollPane_up.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
         jPanel_scroll_up.setLayout(new javax.swing.BoxLayout(jPanel_scroll_up, javax.swing.BoxLayout.Y_AXIS));
         jScrollPane_up.setViewportView(jPanel_scroll_up);
