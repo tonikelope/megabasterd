@@ -95,7 +95,6 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("MasterPassword");
-        setModalExclusionType(java.awt.Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
 
         current_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         current_pass_textfield.setDoubleBuffered(true);

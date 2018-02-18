@@ -70,6 +70,10 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         return file_link_button;
     }
 
+    public JButton getFolder_link_button() {
+        return folder_link_button;
+    }
+
     public JLabel getStatus_label() {
         return status_label;
     }

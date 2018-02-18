@@ -88,7 +88,6 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("MasterPassword");
-        setModalExclusionType(java.awt.Dialog.ModalExclusionType.APPLICATION_EXCLUDE);
         setResizable(false);
 
         confirm_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N

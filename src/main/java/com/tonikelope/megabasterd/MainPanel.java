@@ -696,9 +696,23 @@ public final class MainPanel {
         return exit;
     }
 
+    public void byebyenow() {
+
+        synchronized (DBTools.class) {
+
+            try {
+                DBTools.vaccum();
+            } catch (SQLException ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+            exit(0);
+        }
+    }
+
     public void byebye() {
 
-        if (checkByeBye()) {
+        if (!_exit && checkByeBye()) {
 
             _exit = true;
 
@@ -710,34 +724,40 @@ public final class MainPanel {
                 @Override
                 public void run() {
 
-                    if (!_download_manager.getTransference_running_list().isEmpty()) {
+                    boolean wait;
 
-                        boolean wait;
+                    do {
 
-                        do {
+                        wait = false;
 
-                            wait = false;
+                        if (!_download_manager.getTransference_running_list().isEmpty()) {
 
-                            for (Transference d : _download_manager.getTransference_running_list()) {
+                            for (Transference trans : _download_manager.getTransference_running_list()) {
 
-                                if (!((Download) d).getChunkworkers().isEmpty()) {
+                                Download download = (Download) trans;
+
+                                if (download.isPaused()) {
+                                    download.pause();
+                                }
+
+                                if (!download.getChunkworkers().isEmpty()) {
+
                                     wait = true;
 
-                                    swingInvoke(
-                                            new Runnable() {
+                                    swingInvoke(new Runnable() {
                                         @Override
                                         public void run() {
 
-                                            ((Download) d).getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
-                                            ((Download) d).getView().getSlots_spinner().setEnabled(false);
-                                            ((Download) d).getView().getPause_button().setEnabled(false);
-                                            ((Download) d).getView().getCopy_link_button().setEnabled(false);
-                                            ((Download) d).getView().getOpen_folder_button().setEnabled(false);
-                                            ((Download) d).getView().getFile_size_label().setEnabled(false);
-                                            ((Download) d).getView().getFile_name_label().setEnabled(false);
-                                            ((Download) d).getView().getSpeed_label().setEnabled(false);
-                                            ((Download) d).getView().getSlots_label().setEnabled(false);
-                                            ((Download) d).getView().getProgress_pbar().setEnabled(false);
+                                            download.getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
+                                            download.getView().getSlots_spinner().setEnabled(false);
+                                            download.getView().getPause_button().setEnabled(false);
+                                            download.getView().getCopy_link_button().setEnabled(false);
+                                            download.getView().getOpen_folder_button().setEnabled(false);
+                                            download.getView().getFile_size_label().setEnabled(false);
+                                            download.getView().getFile_name_label().setEnabled(false);
+                                            download.getView().getSpeed_label().setEnabled(false);
+                                            download.getView().getSlots_label().setEnabled(false);
+                                            download.getView().getProgress_pbar().setEnabled(false);
 
                                         }
                                     });
@@ -745,17 +765,54 @@ public final class MainPanel {
                                 }
                             }
 
-                            if (wait) {
+                        }
 
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException ex) {
-                                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                        if (!_upload_manager.getTransference_running_list().isEmpty()) {
+
+                            for (Transference trans : _upload_manager.getTransference_running_list()) {
+
+                                Upload upload = (Upload) trans;
+
+                                if (upload.isPaused()) {
+                                    upload.pause();
+                                }
+
+                                if (!upload.getChunkworkers().isEmpty()) {
+
+                                    wait = true;
+
+                                    swingInvoke(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
+                                            upload.getView().getSlots_spinner().setEnabled(false);
+                                            upload.getView().getPause_button().setEnabled(false);
+                                            upload.getView().getFolder_link_button().setEnabled(false);
+                                            upload.getView().getFile_link_button().setEnabled(false);
+                                            upload.getView().getFile_size_label().setEnabled(false);
+                                            upload.getView().getFile_name_label().setEnabled(false);
+                                            upload.getView().getSpeed_label().setEnabled(false);
+                                            upload.getView().getSlots_label().setEnabled(false);
+                                            upload.getView().getProgress_pbar().setEnabled(false);
+
+                                        }
+                                    });
+
                                 }
                             }
+                        }
 
-                        } while (wait);
-                    }
+                        if (wait) {
+
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+
+                    } while (wait);
 
                     synchronized (DBTools.class) {
 
@@ -771,6 +828,11 @@ public final class MainPanel {
                 }
             });
 
+            WarningExitMessage exit_message = new WarningExitMessage(getView(), true, this);
+
+            exit_message.setLocationRelativeTo(getView());
+
+            exit_message.setVisible(true);
         }
     }
 

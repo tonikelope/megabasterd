@@ -1253,7 +1253,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             } else {
 
-                getView().stop("Stopping download safely, please wait...");
+                getView().stop("Stopping download, please wait...");
 
                 synchronized (_workers_lock) {
 
