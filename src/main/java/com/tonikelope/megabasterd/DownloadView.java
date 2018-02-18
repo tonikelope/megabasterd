@@ -400,7 +400,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             @Override
             public void run() {
 
-                for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner}) {
+                for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
                     c.setEnabled(false);
                 }
@@ -423,7 +423,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             @Override
             public void run() {
 
-                for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner}) {
+                for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
                     c.setEnabled(true);
                 }
@@ -450,7 +450,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             @Override
             public void run() {
 
-                for (JComponent c : new JComponent[]{pause_button, keep_temp_checkbox, stop_button, speed_label, slots_label, slots_spinner}) {
+                for (JComponent c : new JComponent[]{pause_button, keep_temp_checkbox, stop_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
                     c.setEnabled(false);
                 }

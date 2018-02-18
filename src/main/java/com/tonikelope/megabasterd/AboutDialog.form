@@ -108,6 +108,8 @@
       </Properties>
       <Events>
         <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="title_labelMouseReleased"/>
+        <EventHandler event="mouseExited" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="title_labelMouseExited"/>
+        <EventHandler event="mouseEntered" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="title_labelMouseEntered"/>
       </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="made_in_spain_label">
@@ -181,6 +183,8 @@
       </Properties>
       <Events>
         <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="author_webpage_labelMouseReleased"/>
+        <EventHandler event="mouseExited" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="author_webpage_labelMouseExited"/>
+        <EventHandler event="mouseEntered" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="author_webpage_labelMouseEntered"/>
       </Events>
     </Component>
     <Component class="javax.swing.JLabel" name="pica_roja_label">

@@ -48,7 +48,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.93";
+    public static final String VERSION = "2.94";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -114,8 +114,11 @@ public final class MainPanel {
     private int _megacrypter_reverse_port;
     private boolean _megacrypter_reverse;
     private float _zoom_factor;
+    private volatile boolean _exit;
 
     public MainPanel() {
+
+        _exit = false;
 
         _restart = false;
 
@@ -226,6 +229,14 @@ public final class MainPanel {
         resumeDownloads();
 
         resumeUploads();
+    }
+
+    public boolean isExit() {
+        return _exit;
+    }
+
+    public void setExit(boolean _exit) {
+        this._exit = _exit;
     }
 
     public float getZoom_factor() {
@@ -689,16 +700,77 @@ public final class MainPanel {
 
         if (checkByeBye()) {
 
-            synchronized (DBTools.class) {
+            _exit = true;
 
-                try {
-                    DBTools.vaccum();
-                } catch (SQLException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            getView().getPause_all_down_button().setEnabled(false);
+
+            getView().setEnabled(false);
+
+            THREAD_POOL.execute(new Runnable() {
+                @Override
+                public void run() {
+
+                    if (!_download_manager.getTransference_running_list().isEmpty()) {
+
+                        boolean wait;
+
+                        do {
+
+                            wait = false;
+
+                            for (Transference d : _download_manager.getTransference_running_list()) {
+
+                                if (!((Download) d).getChunkworkers().isEmpty()) {
+                                    wait = true;
+
+                                    swingInvoke(
+                                            new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            ((Download) d).getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
+                                            ((Download) d).getView().getSlots_spinner().setEnabled(false);
+                                            ((Download) d).getView().getPause_button().setEnabled(false);
+                                            ((Download) d).getView().getCopy_link_button().setEnabled(false);
+                                            ((Download) d).getView().getOpen_folder_button().setEnabled(false);
+                                            ((Download) d).getView().getFile_size_label().setEnabled(false);
+                                            ((Download) d).getView().getFile_name_label().setEnabled(false);
+                                            ((Download) d).getView().getSpeed_label().setEnabled(false);
+                                            ((Download) d).getView().getSlots_label().setEnabled(false);
+                                            ((Download) d).getView().getProgress_pbar().setEnabled(false);
+
+                                        }
+                                    });
+
+                                }
+                            }
+
+                            if (wait) {
+
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+
+                        } while (wait);
+                    }
+
+                    synchronized (DBTools.class) {
+
+                        try {
+                            DBTools.vaccum();
+                        } catch (SQLException ex) {
+                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                        exit(0);
+                    }
+
                 }
+            });
 
-                exit(0);
-            }
         }
     }
 
@@ -876,6 +948,15 @@ public final class MainPanel {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
+
+                    if (!getView().isVisible()) {
+
+                        getView().setExtendedState(NORMAL);
+                        getView().setVisible(true);
+                        getView().revalidate();
+                        getView().repaint();
+
+                    }
 
                     byebye();
 

@@ -325,7 +325,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="14" style="2"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Note: if you want to download without using a MEGA account (or using a FREE one) you MUST enable MULTI SLOT. "/>
+                        <Property name="text" type="java.lang.String" value="Note: if you want to download without using a MEGA PREMIUM account you MUST enable MULTI SLOT. "/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JSeparator" name="jSeparator3">

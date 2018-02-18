@@ -4,6 +4,7 @@ import java.awt.Dialog;
 import javax.swing.JOptionPane;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import java.awt.Color;
 
 /**
  *
@@ -13,7 +14,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
     private static final String MEGA_URL = "https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A";
     private static final String TONIKELOPE_URL = "http://toni.world";
-    private static final String MEGACRYPTER_URL = "https://megacrypter.com";
+    private static final String MEGACRYPTER_URL = "https://tonikelope.github.io/megacrypter/";
     private static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
     private static final String MEGABASTERD_GITHUB_URL = "https://github.com/tonikelope/megabasterd";
 
@@ -60,6 +61,12 @@ public final class AboutDialog extends javax.swing.JDialog {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 title_labelMouseReleased(evt);
             }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                title_labelMouseExited(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                title_labelMouseEntered(evt);
+            }
         });
 
         made_in_spain_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/made_in_spain.jpg"))); // NOI18N
@@ -103,6 +110,12 @@ public final class AboutDialog extends javax.swing.JDialog {
         author_webpage_label.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
                 author_webpage_labelMouseReleased(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                author_webpage_labelMouseExited(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                author_webpage_labelMouseEntered(evt);
             }
         });
 
@@ -247,6 +260,22 @@ public final class AboutDialog extends javax.swing.JDialog {
     private void title_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_title_labelMouseReleased
         openBrowserURL(MEGABASTERD_GITHUB_URL);
     }//GEN-LAST:event_title_labelMouseReleased
+
+    private void author_webpage_labelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_author_webpage_labelMouseEntered
+        author_webpage_label.setForeground(Color.blue);
+    }//GEN-LAST:event_author_webpage_labelMouseEntered
+
+    private void author_webpage_labelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_author_webpage_labelMouseExited
+        author_webpage_label.setForeground(new Color(102, 102, 102));
+    }//GEN-LAST:event_author_webpage_labelMouseExited
+
+    private void title_labelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_title_labelMouseEntered
+        title_label.setForeground(Color.blue);
+    }//GEN-LAST:event_title_labelMouseEntered
+
+    private void title_labelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_title_labelMouseExited
+        title_label.setForeground(new Color(51, 51, 51));
+    }//GEN-LAST:event_title_labelMouseExited
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel author_webpage_label;

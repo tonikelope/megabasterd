@@ -1504,9 +1504,13 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         return dl_url;
     }
 
-    public long nextChunkId() {
+    public long nextChunkId() throws ChunkInvalidException {
 
         synchronized (_chunkid_lock) {
+
+            if (_main_panel.isExit()) {
+                throw new ChunkInvalidException(null);
+            }
 
             Long next_id;
 
