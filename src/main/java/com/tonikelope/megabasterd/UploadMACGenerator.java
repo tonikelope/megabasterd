@@ -120,7 +120,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                 while (_chunk_queue.containsKey(_last_chunk_id_read + 1)) {
 
-                    if (!upload_workers_finish && _upload.getChunkworkers().isEmpty()) {
+                    if (!upload_workers_finish && _upload.getProgress() == _upload.getFile_size()) {
 
                         _upload.getView().printStatusNormal("Finishing FILE MAC calculation... ***DO NOT EXIT MEGABASTERD NOW***");
 
