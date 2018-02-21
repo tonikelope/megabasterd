@@ -24,7 +24,7 @@ import static com.tonikelope.megabasterd.MainPanel.*;
  */
 public final class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
-    public static final boolean USE_SLOTS_DEFAULT = true;
+    public static final boolean USE_SLOTS_DEFAULT = false;
     public static final int WORKERS_DEFAULT = 8;
     private final MainPanel _main_panel;
     private volatile UploadView _view;
@@ -1002,9 +1002,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         });
 
         getMain_panel().getUpload_manager().getFinishing_uploads_queue().remove(this);
-
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader finished with message ->  {1} {2}...", new Object[]{Thread.currentThread().getName(), _status_error_message, this.getFile_name()});
-
+        
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader {1} BYE BYE", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
     }
 
