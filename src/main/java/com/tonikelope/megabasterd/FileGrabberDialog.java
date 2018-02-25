@@ -394,10 +394,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             skip_rest_button.setEnabled(root_childs);
 
         } else {
-            
-            if(!filechooser.getSelectedFile().canRead()) {
-                
-                JOptionPane.showMessageDialog(this, "File is not readable!", "Error", JOptionPane.ERROR_MESSAGE); 
+
+            if (filechooser.getSelectedFile() != null && !filechooser.getSelectedFile().canRead()) {
+
+                JOptionPane.showMessageDialog(this, "File is not readable!", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
             boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
@@ -479,10 +479,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             skip_rest_button.setEnabled(root_childs);
 
         } else {
-            
-            if(!filechooser.getSelectedFile().canRead()) {
-                
-                JOptionPane.showMessageDialog(this, "Folder is not readable!", "Error", JOptionPane.ERROR_MESSAGE); 
+
+            if (filechooser.getSelectedFile() != null && !filechooser.getSelectedFile().canRead()) {
+
+                JOptionPane.showMessageDialog(this, "Folder is not readable!", "Error", JOptionPane.ERROR_MESSAGE);
             }
 
             boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;

@@ -1002,7 +1002,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         });
 
         getMain_panel().getUpload_manager().getFinishing_uploads_queue().remove(this);
-        
+
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader {1} BYE BYE", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
     }
 
