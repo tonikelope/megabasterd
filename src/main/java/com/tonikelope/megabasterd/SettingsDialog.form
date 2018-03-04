@@ -600,7 +600,7 @@
                                           </Group>
                                           <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="165" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="476" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -727,7 +727,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="14" style="2"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT could be faster in certain congestion situations but in normal use case it&apos;s recommended not to enable it."/>
+                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT is required if you want to stop and resume uploads."/>
               </Properties>
             </Component>
           </SubComponents>

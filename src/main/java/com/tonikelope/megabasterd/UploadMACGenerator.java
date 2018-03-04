@@ -120,7 +120,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                 while (_chunk_queue.containsKey(_last_chunk_id_read + 1)) {
 
-                    if (!upload_workers_finish && _upload.getProgress() == _upload.getFile_size()) {
+                    if (!upload_workers_finish && _bytes_read == _upload.getFile_size()) {
 
                         _upload.getView().printStatusNormal("Finishing FILE MAC calculation... ***DO NOT EXIT MEGABASTERD NOW***");
 
@@ -193,7 +193,14 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                 }
 
                 if (!_exit && (!_upload.isStopped() || !_upload.getChunkworkers().isEmpty()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1))) {
+
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1}/{2} METAMAC wait {3}...", new Object[]{Thread.currentThread().getName(), _bytes_read, _upload.getFile_size(), this.getUpload().getFile_name()});
+
+                    if (_upload.getMain_panel().isExit()) {
+
+                        _upload.secureNotifyWorkers();
+                    }
+
                     secureWait();
                 }
             }

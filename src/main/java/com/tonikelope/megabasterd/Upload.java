@@ -24,7 +24,7 @@ import static com.tonikelope.megabasterd.MainPanel.*;
  */
 public final class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
-    public static final boolean USE_SLOTS_DEFAULT = false;
+    public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 8;
     private final MainPanel _main_panel;
     private volatile UploadView _view;
@@ -389,6 +389,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     _progress = (long) upload_progress.get("bytes_uploaded");
 
                     _provision_ok = true;
+
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "LAST CHUNK ID UPLOADED -> " + _last_chunk_id_dispatched);
                 }
 
             } catch (SQLException ex) {
@@ -666,19 +668,30 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         getView().printStatusNormal("Starting upload, please wait...");
 
         if (!_exit) {
+
             if (_ul_url == null || _restart) {
 
                 int conta_error = 0;
 
                 do {
                     _ul_url = _ma.initUploadFile(_file_name);
-                    long wait_time = MiscTools.getWaitTimeExpBackOff(++conta_error);
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader {1} Upload URL is null, retrying in {2} secs...", new Object[]{Thread.currentThread().getName(), this.getFile_name(), wait_time});
-                    try {
-                        Thread.sleep(wait_time * 1000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+
+                    if (_ul_url == null && !_exit) {
+
+                        long wait_time = MiscTools.getWaitTimeExpBackOff(++conta_error);
+
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader {1} Upload URL is null, retrying in {2} secs...", new Object[]{Thread.currentThread().getName(), this.getFile_name(), wait_time});
+
+                        try {
+
+                            Thread.sleep(wait_time * 1000);
+
+                        } catch (InterruptedException ex) {
+
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
+
                 } while (_ul_url == null && !_exit);
 
                 if (_ul_url != null) {
@@ -686,6 +699,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     try {
 
                         DBTools.updateUploadUrl(_file_name, _ma.getFull_email(), _ul_url);
+
                     } catch (SQLException ex) {
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
@@ -915,7 +929,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             getView().printStatusNormal("Upload CANCELED!");
         }
 
-        if (!_status_error) {
+        if (!_status_error || _main_panel.isExit()) {
 
             try {
                 DBTools.deleteUpload(_file_name, _ma.getFull_email());
@@ -1106,10 +1120,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         synchronized (_chunkid_lock) {
 
-            if (_main_panel.isExit()) {
-                throw new ChunkInvalidException(null);
-            }
-
             Long next_id;
 
             if ((next_id = _rejectedChunkIds.poll()) != null) {
@@ -1179,6 +1189,17 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             }
 
             return i;
+        }
+    }
+
+    public void secureNotifyWorkers() {
+
+        synchronized (_workers_lock) {
+
+            for (ChunkUploader uploader : getChunkworkers()) {
+
+                uploader.secureNotify();
+            }
         }
     }
 

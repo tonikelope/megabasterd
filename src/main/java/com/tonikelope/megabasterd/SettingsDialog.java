@@ -916,7 +916,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_upload_slots_label.setText("Note: MULTI-SLOT could be faster in certain congestion situations but in normal use case it's recommended not to enable it.");
+        rec_upload_slots_label.setText("Note: MULTI-SLOT is required if you want to stop and resume uploads.");
 
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
@@ -949,7 +949,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(limit_upload_speed_checkbox))
-                                .addGap(0, 165, Short.MAX_VALUE)))
+                                .addGap(0, 476, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         uploads_panelLayout.setVerticalGroup(

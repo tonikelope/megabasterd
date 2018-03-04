@@ -48,7 +48,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "2.96";
+    public static final String VERSION = "2.97";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -691,6 +691,37 @@ public final class MainPanel {
 
                 exit = false;
             }
+        } else if (!getUpload_manager().getTransference_running_list().isEmpty()) {
+
+            boolean mono = false;
+
+            for (Transference trans : _upload_manager.getTransference_running_list()) {
+
+                if (!((Upload) trans).isUse_slots()) {
+                    mono = true;
+                    break;
+                }
+            }
+
+            if (mono) {
+
+                Object[] options = {"No",
+                    "Yes"};
+
+                int n = showOptionDialog(getView(),
+                        "It seems MegaBasterd is uploading files that can not be safely stopped.\n\nIF YOU EXIT NOW, THOSE UPLOADS WILL BE ABORTED.\n\nDo you want to continue?",
+                        "Warning!", YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
+                        null,
+                        options,
+                        options[0]);
+
+                if (n == 0) {
+
+                    exit = false;
+                }
+
+            }
+
         }
 
         return exit;
@@ -717,6 +748,8 @@ public final class MainPanel {
             _exit = true;
 
             getView().getPause_all_down_button().setEnabled(false);
+
+            getView().getPause_all_up_button().setEnabled(false);
 
             getView().setEnabled(false);
 
@@ -773,32 +806,37 @@ public final class MainPanel {
 
                                 Upload upload = (Upload) trans;
 
-                                if (upload.isPaused()) {
-                                    upload.pause();
-                                }
+                                if (upload.isUse_slots()) {
 
-                                if (!upload.getChunkworkers().isEmpty()) {
+                                    if (upload.isPaused()) {
+                                        upload.pause();
+                                    }
 
+                                    if (!upload.getChunkworkers().isEmpty()) {
+
+                                        wait = true;
+
+                                        swingInvoke(new Runnable() {
+                                            @Override
+                                            public void run() {
+
+                                                upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
+                                                upload.getView().getSlots_spinner().setEnabled(false);
+                                                upload.getView().getPause_button().setEnabled(false);
+                                                upload.getView().getFolder_link_button().setEnabled(false);
+                                                upload.getView().getFile_link_button().setEnabled(false);
+                                                upload.getView().getFile_size_label().setEnabled(false);
+                                                upload.getView().getFile_name_label().setEnabled(false);
+                                                upload.getView().getSpeed_label().setEnabled(false);
+                                                upload.getView().getSlots_label().setEnabled(false);
+                                                upload.getView().getProgress_pbar().setEnabled(false);
+
+                                            }
+                                        });
+                                    }
+                                } else {
                                     wait = true;
-
-                                    swingInvoke(new Runnable() {
-                                        @Override
-                                        public void run() {
-
-                                            upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
-                                            upload.getView().getSlots_spinner().setEnabled(false);
-                                            upload.getView().getPause_button().setEnabled(false);
-                                            upload.getView().getFolder_link_button().setEnabled(false);
-                                            upload.getView().getFile_link_button().setEnabled(false);
-                                            upload.getView().getFile_size_label().setEnabled(false);
-                                            upload.getView().getFile_name_label().setEnabled(false);
-                                            upload.getView().getSpeed_label().setEnabled(false);
-                                            upload.getView().getSlots_label().setEnabled(false);
-                                            upload.getView().getProgress_pbar().setEnabled(false);
-
-                                        }
-                                    });
-
+                                    upload.stopUploader();
                                 }
                             }
                         }
