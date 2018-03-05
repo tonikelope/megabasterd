@@ -697,7 +697,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         use_mega_label.setText("Mega account (default):");
 
         multi_slot_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        multi_slot_down_checkbox.setText("Use multi slot download mode (download restart required)");
+        multi_slot_down_checkbox.setText("Use multi slot download mode");
         multi_slot_down_checkbox.setDoubleBuffered(true);
         multi_slot_down_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -894,7 +894,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_uploads_spinner.setDoubleBuffered(true);
 
         multi_slot_up_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        multi_slot_up_checkbox.setText("Use multi slot upload mode (upload restart required)");
+        multi_slot_up_checkbox.setText("Use multi slot upload mode");
         multi_slot_up_checkbox.setDoubleBuffered(true);
         multi_slot_up_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
             public void stateChanged(javax.swing.event.ChangeEvent evt) {
@@ -916,7 +916,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_upload_slots_label.setText("Note: MULTI-SLOT is required if you want to stop and resume uploads.");
+        rec_upload_slots_label.setText("Note: MULTI-SLOT is required if you want to resume uploads.");
 
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
@@ -949,7 +949,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(limit_upload_speed_checkbox))
-                                .addGap(0, 476, Short.MAX_VALUE)))
+                                .addGap(0, 612, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         uploads_panelLayout.setVerticalGroup(

@@ -26,6 +26,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 8;
+    public static final int CHUNK_SIZE_MULTI = 10;
     private final MainPanel _main_panel;
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
@@ -1179,7 +1180,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     public long calculateLastUploadedChunk(long bytes_read) {
 
         if (bytes_read > 3584 * 1024) {
-            return 7 + (long) Math.ceil((float) (bytes_read - 3584 * 1024) / (1024 * 1024));
+            return 7 + (long) Math.ceil((float) (bytes_read - 3584 * 1024) / (1024 * 1024 * (this.isUse_slots() ? Upload.CHUNK_SIZE_MULTI : 1)));
         } else {
             int i = 0, tot = 0;
 
