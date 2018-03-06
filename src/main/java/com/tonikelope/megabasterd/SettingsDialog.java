@@ -916,7 +916,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_upload_slots_label.setText("Note: MULTI-SLOT is required if you want to resume uploads.");
+        rec_upload_slots_label.setText("Note: MULTI-SLOT is required if you want to exit and resume uploads.");
 
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
@@ -949,7 +949,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(limit_upload_speed_checkbox))
-                                .addGap(0, 612, Short.MAX_VALUE)))
+                                .addGap(0, 551, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         uploads_panelLayout.setVerticalGroup(
@@ -1424,8 +1424,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         try {
 
-            _settings_ok = true;
-
             if (proxy_host_textfield.getText().isEmpty()) {
 
                 use_proxy_checkbox.setSelected(false);
@@ -1783,6 +1781,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 public void run() {
                                     status.setText("");
                                     JOptionPane.showMessageDialog(tthis, "Settings successfully saved!", "Settings saved", JOptionPane.INFORMATION_MESSAGE);
+                                    _settings_ok = true;
                                     setVisible(false);
                                 }
                             });
@@ -1793,6 +1792,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             } else {
 
                 JOptionPane.showMessageDialog(this, "Settings successfully saved!", "Settings saved", JOptionPane.INFORMATION_MESSAGE);
+                _settings_ok = true;
                 setVisible(false);
             }
 
@@ -1866,6 +1866,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     _main_panel.loadUserSettings();
 
                     JOptionPane.showMessageDialog(this, "Settings successfully imported!", "Settings imported", JOptionPane.INFORMATION_MESSAGE);
+
+                    _settings_ok = true;
 
                     setVisible(false);
 

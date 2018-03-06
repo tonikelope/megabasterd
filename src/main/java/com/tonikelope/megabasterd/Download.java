@@ -44,7 +44,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
     public static final boolean USE_SLOTS_DEFAULT = true;
-    public static final int WORKERS_DEFAULT = 8;
+    public static final int WORKERS_DEFAULT = 4;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
     public static final int CHUNK_SIZE_MULTI = 10;
 
