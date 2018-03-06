@@ -37,7 +37,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
     public static final int THREAD_START = 0x01;
     public static final int THREAD_STOP = 0x02;
-    public static final int CHUNK_WORKERS = 8;
+    public static final int CHUNK_WORKERS = 1;
 
     private final MainPanel _main_panel;
     private final ConcurrentHashMap<String, HashMap<String, Object>> _link_cache;

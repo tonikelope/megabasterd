@@ -616,7 +616,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
 
         rec_download_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_download_slots_label.setText("Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable MULTI SLOT. ");
+        rec_download_slots_label.setText("Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable MULTI SLOT (try to set as few slots as possible). ");
 
         megacrypter_reverse_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         megacrypter_reverse_checkbox.setText("Use Megacrypter reverse mode");
@@ -916,7 +916,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_upload_slots_label.setText("Note: MULTI-SLOT is required if you want to exit and resume uploads.");
+        rec_upload_slots_label.setText("Note: MULTI-SLOT is required if you want to exit and resume uploads (try to set as few slots as possible).");
 
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
@@ -949,7 +949,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(limit_upload_speed_checkbox))
-                                .addGap(0, 551, Short.MAX_VALUE)))
+                                .addGap(0, 308, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         uploads_panelLayout.setVerticalGroup(
