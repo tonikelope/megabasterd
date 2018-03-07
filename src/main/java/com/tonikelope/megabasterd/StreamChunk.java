@@ -31,7 +31,7 @@ public final class StreamChunk {
     private final long _size;
     private final String _url;
     private final ByteArrayOutInputStream _data_os;
-    private boolean _can_write;
+    private boolean _writable;
 
     public StreamChunk(long offset, long size, String url) throws ChunkInvalidException, IOException {
 
@@ -43,10 +43,11 @@ public final class StreamChunk {
         _size = size;
         _url = url + "/" + _offset + "-" + (_offset + _size - 1);
         _data_os = new ByteArrayOutInputStream((int) _size);
+        _writable = true;
     }
 
     public ByteArrayInputStream getInputStream() {
-        _can_write = false;
+        _writable = false;
         return _data_os.toInputStream();
     }
 
@@ -64,7 +65,7 @@ public final class StreamChunk {
 
     public ByteArrayOutputStream getOutputStream() throws IOException {
 
-        if (!_can_write) {
+        if (!_writable) {
 
             throw new IOException("Chunk outputstream is not available!");
         }

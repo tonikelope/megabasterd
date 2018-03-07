@@ -35,11 +35,11 @@ public final class Chunk {
     private final ByteArrayOutInputStream _data_os;
     private final String _url;
     private final int _size_multi;
-    private boolean _can_write;
+    private boolean _writable;
 
     public Chunk(long id, long file_size, String file_url) throws ChunkInvalidException, IOException {
 
-        _can_write = true;
+        _writable = true;
 
         _size_multi = 1;
 
@@ -69,7 +69,7 @@ public final class Chunk {
 
     public Chunk(long id, long file_size, String file_url, int size_multi) throws ChunkInvalidException {
 
-        _can_write = true;
+        _writable = true;
 
         _size_multi = size_multi;
 
@@ -107,7 +107,7 @@ public final class Chunk {
 
     public ByteArrayOutputStream getOutputStream() throws IOException {
 
-        if (!_can_write) {
+        if (!_writable) {
 
             throw new IOException("Chunk outputstream is not available!");
         }
@@ -128,7 +128,9 @@ public final class Chunk {
     }
 
     public ByteArrayInputStream getInputStream() {
-        _can_write = false;
+
+        _writable = false;
+
         return _data_os.toInputStream();
     }
 
