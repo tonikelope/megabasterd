@@ -135,58 +135,20 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                         upload_workers_finish = true;
                     }
 
-                    chunk = _chunk_queue.get(_last_chunk_id_read + 1);
+                    chunk = _chunk_queue.remove(_last_chunk_id_read + 1);
 
-                    InputStream chunk_is = chunk.getInputStream();
+                    try (InputStream chunk_is = chunk.getInputStream()) {
 
-                    if (Upload.CHUNK_SIZE_MULTI == 1 || chunk.getId() <= 7) {
+                        if (Upload.CHUNK_SIZE_MULTI == 1 || chunk.getId() <= 7) {
 
-                        try {
+                            try {
 
-                            int[] chunk_mac = {file_iv[0], file_iv[1], file_iv[0], file_iv[1]};
-                            byte[] byte_block = new byte[16];
+                                int[] chunk_mac = {file_iv[0], file_iv[1], file_iv[0], file_iv[1]};
+                                byte[] byte_block = new byte[16];
 
-                            while ((reads = chunk_is.read(byte_block)) != -1) {
-
-                                if (reads < byte_block.length) {
-                                    for (int i = reads; i < byte_block.length; i++) {
-                                        byte_block[i] = 0;
-                                    }
-                                }
-
-                                int_block = bin2i32a(byte_block);
-
-                                for (int i = 0; i < chunk_mac.length; i++) {
-                                    chunk_mac[i] ^= int_block[i];
-                                }
-
-                                chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
-                            }
-
-                            for (int i = 0; i < file_mac.length; i++) {
-                                file_mac[i] ^= chunk_mac[i];
-                            }
-
-                            file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
-
-                        } catch (IOException | IllegalBlockSizeException | BadPaddingException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                        }
-                    } else {
-
-                        do {
-                            int[] chunk_mac = {file_iv[0], file_iv[1], file_iv[0], file_iv[1]};
-
-                            byte[] byte_block = new byte[16];
-
-                            long chunk_size = 0;
-
-                            do {
-
-                                if ((reads = chunk_is.read(byte_block)) != -1) {
+                                while ((reads = chunk_is.read(byte_block)) != -1) {
 
                                     if (reads < byte_block.length) {
-
                                         for (int i = reads; i < byte_block.length; i++) {
                                             byte_block[i] = 0;
                                         }
@@ -199,30 +161,68 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                                     }
 
                                     chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
-
-                                    chunk_size += byte_block.length;
                                 }
-
-                            } while (reads != -1 && chunk_size < 1024 * 1024);
-
-                            if (chunk_size > 0) {
 
                                 for (int i = 0; i < file_mac.length; i++) {
                                     file_mac[i] ^= chunk_mac[i];
                                 }
 
                                 file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
-                            }
 
-                        } while (reads != -1);
+                            } catch (IOException | IllegalBlockSizeException | BadPaddingException ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            }
+                        } else {
+
+                            do {
+                                int[] chunk_mac = {file_iv[0], file_iv[1], file_iv[0], file_iv[1]};
+
+                                byte[] byte_block = new byte[16];
+
+                                long chunk_size = 0;
+
+                                do {
+
+                                    if ((reads = chunk_is.read(byte_block)) != -1) {
+
+                                        if (reads < byte_block.length) {
+
+                                            for (int i = reads; i < byte_block.length; i++) {
+                                                byte_block[i] = 0;
+                                            }
+                                        }
+
+                                        int_block = bin2i32a(byte_block);
+
+                                        for (int i = 0; i < chunk_mac.length; i++) {
+                                            chunk_mac[i] ^= int_block[i];
+                                        }
+
+                                        chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
+
+                                        chunk_size += byte_block.length;
+                                    }
+
+                                } while (reads != -1 && chunk_size < 1024 * 1024);
+
+                                if (chunk_size > 0) {
+
+                                    for (int i = 0; i < file_mac.length; i++) {
+                                        file_mac[i] ^= chunk_mac[i];
+                                    }
+
+                                    file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
+                                }
+
+                            } while (reads != -1);
+
+                        }
 
                     }
 
                     _bytes_read += chunk.getSize();
 
                     _last_chunk_id_read = chunk.getId();
-
-                    _chunk_queue.remove(chunk.getId());
 
                     new_chunk = true;
 

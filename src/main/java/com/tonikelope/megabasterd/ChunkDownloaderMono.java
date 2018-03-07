@@ -3,7 +3,6 @@ package com.tonikelope.megabasterd;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static com.tonikelope.megabasterd.MiscTools.*;
@@ -26,21 +25,15 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
 
-        String worker_url = null;
-        Chunk chunk;
-        int reads, conta_error, http_status = 200;
-        boolean error, error509;
-        HttpGet httpget = null;
-        CloseableHttpResponse httpresponse = null;
-
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), getId()});
 
         try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
-            conta_error = 0;
 
-            error = false;
-
-            error509 = false;
+            String worker_url = null;
+            int conta_error = 0, http_status = 200;
+            boolean error = false, error509 = false;
+            HttpGet httpget = null;
+            CloseableHttpResponse httpresponse = null;
 
             getDownload().getView().set509Error(false);
 
@@ -58,7 +51,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     }
                 }
 
-                chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), null);
+                Chunk chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), null);
 
                 try {
 
@@ -113,6 +106,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                         if (!isExit() && !getDownload().isStopped() && is != null) {
 
                             byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
+
+                            int reads;
 
                             while (!getDownload().isStopped() && !getDownload().getChunkwriter().isExit() && chunk.getOutputStream().size() < chunk.getSize() && (reads = is.read(buffer, 0, Math.min((int) (chunk.getSize() - chunk.getOutputStream().size()), buffer.length))) != -1) {
                                 chunk.getOutputStream().write(buffer, 0, reads);
@@ -199,16 +194,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         } catch (ChunkInvalidException e) {
 
-        } catch (IOException ex) {
-
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-
-            getDownload().stopDownloader(ex.getMessage());
-
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
+
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            getDownload().stopDownloader(ex.getMessage());
         }
 
         getDownload().stopThisSlot(this);

@@ -87,7 +87,7 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
 
                 while (!_exit && _bytes_written < _end_offset && _chunk_queue.containsKey(_bytes_written)) {
 
-                    StreamChunk current_chunk = _chunk_queue.get(_bytes_written);
+                    StreamChunk current_chunk = _chunk_queue.remove(_bytes_written);
 
                     InputStream is = current_chunk.getInputStream();
 
@@ -101,8 +101,6 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
 
                         _bytes_written += reads;
                     }
-
-                    _chunk_queue.remove(current_chunk.getOffset());
 
                     secureNotifyAll();
 

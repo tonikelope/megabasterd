@@ -43,8 +43,8 @@ public class StreamChunkDownloader implements Runnable {
 
             String url = _chunkwriter.getUrl();
 
-            boolean error = false;
-            boolean error509 = false;
+            boolean error = false, error509 = false;
+
             String current_proxy = null;
 
             long offset = -1;

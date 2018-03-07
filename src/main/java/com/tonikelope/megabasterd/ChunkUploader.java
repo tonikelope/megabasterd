@@ -9,7 +9,6 @@ import java.io.PipedOutputStream;
 import java.io.RandomAccessFile;
 import java.net.SocketTimeoutException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -107,20 +106,20 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
     @Override
     public void run() {
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploader {1} hello! {2}", new Object[]{Thread.currentThread().getName(), getId(), getUpload().getFile_name()});
 
-        String worker_url = _upload.getUl_url();
-        Chunk chunk;
-        int reads, conta_error, http_status, tot_bytes_up;
-        boolean error;
-        OutputStream out;
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploader {1} hello! {2}", new Object[]{Thread.currentThread().getName(), getId(), getUpload().getFile_name()});
 
         try (final CloseableHttpClient httpclient = getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");) {
 
-            conta_error = 0;
+            String worker_url = _upload.getUl_url();
+
+            int conta_error = 0;
 
             while (!_upload.getMain_panel().isExit() && !_exit && !_upload.isStopped() && conta_error < MAX_SLOT_ERROR) {
-                chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url, Upload.CHUNK_SIZE_MULTI);
+
+                int reads, http_status, tot_bytes_up;
+
+                Chunk chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url, Upload.CHUNK_SIZE_MULTI);
 
                 f.seek(chunk.getOffset());
 
@@ -138,7 +137,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 tot_bytes_up = 0;
 
-                error = false;
+                boolean error = false;
 
                 CloseableHttpResponse httpresponse = null;
 
@@ -165,35 +164,37 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                             });
 
                             THREAD_POOL.execute(futureTask);
-                            out = new ThrottledOutputStream(pipeout, _upload.getMain_panel().getStream_supervisor());
 
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploading chunk {1} from worker {2}...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
+                            try (OutputStream out = new ThrottledOutputStream(pipeout, _upload.getMain_panel().getStream_supervisor())) {
 
-                            while (!_exit && !_upload.isStopped() && (reads = cis.read(buffer)) != -1) {
-                                out.write(buffer, 0, reads);
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploading chunk {1} from worker {2}...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
 
-                                _upload.getPartialProgress().add(reads);
+                                while (!_exit && !_upload.isStopped() && (reads = cis.read(buffer)) != -1) {
+                                    out.write(buffer, 0, reads);
 
-                                _upload.getProgress_meter().secureNotify();
+                                    _upload.getPartialProgress().add(reads);
 
-                                tot_bytes_up += reads;
+                                    _upload.getProgress_meter().secureNotify();
 
-                                if (_upload.isPaused() && !_upload.isStopped()) {
+                                    tot_bytes_up += reads;
 
-                                    _upload.pause_worker();
+                                    if (_upload.isPaused() && !_upload.isStopped()) {
 
-                                    secureWait();
+                                        _upload.pause_worker();
 
-                                } else if (!_upload.isPaused() && _upload.getMain_panel().getUpload_manager().isPaused_all()) {
+                                        secureWait();
 
-                                    _upload.pause();
+                                    } else if (!_upload.isPaused() && _upload.getMain_panel().getUpload_manager().isPaused_all()) {
 
-                                    _upload.pause_worker();
+                                        _upload.pause();
 
-                                    secureWait();
+                                        _upload.pause_worker();
+
+                                        secureWait();
+                                    }
                                 }
+
                             }
-                            out.close();
                         }
 
                         if (!_upload.isStopped()) {
@@ -414,7 +415,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         } catch (ChunkInvalidException e) {
 
-        } catch (IOException | URISyntaxException ex) {
+        } catch (Exception ex) {
 
             _upload.stopUploader();
 

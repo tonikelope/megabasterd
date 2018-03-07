@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static com.tonikelope.megabasterd.MiscTools.*;
@@ -93,23 +92,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     @Override
     public void run() {
 
-        String worker_url = null;
-        Chunk chunk;
-        int reads, conta_error, http_status;
-        InputStream is;
-        boolean error, error509;
-        String current_proxy = null;
-        CloseableHttpClient httpclient = null;
-
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
+
+        CloseableHttpClient httpclient = null;
 
         try {
 
-            conta_error = 0;
-
-            error = false;
-
-            error509 = false;
+            int conta_error = 0;
+            String worker_url = null, current_proxy = null;;
+            boolean error = false, error509 = false;
 
             while (!_exit && !_download.isStopped() && (error509 || conta_error < MAX_SLOT_ERROR || _download.getMain_panel().isUse_smart_proxy())) {
 
@@ -159,7 +150,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     worker_url = _download.getDownloadUrlForWorker();
                 }
 
-                chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url, Download.CHUNK_SIZE_MULTI);
+                Chunk chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url, Download.CHUNK_SIZE_MULTI);
 
                 HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
 
@@ -175,51 +166,53 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (!_exit && !_download.isStopped()) {
 
-                        is = new ThrottledInputStream(httpresponse.getEntity().getContent(), _download.getMain_panel().getStream_supervisor());
+                        try (InputStream is = new ThrottledInputStream(httpresponse.getEntity().getContent(), _download.getMain_panel().getStream_supervisor())) {
 
-                        http_status = httpresponse.getStatusLine().getStatusCode();
+                            int http_status = httpresponse.getStatusLine().getStatusCode();
 
-                        if (http_status != HttpStatus.SC_OK) {
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                            if (http_status != HttpStatus.SC_OK) {
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                            error = true;
+                                error = true;
 
-                            if (http_status == 509) {
+                                if (http_status == 509) {
 
-                                error509 = true;
+                                    error509 = true;
 
-                                getDownload().getView().set509Error(true);
-                            }
-
-                        } else {
-
-                            byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
-
-                            while (!_exit && !_download.isStopped() && !_download.getChunkwriter().isExit() && chunk.getOutputStream().size() < chunk.getSize() && (reads = is.read(buffer)) != -1) {
-
-                                chunk.getOutputStream().write(buffer, 0, reads);
-
-                                _download.getPartialProgressQueue().add(reads);
-
-                                _download.getProgress_meter().secureNotify();
-
-                                if (_download.isPaused() && !_download.isStopped()) {
-
-                                    _download.pause_worker();
-
-                                    secureWait();
-
-                                } else if (!_download.isPaused() && _download.getMain_panel().getDownload_manager().isPaused_all()) {
-
-                                    _download.pause();
-
-                                    _download.pause_worker();
-
-                                    secureWait();
+                                    getDownload().getView().set509Error(true);
                                 }
-                            }
 
-                            is.close();
+                            } else {
+
+                                byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
+
+                                int reads;
+
+                                while (!_exit && !_download.isStopped() && !_download.getChunkwriter().isExit() && chunk.getOutputStream().size() < chunk.getSize() && (reads = is.read(buffer)) != -1) {
+
+                                    chunk.getOutputStream().write(buffer, 0, reads);
+
+                                    _download.getPartialProgressQueue().add(reads);
+
+                                    _download.getProgress_meter().secureNotify();
+
+                                    if (_download.isPaused() && !_download.isStopped()) {
+
+                                        _download.pause_worker();
+
+                                        secureWait();
+
+                                    } else if (!_download.isPaused() && _download.getMain_panel().getDownload_manager().isPaused_all()) {
+
+                                        _download.pause();
+
+                                        _download.pause_worker();
+
+                                        secureWait();
+                                    }
+                                }
+
+                            }
 
                             if (chunk.getOutputStream().size() < chunk.getSize()) {
 
@@ -318,12 +311,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         } catch (ChunkInvalidException e) {
 
-        } catch (IOException ex) {
-            _download.stopDownloader(ex.getMessage());
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } catch (URISyntaxException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
+            _download.stopDownloader(ex.getMessage());
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } finally {
 

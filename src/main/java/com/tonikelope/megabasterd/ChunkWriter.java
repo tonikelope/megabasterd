@@ -121,7 +121,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
             if (_file_size > 0) {
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
                     while (_chunk_queue.containsKey(_last_chunk_id_written + 1)) {
-                        current_chunk = _chunk_queue.get(_last_chunk_id_written + 1);
+                        current_chunk = _chunk_queue.remove(_last_chunk_id_written + 1);
 
                         try (CipherInputStream cis = new CipherInputStream(current_chunk.getInputStream(), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
                             while ((reads = cis.read(buffer)) != -1) {
@@ -132,8 +132,6 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
                         }
 
                         _bytes_written += current_chunk.getSize();
-
-                        _chunk_queue.remove(current_chunk.getId());
 
                         _last_chunk_id_written = current_chunk.getId();
 

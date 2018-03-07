@@ -8,7 +8,6 @@ import java.io.PipedInputStream;
 import java.io.PipedOutputStream;
 import java.io.RandomAccessFile;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -41,16 +40,12 @@ public class ChunkUploaderMono extends ChunkUploader {
 
     @Override
     public void run() {
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploaderMONO {1} hello! {2}", new Object[]{Thread.currentThread().getName(), getId(), getUpload().getFile_name()});
 
-        String worker_url = getUpload().getUl_url();
-        Chunk chunk;
-        int reads, conta_error, http_status, tot_bytes_up = -1;
-        boolean error = false;
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploaderMONO {1} hello! {2}", new Object[]{Thread.currentThread().getName(), getId(), getUpload().getFile_name()});
 
         try (CloseableHttpClient httpclient = getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(getUpload().getFile_name(), "r");) {
 
-            conta_error = 0;
+            String worker_url = getUpload().getUl_url();
 
             OutputStream out = null;
 
@@ -58,9 +53,13 @@ public class ChunkUploaderMono extends ChunkUploader {
 
             while (!isExit() && !getUpload().isStopped()) {
 
+                int conta_error = 0, reads, http_status, tot_bytes_up = -1;
+
+                boolean error = false;
+
                 CloseableHttpResponse httpresponse = null;
 
-                chunk = new Chunk(getUpload().nextChunkId(), getUpload().getFile_size(), null);
+                Chunk chunk = new Chunk(getUpload().nextChunkId(), getUpload().getFile_size(), null);
 
                 f.seek(chunk.getOffset());
 
@@ -293,7 +292,7 @@ public class ChunkUploaderMono extends ChunkUploader {
 
         } catch (ChunkInvalidException e) {
 
-        } catch (URISyntaxException | IOException ex) {
+        } catch (Exception ex) {
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }

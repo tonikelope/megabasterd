@@ -1199,36 +1199,38 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     } while (!_exit && chunk.getOutputStream().size() < chunk.getSize());
 
-                    InputStream chunk_is = chunk.getInputStream();
+                    try (InputStream chunk_is = chunk.getInputStream()) {
 
-                    while (!_exit && (reads = chunk_is.read(byte_block)) != -1) {
+                        while (!_exit && (reads = chunk_is.read(byte_block)) != -1) {
 
-                        if (reads < byte_block.length) {
+                            if (reads < byte_block.length) {
 
-                            for (int i = reads; i < byte_block.length; i++) {
-                                byte_block[i] = 0;
+                                for (int i = reads; i < byte_block.length; i++) {
+                                    byte_block[i] = 0;
+                                }
                             }
+
+                            int_block = bin2i32a(byte_block);
+
+                            for (int i = 0; i < chunk_mac.length; i++) {
+                                chunk_mac[i] ^= int_block[i];
+                            }
+
+                            chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
                         }
 
-                        int_block = bin2i32a(byte_block);
-
-                        for (int i = 0; i < chunk_mac.length; i++) {
-                            chunk_mac[i] ^= int_block[i];
+                        for (int i = 0; i < file_mac.length; i++) {
+                            file_mac[i] ^= chunk_mac[i];
                         }
 
-                        chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
+                        file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
+
+                        setProgress(tot);
                     }
-
-                    for (int i = 0; i < file_mac.length; i++) {
-                        file_mac[i] ^= chunk_mac[i];
-                    }
-
-                    file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
-
-                    setProgress(tot);
                 }
 
             } catch (ChunkInvalidException e) {
+
             }
 
             int[] cbc = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};

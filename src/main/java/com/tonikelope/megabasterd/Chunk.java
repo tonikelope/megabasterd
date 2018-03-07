@@ -2,6 +2,8 @@ package com.tonikelope.megabasterd;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import static java.lang.String.valueOf;
 
 /**
@@ -10,14 +12,35 @@ import static java.lang.String.valueOf;
  */
 public final class Chunk {
 
+    public class ByteArrayOutInputStream extends ByteArrayOutputStream {
+
+        public ByteArrayOutInputStream(int size) {
+            super(size);
+        }
+
+        /**
+         * Get an input stream based on the contents of this output stream. Do
+         * not use the output stream after calling this method.
+         *
+         * @return an {@link InputStream}
+         */
+        public ByteArrayInputStream toInputStream() {
+            return new ByteArrayInputStream(this.buf, 0, this.count);
+        }
+    }
+
     private final long _id;
     private final long _offset;
     private final long _size;
-    private final ByteArrayOutputStream _data_os;
+    private final ByteArrayOutInputStream _data_os;
     private final String _url;
     private final int _size_multi;
+    private boolean _can_write;
 
-    public Chunk(long id, long file_size, String file_url) throws ChunkInvalidException {
+    public Chunk(long id, long file_size, String file_url) throws ChunkInvalidException, IOException {
+
+        _can_write = true;
+
         _size_multi = 1;
 
         _id = id;
@@ -41,10 +64,13 @@ public final class Chunk {
 
         _url = file_url != null ? file_url + "/" + _offset + "-" + (_offset + _size - 1) : null;
 
-        _data_os = new ByteArrayOutputStream((int) _size);
+        _data_os = new ByteArrayOutInputStream((int) _size);
     }
 
     public Chunk(long id, long file_size, String file_url, int size_multi) throws ChunkInvalidException {
+
+        _can_write = true;
+
         _size_multi = size_multi;
 
         _id = id;
@@ -68,7 +94,7 @@ public final class Chunk {
 
         _url = file_url != null ? file_url + "/" + _offset + "-" + (_offset + _size - 1) : null;
 
-        _data_os = new ByteArrayOutputStream((int) _size);
+        _data_os = new ByteArrayOutInputStream((int) _size);
     }
 
     public int getSize_multi() {
@@ -79,7 +105,13 @@ public final class Chunk {
         return _offset;
     }
 
-    public ByteArrayOutputStream getOutputStream() {
+    public ByteArrayOutputStream getOutputStream() throws IOException {
+
+        if (!_can_write) {
+
+            throw new IOException("Chunk outputstream is not available!");
+        }
+
         return _data_os;
     }
 
@@ -96,7 +128,8 @@ public final class Chunk {
     }
 
     public ByteArrayInputStream getInputStream() {
-        return new ByteArrayInputStream(_data_os.toByteArray());
+        _can_write = false;
+        return _data_os.toInputStream();
     }
 
     private long calculateSize(long file_size) {
