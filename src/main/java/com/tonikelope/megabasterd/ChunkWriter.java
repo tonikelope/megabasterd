@@ -110,9 +110,6 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
 
     @Override
     public void run() {
-        Chunk current_chunk;
-        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-        int reads;
 
         try {
 
@@ -121,7 +118,12 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
             if (_file_size > 0) {
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
                     while (_chunk_queue.containsKey(_last_chunk_id_written + 1)) {
-                        current_chunk = _chunk_queue.remove(_last_chunk_id_written + 1);
+
+                        Chunk current_chunk = _chunk_queue.remove(_last_chunk_id_written + 1);
+
+                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                        int reads;
 
                         try (CipherInputStream cis = new CipherInputStream(current_chunk.getInputStream(), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
                             while ((reads = cis.read(buffer)) != -1) {

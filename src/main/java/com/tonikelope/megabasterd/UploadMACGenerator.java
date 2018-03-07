@@ -93,8 +93,6 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
         try {
 
-            Chunk chunk;
-
             HashMap upload_progress = DBTools.selectUploadProgress(_upload.getFile_name(), _upload.getMa().getEmail());
 
             int[] file_mac = new int[]{0, 0, 0, 0};
@@ -109,11 +107,8 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
             int[] file_iv = bin2i32a(_upload.getByte_file_iv()), int_block, mac_iv = CryptTools.AES_ZERO_IV_I32A;
 
-            int reads;
+            boolean new_chunk = false, upload_workers_finish = false;
 
-            String temp_file_data;
-            boolean new_chunk = false;
-            boolean upload_workers_finish = false;
             Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", _upload.getByte_file_key(), i32a2bin(mac_iv));
 
             while (!_exit && (!_upload.isStopped() || !_upload.getChunkworkers().isEmpty()) && (_bytes_read < _upload.getFile_size() || (_upload.getFile_size() == 0 && _last_chunk_id_read < 1))) {
@@ -135,11 +130,13 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                         upload_workers_finish = true;
                     }
 
-                    chunk = _chunk_queue.remove(_last_chunk_id_read + 1);
+                    int reads;
 
-                    try (InputStream chunk_is = chunk.getInputStream()) {
+                    Chunk current_chunk = _chunk_queue.remove(_last_chunk_id_read + 1);
 
-                        if (Upload.CHUNK_SIZE_MULTI == 1 || chunk.getId() <= 7) {
+                    try (InputStream chunk_is = current_chunk.getInputStream()) {
+
+                        if (Upload.CHUNK_SIZE_MULTI == 1 || current_chunk.getId() <= 7) {
 
                             try {
 
@@ -220,13 +217,13 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                     }
 
-                    _bytes_read += chunk.getSize();
+                    _bytes_read += current_chunk.getSize();
 
-                    _last_chunk_id_read = chunk.getId();
+                    _last_chunk_id_read = current_chunk.getId();
 
                     new_chunk = true;
 
-                    temp_file_data = (String.valueOf(_bytes_read) + "|" + Bin2BASE64(i32a2bin(file_mac)));
+                    String temp_file_data = (String.valueOf(_bytes_read) + "|" + Bin2BASE64(i32a2bin(file_mac)));
 
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Macgenerator -> {1} {2} {3} {4}", new Object[]{Thread.currentThread().getName(), temp_file_data, _upload.calculateLastUploadedChunk(_bytes_read), _last_chunk_id_read, this.getUpload().getFile_name()});
 
