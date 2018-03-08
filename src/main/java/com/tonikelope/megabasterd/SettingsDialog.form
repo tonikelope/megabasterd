@@ -27,7 +27,7 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jTabbedPane1" max="32767" attributes="0"/>
+                  <Component id="jTabbedPane1" pref="1069" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="status" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
@@ -44,7 +44,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" max="32767" attributes="0"/>
+              <Component id="jTabbedPane1" pref="580" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="cancel_button" min="-2" max="-2" attributes="0"/>
@@ -127,7 +127,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="downloads_scroll_pane" pref="468" max="32767" attributes="0"/>
+                      <Component id="downloads_scroll_pane" pref="515" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -197,7 +197,7 @@
                                       <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
                                       <Component id="use_mega_label" min="-2" max="-2" attributes="0"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="use_mega_account_down_combobox" max="32767" attributes="0"/>
+                                      <Component id="use_mega_account_down_combobox" pref="779" max="32767" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="0" attributes="0">
                                       <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
@@ -223,7 +223,7 @@
                                       </Group>
                                   </Group>
                               </Group>
-                              <EmptySpace pref="614" max="32767" attributes="0"/>
+                              <EmptySpace pref="84" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" alignment="0" attributes="0">
                               <EmptySpace max="-2" attributes="0"/>
@@ -325,7 +325,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="14" style="2"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable MULTI SLOT (try to set as few slots as possible). "/>
+                        <Property name="text" type="java.lang.String" value="Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it (slots consume RAM, so use them moderately). "/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JSeparator" name="jSeparator3">
@@ -600,7 +600,7 @@
                                           </Group>
                                           <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="308" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="220" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -637,7 +637,7 @@
                           <Component id="max_up_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="max_up_speed_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="272" max="32767" attributes="0"/>
+                      <EmptySpace pref="319" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -727,7 +727,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="14" style="2"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT is required if you want to exit and resume uploads (try to set as few slots as possible)."/>
+                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT is required if you want to exit and resume uploads (slots consume RAM, so use them moderately)."/>
               </Properties>
             </Component>
           </SubComponents>
@@ -796,7 +796,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="120" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="143" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -805,7 +805,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="119" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="143" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1079,7 +1079,7 @@
                           <Component id="import_settings_button" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="export_settings_button" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="147" max="32767" attributes="0"/>
+                      <EmptySpace pref="194" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>

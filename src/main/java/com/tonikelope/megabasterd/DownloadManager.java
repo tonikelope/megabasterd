@@ -75,7 +75,7 @@ public final class DownloadManager extends TransferenceManager {
 
             secureNotify();
 
-        } catch (MegaAPIException | MegaCrypterAPIException ex) {
+        } catch (APIException ex) {
 
             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Provision failed! Retrying in separated thread...", Thread.currentThread().getName());
 
@@ -87,7 +87,7 @@ public final class DownloadManager extends TransferenceManager {
 
                         _provision((Download) download, true);
 
-                    } catch (MegaAPIException | MegaCrypterAPIException ex1) {
+                    } catch (APIException ex1) {
 
                         Logger.getLogger(getClass().getName()).log(SEVERE, null, ex1);
                     }
@@ -100,7 +100,7 @@ public final class DownloadManager extends TransferenceManager {
 
     }
 
-    private void _provision(Download download, boolean retry) throws MegaAPIException, MegaCrypterAPIException {
+    private void _provision(Download download, boolean retry) throws APIException {
 
         download.provisionIt(retry);
 

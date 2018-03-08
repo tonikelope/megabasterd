@@ -52,7 +52,7 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
         _exit = false;
     }
 
-    public String getUrl() throws IOException, InterruptedException {
+    public String getUrl() throws Exception {
 
         if (!checkMegaDownloadUrl(_url)) {
 

@@ -140,9 +140,10 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
     }
 
-    private String[] _getMegaFileMetadata(String link, MainPanelView panel) throws IOException, InterruptedException {
+    private String[] _getMegaFileMetadata(String link, MainPanelView panel) throws IOException {
+
         String[] file_info = null;
-        int retry = 0;
+        int conta_error = 0;
         boolean error;
 
         do {
@@ -150,6 +151,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
             error = false;
 
             try {
+
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {
 
                     MegaAPI ma = new MegaAPI();
@@ -162,36 +164,16 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 }
 
-            } catch (MegaAPIException | MegaCrypterAPIException e) {
+            } catch (APIException ex) {
+
                 error = true;
 
-                switch (Integer.parseInt(e.getMessage())) {
-                    case -2:
-                        throw new IOException("Mega link is not valid!");
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex.getMessage());
 
-                    case -14:
-                        throw new IOException("Mega link is not valid!");
-
-                    case 22:
-                        throw new IOException("MegaCrypter link is not valid!");
-
-                    case 23:
-                        throw new IOException("MegaCrypter link is blocked!");
-
-                    case 24:
-                        throw new IOException("MegaCrypter link has expired!");
-
-                    case 25:
-                        throw new IOException("MegaCrypter link pass error!");
-
-                    default:
-
-                        for (long i = getWaitTimeExpBackOff(retry++); i > 0; i--) {
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException ex) {
-                            }
-                        }
+                try {
+                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                } catch (InterruptedException ex2) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex2);
                 }
 
             }
@@ -201,9 +183,10 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         return file_info;
     }
 
-    public String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String mega_account) throws IOException, InterruptedException {
+    public String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String mega_account) throws Exception {
+
         String dl_url = null;
-        int retry = 0;
+        int conta_error = 0;
         boolean error;
 
         do {
@@ -225,33 +208,19 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                 } else {
                     dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes()) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
-            } catch (MegaAPIException | MegaCrypterAPIException e) {
+
+            } catch (APIException ex) {
+
                 error = true;
 
-                switch (Integer.parseInt(e.getMessage())) {
-                    case 22:
-                        throw new IOException("MegaCrypter link is not valid!");
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex.getMessage());
 
-                    case 23:
-                        throw new IOException("MegaCrypter link is blocked!");
-
-                    case 24:
-                        throw new IOException("MegaCrypter link has expired!");
-
-                    case 25:
-                        throw new IOException("MegaCrypter link pass error!");
-
-                    default:
-
-                        for (long i = getWaitTimeExpBackOff(retry++); i > 0; i--) {
-                            try {
-                                Thread.sleep(1000);
-                            } catch (InterruptedException ex) {
-                            }
-                        }
+                try {
+                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                } catch (InterruptedException ex2) {
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex2);
                 }
-            } catch (Exception ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+
             }
 
         } while (error);

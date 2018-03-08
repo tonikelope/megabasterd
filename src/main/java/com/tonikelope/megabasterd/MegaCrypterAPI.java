@@ -77,7 +77,7 @@ public final class MegaCrypterAPI {
                                 int mc_error;
 
                                 if ((mc_error = MegaCrypterAPI.checkMCError(response)) != 0) {
-                                    throw new MegaCrypterAPIException(String.valueOf(mc_error));
+                                    throw new MegaCrypterAPIException(mc_error);
 
                                 }
                             }
@@ -121,7 +121,7 @@ public final class MegaCrypterAPI {
                 dl_url = new String(decrypted_url);
 
             } catch (Exception ex) {
-                throw new MegaCrypterAPIException("25");
+                throw new MegaCrypterAPIException(25);
             }
         }
 
@@ -199,7 +199,7 @@ public final class MegaCrypterAPI {
             String[] pass_items = pass.split("#");
 
             if (pass_items.length != 4) {
-                throw new MegaCrypterAPIException("25");
+                throw new MegaCrypterAPIException(25);
             }
 
             int iterations = Integer.parseInt(pass_items[0]);
@@ -256,7 +256,7 @@ public final class MegaCrypterAPI {
 
             if (bad_pass) {
 
-                throw new MegaCrypterAPIException("25");
+                throw new MegaCrypterAPIException(25);
 
             } else {
 
@@ -284,7 +284,7 @@ public final class MegaCrypterAPI {
 
                 } catch (Exception ex) {
 
-                    throw new MegaCrypterAPIException("25");
+                    throw new MegaCrypterAPIException(25);
 
                 }
             }

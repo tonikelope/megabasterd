@@ -124,7 +124,7 @@ public final class MegaAPI {
         return _trashbin_id;
     }
 
-    private void _realLogin() throws Exception, MegaAPIException {
+    private void _realLogin() throws Exception {
 
         String request = "[{\"a\":\"us\", \"user\":\"" + _email + "\", \"uh\":\"" + _user_hash + "\"}]";
 
@@ -160,7 +160,7 @@ public final class MegaAPI {
         fetchNodes();
     }
 
-    public void login(String email, String password) throws Exception, MegaAPIException {
+    public void login(String email, String password) throws Exception {
 
         _full_email = email;
 
@@ -175,7 +175,7 @@ public final class MegaAPI {
         _realLogin();
     }
 
-    public void fastLogin(String email, int[] password_aes, String user_hash) throws Exception, MegaAPIException {
+    public void fastLogin(String email, int[] password_aes, String user_hash) throws Exception {
 
         _full_email = email;
 
@@ -349,7 +349,7 @@ public final class MegaAPI {
 
                     if (Arrays.asList(MEGA_ERROR_EXCEPTION_CODES).contains(error)) {
 
-                        throw new MegaAPIException(String.valueOf(error));
+                        throw new MegaAPIException(error);
                     }
 
                     Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(error)});
@@ -450,7 +450,7 @@ public final class MegaAPI {
 
         } else {
 
-            throw new MegaAPIException("-14");
+            throw new MegaAPIException(-14);
         }
 
         return file_data;

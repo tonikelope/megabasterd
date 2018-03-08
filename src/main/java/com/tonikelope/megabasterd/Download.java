@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Integer.parseInt;
 import static java.lang.Long.valueOf;
 import static java.lang.Thread.sleep;
 import java.nio.channels.FileChannel;
@@ -809,7 +808,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
     }
 
-    public void provisionIt(boolean retry) throws MegaAPIException, MegaCrypterAPIException {
+    public void provisionIt(boolean retry) throws APIException {
 
         getView().printStatusNormal("Provisioning download, please wait...");
 
@@ -879,7 +878,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 _provision_ok = true;
             }
 
-        } catch (MegaAPIException | MegaCrypterAPIException ex) {
+        } catch (APIException ex) {
 
             throw ex;
 
@@ -992,7 +991,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             boolean error;
 
-            int api_error_retry = 0;
+            int conta_error = 0;
 
             String download_url;
 
@@ -1018,15 +1017,14 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         error = true;
                     }
 
-                } catch (MegaCrypterAPIException | MegaAPIException e) {
+                } catch (APIException ex) {
 
                     error = true;
 
-                    for (long i = getWaitTimeExpBackOff(api_error_retry++); i > 0 && !_exit; i--) {
-                        try {
-                            sleep(1000);
-                        } catch (InterruptedException ex) {
-                        }
+                    try {
+                        Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                    } catch (InterruptedException ex2) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex2);
                     }
                 }
 
@@ -1294,7 +1292,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         }
     }
 
-    public String[] getMegaFileMetadata(String link, MainPanelView panel, boolean retry_request) throws MegaAPIException, MegaCrypterAPIException {
+    public String[] getMegaFileMetadata(String link, MainPanelView panel, boolean retry_request) throws APIException {
 
         String[] file_info = null;
         int retry = 0, error_code;
@@ -1310,49 +1308,21 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     file_info = _ma.getMegaFileMetadata(link);
 
                 } else {
+
                     file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes())) : null);
                 }
 
-            } catch (MegaAPIException | MegaCrypterAPIException ex) {
+            } catch (APIException ex) {
 
                 error = true;
 
                 _status_error = true;
 
-                error_code = parseInt(ex.getMessage());
+                error_code = ex.getCode();
 
                 if (Arrays.asList(FATAL_ERROR_API_CODES).contains(error_code)) {
 
-                    switch (error_code) {
-
-                        case -2:
-                            stopDownloader("Mega link is not valid! " + truncateText(link, 80));
-                            break;
-
-                        case -14:
-                            stopDownloader("Mega link is not valid! " + truncateText(link, 80));
-                            break;
-
-                        case 22:
-                            stopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
-                            break;
-
-                        case 23:
-                            stopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
-                            break;
-
-                        case 24:
-                            stopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
-                            break;
-
-                        case 25:
-                            stopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
-                            break;
-
-                        default:
-                            stopDownloader("MEGA/MC API FATAL ERROR: " + ex.getMessage() + " " + truncateText(link, 80));
-                            break;
-                    }
+                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
 
                 } else {
 
@@ -1392,7 +1362,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             } catch (Exception ex) {
 
-                if (!(ex instanceof MegaAPIException || ex instanceof MegaCrypterAPIException)) {
+                if (!(ex instanceof APIException)) {
                     stopDownloader("Mega link is not valid! " + truncateText(link, 80));
                 }
             }
@@ -1435,55 +1405,42 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes()) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
 
-            } catch (MegaAPIException | MegaCrypterAPIException ex) {
+            } catch (APIException ex) {
                 error = true;
 
-                error_code = parseInt(ex.getMessage());
+                error_code = ex.getCode();
 
-                switch (error_code) {
-                    case 22:
-                        stopDownloader("MegaCrypter link is not valid! " + truncateText(link, 80));
-                        break;
+                if (Arrays.asList(FATAL_ERROR_API_CODES).contains(error_code)) {
 
-                    case 23:
-                        stopDownloader("MegaCrypter link is blocked! " + truncateText(link, 80));
-                        break;
+                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
 
-                    case 24:
-                        stopDownloader("MegaCrypter link has expired! " + truncateText(link, 80));
-                        break;
+                } else {
 
-                    case 25:
-                        stopDownloader("MegaCrypter link pass error! " + truncateText(link, 80));
-                        break;
+                    _retrying_request = true;
 
-                    default:
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
 
-                        _retrying_request = true;
+                            getView().getStop_button().setVisible(true);
 
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-
-                                getView().getStop_button().setVisible(true);
-
-                                getView().getStop_button().setText("CANCEL RETRY");
-                            }
-                        });
-
-                        for (long i = getWaitTimeExpBackOff(retry++); i > 0 && !_exit; i--) {
-                            if (error_code == -18) {
-                                getView().printStatusError("File temporarily unavailable! (Retrying in " + i + " secs...)");
-                            } else {
-                                getView().printStatusError("Mega/MC APIException error " + ex.getMessage() + " (Retrying in " + i + " secs...)");
-                            }
-
-                            try {
-                                sleep(1000);
-                            } catch (InterruptedException ex2) {
-                            }
+                            getView().getStop_button().setText("CANCEL RETRY");
                         }
+                    });
+
+                    for (long i = getWaitTimeExpBackOff(retry++); i > 0 && !_exit; i--) {
+                        if (error_code == -18) {
+                            getView().printStatusError("File temporarily unavailable! (Retrying in " + i + " secs...)");
+                        } else {
+                            getView().printStatusError("Mega/MC APIException error " + ex.getMessage() + " (Retrying in " + i + " secs...)");
+                        }
+
+                        try {
+                            sleep(1000);
+                        } catch (InterruptedException ex2) {
+                        }
+                    }
                 }
             }
 
