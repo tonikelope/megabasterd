@@ -48,7 +48,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "3.3";
+    public static final String VERSION = "3.4";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -63,6 +63,9 @@ public final class MainPanel {
     private static int _proxy_port;
     private static Credentials _proxy_credentials;
     private static boolean _use_proxy;
+    private static boolean _use_smart_proxy;
+    private static String _smart_proxy_url;
+    private static SmartMegaProxyManager _proxy_manager;
 
     public static void main(String args[]) {
 
@@ -88,9 +91,6 @@ public final class MainPanel {
         });
     }
 
-    private volatile boolean _use_smart_proxy;
-    private volatile String _use_smart_proxy_url;
-    private volatile SmartMegaProxyManager _proxy_manager;
     private volatile MainPanelView _view;
     private final GlobalSpeedMeter _global_dl_speed, _global_up_speed;
     private final DownloadManager _download_manager;
@@ -138,7 +138,7 @@ public final class MainPanel {
 
         _use_smart_proxy = false;
 
-        _use_smart_proxy_url = null;
+        _smart_proxy_url = null;
 
         try {
 
@@ -211,7 +211,7 @@ public final class MainPanel {
 
         if (_use_smart_proxy) {
 
-            _proxy_manager = new SmartMegaProxyManager(this, _use_smart_proxy_url);
+            _proxy_manager = new SmartMegaProxyManager(this, _smart_proxy_url);
 
             THREAD_POOL.execute(_proxy_manager);
         }
@@ -243,8 +243,8 @@ public final class MainPanel {
         return _zoom_factor;
     }
 
-    public void setProxy_manager(SmartMegaProxyManager _proxy_manager) {
-        this._proxy_manager = _proxy_manager;
+    public void setProxy_manager(SmartMegaProxyManager proxy_manager) {
+        _proxy_manager = proxy_manager;
     }
 
     public static String getProxy_host() {
@@ -263,15 +263,15 @@ public final class MainPanel {
         return _use_proxy;
     }
 
-    public boolean isUse_smart_proxy() {
+    public static boolean isUse_smart_proxy() {
         return _use_smart_proxy;
     }
 
-    public String getUse_smart_proxy_url() {
-        return _use_smart_proxy_url;
+    public static String getUse_smart_proxy_url() {
+        return _smart_proxy_url;
     }
 
-    public SmartMegaProxyManager getProxy_manager() {
+    public static SmartMegaProxyManager getProxy_manager() {
         return _proxy_manager;
     }
 
@@ -633,7 +633,7 @@ public final class MainPanel {
 
         if (_use_smart_proxy) {
 
-            _use_smart_proxy_url = selectSettingValue("smart_proxy_url");
+            _smart_proxy_url = selectSettingValue("smart_proxy_url");
         }
     }
 

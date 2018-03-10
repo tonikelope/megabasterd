@@ -40,6 +40,7 @@ import javax.swing.JTabbedPane;
 public final class MainPanelView extends javax.swing.JFrame {
 
     private final MainPanel _main_panel;
+    private volatile boolean _smart_proxy;
 
     public JLabel getKiss_server_status() {
         return kiss_server_status;
@@ -167,9 +168,34 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     }
 
+    public void setSmartProxy(boolean enabled) {
+
+        if (_smart_proxy != enabled) {
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+
+                    if (!_main_panel.isLimit_download_speed()) {
+                        _smart_proxy = enabled;
+
+                        if (enabled) {
+                            getGlobal_speed_down_label().setForeground(Color.BLACK);
+                        } else {
+                            getGlobal_speed_down_label().setForeground(new Color(0, 128, 255));
+                        }
+                    }
+
+                }
+            });
+        }
+    }
+
     public MainPanelView(MainPanel main_panel) {
 
         _main_panel = main_panel;
+
+        _smart_proxy = false;
 
         initComponents();
 
@@ -812,24 +838,24 @@ public final class MainPanelView extends javax.swing.JFrame {
                 _main_panel.setMega_proxy_server(null);
             }
 
-            if (this.getMain_panel().isUse_smart_proxy()) {
+            if (MainPanel.isUse_smart_proxy()) {
 
-                if (this.getMain_panel().getProxy_manager() == null) {
+                if (MainPanel.getProxy_manager() == null) {
 
-                    this.getMain_panel().setProxy_manager(new SmartMegaProxyManager(this.getMain_panel(), this.getMain_panel().getUse_smart_proxy_url()));
+                    this.getMain_panel().setProxy_manager(new SmartMegaProxyManager(this.getMain_panel(), MainPanel.getUse_smart_proxy_url()));
 
-                    THREAD_POOL.execute(this.getMain_panel().getProxy_manager());
+                    THREAD_POOL.execute(MainPanel.getProxy_manager());
 
-                } else if (!this.getMain_panel().getProxy_manager().getProxy_list_url().equals(this.getMain_panel().getUse_smart_proxy_url())) {
-                    this.getMain_panel().getProxy_manager().setProxy_list_url(this.getMain_panel().getUse_smart_proxy_url());
+                } else if (!MainPanel.getProxy_manager().getProxy_list_url().equals(MainPanel.getUse_smart_proxy_url())) {
+                    MainPanel.getProxy_manager().setProxy_list_url(MainPanel.getUse_smart_proxy_url());
                 }
 
-            } else if (this.getMain_panel().getProxy_manager() != null) {
+            } else if (MainPanel.getProxy_manager() != null) {
 
-                this.getMain_panel().getProxy_manager().setExit(true);
+                MainPanel.getProxy_manager().setExit(true);
 
-                synchronized (this.getMain_panel().getProxy_manager().getRefresh_lock()) {
-                    this.getMain_panel().getProxy_manager().getRefresh_lock().notify();
+                synchronized (MainPanel.getProxy_manager().getRefresh_lock()) {
+                    MainPanel.getProxy_manager().getRefresh_lock().notify();
                 }
 
                 this.getMain_panel().setProxy_manager(null);

@@ -58,22 +58,9 @@ public class StreamChunkDownloader implements Runnable {
                     _chunkwriter.secureWait();
                 }
 
-                if (httpclient == null || error || (_chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled())) {
+                if (httpclient == null || error) {
 
-                    if (error509 && _chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && !_chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled()) {
-                        _chunkwriter.getServer().getMain_panel().getProxy_manager().setEnabled(true);
-                    }
-
-                    if (_chunkwriter.getServer().getMain_panel().isUse_smart_proxy() && _chunkwriter.getServer().getMain_panel().getProxy_manager().isEnabled() && !MainPanel.isUse_proxy()) {
-
-                        if (error && current_proxy != null) {
-
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
-
-                            _chunkwriter.getServer().getMain_panel().getProxy_manager().excludeProxy(current_proxy);
-                        }
-
-                        current_proxy = _chunkwriter.getServer().getMain_panel().getProxy_manager().getFastestProxy();
+                    if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                         if (httpclient != null) {
                             try {
@@ -83,6 +70,15 @@ public class StreamChunkDownloader implements Runnable {
                             }
                         }
 
+                        if (error && current_proxy != null) {
+
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
+
+                            MainPanel.getProxy_manager().excludeProxy(current_proxy);
+                        }
+
+                        current_proxy = MainPanel.getProxy_manager().getFastestProxy();
+
                         if (current_proxy != null) {
 
                             httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
@@ -90,7 +86,6 @@ public class StreamChunkDownloader implements Runnable {
                         } else {
 
                             httpclient = MiscTools.getApacheKissHttpClient();
-                            _chunkwriter.getServer().getMain_panel().getProxy_manager().setEnabled(false);
                         }
 
                     } else if (httpclient == null) {
@@ -138,10 +133,7 @@ public class StreamChunkDownloader implements Runnable {
 
                                 error = true;
 
-                                if (http_status == 509) {
-
-                                    error509 = true;
-                                }
+                                error509 = (http_status == 509);
 
                             } else {
 

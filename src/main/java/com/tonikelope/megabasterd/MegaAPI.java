@@ -33,7 +33,7 @@ public final class MegaAPI {
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
-    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17};
+    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16};
 
     public static int checkMEGAError(String data) {
         String error = findFirstRegex("^\\[?(\\-[0-9]+)\\]?$", data, 1);
@@ -282,91 +282,137 @@ public final class MegaAPI {
     private String _rawRequest(String request, URL url_api) throws IOException, MegaAPIException {
 
         String response = null;
+        CloseableHttpClient httpclient = null;
+        boolean error509 = false;
+        String current_proxy = null;
+        int error = 0, conta_error = 0;
+        HttpPost httppost;
 
-        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+        do {
 
-            int error, conta_error = 0;
+            try {
 
-            HttpPost httppost;
+                if (httpclient == null || (error509 && MainPanel.isUse_smart_proxy())) {
 
-            do {
-                error = 0;
+                    if (error509 && !MainPanel.isUse_proxy()) {
 
-                try {
+                        if (httpclient != null) {
 
-                    httppost = new HttpPost(url_api.toURI());
-
-                    httppost.setHeader("Content-type", "application/json");
-
-                    httppost.setEntity(new StringEntity(request));
-
-                    try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
-
-                        if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
-
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), httpresponse.getStatusLine().getStatusCode()});
-
-                            if (httpresponse.getStatusLine().getStatusCode() == 509) {
-
-                                error = -17;
-                            }
-
-                        } else {
-
-                            InputStream is = httpresponse.getEntity().getContent();
-
-                            try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                                byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-
-                                int reads;
-
-                                while ((reads = is.read(buffer)) != -1) {
-
-                                    byte_res.write(buffer, 0, reads);
-                                }
-
-                                response = new String(byte_res.toByteArray());
-
-                                if (response.length() > 0) {
-
-                                    error = checkMEGAError(response);
-
-                                }
-
+                            try {
+                                httpclient.close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
                             }
                         }
 
+                        if (current_proxy != null) {
+
+                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
+
+                            MainPanel.getProxy_manager().excludeProxy(current_proxy);
+                        }
+
+                        current_proxy = MainPanel.getProxy_manager().getRandomProxy();
+
+                        if (current_proxy != null) {
+
+                            httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+
+                        } else {
+
+                            httpclient = MiscTools.getApacheKissHttpClient();
+                        }
+
+                    } else if (httpclient == null) {
+
+                        httpclient = MiscTools.getApacheKissHttpClient();
+                    }
+                }
+
+                error = 0;
+
+                error509 = false;
+
+                httppost = new HttpPost(url_api.toURI());
+
+                httppost.setHeader("Content-type", "application/json");
+
+                httppost.setEntity(new StringEntity(request));
+
+                try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
+
+                    if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+
+                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
+
+                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), httpresponse.getStatusLine().getStatusCode()});
+
+                        error509 = (httpresponse.getStatusLine().getStatusCode() == 509);;
+
+                    } else {
+
+                        InputStream is = httpresponse.getEntity().getContent();
+
+                        try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                            byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                            int reads;
+
+                            while ((reads = is.read(buffer)) != -1) {
+
+                                byte_res.write(buffer, 0, reads);
+                            }
+
+                            response = new String(byte_res.toByteArray());
+
+                            if (response.length() > 0) {
+
+                                error = checkMEGAError(response);
+
+                            }
+
+                        }
                     }
 
-                } catch (URISyntaxException ex) {
+                }
+
+            } catch (URISyntaxException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            } catch (Exception ex) {
+                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+
+                if (httpclient != null) {
+                    try {
+                        httpclient.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }
+
+            if (error != 0 && !error509) {
+
+                if (Arrays.asList(MEGA_ERROR_EXCEPTION_CODES).contains(error)) {
+
+                    throw new MegaAPIException(error);
+                }
+
+                Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(error)});
+
+                try {
+                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                } catch (InterruptedException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
-                if (error != 0) {
+            } else if (error == 0) {
 
-                    if (Arrays.asList(MEGA_ERROR_EXCEPTION_CODES).contains(error)) {
+                conta_error = 0;
+            }
 
-                        throw new MegaAPIException(error);
-                    }
-
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(error)});
-
-                    try {
-                        Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
-
-                } else {
-
-                    conta_error = 0;
-                }
-
-            } while (error != 0);
-        }
+        } while (error != 0 || (error509 && MainPanel.isUse_smart_proxy()));
 
         _seqno++;
 

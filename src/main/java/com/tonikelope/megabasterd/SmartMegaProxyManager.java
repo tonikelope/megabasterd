@@ -1,6 +1,5 @@
 package com.tonikelope.megabasterd;
 
-import java.awt.Color;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +28,6 @@ public class SmartMegaProxyManager implements Runnable {
     private final ConcurrentLinkedQueue<String> _proxy_list;
     private final MainPanel _main_panel;
     private volatile boolean _exit;
-    private volatile boolean _enabled;
     private final Object _refresh_lock;
 
     public SmartMegaProxyManager(MainPanel main_panel, String proxy_list_url) {
@@ -37,30 +35,11 @@ public class SmartMegaProxyManager implements Runnable {
         _proxy_list_url = proxy_list_url;
         _proxy_list = new ConcurrentLinkedQueue<>();
         _exit = false;
-        _enabled = false;
         _refresh_lock = new Object();
     }
 
     public String getProxy_list_url() {
         return _proxy_list_url;
-    }
-
-    public boolean isEnabled() {
-        return _enabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-
-        if (!_main_panel.isLimit_download_speed()) {
-
-            if (!_enabled && enabled) {
-                _main_panel.getView().getGlobal_speed_down_label().setForeground(Color.BLACK);
-            } else if (_enabled && !enabled) {
-                _main_panel.getView().getGlobal_speed_down_label().setForeground(new Color(0, 128, 255));
-            }
-        }
-
-        _enabled = enabled;
     }
 
     public void setExit(boolean exit) {
@@ -170,11 +149,6 @@ public class SmartMegaProxyManager implements Runnable {
                 }
 
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
-
-                if (_enabled) {
-
-                    _enabled = false;
-                }
 
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
             }

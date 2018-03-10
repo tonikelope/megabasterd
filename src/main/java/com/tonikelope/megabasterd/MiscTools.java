@@ -793,23 +793,81 @@ public final class MiscTools {
 
     public static boolean checkMegaDownloadUrl(String string_url) {
 
-        boolean url_ok = false;
+        boolean url_ok = false, error509 = false;
 
-        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+        CloseableHttpClient httpclient = null;
 
-            HttpGet httpget = new HttpGet(new URI(string_url + "/0-0"));
+        String current_proxy = null;
 
-            try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+        do {
 
-                url_ok = (httpresponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
+            try {
+
+                if (httpclient == null || !url_ok) {
+
+                    if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+
+                        if (httpclient != null) {
+
+                            try {
+                                httpclient.close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+
+                        if (current_proxy != null) {
+
+                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
+
+                            MainPanel.getProxy_manager().excludeProxy(current_proxy);
+                        }
+
+                        current_proxy = MainPanel.getProxy_manager().getRandomProxy();
+
+                        if (current_proxy != null) {
+
+                            httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+
+                        } else {
+
+                            httpclient = MiscTools.getApacheKissHttpClient();
+                        }
+
+                    } else if (httpclient == null) {
+
+                        httpclient = MiscTools.getApacheKissHttpClient();
+                    }
+                }
+
+                HttpGet httpget = new HttpGet(new URI(string_url + "/0-0"));
+
+                error509 = false;
+
+                try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+
+                    url_ok = (httpresponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
+
+                    error509 = (httpresponse.getStatusLine().getStatusCode() == 509);
+
+                } catch (IOException ex) {
+                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            } catch (Exception ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            } finally {
+
+                if (httpclient != null) {
+                    try {
+                        httpclient.close();
+                    } catch (IOException ex) {
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
             }
 
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException | URISyntaxException ex) {
-
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        } while (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy());
 
         return url_ok;
     }

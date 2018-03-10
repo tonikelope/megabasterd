@@ -380,7 +380,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
     private void use_mega_account_down_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_use_mega_account_down_comboboxItemStateChanged
 
-        if (_selected_item == null || !((String) use_mega_account_down_combobox.getSelectedItem()).equals(_selected_item)) {
+        if (_selected_item == null || !use_mega_account_down_combobox.getSelectedItem().equals(_selected_item)) {
             _selected_item = (String) use_mega_account_down_combobox.getSelectedItem();
 
             if (_main_panel.isUse_mega_account_down() && !"".equals(_selected_item)) {

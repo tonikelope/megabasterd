@@ -102,24 +102,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
             String worker_url = null, current_proxy = null;;
             boolean error = false, error509 = false;
 
-            while (!_exit && !_download.isStopped() && (error509 || conta_error < MAX_SLOT_ERROR || _download.getMain_panel().isUse_smart_proxy())) {
+            while (!_exit && !_download.isStopped() && (error509 || conta_error < MAX_SLOT_ERROR || MainPanel.isUse_smart_proxy())) {
 
-                if (httpclient == null || error || _download.getMain_panel().isUse_smart_proxy()) {
+                if (httpclient == null || error) {
 
-                    if (error509 && _download.getMain_panel().isUse_smart_proxy() && !_download.getMain_panel().getProxy_manager().isEnabled()) {
-                        _download.getMain_panel().getProxy_manager().setEnabled(true);
-                    }
-
-                    if (_download.getMain_panel().isUse_smart_proxy() && _download.getMain_panel().getProxy_manager().isEnabled() && !MainPanel.isUse_proxy()) {
-
-                        if (error && current_proxy != null) {
-
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
-
-                            _download.getMain_panel().getProxy_manager().excludeProxy(current_proxy);
-                        }
-
-                        current_proxy = _download.getMain_panel().getProxy_manager().getRandomProxy();
+                    if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                         if (httpclient != null) {
                             try {
@@ -129,19 +116,30 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             }
                         }
 
+                        if (error && current_proxy != null) {
+
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
+
+                            MainPanel.getProxy_manager().excludeProxy(current_proxy);
+                        }
+
+                        current_proxy = MainPanel.getProxy_manager().getRandomProxy();
+
                         if (current_proxy != null) {
 
                             httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+                            getDownload().getMain_panel().getView().setSmartProxy(true);
 
                         } else {
 
                             httpclient = MiscTools.getApacheKissHttpClient();
-                            _download.getMain_panel().getProxy_manager().setEnabled(false);
+                            getDownload().getMain_panel().getView().setSmartProxy(false);
                         }
 
                     } else if (httpclient == null) {
 
                         httpclient = MiscTools.getApacheKissHttpClient();
+                        getDownload().getMain_panel().getView().setSmartProxy(false);
                     }
                 }
 
@@ -156,11 +154,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 error = false;
 
-                if (error509) {
+                error509 = false;
+
+                if (getDownload().isError509()) {
                     getDownload().getView().set509Error(false);
                 }
-
-                error509 = false;
 
                 try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
 
@@ -179,7 +177,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     error509 = true;
 
-                                    getDownload().getView().set509Error(true);
+                                    if (MainPanel.isUse_smart_proxy()) {
+                                        getDownload().getView().set509Error(true);
+                                    }
+
                                 }
 
                             } else {
@@ -239,7 +240,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 _download.getView().updateSlotsStatus();
 
-                                if (!_download.getMain_panel().isUse_smart_proxy()) {
+                                if (!MainPanel.isUse_smart_proxy()) {
                                     Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
                                 }
 
@@ -285,7 +286,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         _download.getView().updateSlotsStatus();
 
-                        if (!_download.getMain_panel().isUse_smart_proxy()) {
+                        if (!MainPanel.isUse_smart_proxy()) {
                             Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
                         }
 
