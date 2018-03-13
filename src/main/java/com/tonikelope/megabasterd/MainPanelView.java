@@ -866,10 +866,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             JOptionPane.showMessageDialog(this, "MegaBasterd will restart", "Restart required", JOptionPane.WARNING_MESSAGE);
 
-            if (_main_panel.checkByeBye()) {
-
-                restartApplication(1);
-            }
+            _main_panel.byebye(true);
         }
 
         if (!dialog.isRemember_master_pass()) {
@@ -896,7 +893,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void exit_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exit_menuActionPerformed
 
-        _main_panel.byebye();
+        _main_panel.byebye(false);
     }//GEN-LAST:event_exit_menuActionPerformed
 
     private void close_all_finished_down_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_all_finished_down_buttonActionPerformed
