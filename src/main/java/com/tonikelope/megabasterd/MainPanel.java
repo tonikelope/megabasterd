@@ -48,7 +48,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "3.5";
+    public static final String VERSION = "3.6";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -727,7 +727,7 @@ public final class MainPanel {
         return exit;
     }
 
-    public void byebyenow() {
+    public void byebyenow(boolean restart) {
 
         synchronized (DBTools.class) {
 
@@ -737,7 +737,12 @@ public final class MainPanel {
                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-            exit(0);
+            if (restart) {
+                restartApplication(1);
+            } else {
+                exit(0);
+            }
+
         }
     }
 
@@ -852,26 +857,11 @@ public final class MainPanel {
 
                     } while (wait);
 
-                    synchronized (DBTools.class) {
-
-                        try {
-                            DBTools.vaccum();
-                        } catch (SQLException ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-
-                        if (restart) {
-                            restartApplication(1);
-                        } else {
-                            exit(0);
-                        }
-
-                    }
-
+                    byebyenow(restart);
                 }
             });
 
-            WarningExitMessage exit_message = new WarningExitMessage(getView(), true, this);
+            WarningExitMessage exit_message = new WarningExitMessage(getView(), true, this, restart);
 
             exit_message.setLocationRelativeTo(getView());
 

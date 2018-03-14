@@ -26,17 +26,20 @@ import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 public class WarningExitMessage extends javax.swing.JDialog {
 
     MainPanel _main_panel;
+    boolean _restart;
 
     /**
      * Creates new form WarningExitMessage
      */
-    public WarningExitMessage(java.awt.Frame parent, boolean modal, MainPanel main_panel) {
+    public WarningExitMessage(java.awt.Frame parent, boolean modal, MainPanel main_panel, boolean restart) {
         super(parent, modal);
         initComponents();
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, main_panel.getZoom_factor());
 
         _main_panel = main_panel;
+
+        _restart = restart;
 
         pack();
     }
@@ -119,7 +122,7 @@ public class WarningExitMessage extends javax.swing.JDialog {
 
     private void exit_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exit_buttonActionPerformed
 
-        _main_panel.byebyenow();
+        _main_panel.byebyenow(_restart);
     }//GEN-LAST:event_exit_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
