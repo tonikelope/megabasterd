@@ -6,7 +6,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Long.valueOf;
@@ -1178,7 +1177,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             long chunk_id = 1L;
             long tot = 0L;
-            byte[] chunk_buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
             byte[] byte_block = new byte[16];
             int[] int_block;
             int reads;
@@ -1192,39 +1190,37 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     int[] chunk_mac = {iv[0], iv[1], iv[0], iv[1]};
 
-                    do {
-                        chunk.getOutputStream().write(chunk_buffer, 0, is.read(chunk_buffer, 0, Math.min((int) (chunk.getSize() - chunk.getOutputStream().size()), chunk_buffer.length)));
+                    long conta_chunk = 0L;
+                    long chunk_size = chunk.getSize();
 
-                    } while (!_exit && chunk.getOutputStream().size() < chunk.getSize());
+                    while (conta_chunk < chunk_size && (reads = is.read(byte_block)) != -1) {
 
-                    try (InputStream chunk_is = chunk.getInputStream()) {
+                        if (reads < byte_block.length) {
 
-                        while (!_exit && (reads = chunk_is.read(byte_block)) != -1) {
-
-                            if (reads < byte_block.length) {
-
-                                for (int i = reads; i < byte_block.length; i++) {
-                                    byte_block[i] = 0;
-                                }
+                            for (int i = reads; i < byte_block.length; i++) {
+                                byte_block[i] = 0;
                             }
-
-                            int_block = bin2i32a(byte_block);
-
-                            for (int i = 0; i < chunk_mac.length; i++) {
-                                chunk_mac[i] ^= int_block[i];
-                            }
-
-                            chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
                         }
 
-                        for (int i = 0; i < file_mac.length; i++) {
-                            file_mac[i] ^= chunk_mac[i];
+                        int_block = bin2i32a(byte_block);
+
+                        for (int i = 0; i < chunk_mac.length; i++) {
+                            chunk_mac[i] ^= int_block[i];
                         }
 
-                        file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
+                        chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
 
-                        setProgress(tot);
+                        conta_chunk += reads;
                     }
+
+                    for (int i = 0; i < file_mac.length; i++) {
+                        file_mac[i] ^= chunk_mac[i];
+                    }
+
+                    file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
+
+                    setProgress(tot);
+
                 }
 
             } catch (ChunkInvalidException e) {

@@ -51,13 +51,13 @@ public class ChunkUploaderMono extends ChunkUploader {
 
             FutureTask<CloseableHttpResponse> futureTask = null;
 
+            int conta_error = 0, reads, http_status, tot_bytes_up = -1;
+
+            boolean error = false;
+
+            CloseableHttpResponse httpresponse = null;
+
             while (!isExit() && !getUpload().isStopped()) {
-
-                int conta_error = 0, reads, http_status, tot_bytes_up = -1;
-
-                boolean error = false;
-
-                CloseableHttpResponse httpresponse = null;
 
                 Chunk chunk = new Chunk(getUpload().nextChunkId(), getUpload().getFile_size(), null);
 
@@ -172,10 +172,6 @@ public class ChunkUploaderMono extends ChunkUploader {
 
                                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1} {2}", new Object[]{chunk.getOffset(), tot_bytes_up, getUpload().getFile_size()});
 
-                                getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
-
-                                getUpload().getMac_generator().secureNotify();
-
                                 conta_error = 0;
                             }
                         }
@@ -263,10 +259,6 @@ public class ChunkUploaderMono extends ChunkUploader {
                         throw new IOException("UPLOAD FAILED! (Completion handle is empty)");
 
                     } finally {
-
-                        getUpload().getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
-
-                        getUpload().getMac_generator().secureNotify();
 
                         if (out != null) {
                             out.close();

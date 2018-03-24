@@ -48,7 +48,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "3.6";
+    public static final String VERSION = "3.7";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -813,6 +813,8 @@ public final class MainPanel {
 
                                 if (upload.isUse_slots()) {
 
+                                    upload.getMac_generator().secureNotify();
+
                                     if (upload.isPaused()) {
                                         upload.pause();
                                     }
@@ -838,6 +840,12 @@ public final class MainPanel {
 
                                             }
                                         });
+                                    } else {
+                                        try {
+                                            DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getEmail(), upload.getProgress(), upload.getFile_meta_mac() != null ? Bin2BASE64(i32a2bin(upload.getFile_meta_mac())) : null);
+                                        } catch (SQLException ex) {
+                                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
                                     }
                                 } else {
                                     wait = true;

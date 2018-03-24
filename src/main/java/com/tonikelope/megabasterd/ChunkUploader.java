@@ -298,10 +298,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} has uploaded chunk {2}", new Object[]{Thread.currentThread().getName(), _id, chunk.getId()});
 
-                                    _upload.getMac_generator().getChunk_queue().put(chunk.getId(), chunk);
-
-                                    _upload.getMac_generator().secureNotify();
-
                                     conta_error = 0;
                                 }
 

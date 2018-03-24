@@ -45,6 +45,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
     private final ExecutorService _thread_pool;
     private int[] _file_meta_mac;
+    private int[] _file_temp_mac;
     private boolean _finishing_upload;
     private String _fid;
     private boolean _notified;
@@ -103,6 +104,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _thread_pool = Executors.newCachedThreadPool();
         _view = new UploadView(this);
         _progress_meter = new ProgressMeter(this);
+        _file_meta_mac = null;
+        _file_temp_mac = null;
     }
 
     public Upload(Upload upload) {
@@ -136,6 +139,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _thread_pool = Executors.newCachedThreadPool();
         _view = new UploadView(this);
         _progress_meter = new ProgressMeter(this);
+        _file_meta_mac = null;
+        _file_temp_mac = null;
     }
 
     public Object getWorkers_lock() {
@@ -160,6 +165,14 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public byte[] getByte_file_key() {
         return _byte_file_key;
+    }
+
+    public int[] getFile_temp_mac() {
+        return _file_temp_mac;
+    }
+
+    public void setFile_temp_mac(int[] file_temp_mac) {
+        _file_temp_mac = file_temp_mac;
     }
 
     @Override
@@ -1155,6 +1168,10 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _status_error_message = reason != null ? reason : "FATAL ERROR!";
 
         stopUploader();
+    }
+
+    public int[] getFile_meta_mac() {
+        return _file_meta_mac;
     }
 
     @Override

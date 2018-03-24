@@ -22,7 +22,7 @@ public final class DBTools {
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
 
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS downloads(url TEXT, email TEXT, path TEXT, filename TEXT, filekey TEXT, filesize UNSIGNED BIG INT, filepass VARCHAR(64), filenoexpire VARCHAR(64), PRIMARY KEY ('url'), UNIQUE(path, filename));");
-            stat.executeUpdate("CREATE TABLE IF NOT EXISTS uploads(filename TEXT, email TEXT, url TEXT, ul_key TEXT, parent_node TEXT, root_node TEXT, share_key TEXT, folder_link TEXT, bytes_uploaded UNSIGNED BIG INT, temp_mac TEXT, PRIMARY KEY ('filename'), UNIQUE(filename, email));");
+            stat.executeUpdate("CREATE TABLE IF NOT EXISTS uploads(filename TEXT, email TEXT, url TEXT, ul_key TEXT, parent_node TEXT, root_node TEXT, share_key TEXT, folder_link TEXT, bytes_uploaded UNSIGNED BIG INT, meta_mac TEXT, PRIMARY KEY ('filename'), UNIQUE(filename, email));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS settings(key VARCHAR(255), value TEXT, PRIMARY KEY('key'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS mega_accounts(email TEXT, password TEXT, password_aes TEXT, user_hash TEXT, PRIMARY KEY('email'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS elc_accounts(host TEXT, user TEXT, apikey TEXT, PRIMARY KEY('host'));");
@@ -82,7 +82,7 @@ public final class DBTools {
 
     public static synchronized void insertUpload(String filename, String email, String parent_node, String ul_key, String root_node, String share_key, String folder_link) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link, bytes_uploaded, temp_mac) VALUES (?,?,?,?,?,?,?,?,?)")) {
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO uploads (filename, email, parent_node, ul_key, root_node, share_key, folder_link, bytes_uploaded, meta_mac) VALUES (?,?,?,?,?,?,?,?,?)")) {
 
             ps.setString(1, filename);
             ps.setString(2, email);
@@ -109,12 +109,12 @@ public final class DBTools {
         }
     }
 
-    public static synchronized void updateUploadProgres(String filename, String email, Long bytes_uploaded, String temp_mac) throws SQLException {
+    public static synchronized void updateUploadProgress(String filename, String email, Long bytes_uploaded, String meta_mac) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("UPDATE uploads SET bytes_uploaded=?,temp_mac=? WHERE filename=? AND email=?")) {
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("UPDATE uploads SET bytes_uploaded=?,meta_mac=? WHERE filename=? AND email=?")) {
 
             ps.setLong(1, bytes_uploaded);
-            ps.setString(2, temp_mac);
+            ps.setString(2, meta_mac);
             ps.setString(3, filename);
             ps.setString(4, email);
 
@@ -124,7 +124,7 @@ public final class DBTools {
 
     public static synchronized HashMap<String, Object> selectUploadProgress(String filename, String email) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT bytes_uploaded,temp_mac FROM uploads WHERE filename=? AND email=?")) {
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT bytes_uploaded,meta_mac FROM uploads WHERE filename=? AND email=?")) {
 
             ps.setString(1, filename);
             ps.setString(2, email);
@@ -134,7 +134,7 @@ public final class DBTools {
             if (res.next()) {
                 HashMap<String, Object> upload = new HashMap<>();
                 upload.put("bytes_uploaded", res.getLong("bytes_uploaded"));
-                upload.put("temp_mac", res.getString("temp_mac"));
+                upload.put("meta_mac", res.getString("meta_mac"));
                 return upload;
             }
         }
@@ -288,7 +288,7 @@ public final class DBTools {
                 upload.put("share_key", res.getString("share_key"));
                 upload.put("folder_link", res.getString("folder_link"));
                 upload.put("bytes_uploaded", res.getLong("bytes_uploaded"));
-                upload.put("temp_mac", res.getString("temp_mac"));
+                upload.put("meta_mac", res.getString("meta_mac"));
                 uploads.add(upload);
             }
         }
