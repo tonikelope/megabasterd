@@ -123,7 +123,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 f.seek(chunk.getOffset());
 
-                byte[] buffer = new byte[MainPanel.THROTTLE_SLICE_SIZE];
+                byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
                 do {
 

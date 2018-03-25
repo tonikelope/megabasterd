@@ -107,7 +107,7 @@ public class StreamChunkDownloader implements Runnable {
 
                     int reads, http_status;
 
-                    byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
+                    byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
                     StreamChunk chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
 

@@ -9,7 +9,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.io.File;
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 
 /**
@@ -99,7 +99,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                 Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", _upload.getByte_file_key(), i32a2bin(mac_iv));
 
-                try (FileInputStream is = new FileInputStream(new File(_upload.getFile_name()))) {
+                try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(_upload.getFile_name()))) {
 
                     long chunk_id = 1L;
                     long tot = 0L;

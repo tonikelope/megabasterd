@@ -33,6 +33,7 @@ import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import java.io.BufferedInputStream;
 
 /**
  *
@@ -1173,7 +1174,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", _chunkwriter.getByte_file_key(), i32a2bin(cbc_iv));
 
-        try (FileInputStream is = new FileInputStream(new File(filename))) {
+        try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(filename))) {
 
             long chunk_id = 1L;
             long tot = 0L;

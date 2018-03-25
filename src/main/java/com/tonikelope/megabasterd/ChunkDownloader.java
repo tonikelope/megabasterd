@@ -185,7 +185,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             } else {
 
-                                byte[] buffer = new byte[THROTTLE_SLICE_SIZE];
+                                byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
                                 int reads;
 
