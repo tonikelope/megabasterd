@@ -202,31 +202,34 @@ public final class MegaAPI {
             url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
             String res = _rawRequest(request, url_api);
+            
+            if(res!=null) {
+                
+                ObjectMapper objectMapper = new ObjectMapper();
 
-            ObjectMapper objectMapper = new ObjectMapper();
+                HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
 
-            HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
+                quota = new Long[2];
 
-            quota = new Long[2];
+                if (res_map[0].get("cstrg") instanceof Integer) {
 
-            if (res_map[0].get("cstrg") instanceof Integer) {
+                    quota[0] = ((Number) res_map[0].get("cstrg")).longValue();
 
-                quota[0] = ((Number) res_map[0].get("cstrg")).longValue();
+                } else if (res_map[0].get("cstrg") instanceof Long) {
 
-            } else if (res_map[0].get("cstrg") instanceof Long) {
+                    quota[0] = (Long) res_map[0].get("cstrg");
+                }
 
-                quota[0] = (Long) res_map[0].get("cstrg");
+                if (res_map[0].get("mstrg") instanceof Integer) {
+
+                    quota[1] = ((Number) res_map[0].get("mstrg")).longValue();
+
+                } else if (res_map[0].get("mstrg") instanceof Long) {
+
+                    quota[1] = (Long) res_map[0].get("mstrg");
+                }
             }
-
-            if (res_map[0].get("mstrg") instanceof Integer) {
-
-                quota[1] = ((Number) res_map[0].get("mstrg")).longValue();
-
-            } else if (res_map[0].get("mstrg") instanceof Long) {
-
-                quota[1] = (Long) res_map[0].get("mstrg");
-            }
-
+            
         } catch (Exception ex) {
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -374,7 +377,6 @@ public final class MegaAPI {
 
                         }
                     }
-
                 }
 
             } catch (URISyntaxException ex) {
