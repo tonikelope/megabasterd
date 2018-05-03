@@ -823,7 +823,7 @@ public final class MiscTools {
                             MainPanel.getProxy_manager().excludeProxy(current_proxy);
                         }
 
-                        current_proxy = MainPanel.getProxy_manager().getRandomProxy();
+                        current_proxy = MainPanel.getProxy_manager().getFastestProxy();
 
                         if (current_proxy != null) {
 

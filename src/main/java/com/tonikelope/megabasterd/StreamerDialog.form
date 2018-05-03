@@ -31,11 +31,11 @@
                       <Component id="use_mega_account_down_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="use_mega_account_down_combobox" max="32767" attributes="0"/>
-                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="dance_button" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Component id="dance_button" min="-2" pref="324" max="-2" attributes="0"/>
                   </Group>
-                  <Component id="original_link_textfield" max="32767" attributes="0"/>
-                  <Component id="put_label" alignment="0" pref="1076" max="32767" attributes="0"/>
+                  <Component id="put_label" alignment="0" pref="1120" max="32767" attributes="0"/>
+                  <Component id="original_link_textfield" alignment="0" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>

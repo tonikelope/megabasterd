@@ -154,10 +154,10 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                         .addComponent(use_mega_account_down_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(use_mega_account_down_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(dance_button))
-                    .addComponent(original_link_textfield)
-                    .addComponent(put_label, javax.swing.GroupLayout.DEFAULT_SIZE, 1076, Short.MAX_VALUE))
+                        .addGap(18, 18, 18)
+                        .addComponent(dance_button, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(put_label, javax.swing.GroupLayout.DEFAULT_SIZE, 1120, Short.MAX_VALUE)
+                    .addComponent(original_link_textfield))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -312,8 +312,6 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                                 getDance_button().setText("Let's dance, baby");
 
                                 getDance_button().setEnabled(true);
-
-                                pack();
 
                             }
                         });
