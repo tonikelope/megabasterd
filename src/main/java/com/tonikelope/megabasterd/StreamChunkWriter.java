@@ -16,8 +16,8 @@ import static com.tonikelope.megabasterd.MiscTools.*;
  */
 public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable {
 
-    public static final int CHUNK_SIZE = 10485760; //10 MB
-    public static final int BUFFER_CHUNKS_SIZE = 4;
+    public static final int CHUNK_SIZE = 1048576;
+    public static final int BUFFER_CHUNKS_SIZE = 20;
     private long _next_offset_required;
     private long _bytes_written;
     private final long _start_offset;

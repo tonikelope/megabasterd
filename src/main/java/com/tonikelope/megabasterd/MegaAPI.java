@@ -202,9 +202,9 @@ public final class MegaAPI {
             url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
             String res = _rawRequest(request, url_api);
-            
-            if(res!=null) {
-                
+
+            if (res != null) {
+
                 ObjectMapper objectMapper = new ObjectMapper();
 
                 HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
@@ -229,7 +229,7 @@ public final class MegaAPI {
                     quota[1] = (Long) res_map[0].get("mstrg");
                 }
             }
-            
+
         } catch (Exception ex) {
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);

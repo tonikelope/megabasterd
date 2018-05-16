@@ -6,12 +6,13 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.getApacheKissHttpClient;
+import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -23,19 +24,20 @@ import org.apache.http.impl.client.CloseableHttpClient;
 public class SmartMegaProxyManager implements Runnable {
 
     public static final int PROXY_TIMEOUT = 30;
-    public static final int REFRESH_PROXY_LIST_TIMEOUT = 1800;
+    public static final int PROXY_MAX_EXCLUDE_COUNTER = 5;
+    public static final int PROXY_EXCLUDE_SECS = 10;
     private volatile String _proxy_list_url;
     private final ConcurrentLinkedQueue<String> _proxy_list;
+    private final ConcurrentHashMap<String, HashMap> _proxy_info;
     private final MainPanel _main_panel;
     private volatile boolean _exit;
-    private final Object _refresh_lock;
 
     public SmartMegaProxyManager(MainPanel main_panel, String proxy_list_url) {
         _main_panel = main_panel;
         _proxy_list_url = proxy_list_url;
         _proxy_list = new ConcurrentLinkedQueue<>();
+        _proxy_info = new ConcurrentHashMap<>();
         _exit = false;
-        _refresh_lock = new Object();
     }
 
     public String getProxy_list_url() {
@@ -54,53 +56,64 @@ public class SmartMegaProxyManager implements Runnable {
             @Override
             public void run() {
 
-                synchronized (_refresh_lock) {
-
-                    _refreshProxyList();
-                }
+                _refreshProxyList();
             }
         });
     }
 
-    public Object getRefresh_lock() {
-        return _refresh_lock;
-    }
-
     public String getFastestProxy() {
 
-        return _proxy_list.peek();
-    }
+        for (String proxy : _proxy_list) {
 
-    public String getRandomProxy() {
+            HashMap<String, Object> proxy_info = (HashMap<String, Object>) _proxy_info.get(proxy);
 
-        synchronized (_refresh_lock) {
-            return _proxy_list.toArray(new String[_proxy_list.size()])[(new Random()).nextInt(_proxy_list.size())];
+            Long extimestamp = (Long) proxy_info.get("extimestamp");
+
+            if (extimestamp == null || extimestamp + PROXY_EXCLUDE_SECS * 1000 < System.currentTimeMillis()) {
+
+                return proxy;
+
+            } else {
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy is temporary excluded -> {1}", new Object[]{Thread.currentThread().getName(), proxy});
+            }
         }
+
+        return null;
     }
 
     public void excludeProxy(String proxy) {
 
-        if (_proxy_list.contains(proxy)) {
+        if (_proxy_info.containsKey(proxy)) {
 
-            synchronized (_refresh_lock) {
+            HashMap<String, Object> proxy_info = (HashMap<String, Object>) _proxy_info.get(proxy);
+
+            int excount = (int) proxy_info.get("excount") + 1;
+
+            if (excount < PROXY_MAX_EXCLUDE_COUNTER) {
+
+                proxy_info.put("excount", excount);
+
+                proxy_info.put("extimestamp", System.currentTimeMillis());
+
+            } else {
+
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy removed -> {1}", new Object[]{Thread.currentThread().getName(), proxy});
 
                 _proxy_list.remove(proxy);
-            }
+                _proxy_info.remove(proxy);
 
-            _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
 
-            if (_proxy_list.isEmpty()) {
+                if (_proxy_list.isEmpty()) {
 
-                THREAD_POOL.execute(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        synchronized (_refresh_lock) {
+                    THREAD_POOL.execute(new Runnable() {
+                        @Override
+                        public void run() {
 
                             _refreshProxyList();
                         }
-                    }
-                });
+                    });
+                }
             }
         }
     }
@@ -139,11 +152,16 @@ public class SmartMegaProxyManager implements Runnable {
                 if (proxy_list.length > 0) {
 
                     _proxy_list.clear();
+                    _proxy_info.clear();
 
                     for (String proxy : proxy_list) {
 
                         if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            this._proxy_list.add(proxy);
+                            _proxy_list.add(proxy);
+                            HashMap<String, Object> proxy_info = new HashMap<>();
+                            proxy_info.put("extimestamp", null);
+                            proxy_info.put("excount", 0);
+                            _proxy_info.put(proxy.trim(), proxy_info);
                         }
                     }
                 }
@@ -167,17 +185,18 @@ public class SmartMegaProxyManager implements Runnable {
 
         _main_panel.getView().updateSmartProxyStatus("");
 
+        this._refreshProxyList();
+
         while (!_exit) {
 
-            synchronized (_refresh_lock) {
+            this._refreshProxyList();
 
-                this._refreshProxyList();
-
-                try {
-                    _refresh_lock.wait(1000 * REFRESH_PROXY_LIST_TIMEOUT);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            try {
+                synchronized (this) {
+                    wait();
                 }
+            } catch (InterruptedException ex) {
+                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             }
         }
 

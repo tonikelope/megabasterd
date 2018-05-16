@@ -854,8 +854,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 MainPanel.getProxy_manager().setExit(true);
 
-                synchronized (MainPanel.getProxy_manager().getRefresh_lock()) {
-                    MainPanel.getProxy_manager().getRefresh_lock().notify();
+                synchronized (MainPanel.getProxy_manager()) {
+                    MainPanel.getProxy_manager().notify();
                 }
 
                 this.getMain_panel().setProxy_manager(null);
