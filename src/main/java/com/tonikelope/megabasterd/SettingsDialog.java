@@ -1458,7 +1458,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             settings.put("megacrypter_reverse", megacrypter_reverse_checkbox.isSelected() ? "yes" : "no");
             settings.put("megacrypter_reverse_port", String.valueOf(megacrypter_reverse_port_spinner.getValue()));
             settings.put("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
-            settings.put("smart_proxy_url", smart_proxy_url_text.getText());
+            settings.put("smart_proxy_url", !smart_proxy_url_text.getText().equals("") ? smart_proxy_url_text.getText() : DEFAULT_SMART_PROXY_URL);
 
             String old_zoom = DBTools.selectSettingValue("font_zoom");
 
