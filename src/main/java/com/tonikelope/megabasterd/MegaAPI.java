@@ -312,7 +312,7 @@ public final class MegaAPI {
 
                             Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
 
-                            MainPanel.getProxy_manager().excludeProxy(current_proxy);
+                            MainPanel.getProxy_manager().removeProxy(current_proxy);
                         }
 
                         current_proxy = MainPanel.getProxy_manager().getFastestProxy();

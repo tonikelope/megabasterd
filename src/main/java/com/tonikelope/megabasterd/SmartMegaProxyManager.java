@@ -11,8 +11,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.getApacheKissHttpClient;
-import java.util.HashMap;
-import java.util.concurrent.ConcurrentHashMap;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -23,12 +21,9 @@ import org.apache.http.impl.client.CloseableHttpClient;
  */
 public class SmartMegaProxyManager implements Runnable {
 
-    public static final int PROXY_TIMEOUT = 30;
-    public static final int PROXY_MAX_EXCLUDE_COUNTER = 5;
-    public static final int PROXY_EXCLUDE_SECS = 10;
+    public static final int PROXY_TIMEOUT = 15;
     private volatile String _proxy_list_url;
     private final ConcurrentLinkedQueue<String> _proxy_list;
-    private final ConcurrentHashMap<String, HashMap> _proxy_info;
     private final MainPanel _main_panel;
     private volatile boolean _exit;
 
@@ -36,7 +31,6 @@ public class SmartMegaProxyManager implements Runnable {
         _main_panel = main_panel;
         _proxy_list_url = proxy_list_url;
         _proxy_list = new ConcurrentLinkedQueue<>();
-        _proxy_info = new ConcurrentHashMap<>();
         _exit = false;
     }
 
@@ -63,57 +57,28 @@ public class SmartMegaProxyManager implements Runnable {
 
     public String getFastestProxy() {
 
-        for (String proxy : _proxy_list) {
-
-            HashMap<String, Object> proxy_info = (HashMap<String, Object>) _proxy_info.get(proxy);
-
-            Long extimestamp = (Long) proxy_info.get("extimestamp");
-
-            if (extimestamp == null || extimestamp + PROXY_EXCLUDE_SECS * 1000 < System.currentTimeMillis()) {
-
-                return proxy;
-
-            } else {
-                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy is temporary excluded -> {1}", new Object[]{Thread.currentThread().getName(), proxy});
-            }
-        }
-
-        return null;
+        return _proxy_list.peek();
     }
 
-    public void excludeProxy(String proxy) {
+    public void removeProxy(String proxy) {
 
-        if (_proxy_info.containsKey(proxy)) {
+        if (_proxy_list.contains(proxy)) {
 
-            HashMap<String, Object> proxy_info = (HashMap<String, Object>) _proxy_info.get(proxy);
+            _proxy_list.remove(proxy);
 
-            int excount = (int) proxy_info.get("excount") + 1;
+            _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
 
-            if (excount < PROXY_MAX_EXCLUDE_COUNTER) {
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy removed -> {1}", new Object[]{Thread.currentThread().getName(), proxy});
 
-                proxy_info.put("excount", excount);
+            if (_proxy_list.isEmpty()) {
 
-                proxy_info.put("extimestamp", System.currentTimeMillis());
+                THREAD_POOL.execute(new Runnable() {
+                    @Override
+                    public void run() {
 
-            } else {
-
-                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy removed -> {1}", new Object[]{Thread.currentThread().getName(), proxy});
-
-                _proxy_list.remove(proxy);
-                _proxy_info.remove(proxy);
-
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
-
-                if (_proxy_list.isEmpty()) {
-
-                    THREAD_POOL.execute(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            _refreshProxyList();
-                        }
-                    });
-                }
+                        _refreshProxyList();
+                    }
+                });
             }
         }
     }
@@ -152,23 +117,18 @@ public class SmartMegaProxyManager implements Runnable {
                 if (proxy_list.length > 0) {
 
                     _proxy_list.clear();
-                    _proxy_info.clear();
 
                     for (String proxy : proxy_list) {
 
                         if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
                             _proxy_list.add(proxy);
-                            HashMap<String, Object> proxy_info = new HashMap<>();
-                            proxy_info.put("extimestamp", null);
-                            proxy_info.put("excount", 0);
-                            _proxy_info.put(proxy.trim(), proxy_info);
                         }
                     }
                 }
 
-                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
-
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
+
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
             }
 
         } catch (MalformedURLException ex) {

@@ -118,9 +118,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (error && current_proxy != null) {
 
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
-
-                            MainPanel.getProxy_manager().excludeProxy(current_proxy);
+                            MainPanel.getProxy_manager().removeProxy(current_proxy);
                         }
 
                         current_proxy = MainPanel.getProxy_manager().getFastestProxy();
@@ -152,9 +150,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
 
-                error = false;
+                error = true;
 
-                error509 = false;
+                error509 = true;
 
                 if (getDownload().isError509()) {
                     getDownload().getView().set509Error(false);

@@ -72,9 +72,7 @@ public class StreamChunkDownloader implements Runnable {
 
                         if (error && current_proxy != null) {
 
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Worker [{1}]: excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_proxy});
-
-                            MainPanel.getProxy_manager().excludeProxy(current_proxy);
+                            MainPanel.getProxy_manager().removeProxy(current_proxy);
                         }
 
                         current_proxy = MainPanel.getProxy_manager().getFastestProxy();
