@@ -46,6 +46,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public static final int WORKERS_DEFAULT = 4;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
     public static final int CHUNK_SIZE_MULTI = 10;
+    public static final int TURBO_MODE_SLOTS = 20;
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view;
@@ -54,6 +55,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private final Object _workers_lock;
     private final Object _chunkid_lock;
     private final Object _dl_url_lock;
+    private final Object _turbo_proxy_lock;
     private boolean _notified;
     private final String _url;
     private final String _download_path;
@@ -88,6 +90,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private final MegaAPI _ma;
     private volatile boolean _canceled;
     private volatile boolean _error509;
+    private volatile boolean _turbo_proxy_mode;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
 
@@ -117,11 +120,13 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _use_slots = use_slots;
         _slots = slots;
         _error509 = false;
+        _turbo_proxy_mode = false;
         _restart = restart;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
         _chunkid_lock = new Object();
         _dl_url_lock = new Object();
+        _turbo_proxy_lock = new Object();
         _chunkworkers = new ArrayList<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
@@ -162,6 +167,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _workers_lock = new Object();
         _chunkid_lock = new Object();
         _dl_url_lock = new Object();
+        _turbo_proxy_lock = new Object();
         _chunkworkers = new ArrayList<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
@@ -169,6 +175,55 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
 
+    }
+
+    public boolean isTurboProxy_mode() {
+
+        synchronized (_turbo_proxy_lock) {
+            return _turbo_proxy_mode;
+        }
+    }
+
+    public void setTurboProxy_mode(boolean turbo_mode) {
+
+        synchronized (_turbo_proxy_lock) {
+
+            if (_turbo_proxy_mode != turbo_mode) {
+
+                _turbo_proxy_mode = turbo_mode;
+
+                if (_turbo_proxy_mode) {
+
+                    Download tthis = this;
+
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+
+                            synchronized (_workers_lock) {
+
+                                getView().getSlots_spinner().setEnabled(false);
+
+                                for (int t = getChunkworkers().size(); t <= TURBO_MODE_SLOTS; t++) {
+
+                                    ChunkDownloader c = new ChunkDownloader(t, tthis);
+
+                                    _chunkworkers.add(c);
+
+                                    _thread_pool.execute(c);
+                                }
+
+                                getView().getSlots_spinner().setValue(TURBO_MODE_SLOTS);
+
+                                getView().getSlots_spinner().setEnabled(true);
+                            }
+                        }
+                    });
+                }
+
+            }
+        }
     }
 
     public boolean isError509() {

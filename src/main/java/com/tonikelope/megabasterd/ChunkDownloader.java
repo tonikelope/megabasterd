@@ -127,17 +127,20 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
                             getDownload().getMain_panel().getView().setSmartProxy(true);
+                            getDownload().setTurboProxy_mode(true);
 
                         } else {
 
                             httpclient = MiscTools.getApacheKissHttpClient();
                             getDownload().getMain_panel().getView().setSmartProxy(false);
+                            getDownload().setTurboProxy_mode(false);
                         }
 
                     } else if (httpclient == null) {
 
                         httpclient = MiscTools.getApacheKissHttpClient();
                         getDownload().getMain_panel().getView().setSmartProxy(false);
+                        getDownload().setTurboProxy_mode(false);
                     }
                 }
 

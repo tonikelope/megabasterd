@@ -134,7 +134,6 @@ public final class MainPanelView extends javax.swing.JFrame {
             public void run() {
 
                 getKiss_server_status().setText(status + " ");
-                pack();
             }
         });
 
@@ -148,7 +147,6 @@ public final class MainPanelView extends javax.swing.JFrame {
             public void run() {
 
                 getSmart_proxy_status().setText(status + " ");
-                pack();
             }
         });
 
@@ -162,7 +160,6 @@ public final class MainPanelView extends javax.swing.JFrame {
             public void run() {
 
                 getMc_reverse_status().setText(status + " ");
-                pack();
             }
         });
 
