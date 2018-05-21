@@ -150,9 +150,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
 
-                error = true;
+                error = false;
 
-                error509 = true;
+                error509 = false;
 
                 if (getDownload().isError509()) {
                     getDownload().getView().set509Error(false);
@@ -178,7 +178,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                     if (MainPanel.isUse_smart_proxy()) {
                                         getDownload().getView().set509Error(true);
                                     }
-
                                 }
 
                             } else {
