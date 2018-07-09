@@ -247,6 +247,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         new_download_menu = new javax.swing.JMenuItem();
         new_upload_menu = new javax.swing.JMenuItem();
         new_stream_menu = new javax.swing.JMenuItem();
+        split_file_menu = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         clean_all_down_menu = new javax.swing.JMenuItem();
         clean_all_up_menu = new javax.swing.JMenuItem();
@@ -452,6 +453,16 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
         file_menu.add(new_stream_menu);
+
+        split_file_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        split_file_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cut-30.png"))); // NOI18N
+        split_file_menu.setText("Split file");
+        split_file_menu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                split_file_menuActionPerformed(evt);
+            }
+        });
+        file_menu.add(split_file_menu);
         file_menu.add(jSeparator4);
 
         clean_all_down_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
@@ -1083,6 +1094,15 @@ public final class MainPanelView extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_clean_all_up_menuActionPerformed
 
+    private void split_file_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_split_file_menuActionPerformed
+        // TODO add your handling code here:
+        FileSplitterDialog dialog = new FileSplitterDialog(this, true);
+
+        dialog.setLocationRelativeTo(this);
+
+        dialog.setVisible(true);
+    }//GEN-LAST:event_split_file_menuActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem about_menu;
     private javax.swing.JMenuItem clean_all_down_menu;
@@ -1116,6 +1136,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JButton pause_all_up_button;
     private javax.swing.JMenuItem settings_menu;
     private javax.swing.JLabel smart_proxy_status;
+    private javax.swing.JMenuItem split_file_menu;
     private javax.swing.JLabel status_down_label;
     private javax.swing.JLabel status_up_label;
     private javax.swing.JLabel up_remtime_label;

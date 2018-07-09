@@ -44,7 +44,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" max="32767" attributes="0"/>
+              <Component id="jTabbedPane1" pref="536" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="cancel_button" min="-2" max="-2" attributes="0"/>
@@ -127,7 +127,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="downloads_scroll_pane" pref="465" max="32767" attributes="0"/>
+                      <Component id="downloads_scroll_pane" pref="471" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -406,7 +406,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="18" style="0"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Custom URL:"/>
+                        <Property name="text" type="java.lang.String" value="Custom URL (optional):"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JSpinner" name="max_downloads_spinner">
@@ -637,7 +637,7 @@
                           <Component id="max_up_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="max_up_speed_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="269" max="32767" attributes="0"/>
+                      <EmptySpace pref="275" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -796,7 +796,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="118" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="121" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -805,7 +805,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="118" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="121" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1079,7 +1079,7 @@
                           <Component id="import_settings_button" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="export_settings_button" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="144" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>

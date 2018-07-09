@@ -13,10 +13,10 @@ import java.awt.Color;
 public final class AboutDialog extends javax.swing.JDialog {
 
     private static final String MEGA_URL = "https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A";
-    private static final String TONIKELOPE_URL = "http://toni.world";
+    private static final String TONIKELOPE_URL = "https://github.com/tonikelope/";
     private static final String MEGACRYPTER_URL = "https://tonikelope.github.io/megacrypter/";
     private static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
-    private static final String MEGABASTERD_GITHUB_URL = "https://github.com/tonikelope/megabasterd";
+    private static final String MEGABASTERD_GITHUB_URL = "https://github.com/tonikelope/megabasterd/";
 
     public AboutDialog(MainPanelView parent, boolean modal) {
 
