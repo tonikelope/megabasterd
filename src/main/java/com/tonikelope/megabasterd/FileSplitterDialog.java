@@ -255,6 +255,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             this.file_name_label.setText(this._file.getAbsolutePath());
             this.file_size_label.setText(MiscTools.formatBytes(this._file.length()));
             this.output_folder_label.setText(this._file.getParentFile().getAbsolutePath());
+            this._output_dir = new File(this._file.getParentFile().getAbsolutePath());
             this.jProgressBar2.setMinimum(0);
             this.jProgressBar2.setMaximum(MAX_VALUE);
             this.jProgressBar2.setStringPainted(true);
