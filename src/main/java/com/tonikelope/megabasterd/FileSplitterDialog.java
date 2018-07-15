@@ -325,7 +325,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private void split_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_split_buttonActionPerformed
         // TODO add your handling code here:
 
-        if (this._output_dir != null) {
+        if (this._output_dir != null && !"".equals(this.split_size_text.getText())) {
 
             this.split_button.setText("SPLITTING FILE...");
 
