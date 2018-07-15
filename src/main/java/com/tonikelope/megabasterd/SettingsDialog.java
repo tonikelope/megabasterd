@@ -926,7 +926,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_upload_slots_label.setText("Note: MULTI-SLOT is required if you want to exit and resume uploads (slots consume RAM, so use them moderately).");
+        rec_upload_slots_label.setText("Note: MULTI-SLOT is required if you want to exit and resume uploads and it's more robust (slots consume RAM, so use them moderately).");
 
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
@@ -959,7 +959,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(limit_upload_speed_checkbox))
-                                .addGap(0, 220, Short.MAX_VALUE)))
+                                .addGap(0, 74, Short.MAX_VALUE)))
                         .addContainerGap())))
         );
         uploads_panelLayout.setVerticalGroup(
@@ -1411,7 +1411,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 536, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cancel_button)

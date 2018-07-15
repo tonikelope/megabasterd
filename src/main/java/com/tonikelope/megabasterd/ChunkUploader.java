@@ -1,33 +1,24 @@
 package com.tonikelope.megabasterd;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.io.RandomAccessFile;
-import java.net.SocketTimeoutException;
-import java.net.URI;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.CryptTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
 
 /**
  *
@@ -109,17 +100,19 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploader {1} hello! {2}", new Object[]{Thread.currentThread().getName(), getId(), getUpload().getFile_name()});
 
-        try (final CloseableHttpClient httpclient = getApacheKissHttpClient(); RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");) {
-
-            String worker_url = _upload.getUl_url();
+        try (RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");) {
 
             int conta_error = 0;
 
             while (!_upload.getMain_panel().isExit() && !_exit && !_upload.isStopped() && conta_error < MAX_SLOT_ERROR) {
 
+                String worker_url = _upload.getUl_url();
+
                 int reads, http_status, tot_bytes_up;
 
                 Chunk chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url, Upload.CHUNK_SIZE_MULTI);
+
+                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} Uploading -> {2}", new Object[]{Thread.currentThread().getName(), _id, chunk.getUrl()});
 
                 f.seek(chunk.getOffset());
 
@@ -131,41 +124,45 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 } while (!_exit && !_upload.isStopped() && chunk.getOutputStream().size() < chunk.getSize());
 
-                final HttpPost httppost = new HttpPost(new URI(chunk.getUrl()));
+                URL url = new URL(chunk.getUrl());
 
-                final long postdata_length = chunk.getSize();
+                HttpURLConnection con = null;
+
+                if (MainPanel.isUse_proxy()) {
+
+                    con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                    if (MainPanel.getProxy_user() != null) {
+
+                        con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                    }
+                } else {
+
+                    con = (HttpURLConnection) url.openConnection();
+                }
+
+                con.setRequestMethod("POST");
+
+                con.setDoOutput(true);
+
+                con.setFixedLengthStreamingMode(chunk.getSize());
+
+                con.setConnectTimeout(Upload.HTTP_TIMEOUT);
+
+                con.setReadTimeout(Upload.HTTP_TIMEOUT);
+
+                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 tot_bytes_up = 0;
 
                 boolean error = false;
 
-                CloseableHttpResponse httpresponse = null;
-
                 try {
 
                     if (!_exit && !_upload.isStopped()) {
 
-                        final FutureTask<CloseableHttpResponse> futureTask;
-
                         try (CipherInputStream cis = new CipherInputStream(chunk.getInputStream(), genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk.getOffset())))) {
 
-                            final PipedOutputStream pipeout = new PipedOutputStream();
-
-                            final PipedInputStream pipein = new PipedInputStream(pipeout);
-
-                            futureTask = new FutureTask<>(new Callable() {
-                                @Override
-                                public CloseableHttpResponse call() throws IOException {
-
-                                    httppost.setEntity(new InputStreamEntity(pipein, postdata_length));
-
-                                    return httpclient.execute(httppost);
-                                }
-                            });
-
-                            THREAD_POOL.execute(futureTask);
-
-                            try (OutputStream out = new ThrottledOutputStream(pipeout, _upload.getMain_panel().getStream_supervisor())) {
+                            try (OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
 
                                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploading chunk {1} from worker {2}...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
 
@@ -194,29 +191,15 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     }
                                 }
 
+                                out.flush();
+
+                                out.close();
+
                             }
-                        }
 
-                        if (!_upload.isStopped()) {
+                            if (!_upload.isStopped() && !_exit) {
 
-                            try {
-
-                                if (!_exit) {
-
-                                    httpresponse = futureTask.get();
-
-                                } else {
-
-                                    futureTask.cancel(true);
-
-                                    httpresponse = null;
-                                }
-
-                                if (httpresponse == null) {
-
-                                    error = true;
-
-                                } else if ((http_status = httpresponse.getStatusLine().getStatusCode()) != HttpStatus.SC_OK) {
+                                if ((http_status = con.getResponseCode()) != 200) {
 
                                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
@@ -226,43 +209,43 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     if (tot_bytes_up < chunk.getSize()) {
 
+                                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} {1} bytes uploaded < {2}", new Object[]{Thread.currentThread().getName(), tot_bytes_up, chunk.getSize()});
+
                                         error = true;
 
                                     } else {
 
-                                        if (_upload.getCompletion_handle() == null) {
+                                        String httpresponse = null;
 
-                                            InputStream is = httpresponse.getEntity().getContent();
+                                        InputStream is = con.getInputStream();
 
-                                            try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                                        try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                                while (_upload.getCompletion_handle() == null && (reads = is.read(buffer)) != -1) {
+                                            while ((reads = is.read(buffer)) != -1) {
 
-                                                    byte_res.write(buffer, 0, reads);
-                                                }
+                                                byte_res.write(buffer, 0, reads);
+                                            }
 
-                                                if (_upload.getCompletion_handle() == null) {
+                                            httpresponse = new String(byte_res.toByteArray());
 
-                                                    String response = new String(byte_res.toByteArray());
+                                        }
 
-                                                    if (response.length() > 0) {
+                                        if (httpresponse != null && httpresponse.length() > 0) {
 
-                                                        if (MegaAPI.checkMEGAError(response) != 0) {
+                                            if (MegaAPI.checkMEGAError(httpresponse) != 0) {
 
-                                                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} UPLOAD FAILED! (MEGA ERROR: {1})", new Object[]{Thread.currentThread().getName(), MegaAPI.checkMEGAError(response)});
+                                                Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} UPLOAD FAILED! (MEGA ERROR: {1})", new Object[]{Thread.currentThread().getName(), MegaAPI.checkMEGAError(httpresponse)});
 
-                                                            error = true;
+                                                error = true;
 
-                                                        } else {
+                                            } else {
 
-                                                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), response});
+                                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), httpresponse});
 
-                                                            _upload.setCompletion_handle(response);
-                                                        }
-                                                    }
-                                                }
+                                                _upload.setCompletion_handle(httpresponse);
                                             }
                                         }
+
                                     }
                                 }
 
@@ -301,121 +284,82 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     conta_error = 0;
                                 }
 
-                            } catch (ExecutionException | InterruptedException | CancellationException exception) {
-
-                                error = true;
-
-                                Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
+                            } else if (_exit) {
 
                                 _upload.rejectChunkId(chunk.getId());
-
-                                if (tot_bytes_up > 0) {
-
-                                    _upload.getPartialProgress().add(-1 * tot_bytes_up);
-
-                                    _upload.getProgress_meter().secureNotify();
-                                }
-
-                                conta_error++;
-
-                                if (!_exit) {
-
-                                    _error_wait = true;
-
-                                    _upload.getView().updateSlotsStatus();
-
-                                    try {
-                                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-                                    } catch (InterruptedException ex) {
-                                        Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
-                                    }
-
-                                    _error_wait = false;
-
-                                    _upload.getView().updateSlotsStatus();
-                                }
-
-                            } finally {
-
-                                if (httpresponse != null) {
-
-                                    httpresponse.close();
-                                }
                             }
+
+                        } catch (IOException ex) {
+
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, ex.getMessage());
+
+                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
+
+                            _upload.rejectChunkId(chunk.getId());
+
+                            if (tot_bytes_up > 0) {
+
+                                _upload.getPartialProgress().add(-1 * tot_bytes_up);
+
+                                _upload.getProgress_meter().secureNotify();
+                            }
+
+                            conta_error++;
+
+                            if (!_exit) {
+
+                                _error_wait = true;
+
+                                _upload.getView().updateSlotsStatus();
+
+                                try {
+                                    Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                                } catch (InterruptedException exception) {
+                                    Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, exception);
+                                }
+
+                                _error_wait = false;
+
+                                _upload.getView().updateSlotsStatus();
+                            }
+
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+
                         }
 
-                    } else if (_exit) {
-
-                        _upload.rejectChunkId(chunk.getId());
-                    }
-
-                } catch (IOException ex) {
-
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk.getId(), _id});
-
-                    _upload.rejectChunkId(chunk.getId());
-
-                    if (tot_bytes_up > 0) {
-
-                        _upload.getPartialProgress().add(-1 * tot_bytes_up);
-
-                        _upload.getProgress_meter().secureNotify();
-                    }
-
-                    if (!(ex instanceof SocketTimeoutException)) {
-                        conta_error++;
-                    }
-
-                    if (!_exit) {
-
-                        _error_wait = true;
-
-                        _upload.getView().updateSlotsStatus();
-
-                        try {
-                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-                        } catch (InterruptedException exception) {
-                            Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, exception);
+                        if (_upload.getMain_panel().isExit()) {
+                            secureWait();
                         }
-
-                        _error_wait = false;
-
-                        _upload.getView().updateSlotsStatus();
                     }
 
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    if (conta_error == MAX_SLOT_ERROR) {
 
-                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        _upload.setStatus_error(true);
 
+                        _upload.stopUploader("UPLOAD FAILED: too many errors");
+
+                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, "UPLOAD FAILED: too many errors");
+                    }
+
+                } catch (Exception ex) {
+
+                    _upload.stopUploader();
+
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 } finally {
-
-                    if (httpresponse != null) {
-                        httpresponse.close();
-                    }
+                    con.disconnect();
                 }
 
-                if (_upload.getMain_panel().isExit()) {
-                    secureWait();
-                }
             }
 
-            if (conta_error == MAX_SLOT_ERROR) {
-
-                _upload.setStatus_error(true);
-
-                _upload.stopUploader("UPLOAD FAILED: too many errors");
-
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, "UPLOAD FAILED: too many errors");
-            }
-
-        } catch (ChunkInvalidException e) {
-
-        } catch (Exception ex) {
-
-            _upload.stopUploader();
-
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ChunkInvalidException ex) {
         }
 
         _upload.stopThisSlot(this);
@@ -423,6 +367,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
         _upload.getMac_generator().secureNotify();
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ChunkUploader {1} bye bye...", new Object[]{Thread.currentThread().getName(), _id});
+
     }
 
 }

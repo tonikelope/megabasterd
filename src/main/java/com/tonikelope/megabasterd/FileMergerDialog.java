@@ -27,11 +27,8 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import static java.lang.Integer.MAX_VALUE;
 import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -41,22 +38,23 @@ import javax.swing.JOptionPane;
  *
  * @author tonikelope
  */
-public class FileSplitterDialog extends javax.swing.JDialog {
+public class FileMergerDialog extends javax.swing.JDialog {
 
     private final MainPanel _main_panel;
-    private File _file = null;
     private File _output_dir = null;
     private long _progress = 0L;
+    private final ArrayList<String> _file_parts = new ArrayList<>();
+    private String _file_name = null;
+    private long _file_size = 0L;
 
     /**
      * Creates new form FileSplitterDialog
      */
-    public FileSplitterDialog(MainPanelView parent, boolean modal) {
+    public FileMergerDialog(MainPanelView parent, boolean modal) {
         super(parent, modal);
         _main_panel = parent.getMain_panel();
         initComponents();
         updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
-
         jProgressBar2.setMinimum(0);
         jProgressBar2.setMaximum(MAX_VALUE);
         jProgressBar2.setStringPainted(true);
@@ -65,61 +63,46 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         pack();
     }
 
-    private boolean _splitFile() throws IOException {
+    private boolean _mergeFile() throws IOException {
 
-        int mBperSplit = Integer.parseInt(this.split_size_text.getText());
+        try (RandomAccessFile targetFile = new RandomAccessFile(this.file_name_label.getText(), "rw")) {
 
-        if (mBperSplit <= 0) {
-            throw new IllegalArgumentException("mBperSplit must be more than zero");
-        }
+            FileChannel targetChannel = targetFile.getChannel();
 
-        List<Path> partFiles = new ArrayList<>();
-        final long sourceSize = Files.size(Paths.get(this._file.getAbsolutePath()));
-        final long bytesPerSplit = 1024L * 1024L * mBperSplit;
-        final long numSplits = sourceSize / bytesPerSplit;
-        final long remainingBytes = sourceSize % bytesPerSplit;
-        int position = 0;
-        int conta_split = 1;
+            for (String file_path : this._file_parts) {
 
-        try (RandomAccessFile sourceFile = new RandomAccessFile(this._file.getAbsolutePath(), "r");
-                FileChannel sourceChannel = sourceFile.getChannel()) {
+                RandomAccessFile rfile = new RandomAccessFile(file_path, "r");
 
-            for (; position < numSplits; position++, conta_split++) {
-                _writePartToFile(bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split);
+                targetChannel.transferFrom(rfile.getChannel(), this._progress, rfile.length());
+
+                this._progress += rfile.length();
+
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+
+                        jProgressBar2.setValue((int) Math.ceil((MAX_VALUE / (double) _file_size * _progress)));
+                    }
+                });
 
                 if (!this.isVisible()) {
-
                     return false;
                 }
             }
-
-            if (remainingBytes > 0) {
-                _writePartToFile(remainingBytes, position * bytesPerSplit, sourceChannel, conta_split);
-            }
         }
+
         return true;
     }
 
-    private void _writePartToFile(long byteSize, long position, FileChannel sourceChannel, int conta_split) throws IOException {
+    private void _deleteParts() {
 
-        Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._file.getName() + ".part" + String.valueOf(conta_split));
-        try (RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");
-                FileChannel toChannel = toFile.getChannel()) {
-            sourceChannel.position(position);
-            toChannel.transferFrom(sourceChannel, 0, byteSize);
+        for (String file_path : this._file_parts) {
+
+            File file = new File(file_path);
+
+            file.delete();
         }
-
-        this._progress += byteSize;
-
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                jProgressBar2.setValue((int) Math.ceil((MAX_VALUE / (double) _file.length()) * _progress));
-            }
-        });
-
     }
 
     /**
@@ -136,17 +119,16 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         output_button = new javax.swing.JButton();
         file_size_label = new javax.swing.JLabel();
         output_folder_label = new javax.swing.JLabel();
-        split_size_label = new javax.swing.JLabel();
-        split_size_text = new javax.swing.JTextField();
         jProgressBar2 = new javax.swing.JProgressBar();
-        split_button = new javax.swing.JButton();
+        merge_button = new javax.swing.JButton();
+        delete_parts_checkbox = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("File Splitter");
+        setTitle("File Merger");
 
         file_button.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         file_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-add-file-30.png"))); // NOI18N
-        file_button.setText("Select file");
+        file_button.setText("Select files");
         file_button.setDoubleBuffered(true);
         file_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -173,27 +155,25 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         output_folder_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         output_folder_label.setDoubleBuffered(true);
 
-        split_size_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        split_size_label.setText("Split size (MBs):");
-        split_size_label.setDoubleBuffered(true);
-
-        split_size_text.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        split_size_text.setDoubleBuffered(true);
-
         jProgressBar2.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         jProgressBar2.setDoubleBuffered(true);
 
-        split_button.setBackground(new java.awt.Color(102, 204, 255));
-        split_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
-        split_button.setForeground(new java.awt.Color(255, 255, 255));
-        split_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cut-30.png"))); // NOI18N
-        split_button.setText("SPLIT FILE");
-        split_button.setDoubleBuffered(true);
-        split_button.addActionListener(new java.awt.event.ActionListener() {
+        merge_button.setBackground(new java.awt.Color(102, 204, 255));
+        merge_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        merge_button.setForeground(new java.awt.Color(255, 255, 255));
+        merge_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-glue-30.png"))); // NOI18N
+        merge_button.setText("MERGE FILE");
+        merge_button.setDoubleBuffered(true);
+        merge_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                split_buttonActionPerformed(evt);
+                merge_buttonActionPerformed(evt);
             }
         });
+
+        delete_parts_checkbox.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        delete_parts_checkbox.setSelected(true);
+        delete_parts_checkbox.setText("Delete parts after merge");
+        delete_parts_checkbox.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -202,17 +182,16 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(delete_parts_checkbox)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addComponent(file_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(file_name_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(output_button, javax.swing.GroupLayout.DEFAULT_SIZE, 576, Short.MAX_VALUE)
                     .addComponent(file_size_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(output_folder_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jProgressBar2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(split_size_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(split_size_text))
-                    .addComponent(split_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(merge_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -228,14 +207,12 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                 .addComponent(output_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(output_folder_label)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(split_size_label)
-                    .addComponent(split_size_text, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jProgressBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addComponent(split_button)
+                .addComponent(delete_parts_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(merge_button)
                 .addContainerGap())
         );
 
@@ -245,32 +222,57 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private void file_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_file_buttonActionPerformed
         // TODO add your handling code here:
 
-        this.file_button.setText("Opening file...");
+        this.file_button.setText("Selecting file...");
 
         this.file_button.setEnabled(false);
 
         this.output_button.setEnabled(false);
 
-        this.split_button.setEnabled(false);
+        this.merge_button.setEnabled(false);
+
+        this.delete_parts_checkbox.setEnabled(false);
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
-        filechooser.setDialogTitle("Select file");
+        filechooser.setDialogTitle("Select any part of the original file");
 
         filechooser.setAcceptAllFileFilterUsed(false);
 
         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION && filechooser.getSelectedFile().canRead()) {
 
-            this._file = filechooser.getSelectedFile();
-            this.file_name_label.setText(this._file.getAbsolutePath());
-            this.file_size_label.setText(MiscTools.formatBytes(this._file.length()));
-            this.output_folder_label.setText(this._file.getParentFile().getAbsolutePath());
-            this._output_dir = new File(this._file.getParentFile().getAbsolutePath());
-            this.jProgressBar2.setMinimum(0);
-            this.jProgressBar2.setMaximum(MAX_VALUE);
-            this.jProgressBar2.setStringPainted(true);
-            this.jProgressBar2.setValue(0);
-            this._progress = 0L;
+            this._file_name = MiscTools.findFirstRegex("^(.+)\\.part[0-9]+$", filechooser.getSelectedFile().getName(), 1);
+
+            if (this._file_name != null) {
+
+                this.file_name_label.setText(filechooser.getSelectedFile().getParentFile().getAbsolutePath() + "/" + this._file_name);
+
+                this.output_folder_label.setText(filechooser.getSelectedFile().getParentFile().getAbsolutePath());
+
+                this._output_dir = new File(filechooser.getSelectedFile().getParentFile().getAbsolutePath());
+
+                File directory = filechooser.getSelectedFile().getParentFile();
+
+                File[] fList = directory.listFiles();
+
+                _file_size = 0L;
+
+                for (File file : fList) {
+
+                    if (file.isFile() && file.canRead() && file.getName().startsWith(this._file_name + ".part")) {
+
+                        this._file_parts.add(file.getAbsolutePath());
+
+                        _file_size += file.length();
+
+                    }
+                }
+
+                Collections.sort(this._file_parts);
+
+                this.file_size_label.setText(MiscTools.formatBytes(_file_size));
+
+            }
+
         }
 
         this.file_button.setText("Select file");
@@ -279,7 +281,9 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         this.output_button.setEnabled(true);
 
-        this.split_button.setEnabled(true);
+        this.merge_button.setEnabled(true);
+
+        this.delete_parts_checkbox.setEnabled(true);
 
         pack();
 
@@ -294,7 +298,9 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         this.output_button.setEnabled(false);
 
-        this.split_button.setEnabled(false);
+        this.merge_button.setEnabled(false);
+
+        this.delete_parts_checkbox.setEnabled(false);
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -317,25 +323,27 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         this.output_button.setEnabled(true);
 
-        this.split_button.setEnabled(true);
+        this.merge_button.setEnabled(true);
+
+        this.delete_parts_checkbox.setEnabled(true);
 
         pack();
     }//GEN-LAST:event_output_buttonActionPerformed
 
-    private void split_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_split_buttonActionPerformed
+    private void merge_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_merge_buttonActionPerformed
         // TODO add your handling code here:
 
         if (this._output_dir != null) {
 
-            this.split_button.setText("SPLITTING FILE...");
+            this.merge_button.setText("MERGING FILE...");
 
             this.file_button.setEnabled(false);
 
             this.output_button.setEnabled(false);
 
-            this.split_button.setEnabled(false);
+            this.merge_button.setEnabled(false);
 
-            this.split_size_text.setEnabled(false);
+            this.delete_parts_checkbox.setEnabled(false);
 
             this.jProgressBar2.setVisible(true);
 
@@ -348,13 +356,16 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                 public void run() {
 
                     try {
-                        if (_splitFile()) {
+                        if (_mergeFile()) {
+                            if (delete_parts_checkbox.isSelected()) {
+                                _deleteParts();
+                            }
 
-                            JOptionPane.showMessageDialog(tthis, "File successfully splitted!");
+                            JOptionPane.showMessageDialog(tthis, "File successfully merged!");
 
                             if (Desktop.isDesktopSupported()) {
                                 try {
-                                    Desktop.getDesktop().open(_output_dir);
+                                    Desktop.getDesktop().open(new File(file_name_label.getText()).getParentFile());
                                 } catch (IOException ex) {
 
                                 }
@@ -362,20 +373,22 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
                         }
                     } catch (IOException ex) {
-                        Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, null, ex);
                     }
 
-                    _file = null;
-
-                    _output_dir = null;
+                    _file_parts.clear();
 
                     file_name_label.setText("");
 
+                    file_size_label.setText("");
+
                     output_folder_label.setText("");
 
-                    split_size_text.setText("");
+                    _output_dir = null;
 
-                    file_size_label.setText("");
+                    _file_name = null;
+
+                    _file_size = 0L;
 
                     _progress = 0L;
 
@@ -385,15 +398,15 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                     jProgressBar2.setValue(0);
                     jProgressBar2.setVisible(false);
 
-                    split_button.setText("SPLIT FILE");
+                    merge_button.setText("MERGE FILE");
 
                     file_button.setEnabled(true);
 
                     output_button.setEnabled(true);
 
-                    split_button.setEnabled(true);
+                    merge_button.setEnabled(true);
 
-                    split_size_text.setEnabled(true);
+                    delete_parts_checkbox.setEnabled(true);
 
                     pack();
 
@@ -401,17 +414,16 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             });
 
         }
-    }//GEN-LAST:event_split_buttonActionPerformed
+    }//GEN-LAST:event_merge_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JCheckBox delete_parts_checkbox;
     private javax.swing.JButton file_button;
     private javax.swing.JLabel file_name_label;
     private javax.swing.JLabel file_size_label;
     private javax.swing.JProgressBar jProgressBar2;
+    private javax.swing.JButton merge_button;
     private javax.swing.JButton output_button;
     private javax.swing.JLabel output_folder_label;
-    private javax.swing.JButton split_button;
-    private javax.swing.JLabel split_size_label;
-    private javax.swing.JTextField split_size_text;
     // End of variables declaration//GEN-END:variables
 }

@@ -3,15 +3,14 @@ package com.tonikelope.megabasterd;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
-import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
 
 /**
  *
@@ -94,27 +93,28 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 
-        CloseableHttpClient httpclient = null;
+        HttpURLConnection con = null;
 
         try {
 
             int conta_error = 0;
-            String worker_url = null, current_proxy = null;;
+
+            String worker_url = null, current_proxy = null;
+
             boolean error = false, error509 = false;
 
             while (!_exit && !_download.isStopped() && (error509 || conta_error < MAX_SLOT_ERROR || MainPanel.isUse_smart_proxy())) {
 
-                if (httpclient == null || error) {
+                if (worker_url == null || error) {
+
+                    worker_url = _download.getDownloadUrlForWorker();
+                }
+
+                Chunk chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url, Download.CHUNK_SIZE_MULTI);
+
+                if (con == null || error) {
 
                     if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
-
-                        if (httpclient != null) {
-                            try {
-                                httpclient.close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
 
                         if (error && current_proxy != null) {
 
@@ -125,33 +125,71 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (current_proxy != null) {
 
-                            httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+                            String[] proxy_info = current_proxy.split(":");
+
+                            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+
+                            URL url = new URL(chunk.getUrl());
+
+                            con = (HttpURLConnection) url.openConnection(proxy);
+
                             getDownload().getMain_panel().getView().setSmartProxy(true);
                             getDownload().setTurboProxy_mode(true);
 
                         } else {
 
-                            httpclient = MiscTools.getApacheKissHttpClient();
+                            URL url = new URL(chunk.getUrl());
+
+                            con = (HttpURLConnection) url.openConnection();
+
                             getDownload().getMain_panel().getView().setSmartProxy(false);
                             getDownload().setTurboProxy_mode(false);
                         }
 
-                    } else if (httpclient == null) {
+                    } else if (con == null) {
 
-                        httpclient = MiscTools.getApacheKissHttpClient();
+                        URL url = new URL(chunk.getUrl());
+
+                        if (MainPanel.isUse_proxy()) {
+
+                            con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+
+                            if (MainPanel.getProxy_user() != null) {
+
+                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                            }
+                        } else {
+
+                            con = (HttpURLConnection) url.openConnection();
+                        }
+
                         getDownload().getMain_panel().getView().setSmartProxy(false);
                         getDownload().setTurboProxy_mode(false);
                     }
+
+                } else {
+
+                    URL url = new URL(chunk.getUrl());
+
+                    if (MainPanel.isUse_proxy()) {
+
+                        con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                        if (MainPanel.getProxy_user() != null) {
+
+                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                        }
+                    } else {
+
+                        con = (HttpURLConnection) url.openConnection();
+                    }
+
                 }
 
-                if (worker_url == null || error) {
+                con.setConnectTimeout(Upload.HTTP_TIMEOUT);
 
-                    worker_url = _download.getDownloadUrlForWorker();
-                }
+                con.setReadTimeout(Upload.HTTP_TIMEOUT);
 
-                Chunk chunk = new Chunk(_download.nextChunkId(), _download.getFile_size(), worker_url, Download.CHUNK_SIZE_MULTI);
-
-                HttpGet httpget = new HttpGet(new URI(chunk.getUrl()));
+                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 error = false;
 
@@ -161,15 +199,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     getDownload().getView().set509Error(false);
                 }
 
-                try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+                try {
 
                     if (!_exit && !_download.isStopped()) {
 
-                        try (InputStream is = new ThrottledInputStream(httpresponse.getEntity().getContent(), _download.getMain_panel().getStream_supervisor())) {
+                        try (InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor())) {
 
-                            int http_status = httpresponse.getStatusLine().getStatusCode();
+                            int http_status = con.getResponseCode();
 
-                            if (http_status != HttpStatus.SC_OK) {
+                            if (http_status != 200) {
                                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                                 error = true;
@@ -300,6 +338,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 } catch (InterruptedException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
+                } finally {
+
+                    if (con != null) {
+                        con.disconnect();
+                    }
                 }
             }
 
@@ -315,15 +358,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         } catch (Exception ex) {
             _download.stopDownloader(ex.getMessage());
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } finally {
-
-            if (httpclient != null) {
-                try {
-                    httpclient.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                }
-            }
         }
 
         _download.stopThisSlot(this);

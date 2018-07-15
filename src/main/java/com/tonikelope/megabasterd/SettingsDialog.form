@@ -44,7 +44,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" pref="536" max="32767" attributes="0"/>
+              <Component id="jTabbedPane1" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="cancel_button" min="-2" max="-2" attributes="0"/>
@@ -600,7 +600,7 @@
                                           </Group>
                                           <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="220" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="74" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -727,7 +727,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="14" style="2"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT is required if you want to exit and resume uploads (slots consume RAM, so use them moderately)."/>
+                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT is required if you want to exit and resume uploads and it&apos;s more robust (slots consume RAM, so use them moderately)."/>
               </Properties>
             </Component>
           </SubComponents>

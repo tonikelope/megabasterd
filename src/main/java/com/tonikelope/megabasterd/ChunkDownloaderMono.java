@@ -2,15 +2,14 @@ package com.tonikelope.megabasterd;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
 
 /**
  *
@@ -27,13 +26,13 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), getId()});
 
-        try (CloseableHttpClient httpclient = MiscTools.getApacheKissHttpClient()) {
+        HttpURLConnection con = null;
+
+        try {
 
             String worker_url = null;
             int conta_error = 0, http_status = 200;
             boolean error = false, error509 = false;
-            HttpGet httpget = null;
-            CloseableHttpResponse httpresponse = null;
 
             getDownload().getView().set509Error(false);
 
@@ -44,26 +43,37 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                 if (worker_url == null || error) {
 
                     worker_url = getDownload().getDownloadUrlForWorker();
-
-                    if (httpresponse != null) {
-
-                        httpresponse.close();
-                    }
                 }
 
                 Chunk chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), null);
 
                 try {
 
-                    if (httpget == null || error) {
+                    if (con == null || error) {
 
-                        httpget = new HttpGet(new URI(worker_url + "/" + chunk.getOffset()));
+                        URL url = new URL(worker_url + "/" + chunk.getOffset());
 
-                        httpresponse = httpclient.execute(httpget);
+                        if (MainPanel.isUse_proxy()) {
 
-                        is = new ThrottledInputStream(httpresponse.getEntity().getContent(), getDownload().getMain_panel().getStream_supervisor());
+                            con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                            if (MainPanel.getProxy_user() != null) {
 
-                        http_status = httpresponse.getStatusLine().getStatusCode();
+                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                            }
+                        } else {
+
+                            con = (HttpURLConnection) url.openConnection();
+                        }
+
+                        con.setConnectTimeout(Upload.HTTP_TIMEOUT);
+
+                        con.setReadTimeout(Upload.HTTP_TIMEOUT);
+
+                        con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
+
+                        is = new ThrottledInputStream(con.getInputStream(), getDownload().getMain_panel().getStream_supervisor());
+
+                        http_status = con.getResponseCode();
                     }
 
                     error = false;
@@ -75,7 +85,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     error509 = false;
 
-                    if (http_status != HttpStatus.SC_OK) {
+                    if (http_status != 200) {
 
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
@@ -189,7 +199,12 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                 } catch (InterruptedException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                } finally {
+                    if (con != null) {
+                        con.disconnect();
+                    }
                 }
+
             }
 
         } catch (ChunkInvalidException e) {
@@ -198,6 +213,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             getDownload().stopDownloader(ex.getMessage());
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
         }
 
         getDownload().stopThisSlot(this);

@@ -25,9 +25,6 @@ import java.util.regex.Pattern;
 import javax.crypto.CipherInputStream;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 
 /**
  *
@@ -267,9 +264,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         String httpmethod = xchg.getRequestMethod();
 
-        HttpGet httpget;
-
-        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+        try {
 
             Headers reqheaders = xchg.getRequestHeaders();
 
@@ -346,7 +341,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 resheaders.add("Connection", "close");
 
-                xchg.sendResponseHeaders(HttpStatus.SC_OK, 0);
+                xchg.sendResponseHeaders(200, 0);
 
             } else if (httpmethod.equals("GET")) {
 
@@ -424,13 +419,13 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                     resheaders.add("Content-Range", "bytes " + ranges[0] + "-" + (ranges[1] >= 0 ? ranges[1] : (file_size - 1)) + "/" + file_size);
 
-                    xchg.sendResponseHeaders(HttpStatus.SC_PARTIAL_CONTENT, clength);
+                    xchg.sendResponseHeaders(206, clength);
 
                     chunkwriter = new StreamChunkWriter(this, link, file_info, mega_account, pipeout, temp_url, ranges[0] - sync_bytes, ranges[1] >= 0 ? ranges[1] : file_size - 1);
 
                 } else {
 
-                    xchg.sendResponseHeaders(HttpStatus.SC_OK, file_size);
+                    xchg.sendResponseHeaders(200, file_size);
 
                     chunkwriter = new StreamChunkWriter(this, link, file_info, mega_account, pipeout, temp_url, 0, file_size - 1);
                 }

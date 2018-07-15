@@ -248,6 +248,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         new_upload_menu = new javax.swing.JMenuItem();
         new_stream_menu = new javax.swing.JMenuItem();
         split_file_menu = new javax.swing.JMenuItem();
+        merge_file_menu = new javax.swing.JMenuItem();
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         clean_all_down_menu = new javax.swing.JMenuItem();
         clean_all_up_menu = new javax.swing.JMenuItem();
@@ -463,6 +464,16 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
         file_menu.add(split_file_menu);
+
+        merge_file_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        merge_file_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-glue-30.png"))); // NOI18N
+        merge_file_menu.setText("Merge file");
+        merge_file_menu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                merge_file_menuActionPerformed(evt);
+            }
+        });
+        file_menu.add(merge_file_menu);
         file_menu.add(jSeparator4);
 
         clean_all_down_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
@@ -1103,6 +1114,16 @@ public final class MainPanelView extends javax.swing.JFrame {
         dialog.setVisible(true);
     }//GEN-LAST:event_split_file_menuActionPerformed
 
+    private void merge_file_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_merge_file_menuActionPerformed
+        // TODO add your handling code here:
+
+        FileMergerDialog dialog = new FileMergerDialog(this, true);
+
+        dialog.setLocationRelativeTo(this);
+
+        dialog.setVisible(true);
+    }//GEN-LAST:event_merge_file_menuActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem about_menu;
     private javax.swing.JMenuItem clean_all_down_menu;
@@ -1129,6 +1150,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JLabel logo_label;
     private javax.swing.JMenuBar main_menubar;
     private javax.swing.JLabel mc_reverse_status;
+    private javax.swing.JMenuItem merge_file_menu;
     private javax.swing.JMenuItem new_download_menu;
     private javax.swing.JMenuItem new_stream_menu;
     private javax.swing.JMenuItem new_upload_menu;

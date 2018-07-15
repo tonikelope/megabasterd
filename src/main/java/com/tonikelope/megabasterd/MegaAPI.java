@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,11 +16,9 @@ import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.CryptTools.*;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import org.codehaus.jackson.map.ObjectMapper;
 
 /**
@@ -282,30 +279,26 @@ public final class MegaAPI {
 
     }
 
-    private String _rawRequest(String request, URL url_api) throws IOException, MegaAPIException {
+    private String _rawRequest(String request, URL url_api) throws MegaAPIException {
 
         String response = null;
-        CloseableHttpClient httpclient = null;
         boolean error509 = false;
         String current_proxy = null;
         int error = 0, conta_error = 0;
-        HttpPost httppost;
+
+        HttpURLConnection con = null;
 
         do {
 
             try {
 
-                if (httpclient == null || (error509 && MainPanel.isUse_smart_proxy())) {
+                if (con == null || (error509 && MainPanel.isUse_smart_proxy())) {
 
                     if (error509 && !MainPanel.isUse_proxy()) {
 
-                        if (httpclient != null) {
+                        if (con != null) {
 
-                            try {
-                                httpclient.close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-                            }
+                            con.disconnect();
                         }
 
                         if (current_proxy != null) {
@@ -319,16 +312,31 @@ public final class MegaAPI {
 
                         if (current_proxy != null) {
 
-                            httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+                            String[] proxy_info = current_proxy.split(":");
+
+                            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+
+                            con = (HttpURLConnection) url_api.openConnection(proxy);
 
                         } else {
 
-                            httpclient = MiscTools.getApacheKissHttpClient();
+                            con = (HttpURLConnection) url_api.openConnection();
                         }
 
-                    } else if (httpclient == null) {
+                    } else if (con == null) {
 
-                        httpclient = MiscTools.getApacheKissHttpClient();
+                        if (MainPanel.isUse_proxy()) {
+
+                            con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                            if (MainPanel.getProxy_user() != null) {
+
+                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                            }
+                        } else {
+
+                            con = (HttpURLConnection) url_api.openConnection();
+                        }
+
                     }
                 }
 
@@ -336,61 +344,60 @@ public final class MegaAPI {
 
                 error509 = false;
 
-                httppost = new HttpPost(url_api.toURI());
+                con.setRequestProperty("Content-type", "application/json");
 
-                httppost.setHeader("Content-type", "application/json");
+                con.setConnectTimeout(Transference.HTTP_TIMEOUT);
 
-                httppost.setEntity(new StringEntity(request));
+                con.setReadTimeout(Transference.HTTP_TIMEOUT);
 
-                try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
+                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                    if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
+                con.setRequestMethod("POST");
 
-                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
+                con.setDoOutput(true);
 
-                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), httpresponse.getStatusLine().getStatusCode()});
+                con.getOutputStream().write(request.getBytes());
 
-                        error509 = (httpresponse.getStatusLine().getStatusCode() == 509);;
+                if (con.getResponseCode() != 200) {
 
-                    } else {
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
 
-                        InputStream is = httpresponse.getEntity().getContent();
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), con.getResponseCode()});
 
-                        try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                    error509 = (con.getResponseCode() == 509);;
 
-                            byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+                } else {
 
-                            int reads;
+                    InputStream is = con.getInputStream();
 
-                            while ((reads = is.read(buffer)) != -1) {
+                    try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                byte_res.write(buffer, 0, reads);
-                            }
+                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
-                            response = new String(byte_res.toByteArray());
+                        int reads;
 
-                            if (response.length() > 0) {
+                        while ((reads = is.read(buffer)) != -1) {
 
-                                error = checkMEGAError(response);
+                            byte_res.write(buffer, 0, reads);
+                        }
 
-                            }
+                        response = new String(byte_res.toByteArray());
+
+                        if (response.length() > 0) {
+
+                            error = checkMEGAError(response);
 
                         }
+
                     }
                 }
 
-            } catch (URISyntaxException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             } catch (Exception ex) {
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
 
-                if (httpclient != null) {
-                    try {
-                        httpclient.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
+                if (con != null) {
+                    con.disconnect();
                 }
             }
 
@@ -600,7 +607,7 @@ public final class MegaAPI {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
-        return res_map[0];
+        return res_map != null ? res_map[0] : null;
     }
 
     public byte[] encryptKey(byte[] a, byte[] key) throws Exception {

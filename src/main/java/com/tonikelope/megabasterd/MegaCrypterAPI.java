@@ -4,7 +4,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -17,11 +16,9 @@ import javax.crypto.Cipher;
 import javax.swing.JOptionPane;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.CryptTools.*;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import org.codehaus.jackson.map.ObjectMapper;
 
 /**
@@ -33,62 +30,79 @@ public final class MegaCrypterAPI {
     public static final Set<String> PASS_CACHE = new HashSet<>();
     public static final Object PASS_LOCK = new Object();
 
-    private static String _rawRequest(String request, URL url_api) throws IOException, MegaCrypterAPIException {
+    private static String _rawRequest(String request, URL url_api) throws MegaCrypterAPIException {
 
         String response = null;
 
-        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+        HttpURLConnection con = null;
 
-            HttpPost httppost;
+        try {
 
-            try {
-                httppost = new HttpPost(url_api.toURI());
+            if (MainPanel.isUse_proxy()) {
 
-                httppost.setHeader("Content-type", "application/json");
+                con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                if (MainPanel.getProxy_user() != null) {
 
-                httppost.setHeader("Custom-User-Agent", MainPanel.DEFAULT_USER_AGENT);
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                }
+            } else {
 
-                httppost.setEntity(new StringEntity(request));
+                con = (HttpURLConnection) url_api.openConnection();
+            }
 
-                try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
+            con.setRequestProperty("Content-type", "application/json");
 
-                    if (httpresponse.getStatusLine().getStatusCode() != HttpStatus.SC_OK) {
-                        Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), httpresponse.getStatusLine().getStatusCode()});
+            con.setConnectTimeout(Transference.HTTP_TIMEOUT);
 
-                    } else {
+            con.setReadTimeout(Transference.HTTP_TIMEOUT);
 
-                        InputStream is = httpresponse.getEntity().getContent();
+            con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                        try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+            con.setRequestMethod("POST");
 
-                            byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+            con.setDoOutput(true);
 
-                            int reads;
+            con.getOutputStream().write(request.getBytes());
 
-                            while ((reads = is.read(buffer)) != -1) {
+            if (con.getResponseCode() != 200) {
+                Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), con.getResponseCode()});
 
-                                byte_res.write(buffer, 0, reads);
-                            }
+            } else {
 
-                            response = new String(byte_res.toByteArray());
+                InputStream is = con.getInputStream();
 
-                            if (response.length() > 0) {
+                try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                int mc_error;
+                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
-                                if ((mc_error = MegaCrypterAPI.checkMCError(response)) != 0) {
-                                    throw new MegaCrypterAPIException(mc_error);
+                    int reads;
 
-                                }
-                            }
+                    while ((reads = is.read(buffer)) != -1) {
+
+                        byte_res.write(buffer, 0, reads);
+                    }
+
+                    response = new String(byte_res.toByteArray());
+
+                    if (response.length() > 0) {
+
+                        int mc_error;
+
+                        if ((mc_error = MegaCrypterAPI.checkMCError(response)) != 0) {
+                            throw new MegaCrypterAPIException(mc_error);
+
                         }
                     }
                 }
-
-            } catch (URISyntaxException ex) {
-                Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, null, ex);
             }
 
+        } catch (Exception ex) {
+            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+
+            if (con != null) {
+                con.disconnect();
+            }
         }
 
         return response;

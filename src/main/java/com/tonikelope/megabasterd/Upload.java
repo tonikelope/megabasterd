@@ -26,7 +26,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 4;
-    public static final int CHUNK_SIZE_MULTI = 10;
+    public static final int CHUNK_SIZE_MULTI = 1; //No funciona bien otra cosa
     private final MainPanel _main_panel;
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
@@ -873,30 +873,54 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         int[] node_key = {ul_key[0] ^ ul_key[4], ul_key[1] ^ ul_key[5], ul_key[2] ^ _file_meta_mac[0], ul_key[3] ^ _file_meta_mac[1], ul_key[4], ul_key[5], _file_meta_mac[0], _file_meta_mac[1]};
 
-                        upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handle, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
+                        int conta_error = 0;
 
-                        List files = (List) upload_res.get("f");
+                        do {
+                            upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handle, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
 
-                        _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
+                            if (upload_res == null && !_exit) {
 
-                        try {
+                                long wait_time = MiscTools.getWaitTimeExpBackOff(++conta_error);
 
-                            _file_link = _ma.getPublicFileLink(_fid, i32a2bin(node_key));
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader {1} Finisih upload res is null, retrying in {2} secs...", new Object[]{Thread.currentThread().getName(), this.getFile_name(), wait_time});
 
-                            swingInvoke(
-                                    new Runnable() {
-                                @Override
-                                public void run() {
+                                try {
 
-                                    getView().getFile_link_button().setEnabled(true);
+                                    Thread.sleep(wait_time * 1000);
+
+                                } catch (InterruptedException ex) {
+
+                                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                                 }
-                            });
+                            }
 
-                        } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        } while (upload_res == null && !_exit);
+
+                        if (upload_res != null && !_exit) {
+                            List files = (List) upload_res.get("f");
+
+                            _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
+
+                            try {
+
+                                _file_link = _ma.getPublicFileLink(_fid, i32a2bin(node_key));
+
+                                swingInvoke(
+                                        new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        getView().getFile_link_button().setEnabled(true);
+                                    }
+                                });
+
+                            } catch (Exception ex) {
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            }
+
+                            getView().printStatusOK("File successfully uploaded! (" + _ma.getFull_email() + ")");
+
                         }
-
-                        getView().printStatusOK("File successfully uploaded! (" + _ma.getFull_email() + ")");
 
                     } else {
 

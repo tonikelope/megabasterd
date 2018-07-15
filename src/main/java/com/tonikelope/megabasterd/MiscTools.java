@@ -24,7 +24,6 @@ import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.security.MessageDigest;
@@ -55,28 +54,10 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
 import static com.tonikelope.megabasterd.MainPanel.VERSION;
-import org.apache.http.HttpException;
-import org.apache.http.HttpHost;
-import org.apache.http.HttpRequest;
-import org.apache.http.HttpRequestInterceptor;
-import org.apache.http.HttpStatus;
-import org.apache.http.auth.AuthScope;
-import org.apache.http.client.CredentialsProvider;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.protocol.RequestAddCookies;
-import org.apache.http.client.protocol.RequestAuthCache;
-import org.apache.http.client.protocol.RequestClientConnControl;
-import org.apache.http.client.protocol.RequestDefaultHeaders;
-import org.apache.http.client.protocol.ResponseProcessCookies;
-import org.apache.http.impl.client.BasicCredentialsProvider;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.RequestContent;
-import org.apache.http.protocol.RequestTargetHost;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
 
 /**
  *
@@ -431,45 +412,6 @@ public final class MiscTools {
 
     }
 
-    public static String deflateURL(String link) throws MalformedURLException, IOException {
-
-        String response = null;
-
-        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
-
-            HttpGet httpget = new HttpGet(new URI("http://tinyurl.com/api-create.php?url=" + URLEncoder.encode(link.trim(), "UTF-8")));
-
-            httpget.addHeader("Custom-User-Agent", MainPanel.DEFAULT_USER_AGENT);
-
-            try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
-
-                InputStream is = httpresponse.getEntity().getContent();
-
-                try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-
-                    int reads;
-
-                    while ((reads = is.read(buffer)) != -1) {
-
-                        byte_res.write(buffer, 0, reads);
-                    }
-
-                    response = new String(byte_res.toByteArray()).trim();
-
-                }
-            }
-
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException | URISyntaxException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        return findFirstRegex("http", response, 0) != null ? response : link;
-    }
-
     public static String formatBytes(Long bytes) {
 
         String[] units = {"B", "KB", "MB", "GB", "TB"};
@@ -795,7 +737,7 @@ public final class MiscTools {
 
         boolean url_ok = false, error509 = false;
 
-        CloseableHttpClient httpclient = null;
+        HttpURLConnection con = null;
 
         String current_proxy = null;
 
@@ -803,17 +745,15 @@ public final class MiscTools {
 
             try {
 
-                if (httpclient == null || !url_ok) {
+                URL url = new URL(string_url + "/0-0");
+
+                if (con == null || !url_ok) {
 
                     if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                        if (httpclient != null) {
+                        if (con != null) {
 
-                            try {
-                                httpclient.close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-                            }
+                            con.disconnect();
                         }
 
                         if (current_proxy != null) {
@@ -827,28 +767,40 @@ public final class MiscTools {
 
                         if (current_proxy != null) {
 
-                            httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
+                            String[] proxy_info = current_proxy.split(":");
+
+                            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+
+                            con = (HttpURLConnection) url.openConnection(proxy);
 
                         } else {
 
-                            httpclient = MiscTools.getApacheKissHttpClient();
+                            con = (HttpURLConnection) url.openConnection();
                         }
 
-                    } else if (httpclient == null) {
+                    } else if (con == null) {
 
-                        httpclient = MiscTools.getApacheKissHttpClient();
+                        if (MainPanel.isUse_proxy()) {
+
+                            con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                            if (MainPanel.getProxy_user() != null) {
+
+                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                            }
+                        } else {
+
+                            con = (HttpURLConnection) url.openConnection();
+                        }
                     }
                 }
 
-                HttpGet httpget = new HttpGet(new URI(string_url + "/0-0"));
-
                 error509 = false;
 
-                try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+                try {
 
-                    url_ok = (httpresponse.getStatusLine().getStatusCode() == HttpStatus.SC_OK);
+                    url_ok = (con.getResponseCode() == 200);
 
-                    error509 = (httpresponse.getStatusLine().getStatusCode() == 509);
+                    error509 = (con.getResponseCode() == 509);
 
                 } catch (IOException ex) {
                     Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
@@ -858,12 +810,8 @@ public final class MiscTools {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
 
-                if (httpclient != null) {
-                    try {
-                        httpclient.close();
-                    } catch (IOException ex) {
-                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                if (con != null) {
+                    con.disconnect();
                 }
             }
 
@@ -875,34 +823,48 @@ public final class MiscTools {
     public static String getMyPublicIP() {
 
         String public_ip = null;
+        HttpURLConnection con = null;
 
-        try (CloseableHttpClient httpclient = getApacheKissHttpClientNOProxy()) {
+        try {
 
-            HttpGet httpget = new HttpGet(new URI("http://whatismyip.akamai.com/"));
+            URL url_api = new URL("http://whatismyip.akamai.com/");
 
-            try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+            if (MainPanel.isUse_proxy()) {
 
-                InputStream is = httpresponse.getEntity().getContent();
+                con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                if (MainPanel.getProxy_user() != null) {
 
-                try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-
-                    int reads;
-
-                    while ((reads = is.read(buffer)) != -1) {
-
-                        byte_res.write(buffer, 0, reads);
-                    }
-
-                    public_ip = new String(byte_res.toByteArray());
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                 }
+            } else {
+
+                con = (HttpURLConnection) url_api.openConnection();
+            }
+
+            InputStream is = con.getInputStream();
+
+            try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                int reads;
+
+                while ((reads = is.read(buffer)) != -1) {
+
+                    byte_res.write(buffer, 0, reads);
+                }
+
+                public_ip = new String(byte_res.toByteArray());
             }
 
         } catch (MalformedURLException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException | URISyntaxException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
         }
 
         return public_ip;
@@ -950,98 +912,6 @@ public final class MiscTools {
         } catch (URISyntaxException | IOException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    private static HttpClientBuilder _getApacheKissHttpClientBuilder() {
-
-        return HttpClients.custom()
-                .addInterceptorFirst(new RequestDefaultHeaders())
-                .addInterceptorFirst(new RequestContent())
-                .addInterceptorFirst(new RequestTargetHost())
-                .addInterceptorFirst(new RequestClientConnControl())
-                .addInterceptorFirst(new RequestAddCookies())
-                .addInterceptorFirst(new ResponseProcessCookies())
-                .addInterceptorFirst(new RequestAuthCache())
-                .addInterceptorLast(new HttpRequestInterceptor() {
-
-                    @Override
-                    public void process(final HttpRequest request, final HttpContext context) throws HttpException, IOException {
-
-                        if (request.containsHeader("User-Agent")) {
-
-                            request.removeHeaders("User-Agent");
-
-                        }
-
-                        if (request.containsHeader("Custom-User-Agent")) {
-
-                            request.addHeader("User-Agent", request.getFirstHeader("Custom-User-Agent").getValue());
-
-                            request.removeHeaders("Custom-User-Agent");
-                        }
-                    }
-
-                });
-    }
-
-    public static CloseableHttpClient getApacheKissHttpClient() {
-
-        HttpClientBuilder builder = _getApacheKissHttpClientBuilder();
-
-        if (MainPanel.isUse_proxy() && MainPanel.getProxy_host() != null) {
-
-            HttpHost proxy = new HttpHost(MainPanel.getProxy_host(), MainPanel.getProxy_port());
-
-            builder = builder.setProxy(proxy);
-
-            if (MainPanel.getProxy_credentials() != null) {
-
-                CredentialsProvider credsProvider = new BasicCredentialsProvider();
-
-                AuthScope authScope = new AuthScope(MainPanel.getProxy_host(), MainPanel.getProxy_port());
-
-                credsProvider.setCredentials(authScope, MainPanel.getProxy_credentials());
-
-                builder = builder.setDefaultCredentialsProvider(credsProvider);
-            }
-        }
-
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(HTTP_TIMEOUT * 1000)
-                .setConnectTimeout(HTTP_TIMEOUT * 1000)
-                .build();
-
-        return builder.setDefaultRequestConfig(requestConfig).build();
-    }
-
-    public static CloseableHttpClient getApacheKissHttpClientSmartProxy(String current_proxy) throws Exception {
-
-        HttpClientBuilder builder = _getApacheKissHttpClientBuilder();
-
-        String[] proxy_parts = current_proxy.split(":");
-
-        HttpHost proxy = new HttpHost(proxy_parts[0], Integer.valueOf(proxy_parts[1]));
-
-        builder = builder.setProxy(proxy);
-
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(SmartMegaProxyManager.PROXY_TIMEOUT * 1000)
-                .setConnectTimeout(SmartMegaProxyManager.PROXY_TIMEOUT * 1000)
-                .build();
-
-        return builder.setDefaultRequestConfig(requestConfig).build();
-    }
-
-    public static CloseableHttpClient getApacheKissHttpClientNOProxy() {
-
-        HttpClientBuilder builder = _getApacheKissHttpClientBuilder();
-
-        RequestConfig requestConfig = RequestConfig.custom()
-                .setSocketTimeout(HTTP_TIMEOUT * 1000)
-                .setConnectTimeout(HTTP_TIMEOUT * 1000)
-                .build();
-
-        return builder.setDefaultRequestConfig(requestConfig).build();
     }
 
     public static byte[] recReverseArray(byte[] arr, int start, int end) {

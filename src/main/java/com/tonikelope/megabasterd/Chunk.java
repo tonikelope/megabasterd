@@ -92,7 +92,7 @@ public final class Chunk {
 
         _size = calculateSize(file_size);
 
-        _url = file_url != null ? file_url + "/" + _offset + "-" + (_offset + _size - 1) : null;
+        _url = file_url != null ? file_url + "/" + _offset + (_offset + _size == file_size ? "" : "-" + (_offset + _size - 1)) : null;
 
         _data_os = new ByteArrayOutInputStream((int) _size);
     }

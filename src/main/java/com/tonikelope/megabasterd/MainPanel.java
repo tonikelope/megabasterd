@@ -39,8 +39,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
-import org.apache.http.auth.Credentials;
-import org.apache.http.auth.UsernamePasswordCredentials;
 
 /**
  *
@@ -48,7 +46,7 @@ import org.apache.http.auth.UsernamePasswordCredentials;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "4.4";
+    public static final String VERSION = "4.5";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -61,8 +59,9 @@ public final class MainPanel {
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
     private static String _proxy_host;
     private static int _proxy_port;
-    private static Credentials _proxy_credentials;
     private static boolean _use_proxy;
+    private static String _proxy_user;
+    private static String _proxy_pass;
     private static boolean _use_smart_proxy;
     private static String _smart_proxy_url;
     private static SmartMegaProxyManager _proxy_manager;
@@ -132,7 +131,9 @@ public final class MainPanel {
 
         _proxy_port = 3128;
 
-        _proxy_credentials = null;
+        _proxy_user = null;
+
+        _proxy_pass = null;
 
         _use_proxy = false;
 
@@ -231,6 +232,14 @@ public final class MainPanel {
         resumeUploads();
     }
 
+    public static String getProxy_user() {
+        return _proxy_user;
+    }
+
+    public static String getProxy_pass() {
+        return _proxy_pass;
+    }
+
     public boolean isExit() {
         return _exit;
     }
@@ -253,10 +262,6 @@ public final class MainPanel {
 
     public static int getProxy_port() {
         return _proxy_port;
-    }
-
-    public static Credentials getProxy_credentials() {
-        return _proxy_credentials;
     }
 
     public static boolean isUse_proxy() {
@@ -593,19 +598,9 @@ public final class MainPanel {
 
             _proxy_port = (proxy_port == null || proxy_port.isEmpty()) ? 8080 : Integer.parseInt(proxy_port);
 
-            String proxy_user = DBTools.selectSettingValue("proxy_user");
+            _proxy_user = DBTools.selectSettingValue("proxy_user");
 
-            String proxy_pass = DBTools.selectSettingValue("proxy_pass");
-
-            if (proxy_user != null && !proxy_user.isEmpty() && proxy_pass != null) {
-
-                _proxy_credentials = new UsernamePasswordCredentials(proxy_user, proxy_pass);
-
-            } else {
-
-                _proxy_credentials = null;
-
-            }
+            _proxy_pass = DBTools.selectSettingValue("proxy_pass");
         }
 
         String use_megacrypter_reverse = selectSettingValue("megacrypter_reverse");

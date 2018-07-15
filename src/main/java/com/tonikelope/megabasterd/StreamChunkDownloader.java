@@ -2,15 +2,14 @@ package com.tonikelope.megabasterd;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
 
 /**
  *
@@ -37,7 +36,7 @@ public class StreamChunkDownloader implements Runnable {
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 
-        CloseableHttpClient httpclient = null;
+        HttpURLConnection con = null;
 
         try {
 
@@ -58,40 +57,6 @@ public class StreamChunkDownloader implements Runnable {
                     _chunkwriter.secureWait();
                 }
 
-                if (httpclient == null || error) {
-
-                    if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
-
-                        if (httpclient != null) {
-                            try {
-                                httpclient.close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-
-                        if (error && current_proxy != null) {
-
-                            MainPanel.getProxy_manager().removeProxy(current_proxy);
-                        }
-
-                        current_proxy = MainPanel.getProxy_manager().getFastestProxy();
-
-                        if (current_proxy != null) {
-
-                            httpclient = MiscTools.getApacheKissHttpClientSmartProxy(current_proxy);
-
-                        } else {
-
-                            httpclient = MiscTools.getApacheKissHttpClient();
-                        }
-
-                    } else if (httpclient == null) {
-
-                        httpclient = MiscTools.getApacheKissHttpClient();
-                    }
-                }
-
                 if (!error) {
 
                     offset = _chunkwriter.nextOffset();
@@ -103,29 +68,94 @@ public class StreamChunkDownloader implements Runnable {
 
                 if (offset >= 0) {
 
+                    StreamChunk chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
+
+                    if (con == null || error) {
+
+                        if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+
+                            if (error && current_proxy != null) {
+
+                                MainPanel.getProxy_manager().removeProxy(current_proxy);
+                            }
+
+                            current_proxy = MainPanel.getProxy_manager().getFastestProxy();
+
+                            if (current_proxy != null) {
+
+                                String[] proxy_info = current_proxy.split(":");
+
+                                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+
+                                URL chunk_url = new URL(chunk_stream.getUrl());
+
+                                con = (HttpURLConnection) chunk_url.openConnection(proxy);
+
+                            } else {
+
+                                URL chunk_url = new URL(chunk_stream.getUrl());
+
+                                con = (HttpURLConnection) chunk_url.openConnection();
+                            }
+
+                        } else if (con == null) {
+
+                            URL chunk_url = new URL(chunk_stream.getUrl());
+
+                            if (MainPanel.isUse_proxy()) {
+
+                                con = (HttpURLConnection) chunk_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                                if (MainPanel.getProxy_user() != null) {
+
+                                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                                }
+                            } else {
+
+                                con = (HttpURLConnection) chunk_url.openConnection();
+                            }
+                        }
+                    } else {
+
+                        URL chunk_url = new URL(chunk_stream.getUrl());
+
+                        if (MainPanel.isUse_proxy()) {
+
+                            con = (HttpURLConnection) chunk_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                            if (MainPanel.getProxy_user() != null) {
+
+                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                            }
+                        } else {
+
+                            con = (HttpURLConnection) chunk_url.openConnection();
+                        }
+                    }
+
+                    con.setConnectTimeout(Transference.HTTP_TIMEOUT);
+
+                    con.setReadTimeout(Transference.HTTP_TIMEOUT);
+
+                    con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
+
                     int reads, http_status;
 
                     byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
-                    StreamChunk chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
-
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: offset: {2} size: {3}", new Object[]{Thread.currentThread().getName(), _id, offset, chunk_stream.getSize()});
-
-                    HttpGet httpget = new HttpGet(new URI(chunk_stream.getUrl()));
 
                     error = false;
 
                     error509 = false;
 
-                    try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+                    try {
 
                         if (!_exit) {
 
-                            InputStream is = httpresponse.getEntity().getContent();
+                            InputStream is = con.getInputStream();
 
-                            http_status = httpresponse.getStatusLine().getStatusCode();
+                            http_status = con.getResponseCode();
 
-                            if (http_status != HttpStatus.SC_OK) {
+                            if (http_status != 200) {
 
                                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
@@ -163,6 +193,10 @@ public class StreamChunkDownloader implements Runnable {
                         error = true;
 
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    } finally {
+                        if (con != null) {
+                            con.disconnect();
+                        }
                     }
 
                 } else {
@@ -175,14 +209,6 @@ public class StreamChunkDownloader implements Runnable {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } finally {
-            if (httpclient != null) {
-                try {
-                    httpclient.close();
-                } catch (IOException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                }
-            }
         }
 
         _chunkwriter.secureNotifyAll();

@@ -4,7 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
@@ -31,12 +30,10 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import javax.swing.JOptionPane;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.message.BasicNameValuePair;
+import java.net.HttpURLConnection;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.net.URL;
 import org.codehaus.jackson.map.ObjectMapper;
 
 /**
@@ -365,140 +362,148 @@ public final class CryptTools {
 
                 byte[] pass_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2 + url_bin_length + 2, 4 + bin_links_length + 2 + url_bin_length + 2 + pass_bin_length);
 
-                try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+                URL url = new URL(new String(url_bin).trim());
 
-                    HttpPost httppost = new HttpPost(new String(url_bin).trim());
+                HttpURLConnection con = null;
 
-                    httppost.setHeader("Custom-User-Agent", MainPanel.DEFAULT_USER_AGENT);
+                if (MainPanel.isUse_proxy()) {
 
-                    ArrayList<NameValuePair> nameValuePairs = new ArrayList<>();
+                    con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                    if (MainPanel.getProxy_user() != null) {
 
-                    nameValuePairs.add(new BasicNameValuePair("OPERATION_TYPE", "D"));
+                        con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                    }
+                } else {
 
-                    nameValuePairs.add(new BasicNameValuePair("DATA", new String(pass_bin)));
+                    con = (HttpURLConnection) url.openConnection();
+                }
 
-                    HashMap<String, String> elc_account_data;
+                con.setRequestMethod("POST");
 
-                    String user, api_key;
+                con.setDoOutput(true);
 
-                    boolean remember_master_pass;
+                con.setConnectTimeout(Upload.HTTP_TIMEOUT);
 
-                    if (main_panel.getElc_accounts().get(httppost.getURI().getHost()) != null) {
+                con.setReadTimeout(Upload.HTTP_TIMEOUT);
 
-                        elc_account_data = (HashMap) main_panel.getElc_accounts().get(httppost.getURI().getHost());
+                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                        if (main_panel.getMaster_pass_hash() != null) {
+                HashMap<String, String> elc_account_data;
 
-                            if (main_panel.getMaster_pass() == null) {
+                String user, api_key;
 
-                                GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(main_panel.getView(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt(), main_panel);
+                boolean remember_master_pass;
 
-                                dialog.setLocationRelativeTo(main_panel.getView());
+                if (main_panel.getElc_accounts().get(url.getHost()) != null) {
 
-                                dialog.setVisible(true);
+                    elc_account_data = (HashMap) main_panel.getElc_accounts().get(url.getHost());
 
-                                if (dialog.isPass_ok()) {
+                    if (main_panel.getMaster_pass_hash() != null) {
 
-                                    main_panel.setMaster_pass(dialog.getPass());
+                        if (main_panel.getMaster_pass() == null) {
 
-                                    dialog.deletePass();
+                            GetMasterPasswordDialog dialog = new GetMasterPasswordDialog(main_panel.getView(), true, main_panel.getMaster_pass_hash(), main_panel.getMaster_pass_salt(), main_panel);
 
-                                    remember_master_pass = dialog.getRemember_checkbox().isSelected();
+                            dialog.setLocationRelativeTo(main_panel.getView());
 
-                                    dialog.dispose();
+                            dialog.setVisible(true);
 
-                                    user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            if (dialog.isPass_ok()) {
 
-                                    api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                main_panel.setMaster_pass(dialog.getPass());
 
-                                    if (!remember_master_pass) {
+                                dialog.deletePass();
 
-                                        main_panel.setMaster_pass(null);
-                                    }
+                                remember_master_pass = dialog.getRemember_checkbox().isSelected();
 
-                                } else {
-
-                                    dialog.dispose();
-
-                                    throw new Exception("NO valid ELC account available!");
-                                }
-
-                            } else {
+                                dialog.dispose();
 
                                 user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                 api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
+                                if (!remember_master_pass) {
+
+                                    main_panel.setMaster_pass(null);
+                                }
+
+                            } else {
+
+                                dialog.dispose();
+
+                                throw new Exception("NO valid ELC account available!");
                             }
 
                         } else {
 
-                            user = elc_account_data.get("user");
+                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                            api_key = elc_account_data.get("apikey");
+                            api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
                         }
 
                     } else {
 
-                        throw new Exception("NO valid ELC account available!");
+                        user = elc_account_data.get("user");
+
+                        api_key = elc_account_data.get("apikey");
                     }
 
-                    nameValuePairs.add(new BasicNameValuePair("USER", user));
+                } else {
 
-                    nameValuePairs.add(new BasicNameValuePair("APIKEY", api_key));
+                    throw new Exception("NO valid ELC account available!");
+                }
 
-                    httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
+                String postdata = "OPERATION_TYPE=D&DATA=" + new String(pass_bin) + "&USER=" + user + "&APIKEY=" + api_key;
 
-                    try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
+                con.getOutputStream().write(postdata.getBytes());
 
-                        InputStream is = httpresponse.getEntity().getContent();
+                InputStream is = con.getInputStream();
 
-                        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-                            byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
-                            int reads;
+                    int reads;
 
-                            while ((reads = is.read(buffer)) != -1) {
+                    while ((reads = is.read(buffer)) != -1) {
 
-                                out.write(buffer, 0, reads);
-                            }
+                        out.write(buffer, 0, reads);
+                    }
 
-                            ObjectMapper objectMapper = new ObjectMapper();
+                    ObjectMapper objectMapper = new ObjectMapper();
 
-                            HashMap res_map = objectMapper.readValue(new String(out.toByteArray()), HashMap.class);
+                    HashMap res_map = objectMapper.readValue(new String(out.toByteArray()), HashMap.class);
 
-                            String dec_pass = (String) res_map.get("d");
+                    String dec_pass = (String) res_map.get("d");
 
-                            if (dec_pass != null && dec_pass.length() > 0) {
+                    if (dec_pass != null && dec_pass.length() > 0) {
 
-                                dec_pass = (String) res_map.get("d");
+                        dec_pass = (String) res_map.get("d");
 
-                                byte[] pass_dec_byte = BASE642Bin(dec_pass);
+                        byte[] pass_dec_byte = BASE642Bin(dec_pass);
 
-                                byte[] key = Arrays.copyOfRange(pass_dec_byte, 0, 16);
+                        byte[] key = Arrays.copyOfRange(pass_dec_byte, 0, 16);
 
-                                byte[] iv = new byte[16];
+                        byte[] iv = new byte[16];
 
-                                Arrays.fill(iv, (byte) 0);
+                        Arrays.fill(iv, (byte) 0);
 
-                                System.arraycopy(pass_dec_byte, 16, iv, 0, 8);
+                        System.arraycopy(pass_dec_byte, 16, iv, 0, 8);
 
-                                byte[] bin_links_dec = CryptTools.aes_cbc_decrypt(bin_links, key, iv);
+                        byte[] bin_links_dec = CryptTools.aes_cbc_decrypt(bin_links, key, iv);
 
-                                String[] links_string = (new String(bin_links_dec).trim()).split("\\|");
+                        String[] links_string = (new String(bin_links_dec).trim()).split("\\|");
 
-                                for (String s : links_string) {
+                        for (String s : links_string) {
 
-                                    links.add("https://mega.nz/" + s);
-                                }
-
-                            } else {
-                                throw new Exception(httppost.getURI().getAuthority() + " ELC SERVER ERROR " + new String(out.toByteArray()));
-                            }
-
+                            links.add("https://mega.nz/" + s);
                         }
+
+                    } else {
+                        throw new Exception(url.getAuthority() + " ELC SERVER ERROR " + new String(out.toByteArray()));
                     }
+
                 }
 
             } catch (Exception ex) {
@@ -524,67 +529,77 @@ public final class CryptTools {
 
         String enc_dlc_data = data.substring(0, data.length() - 88).trim();
 
-        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+        try {
 
-            HttpPost httppost = new HttpPost(new URI(dlc_url));
+            URL url = new URL(dlc_url);
 
-            httppost.setHeader("Custom-User-Agent", "Mozilla/5.0 (X11; U; Linux amd64; rv:44.0) Gecko/20100101 Firefox/44.0");
+            HttpURLConnection con = null;
 
-            httppost.setHeader("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+            if (MainPanel.isUse_proxy()) {
 
-            httppost.setHeader("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
+                con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                if (MainPanel.getProxy_user() != null) {
 
-            httppost.setHeader("Accept-Encoding", "gzip, deflate");
-
-            httppost.setHeader("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
-
-            httppost.setHeader("Cache-Control", "no-cache");
-
-            httppost.setHeader("rev", dlc_rev);
-
-            ArrayList<NameValuePair> nameValuePairs = new ArrayList<>();
-
-            nameValuePairs.add(new BasicNameValuePair("destType", "jdtc6"));
-
-            nameValuePairs.add(new BasicNameValuePair("b", "JD"));
-
-            nameValuePairs.add(new BasicNameValuePair("srcType", "dlc"));
-
-            nameValuePairs.add(new BasicNameValuePair("data", dlc_id));
-
-            nameValuePairs.add(new BasicNameValuePair("v", dlc_rev));
-
-            httppost.setEntity(new UrlEncodedFormEntity(nameValuePairs));
-
-            try (CloseableHttpResponse httpresponse = httpclient.execute(httppost)) {
-
-                InputStream is = httpresponse.getEntity().getContent();
-
-                String enc_dlc_key;
-
-                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-                    int reads;
-                    while ((reads = is.read(buffer)) != -1) {
-
-                        out.write(buffer, 0, reads);
-                    }
-                    enc_dlc_key = findFirstRegex("< *rc *>(.+?)< */ *rc *>", new String(out.toByteArray()), 1);
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                 }
+            } else {
 
-                String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key))).trim();
-
-                String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key))).trim();
-
-                String dec_dlc_data_file = findFirstRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), "UTF-8"), 1);
-
-                ArrayList<String> urls = findAllRegex("< *url *>(.+?)< */ *url *>", dec_dlc_data_file, 1);
-
-                for (String s : urls) {
-
-                    links.add(new String(BASE642Bin(s)));
-                }
+                con = (HttpURLConnection) url.openConnection();
             }
+
+            con.setRequestMethod("POST");
+
+            con.setDoOutput(true);
+
+            con.setConnectTimeout(Upload.HTTP_TIMEOUT);
+
+            con.setReadTimeout(Upload.HTTP_TIMEOUT);
+
+            con.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; U; Linux amd64; rv:44.0) Gecko/20100101 Firefox/44.0");
+
+            con.setRequestProperty("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
+
+            con.setRequestProperty("Accept-Language", "de,en-gb;q=0.7, en;q=0.3");
+
+            con.setRequestProperty("Accept-Encoding", "gzip, deflate");
+
+            con.setRequestProperty("Accept-Charset", "ISO-8859-1,utf-8;q=0.7,*;q=0.7");
+
+            con.setRequestProperty("Cache-Control", "no-cache");
+
+            con.setRequestProperty("rev", dlc_rev);
+
+            String postdata = "destType=jdtc6&b=JD&srcType=dlc&data=" + dlc_id + "&v=" + dlc_rev;
+
+            con.getOutputStream().write(postdata.getBytes());
+
+            InputStream is = con.getInputStream();
+
+            String enc_dlc_key;
+
+            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+                int reads;
+                while ((reads = is.read(buffer)) != -1) {
+
+                    out.write(buffer, 0, reads);
+                }
+                enc_dlc_key = findFirstRegex("< *rc *>(.+?)< */ *rc *>", new String(out.toByteArray()), 1);
+            }
+
+            String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key))).trim();
+
+            String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key))).trim();
+
+            String dec_dlc_data_file = findFirstRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), "UTF-8"), 1);
+
+            ArrayList<String> urls = findAllRegex("< *url *>(.+?)< */ *url *>", dec_dlc_data_file, 1);
+
+            for (String s : urls) {
+
+                links.add(new String(BASE642Bin(s)));
+            }
+
         } catch (Exception ex) {
 
             Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, null, ex);

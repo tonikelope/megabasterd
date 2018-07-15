@@ -4,16 +4,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
-import static com.tonikelope.megabasterd.MiscTools.getApacheKissHttpClient;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  *
@@ -87,29 +83,34 @@ public class SmartMegaProxyManager implements Runnable {
 
         String data;
 
-        try (CloseableHttpClient httpclient = getApacheKissHttpClient()) {
+        try {
 
             if (this._proxy_list_url != null && this._proxy_list_url.length() > 0) {
 
-                HttpGet httpget = new HttpGet(new URI(this._proxy_list_url));
+                URL url = new URL(this._proxy_list_url);
 
-                try (CloseableHttpResponse httpresponse = httpclient.execute(httpget)) {
+                HttpURLConnection con = (HttpURLConnection) url.openConnection();
 
-                    InputStream is = httpresponse.getEntity().getContent();
+                con.setConnectTimeout(Transference.HTTP_TIMEOUT);
 
-                    try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                con.setReadTimeout(Transference.HTTP_TIMEOUT);
 
-                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                        int reads;
+                InputStream is = con.getInputStream();
 
-                        while ((reads = is.read(buffer)) != -1) {
+                try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                            byte_res.write(buffer, 0, reads);
-                        }
+                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
-                        data = new String(byte_res.toByteArray());
+                    int reads;
+
+                    while ((reads = is.read(buffer)) != -1) {
+
+                        byte_res.write(buffer, 0, reads);
                     }
+
+                    data = new String(byte_res.toByteArray());
                 }
 
                 String[] proxy_list = data.split("\n");
@@ -133,7 +134,7 @@ public class SmartMegaProxyManager implements Runnable {
 
         } catch (MalformedURLException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException | URISyntaxException ex) {
+        } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
     }
