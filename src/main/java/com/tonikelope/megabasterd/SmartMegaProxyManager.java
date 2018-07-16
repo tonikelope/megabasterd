@@ -44,7 +44,7 @@ public class SmartMegaProxyManager {
                 return k;
             }
         }
-        
+
         _refreshProxyList();
 
         return null;
