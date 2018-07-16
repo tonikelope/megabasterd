@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 /**
  *
@@ -327,6 +328,8 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         if (this._output_dir != null && !"".equals(this.split_size_text.getText())) {
 
+            this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
             this.split_button.setText("SPLITTING FILE...");
 
             this.file_button.setEnabled(false);
@@ -394,6 +397,8 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                     split_button.setEnabled(true);
 
                     split_size_text.setEnabled(true);
+
+                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
                     pack();
 

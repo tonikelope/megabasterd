@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 /**
  *
@@ -335,6 +336,8 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         if (this._output_dir != null) {
 
+            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
             this.merge_button.setText("MERGING FILE...");
 
             this.file_button.setEnabled(false);
@@ -407,6 +410,8 @@ public class FileMergerDialog extends javax.swing.JDialog {
                     merge_button.setEnabled(true);
 
                     delete_parts_checkbox.setEnabled(true);
+
+                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
                     pack();
 
