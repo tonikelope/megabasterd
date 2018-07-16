@@ -28,12 +28,12 @@ public class SmartMegaProxyManager {
         _refreshProxyList();
     }
 
-    public int getProxyCount() {
+    public synchronized int getProxyCount() {
 
         return _proxy_list.size();
     }
 
-    public String getFastestProxy() {
+    public synchronized String getFastestProxy() {
 
         Set<String> keys = _proxy_list.keySet();
 
@@ -44,11 +44,13 @@ public class SmartMegaProxyManager {
                 return k;
             }
         }
+        
+        _refreshProxyList();
 
         return null;
     }
 
-    public void blockProxy(String proxy) {
+    public synchronized void blockProxy(String proxy) {
 
         if (_proxy_list.containsKey(proxy)) {
 
