@@ -38,11 +38,6 @@ public class StreamChunkDownloader implements Runnable {
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 
-        if (MainPanel.isUse_smart_proxy()) {
-
-            _proxy_manager = new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url());
-        }
-
         HttpURLConnection con = null;
 
         try {
@@ -60,10 +55,6 @@ public class StreamChunkDownloader implements Runnable {
                 if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
 
                     _proxy_manager = new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url());
-
-                } else {
-
-                    _proxy_manager = null;
 
                 }
 

@@ -30,8 +30,6 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
@@ -74,7 +72,6 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             throw new IllegalArgumentException("mBperSplit must be more than zero");
         }
 
-        List<Path> partFiles = new ArrayList<>();
         final long sourceSize = Files.size(Paths.get(this._file.getAbsolutePath()));
         final long bytesPerSplit = 1024L * 1024L * mBperSplit;
         final long numSplits = sourceSize / bytesPerSplit;
@@ -87,17 +84,13 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
             for (; position < numSplits; position++, conta_split++) {
                 _writePartToFile(bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split);
-
-                if (!this.isVisible()) {
-
-                    return false;
-                }
             }
 
             if (remainingBytes > 0) {
                 _writePartToFile(remainingBytes, position * bytesPerSplit, sourceChannel, conta_split);
             }
         }
+
         return true;
     }
 

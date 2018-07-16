@@ -86,10 +86,6 @@ public class FileMergerDialog extends javax.swing.JDialog {
                         jProgressBar2.setValue((int) Math.ceil((MAX_VALUE / (double) _file_size * _progress)));
                     }
                 });
-
-                if (!this.isVisible()) {
-                    return false;
-                }
             }
         }
 
