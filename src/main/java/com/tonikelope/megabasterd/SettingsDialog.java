@@ -432,7 +432,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         String smart_proxy = DBTools.selectSettingValue("smart_proxy");
 
-        String smart_proxy_url = DEFAULT_SMART_PROXY_URL;
+        String smart_proxy_url = null;
 
         if (smart_proxy != null) {
 
@@ -453,20 +453,12 @@ public final class SettingsDialog extends javax.swing.JDialog {
             multi_slot_down_checkbox.setSelected(true);
             rec_smart_proxy_label.setEnabled(true);
 
-            if (!smart_proxy_url.equals(DEFAULT_SMART_PROXY_URL)) {
-                smart_proxy_url_text.setText(smart_proxy_url);
-            }
-
         } else {
 
             smart_proxy_checkbox.setSelected(false);
             smart_proxy_url_label.setEnabled(false);
             smart_proxy_url_text.setEnabled(false);
             rec_smart_proxy_label.setEnabled(false);
-
-            if (!smart_proxy_url.equals(DEFAULT_SMART_PROXY_URL)) {
-                smart_proxy_url_text.setText(smart_proxy_url);
-            }
         }
 
         boolean use_proxy = false;
@@ -1202,7 +1194,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         proxy_port_label.setEnabled(false);
 
         proxy_port_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        proxy_port_textfield.setHorizontalAlignment(javax.swing.JTextField.RIGHT);
+        proxy_port_textfield.setHorizontalAlignment(javax.swing.JTextField.LEFT);
         proxy_port_textfield.setDoubleBuffered(true);
         proxy_port_textfield.setEnabled(false);
         proxy_port_textfield.addMouseListener(new ContextMenuMouseListener());

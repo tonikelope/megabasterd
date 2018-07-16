@@ -212,9 +212,10 @@ public final class MainPanel {
 
         if (_use_smart_proxy) {
 
-            _proxy_manager = new SmartMegaProxyManager(this, _smart_proxy_url);
+            _proxy_manager = new SmartMegaProxyManager(_smart_proxy_url);
 
-            THREAD_POOL.execute(_proxy_manager);
+            _view.updateSmartProxyStatus("SmartProxy: " + String.valueOf(_proxy_manager.getProxyCount()));
+
         }
 
         swingInvoke(
@@ -252,7 +253,7 @@ public final class MainPanel {
         return _zoom_factor;
     }
 
-    public void setProxy_manager(SmartMegaProxyManager proxy_manager) {
+    public static void setProxy_manager(SmartMegaProxyManager proxy_manager) {
         _proxy_manager = proxy_manager;
     }
 
@@ -629,6 +630,10 @@ public final class MainPanel {
         if (_use_smart_proxy) {
 
             _smart_proxy_url = selectSettingValue("smart_proxy_url");
+
+        } else {
+
+            _smart_proxy_url = null;
         }
     }
 

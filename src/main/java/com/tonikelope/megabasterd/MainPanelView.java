@@ -859,25 +859,13 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             if (MainPanel.isUse_smart_proxy()) {
 
-                if (MainPanel.getProxy_manager() == null) {
+                MainPanel.setProxy_manager(new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url()));
 
-                    this.getMain_panel().setProxy_manager(new SmartMegaProxyManager(this.getMain_panel(), MainPanel.getUse_smart_proxy_url()));
+                updateSmartProxyStatus("SmartProxy: " + String.valueOf(MainPanel.getProxy_manager().getProxyCount()));
 
-                    THREAD_POOL.execute(MainPanel.getProxy_manager());
+            } else {
 
-                } else if (!MainPanel.getProxy_manager().getProxy_list_url().equals(MainPanel.getUse_smart_proxy_url())) {
-                    MainPanel.getProxy_manager().setProxy_list_url(MainPanel.getUse_smart_proxy_url());
-                }
-
-            } else if (MainPanel.getProxy_manager() != null) {
-
-                MainPanel.getProxy_manager().setExit(true);
-
-                synchronized (MainPanel.getProxy_manager()) {
-                    MainPanel.getProxy_manager().notify();
-                }
-
-                this.getMain_panel().setProxy_manager(null);
+                updateSmartProxyStatus("");
             }
         }
 

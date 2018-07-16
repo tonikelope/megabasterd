@@ -20,10 +20,12 @@ public class StreamChunkDownloader implements Runnable {
     private final int _id;
     private final StreamChunkWriter _chunkwriter;
     private volatile boolean _exit;
+    private SmartMegaProxyManager _proxy_manager;
 
     public StreamChunkDownloader(int id, StreamChunkWriter chunkwriter) {
         _id = id;
         _chunkwriter = chunkwriter;
+        _proxy_manager = null;
         _exit = false;
     }
 
@@ -35,6 +37,11 @@ public class StreamChunkDownloader implements Runnable {
     public void run() {
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
+
+        if (MainPanel.isUse_smart_proxy()) {
+
+            _proxy_manager = new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url());
+        }
 
         HttpURLConnection con = null;
 
@@ -49,6 +56,16 @@ public class StreamChunkDownloader implements Runnable {
             long offset = -1;
 
             while (!_exit && !_chunkwriter.isExit()) {
+
+                if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
+
+                    _proxy_manager = new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url());
+
+                } else {
+
+                    _proxy_manager = null;
+
+                }
 
                 while (!_exit && !_chunkwriter.isExit() && _chunkwriter.getChunk_queue().size() >= StreamChunkWriter.BUFFER_CHUNKS_SIZE) {
 
@@ -76,10 +93,10 @@ public class StreamChunkDownloader implements Runnable {
 
                             if (error && current_proxy != null) {
 
-                                MainPanel.getProxy_manager().removeProxy(current_proxy);
+                                _proxy_manager.blockProxy(current_proxy);
                             }
 
-                            current_proxy = MainPanel.getProxy_manager().getFastestProxy();
+                            current_proxy = _proxy_manager.getFastestProxy();
 
                             if (current_proxy != null) {
 
@@ -105,7 +122,8 @@ public class StreamChunkDownloader implements Runnable {
                             if (MainPanel.isUse_proxy()) {
 
                                 con = (HttpURLConnection) chunk_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-                                if (MainPanel.getProxy_user() != null) {
+
+                                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
                                     con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                                 }
@@ -121,7 +139,8 @@ public class StreamChunkDownloader implements Runnable {
                         if (MainPanel.isUse_proxy()) {
 
                             con = (HttpURLConnection) chunk_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-                            if (MainPanel.getProxy_user() != null) {
+
+                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
                                 con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                             }

@@ -25,6 +25,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private boolean _notified;
+    private SmartMegaProxyManager _proxy_manager;
 
     public ChunkDownloader(int id, Download download) {
         _notified = false;
@@ -32,6 +33,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _secure_notify_lock = new Object();
         _id = id;
         _download = download;
+        _proxy_manager = null;
         _error_wait = false;
 
     }
@@ -105,6 +107,16 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             while (!_exit && !_download.isStopped() && (error509 || conta_error < MAX_SLOT_ERROR || MainPanel.isUse_smart_proxy())) {
 
+                if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
+
+                    _proxy_manager = new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url());
+
+                } else {
+
+                    _proxy_manager = null;
+
+                }
+
                 if (worker_url == null || error) {
 
                     worker_url = _download.getDownloadUrlForWorker();
@@ -118,10 +130,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (error && current_proxy != null) {
 
-                            MainPanel.getProxy_manager().removeProxy(current_proxy);
+                            _proxy_manager.blockProxy(current_proxy);
                         }
 
-                        current_proxy = MainPanel.getProxy_manager().getFastestProxy();
+                        current_proxy = _proxy_manager.getFastestProxy();
 
                         if (current_proxy != null) {
 
@@ -154,7 +166,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                            if (MainPanel.getProxy_user() != null) {
+                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
                                 con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                             }
@@ -174,7 +186,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     if (MainPanel.isUse_proxy()) {
 
                         con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-                        if (MainPanel.getProxy_user() != null) {
+
+                        if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
                             con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                         }

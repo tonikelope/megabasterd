@@ -1185,7 +1185,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="18" style="0"/>
                     </Property>
-                    <Property name="horizontalAlignment" type="int" value="4"/>
+                    <Property name="horizontalAlignment" type="int" value="2"/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                     <Property name="enabled" type="boolean" value="false"/>
                   </Properties>

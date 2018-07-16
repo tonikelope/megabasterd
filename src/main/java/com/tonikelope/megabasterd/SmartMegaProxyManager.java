@@ -4,78 +4,55 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.LinkedHashMap;
+import java.util.Set;
 
 /**
  *
  * @author tonikelope
  */
-public class SmartMegaProxyManager implements Runnable {
+public class SmartMegaProxyManager {
 
-    public static final int PROXY_TIMEOUT = 15;
+    public static String DEFAULT_SMART_PROXY_URL = "https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt";
+    public static final int BLOCK_TIME = 30;
     private volatile String _proxy_list_url;
-    private final ConcurrentLinkedQueue<String> _proxy_list;
-    private final MainPanel _main_panel;
-    private volatile boolean _exit;
+    private final LinkedHashMap<String, Long> _proxy_list;
 
-    public SmartMegaProxyManager(MainPanel main_panel, String proxy_list_url) {
-        _main_panel = main_panel;
-        _proxy_list_url = proxy_list_url;
-        _proxy_list = new ConcurrentLinkedQueue<>();
-        _exit = false;
+    public SmartMegaProxyManager(String proxy_list_url) {
+        _proxy_list_url = (proxy_list_url != null && !"".equals(proxy_list_url)) ? proxy_list_url : DEFAULT_SMART_PROXY_URL;
+        _proxy_list = new LinkedHashMap<>();
+        _refreshProxyList();
     }
 
-    public String getProxy_list_url() {
-        return _proxy_list_url;
-    }
+    public int getProxyCount() {
 
-    public void setExit(boolean exit) {
-        _exit = exit;
-    }
-
-    public void setProxy_list_url(String proxy_list_url) {
-
-        _proxy_list_url = proxy_list_url;
-
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                _refreshProxyList();
-            }
-        });
+        return _proxy_list.size();
     }
 
     public String getFastestProxy() {
 
-        return _proxy_list.peek();
+        Set<String> keys = _proxy_list.keySet();
+
+        for (String k : keys) {
+
+            if (_proxy_list.get(k) < System.currentTimeMillis()) {
+
+                return k;
+            }
+        }
+
+        return null;
     }
 
-    public void removeProxy(String proxy) {
+    public void blockProxy(String proxy) {
 
-        if (_proxy_list.contains(proxy)) {
+        if (_proxy_list.containsKey(proxy)) {
 
-            _proxy_list.remove(proxy);
-
-            _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
-
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy removed -> {1}", new Object[]{Thread.currentThread().getName(), proxy});
-
-            if (_proxy_list.isEmpty()) {
-
-                THREAD_POOL.execute(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        _refreshProxyList();
-                    }
-                });
-            }
+            _proxy_list.put(proxy, System.currentTimeMillis() + BLOCK_TIME * 1000);
         }
     }
 
@@ -122,12 +99,10 @@ public class SmartMegaProxyManager implements Runnable {
                     for (String proxy : proxy_list) {
 
                         if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            _proxy_list.add(proxy);
+                            _proxy_list.put(proxy, System.currentTimeMillis());
                         }
                     }
                 }
-
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: " + _proxy_list.size());
 
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
             }
@@ -137,34 +112,6 @@ public class SmartMegaProxyManager implements Runnable {
         } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
-    }
-
-    @Override
-    public void run() {
-
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: hello!", new Object[]{Thread.currentThread().getName()});
-
-        _main_panel.getView().updateSmartProxyStatus("");
-
-        this._refreshProxyList();
-
-        while (!_exit) {
-
-            this._refreshProxyList();
-
-            try {
-                synchronized (this) {
-                    wait();
-                }
-            } catch (InterruptedException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-
-        _main_panel.getView().updateSmartProxyStatus("");
-
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: bye bye", new Object[]{Thread.currentThread().getName()});
-
     }
 
 }

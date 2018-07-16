@@ -760,7 +760,7 @@ public final class MiscTools {
 
                             Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
 
-                            MainPanel.getProxy_manager().removeProxy(current_proxy);
+                            MainPanel.getProxy_manager().blockProxy(current_proxy);
                         }
 
                         current_proxy = MainPanel.getProxy_manager().getFastestProxy();
@@ -783,7 +783,8 @@ public final class MiscTools {
                         if (MainPanel.isUse_proxy()) {
 
                             con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-                            if (MainPanel.getProxy_user() != null) {
+
+                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
                                 con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                             }
@@ -832,7 +833,8 @@ public final class MiscTools {
             if (MainPanel.isUse_proxy()) {
 
                 con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-                if (MainPanel.getProxy_user() != null) {
+
+                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
                     con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                 }

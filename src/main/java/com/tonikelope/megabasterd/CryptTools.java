@@ -369,7 +369,8 @@ public final class CryptTools {
                 if (MainPanel.isUse_proxy()) {
 
                     con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-                    if (MainPanel.getProxy_user() != null) {
+
+                    if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
                         con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                     }
@@ -538,7 +539,8 @@ public final class CryptTools {
             if (MainPanel.isUse_proxy()) {
 
                 con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-                if (MainPanel.getProxy_user() != null) {
+
+                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
                     con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                 }
