@@ -106,7 +106,7 @@ public class StreamChunkDownloader implements Runnable {
                                 con = (HttpURLConnection) chunk_url.openConnection();
                             }
 
-                        } else if (con == null) {
+                        } else {
 
                             URL chunk_url = new URL(chunk_stream.getUrl());
 
@@ -122,22 +122,6 @@ public class StreamChunkDownloader implements Runnable {
 
                                 con = (HttpURLConnection) chunk_url.openConnection();
                             }
-                        }
-                    } else {
-
-                        URL chunk_url = new URL(chunk_stream.getUrl());
-
-                        if (MainPanel.isUse_proxy()) {
-
-                            con = (HttpURLConnection) chunk_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-
-                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
-
-                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
-                            }
-                        } else {
-
-                            con = (HttpURLConnection) chunk_url.openConnection();
                         }
                     }
 
@@ -206,6 +190,7 @@ public class StreamChunkDownloader implements Runnable {
                     } finally {
                         if (con != null) {
                             con.disconnect();
+                            con = null;
                         }
                     }
 

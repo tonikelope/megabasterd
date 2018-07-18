@@ -203,6 +203,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                 } finally {
                     if (con != null) {
                         con.disconnect();
+                        con = null;
                     }
                 }
 
@@ -214,10 +215,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
             getDownload().stopDownloader(ex.getMessage());
-        } finally {
-            if (con != null) {
-                con.disconnect();
-            }
         }
 
         getDownload().stopThisSlot(this);

@@ -200,31 +200,28 @@ public final class MegaAPI {
 
             String res = _rawRequest(request, url_api);
 
-            if (res != null) {
+            ObjectMapper objectMapper = new ObjectMapper();
 
-                ObjectMapper objectMapper = new ObjectMapper();
+            HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
 
-                HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
+            quota = new Long[2];
 
-                quota = new Long[2];
+            if (res_map[0].get("cstrg") instanceof Integer) {
 
-                if (res_map[0].get("cstrg") instanceof Integer) {
+                quota[0] = ((Number) res_map[0].get("cstrg")).longValue();
 
-                    quota[0] = ((Number) res_map[0].get("cstrg")).longValue();
+            } else if (res_map[0].get("cstrg") instanceof Long) {
 
-                } else if (res_map[0].get("cstrg") instanceof Long) {
+                quota[0] = (Long) res_map[0].get("cstrg");
+            }
 
-                    quota[0] = (Long) res_map[0].get("cstrg");
-                }
+            if (res_map[0].get("mstrg") instanceof Integer) {
 
-                if (res_map[0].get("mstrg") instanceof Integer) {
+                quota[1] = ((Number) res_map[0].get("mstrg")).longValue();
 
-                    quota[1] = ((Number) res_map[0].get("mstrg")).longValue();
+            } else if (res_map[0].get("mstrg") instanceof Long) {
 
-                } else if (res_map[0].get("mstrg") instanceof Long) {
-
-                    quota[1] = (Long) res_map[0].get("mstrg");
-                }
+                quota[1] = (Long) res_map[0].get("mstrg");
             }
 
         } catch (Exception ex) {
@@ -292,14 +289,9 @@ public final class MegaAPI {
 
             try {
 
-                if (con == null || (error509 && MainPanel.isUse_smart_proxy())) {
+                if (con == null || error != 0) {
 
                     if (error509 && !MainPanel.isUse_proxy()) {
-
-                        if (con != null) {
-
-                            con.disconnect();
-                        }
 
                         if (current_proxy != null) {
 
@@ -323,7 +315,7 @@ public final class MegaAPI {
                             con = (HttpURLConnection) url_api.openConnection();
                         }
 
-                    } else if (con == null) {
+                    } else {
 
                         if (MainPanel.isUse_proxy()) {
 
@@ -388,6 +380,8 @@ public final class MegaAPI {
 
                             error = checkMEGAError(response);
 
+                        } else {
+                            error = 1337;
                         }
 
                     }
@@ -395,10 +389,12 @@ public final class MegaAPI {
 
             } catch (Exception ex) {
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                error = 1337;
             } finally {
 
                 if (con != null) {
                     con.disconnect();
+                    con = null;
                 }
             }
 
@@ -661,7 +657,7 @@ public final class MegaAPI {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
-        return res_map[0];
+        return res_map != null ? res_map[0] : null;
 
     }
 
@@ -691,7 +687,7 @@ public final class MegaAPI {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
-        return res_map[0];
+        return res_map != null ? res_map[0] : null;
 
     }
 

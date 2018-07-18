@@ -751,11 +751,6 @@ public final class MiscTools {
 
                     if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                        if (con != null) {
-
-                            con.disconnect();
-                        }
-
                         if (current_proxy != null) {
 
                             Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
@@ -778,7 +773,8 @@ public final class MiscTools {
                             con = (HttpURLConnection) url.openConnection();
                         }
 
-                    } else if (con == null) {
+                    }
+                    {
 
                         if (MainPanel.isUse_proxy()) {
 
@@ -813,6 +809,7 @@ public final class MiscTools {
 
                 if (con != null) {
                     con.disconnect();
+                    con = null;
                 }
             }
 

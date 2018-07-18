@@ -103,6 +103,7 @@ public final class MegaCrypterAPI {
 
             if (con != null) {
                 con.disconnect();
+                con = null;
             }
         }
 
