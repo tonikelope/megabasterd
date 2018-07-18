@@ -47,7 +47,7 @@ public class MegaProxyServer implements Runnable {
     @Override
     public void run() {
 
-        _main_panel.getView().updateMCReverseStatus("MCReverse running on port: " + _port);
+        _main_panel.getView().updateMCReverseStatus("MC reverse mode: ON (port " + _port + ")");
 
         try {
 
@@ -77,7 +77,7 @@ public class MegaProxyServer implements Runnable {
             }
         }
 
-        _main_panel.getView().updateMCReverseStatus("");
+        _main_panel.getView().updateMCReverseStatus("MC reverse mode: OFF");
     }
 
     public static class Handler extends Thread {

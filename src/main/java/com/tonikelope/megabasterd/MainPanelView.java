@@ -560,11 +560,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jTabbedPane1)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)
+                        .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
+                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(logo_label)))
                 .addContainerGap())
@@ -861,11 +861,11 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 MainPanel.setProxy_manager(new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url()));
 
-                updateSmartProxyStatus("SmartProxy: " + String.valueOf(MainPanel.getProxy_manager().getProxyCount()));
+                updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(MainPanel.getProxy_manager().getProxyCount()) + ")");
 
             } else {
 
-                updateSmartProxyStatus("");
+                updateSmartProxyStatus("SmartProxy: OFF");
             }
         }
 

@@ -134,7 +134,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Yet another (unofficial) cross-platform MEGA.NZ downloader/uploader/streamer suite. "/>
+        <Property name="text" type="java.lang.String" value="Yet another (unofficial) cross-platform MEGA.NZ downloader/uploader/streaming suite. "/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>

@@ -118,7 +118,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="downloads_scroll_pane" pref="1040" max="32767" attributes="0"/>
+                      <Component id="downloads_scroll_pane" pref="1121" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -325,7 +325,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="14" style="2"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it (slots consume RAM, so use them moderately). "/>
+                        <Property name="text" type="java.lang.String" value="Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it. (Slots consume RAM, so use them moderately). "/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JSeparator" name="jSeparator3">
@@ -600,7 +600,7 @@
                                           </Group>
                                           <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="0" pref="74" max="32767" attributes="0"/>
+                                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
@@ -727,7 +727,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="14" style="2"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: MULTI-SLOT is required if you want to exit and resume uploads and it&apos;s more robust (slots consume RAM, so use them moderately)."/>
+                <Property name="text" type="java.lang.String" value="Note: This is required if you want to exit and resume uploads and it&apos;s also more robust against corrupt uploads. (Slots consume RAM, so use them moderately)."/>
               </Properties>
             </Component>
           </SubComponents>
@@ -1230,11 +1230,11 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="proxy_user_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_user_textfield" pref="287" max="32767" attributes="0"/>
+                              <Component id="proxy_user_textfield" pref="328" max="32767" attributes="0"/>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Component id="proxy_pass_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_pass_textfield" pref="446" max="32767" attributes="0"/>
+                              <Component id="proxy_pass_textfield" pref="486" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>

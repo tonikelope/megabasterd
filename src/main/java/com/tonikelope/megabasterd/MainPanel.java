@@ -46,12 +46,13 @@ import static java.awt.event.WindowEvent.WINDOW_CLOSING;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "4.8";
+    public static final String VERSION = "4.9";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
+    public static final boolean DEFAULT_SMART_PROXY = true;
     public static final Font DEFAULT_FONT = createAndRegisterFont("/fonts/Itim-Regular.ttf");
     public static final float ZOOM_FACTOR = 1.0f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:57.0) Gecko/20100101 Firefox/57.0";
@@ -208,6 +209,15 @@ public final class MainPanel {
 
         } else {
             _mega_proxy_server = null;
+
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+                    getView().updateMCReverseStatus("MC reverse mode: OFF");
+                }
+            });
+
         }
 
         if (_use_smart_proxy) {
@@ -223,13 +233,21 @@ public final class MainPanel {
                             new Runnable() {
                         @Override
                         public void run() {
-                            getView().updateSmartProxyStatus("SmartProxy: " + String.valueOf(_proxy_manager.getProxyCount()));
+                            getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(_proxy_manager.getProxyCount()) + ")");
                         }
                     });
 
                 }
             });
 
+        } else {
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+                    getView().updateSmartProxyStatus("SmartProxy: OFF");
+                }
+            });
         }
 
         swingInvoke(
@@ -638,7 +656,7 @@ public final class MainPanel {
         if (use_smart_proxy != null) {
             _use_smart_proxy = use_smart_proxy.equals("yes");
         } else {
-            _use_smart_proxy = false;
+            _use_smart_proxy = DEFAULT_SMART_PROXY;
         }
 
         if (_use_smart_proxy) {

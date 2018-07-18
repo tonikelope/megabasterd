@@ -98,7 +98,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
     public void start(int port, String context) throws IOException {
 
-        _main_panel.getView().updateKissStreamServerStatus("Stream server running on port: " + STREAMER_PORT);
+        _main_panel.getView().updateKissStreamServerStatus("Streaming server: ON (port " + STREAMER_PORT + ")");
 
         HttpServer httpserver = HttpServer.create(new InetSocketAddress(InetAddress.getLoopbackAddress(), port), 0);
 
@@ -126,11 +126,11 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         if (getWorking_threads().size() > 0) {
 
-            status = "Stream server running on port: " + STREAMER_PORT + " (" + getWorking_threads().size() + ")";
+            status = "Streaming server: ON (port " + STREAMER_PORT + " [" + getWorking_threads().size() + "])";
 
         } else {
 
-            status = "Stream server running on port: " + STREAMER_PORT;
+            status = "Streaming server: ON (port " + STREAMER_PORT + ")";
         }
 
         _main_panel.getView().updateKissStreamServerStatus(status);

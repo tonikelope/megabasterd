@@ -225,11 +225,11 @@
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="jTabbedPane1" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
-                      <Component id="kiss_server_status" pref="206" max="32767" attributes="0"/>
+                      <Component id="kiss_server_status" pref="210" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="mc_reverse_status" pref="210" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                      <Component id="smart_proxy_status" pref="215" max="32767" attributes="0"/>
+                      <Component id="smart_proxy_status" pref="210" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="logo_label" min="-2" max="-2" attributes="0"/>
                   </Group>
