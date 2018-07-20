@@ -30,6 +30,7 @@ import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
@@ -40,7 +41,7 @@ import javax.swing.JTabbedPane;
 public final class MainPanelView extends javax.swing.JFrame {
 
     private final MainPanel _main_panel;
-    private volatile boolean _smart_proxy;
+    private final ConcurrentHashMap<Thread, Boolean> _smart_proxy_threads;
 
     public JLabel getKiss_server_status() {
         return kiss_server_status;
@@ -167,32 +168,39 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public void setSmartProxy(boolean enabled) {
 
-        if (_smart_proxy != enabled) {
+        final boolean empty_previous = _smart_proxy_threads.isEmpty();
+
+        if (enabled) {
+            _smart_proxy_threads.put(Thread.currentThread(), true);
+        } else {
+            _smart_proxy_threads.remove(Thread.currentThread());
+        }
+
+        if (!_main_panel.isLimit_download_speed() && _smart_proxy_threads.isEmpty() != empty_previous) {
+
             swingInvoke(
                     new Runnable() {
                 @Override
                 public void run() {
 
-                    if (!_main_panel.isLimit_download_speed()) {
-                        _smart_proxy = enabled;
-
-                        if (enabled) {
-                            getGlobal_speed_down_label().setForeground(Color.BLACK);
-                        } else {
-                            getGlobal_speed_down_label().setForeground(new Color(0, 128, 255));
-                        }
+                    if (_smart_proxy_threads.isEmpty()) {
+                        getGlobal_speed_down_label().setForeground(new Color(0, 128, 255));
+                    } else {
+                        getGlobal_speed_down_label().setForeground(Color.BLACK);
                     }
-
                 }
+
             });
+
         }
+
     }
 
     public MainPanelView(MainPanel main_panel) {
 
         _main_panel = main_panel;
 
-        _smart_proxy = false;
+        _smart_proxy_threads = new ConcurrentHashMap<>();
 
         initComponents();
 
