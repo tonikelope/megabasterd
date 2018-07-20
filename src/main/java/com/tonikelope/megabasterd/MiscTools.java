@@ -871,7 +871,7 @@ public final class MiscTools {
 
     public static String checkNewVersion(String folder_node, String folder_key) {
 
-        String new_version = null;
+        String new_version_major = null, new_version_minor = null, current_version_major = null, current_version_minor = null;
 
         try {
             MegaAPI ma = new MegaAPI();
@@ -884,24 +884,28 @@ public final class MiscTools {
 
                     HashMap<String, Object> current_node = (HashMap<String, Object>) o;
 
-                    new_version = findFirstRegex("([0-9\\.]+)\\.run", (String) current_node.get("name"), 1);
+                    new_version_major = findFirstRegex("([0-9]+)\\.[0-9]+\\.run", (String) current_node.get("name"), 1);
 
-                    if (new_version != null && Double.parseDouble(new_version) > Double.parseDouble(VERSION)) {
+                    new_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)\\.run", (String) current_node.get("name"), 1);
 
-                        break;
+                    current_version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", VERSION, 1);
 
-                    } else {
+                    current_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", VERSION, 1);
 
-                        new_version = null;
+                    if (new_version_major != null && (Integer.parseInt(current_version_major) < Integer.parseInt(new_version_major) || (Integer.parseInt(current_version_major) == Integer.parseInt(new_version_major) && Integer.parseInt(current_version_minor) < Integer.parseInt(new_version_minor)))) {
+
+                        return new_version_major + "." + new_version_minor;
+
                     }
                 }
+
             }
 
         } catch (Exception ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
 
-        return new_version;
+        return null;
     }
 
     public static void openBrowserURL(final String url) {

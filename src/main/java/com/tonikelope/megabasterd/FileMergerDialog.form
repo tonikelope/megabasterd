@@ -76,7 +76,7 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/images/icons8-add-file-30.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Select files"/>
+        <Property name="text" type="java.lang.String" value="Select (any) file part"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
       <Events>

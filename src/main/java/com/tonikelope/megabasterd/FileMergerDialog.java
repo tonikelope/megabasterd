@@ -125,7 +125,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         file_button.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         file_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-add-file-30.png"))); // NOI18N
-        file_button.setText("Select files");
+        file_button.setText("Select (any) file part");
         file_button.setDoubleBuffered(true);
         file_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -272,7 +272,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         }
 
-        this.file_button.setText("Select file");
+        this.file_button.setText("Select (any) file part");
 
         this.file_button.setEnabled(true);
 
