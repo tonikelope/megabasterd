@@ -84,6 +84,13 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                                 account_combobox.addItem((String) o);
                             }
+
+                            for (Object o : _main_panel.getMega_active_accounts().keySet()) {
+
+                                account_combobox.setSelectedItem((String) o);
+
+                                break;
+                            }
                         }
                     });
                 }

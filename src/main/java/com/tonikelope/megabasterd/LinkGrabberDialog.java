@@ -259,7 +259,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         change_dir_button.setText("Selecting dir...");
         change_dir_button.setEnabled(false);
-        
+
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
@@ -274,14 +274,12 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             _download_path = file.getAbsolutePath();
 
             download_dir_label.setText(truncateText(_download_path, 80));
-            
-            
 
         }
-        
+
         change_dir_button.setText("Select download dir");
         change_dir_button.setEnabled(true);
-        
+
         pack();
     }//GEN-LAST:event_change_dir_buttonActionPerformed
 
