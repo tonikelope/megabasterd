@@ -127,7 +127,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         skip_button = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("FileGrabber");
+        setTitle("File Grabber");
 
         jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Files"));
 

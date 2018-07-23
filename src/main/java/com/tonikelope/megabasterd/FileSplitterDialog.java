@@ -34,6 +34,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 
 /**
@@ -356,44 +357,48 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                                 }
                             }
 
+                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+                            setVisible(false);
+
+                        } else {
+                            _file = null;
+
+                            _output_dir = null;
+
+                            file_name_label.setText("");
+
+                            output_folder_label.setText("");
+
+                            split_size_text.setText("");
+
+                            file_size_label.setText("");
+
+                            _progress = 0L;
+
+                            jProgressBar2.setMinimum(0);
+                            jProgressBar2.setMaximum(MAX_VALUE);
+                            jProgressBar2.setStringPainted(true);
+                            jProgressBar2.setValue(0);
+                            jProgressBar2.setVisible(false);
+
+                            split_button.setText("SPLIT FILE");
+
+                            file_button.setEnabled(true);
+
+                            output_button.setEnabled(true);
+
+                            split_button.setEnabled(true);
+
+                            split_size_text.setEnabled(true);
+
+                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+                            pack();
                         }
                     } catch (IOException ex) {
                         Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
-                    _file = null;
-
-                    _output_dir = null;
-
-                    file_name_label.setText("");
-
-                    output_folder_label.setText("");
-
-                    split_size_text.setText("");
-
-                    file_size_label.setText("");
-
-                    _progress = 0L;
-
-                    jProgressBar2.setMinimum(0);
-                    jProgressBar2.setMaximum(MAX_VALUE);
-                    jProgressBar2.setStringPainted(true);
-                    jProgressBar2.setValue(0);
-                    jProgressBar2.setVisible(false);
-
-                    split_button.setText("SPLIT FILE");
-
-                    file_button.setEnabled(true);
-
-                    output_button.setEnabled(true);
-
-                    split_button.setEnabled(true);
-
-                    split_size_text.setEnabled(true);
-
-                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-                    pack();
 
                 }
             });

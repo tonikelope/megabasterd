@@ -370,46 +370,50 @@ public class FileMergerDialog extends javax.swing.JDialog {
                                 }
                             }
 
+                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+                            setVisible(false);
+
+                        } else {
+                            _file_parts.clear();
+
+                            file_name_label.setText("");
+
+                            file_size_label.setText("");
+
+                            output_folder_label.setText("");
+
+                            _output_dir = null;
+
+                            _file_name = null;
+
+                            _file_size = 0L;
+
+                            _progress = 0L;
+
+                            jProgressBar2.setMinimum(0);
+                            jProgressBar2.setMaximum(MAX_VALUE);
+                            jProgressBar2.setStringPainted(true);
+                            jProgressBar2.setValue(0);
+                            jProgressBar2.setVisible(false);
+
+                            merge_button.setText("MERGE FILE");
+
+                            file_button.setEnabled(true);
+
+                            output_button.setEnabled(true);
+
+                            merge_button.setEnabled(true);
+
+                            delete_parts_checkbox.setEnabled(true);
+
+                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+                            pack();
                         }
                     } catch (IOException ex) {
                         Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, null, ex);
                     }
-
-                    _file_parts.clear();
-
-                    file_name_label.setText("");
-
-                    file_size_label.setText("");
-
-                    output_folder_label.setText("");
-
-                    _output_dir = null;
-
-                    _file_name = null;
-
-                    _file_size = 0L;
-
-                    _progress = 0L;
-
-                    jProgressBar2.setMinimum(0);
-                    jProgressBar2.setMaximum(MAX_VALUE);
-                    jProgressBar2.setStringPainted(true);
-                    jProgressBar2.setValue(0);
-                    jProgressBar2.setVisible(false);
-
-                    merge_button.setText("MERGE FILE");
-
-                    file_button.setEnabled(true);
-
-                    output_button.setEnabled(true);
-
-                    merge_button.setEnabled(true);
-
-                    delete_parts_checkbox.setEnabled(true);
-
-                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-                    pack();
 
                 }
             });

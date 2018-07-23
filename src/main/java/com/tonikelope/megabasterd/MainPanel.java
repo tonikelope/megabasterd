@@ -46,7 +46,7 @@ import static java.awt.event.WindowEvent.WINDOW_CLOSING;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "4.10";
+    public static final String VERSION = "5.0";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
