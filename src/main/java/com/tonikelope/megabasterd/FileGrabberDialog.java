@@ -28,6 +28,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private long _total_space;
     private final MainPanel _main_panel;
     private final boolean _remember_master_pass;
+    private boolean _inserting_mega_accounts;
 
     public boolean isUpload() {
         return _upload;
@@ -65,6 +66,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         _total_space = 0L;
         _base_path = null;
         _upload = false;
+        _inserting_mega_accounts = false;
         _remember_master_pass = true;
         _files = new ArrayList<>();
 
@@ -80,16 +82,31 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                         @Override
                         public void run() {
 
-                            for (Object o : _main_panel.getMega_accounts().keySet()) {
+                            if (!_main_panel.getMega_active_accounts().isEmpty()) {
+                                _inserting_mega_accounts = true;
 
-                                account_combobox.addItem((String) o);
-                            }
+                                for (Object o : _main_panel.getMega_accounts().keySet()) {
 
-                            for (Object o : _main_panel.getMega_active_accounts().keySet()) {
+                                    account_combobox.addItem((String) o);
+                                }
 
-                                account_combobox.setSelectedItem((String) o);
+                                _inserting_mega_accounts = false;
 
-                                break;
+                                for (Object o : _main_panel.getMega_active_accounts().keySet()) {
+
+                                    account_combobox.setSelectedItem((String) o);
+
+                                    account_comboboxItemStateChanged(null);
+
+                                    break;
+                                }
+
+                            } else {
+
+                                for (Object o : _main_panel.getMega_accounts().keySet()) {
+
+                                    account_combobox.addItem((String) o);
+                                }
                             }
                         }
                     });
@@ -521,7 +538,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         String selected_item = (String) account_combobox.getSelectedItem();
 
-        if (selected_item != null) {
+        if (!_inserting_mega_accounts && selected_item != null) {
 
             final String email = selected_item;
 
