@@ -676,7 +676,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
 
-        change_download_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        change_download_dir_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         change_download_dir_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-folder-30.png"))); // NOI18N
         change_download_dir_button.setText("Change it");
         change_download_dir_button.setDoubleBuffered(true);
@@ -721,7 +721,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_port_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
         down_dir_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        down_dir_label.setText("Default downloads directory:");
+        down_dir_label.setText("Download folder:");
         down_dir_label.setDoubleBuffered(true);
 
         rec_smart_proxy_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
@@ -746,18 +746,15 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addGap(27, 27, 27)
+                        .addComponent(use_mega_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(use_mega_account_down_combobox, 0, 905, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addContainerGap()
                         .addComponent(max_downloads_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(max_downloads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(down_dir_label)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(change_download_dir_button)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(default_dir_label))))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(27, 27, 27)
                         .addComponent(default_slots_down_label)
@@ -768,11 +765,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(rec_download_slots_label)
                             .addComponent(multi_slot_down_checkbox)))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addGap(27, 27, 27)
-                        .addComponent(use_mega_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(use_mega_account_down_combobox, 0, 828, Short.MAX_VALUE))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGap(27, 27, 27)
                         .addComponent(megacrypter_reverse_port_label)
@@ -791,8 +783,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(megacrypter_reverse_warning_label)
-                            .addComponent(smart_proxy_checkbox))))
-                .addContainerGap(89, Short.MAX_VALUE))
+                            .addComponent(smart_proxy_checkbox)))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addComponent(change_download_dir_button, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(down_dir_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(default_dir_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addContainerGap())
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
                 .addComponent(rec_smart_proxy_label)
@@ -802,11 +800,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel3Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(down_dir_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(change_download_dir_button)
-                    .addComponent(default_dir_label))
+                    .addComponent(down_dir_label)
+                    .addComponent(default_dir_label)
+                    .addComponent(change_download_dir_button, javax.swing.GroupLayout.PREFERRED_SIZE, 28, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

@@ -257,13 +257,13 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
     private void change_dir_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_change_dir_buttonActionPerformed
 
-        change_dir_button.setText("Selecting dir...");
+        change_dir_button.setText("Selecting folder...");
         change_dir_button.setEnabled(false);
 
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
-        filechooser.setDialogTitle("Download directory");
+        filechooser.setDialogTitle("Download folder");
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         filechooser.setAcceptAllFileFilterUsed(false);
 
@@ -277,7 +277,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         }
 
-        change_dir_button.setText("Select download dir");
+        change_dir_button.setText("Change download folder");
         change_dir_button.setEnabled(true);
 
         pack();
