@@ -24,7 +24,7 @@ import static com.tonikelope.megabasterd.MainPanel.*;
  */
 public final class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
-    public static final boolean USE_SLOTS_DEFAULT = true;
+    public static final boolean USE_SLOTS_DEFAULT = true; //OBLIGATORIO
     public static final int WORKERS_DEFAULT = 4;
     public static final int CHUNK_SIZE_MULTI = 1; //No funciona bien otra cosa
     private final MainPanel _main_panel;
@@ -89,7 +89,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _root_node = root_node;
         _share_key = share_key;
         _folder_link = folder_link;
-        _use_slots = use_slots;
+        _use_slots = true; //OBLIGATORIO
         _slots = slots;
         _restart = false;
         _progress = 0L;
@@ -771,27 +771,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                                 getView().getSlots_spinner().setVisible(true);
 
                                 getView().getSlot_status_label().setVisible(true);
-                            }
-                        });
-
-                    } else {
-
-                        ChunkUploaderMono c = new ChunkUploaderMono(this);
-
-                        _chunkworkers.add(c);
-
-                        _thread_pool.execute(c);
-
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-
-                                getView().getSlots_label().setVisible(false);
-
-                                getView().getSlots_spinner().setVisible(false);
-
-                                getView().getSlot_status_label().setVisible(false);
                             }
                         });
 

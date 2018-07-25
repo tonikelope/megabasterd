@@ -46,7 +46,7 @@ import static java.awt.event.WindowEvent.WINDOW_CLOSING;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.2";
+    public static final String VERSION = "5.3";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -517,13 +517,7 @@ public final class MainPanel {
             _use_slots_down = Download.USE_SLOTS_DEFAULT;
         }
 
-        use_slots = selectSettingValue("use_slots_up");
-
-        if (use_slots != null) {
-            _use_slots_up = use_slots.equals("yes");
-        } else {
-            _use_slots_up = Upload.USE_SLOTS_DEFAULT;
-        }
+        _use_slots_up = Upload.USE_SLOTS_DEFAULT;
 
         String max_downloads = selectSettingValue("max_downloads");
 
