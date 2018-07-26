@@ -110,7 +110,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 int reads, http_status, tot_bytes_up;
 
-                Chunk chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url, Upload.CHUNK_SIZE_MULTI);
+                Chunk chunk = new Chunk(_upload.nextChunkId(), _upload.getFile_size(), worker_url);
 
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} Uploading -> {2}", new Object[]{Thread.currentThread().getName(), _id, chunk.getUrl()});
 

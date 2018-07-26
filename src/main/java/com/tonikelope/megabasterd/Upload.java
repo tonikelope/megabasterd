@@ -24,9 +24,8 @@ import static com.tonikelope.megabasterd.MainPanel.*;
  */
 public final class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
-    public static final boolean USE_SLOTS_DEFAULT = true; //OBLIGATORIO
-    public static final int WORKERS_DEFAULT = 4;
-    public static final int CHUNK_SIZE_MULTI = 1; //No funciona bien otra cosa
+    public static final int WORKERS_DEFAULT = 6;
+    public static final int CHUNK_SIZE_MULTI = 1; //OBLIGATORIO
     private final MainPanel _main_panel;
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
@@ -68,12 +67,11 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final String _root_node;
     private final byte[] _share_key;
     private final String _folder_link;
-    private final boolean _use_slots;
     private final boolean _restart;
     private volatile boolean _closed;
     private volatile boolean _canceled;
 
-    public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean use_slots, int slots) {
+    public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, int slots) {
 
         _notified = false;
         _provision_ok = true;
@@ -89,7 +87,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _root_node = root_node;
         _share_key = share_key;
         _folder_link = folder_link;
-        _use_slots = true; //OBLIGATORIO
         _slots = slots;
         _restart = false;
         _progress = 0L;
@@ -125,7 +122,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _root_node = upload.getRoot_node();
         _share_key = upload.getShare_key();
         _folder_link = upload.getFolder_link();
-        _use_slots = upload.getMain_panel().isUse_slots_up();
         _slots = upload.getMain_panel().getDefault_slots_up();
         _progress = 0L;
         _last_chunk_id_dispatched = 0L;
@@ -288,10 +284,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public String getFolder_link() {
         return _folder_link;
-    }
-
-    public boolean isUse_slots() {
-        return _use_slots;
     }
 
     public boolean isRestart() {
@@ -749,32 +741,29 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 synchronized (_workers_lock) {
 
-                    if (_use_slots) {
+                    for (int t = 1; t <= _slots; t++) {
+                        ChunkUploader c = new ChunkUploader(t, this);
 
-                        for (int t = 1; t <= _slots; t++) {
-                            ChunkUploader c = new ChunkUploader(t, this);
+                        _chunkworkers.add(c);
 
-                            _chunkworkers.add(c);
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Starting chunkuploader {1} ...", new Object[]{Thread.currentThread().getName(), t});
 
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Starting chunkuploader {1} ...", new Object[]{Thread.currentThread().getName(), t});
-
-                            _thread_pool.execute(c);
-                        }
-
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-
-                                getView().getSlots_label().setVisible(true);
-
-                                getView().getSlots_spinner().setVisible(true);
-
-                                getView().getSlot_status_label().setVisible(true);
-                            }
-                        });
-
+                        _thread_pool.execute(c);
                     }
+
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+
+                            getView().getSlots_label().setVisible(true);
+
+                            getView().getSlots_spinner().setVisible(true);
+
+                            getView().getSlot_status_label().setVisible(true);
+                        }
+                    });
+
                 }
 
                 getView().printStatusNormal("Uploading file to mega (" + _ma.getFull_email() + ") ...");
@@ -1077,20 +1066,17 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     _finishing_upload = true;
 
-                    if (_use_slots) {
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+                            getView().getSlots_spinner().setEnabled(false);
 
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-                                getView().getSlots_spinner().setEnabled(false);
+                            getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
+                        }
+                    });
 
-                                getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
-                            }
-                        });
-                    }
-
-                } else if (!_finishing_upload && _use_slots) {
+                } else if (!_finishing_upload) {
 
                     swingInvoke(
                             new Runnable() {
@@ -1117,9 +1103,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 }
 
-                if (_use_slots) {
-                    getView().updateSlotsStatus();
-                }
+                getView().updateSlotsStatus();
+
             }
         }
     }
@@ -1191,7 +1176,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     public long calculateLastUploadedChunk(long bytes_read) {
 
         if (bytes_read > 3584 * 1024) {
-            return 7 + (long) Math.ceil((float) (bytes_read - 3584 * 1024) / (1024 * 1024 * (this.isUse_slots() ? Upload.CHUNK_SIZE_MULTI : 1)));
+            return 7 + (long) Math.ceil((float) (bytes_read - 3584 * 1024) / (1024 * 1024));
         } else {
             int i = 0, tot = 0;
 

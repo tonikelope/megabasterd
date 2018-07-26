@@ -39,6 +39,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
+import java.io.File;
 
 /**
  *
@@ -46,7 +47,7 @@ import static java.awt.event.WindowEvent.WINDOW_CLOSING;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.3";
+    public static final String VERSION = "5.4";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -97,7 +98,7 @@ public final class MainPanel {
     private final UploadManager _upload_manager;
     private final StreamThrottlerSupervisor _stream_supervisor;
     private int _max_dl, _max_ul, _default_slots_down, _default_slots_up, _max_dl_speed, _max_up_speed;
-    private boolean _use_slots_down, _use_slots_up, _limit_download_speed, _limit_upload_speed, _use_mega_account_down;
+    private boolean _use_slots_down, _limit_download_speed, _limit_upload_speed, _use_mega_account_down;
     private String _mega_account_down;
     private String _default_download_path;
     private HashMap<String, Object> _mega_accounts;
@@ -463,10 +464,6 @@ public final class MainPanel {
         return _streamserver;
     }
 
-    public boolean isUse_slots_up() {
-        return _use_slots_up;
-    }
-
     public int getMax_dl_speed() {
         return _max_dl_speed;
     }
@@ -516,8 +513,6 @@ public final class MainPanel {
         } else {
             _use_slots_down = Download.USE_SLOTS_DEFAULT;
         }
-
-        _use_slots_up = Upload.USE_SLOTS_DEFAULT;
 
         String max_downloads = selectSettingValue("max_downloads");
 
@@ -717,37 +712,6 @@ public final class MainPanel {
 
                 exit = false;
             }
-        } else if (!getUpload_manager().getTransference_running_list().isEmpty()) {
-
-            boolean mono = false;
-
-            for (Transference trans : _upload_manager.getTransference_running_list()) {
-
-                if (!((Upload) trans).isUse_slots()) {
-                    mono = true;
-                    break;
-                }
-            }
-
-            if (mono) {
-
-                Object[] options = {"No",
-                    "Yes"};
-
-                int n = showOptionDialog(getView(),
-                        "It seems MegaBasterd is uploading files that can not be safely stopped.\n\nIF YOU EXIT NOW, THOSE UPLOADS WILL BE ABORTED.\n\nDo you want to continue?",
-                        "Warning!", YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
-                        null,
-                        options,
-                        options[0]);
-
-                if (n == 0) {
-
-                    exit = false;
-                }
-
-            }
-
         }
 
         return exit;
@@ -764,6 +728,35 @@ public final class MainPanel {
             }
 
             if (restart) {
+                JOptionPane.showMessageDialog(getView(), "MegaBasterd will restart", "Restart required", JOptionPane.WARNING_MESSAGE);
+                restartApplication(1);
+            } else {
+                exit(0);
+            }
+
+        }
+    }
+
+    public void byebyenow(boolean restart, boolean delete_db) {
+
+        synchronized (DBTools.class) {
+
+            if (delete_db) {
+
+                File db_file = new File(SqliteSingleton.SQLITE_FILE);
+
+                db_file.delete();
+
+            } else {
+                try {
+                    DBTools.vaccum();
+                } catch (SQLException ex) {
+                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            if (restart) {
+                JOptionPane.showMessageDialog(getView(), "MegaBasterd will restart", "Restart required", JOptionPane.WARNING_MESSAGE);
                 restartApplication(1);
             } else {
                 exit(0);
@@ -837,46 +830,41 @@ public final class MainPanel {
 
                                 Upload upload = (Upload) trans;
 
-                                if (upload.isUse_slots()) {
+                                upload.getMac_generator().secureNotify();
 
-                                    upload.getMac_generator().secureNotify();
-
-                                    if (upload.isPaused()) {
-                                        upload.pause();
-                                    }
-
-                                    if (!upload.getChunkworkers().isEmpty()) {
-
-                                        wait = true;
-
-                                        swingInvoke(new Runnable() {
-                                            @Override
-                                            public void run() {
-
-                                                upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
-                                                upload.getView().getSlots_spinner().setEnabled(false);
-                                                upload.getView().getPause_button().setEnabled(false);
-                                                upload.getView().getFolder_link_button().setEnabled(false);
-                                                upload.getView().getFile_link_button().setEnabled(false);
-                                                upload.getView().getFile_size_label().setEnabled(false);
-                                                upload.getView().getFile_name_label().setEnabled(false);
-                                                upload.getView().getSpeed_label().setEnabled(false);
-                                                upload.getView().getSlots_label().setEnabled(false);
-                                                upload.getView().getProgress_pbar().setEnabled(false);
-
-                                            }
-                                        });
-                                    } else {
-                                        try {
-                                            DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getEmail(), upload.getProgress(), upload.getFile_meta_mac() != null ? Bin2BASE64(i32a2bin(upload.getFile_meta_mac())) : null);
-                                        } catch (SQLException ex) {
-                                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
-                                        }
-                                    }
-                                } else {
-                                    wait = true;
-                                    upload.stopUploader();
+                                if (upload.isPaused()) {
+                                    upload.pause();
                                 }
+
+                                if (!upload.getChunkworkers().isEmpty()) {
+
+                                    wait = true;
+
+                                    swingInvoke(new Runnable() {
+                                        @Override
+                                        public void run() {
+
+                                            upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
+                                            upload.getView().getSlots_spinner().setEnabled(false);
+                                            upload.getView().getPause_button().setEnabled(false);
+                                            upload.getView().getFolder_link_button().setEnabled(false);
+                                            upload.getView().getFile_link_button().setEnabled(false);
+                                            upload.getView().getFile_size_label().setEnabled(false);
+                                            upload.getView().getFile_name_label().setEnabled(false);
+                                            upload.getView().getSpeed_label().setEnabled(false);
+                                            upload.getView().getSlots_label().setEnabled(false);
+                                            upload.getView().getProgress_pbar().setEnabled(false);
+
+                                        }
+                                    });
+                                } else {
+                                    try {
+                                        DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getEmail(), upload.getProgress(), upload.getFile_meta_mac() != null ? Bin2BASE64(i32a2bin(upload.getFile_meta_mac())) : null);
+                                    } catch (SQLException ex) {
+                                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                }
+
                             }
                         }
 
@@ -1171,7 +1159,7 @@ public final class MainPanel {
                                     ma = new MegaAPI();
                                 }
 
-                                Upload upload = new Upload(tthis, ma, (String) o.get("filename"), (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), _use_slots_up, _default_slots_up);
+                                Upload upload = new Upload(tthis, ma, (String) o.get("filename"), (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), _default_slots_up);
 
                                 getUpload_manager().getTransference_provision_queue().add(upload);
 
