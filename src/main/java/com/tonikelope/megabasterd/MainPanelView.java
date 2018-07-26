@@ -167,15 +167,13 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public void setSmartProxy(boolean enabled) {
 
-        final boolean empty_previous = _smart_proxy_threads.isEmpty();
-
         if (enabled) {
             _smart_proxy_threads.put(Thread.currentThread(), true);
         } else {
             _smart_proxy_threads.remove(Thread.currentThread());
         }
 
-        if (!_main_panel.isLimit_download_speed() && _smart_proxy_threads.isEmpty() != empty_previous) {
+        if (!_main_panel.isLimit_download_speed()) {
 
             swingInvoke(
                     new Runnable() {

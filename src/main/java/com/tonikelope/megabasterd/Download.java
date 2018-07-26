@@ -177,51 +177,40 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     }
 
-    public boolean isTurboProxy_mode() {
-
-        synchronized (_turbo_proxy_lock) {
-            return _turbo_proxy_mode;
-        }
-    }
-
-    public void setTurboProxy_mode(boolean turbo_mode) {
+    public void enableProxyTurboMode() {
 
         synchronized (_turbo_proxy_lock) {
 
-            if (_turbo_proxy_mode != turbo_mode) {
+            if (!_turbo_proxy_mode) {
 
-                _turbo_proxy_mode = turbo_mode;
+                _turbo_proxy_mode = true;
 
-                if (_turbo_proxy_mode) {
+                Download tthis = this;
 
-                    Download tthis = this;
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
 
-                    swingInvoke(
-                            new Runnable() {
-                        @Override
-                        public void run() {
+                        synchronized (_workers_lock) {
 
-                            synchronized (_workers_lock) {
+                            getView().getSlots_spinner().setEnabled(false);
 
-                                getView().getSlots_spinner().setEnabled(false);
+                            for (int t = getChunkworkers().size(); t <= TURBO_MODE_SLOTS; t++) {
 
-                                for (int t = getChunkworkers().size(); t <= TURBO_MODE_SLOTS; t++) {
+                                ChunkDownloader c = new ChunkDownloader(t, tthis);
 
-                                    ChunkDownloader c = new ChunkDownloader(t, tthis);
+                                _chunkworkers.add(c);
 
-                                    _chunkworkers.add(c);
-
-                                    _thread_pool.execute(c);
-                                }
-
-                                getView().getSlots_spinner().setValue(TURBO_MODE_SLOTS);
-
-                                getView().getSlots_spinner().setEnabled(true);
+                                _thread_pool.execute(c);
                             }
-                        }
-                    });
-                }
 
+                            getView().getSlots_spinner().setValue(TURBO_MODE_SLOTS);
+
+                            getView().getSlots_spinner().setEnabled(true);
+                        }
+                    }
+                });
             }
         }
     }

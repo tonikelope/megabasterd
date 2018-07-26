@@ -143,7 +143,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             con = (HttpURLConnection) url.openConnection(proxy);
 
                             getDownload().getMain_panel().getView().setSmartProxy(true);
-                            getDownload().setTurboProxy_mode(true);
+                            getDownload().enableProxyTurboMode();
 
                         } else {
 
@@ -152,7 +152,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             con = (HttpURLConnection) url.openConnection();
 
                             getDownload().getMain_panel().getView().setSmartProxy(false);
-                            getDownload().setTurboProxy_mode(false);
                         }
 
                     } else {
@@ -173,7 +172,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         }
 
                         getDownload().getMain_panel().getView().setSmartProxy(false);
-                        getDownload().setTurboProxy_mode(false);
                     }
 
                 }
