@@ -18,7 +18,6 @@ import java.net.URL;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int MAX_SLOT_ERROR = 3;
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
@@ -105,7 +104,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             boolean error = false, error509 = false, error403 = false;
 
-            while (!_exit && !_download.isStopped() && (error509 || conta_error < MAX_SLOT_ERROR || MainPanel.isUse_smart_proxy())) {
+            while (!_exit && !_download.isStopped() && (error509 || MainPanel.isUse_smart_proxy())) {
 
                 if (worker_url == null || error403) {
 
@@ -344,13 +343,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         con = null;
                     }
                 }
-            }
-
-            if (conta_error == MAX_SLOT_ERROR) {
-
-                _download.setStatus_error(true);
-
-                _download.stopDownloader("DOWNLOAD FAILED: too many errors");
             }
 
         } catch (ChunkInvalidException e) {

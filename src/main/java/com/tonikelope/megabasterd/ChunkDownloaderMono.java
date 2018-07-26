@@ -38,7 +38,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             InputStream is = null;
 
-            while (!isExit() && !getDownload().isStopped() && (error509 || conta_error < MAX_SLOT_ERROR)) {
+            while (!isExit() && !getDownload().isStopped() && error509) {
 
                 if (worker_url == null || error403) {
 
