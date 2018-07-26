@@ -103,17 +103,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             String worker_url = null, current_proxy = null;
 
-            boolean error = false, error509 = false;
+            boolean error = false, error509 = false, error403 = false;
 
             while (!_exit && !_download.isStopped() && (error509 || conta_error < MAX_SLOT_ERROR || MainPanel.isUse_smart_proxy())) {
 
-                if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
-
-                    _proxy_manager = new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url());
-
-                }
-
-                if (worker_url == null || error) {
+                if (worker_url == null || error403) {
 
                     worker_url = _download.getDownloadUrlForWorker();
                 }
@@ -124,9 +118,17 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                        if (error && current_proxy != null) {
+                        if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
+
+                            _proxy_manager = new SmartMegaProxyManager(null);
+
+                        }
+
+                        if (error && !error403 && current_proxy != null) {
 
                             _proxy_manager.blockProxy(current_proxy);
+                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
+
                         }
 
                         current_proxy = _proxy_manager.getFastestProxy();
@@ -185,6 +187,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 error = false;
 
+                error403 = false;
+
                 error509 = false;
 
                 if (getDownload().isError509()) {
@@ -195,25 +199,29 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (!_exit && !_download.isStopped()) {
 
-                        try (InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor())) {
+                        int http_status = con.getResponseCode();
 
-                            int http_status = con.getResponseCode();
+                        if (http_status != 200) {
 
-                            if (http_status != 200) {
-                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                                error = true;
+                            error = true;
 
-                                if (http_status == 509) {
+                            if (http_status == 509) {
 
-                                    error509 = true;
+                                error509 = true;
 
-                                    if (MainPanel.isUse_smart_proxy()) {
-                                        getDownload().getView().set509Error(true);
-                                    }
+                                if (MainPanel.isUse_smart_proxy()) {
+                                    getDownload().getView().set509Error(true);
                                 }
+                            } else if (http_status == 403) {
 
-                            } else {
+                                error403 = true;
+                            }
+
+                        } else {
+
+                            try (InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor())) {
 
                                 byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -242,20 +250,19 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                         secureWait();
                                     }
                                 }
+                            }
+                        }
+
+                        if (chunk.getOutputStream().size() < chunk.getSize()) {
+
+                            if (chunk.getOutputStream().size() > 0) {
+                                _download.getPartialProgressQueue().add(-1 * chunk.getOutputStream().size());
+
+                                _download.getProgress_meter().secureNotify();
 
                             }
 
-                            if (chunk.getOutputStream().size() < chunk.getSize()) {
-
-                                if (chunk.getOutputStream().size() > 0) {
-                                    _download.getPartialProgressQueue().add(-1 * chunk.getOutputStream().size());
-
-                                    _download.getProgress_meter().secureNotify();
-
-                                }
-
-                                error = true;
-                            }
+                            error = true;
                         }
 
                         if (error && !_download.isStopped()) {

@@ -32,7 +32,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             String worker_url = null;
             int conta_error = 0, http_status = 200;
-            boolean error = false, error509 = false;
+            boolean error = false, error509 = false, error403 = false;
 
             getDownload().getView().set509Error(false);
 
@@ -40,7 +40,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             while (!isExit() && !getDownload().isStopped() && (error509 || conta_error < MAX_SLOT_ERROR)) {
 
-                if (worker_url == null || error) {
+                if (worker_url == null || error403) {
 
                     worker_url = getDownload().getDownloadUrlForWorker();
                 }
@@ -79,12 +79,13 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     error = false;
 
-                    if (error509) {
-
-                        getDownload().getView().set509Error(false);
-                    }
+                    error403 = false;
 
                     error509 = false;
+
+                    if (getDownload().isError509()) {
+                        getDownload().getView().set509Error(false);
+                    }
 
                     if (http_status != 200) {
 
@@ -97,6 +98,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             error509 = true;
 
                             getDownload().getView().set509Error(true);
+                        } else if (http_status == 403) {
+                            error403 = true;
                         }
 
                         getDownload().rejectChunkId(chunk.getId());

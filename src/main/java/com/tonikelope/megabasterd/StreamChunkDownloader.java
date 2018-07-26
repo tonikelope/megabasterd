@@ -44,7 +44,7 @@ public class StreamChunkDownloader implements Runnable {
 
             String url = _chunkwriter.getUrl();
 
-            boolean error = false, error509 = false;
+            boolean error = false, error509 = false, error403 = false;
 
             String current_proxy = null;
 
@@ -69,7 +69,7 @@ public class StreamChunkDownloader implements Runnable {
 
                     offset = _chunkwriter.nextOffset();
 
-                } else {
+                } else if (error403) {
 
                     url = _chunkwriter.getUrl();
                 }
@@ -141,11 +141,11 @@ public class StreamChunkDownloader implements Runnable {
 
                     error509 = false;
 
+                    error403 = false;
+
                     try {
 
                         if (!_exit) {
-
-                            InputStream is = con.getInputStream();
 
                             http_status = con.getResponseCode();
 
@@ -155,9 +155,18 @@ public class StreamChunkDownloader implements Runnable {
 
                                 error = true;
 
-                                error509 = (http_status == 509);
+                                if (http_status == 509) {
+
+                                    error509 = true;
+
+                                } else if (http_status == 403) {
+
+                                    error403 = true;
+                                }
 
                             } else {
+
+                                InputStream is = con.getInputStream();
 
                                 while (!_exit && !_chunkwriter.isExit() && (reads = is.read(buffer)) != -1) {
 

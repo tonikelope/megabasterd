@@ -735,9 +735,13 @@ public final class MiscTools {
 
     public static boolean checkMegaDownloadUrl(String string_url) {
 
-        boolean url_ok = false, error509 = false;
+        boolean url_ok = false;
 
         HttpURLConnection con = null;
+
+        boolean error = false, error509 = false, error403 = false;
+
+        SmartMegaProxyManager proxy_manager = null;
 
         String current_proxy = null;
 
@@ -747,18 +751,24 @@ public final class MiscTools {
 
                 URL url = new URL(string_url + "/0-0");
 
-                if (con == null || !url_ok) {
+                if (con == null || error) {
 
                     if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                        if (current_proxy != null) {
+                        if (MainPanel.isUse_smart_proxy() && proxy_manager == null) {
 
-                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
+                            proxy_manager = MainPanel.getProxy_manager();
 
-                            MainPanel.getProxy_manager().blockProxy(current_proxy);
                         }
 
-                        current_proxy = MainPanel.getProxy_manager().getFastestProxy();
+                        if (error && !error403 && current_proxy != null) {
+
+                            proxy_manager.blockProxy(current_proxy);
+                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
+
+                        }
+
+                        current_proxy = proxy_manager.getFastestProxy();
 
                         if (current_proxy != null) {
 
@@ -770,11 +780,21 @@ public final class MiscTools {
 
                         } else {
 
-                            con = (HttpURLConnection) url.openConnection();
+                            if (MainPanel.isUse_proxy()) {
+
+                                con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+
+                                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+
+                                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                                }
+                            } else {
+
+                                con = (HttpURLConnection) url.openConnection();
+                            }
                         }
 
-                    }
-                    {
+                    } else {
 
                         if (MainPanel.isUse_proxy()) {
 
@@ -789,31 +809,33 @@ public final class MiscTools {
                             con = (HttpURLConnection) url.openConnection();
                         }
                     }
+
                 }
 
-                error509 = false;
+                con.setConnectTimeout(Transference.HTTP_TIMEOUT);
 
-                try {
+                con.setReadTimeout(Transference.HTTP_TIMEOUT);
 
-                    url_ok = (con.getResponseCode() == 200);
+                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                    error509 = (con.getResponseCode() == 509);
+                int http_status = con.getResponseCode();
 
-                } catch (IOException ex) {
-                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                if (http_status != 403) {
+
+                    url_ok = true;
+
                 }
 
-            } catch (Exception ex) {
+            } catch (IOException ex) {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             } finally {
 
                 if (con != null) {
                     con.disconnect();
-                    con = null;
                 }
             }
 
-        } while (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy());
+        } while (error509);
 
         return url_ok;
     }
