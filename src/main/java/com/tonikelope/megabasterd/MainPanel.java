@@ -47,7 +47,7 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.7";
+    public static final String VERSION = "5.8";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -65,7 +65,6 @@ public final class MainPanel {
     private static String _proxy_user;
     private static String _proxy_pass;
     private static boolean _use_smart_proxy;
-    private static String _smart_proxy_url;
     private static SmartMegaProxyManager _proxy_manager;
 
     public static void main(String args[]) {
@@ -140,8 +139,6 @@ public final class MainPanel {
         _use_proxy = false;
 
         _use_smart_proxy = false;
-
-        _smart_proxy_url = null;
 
         try {
 
@@ -228,7 +225,7 @@ public final class MainPanel {
                 @Override
                 public void run() {
 
-                    _proxy_manager = new SmartMegaProxyManager(_smart_proxy_url);
+                    _proxy_manager = new SmartMegaProxyManager(null);
 
                     swingInvoke(
                             new Runnable() {
@@ -304,10 +301,6 @@ public final class MainPanel {
 
     public static boolean isUse_smart_proxy() {
         return _use_smart_proxy;
-    }
-
-    public static String getUse_smart_proxy_url() {
-        return _smart_proxy_url;
     }
 
     public static SmartMegaProxyManager getProxy_manager() {
@@ -646,15 +639,6 @@ public final class MainPanel {
             _use_smart_proxy = use_smart_proxy.equals("yes");
         } else {
             _use_smart_proxy = DEFAULT_SMART_PROXY;
-        }
-
-        if (_use_smart_proxy) {
-
-            _smart_proxy_url = selectSettingValue("smart_proxy_url");
-
-        } else {
-
-            _smart_proxy_url = null;
         }
     }
 

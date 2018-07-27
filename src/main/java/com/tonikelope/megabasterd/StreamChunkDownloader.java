@@ -54,7 +54,7 @@ public class StreamChunkDownloader implements Runnable {
 
                 if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
 
-                    _proxy_manager = new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url());
+                    _proxy_manager = new SmartMegaProxyManager(null);
 
                 }
 

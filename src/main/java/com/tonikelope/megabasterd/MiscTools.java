@@ -58,6 +58,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import javax.swing.border.TitledBorder;
 
 /**
  *
@@ -273,6 +274,15 @@ public final class MiscTools {
 
             component.setFont(new_font);
         }
+    }
+
+    public static void updateTitledBorderFont(final TitledBorder border, final Font font, final float zoom_factor) {
+
+        Font old_title_font = border.getTitleFont();
+
+        Font new_title_font = font.deriveFont(old_title_font.getStyle(), Math.round(old_title_font.getSize() * zoom_factor));
+
+        border.setTitleFont(new_title_font);
     }
 
     public static String HashString(String algo, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {

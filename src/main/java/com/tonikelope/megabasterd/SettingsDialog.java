@@ -75,6 +75,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
+        updateTitledBorderFont(((javax.swing.border.TitledBorder) proxy_panel.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
+
+        updateTitledBorderFont(((javax.swing.border.TitledBorder) proxy_auth_panel.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
+
         downloads_scroll_pane.getVerticalScrollBar().setUnitIncrement(20);
 
         downloads_scroll_pane.getHorizontalScrollBar().setUnitIncrement(20);
@@ -421,17 +425,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         String smart_proxy = DBTools.selectSettingValue("smart_proxy");
 
-        String smart_proxy_url = null;
-
         if (smart_proxy != null) {
 
             use_smart_proxy = smart_proxy.equals("yes");
-
-            String url = DBTools.selectSettingValue("smart_proxy_url");
-
-            if (url != null && !"".equals(url)) {
-                smart_proxy_url = url;
-            }
         }
 
         if (use_smart_proxy) {
@@ -514,6 +510,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_port_spinner = new javax.swing.JSpinner();
         down_dir_label = new javax.swing.JLabel();
         rec_smart_proxy_label = new javax.swing.JLabel();
+        jSeparator5 = new javax.swing.JSeparator();
+        jSeparator6 = new javax.swing.JSeparator();
+        jSeparator7 = new javax.swing.JSeparator();
+        jSeparator8 = new javax.swing.JSeparator();
+        jSeparator9 = new javax.swing.JSeparator();
+        jSeparator10 = new javax.swing.JSeparator();
+        jSeparator11 = new javax.swing.JSeparator();
         uploads_panel = new javax.swing.JPanel();
         default_slots_up_label = new javax.swing.JLabel();
         max_uploads_label = new javax.swing.JLabel();
@@ -523,6 +526,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         max_up_speed_spinner = new javax.swing.JSpinner();
         limit_upload_speed_checkbox = new javax.swing.JCheckBox();
         rec_upload_slots_label = new javax.swing.JLabel();
+        jSeparator3 = new javax.swing.JSeparator();
+        jSeparator4 = new javax.swing.JSeparator();
         accounts_panel = new javax.swing.JPanel();
         mega_accounts_scrollpane = new javax.swing.JScrollPane();
         mega_accounts_table = new javax.swing.JTable();
@@ -557,6 +562,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         zoom_spinner = new javax.swing.JSpinner();
         rec_zoom_label = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        jSeparator1 = new javax.swing.JSeparator();
+        jSeparator2 = new javax.swing.JSeparator();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -709,9 +716,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addComponent(default_dir_label))
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addContainerGap()
-                                .addComponent(rec_smart_proxy_label))
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addContainerGap()
                                 .addComponent(max_downloads_label)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(max_downloads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -740,19 +744,32 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addComponent(max_down_speed_label)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(smart_proxy_checkbox)
                                     .addGroup(jPanel3Layout.createSequentialGroup()
                                         .addGap(21, 21, 21)
                                         .addComponent(use_mega_label)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                         .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                        .addGap(0, 428, Short.MAX_VALUE))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel3Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addContainerGap()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(rec_download_slots_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(megacrypter_reverse_warning_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(rec_download_slots_label, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 1164, Short.MAX_VALUE)
+                            .addComponent(megacrypter_reverse_warning_label, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jSeparator5)
+                            .addComponent(jSeparator6)
+                            .addComponent(jSeparator7)
+                            .addComponent(jSeparator8)
+                            .addComponent(jSeparator9)
+                            .addComponent(jSeparator10)
+                            .addComponent(jSeparator11)
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(rec_smart_proxy_label)
+                                .addGap(0, 0, Short.MAX_VALUE)))))
                 .addContainerGap())
+            .addGroup(jPanel3Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(smart_proxy_checkbox)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel3Layout.setVerticalGroup(
             jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -763,9 +780,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(default_dir_label)
                     .addComponent(change_download_dir_button))
                 .addGap(18, 18, 18)
+                .addComponent(jSeparator5, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_downloads_label)
                     .addComponent(max_downloads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator6, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(multi_slot_down_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -775,19 +796,27 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rec_download_slots_label)
                 .addGap(18, 18, 18)
+                .addComponent(jSeparator7, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(limit_download_speed_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(max_down_speed_label))
                 .addGap(18, 18, 18)
+                .addComponent(jSeparator8, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(verify_file_down_checkbox)
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator9, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(use_mega_account_down_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(use_mega_label))
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(megacrypter_reverse_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -797,10 +826,12 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGap(7, 7, 7)
                 .addComponent(megacrypter_reverse_warning_label)
                 .addGap(18, 18, 18)
+                .addComponent(jSeparator11, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(smart_proxy_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(rec_smart_proxy_label)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(94, Short.MAX_VALUE))
         );
 
         downloads_scroll_pane.setViewportView(jPanel3);
@@ -811,14 +842,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 1101, Short.MAX_VALUE)
+                .addComponent(downloads_scroll_pane)
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 469, Short.MAX_VALUE)
+                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 529, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -864,7 +895,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rec_upload_slots_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSeparator3, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(rec_upload_slots_label, javax.swing.GroupLayout.DEFAULT_SIZE, 1205, Short.MAX_VALUE)
                     .addGroup(uploads_panelLayout.createSequentialGroup()
                         .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(uploads_panelLayout.createSequentialGroup()
@@ -881,7 +913,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(max_uploads_spinner, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jSeparator4))
                 .addContainerGap())
         );
         uploads_panelLayout.setVerticalGroup(
@@ -892,18 +925,22 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(max_uploads_label)
                     .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
+                .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(default_slots_up_label)
                     .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rec_upload_slots_label)
                 .addGap(18, 18, 18)
+                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
                 .addComponent(limit_upload_speed_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_up_speed_label)
                     .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(304, Short.MAX_VALUE))
+                .addContainerGap(324, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_panel); // NOI18N
@@ -1084,7 +1121,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1092,7 +1129,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 146, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1169,11 +1206,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(proxy_user_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
+                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 375, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(proxy_pass_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 472, Short.MAX_VALUE))
+                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 523, Short.MAX_VALUE))
         );
         proxy_auth_panelLayout.setVerticalGroup(
             proxy_auth_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1195,7 +1232,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(proxy_panelLayout.createSequentialGroup()
                         .addComponent(use_proxy_checkbox)
-                        .addGap(0, 854, Short.MAX_VALUE))
+                        .addGap(0, 958, Short.MAX_VALUE))
                     .addGroup(proxy_panelLayout.createSequentialGroup()
                         .addGroup(proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, proxy_panelLayout.createSequentialGroup()
@@ -1260,6 +1297,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         rec_zoom_label.setDoubleBuffered(true);
 
         jButton1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 0, 0));
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
         jButton1.setText("RESET MEGABASTERD");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
@@ -1267,6 +1305,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 jButton1ActionPerformed(evt);
             }
         });
+
+        jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
@@ -1283,31 +1323,39 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(rec_zoom_label, javax.swing.GroupLayout.PREFERRED_SIZE, 203, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                             .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
                                 .addComponent(import_settings_button)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(export_settings_button)))))
+                                .addComponent(export_settings_button))))
+                    .addComponent(jSeparator1))
                 .addContainerGap())
         );
         advanced_panelLayout.setVerticalGroup(
             advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addGap(20, 20, 20)
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(export_settings_button)
-                    .addComponent(import_settings_button)
-                    .addComponent(zoom_label)
-                    .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jButton1)
-                    .addComponent(rec_zoom_label, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(export_settings_button)
+                            .addComponent(import_settings_button)
+                            .addComponent(zoom_label)
+                            .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jButton1)
+                            .addComponent(rec_zoom_label, javax.swing.GroupLayout.PREFERRED_SIZE, 17, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jSeparator2))
+                .addGap(18, 18, 18)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(180, Short.MAX_VALUE))
+                .addContainerGap(220, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Advanced", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-administrative-tools-30.png")), advanced_panel); // NOI18N
@@ -1335,7 +1383,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 596, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cancel_button)
@@ -2371,7 +2419,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             "Yes"};
 
         int n = showOptionDialog(this,
-                "ALL YOUR DATA AND TRANSFERENCES WILL BE DELETED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?",
+                "ALL YOUR SETTINGS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?",
                 "Warning!", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
                 null,
                 options,
@@ -2411,6 +2459,17 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JProgressBar jProgressBar1;
+    private javax.swing.JSeparator jSeparator1;
+    private javax.swing.JSeparator jSeparator10;
+    private javax.swing.JSeparator jSeparator11;
+    private javax.swing.JSeparator jSeparator2;
+    private javax.swing.JSeparator jSeparator3;
+    private javax.swing.JSeparator jSeparator4;
+    private javax.swing.JSeparator jSeparator5;
+    private javax.swing.JSeparator jSeparator6;
+    private javax.swing.JSeparator jSeparator7;
+    private javax.swing.JSeparator jSeparator8;
+    private javax.swing.JSeparator jSeparator9;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JCheckBox limit_download_speed_checkbox;
     private javax.swing.JCheckBox limit_upload_speed_checkbox;

@@ -866,7 +866,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             if (MainPanel.isUse_smart_proxy()) {
 
-                MainPanel.setProxy_manager(new SmartMegaProxyManager(MainPanel.getUse_smart_proxy_url()));
+                MainPanel.setProxy_manager(new SmartMegaProxyManager(null));
 
                 updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(MainPanel.getProxy_manager().getProxyCount()) + ")");
 
