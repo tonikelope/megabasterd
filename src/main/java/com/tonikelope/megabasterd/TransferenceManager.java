@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import javax.swing.JPanel;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import static java.util.logging.Level.SEVERE;
 
 /**
  *
@@ -400,7 +401,18 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                             if (run != null) {
 
-                                run.run();
+                                boolean run_error;
+
+                                do {
+                                    run_error = false;
+
+                                    try {
+                                        run.run();
+                                    } catch (Exception ex) {
+                                        run_error = true;
+                                        Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                                    }
+                                } while (run_error);
                             }
                         }
 
