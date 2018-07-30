@@ -150,7 +150,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                         .addComponent(status_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(ok_button)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cancel_button))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(lock_label)
