@@ -134,6 +134,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             public void run() {
 
                 getKiss_server_status().setText(status + " ");
+                pack();
             }
         });
 
@@ -147,6 +148,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             public void run() {
 
                 getSmart_proxy_status().setText(status + " ");
+                pack();
             }
         });
 
@@ -160,6 +162,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             public void run() {
 
                 getMc_reverse_status().setText(status + " ");
+                pack();
             }
         });
 
@@ -562,17 +565,19 @@ public final class MainPanelView extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jTabbedPane1)
-                    .addGroup(layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(271, 271, 271))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(logo_label)))
                 .addContainerGap())
         );
@@ -580,7 +585,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 451, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(logo_label)

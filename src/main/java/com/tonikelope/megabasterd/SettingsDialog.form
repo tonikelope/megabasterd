@@ -31,7 +31,7 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jTabbedPane1" max="32767" attributes="0"/>
+                  <Component id="jTabbedPane1" pref="1071" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="status" max="32767" attributes="0"/>
                       <EmptySpace min="-2" pref="285" max="-2" attributes="0"/>
@@ -131,8 +131,8 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="downloads_scroll_pane" pref="1056" max="32767" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <Component id="downloads_scroll_pane" pref="1040" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -566,7 +566,7 @@
                       <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jSeparator3" alignment="1" max="32767" attributes="0"/>
-                          <Component id="rec_upload_slots_label" alignment="0" pref="1056" max="32767" attributes="0"/>
+                          <Component id="rec_upload_slots_label" alignment="0" pref="1040" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
@@ -1100,7 +1100,7 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
                                   <Component id="use_proxy_checkbox" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="0" pref="809" max="32767" attributes="0"/>
+                                  <EmptySpace min="0" pref="793" max="32767" attributes="0"/>
                               </Group>
                               <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
@@ -1226,11 +1226,11 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="proxy_user_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_user_textfield" pref="304" max="32767" attributes="0"/>
+                              <Component id="proxy_user_textfield" pref="296" max="32767" attributes="0"/>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Component id="proxy_pass_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_pass_textfield" pref="445" max="32767" attributes="0"/>
+                              <Component id="proxy_pass_textfield" pref="437" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
