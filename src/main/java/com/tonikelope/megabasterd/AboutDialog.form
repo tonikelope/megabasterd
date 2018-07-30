@@ -31,31 +31,29 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="mcdown_url_button" max="-2" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
-                      <Component id="check_version_button" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
+                  <Group type="102" attributes="0">
                       <Component id="made_in_spain_label" max="-2" attributes="0"/>
-                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="dot_com_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="1" attributes="0">
-                              <Component id="pica_roja_label" max="-2" attributes="0"/>
-                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="mb_label" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <Component id="mega_logo_label" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Component id="mc_logo_label" max="-2" attributes="0"/>
                           </Group>
-                          <Component id="author_webpage_label" alignment="1" max="-2" attributes="0"/>
+                          <Component id="author_webpage_label" alignment="1" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
-                  <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="title_label" max="-2" attributes="0"/>
-                          <Component id="subtitle_label" alignment="0" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                  <Component id="subtitle_label" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="title_label" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="83" max="-2" attributes="0"/>
+                      <Component id="mcdown_url_button" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="check_version_button" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -66,22 +64,27 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="title_label" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="subtitle_label" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="mcdown_url_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="check_version_button" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="title_label" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <EmptySpace min="-2" pref="9" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="mcdown_url_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="check_version_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                  </Group>
               </Group>
               <EmptySpace type="separate" max="-2" attributes="0"/>
+              <Component id="subtitle_label" min="-2" max="-2" attributes="0"/>
+              <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="1" attributes="0">
                   <Component id="made_in_spain_label" min="-2" max="-2" attributes="0"/>
                   <Component id="dot_com_label" alignment="1" min="-2" max="-2" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="pica_roja_label" alignment="1" min="-2" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="1" attributes="0">
+                          <Component id="mb_label" alignment="1" min="-2" max="-2" attributes="0"/>
                           <Component id="mc_logo_label" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Component id="mega_logo_label" alignment="1" min="-2" max="-2" attributes="0"/>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="author_webpage_label" min="-2" max="-2" attributes="0"/>
@@ -129,12 +132,12 @@
     <Component class="javax.swing.JLabel" name="subtitle_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="16" style="1"/>
+          <Font name="Dialog" size="20" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Yet another (unofficial) cross-platform MEGA.NZ downloader/uploader/streaming suite. "/>
+        <Property name="text" type="java.lang.String" value="Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite. "/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
@@ -170,12 +173,12 @@
     <Component class="javax.swing.JLabel" name="author_webpage_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="16" style="2"/>
+          <Font name="Dialog" size="12" style="2"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Made with love (and with no warranty) by tonikelope"/>
+        <Property name="text" type="java.lang.String" value="Made with love (and with no warranty) by tonikelope. (The copyright for the MEGA logo belongs to Mega Limited)."/>
         <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
           <Color id="Cursor de Mano"/>
         </Property>
@@ -187,10 +190,10 @@
         <EventHandler event="mouseEntered" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="author_webpage_labelMouseEntered"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JLabel" name="pica_roja_label">
+    <Component class="javax.swing.JLabel" name="mb_label">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/images/pica_roja_big.png"/>
+          <Image iconType="3" name="/images/mbasterd_logo_nuevo.png"/>
         </Property>
         <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
           <Color id="Cursor de Mano"/>
@@ -198,7 +201,7 @@
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
       <Events>
-        <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="pica_roja_labelMouseReleased"/>
+        <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mb_labelMouseReleased"/>
       </Events>
     </Component>
     <Component class="javax.swing.JButton" name="check_version_button">
@@ -222,6 +225,19 @@
           <Image iconType="3" name="/images/dot_com2.png"/>
         </Property>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="mega_logo_label">
+      <Properties>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/images/mega_logo.png"/>
+        </Property>
+        <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
+          <Color id="Cursor de Mano"/>
+        </Property>
+      </Properties>
+      <Events>
+        <EventHandler event="mouseReleased" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mega_logo_labelMouseReleased"/>
+      </Events>
     </Component>
   </SubComponents>
 </Form>

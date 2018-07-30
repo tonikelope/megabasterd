@@ -28,13 +28,16 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="jTabbedPane1" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
                       <Component id="status" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="285" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" alignment="1" attributes="0">
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       <Component id="save_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="cancel_button" min="-2" max="-2" attributes="0"/>
@@ -47,19 +50,16 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
-              <EmptySpace max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" pref="596" max="32767" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
+              <Component id="jTabbedPane1" max="32767" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <Component id="status" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="cancel_button" min="-2" max="-2" attributes="0"/>
-                  <Group type="102" alignment="1" attributes="0">
-                      <Group type="103" groupAlignment="1" attributes="0">
-                          <Component id="status" min="-2" max="-2" attributes="0"/>
-                          <Component id="save_button" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                  </Group>
+                  <Component id="save_button" alignment="1" min="-2" max="-2" attributes="0"/>
               </Group>
+              <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -130,9 +130,9 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="downloads_scroll_pane" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <Component id="downloads_scroll_pane" pref="1056" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -140,7 +140,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="downloads_scroll_pane" pref="529" max="32767" attributes="0"/>
+                      <Component id="downloads_scroll_pane" pref="512" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -163,10 +163,26 @@
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
+                                  <Component id="jSeparator10" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="jSeparator5" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="jSeparator9" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="jSeparator8" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="jSeparator7" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="jSeparator6" alignment="1" max="32767" attributes="0"/>
+                                  <Component id="jSeparator11" alignment="1" max="32767" attributes="0"/>
+                                  <Group type="102" attributes="0">
+                                      <EmptySpace min="20" pref="20" max="-2" attributes="0"/>
+                                      <Group type="103" groupAlignment="0" attributes="0">
+                                          <Component id="megacrypter_reverse_warning_label" max="32767" attributes="0"/>
+                                          <Group type="102" attributes="0">
+                                              <Component id="rec_download_slots_label" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                          </Group>
+                                      </Group>
+                                  </Group>
                                   <Group type="102" attributes="0">
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Group type="102" alignment="0" attributes="0">
-                                              <EmptySpace max="-2" attributes="0"/>
                                               <Component id="change_download_dir_button" min="-2" max="-2" attributes="0"/>
                                               <EmptySpace max="-2" attributes="0"/>
                                               <Component id="down_dir_label" min="-2" max="-2" attributes="0"/>
@@ -174,98 +190,68 @@
                                               <Component id="default_dir_label" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                           <Group type="102" alignment="0" attributes="0">
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="max_downloads_label" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="-2" attributes="0"/>
+                                              <Component id="max_downloads_label" min="-2" pref="252" max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Component id="max_downloads_spinner" min="-2" max="-2" attributes="0"/>
                                           </Group>
                                           <Group type="102" alignment="0" attributes="0">
-                                              <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
-                                              <Component id="default_slots_down_label" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="default_slots_down_spinner" min="-2" max="-2" attributes="0"/>
-                                          </Group>
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Component id="multi_slot_down_checkbox" min="-2" max="-2" attributes="0"/>
-                                          </Group>
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
+                                              <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
                                               <Component id="megacrypter_reverse_port_label" min="-2" max="-2" attributes="0"/>
-                                              <EmptySpace max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                               <Component id="megacrypter_reverse_port_spinner" min="-2" max="-2" attributes="0"/>
                                           </Group>
-                                          <Group type="102" attributes="0">
-                                              <EmptySpace max="-2" attributes="0"/>
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="megacrypter_reverse_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="use_mega_account_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="verify_file_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="limit_download_speed_checkbox" min="-2" max="-2" attributes="0"/>
-                                                  <Group type="102" alignment="0" attributes="0">
-                                                      <EmptySpace min="15" pref="15" max="-2" attributes="0"/>
-                                                      <Component id="max_down_speed_label" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="max_down_speed_spinner" min="-2" max="-2" attributes="0"/>
-                                                  </Group>
-                                                  <Group type="102" attributes="0">
-                                                      <EmptySpace min="21" pref="21" max="-2" attributes="0"/>
-                                                      <Component id="use_mega_label" min="-2" max="-2" attributes="0"/>
-                                                      <EmptySpace max="-2" attributes="0"/>
-                                                      <Component id="use_mega_account_down_combobox" min="-2" pref="500" max="-2" attributes="0"/>
-                                                  </Group>
-                                              </Group>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
+                                              <Component id="max_down_speed_label" min="-2" pref="162" max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                              <Component id="max_down_speed_spinner" min="-2" max="-2" attributes="0"/>
                                           </Group>
+                                          <Group type="102" attributes="0">
+                                              <EmptySpace min="-2" pref="28" max="-2" attributes="0"/>
+                                              <Component id="use_mega_label" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                                              <Component id="use_mega_account_down_combobox" min="-2" pref="500" max="-2" attributes="0"/>
+                                          </Group>
+                                          <Group type="102" alignment="0" attributes="0">
+                                              <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                                              <Component id="default_slots_down_label" min="-2" max="-2" attributes="0"/>
+                                              <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
+                                              <Component id="default_slots_down_spinner" min="-2" max="-2" attributes="0"/>
+                                          </Group>
+                                          <Component id="multi_slot_down_checkbox" min="-2" max="-2" attributes="0"/>
+                                          <Component id="limit_download_speed_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="verify_file_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="use_mega_account_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="megacrypter_reverse_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="smart_proxy_checkbox" min="-2" max="-2" attributes="0"/>
+                                          <Component id="rec_smart_proxy_label" max="-2" attributes="0"/>
                                       </Group>
                                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                   </Group>
-                                  <Group type="102" attributes="0">
-                                      <EmptySpace max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="0" attributes="0">
-                                          <Component id="rec_download_slots_label" alignment="1" pref="1164" max="32767" attributes="0"/>
-                                          <Component id="megacrypter_reverse_warning_label" alignment="1" max="32767" attributes="0"/>
-                                          <Component id="jSeparator5" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="jSeparator6" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="jSeparator7" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="jSeparator8" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="jSeparator9" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="jSeparator10" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="jSeparator11" alignment="0" max="32767" attributes="0"/>
-                                          <Group type="102" attributes="0">
-                                              <Component id="rec_smart_proxy_label" max="-2" attributes="0"/>
-                                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                          </Group>
-                                      </Group>
-                                  </Group>
                               </Group>
-                              <EmptySpace max="-2" attributes="0"/>
-                          </Group>
-                          <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace max="-2" attributes="0"/>
-                              <Component id="smart_proxy_checkbox" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace max="32767" attributes="0"/>
+                              <EmptySpace min="-2" pref="0" max="-2" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
                     <DimensionLayout dim="1">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Group type="102" alignment="0" attributes="0">
-                              <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" pref="0" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="down_dir_label" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="default_dir_label" alignment="3" max="-2" attributes="0"/>
                                   <Component id="change_download_dir_button" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jSeparator5" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                              <Component id="jSeparator5" min="-2" pref="2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="max_downloads_label" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="max_downloads_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jSeparator6" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                              <Component id="jSeparator6" min="-2" pref="2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="multi_slot_down_checkbox" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
@@ -275,8 +261,8 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="rec_download_slots_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jSeparator7" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                              <Component id="jSeparator7" min="-2" pref="2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="limit_download_speed_checkbox" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
@@ -284,12 +270,12 @@
                                   <Component id="max_down_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jSeparator8" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                              <Component id="jSeparator8" min="-2" pref="2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="verify_file_down_checkbox" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jSeparator9" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                              <Component id="jSeparator9" min="-2" pref="2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="use_mega_account_down_checkbox" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
@@ -297,23 +283,23 @@
                                   <Component id="use_mega_label" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jSeparator10" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
+                              <Component id="jSeparator10" min="-2" pref="2" max="-2" attributes="0"/>
+                              <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="megacrypter_reverse_checkbox" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="unrelated" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="megacrypter_reverse_port_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="megacrypter_reverse_port_label" alignment="3" min="-2" max="-2" attributes="0"/>
                               </Group>
-                              <EmptySpace min="-2" pref="7" max="-2" attributes="0"/>
+                              <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Component id="megacrypter_reverse_warning_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="jSeparator11" min="-2" max="-2" attributes="0"/>
+                              <Component id="jSeparator11" min="-2" pref="2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="smart_proxy_checkbox" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Component id="rec_smart_proxy_label" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace pref="94" max="32767" attributes="0"/>
+                              <EmptySpace max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
@@ -529,7 +515,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="14" style="2"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Note: use it in order to mitigate bandwidth limit. (Multi slot required)."/>
+                        <Property name="text" type="java.lang.String" value="Note: enable it in order to mitigate bandwidth limit. (Multi slot required)."/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JSeparator" name="jSeparator5">
@@ -577,16 +563,16 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="jSeparator3" alignment="1" max="32767" attributes="0"/>
-                          <Component id="rec_upload_slots_label" alignment="0" pref="1205" max="32767" attributes="0"/>
+                          <Component id="rec_upload_slots_label" alignment="0" pref="1056" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Group type="102" alignment="0" attributes="0">
-                                      <EmptySpace min="21" pref="21" max="-2" attributes="0"/>
+                                      <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
                                       <Component id="max_up_speed_label" min="-2" max="-2" attributes="0"/>
-                                      <EmptySpace max="-2" attributes="0"/>
+                                      <EmptySpace type="unrelated" max="-2" attributes="0"/>
                                       <Component id="max_up_speed_spinner" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
@@ -595,7 +581,7 @@
                                           <Component id="default_slots_up_label" max="32767" attributes="0"/>
                                           <Component id="max_uploads_label" max="32767" attributes="0"/>
                                       </Group>
-                                      <EmptySpace min="-2" pref="41" max="-2" attributes="0"/>
+                                      <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                                       <Group type="103" groupAlignment="0" attributes="0">
                                           <Component id="max_uploads_spinner" alignment="1" min="-2" max="-2" attributes="0"/>
                                           <Component id="default_slots_up_spinner" alignment="1" min="-2" max="-2" attributes="0"/>
@@ -606,14 +592,14 @@
                           </Group>
                           <Component id="jSeparator4" alignment="0" max="32767" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="max_uploads_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="max_uploads_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -636,7 +622,7 @@
                           <Component id="max_up_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="max_up_speed_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="324" max="32767" attributes="0"/>
+                      <EmptySpace pref="315" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -710,7 +696,7 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="14" style="2"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Note: (Slots consume RAM, so use them moderately)."/>
+                <Property name="text" type="java.lang.String" value="Note: slots consume RAM, so use them moderately."/>
               </Properties>
             </Component>
             <Component class="javax.swing.JSeparator" name="jSeparator3">
@@ -744,7 +730,7 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="mega_accounts_scrollpane" alignment="0" max="32767" attributes="0"/>
                           <Group type="102" attributes="0">
@@ -774,14 +760,14 @@
                           </Group>
                           <Component id="jLabel1" alignment="0" max="32767" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="unlock_accounts_button" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="delete_all_accounts_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -792,7 +778,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="146" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="141" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -801,7 +787,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="146" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="142" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1037,7 +1023,7 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="proxy_panel" max="32767" attributes="0"/>
                           <Group type="102" alignment="1" attributes="0">
@@ -1063,14 +1049,14 @@
                           </Group>
                           <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
                       </Group>
-                      <EmptySpace max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Group type="102" attributes="0">
                               <Group type="103" groupAlignment="3" attributes="0">
@@ -1091,7 +1077,7 @@
                       <Component id="jSeparator1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="separate" min="-2" max="-2" attributes="0"/>
                       <Component id="proxy_panel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="220" max="32767" attributes="0"/>
+                      <EmptySpace pref="211" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -1114,7 +1100,7 @@
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Group type="102" attributes="0">
                                   <Component id="use_proxy_checkbox" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="0" pref="958" max="32767" attributes="0"/>
+                                  <EmptySpace min="0" pref="809" max="32767" attributes="0"/>
                               </Group>
                               <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
@@ -1240,11 +1226,11 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="proxy_user_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_user_textfield" pref="375" max="32767" attributes="0"/>
+                              <Component id="proxy_user_textfield" pref="304" max="32767" attributes="0"/>
                               <EmptySpace min="-2" max="-2" attributes="0"/>
                               <Component id="proxy_pass_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
-                              <Component id="proxy_pass_textfield" pref="523" max="32767" attributes="0"/>
+                              <Component id="proxy_pass_textfield" pref="445" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                     </DimensionLayout>
