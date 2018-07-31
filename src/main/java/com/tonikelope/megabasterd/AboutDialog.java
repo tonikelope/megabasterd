@@ -12,12 +12,13 @@ import java.awt.Color;
  */
 public final class AboutDialog extends javax.swing.JDialog {
 
-    private static final String MEGA_URL = "https://mega.nz/";
-    private static final String MEGABASTERD_URL = "https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A";
-    private static final String TONIKELOPE_URL = "https://github.com/tonikelope/";
-    private static final String MEGACRYPTER_URL = "https://tonikelope.github.io/megacrypter/";
-    private static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
-    private static final String MEGABASTERD_GITHUB_URL = "https://github.com/tonikelope/megabasterd/";
+    public static final String MEGA_URL = "https://mega.nz/";
+    public static final String MEGABASTERD_URL = "https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A";
+    public static final String TONIKELOPE_URL = "https://github.com/tonikelope/";
+    public static final String MEGACRYPTER_URL = "https://tonikelope.github.io/megacrypter/";
+    public static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
+    public static final String MEGABASTERD_GITHUB_URL = "https://github.com/tonikelope/megabasterd/";
+    public static final String KIM_URL = "http://www.kim.com/";
 
     public AboutDialog(MainPanelView parent, boolean modal) {
 
@@ -48,7 +49,6 @@ public final class AboutDialog extends javax.swing.JDialog {
         mb_label = new javax.swing.JLabel();
         check_version_button = new javax.swing.JButton();
         dot_com_label = new javax.swing.JLabel();
-        mega_logo_label = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("About");
@@ -83,7 +83,19 @@ public final class AboutDialog extends javax.swing.JDialog {
         subtitle_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
         subtitle_label.setText("Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite. ");
+        subtitle_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         subtitle_label.setDoubleBuffered(true);
+        subtitle_label.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                subtitle_labelMouseReleased(evt);
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                subtitle_labelMouseExited(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                subtitle_labelMouseEntered(evt);
+            }
+        });
 
         mc_logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/mega_crypter.png"))); // NOI18N
         mc_logo_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -104,9 +116,9 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        author_webpage_label.setFont(new java.awt.Font("Dialog", 2, 12)); // NOI18N
+        author_webpage_label.setFont(new java.awt.Font("Dialog", 2, 18)); // NOI18N
         author_webpage_label.setForeground(new java.awt.Color(102, 102, 102));
-        author_webpage_label.setText("Made with love (and with no warranty) by tonikelope. (The copyright for the MEGA logo belongs to Mega Limited).");
+        author_webpage_label.setText("Made with love (and with no warranty) by tonikelope.");
         author_webpage_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         author_webpage_label.setDoubleBuffered(true);
         author_webpage_label.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -141,12 +153,10 @@ public final class AboutDialog extends javax.swing.JDialog {
         });
 
         dot_com_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/dot_com2.png"))); // NOI18N
-
-        mega_logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/mega_logo.png"))); // NOI18N
-        mega_logo_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        mega_logo_label.addMouseListener(new java.awt.event.MouseAdapter() {
+        dot_com_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        dot_com_label.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseReleased(java.awt.event.MouseEvent evt) {
-                mega_logo_labelMouseReleased(evt);
+                dot_com_labelMouseReleased(evt);
             }
         });
 
@@ -165,15 +175,13 @@ public final class AboutDialog extends javax.swing.JDialog {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addComponent(mb_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(mega_logo_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addGap(18, 18, 18)
                                 .addComponent(mc_logo_label))
                             .addComponent(author_webpage_label, javax.swing.GroupLayout.Alignment.TRAILING)))
                     .addComponent(subtitle_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(77, 77, 77)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(mcdown_url_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(check_version_button)))
@@ -199,8 +207,7 @@ public final class AboutDialog extends javax.swing.JDialog {
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(mb_label)
-                            .addComponent(mc_logo_label)
-                            .addComponent(mega_logo_label))
+                            .addComponent(mc_logo_label))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(author_webpage_label)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -294,10 +301,25 @@ public final class AboutDialog extends javax.swing.JDialog {
         title_label.setForeground(new Color(51, 51, 51));
     }//GEN-LAST:event_title_labelMouseExited
 
-    private void mega_logo_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mega_logo_labelMouseReleased
+    private void subtitle_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_subtitle_labelMouseReleased
         // TODO add your handling code here:
         openBrowserURL(MEGA_URL);
-    }//GEN-LAST:event_mega_logo_labelMouseReleased
+    }//GEN-LAST:event_subtitle_labelMouseReleased
+
+    private void dot_com_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_dot_com_labelMouseReleased
+        // TODO add your handling code here:
+        openBrowserURL(KIM_URL);
+    }//GEN-LAST:event_dot_com_labelMouseReleased
+
+    private void subtitle_labelMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_subtitle_labelMouseEntered
+        // TODO add your handling code here:
+        subtitle_label.setForeground(Color.blue);
+    }//GEN-LAST:event_subtitle_labelMouseEntered
+
+    private void subtitle_labelMouseExited(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_subtitle_labelMouseExited
+        // TODO add your handling code here:
+        subtitle_label.setForeground(new Color(102, 102, 102));
+    }//GEN-LAST:event_subtitle_labelMouseExited
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel author_webpage_label;
@@ -307,7 +329,6 @@ public final class AboutDialog extends javax.swing.JDialog {
     private javax.swing.JLabel mb_label;
     private javax.swing.JLabel mc_logo_label;
     private javax.swing.JButton mcdown_url_button;
-    private javax.swing.JLabel mega_logo_label;
     private javax.swing.JLabel subtitle_label;
     private javax.swing.JLabel title_label;
     // End of variables declaration//GEN-END:variables

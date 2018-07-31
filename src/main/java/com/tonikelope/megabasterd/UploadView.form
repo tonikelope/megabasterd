@@ -111,6 +111,9 @@
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
           <Font name="Dialog" size="20" style="1"/>
         </Property>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="66" green="66" red="66" type="rgb"/>
+        </Property>
         <Property name="text" type="java.lang.String" value="status"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
@@ -196,7 +199,7 @@
           <Font name="Dialog" size="20" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ff" green="33" red="33" type="rgb"/>
+          <Color blue="99" green="66" red="0" type="rgb"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Archivo de prueba xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -238,7 +241,7 @@
           <Font name="Dialog" size="20" style="1"/>
         </Property>
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
-          <Color blue="ff" green="33" red="33" type="rgb"/>
+          <Color blue="99" green="66" red="0" type="rgb"/>
         </Property>
         <Property name="text" type="java.lang.String" value="500 MB"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>

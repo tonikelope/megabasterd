@@ -63,6 +63,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         initComponents();
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
+
+        updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel1.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
+
+        updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel2.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
+
         _total_space = 0L;
         _base_path = null;
         _upload = false;
@@ -282,7 +287,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         total_file_size_label.setDoubleBuffered(true);
         total_file_size_label.setEnabled(false);
 
-        warning_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        warning_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
         warning_label.setText("If you DO NOT want to upload some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).");
         warning_label.setDoubleBuffered(true);
         warning_label.setEnabled(false);
@@ -443,7 +448,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
     private void add_folder_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_folder_buttonActionPerformed
 
-        add_folder_button.setText("Adding files, please wait...");
+        add_folder_button.setText("Adding folder, please wait...");
 
         add_files_button.setEnabled(false);
         add_folder_button.setEnabled(false);
@@ -544,7 +549,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             final Dialog tthis = this;
 
-            used_space_label.setForeground(Color.black);
+            used_space_label.setForeground(new Color(102, 102, 102));
 
             used_space_label.setText("Checking account quota, please wait...");
 
@@ -583,7 +588,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                         if (quota[0] <= Math.round((double) quota[1] / 2)) {
 
-                            used_space_color = new Color(0, 128, 0);
+                            used_space_color = new Color(0, 170, 0);
 
                         } else if (quota[0] < quota[1]) {
 

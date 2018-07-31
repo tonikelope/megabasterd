@@ -154,6 +154,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 3, true));
 
         status_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        status_label.setForeground(new java.awt.Color(102, 102, 102));
         status_label.setText("status");
         status_label.setDoubleBuffered(true);
 
@@ -206,7 +207,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         keep_temp_checkbox.setDoubleBuffered(true);
 
         file_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        file_name_label.setForeground(new java.awt.Color(51, 51, 255));
+        file_name_label.setForeground(new java.awt.Color(0, 102, 153));
         file_name_label.setText("Archivo de prueba xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
         file_name_label.setDoubleBuffered(true);
 
@@ -241,7 +242,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         });
 
         file_size_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
-        file_size_label.setForeground(new java.awt.Color(51, 51, 255));
+        file_size_label.setForeground(new java.awt.Color(0, 102, 153));
         file_size_label.setText("500 MB");
         file_size_label.setDoubleBuffered(true);
 
@@ -526,7 +527,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             @Override
             public void run() {
 
-                status_label.setForeground(new Color(0, 128, 0));
+                status_label.setForeground(new Color(0, 170, 0));
                 status_label.setText(message);
             }
         });
@@ -540,7 +541,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             @Override
             public void run() {
 
-                status_label.setForeground(Color.black);
+                status_label.setForeground(new Color(102, 102, 102));
                 status_label.setText(message);
             }
         });

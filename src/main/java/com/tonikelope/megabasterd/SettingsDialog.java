@@ -1855,7 +1855,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             "Yes"};
 
         int n = showOptionDialog(this,
-                "Only SAVED settings and accounts will be exported. (If you are unsure, it is best to save your current settings and then export them).\n\nDo you want to continue?",
+                "Only SAVED settings and accounts will be exported. (If you are unsure, it is better to save your current settings and then export them).\n\nDo you want to continue?",
                 "EXPORT SETTINGS", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
                 null,
                 options,
@@ -2432,7 +2432,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             "Yes"};
 
         int n = showOptionDialog(this,
-                "ALL YOUR SETTINGS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?",
+                "ALL YOUR SETTINGS, ACCOUNTS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?",
                 "RESET MEGABASTERD", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
                 null,
                 options,

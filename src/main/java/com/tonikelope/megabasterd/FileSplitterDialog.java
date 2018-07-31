@@ -138,6 +138,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("File Splitter");
+        setResizable(false);
 
         file_button.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         file_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-add-file-30.png"))); // NOI18N

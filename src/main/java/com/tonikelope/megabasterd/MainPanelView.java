@@ -508,6 +508,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(jSeparator2);
 
         hide_tray_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        hide_tray_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/mbasterd_32.png"))); // NOI18N
         hide_tray_menu.setText("Hide to tray");
         hide_tray_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

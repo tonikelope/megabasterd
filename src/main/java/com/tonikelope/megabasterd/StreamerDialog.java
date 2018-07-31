@@ -114,6 +114,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Streamer");
+        setResizable(false);
 
         put_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         put_label.setText("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:");
@@ -258,7 +259,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                         _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
                         copyTextToClipboard(stream_link);
-                        JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content. (I recommend to use MPLAYER)");
+                        JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content.");
                         dispose();
                         getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
                     }
@@ -299,6 +300,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                                 @Override
                                 public void run() {
                                     use_mega_account_down_combobox.setSelectedIndex(_main_panel.getMega_accounts().size());
+                                    pack();
 
                                 }
                             });
@@ -312,6 +314,8 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                                 getDance_button().setText("Let's dance, baby");
 
                                 getDance_button().setEnabled(true);
+
+                                pack();
 
                             }
                         });
