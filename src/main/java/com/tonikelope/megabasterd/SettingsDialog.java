@@ -33,6 +33,7 @@ import javax.swing.table.DefaultTableModel;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import java.nio.file.Paths;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 /**
@@ -96,9 +97,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         String default_download_dir = DBTools.selectSettingValue("default_down_dir");
 
-        if (default_download_dir == null) {
-            default_download_dir = ".";
-        }
+        default_download_dir = Paths.get(default_download_dir == null ? "." : default_download_dir).toAbsolutePath().normalize().toString();
 
         _download_path = default_download_dir;
 

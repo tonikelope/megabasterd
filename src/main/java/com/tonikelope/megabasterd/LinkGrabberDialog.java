@@ -16,6 +16,7 @@ import javax.swing.JTextArea;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import java.nio.file.Paths;
 
 /**
  *
@@ -64,13 +65,13 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         _download = false;
 
-        _download_path = download_path;
+        _download_path = Paths.get(download_path).toAbsolutePath().normalize().toString();
 
         _selected_item = null;
 
         _clipboardspy = clipboardspy;
 
-        download_dir_label.setText(truncateText(download_path, 80));
+        download_dir_label.setText(truncateText(_download_path, 80));
 
         if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
 
