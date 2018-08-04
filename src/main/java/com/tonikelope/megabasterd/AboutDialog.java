@@ -17,7 +17,7 @@ public final class AboutDialog extends javax.swing.JDialog {
     public static final String TONIKELOPE_URL = "https://github.com/tonikelope/";
     public static final String MEGACRYPTER_URL = "https://tonikelope.github.io/megacrypter/";
     public static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
-    public static final String MEGABASTERD_GITHUB_URL = "https://github.com/tonikelope/megabasterd/";
+    public static final String MEGABASTERD_GITHUB_URL = "https://tonikelope.github.io/megabasterd/";
     public static final String KIM_URL = "http://www.kim.com/";
 
     public AboutDialog(MainPanelView parent, boolean modal) {

@@ -65,6 +65,7 @@ public final class MegaAPI {
     public MegaAPI() {
         _req_id = null;
         _trashbin_id = null;
+        _full_email = null;
         _email = null;
         _inbox_id = null;
         _root_id = null;

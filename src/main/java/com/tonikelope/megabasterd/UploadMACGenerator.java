@@ -77,7 +77,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
             boolean mac = false;
 
-            HashMap upload_progress = DBTools.selectUploadProgress(_upload.getFile_name(), _upload.getMa().getEmail());
+            HashMap upload_progress = DBTools.selectUploadProgress(_upload.getFile_name(), _upload.getMa().getFull_email());
 
             int[] file_mac = new int[]{0, 0, 0, 0};
 

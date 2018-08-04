@@ -375,7 +375,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             try {
                 _file_size = the_file.length();
 
-                HashMap upload_progress = DBTools.selectUploadProgress(getFile_name(), getMa().getEmail());
+                HashMap upload_progress = DBTools.selectUploadProgress(getFile_name(), getMa().getFull_email());
 
                 if (upload_progress == null) {
 
