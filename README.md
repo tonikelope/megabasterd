@@ -1,4 +1,4 @@
 <p align="center"><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/src/main/resources/images/mbasterd_logo_git.png"></p>
-<p align="center">[<a href="https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A"><b>Download latest build]</p>
+<p align="center">[<a href="https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A"><b>Download latest build]</b></p>
 
-DEMO -> https://youtu.be/5TkBXT7osQI
+<iframe width="420" height="315" src="https://www.youtube.com/embed/5TkBXT7osQI" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
