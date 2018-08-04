@@ -1,6 +1,6 @@
 <p align="center"><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/src/main/resources/images/mbasterd_logo_git.png"></p>
-<p align="center">Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite.<br>[<a href="https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A"><b>Download latest build here (Windows, Linux, macOS)</b></a>]</p>
+<p align="center">Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite.<br><b>[<a href="https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A">Download latest build</a>]</b></p>
 
 ![Screnshot](/src/main/resources/images/mbasterd_screen.png)
 
-DEMO -> https://youtu.be/5TkBXT7osQI
+<p align="center">https://youtu.be/5TkBXT7osQI</p>
