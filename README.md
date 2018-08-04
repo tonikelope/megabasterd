@@ -5,4 +5,4 @@
 <iframe src="https://www.youtube.com/embed/5TkBXT7osQI" frameborder="0" allowfullscreen="allowfullscreen"></iframe>
 </div>
 
-<p align="center"><i>MegaBasterd requires <a href="https://java.com" target="_blank">Java</a></i></p>
+<p align="center"><i>Note: MegaBasterd requires <a href="https://java.com" target="_blank">Java</a></i></p>
