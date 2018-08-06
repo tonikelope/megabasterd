@@ -59,7 +59,7 @@
               <Component id="output_folder_label" min="-2" max="-2" attributes="0"/>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="jProgressBar2" min="-2" pref="36" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace type="separate" max="32767" attributes="0"/>
               <Component id="delete_parts_checkbox" min="-2" max="-2" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="merge_button" min="-2" max="-2" attributes="0"/>
@@ -102,6 +102,7 @@
         </Property>
         <Property name="text" type="java.lang.String" value="Change output folder"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="output_buttonActionPerformed"/>
@@ -110,7 +111,7 @@
     <Component class="javax.swing.JLabel" name="file_size_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="18" style="0"/>
+          <Font name="Dialog" size="18" style="1"/>
         </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
@@ -147,6 +148,7 @@
         </Property>
         <Property name="text" type="java.lang.String" value="MERGE FILE"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="merge_buttonActionPerformed"/>
@@ -160,6 +162,7 @@
         <Property name="selected" type="boolean" value="true"/>
         <Property name="text" type="java.lang.String" value="Delete parts after merge"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
     </Component>
   </SubComponents>

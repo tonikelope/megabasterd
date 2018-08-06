@@ -194,9 +194,9 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 MegaAPI ma = null;
 
-                if (mega_account == null || (ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, _main_panel.getView(), mega_account)) == null) {
+                if (mega_account != null) {
 
-                    ma = new MegaAPI();
+                    ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, _main_panel.getView(), mega_account);
                 }
 
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {

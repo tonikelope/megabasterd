@@ -665,7 +665,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_port_label.setText("TCP Port:");
 
         default_dir_label.setBackground(new java.awt.Color(153, 255, 153));
-        default_dir_label.setFont(new java.awt.Font("Dialog", 2, 18)); // NOI18N
+        default_dir_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         default_dir_label.setText("default dir");
         default_dir_label.setOpaque(true);
 

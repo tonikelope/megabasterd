@@ -157,24 +157,27 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         output_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-add-folder-30.png"))); // NOI18N
         output_button.setText("Change output folder");
         output_button.setDoubleBuffered(true);
+        output_button.setEnabled(false);
         output_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 output_buttonActionPerformed(evt);
             }
         });
 
-        file_size_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        file_size_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         file_size_label.setDoubleBuffered(true);
 
         output_folder_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         output_folder_label.setDoubleBuffered(true);
 
-        split_size_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        split_size_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         split_size_label.setText("Split size (MBs):");
         split_size_label.setDoubleBuffered(true);
+        split_size_label.setEnabled(false);
 
         split_size_text.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         split_size_text.setDoubleBuffered(true);
+        split_size_text.setEnabled(false);
 
         jProgressBar2.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         jProgressBar2.setDoubleBuffered(true);
@@ -185,6 +188,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         split_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cut-30.png"))); // NOI18N
         split_button.setText("SPLIT FILE");
         split_button.setDoubleBuffered(true);
+        split_button.setEnabled(false);
         split_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 split_buttonActionPerformed(evt);
@@ -245,10 +249,6 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         this.file_button.setEnabled(false);
 
-        this.output_button.setEnabled(false);
-
-        this.split_button.setEnabled(false);
-
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
         filechooser.setDialogTitle("Select file");
@@ -267,15 +267,16 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             this.jProgressBar2.setStringPainted(true);
             this.jProgressBar2.setValue(0);
             this._progress = 0L;
+
+            this.output_button.setEnabled(true);
+            this.split_size_label.setEnabled(true);
+            this.split_size_text.setEnabled(true);
+            this.split_button.setEnabled(true);
         }
 
         this.file_button.setText("Select file");
 
         this.file_button.setEnabled(true);
-
-        this.output_button.setEnabled(true);
-
-        this.split_button.setEnabled(true);
 
         pack();
 

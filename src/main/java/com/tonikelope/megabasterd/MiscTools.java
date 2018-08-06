@@ -1034,7 +1034,7 @@ public final class MiscTools {
 
                             pdialog.dispose();
 
-                            throw new Exception();
+                            return null;
                         }
 
                     } else {

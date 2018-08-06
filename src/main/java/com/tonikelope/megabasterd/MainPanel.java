@@ -47,7 +47,7 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.16";
+    public static final String VERSION = "5.17";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -966,18 +966,16 @@ public final class MainPanel {
 
                             String email = (String) o.get("email");
 
-                            MegaAPI ma;
+                            MegaAPI ma = new MegaAPI();
 
-                            if (!tthis.isUse_mega_account_down() || _mega_accounts.get(email) == null || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) == null) {
+                            if (!tthis.isUse_mega_account_down() || (_mega_accounts.get(email) != null && (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null)) {
 
-                                ma = new MegaAPI();
+                                Download download = new Download(tthis, ma, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, _default_slots_down, false);
+
+                                getDownload_manager().getTransference_provision_queue().add(download);
+
+                                conta_downloads++;
                             }
-
-                            Download download = new Download(tthis, ma, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, _default_slots_down, false);
-
-                            getDownload_manager().getTransference_provision_queue().add(download);
-
-                            conta_downloads++;
 
                         } catch (Exception ex) {
                             Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
@@ -1141,19 +1139,18 @@ public final class MainPanel {
 
                             String email = (String) o.get("email");
 
-                            MegaAPI ma;
-
                             if (_mega_accounts.get(email) != null) {
 
-                                if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) == null) {
-                                    ma = new MegaAPI();
+                                MegaAPI ma;
+
+                                if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+
+                                    Upload upload = new Upload(tthis, ma, (String) o.get("filename"), (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), _default_slots_up);
+
+                                    getUpload_manager().getTransference_provision_queue().add(upload);
+
+                                    conta_uploads++;
                                 }
-
-                                Upload upload = new Upload(tthis, ma, (String) o.get("filename"), (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), _default_slots_up);
-
-                                getUpload_manager().getTransference_provision_queue().add(upload);
-
-                                conta_uploads++;
 
                             } else {
 

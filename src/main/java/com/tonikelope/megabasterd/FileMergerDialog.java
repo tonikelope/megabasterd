@@ -141,13 +141,14 @@ public class FileMergerDialog extends javax.swing.JDialog {
         output_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-add-folder-30.png"))); // NOI18N
         output_button.setText("Change output folder");
         output_button.setDoubleBuffered(true);
+        output_button.setEnabled(false);
         output_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 output_buttonActionPerformed(evt);
             }
         });
 
-        file_size_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        file_size_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         file_size_label.setDoubleBuffered(true);
 
         output_folder_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
@@ -162,6 +163,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
         merge_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-glue-30.png"))); // NOI18N
         merge_button.setText("MERGE FILE");
         merge_button.setDoubleBuffered(true);
+        merge_button.setEnabled(false);
         merge_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 merge_buttonActionPerformed(evt);
@@ -172,6 +174,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
         delete_parts_checkbox.setSelected(true);
         delete_parts_checkbox.setText("Delete parts after merge");
         delete_parts_checkbox.setDoubleBuffered(true);
+        delete_parts_checkbox.setEnabled(false);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -207,7 +210,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                 .addComponent(output_folder_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jProgressBar2, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, Short.MAX_VALUE)
                 .addComponent(delete_parts_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(merge_button)
@@ -223,12 +226,6 @@ public class FileMergerDialog extends javax.swing.JDialog {
         this.file_button.setText("Selecting file...");
 
         this.file_button.setEnabled(false);
-
-        this.output_button.setEnabled(false);
-
-        this.merge_button.setEnabled(false);
-
-        this.delete_parts_checkbox.setEnabled(false);
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -269,6 +266,11 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
                 this.file_size_label.setText(MiscTools.formatBytes(_file_size));
 
+                this.output_button.setEnabled(true);
+
+                this.delete_parts_checkbox.setEnabled(true);
+
+                this.merge_button.setEnabled(true);
             }
 
         }
@@ -276,12 +278,6 @@ public class FileMergerDialog extends javax.swing.JDialog {
         this.file_button.setText("Select (any) file part");
 
         this.file_button.setEnabled(true);
-
-        this.output_button.setEnabled(true);
-
-        this.merge_button.setEnabled(true);
-
-        this.delete_parts_checkbox.setEnabled(true);
 
         pack();
 
