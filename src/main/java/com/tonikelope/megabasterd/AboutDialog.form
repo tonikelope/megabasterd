@@ -134,7 +134,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite. "/>
+        <Property name="text" type="java.lang.String" value="Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite."/>
         <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
           <Color id="Cursor de Mano"/>
         </Property>

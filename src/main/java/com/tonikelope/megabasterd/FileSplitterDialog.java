@@ -19,6 +19,7 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MainPanel.DEFAULT_FONT;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.swingInvoke;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
 import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 import java.awt.Desktop;
 import java.awt.Dialog;
@@ -57,11 +58,14 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         initComponents();
         updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
+        translateLabels(getRootPane());
+
         jProgressBar2.setMinimum(0);
         jProgressBar2.setMaximum(MAX_VALUE);
         jProgressBar2.setStringPainted(true);
         jProgressBar2.setValue(0);
         jProgressBar2.setVisible(false);
+
         pack();
     }
 

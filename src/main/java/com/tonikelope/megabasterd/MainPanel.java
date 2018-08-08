@@ -47,12 +47,13 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.17";
+    public static final String VERSION = "5.18";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
+    public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = true;
     public static final Font DEFAULT_FONT = createAndRegisterFont("/fonts/Itim-Regular.ttf");
     public static final float ZOOM_FACTOR = 1.0f;
@@ -66,6 +67,7 @@ public final class MainPanel {
     private static String _proxy_pass;
     private static boolean _use_smart_proxy;
     private static SmartMegaProxyManager _proxy_manager;
+    private static String _language;
 
     public static void main(String args[]) {
 
@@ -153,6 +155,12 @@ public final class MainPanel {
         UIManager.put("OptionPane.messageFont", DEFAULT_FONT.deriveFont(15f * getZoom_factor()));
 
         UIManager.put("OptionPane.buttonFont", DEFAULT_FONT.deriveFont(13f * getZoom_factor()));
+
+        UIManager.put("OptionPane.cancelButtonText", LabelTranslatorSingleton.getInstance().translate("Cancel"));
+
+        UIManager.put("OptionPane.yesButtonText", LabelTranslatorSingleton.getInstance().translate("Yes"));
+
+        UIManager.put("OptionPane.okButtonText", LabelTranslatorSingleton.getInstance().translate("OK"));
 
         _view = new MainPanelView(this);
 
@@ -261,6 +269,10 @@ public final class MainPanel {
         resumeDownloads();
 
         resumeUploads();
+    }
+
+    public static String getLanguage() {
+        return _language;
     }
 
     public static String getProxy_user() {
@@ -640,6 +652,12 @@ public final class MainPanel {
         } else {
             _use_smart_proxy = DEFAULT_SMART_PROXY;
         }
+
+        _language = DBTools.selectSettingValue("language");
+
+        if (_language == null) {
+            _language = DEFAULT_LANGUAGE;
+        }
     }
 
     public boolean checkByeBye() {
@@ -649,11 +667,11 @@ public final class MainPanel {
         if (!_streamserver.getWorking_threads().isEmpty()) {
 
             Object[] options = {"No",
-                "Yes"};
+                LabelTranslatorSingleton.getInstance().translate("Yes")};
 
             int n = showOptionDialog(getView(),
-                    "It seems MegaBasterd is streaming video. Do you want to exit?",
-                    "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
+                    LabelTranslatorSingleton.getInstance().translate("It seems MegaBasterd is streaming video. Do you want to exit?"),
+                    LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
                     null,
                     options,
                     options[0]);
@@ -666,11 +684,11 @@ public final class MainPanel {
         } else if (!getDownload_manager().getTransference_provision_queue().isEmpty() || !getUpload_manager().getTransference_provision_queue().isEmpty()) {
 
             Object[] options = {"No",
-                "Yes"};
+                LabelTranslatorSingleton.getInstance().translate("Yes")};
 
             int n = showOptionDialog(getView(),
-                    "It seems MegaBasterd is provisioning down/uploads.\n\nIf you exit now, unprovisioned down/uploads will be lost.\n\nDo you want to continue?",
-                    "Warning!", YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
+                    LabelTranslatorSingleton.getInstance().translate("It seems MegaBasterd is provisioning down/uploads.\n\nIf you exit now, unprovisioned down/uploads will be lost.\n\nDo you want to continue?"),
+                    LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
                     null,
                     options,
                     options[0]);
@@ -683,11 +701,11 @@ public final class MainPanel {
         } else if (!getUpload_manager().getFinishing_uploads_queue().isEmpty()) {
 
             Object[] options = {"No",
-                "Yes"};
+                LabelTranslatorSingleton.getInstance().translate("Yes")};
 
             int n = showOptionDialog(getView(),
-                    "It seems MegaBasterd is just finishing uploading some files.\n\nIF YOU EXIT NOW, THOSE UPLOADS WILL FAIL.\n\nDo you want to continue?",
-                    "Warning!", YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
+                    LabelTranslatorSingleton.getInstance().translate("It seems MegaBasterd is just finishing uploading some files.\n\nIF YOU EXIT NOW, THOSE UPLOADS WILL FAIL.\n\nDo you want to continue?"),
+                    LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
                     null,
                     options,
                     options[0]);
@@ -712,7 +730,7 @@ public final class MainPanel {
             }
 
             if (restart) {
-                JOptionPane.showMessageDialog(getView(), "MegaBasterd will restart", "Restart required", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
                 restartApplication(1);
             } else {
                 exit(0);
@@ -740,7 +758,7 @@ public final class MainPanel {
             }
 
             if (restart) {
-                JOptionPane.showMessageDialog(getView(), "MegaBasterd will restart", "Restart required", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
                 restartApplication(1);
             } else {
                 exit(0);

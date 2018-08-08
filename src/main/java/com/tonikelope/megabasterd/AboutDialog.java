@@ -28,6 +28,8 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, parent.getMain_panel().getZoom_factor());
 
+        translateLabels(getRootPane());
+
         pack();
     }
 
@@ -82,7 +84,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         subtitle_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
-        subtitle_label.setText("Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite. ");
+        subtitle_label.setText("Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite.");
         subtitle_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         subtitle_label.setDoubleBuffered(true);
         subtitle_label.addMouseListener(new java.awt.event.MouseAdapter() {
@@ -220,14 +222,16 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         copyTextToClipboard(MEGABASTERD_URL);
 
-        JOptionPane.showMessageDialog(this, "MEGA URL was copied to clipboard!");
+        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("MEGA URL was copied to clipboard!"));
     }//GEN-LAST:event_mcdown_url_buttonActionPerformed
 
     private void check_version_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_check_version_buttonActionPerformed
 
+        String old_check_version_button_text = check_version_button.getText();
+
         check_version_button.setEnabled(false);
 
-        check_version_button.setText("Checking, please wait...");
+        check_version_button.setText(LabelTranslatorSingleton.getInstance().translate("Checking, please wait..."));
 
         pack();
 
@@ -243,14 +247,14 @@ public final class AboutDialog extends javax.swing.JDialog {
 
                 if (new_version != null) {
 
-                    JOptionPane.showMessageDialog(tthis, "MegaBasterd NEW VERSION (" + new_version + ") is available!\n\n(HELP > ABOUT for more info)");
+                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + new_version);
 
                 } else {
 
-                    JOptionPane.showMessageDialog(tthis, "You have the latest version ;)");
+                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("You have the latest version ;)"));
                 }
 
-                check_version_button.setText("Check version");
+                check_version_button.setText(old_check_version_button_text);
 
                 check_version_button.setEnabled(true);
 

@@ -80,6 +80,16 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         updateTitledBorderFont(((javax.swing.border.TitledBorder) proxy_auth_panel.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
 
+        translateLabels(getRootPane());
+
+        jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
+
+        jTabbedPane1.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
+
+        jTabbedPane1.setTitleAt(2, LabelTranslatorSingleton.getInstance().translate("Accounts"));
+
+        jTabbedPane1.setTitleAt(3, LabelTranslatorSingleton.getInstance().translate("Advanced"));
+
         downloads_scroll_pane.getVerticalScrollBar().setUnitIncrement(20);
 
         downloads_scroll_pane.getHorizontalScrollBar().setUnitIncrement(20);
@@ -459,6 +469,22 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         proxy_pass_textfield.setText(DBTools.selectSettingValue("proxy_pass"));
 
+        String language = DBTools.selectSettingValue("language");
+
+        this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("English"));
+
+        this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
+
+        if (language == null) {
+            language = MainPanel.DEFAULT_LANGUAGE;
+        }
+
+        if (language.equals("EN")) {
+            this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("English"));
+        } else if (language.equals("ES")) {
+            this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
+        }
+
         _remember_master_pass = true;
 
         _deleted_mega_accounts = new HashSet();
@@ -563,6 +589,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         jButton1 = new javax.swing.JButton();
         jSeparator1 = new javax.swing.JSeparator();
         jSeparator2 = new javax.swing.JSeparator();
+        jLabel2 = new javax.swing.JLabel();
+        language_combo = new javax.swing.JComboBox<>();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -599,7 +627,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
 
         rec_download_slots_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_download_slots_label.setText("Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it. (Slots consume RAM, so use them moderately). ");
+        rec_download_slots_label.setText("Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it. (Slots consume RAM, so use them moderately).");
 
         megacrypter_reverse_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         megacrypter_reverse_checkbox.setText("Use MegaCrypter reverse mode");
@@ -717,7 +745,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             .addComponent(megacrypter_reverse_warning_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(rec_download_slots_label)
-                                .addGap(0, 27, Short.MAX_VALUE))))
+                                .addGap(0, 31, Short.MAX_VALUE))))
                     .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createSequentialGroup()
@@ -1296,6 +1324,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         jSeparator2.setOrientation(javax.swing.SwingConstants.VERTICAL);
 
+        jLabel2.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel2.setText("Language:");
+
+        language_combo.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
         advanced_panelLayout.setHorizontalGroup(
@@ -1307,13 +1340,20 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, advanced_panelLayout.createSequentialGroup()
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(zoom_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(rec_zoom_label))
+                                .addComponent(jLabel2)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(language_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                                        .addComponent(zoom_label)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(rec_zoom_label))
+                                .addGap(0, 0, Short.MAX_VALUE)))
                         .addGap(18, 18, 18)
                         .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 50, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 270, Short.MAX_VALUE)
+                        .addGap(136, 136, 136)
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
                                 .addComponent(import_settings_button)
@@ -1327,7 +1367,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(advanced_panelLayout.createSequentialGroup()
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(export_settings_button)
@@ -1337,13 +1377,19 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jButton1)
-                            .addComponent(rec_zoom_label)))
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel2)
+                                    .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(rec_zoom_label)))
+                        .addGap(6, 6, 6))
                     .addComponent(jSeparator2))
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addContainerGap(192, Short.MAX_VALUE))
+                .addContainerGap(172, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Advanced", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-administrative-tools-30.png")), advanced_panel); // NOI18N
@@ -1421,6 +1467,22 @@ public final class SettingsDialog extends javax.swing.JDialog {
             settings.put("megacrypter_reverse_port", String.valueOf(megacrypter_reverse_port_spinner.getValue()));
             settings.put("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
 
+            String old_language = DBTools.selectSettingValue("language");
+
+            if (old_language == null) {
+                old_language = MainPanel.DEFAULT_LANGUAGE;
+            }
+
+            String language = (String) language_combo.getSelectedItem();
+
+            if (language.equals(LabelTranslatorSingleton.getInstance().translate("English"))) {
+                language = "EN";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Spanish"))) {
+                language = "ES";
+            }
+
+            settings.put("language", language);
+
             String old_zoom = DBTools.selectSettingValue("font_zoom");
 
             if (old_zoom == null) {
@@ -1485,7 +1547,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             insertSettingsValues(settings);
 
-            if (!zoom.equals(old_zoom)
+            if (!language.equals(old_language) || !zoom.equals(old_zoom)
                     || use_proxy != old_use_proxy
                     || !proxy_host.equals(old_proxy_host)
                     || !proxy_port.equals(old_proxy_port)
@@ -1721,7 +1783,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                     pack();
 
-                                    JOptionPane.showMessageDialog(tthis, "There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n" + final_email_error, "Mega Account Check Error", JOptionPane.ERROR_MESSAGE);
+                                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n") + final_email_error, "Mega Account Check Error", JOptionPane.ERROR_MESSAGE);
 
                                     save_button.setEnabled(true);
 
@@ -1755,7 +1817,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 @Override
                                 public void run() {
                                     status.setText("");
-                                    JOptionPane.showMessageDialog(tthis, "Settings successfully saved!", "Settings saved", JOptionPane.INFORMATION_MESSAGE);
+                                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Settings successfully saved!"), LabelTranslatorSingleton.getInstance().translate("Settings saved"), JOptionPane.INFORMATION_MESSAGE);
                                     _settings_ok = true;
                                     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
                                     setVisible(false);
@@ -1767,7 +1829,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             } else {
 
-                JOptionPane.showMessageDialog(this, "Settings successfully saved!", "Settings saved", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Settings successfully saved!"), LabelTranslatorSingleton.getInstance().translate("Settings saved"), JOptionPane.INFORMATION_MESSAGE);
                 _settings_ok = true;
                 setDefaultCloseOperation(DISPOSE_ON_CLOSE);
                 setVisible(false);
@@ -1798,11 +1860,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private void import_settings_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_settings_buttonActionPerformed
 
         Object[] options = {"No",
-            "Yes"};
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
 
         int n = showOptionDialog(this,
-                "All your current settings and accounts will be deleted after import. (It is recommended to export your current settings before importing). \n\nDo you want to continue?",
-                "IMPORT SETTINGS", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+                LabelTranslatorSingleton.getInstance().translate("All your current settings and accounts will be deleted after import. (It is recommended to export your current settings before importing). \n\nDo you want to continue?"),
+                LabelTranslatorSingleton.getInstance().translate("IMPORT SETTINGS"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
                 null,
                 options,
                 options[0]);
@@ -1830,7 +1892,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         _main_panel.loadUserSettings();
 
-                        JOptionPane.showMessageDialog(this, "Settings successfully imported!", "Settings imported", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Settings successfully imported!"), LabelTranslatorSingleton.getInstance().translate("Settings imported"), JOptionPane.INFORMATION_MESSAGE);
 
                         _settings_ok = true;
 
@@ -1851,11 +1913,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private void export_settings_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_export_settings_buttonActionPerformed
 
         Object[] options = {"No",
-            "Yes"};
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
 
         int n = showOptionDialog(this,
-                "Only SAVED settings and accounts will be exported. (If you are unsure, it is better to save your current settings and then export them).\n\nDo you want to continue?",
-                "EXPORT SETTINGS", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+                LabelTranslatorSingleton.getInstance().translate("Only SAVED settings and accounts will be exported. (If you are unsure, it is better to save your current settings and then export them).\n\nDo you want to continue?"),
+                LabelTranslatorSingleton.getInstance().translate("EXPORT SETTINGS"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
                 null,
                 options,
                 options[0]);
@@ -1889,7 +1951,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         oos.writeObject(settings);
 
-                        JOptionPane.showMessageDialog(this, "Settings successfully exported!", "Settings exported", JOptionPane.INFORMATION_MESSAGE);
+                        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Settings successfully exported!"), LabelTranslatorSingleton.getInstance().translate("Settings exported"), JOptionPane.INFORMATION_MESSAGE);
 
                         setVisible(false);
 
@@ -2047,11 +2109,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private void delete_all_accounts_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_delete_all_accounts_buttonActionPerformed
 
         Object[] options = {"No",
-            "Yes"};
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
 
         int n = showOptionDialog(this,
-                "Master password will be reset and all your accounts will be removed. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?",
-                "RESET ACCOUNTS", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+                LabelTranslatorSingleton.getInstance().translate("Master password will be reset and all your accounts will be removed. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?"),
+                LabelTranslatorSingleton.getInstance().translate("RESET ACCOUNTS"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
                 null,
                 options,
                 options[0]);
@@ -2117,7 +2179,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 _main_panel.getElc_accounts().clear();
 
-                JOptionPane.showMessageDialog(this, "Accounts successfully reset!", "Accounts reset", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Accounts successfully reset!"), LabelTranslatorSingleton.getInstance().translate("Accounts reset"), JOptionPane.INFORMATION_MESSAGE);
 
                 setVisible(false);
 
@@ -2428,11 +2490,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
 
         Object[] options = {"No",
-            "Yes"};
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
 
         int n = showOptionDialog(this,
-                "ALL YOUR SETTINGS, ACCOUNTS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?",
-                "RESET MEGABASTERD", YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+                LabelTranslatorSingleton.getInstance().translate("ALL YOUR SETTINGS, ACCOUNTS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?"),
+                LabelTranslatorSingleton.getInstance().translate("RESET MEGABASTERD"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
                 null,
                 options,
                 options[0]);
@@ -2469,6 +2531,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JButton import_settings_button;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
     private javax.swing.JPanel jPanel3;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JSeparator jSeparator1;
@@ -2483,6 +2546,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
     private javax.swing.JTabbedPane jTabbedPane1;
+    private javax.swing.JComboBox<String> language_combo;
     private javax.swing.JCheckBox limit_download_speed_checkbox;
     private javax.swing.JCheckBox limit_upload_speed_checkbox;
     private javax.swing.JLabel max_down_speed_label;

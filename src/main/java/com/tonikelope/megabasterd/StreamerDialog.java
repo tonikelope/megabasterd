@@ -52,6 +52,8 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
+        translateLabels(getRootPane());
+
         _clipboardspy = clipboardspy;
 
         _selected_item = null;
@@ -247,7 +249,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                     if (error) {
 
-                        JOptionPane.showMessageDialog(tthis, "Please, paste a Mega/MegaCrypter/ELC link!", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Please, paste a Mega/MegaCrypter/ELC link!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         original_link_textfield.setText("");
 

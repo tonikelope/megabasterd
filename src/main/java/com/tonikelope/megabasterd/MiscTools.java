@@ -58,6 +58,10 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -252,7 +256,7 @@ public final class MiscTools {
             if (component instanceof javax.swing.JMenu) {
 
                 for (Component child : ((javax.swing.JMenu) component).getMenuComponents()) {
-                    if (child instanceof Container) {
+                    if (child instanceof JMenuItem) {
 
                         updateFonts(child, font, zoom_factor);
                     }
@@ -273,6 +277,48 @@ public final class MiscTools {
             Font new_font = font.deriveFont(old_font.getStyle(), Math.round(old_font.getSize() * zoom_factor));
 
             component.setFont(new_font);
+        }
+    }
+
+    public static void translateLabels(final Component component) {
+
+        if (component != null) {
+
+            if (component instanceof javax.swing.JLabel) {
+
+                ((JLabel) component).setText(LabelTranslatorSingleton.getInstance().translate(((JLabel) component).getText()));
+
+            } else if (component instanceof javax.swing.JButton) {
+
+                ((JButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((JButton) component).getText()));
+
+            } else if (component instanceof javax.swing.JCheckBox) {
+
+                ((javax.swing.JCheckBox) component).setText(LabelTranslatorSingleton.getInstance().translate(((javax.swing.JCheckBox) component).getText()));
+
+            } else if ((component instanceof JMenuItem) && !(component instanceof JMenu)) {
+
+                ((JMenuItem) component).setText(LabelTranslatorSingleton.getInstance().translate(((JMenuItem) component).getText()));
+
+            } else if (component instanceof JMenu) {
+
+                for (Component child : ((JMenu) component).getMenuComponents()) {
+                    if (child instanceof JMenuItem) {
+                        translateLabels(child);
+                    }
+                }
+
+                ((JMenu) component).setText(LabelTranslatorSingleton.getInstance().translate(((JMenu) component).getText()));
+
+            } else if (component instanceof Container) {
+
+                for (Component child : ((Container) component).getComponents()) {
+                    if (child instanceof Container) {
+
+                        translateLabels(child);
+                    }
+                }
+            }
         }
     }
 

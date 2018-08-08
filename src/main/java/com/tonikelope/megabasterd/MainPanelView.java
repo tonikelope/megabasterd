@@ -206,6 +206,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         updateFonts(getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
+        translateLabels(getRootPane());
+
         for (JComponent c : new JComponent[]{global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
 
             c.setVisible(false);
@@ -216,6 +218,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
         jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
+
+        jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
+        jTabbedPane1.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
 
         pack();
     }
@@ -922,11 +927,11 @@ public final class MainPanelView extends javax.swing.JFrame {
     private void clean_all_down_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clean_all_down_menuActionPerformed
 
         Object[] options = {"No",
-            "Yes"};
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
 
         int n = showOptionDialog(_main_panel.getView(),
-                "Remove all preprocessing, provisioning and waiting downloads?",
-                "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
+                LabelTranslatorSingleton.getInstance().translate("Remove all preprocessing, provisioning and waiting downloads?"),
+                LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
                 null,
                 options,
                 options[0]);
@@ -1090,11 +1095,11 @@ public final class MainPanelView extends javax.swing.JFrame {
     private void clean_all_up_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clean_all_up_menuActionPerformed
 
         Object[] options = {"No",
-            "Yes"};
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
 
         int n = showOptionDialog(_main_panel.getView(),
-                "Remove all preprocessing, provisioning and waiting uploads?",
-                "Warning!", YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
+                LabelTranslatorSingleton.getInstance().translate("Remove all preprocessing, provisioning and waiting uploads?"),
+                LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
                 null,
                 options,
                 options[0]);

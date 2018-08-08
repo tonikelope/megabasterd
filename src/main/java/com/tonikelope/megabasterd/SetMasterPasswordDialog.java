@@ -56,6 +56,8 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, main_panel.getZoom_factor());
 
+        translateLabels(getRootPane());
+
         _pass_ok = false;
 
         _new_pass = null;
@@ -207,7 +209,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
     private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
 
-        status_label.setText("Verifying your password, please wait...");
+        status_label.setText(LabelTranslatorSingleton.getInstance().translate("Verifying your password, please wait..."));
 
         final Dialog tthis = this;
 
@@ -220,7 +222,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
                     if (Arrays.equals(new_pass_textfield.getPassword(), confirm_pass_textfield.getPassword())) {
 
-                        status_label.setText("Processing your password, please wait...");
+                        status_label.setText(LabelTranslatorSingleton.getInstance().translate("Processing your password, please wait..."));
 
                         if (new_pass_textfield.getPassword().length > 0) {
 
@@ -235,7 +237,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
                     } else {
 
-                        JOptionPane.showMessageDialog(tthis, "Passwords does not match!", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         status_label.setText("");
 

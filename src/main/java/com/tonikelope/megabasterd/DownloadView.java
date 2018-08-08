@@ -91,6 +91,8 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         updateFonts(this, DEFAULT_FONT, download.getMain_panel().getZoom_factor());
 
+        translateLabels(getRootPane());
+
         _download = download;
 
         slots_spinner.setModel(new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));

@@ -63,6 +63,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
 
+        translateLabels(getRootPane());
+
         _download = false;
 
         _download_path = Paths.get(download_path).toAbsolutePath().normalize().toString();

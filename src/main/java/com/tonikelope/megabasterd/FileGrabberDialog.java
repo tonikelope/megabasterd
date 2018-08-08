@@ -68,6 +68,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel2.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
 
+        translateLabels(getRootPane());
+
         _total_space = 0L;
         _base_path = null;
         _upload = false;
@@ -426,7 +428,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             if (filechooser.getSelectedFile() != null && !filechooser.getSelectedFile().canRead()) {
 
-                JOptionPane.showMessageDialog(this, "File is not readable!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("File is not readable!"), "Error", JOptionPane.ERROR_MESSAGE);
             }
 
             boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
@@ -511,7 +513,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             if (filechooser.getSelectedFile() != null && !filechooser.getSelectedFile().canRead()) {
 
-                JOptionPane.showMessageDialog(this, "Folder is not readable!", "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Folder is not readable!"), "Error", JOptionPane.ERROR_MESSAGE);
             }
 
             boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;

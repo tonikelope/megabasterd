@@ -64,6 +64,8 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
         updateFonts(this.getRootPane(), DEFAULT_FONT, main_panel.getZoom_factor());
 
+        translateLabels(getRootPane());
+
         _current_pass_hash = current_pass_hash;
 
         _pass_ok = false;
@@ -194,7 +196,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
     private void ok_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ok_buttonActionPerformed
 
-        status_label.setText("Verifying your password, please wait...");
+        status_label.setText(LabelTranslatorSingleton.getInstance().translate("Verifying your password, please wait..."));
 
         pack();
 
@@ -211,7 +213,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
                     if (!pass_hash.equals(_current_pass_hash)) {
 
-                        JOptionPane.showMessageDialog(tthis, "BAD PASSWORD!", "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         status_label.setText("");
 

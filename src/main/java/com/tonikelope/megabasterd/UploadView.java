@@ -84,6 +84,8 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         updateFonts(this, DEFAULT_FONT, upload.getMain_panel().getZoom_factor());
 
+        translateLabels(getRootPane());
+
         _upload = upload;
 
         slots_spinner.setModel(new SpinnerNumberModel(_upload.getMain_panel().getDefault_slots_up(), MIN_WORKERS, MAX_WORKERS, 1));
