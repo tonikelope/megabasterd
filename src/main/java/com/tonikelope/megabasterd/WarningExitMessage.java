@@ -68,7 +68,7 @@ public class WarningExitMessage extends javax.swing.JDialog {
 
         warning_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         warning_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-error-96.png"))); // NOI18N
-        warning_label.setText("Megabasterd is stopping transferences safely, please wait...  ");
+        warning_label.setText("Megabasterd is stopping transferences safely, please wait...");
 
         exit_button.setBackground(new java.awt.Color(255, 0, 0));
         exit_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N

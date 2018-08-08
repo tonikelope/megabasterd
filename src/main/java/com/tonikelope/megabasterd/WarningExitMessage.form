@@ -89,7 +89,7 @@
             <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
               <Image iconType="3" name="/images/icons8-error-96.png"/>
             </Property>
-            <Property name="text" type="java.lang.String" value="Megabasterd is stopping transferences safely, please wait...  "/>
+            <Property name="text" type="java.lang.String" value="Megabasterd is stopping transferences safely, please wait..."/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="exit_button">

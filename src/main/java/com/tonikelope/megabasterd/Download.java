@@ -592,7 +592,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                             }
                         }
 
-                        getView().printStatusNormal("Downloading file from mega " + (_ma.getFull_email() != null ? "(" + _ma.getFull_email() + ")" : "") + " ...");
+                        getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate("Downloading file from mega ") + (_ma.getFull_email() != null ? "(" + _ma.getFull_email() + ")" : "") + " ...");
 
                         getMain_panel().getDownload_manager().secureNotify();
 
@@ -685,7 +685,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                                         getView().getStop_button().setVisible(true);
 
-                                        getView().getStop_button().setText("CANCEL CHECK");
+                                        getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL CHECK"));
                                     }
                                 });
 
@@ -999,7 +999,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     @Override
                     public void run() {
 
-                        getView().getPause_button().setText("RESUME DOWNLOAD");
+                        getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
                         getView().getPause_button().setEnabled(true);
                     }
                 });
@@ -1017,7 +1017,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             @Override
             public void run() {
 
-                getView().getPause_button().setText("RESUME DOWNLOAD");
+                getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
                 getView().getPause_button().setEnabled(true);
             }
         });
@@ -1192,7 +1192,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         @Override
                         public void run() {
 
-                            getView().getPause_button().setText("RESUME DOWNLOAD");
+                            getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
 
                             getView().getPause_button().setEnabled(true);
                         }
@@ -1383,7 +1383,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                             getView().getStop_button().setVisible(true);
 
-                            getView().getStop_button().setText("CANCEL RETRY");
+                            getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL RETRY"));
                         }
                     });
 
@@ -1417,7 +1417,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 @Override
                 public void run() {
 
-                    getView().getStop_button().setText("CANCEL DOWNLOAD");
+                    getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL DOWNLOAD"));
                     getView().getStop_button().setVisible(false);
                 }
             });
@@ -1466,7 +1466,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                             getView().getStop_button().setVisible(true);
 
-                            getView().getStop_button().setText("CANCEL RETRY");
+                            getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL RETRY"));
                         }
                     });
 
@@ -1494,7 +1494,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 @Override
                 public void run() {
 
-                    getView().getStop_button().setText("CANCEL DOWNLOAD");
+                    getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL DOWNLOAD"));
                     getView().getStop_button().setVisible(false);
                 }
             });

@@ -124,7 +124,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         } else {
 
             used_space_label.setForeground(Color.red);
-            used_space_label.setText("No MEGA accounts available (Go to Settings > Accounts)");
+            used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("No MEGA accounts available (Go to Settings > Accounts)"));
         }
 
         pack();
@@ -361,7 +361,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
     private void add_files_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_files_buttonActionPerformed
 
-        add_files_button.setText("Adding files, please wait...");
+        add_files_button.setText(LabelTranslatorSingleton.getInstance().translate("Adding files, please wait..."));
         add_files_button.setEnabled(false);
         add_folder_button.setEnabled(false);
         warning_label.setEnabled(false);
@@ -412,7 +412,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             add_folder_button.setEnabled(true);
 
-            add_files_button.setText("Add files");
+            add_files_button.setText(LabelTranslatorSingleton.getInstance().translate("Add files"));
 
             boolean root_childs = ((TreeNode) tree_model.getRoot()).getChildCount() > 0;
 
@@ -433,7 +433,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
-            add_files_button.setText("Add files");
+            add_files_button.setText(LabelTranslatorSingleton.getInstance().translate("Add files"));
             add_files_button.setEnabled(true);
             add_folder_button.setEnabled(true);
             file_tree.setRootVisible(root_childs);
@@ -450,7 +450,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
     private void add_folder_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_add_folder_buttonActionPerformed
 
-        add_folder_button.setText("Adding folder, please wait...");
+        add_folder_button.setText(LabelTranslatorSingleton.getInstance().translate("Adding folder, please wait..."));
 
         add_files_button.setEnabled(false);
         add_folder_button.setEnabled(false);
@@ -495,7 +495,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             add_folder_button.setEnabled(true);
 
-            add_folder_button.setText("Add folder");
+            add_folder_button.setText(LabelTranslatorSingleton.getInstance().translate("Add folder"));
 
             boolean root_childs = ((TreeNode) tree_model.getRoot()).getChildCount() > 0;
 
@@ -518,7 +518,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
-            add_folder_button.setText("Add folder");
+            add_folder_button.setText(LabelTranslatorSingleton.getInstance().translate("Add folder"));
             add_files_button.setEnabled(true);
             add_folder_button.setEnabled(true);
             file_tree.setRootVisible(root_childs);
@@ -553,7 +553,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             used_space_label.setForeground(new Color(102, 102, 102));
 
-            used_space_label.setText("Checking account quota, please wait...");
+            used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("Checking account quota, please wait..."));
 
             account_combobox.setEnabled(false);
             account_label.setEnabled(false);
@@ -638,7 +638,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                                 used_space_label.setForeground(Color.red);
 
-                                used_space_label.setText("ERROR checking account quota!");
+                                used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
                             }
                         });
 

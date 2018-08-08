@@ -202,7 +202,7 @@ public final class MainPanel {
 
                 if (new_version != null) {
 
-                    JOptionPane.showMessageDialog(getView(), "MegaBasterd NEW VERSION (" + new_version + ") is available!\n\n(HELP > ABOUT for more info)");
+                    JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + new_version);
                 }
             }
         });

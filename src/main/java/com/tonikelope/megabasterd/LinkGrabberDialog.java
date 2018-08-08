@@ -171,7 +171,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         });
 
         down_dir_to_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        down_dir_to_label.setText("Download folder: ");
+        down_dir_to_label.setText("Download folder:");
         down_dir_to_label.setDoubleBuffered(true);
 
         download_dir_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
@@ -258,7 +258,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
     private void change_dir_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_change_dir_buttonActionPerformed
 
-        change_dir_button.setText("Selecting folder...");
+        change_dir_button.setText(LabelTranslatorSingleton.getInstance().translate("Selecting folder..."));
         change_dir_button.setEnabled(false);
 
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
@@ -278,7 +278,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         }
 
-        change_dir_button.setText("Change it");
+        change_dir_button.setText(LabelTranslatorSingleton.getInstance().translate("Change it"));
         change_dir_button.setEnabled(true);
 
         pack();
@@ -286,7 +286,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
     private void dlc_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_dlc_buttonActionPerformed
 
-        dlc_button.setText("Loading DLC, please wait...");
+        dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Loading DLC, please wait..."));
 
         dlc_button.setEnabled(false);
 
@@ -363,7 +363,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
-                    dlc_button.setText("Load DLC container");
+                    dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
 
                     dlc_button.setEnabled(true);
 
@@ -377,7 +377,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         } else {
 
-            dlc_button.setText("Load DLC container");
+            dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
 
             dlc_button.setEnabled(true);
 
@@ -401,7 +401,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
                 dance_button.setEnabled(false);
 
-                dance_button.setText("Checking MEGA account...");
+                dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Checking MEGA account..."));
 
                 pack();
 
@@ -429,7 +429,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                             public void run() {
                                 getUse_mega_account_down_combobox().setEnabled(true);
 
-                                getDance_button().setText("Let's dance, baby");
+                                getDance_button().setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
 
                                 getDance_button().setEnabled(true);
 

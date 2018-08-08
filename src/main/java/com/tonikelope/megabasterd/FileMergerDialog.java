@@ -226,7 +226,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
     private void file_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_file_buttonActionPerformed
         // TODO add your handling code here:
 
-        this.file_button.setText("Selecting file...");
+        this.file_button.setText(LabelTranslatorSingleton.getInstance().translate("Selecting file..."));
 
         this.file_button.setEnabled(false);
 
@@ -278,7 +278,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         }
 
-        this.file_button.setText("Select (any) file part");
+        this.file_button.setText(LabelTranslatorSingleton.getInstance().translate("Select (any) file part"));
 
         this.file_button.setEnabled(true);
 
@@ -289,7 +289,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
     private void output_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_output_buttonActionPerformed
         // TODO add your handling code here:
 
-        this.output_button.setText("Changing output folder...");
+        this.output_button.setText(LabelTranslatorSingleton.getInstance().translate("Changing output folder..."));
 
         this.file_button.setEnabled(false);
 
@@ -314,7 +314,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
             this.output_folder_label.setText(this._output_dir.getAbsolutePath());
         }
 
-        this.output_button.setText("Change output folder");
+        this.output_button.setText(LabelTranslatorSingleton.getInstance().translate("Change output folder"));
 
         this.file_button.setEnabled(true);
 
@@ -334,7 +334,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-            this.merge_button.setText("MERGING FILE...");
+            this.merge_button.setText(LabelTranslatorSingleton.getInstance().translate("MERGING FILE..."));
 
             this.file_button.setEnabled(false);
 
@@ -360,7 +360,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                                 _deleteParts();
                             }
 
-                            JOptionPane.showMessageDialog(tthis, "File successfully merged!");
+                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
 
                             if (Desktop.isDesktopSupported()) {
                                 try {
@@ -397,7 +397,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                             jProgressBar2.setValue(0);
                             jProgressBar2.setVisible(false);
 
-                            merge_button.setText("MERGE FILE");
+                            merge_button.setText(LabelTranslatorSingleton.getInstance().translate("MERGE FILE"));
 
                             file_button.setEnabled(true);
 

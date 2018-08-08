@@ -84,7 +84,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         updateFonts(this, DEFAULT_FONT, upload.getMain_panel().getZoom_factor());
 
-        translateLabels(getRootPane());
+        translateLabels(this);
 
         _upload = upload;
 
@@ -358,13 +358,13 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         folder_link_button.setEnabled(false);
 
-        folder_link_button.setText("Please wait...");
+        folder_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Please wait..."));
 
         copyTextToClipboard(_upload.getFolder_link());
 
-        folder_link_button.setText("Copy folder link");
+        folder_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Copy folder link"));
 
-        JOptionPane.showMessageDialog(_upload.getMain_panel().getView(), "MEGA folder link was copied to clipboard!");
+        JOptionPane.showMessageDialog(_upload.getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("MEGA folder link was copied to clipboard!"));
 
         folder_link_button.setEnabled(true);
     }//GEN-LAST:event_folder_link_buttonActionPerformed
@@ -373,13 +373,13 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         file_link_button.setEnabled(false);
 
-        file_link_button.setText("Please wait...");
+        file_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Please wait..."));
 
         copyTextToClipboard(_upload.getFile_link());
 
-        file_link_button.setText("Copy file link");
+        file_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Copy file link"));
 
-        JOptionPane.showMessageDialog(_upload.getMain_panel().getView(), "MEGA file link was copied to clipboard!");
+        JOptionPane.showMessageDialog(_upload.getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("MEGA file link was copied to clipboard!"));
 
         file_link_button.setEnabled(true);
 
@@ -430,7 +430,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     @Override
     public void resume() {
 
-        printStatusNormal("Uploading file from mega ...");
+        printStatusNormal("Uploading file to mega ...");
 
         swingInvoke(
                 new Runnable() {
@@ -447,7 +447,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                     c.setVisible(false);
                 }
 
-                pause_button.setText("PAUSE DOWNLOAD");
+                pause_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE UPLOAD"));
                 _upload.getMain_panel().getView().getPause_all_up_button().setVisible(true);
             }
         });
@@ -501,7 +501,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             public void run() {
 
                 status_label.setForeground(Color.red);
-                status_label.setText(message);
+                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
             }
         });
     }
@@ -515,7 +515,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             public void run() {
 
                 status_label.setForeground(new Color(0, 170, 0));
-                status_label.setText(message);
+                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
             }
         });
     }
@@ -529,7 +529,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             public void run() {
 
                 status_label.setForeground(new Color(102, 102, 102));
-                status_label.setText(message);
+                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
             }
         });
 

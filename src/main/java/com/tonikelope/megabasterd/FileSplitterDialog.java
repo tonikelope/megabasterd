@@ -249,7 +249,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private void file_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_file_buttonActionPerformed
         // TODO add your handling code here:
 
-        this.file_button.setText("Opening file...");
+        this.file_button.setText(LabelTranslatorSingleton.getInstance().translate("Opening file..."));
 
         this.file_button.setEnabled(false);
 
@@ -278,7 +278,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             this.split_button.setEnabled(true);
         }
 
-        this.file_button.setText("Select file");
+        this.file_button.setText(LabelTranslatorSingleton.getInstance().translate("Select file"));
 
         this.file_button.setEnabled(true);
 
@@ -289,7 +289,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private void output_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_output_buttonActionPerformed
         // TODO add your handling code here:
 
-        this.output_button.setText("Changing output folder...");
+        this.output_button.setText(LabelTranslatorSingleton.getInstance().translate("Changing output folder..."));
 
         this.file_button.setEnabled(false);
 
@@ -312,7 +312,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             this.output_folder_label.setText(this._output_dir.getAbsolutePath());
         }
 
-        this.output_button.setText("Change output folder");
+        this.output_button.setText(LabelTranslatorSingleton.getInstance().translate("Change output folder"));
 
         this.file_button.setEnabled(true);
 
@@ -330,7 +330,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
             this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-            this.split_button.setText("SPLITTING FILE...");
+            this.split_button.setText(LabelTranslatorSingleton.getInstance().translate("SPLITTING FILE..."));
 
             this.file_button.setEnabled(false);
 
@@ -353,7 +353,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                     try {
                         if (_splitFile()) {
 
-                            JOptionPane.showMessageDialog(tthis, "File successfully splitted!");
+                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully splitted!"));
 
                             if (Desktop.isDesktopSupported()) {
                                 try {
@@ -388,7 +388,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                             jProgressBar2.setValue(0);
                             jProgressBar2.setVisible(false);
 
-                            split_button.setText("SPLIT FILE");
+                            split_button.setText(LabelTranslatorSingleton.getInstance().translate("SPLIT FILE"));
 
                             file_button.setEnabled(true);
 

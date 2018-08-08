@@ -261,7 +261,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                         _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
                         copyTextToClipboard(stream_link);
-                        JOptionPane.showMessageDialog(tthis, "Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content.");
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
                         dispose();
                         getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
                     }
@@ -284,7 +284,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                 dance_button.setEnabled(false);
 
-                dance_button.setText("Checking MEGA account...");
+                dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Checking MEGA account..."));
 
                 pack();
 
@@ -313,7 +313,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                             public void run() {
                                 getUse_mega_account_down_combobox().setEnabled(true);
 
-                                getDance_button().setText("Let's dance, baby");
+                                getDance_button().setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
 
                                 getDance_button().setEnabled(true);
 

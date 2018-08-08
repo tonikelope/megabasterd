@@ -91,7 +91,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         updateFonts(this, DEFAULT_FONT, download.getMain_panel().getZoom_factor());
 
-        translateLabels(getRootPane());
+        translateLabels(this);
 
         _download = download;
 
@@ -361,7 +361,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         copyTextToClipboard(_download.getUrl());
 
-        JOptionPane.showMessageDialog(_download.getMain_panel().getView(), "Link was copied to clipboard!");
+        JOptionPane.showMessageDialog(_download.getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("Link was copied to clipboard!"));
     }//GEN-LAST:event_copy_link_buttonActionPerformed
 
     private void restart_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restart_buttonActionPerformed
@@ -387,7 +387,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             try {
                 Desktop.getDesktop().open(new File(_download.getDownload_path() + "/" + _download.getFile_name()).getParentFile());
             } catch (IOException ex) {
-                JOptionPane.showMessageDialog(_download.getMain_panel().getView(), "Folder not found");
+                JOptionPane.showMessageDialog(_download.getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("Folder not found"));
             }
         }
 
@@ -436,7 +436,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                     c.setVisible(false);
                 }
 
-                pause_button.setText("PAUSE DOWNLOAD");
+                pause_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE DOWNLOAD"));
                 _download.getMain_panel().getView().getPause_all_down_button().setVisible(true);
             }
         });
@@ -516,7 +516,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             public void run() {
 
                 status_label.setForeground(Color.red);
-                status_label.setText(message);
+                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
             }
         });
     }
@@ -530,7 +530,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             public void run() {
 
                 status_label.setForeground(new Color(0, 170, 0));
-                status_label.setText(message);
+                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
             }
         });
     }
@@ -544,7 +544,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             public void run() {
 
                 status_label.setForeground(new Color(102, 102, 102));
-                status_label.setText(message);
+                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
             }
         });
 
@@ -583,7 +583,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                 @Override
                 public void run() {
                     slot_status_label.setForeground(status_color);
-                    slot_status_label.setText(status);
+                    slot_status_label.setText(LabelTranslatorSingleton.getInstance().translate(status));
                 }
             });
         }

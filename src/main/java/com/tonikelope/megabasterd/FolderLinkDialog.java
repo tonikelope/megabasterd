@@ -270,7 +270,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
     private void restore_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restore_buttonActionPerformed
 
-        restore_button.setText("Restoring data, please wait...");
+        restore_button.setText(LabelTranslatorSingleton.getInstance().translate("Restoring data, please wait..."));
 
         file_tree.setEnabled(false);
 
@@ -288,7 +288,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                 _genDownloadLiks();
 
                 restore_button.setVisible(false);
-                restore_button.setText("Restore folder data");
+                restore_button.setText(LabelTranslatorSingleton.getInstance().translate("Restore folder data"));
                 boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
                 for (JComponent c : new JComponent[]{restore_button, dance_button, skip_button, skip_rest_button, file_tree}) {

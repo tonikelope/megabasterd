@@ -428,7 +428,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         } else {
 
-            getView().printStatusNormal("Waiting to start (" + _ma.getFull_email() + ") ...");
+            getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate("Waiting to start (") + _ma.getFull_email() + ") ...");
 
             swingInvoke(
                     new Runnable() {
@@ -766,7 +766,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 }
 
-                getView().printStatusNormal("Uploading file to mega (" + _ma.getFull_email() + ") ...");
+                getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate("Uploading file to mega (") + _ma.getFull_email() + ") ...");
 
                 getMain_panel().getUpload_manager().secureNotify();
 
@@ -886,7 +886,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             }
 
-                            getView().printStatusOK("File successfully uploaded! (" + _ma.getFull_email() + ")");
+                            getView().printStatusOK(LabelTranslatorSingleton.getInstance().translate("File successfully uploaded! (") + _ma.getFull_email() + ")");
 
                         }
 
@@ -1029,7 +1029,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                         new Runnable() {
                     @Override
                     public void run() {
-                        getView().getPause_button().setText("RESUME UPLOAD");
+                        getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME UPLOAD"));
                         getView().getPause_button().setEnabled(true);
 
                     }
@@ -1049,7 +1049,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             @Override
             public void run() {
 
-                getView().getPause_button().setText("RESUME UPLOAD");
+                getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME UPLOAD"));
                 getView().getPause_button().setEnabled(true);
             }
         });
@@ -1096,7 +1096,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                             new Runnable() {
                         @Override
                         public void run() {
-                            getView().getPause_button().setText("RESUME UPLOAD");
+                            getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME UPLOAD"));
                             getView().getPause_button().setEnabled(true);
                         }
                     });

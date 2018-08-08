@@ -303,7 +303,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                 if (!_transference_finished_queue.isEmpty() && _isOKFinishedInQueue()) {
 
-                    _close_all_button.setText("Close all OK finished");
+                    _close_all_button.setText(LabelTranslatorSingleton.getInstance().translate("Close all OK finished"));
 
                     _close_all_button.setVisible(true);
 
