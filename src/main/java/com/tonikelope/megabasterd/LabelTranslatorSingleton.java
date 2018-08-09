@@ -246,6 +246,11 @@ public final class LabelTranslatorSingleton {
         _rosetta.put("Username:", "Usuario:");
         _rosetta.put("Password:", "Contraseña:");
         _rosetta.put("Link was copied to clipboard!", "¡Enlace copiado al portapapeles!");
+        _rosetta.put("Checking if there are previous downloads, please wait...", "Comprobando si existen descargas previas, por favor espera...");
+        _rosetta.put("Checking if there are previous uploads, please wait...", "Comprobando si existen subidas previas, por favor espera...");
+        _rosetta.put("Restore window", "Restaurar ventana");
+        _rosetta.put("EXIT", "SALIR");
+
     }
 
     public String translate(String orig) {

@@ -961,7 +961,7 @@ public final class MainPanel {
                 new Runnable() {
             @Override
             public void run() {
-                getView().getStatus_down_label().setText("Checking if there are previous downloads, please wait...");
+                getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait..."));
             }
         });
 
@@ -1038,7 +1038,7 @@ public final class MainPanel {
 
             PopupMenu menu = new PopupMenu();
 
-            MenuItem messageItem = new MenuItem("Restore window");
+            MenuItem messageItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("Restore window"));
 
             messageItem.addActionListener(new ActionListener() {
 
@@ -1065,7 +1065,7 @@ public final class MainPanel {
 
             menu.add(messageItem);
 
-            MenuItem closeItem = new MenuItem("EXIT");
+            MenuItem closeItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("EXIT"));
 
             closeItem.addActionListener(new ActionListener() {
 
@@ -1135,7 +1135,7 @@ public final class MainPanel {
                 new Runnable() {
             @Override
             public void run() {
-                getView().getStatus_up_label().setText("Checking if there are previous uploads, please wait...");
+                getView().getStatus_up_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous uploads, please wait..."));
             }
         });
 
