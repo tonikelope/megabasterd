@@ -47,7 +47,7 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.19";
+    public static final String VERSION = "5.20";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -57,7 +57,7 @@ public final class MainPanel {
     public static final boolean DEFAULT_SMART_PROXY = true;
     public static final Font DEFAULT_FONT = createAndRegisterFont("/fonts/Itim-Regular.ttf");
     public static final float ZOOM_FACTOR = 1.0f;
-    public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:57.0) Gecko/20100101 Firefox/57.0";
+    public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/mbasterd_32.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
     private static String _proxy_host;
@@ -154,7 +154,7 @@ public final class MainPanel {
 
         UIManager.put("OptionPane.messageFont", DEFAULT_FONT.deriveFont(15f * getZoom_factor()));
 
-        UIManager.put("OptionPane.buttonFont", DEFAULT_FONT.deriveFont(13f * getZoom_factor()));
+        UIManager.put("OptionPane.buttonFont", DEFAULT_FONT.deriveFont(15f * getZoom_factor()));
 
         UIManager.put("OptionPane.cancelButtonText", LabelTranslatorSingleton.getInstance().translate("Cancel"));
 

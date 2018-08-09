@@ -250,6 +250,7 @@ public final class LabelTranslatorSingleton {
         _rosetta.put("Checking if there are previous uploads, please wait...", "Comprobando si existen subidas previas, por favor espera...");
         _rosetta.put("Restore window", "Restaurar ventana");
         _rosetta.put("EXIT", "SALIR");
+        _rosetta.put("File successfully downloaded!", "¡Archivo descargado correctamente!");
 
     }
 
