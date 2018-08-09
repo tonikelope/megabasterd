@@ -119,7 +119,7 @@ public final class LabelTranslatorSingleton {
         _rosetta.put("Restoring data, please wait...", "Restaurando datos, por favor espera...");
         _rosetta.put("File", "Archivo");
         _rosetta.put("Hide to tray", "Ocultar en la bandeja");
-        _rosetta.put("Close all OK finished", "Cerrar todas las terminadas OK");
+        _rosetta.put("Close all OK finished", "Cerrar las que finalizaron OK");
         _rosetta.put("Exit", "Salir");
         _rosetta.put("Download folder:", "Carpeta para las descargas:");
         _rosetta.put("Default slots per file:", "Slots por archivo por defecto:");
@@ -209,7 +209,7 @@ public final class LabelTranslatorSingleton {
         _rosetta.put("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:", "Pon aquí tu enlace de MEGA/MegaCrypter/ELC para conseguir un enlace de streaming:");
         _rosetta.put("Use this account for streaming:", "Usar esta cuenta para streaming:");
         _rosetta.put("Use this account for download:", "Usar esta cuenta para descargar:");
-        _rosetta.put("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content.", "El enlace de streaming se ha copiado en el portapapeles!\nRecuerda dejar abierto MegaBasterd mientras se reproduce el contenido.");
+        _rosetta.put("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content.", "Enlace de streaming copiado al portapapeles!\nRecuerda dejar abierto MegaBasterd mientras se reproduce el contenido.");
         _rosetta.put("CANCEL UPLOAD", "CANCELAR SUBIDA");
         _rosetta.put("Upload paused!", "¡Subida pausada!");
         _rosetta.put("Stopping download safely before exit MegaBasterd, please wait...", "Deteniendo descarga de forma segura antes de salir, por favor espera...");
@@ -227,6 +227,24 @@ public final class LabelTranslatorSingleton {
         _rosetta.put("Waiting to start (", "Esperando para empezar (");
         _rosetta.put("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***", "Creando nuevo nodo de MEGA ... ***NO CIERRES MEGABASTERD EN ESTE MOMENTO***");
         _rosetta.put("File successfully uploaded! (", "¡Archivo subido correctamente! (");
+        _rosetta.put("PAUSE ALL", "PAUSAR TODO");
+        _rosetta.put("MEGA folder link was copied to clipboard!", "¡Enlace de carpeta de MEGA copiado al portapapeles!");
+        _rosetta.put("MEGA file link was copied to clipboard!", "¡Enlace de fichero de MEGA copiado al portapapeles!");
+        _rosetta.put("Pausing download ...", "Pausando descarga ...");
+        _rosetta.put("Pausing upload ...", "Pausando subida ...");
+        _rosetta.put("File successfully downloaded! (Integrity check PASSED)", "¡Archivo descargado correctamente! (Test de integridad CORRECTO)");
+        _rosetta.put("File successfully downloaded! (but integrity check CANCELED)", "¡Archivo descargado correctamente! (Test de integridad cancelado)");
+        _rosetta.put("UPLOAD FAILED! (Empty completion handle!)", "¡SUBIDA FALLIDA! (Completion handle vacío)");
+        _rosetta.put("BAD NEWS :( File is DAMAGED!", "MALAS NOTICIAS :( El archivo está corrupto!");
+        _rosetta.put("File temporarily unavailable! (Retrying in ", "¡Archivo temporalmente no disponible! (Reintentando en ");
+        _rosetta.put(" secs...)", " segundos...)");
+        _rosetta.put(" (Retrying in ", " (Reintentando en ");
+        _rosetta.put("Proxy settings", "Ajustes de proxy");
+        _rosetta.put("Authentication", "Autenticación");
+        _rosetta.put("Upload info", "Información de la subida");
+        _rosetta.put("Files", "Archivos");
+        _rosetta.put("Username:", "Usuario:");
+        _rosetta.put("Password:", "Contraseña:");
     }
 
     public String translate(String orig) {

@@ -102,9 +102,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             String worker_url = null, current_proxy = null;
 
-            boolean error = false, error509 = false, error403 = false;
+            boolean error = false, error509 = false, error403 = false, error503 = false;
 
-            while (!_exit && !_download.isStopped() && (error509 || MainPanel.isUse_smart_proxy())) {
+            while (!_exit && !_download.isStopped() && !error503) {
 
                 if (worker_url == null || error403) {
 
@@ -176,9 +176,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 }
 
-                con.setConnectTimeout(Upload.HTTP_TIMEOUT);
+                con.setConnectTimeout(Download.HTTP_TIMEOUT);
 
-                con.setReadTimeout(Upload.HTTP_TIMEOUT);
+                con.setReadTimeout(Download.HTTP_TIMEOUT);
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
@@ -187,6 +187,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 error403 = false;
 
                 error509 = false;
+
+                error503 = false;
 
                 if (getDownload().isError509()) {
                     getDownload().getView().set509Error(false);
@@ -214,6 +216,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             } else if (http_status == 403) {
 
                                 error403 = true;
+                            } else if (http_status == 503) {
+
+                                error503 = true;
                             }
 
                         } else {

@@ -38,7 +38,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             InputStream is = null;
 
-            while (!isExit() && !getDownload().isStopped() && error509) {
+            while (!isExit() && !getDownload().isStopped()) {
 
                 if (worker_url == null || error403) {
 
@@ -66,15 +66,15 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             con = (HttpURLConnection) url.openConnection();
                         }
 
-                        con.setConnectTimeout(Upload.HTTP_TIMEOUT);
+                        con.setConnectTimeout(Download.HTTP_TIMEOUT);
 
-                        con.setReadTimeout(Upload.HTTP_TIMEOUT);
+                        con.setReadTimeout(Download.HTTP_TIMEOUT);
 
                         con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                        is = new ThrottledInputStream(con.getInputStream(), getDownload().getMain_panel().getStream_supervisor());
-
                         http_status = con.getResponseCode();
+
+                        is = new ThrottledInputStream(con.getInputStream(), getDownload().getMain_panel().getStream_supervisor());
                     }
 
                     error = false;
@@ -204,7 +204,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                 } catch (InterruptedException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 } finally {
-                    if (con != null) {
+                    if (error && con != null) {
                         con.disconnect();
                         con = null;
                     }

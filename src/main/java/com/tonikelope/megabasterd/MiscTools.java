@@ -62,6 +62,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JPanel;
 import javax.swing.border.TitledBorder;
 
 /**
@@ -317,6 +318,10 @@ public final class MiscTools {
 
                         translateLabels(child);
                     }
+                }
+
+                if ((component instanceof JPanel) && (((JPanel) component).getBorder() instanceof TitledBorder)) {
+                    ((TitledBorder) ((JPanel) component).getBorder()).setTitle(LabelTranslatorSingleton.getInstance().translate(((TitledBorder) ((JPanel) component).getBorder()).getTitle()));
                 }
             }
         }
