@@ -245,6 +245,7 @@ public final class LabelTranslatorSingleton {
         _rosetta.put("Files", "Archivos");
         _rosetta.put("Username:", "Usuario:");
         _rosetta.put("Password:", "Contraseña:");
+        _rosetta.put("Link was copied to clipboard!", "¡Enlace copiado al portapapeles!");
     }
 
     public String translate(String orig) {
