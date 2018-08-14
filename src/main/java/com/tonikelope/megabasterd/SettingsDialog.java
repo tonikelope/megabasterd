@@ -1640,7 +1640,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 final int model_row_count = model.getRowCount();
 
-                status.setText("Checking your MEGA accounts, please wait...");
+                status.setText(LabelTranslatorSingleton.getInstance().translate("Checking your MEGA accounts, please wait..."));
 
                 save_button.setEnabled(false);
 

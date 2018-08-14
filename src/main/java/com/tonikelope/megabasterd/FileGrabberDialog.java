@@ -601,7 +601,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                             used_space_color = Color.red;
                         }
 
-                        final String quota_m = "Quota used: " + formatBytes(quota[0]) + "/" + formatBytes(quota[1]);
+                        final String quota_m = LabelTranslatorSingleton.getInstance().translate("Quota used: ") + formatBytes(quota[0]) + "/" + formatBytes(quota[1]);
 
                         swingInvoke(new Runnable() {
                             @Override

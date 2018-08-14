@@ -39,6 +39,7 @@ public final class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _rosetta.put("Checking your MEGA accounts, please wait...", "Comprobando tus cuentas de MEGA, por favor espera...");
         _rosetta.put("Check version", "Comprobar versión");
         _rosetta.put("Checking, please wait...", "Comprobando, por favor espera...");
         _rosetta.put("You have the latest version ;)", "Tienes la versión más reciente ;)");
@@ -251,6 +252,9 @@ public final class LabelTranslatorSingleton {
         _rosetta.put("Restore window", "Restaurar ventana");
         _rosetta.put("EXIT", "SALIR");
         _rosetta.put("File successfully downloaded!", "¡Archivo descargado correctamente!");
+        _rosetta.put("Quota used: ", "Espacio usado: ");
+        _rosetta.put("Streaming server: ON (port ", "Servidor de streaming: ON (puerto ");
+        _rosetta.put("MC reverse mode: ON (port ", "MC reverse mode: ON (puerto ");
 
     }
 

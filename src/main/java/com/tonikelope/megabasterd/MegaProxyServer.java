@@ -47,7 +47,7 @@ public class MegaProxyServer implements Runnable {
     @Override
     public void run() {
 
-        _main_panel.getView().updateMCReverseStatus("MC reverse mode: ON (port " + _port + ")");
+        _main_panel.getView().updateMCReverseStatus(LabelTranslatorSingleton.getInstance().translate("MC reverse mode: ON (port ") + _port + ")");
 
         try {
 
