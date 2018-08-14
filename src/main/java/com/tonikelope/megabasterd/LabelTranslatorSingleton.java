@@ -144,7 +144,7 @@ public final class LabelTranslatorSingleton {
         _rosetta.put("Settings successfully imported!", "¡Ajustes importados correctamente!");
         _rosetta.put("Settings successfully exported!", "¡Ajustes exportados correctamente!");
         _rosetta.put("Settings successfully reset!", "¡Ajustes reseteados correctamente!");
-        _rosetta.put("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n", "Hay errores con algunas cuentas (email y/o contraseña incorrecta). Por favor, revísalas:\n\n");
+        _rosetta.put("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n", "Hay errores con algunas cuentas (email y/o contraseña incorrectos). Por favor, revísalas:\n\n");
         _rosetta.put("Settings saved", "Ajustes guardados");
         _rosetta.put("Settings imported", "Ajustes importados");
         _rosetta.put("Settings exported", "Ajustes exportados");
