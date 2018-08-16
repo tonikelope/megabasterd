@@ -192,7 +192,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
             try {
 
-                MegaAPI ma = null;
+                MegaAPI ma = new MegaAPI();
 
                 if (mega_account != null) {
 
