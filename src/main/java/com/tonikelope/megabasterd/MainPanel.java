@@ -47,7 +47,7 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.22";
+    public static final String VERSION = "5.23";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -55,7 +55,7 @@ public final class MainPanel {
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = true;
-    public static final Font DEFAULT_FONT = createAndRegisterFont("/fonts/Itim-Regular.ttf");
+    public static final Font DEFAULT_FONT = createAndRegisterFont("/fonts/Kalam-Regular.ttf");
     public static final float ZOOM_FACTOR = 1.0f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/mbasterd_32.png";
