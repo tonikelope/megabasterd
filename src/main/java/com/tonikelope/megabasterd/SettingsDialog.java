@@ -1870,6 +1870,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         if (n == 1) {
             JFileChooser filechooser = new JFileChooser();
+            updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
             filechooser.setCurrentDirectory(new File(_download_path));
             filechooser.setDialogTitle("Select settings file");
 
@@ -1923,6 +1924,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         if (n == 1) {
             JFileChooser filechooser = new JFileChooser();
+            updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
             filechooser.setCurrentDirectory(new File(_download_path));
             filechooser.setDialogTitle("Save as");
 
@@ -2387,6 +2389,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private void change_download_dir_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_change_download_dir_buttonActionPerformed
 
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
+        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
         filechooser.setDialogTitle("Default download directory");

@@ -255,6 +255,8 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
+        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+
         filechooser.setDialogTitle("Select file");
 
         filechooser.setAcceptAllFileFilterUsed(false);
@@ -298,6 +300,8 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         this.split_button.setEnabled(false);
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
+
+        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setDialogTitle("Add directory");
 

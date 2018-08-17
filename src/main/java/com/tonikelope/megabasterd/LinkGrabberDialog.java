@@ -263,6 +263,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
+        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
         filechooser.setDialogTitle("Download folder");
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
@@ -297,6 +299,8 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
         pack();
 
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
+
+        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setDialogTitle("Select DLC container");
 
