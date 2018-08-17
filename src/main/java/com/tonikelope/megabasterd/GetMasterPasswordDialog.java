@@ -133,10 +133,10 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
         please_label.setText("Please, enter your master password");
         please_label.setDoubleBuffered(true);
 
-        status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        status_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         status_label.setDoubleBuffered(true);
 
-        remember_checkbox.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        remember_checkbox.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         remember_checkbox.setSelected(true);
         remember_checkbox.setText("Remember for this session");
         remember_checkbox.setDoubleBuffered(true);

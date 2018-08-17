@@ -149,7 +149,7 @@
     <Component class="javax.swing.JLabel" name="speed_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="26" style="3"/>
+          <Font name="Dialog" size="26" style="1"/>
         </Property>
         <Property name="horizontalAlignment" type="int" value="2"/>
         <Property name="text" type="java.lang.String" value="speed"/>

@@ -280,14 +280,14 @@ public final class MainPanelView extends javax.swing.JFrame {
         logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/mbasterd_logo_nuevo.png"))); // NOI18N
         logo_label.setDoubleBuffered(true);
 
-        kiss_server_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
+        kiss_server_status.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         kiss_server_status.setForeground(new java.awt.Color(102, 102, 102));
         kiss_server_status.setDoubleBuffered(true);
 
-        mc_reverse_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
+        mc_reverse_status.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         mc_reverse_status.setForeground(new java.awt.Color(102, 102, 102));
 
-        smart_proxy_status.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
+        smart_proxy_status.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         smart_proxy_status.setForeground(new java.awt.Color(102, 102, 102));
         smart_proxy_status.setDoubleBuffered(true);
 
@@ -298,7 +298,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         global_speed_down_label.setText("Speed");
         global_speed_down_label.setDoubleBuffered(true);
 
-        status_down_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
+        status_down_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         status_down_label.setForeground(new java.awt.Color(102, 102, 102));
         status_down_label.setDoubleBuffered(true);
 
@@ -369,7 +369,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         global_speed_up_label.setText("Speed");
         global_speed_up_label.setDoubleBuffered(true);
 
-        status_up_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
+        status_up_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         status_up_label.setForeground(new java.awt.Color(102, 102, 102));
 
         close_all_finished_up_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
@@ -591,7 +591,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 431, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(logo_label)

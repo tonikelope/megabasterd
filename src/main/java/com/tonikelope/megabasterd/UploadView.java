@@ -150,7 +150,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
-        speed_label.setFont(new java.awt.Font("Dialog", 3, 26)); // NOI18N
+        speed_label.setFont(new java.awt.Font("Dialog", 1, 26)); // NOI18N
         speed_label.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         speed_label.setText("speed");
         speed_label.setDoubleBuffered(true);

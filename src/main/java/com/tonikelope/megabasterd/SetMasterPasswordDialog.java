@@ -127,7 +127,8 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         lock_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock_medium.png"))); // NOI18N
         lock_label.setDoubleBuffered(true);
 
-        warning_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        warning_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        warning_label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         warning_label.setText("WARNING: if you forget this password, you will have to insert all your accounts again.");
         warning_label.setDoubleBuffered(true);
 
@@ -138,7 +139,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         new_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         new_pass_textfield.setDoubleBuffered(true);
 
-        status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        status_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         status_label.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
