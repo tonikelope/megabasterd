@@ -104,7 +104,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             boolean error = false, error509 = false, error403 = false, error503 = false;
 
-            while (!_exit && !_download.isStopped() && !error503) {
+            while (!_exit && !_download.isStopped()) {
 
                 if (worker_url == null || error403) {
 
@@ -216,6 +216,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             } else if (http_status == 403) {
 
                                 error403 = true;
+
                             } else if (http_status == 503) {
 
                                 error503 = true;
@@ -273,15 +274,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             conta_error++;
 
-                            if (!_exit) {
+                            if (!_exit && (!error509 || !MainPanel.isUse_smart_proxy()) && !error403) {
 
                                 _error_wait = true;
 
                                 _download.getView().updateSlotsStatus();
 
-                                if (!MainPanel.isUse_smart_proxy()) {
-                                    Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-                                }
+                                Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
 
                                 _error_wait = false;
 
@@ -319,15 +318,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         conta_error++;
                     }
 
-                    if (!_exit) {
+                    if (!_exit && (!error509 || !MainPanel.isUse_smart_proxy()) && !error403) {
 
                         _error_wait = true;
 
                         _download.getView().updateSlotsStatus();
 
-                        if (!MainPanel.isUse_smart_proxy()) {
-                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-                        }
+                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
 
                         _error_wait = false;
 

@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 
 /**
@@ -305,7 +306,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                 _upload.getProgress_meter().secureNotify();
                             }
 
-                            conta_error++;
+                            if (!(ex instanceof SocketTimeoutException)) {
+                                conta_error++;
+                            }
 
                             if (!_exit) {
 

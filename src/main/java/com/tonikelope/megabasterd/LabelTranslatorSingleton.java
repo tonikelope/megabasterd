@@ -137,6 +137,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Your MEGA accounts:", "Tus cuentas de MEGA:");
         _addTranslation("Your ELC accounts:", "Tus cuentas ELC:");
         _addTranslation("Note: restart required.", "Nota: es necesario reiniciar.");
+        _addTranslation("Note: restart might be required.", "Nota: podría ser necesario reiniciar.");
         _addTranslation("Font ZOOM (%):", "Zoom de la fuente (%):");
         _addTranslation("Note: MegaBasterd will use this proxy for ALL connections (restart required).", "Nota: MegaBasterd utilizará este proxy para todas las conexiones (es necesario reiniciar).");
         _addTranslation("Port:", "Puerto:");
