@@ -29,6 +29,7 @@ import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import java.awt.Dimension;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -128,43 +129,67 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public void updateKissStreamServerStatus(final String status) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        String old_status = getKiss_server_status().getText();
 
-                getKiss_server_status().setText(status + " ");
-                pack();
-            }
-        });
+        if (!old_status.equals(status + " ")) {
+            Dimension frame_size = this.getSize();
+
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+
+                    getKiss_server_status().setText(status + " ");
+
+                    pack();
+                    setSize(frame_size);
+                }
+            });
+        }
 
     }
 
     public void updateSmartProxyStatus(final String status) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        String old_status = getSmart_proxy_status().getText();
 
-                getSmart_proxy_status().setText(status + " ");
-                pack();
-            }
-        });
+        if (!old_status.equals(status + " ")) {
+            Dimension frame_size = this.getSize();
+
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+
+                    getSmart_proxy_status().setText(status + " ");
+
+                    pack();
+                    setSize(frame_size);
+                }
+            });
+        }
 
     }
 
     public void updateMCReverseStatus(final String status) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        String old_status = getMc_reverse_status().getText();
 
-                getMc_reverse_status().setText(status + " ");
-                pack();
-            }
-        });
+        if (!old_status.equals(status + " ")) {
+            Dimension frame_size = this.getSize();
+
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+
+                    getMc_reverse_status().setText(status + " ");
+
+                    pack();
+                    setSize(frame_size);
+                }
+            });
+        }
 
     }
 

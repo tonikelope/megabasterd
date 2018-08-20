@@ -211,7 +211,7 @@ public class StreamChunkDownloader implements Runnable {
 
         } catch (IOException | URISyntaxException | ChunkInvalidException | InterruptedException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-        } catch (Exception ex) {
+        } catch (OutOfMemoryError | Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 

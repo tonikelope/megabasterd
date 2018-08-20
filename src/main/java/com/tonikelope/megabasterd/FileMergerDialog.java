@@ -20,6 +20,7 @@ import static com.tonikelope.megabasterd.MainPanel.DEFAULT_FONT;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.swingInvoke;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.truncateText;
 import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 import java.awt.Desktop;
 import java.awt.Dialog;
@@ -244,9 +245,13 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
             if (this._file_name != null) {
 
-                this.file_name_label.setText(filechooser.getSelectedFile().getParentFile().getAbsolutePath() + "/" + this._file_name);
+                this.file_name_label.setText(truncateText(filechooser.getSelectedFile().getParentFile().getAbsolutePath() + "/" + this._file_name, 100));
 
-                this.output_folder_label.setText(filechooser.getSelectedFile().getParentFile().getAbsolutePath());
+                this.file_name_label.setToolTipText(filechooser.getSelectedFile().getParentFile().getAbsolutePath() + "/" + this._file_name);
+
+                this.output_folder_label.setText(truncateText(filechooser.getSelectedFile().getParentFile().getAbsolutePath(), 100));
+
+                this.output_folder_label.setToolTipText(filechooser.getSelectedFile().getParentFile().getAbsolutePath());
 
                 this._output_dir = new File(filechooser.getSelectedFile().getParentFile().getAbsolutePath());
 
@@ -315,7 +320,9 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
             this._output_dir = filechooser.getSelectedFile();
 
-            this.output_folder_label.setText(this._output_dir.getAbsolutePath());
+            this.output_folder_label.setText(truncateText(this._output_dir.getAbsolutePath(), 100));
+
+            this.output_folder_label.setToolTipText(this._output_dir.getAbsolutePath());
         }
 
         this.output_button.setText(LabelTranslatorSingleton.getInstance().translate("Change output folder"));

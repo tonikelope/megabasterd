@@ -96,7 +96,7 @@
                   <Component id="speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="pause_button" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+              <EmptySpace type="separate" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="103" alignment="0" groupAlignment="3" attributes="0">
                       <Component id="close_button" alignment="3" min="-2" max="-2" attributes="0"/>
