@@ -41,6 +41,8 @@ public final class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _addTranslation("FATAL ERROR! ", "¡ERROR FATAL! ");
+        _addTranslation("Mega link is not valid! ", "Enlace de MEGA incorrecto! ");
         _addTranslation("Checking your MEGA accounts, please wait...", "Comprobando tus cuentas de MEGA, por favor espera...");
         _addTranslation("Check version", "Comprobar versión");
         _addTranslation("Checking, please wait...", "Comprobando, por favor espera...");

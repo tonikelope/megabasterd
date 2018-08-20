@@ -347,9 +347,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         } catch (ChunkInvalidException e) {
 
-        } catch (Exception ex) {
-            _download.stopDownloader(ex.getMessage());
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        } catch (OutOfMemoryError | Exception error) {
+            _download.stopDownloader(error.getMessage());
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, error.getMessage());
         }
 
         _download.stopThisSlot(this);

@@ -13,7 +13,6 @@ import javax.crypto.NoSuchPaddingException;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.CryptTools.*;
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -360,11 +359,10 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
             }
 
-        } catch (FileNotFoundException ex) {
-            Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (IOException ex) {
-            Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, ex);
         } catch (ChunkInvalidException ex) {
+        } catch (OutOfMemoryError | Exception error) {
+            _upload.stopUploader(error.getMessage());
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, error.getMessage());
         }
 
         _upload.stopThisSlot(this);

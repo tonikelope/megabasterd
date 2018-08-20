@@ -37,7 +37,7 @@ public final class Chunk {
     private final int _size_multi;
     private boolean _writable;
 
-    public Chunk(long id, long file_size, String file_url) throws ChunkInvalidException, IOException {
+    public Chunk(long id, long file_size, String file_url) throws ChunkInvalidException, IOException, OutOfMemoryError {
 
         _writable = true;
 
@@ -67,7 +67,7 @@ public final class Chunk {
         _data_os = new ByteArrayOutInputStream((int) _size);
     }
 
-    public Chunk(long id, long file_size, String file_url, int size_multi) throws ChunkInvalidException {
+    public Chunk(long id, long file_size, String file_url, int size_multi) throws ChunkInvalidException, OutOfMemoryError {
 
         _writable = true;
 

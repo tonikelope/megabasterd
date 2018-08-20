@@ -212,10 +212,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         } catch (ChunkInvalidException e) {
 
-        } catch (Exception ex) {
-
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-            getDownload().stopDownloader(ex.getMessage());
+        } catch (OutOfMemoryError | Exception error) {
+            getDownload().stopDownloader(error.getMessage());
+            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, error.getMessage());
         }
 
         getDownload().stopThisSlot(this);

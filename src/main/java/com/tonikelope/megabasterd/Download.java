@@ -1311,7 +1311,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public void stopDownloader(String reason) {
 
-        _status_error_message = reason != null ? reason : "FATAL ERROR!";
+        _status_error = true;
+
+        _status_error_message = (reason != null ? LabelTranslatorSingleton.getInstance().translate("FATAL ERROR! ") + reason : LabelTranslatorSingleton.getInstance().translate("FATAL ERROR! "));
 
         stopDownloader();
     }
