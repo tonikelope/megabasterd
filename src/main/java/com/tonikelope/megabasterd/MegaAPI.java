@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -19,7 +20,6 @@ import static com.tonikelope.megabasterd.CryptTools.*;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import org.codehaus.jackson.map.ObjectMapper;
 
 /**
  *
