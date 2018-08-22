@@ -368,7 +368,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         if (!the_file.exists()) {
 
-            _status_error_message = "ERROR: FILE NOT FOUND -> " + _file_name;
+            _status_error_message = "ERROR: FILE NOT FOUND";
 
         } else {
 
@@ -407,6 +407,27 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         if (!_provision_ok) {
 
             _status_error = true;
+
+            if (_file_name != null) {
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+
+                        getView().getFile_name_label().setVisible(true);
+
+                        getView().getFile_name_label().setText(_file_name);
+
+                        getView().getFile_name_label().setText(truncateText(_file_name, 100));
+
+                        getView().getFile_name_label().setToolTipText(_file_name);
+
+                        getView().getFile_size_label().setVisible(true);
+
+                        getView().getFile_size_label().setText(formatBytes(_file_size));
+                    }
+                });
+            }
 
             getView().hideAllExceptStatus();
 

@@ -41,7 +41,10 @@ public final class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _addTranslation("PROVISION FAILED", "ERROR AL APROVISIONAR");
+        _addTranslation("Error registering download: file is already downloading.", "Error al registrar la descarga: el archivo ya se está descargando.");
         _addTranslation("FATAL ERROR! ", "¡ERROR FATAL! ");
+        _addTranslation("ERROR: FILE NOT FOUND", "ERROR: ARCHIVO NO ENCONTRADO");
         _addTranslation("Mega link is not valid! ", "Enlace de MEGA incorrecto! ");
         _addTranslation("Checking your MEGA accounts, please wait...", "Comprobando tus cuentas de MEGA, por favor espera...");
         _addTranslation("Check version", "Comprobar versión");

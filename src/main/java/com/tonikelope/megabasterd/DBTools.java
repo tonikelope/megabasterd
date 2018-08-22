@@ -92,6 +92,7 @@ public final class DBTools {
             ps.setString(6, share_key);
             ps.setString(7, folder_link);
             ps.setLong(8, 0L);
+            ps.setString(9, null);
 
             ps.executeUpdate();
         }

@@ -350,6 +350,11 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
                     c.setVisible(false);
                 }
+
+                for (JComponent c : new JComponent[]{status_label, file_name_label, file_size_label}) {
+
+                    c.setVisible(true);
+                }
             }
         });
     }

@@ -900,7 +900,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
 
-                        _status_error_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading or megabasterd.db file is corrupted :()";
+                        _status_error_message = "Error registering download: file is already downloading.";
                     }
 
                 }
@@ -915,7 +915,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 } catch (SQLException ex) {
 
-                    _status_error_message = "Error registering download (file " + _download_path + "/" + _file_name + " already downloading)";
+                    _status_error_message = "Error registering download: file is already downloading.";
                 }
             } else {
 
@@ -934,6 +934,25 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         if (!_provision_ok) {
 
             _status_error = true;
+
+            if (_file_name != null) {
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+
+                        getView().getFile_name_label().setVisible(true);
+
+                        getView().getFile_name_label().setText(truncateText(_download_path + "/" + _file_name, 100));
+
+                        getView().getFile_name_label().setToolTipText(_download_path + "/" + _file_name);
+
+                        getView().getFile_size_label().setVisible(true);
+
+                        getView().getFile_size_label().setText(formatBytes(_file_size));
+                    }
+                });
+            }
 
             getView().hideAllExceptStatus();
 

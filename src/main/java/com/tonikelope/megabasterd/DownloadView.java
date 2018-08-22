@@ -124,6 +124,11 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
                     c.setVisible(false);
                 }
+
+                for (JComponent c : new JComponent[]{status_label, file_name_label, file_size_label}) {
+
+                    c.setVisible(true);
+                }
             }
         });
     }
