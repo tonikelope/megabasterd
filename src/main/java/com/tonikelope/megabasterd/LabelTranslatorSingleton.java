@@ -144,7 +144,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Note: restart required.", "Nota: es necesario reiniciar.");
         _addTranslation("Note: restart might be required.", "Nota: podría ser necesario reiniciar.");
         _addTranslation("Font ZOOM (%):", "Zoom de la fuente (%):");
-        _addTranslation("Note: MegaBasterd will use this proxy for ALL connections (restart required).", "Nota: MegaBasterd utilizará este proxy para todas las conexiones (es necesario reiniciar).");
+        _addTranslation("Note: MegaBasterd will use this proxy for ALL connections.", "Nota: MegaBasterd utilizará este proxy para todas las conexiones.");
         _addTranslation("Port:", "Puerto:");
         _addTranslation("Settings successfully saved!", "¡Ajustes guardados correctamente!");
         _addTranslation("Settings successfully imported!", "¡Ajustes importados correctamente!");

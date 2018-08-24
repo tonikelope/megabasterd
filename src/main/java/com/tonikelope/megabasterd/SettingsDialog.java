@@ -74,13 +74,13 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
 
         updateTitledBorderFont(((javax.swing.border.TitledBorder) proxy_panel.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
 
         updateTitledBorderFont(((javax.swing.border.TitledBorder) proxy_auth_panel.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
 
-        translateLabels(getRootPane());
+        translateLabels(this);
 
         jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
 
@@ -1190,7 +1190,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
         });
 
         proxy_warning_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        proxy_warning_label.setText("Note: MegaBasterd will use this proxy for ALL connections (restart required).");
+        proxy_warning_label.setText("Note: MegaBasterd will use this proxy for ALL connections.");
         proxy_warning_label.setEnabled(false);
 
         proxy_auth_panel.setBorder(javax.swing.BorderFactory.createTitledBorder("Authentication"));

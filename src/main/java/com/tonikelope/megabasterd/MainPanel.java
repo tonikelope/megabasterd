@@ -47,7 +47,7 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.29";
+    public static final String VERSION = "5.30";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -1037,6 +1037,10 @@ public final class MainPanel {
         if (java.awt.SystemTray.isSupported()) {
 
             PopupMenu menu = new PopupMenu();
+
+            Font new_font = DEFAULT_FONT;
+
+            menu.setFont(new_font.deriveFont(Font.BOLD, Math.round(14 * ZOOM_FACTOR)));
 
             MenuItem messageItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("Restore window"));
 

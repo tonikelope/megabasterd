@@ -62,9 +62,9 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, main_panel.getZoom_factor());
+        updateFonts(this, DEFAULT_FONT, main_panel.getZoom_factor());
 
-        translateLabels(getRootPane());
+        translateLabels(this);
 
         _current_pass_hash = current_pass_hash;
 
@@ -96,7 +96,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
         remember_checkbox = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("MasterPassword");
+        setTitle("Master password unlock");
 
         current_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         current_pass_textfield.setDoubleBuffered(true);

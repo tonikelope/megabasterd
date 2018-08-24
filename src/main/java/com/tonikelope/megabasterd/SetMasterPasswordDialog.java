@@ -54,9 +54,9 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, main_panel.getZoom_factor());
+        updateFonts(this, DEFAULT_FONT, main_panel.getZoom_factor());
 
-        translateLabels(getRootPane());
+        translateLabels(this);
 
         _pass_ok = false;
 
@@ -89,7 +89,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         status_label = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle("MasterPassword");
+        setTitle("Master password setup");
         setResizable(false);
 
         confirm_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N

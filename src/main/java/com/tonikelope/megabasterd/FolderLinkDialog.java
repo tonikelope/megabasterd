@@ -54,9 +54,9 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, parent.getMain_panel().getZoom_factor());
+        updateFonts(this, DEFAULT_FONT, parent.getMain_panel().getZoom_factor());
 
-        translateLabels(getRootPane());
+        translateLabels(this);
 
         _mega_error = false;
         _total_space = 0L;

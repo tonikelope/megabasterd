@@ -36,9 +36,9 @@ public class WarningExitMessage extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, main_panel.getZoom_factor());
+        updateFonts(this, DEFAULT_FONT, main_panel.getZoom_factor());
 
-        translateLabels(getRootPane());
+        translateLabels(this);
 
         _main_panel = main_panel;
 

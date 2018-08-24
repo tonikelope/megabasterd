@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public interface Transference {
 
     int MIN_WORKERS = 1;
-    int MAX_WORKERS = 30;
+    int MAX_WORKERS = 20;
     int HTTP_TIMEOUT = 30000;
-    int MAX_SIM_TRANSFERENCES = 30;
+    int MAX_SIM_TRANSFERENCES = 20;
     int SIM_TRANSFERENCES_DEFAULT = 4;
     boolean LIMIT_TRANSFERENCE_SPEED_DEFAULT = false;
     int MAX_TRANSFERENCE_SPEED_DEFAULT = 5;

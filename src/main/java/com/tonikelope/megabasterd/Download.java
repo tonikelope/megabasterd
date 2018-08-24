@@ -46,7 +46,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
     public static final int CHUNK_SIZE_MULTI = 10;
-    public static final int TURBO_MODE_SLOTS = 20;
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view;
@@ -196,7 +195,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                             getView().getSlots_spinner().setEnabled(false);
 
-                            for (int t = getChunkworkers().size(); t <= TURBO_MODE_SLOTS; t++) {
+                            for (int t = getChunkworkers().size(); t <= Transference.MAX_WORKERS; t++) {
 
                                 ChunkDownloader c = new ChunkDownloader(t, tthis);
 
@@ -205,7 +204,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                 _thread_pool.execute(c);
                             }
 
-                            getView().getSlots_spinner().setValue(TURBO_MODE_SLOTS);
+                            getView().getSlots_spinner().setValue(Transference.MAX_WORKERS);
 
                             getView().getSlots_spinner().setEnabled(true);
                         }

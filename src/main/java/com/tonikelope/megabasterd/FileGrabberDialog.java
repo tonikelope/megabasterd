@@ -62,13 +62,13 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
 
         updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel1.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
 
         updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel2.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
 
-        translateLabels(getRootPane());
+        translateLabels(this);
 
         _total_space = 0L;
         _base_path = null;

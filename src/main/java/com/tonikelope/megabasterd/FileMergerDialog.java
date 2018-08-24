@@ -57,8 +57,8 @@ public class FileMergerDialog extends javax.swing.JDialog {
         super(parent, modal);
         _main_panel = parent.getMain_panel();
         initComponents();
-        updateFonts(this.getRootPane(), DEFAULT_FONT, _main_panel.getZoom_factor());
-        translateLabels(getRootPane());
+        updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
+        translateLabels(this);
         jProgressBar2.setMinimum(0);
         jProgressBar2.setMaximum(MAX_VALUE);
         jProgressBar2.setStringPainted(true);

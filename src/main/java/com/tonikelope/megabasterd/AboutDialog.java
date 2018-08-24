@@ -26,9 +26,9 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this.getRootPane(), DEFAULT_FONT, parent.getMain_panel().getZoom_factor());
+        updateFonts(this, DEFAULT_FONT, parent.getMain_panel().getZoom_factor());
 
-        translateLabels(getRootPane());
+        translateLabels(this);
 
         pack();
     }

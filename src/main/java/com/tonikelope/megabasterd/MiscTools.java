@@ -59,6 +59,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
@@ -322,6 +323,10 @@ public final class MiscTools {
 
                 if ((component instanceof JPanel) && (((JPanel) component).getBorder() instanceof TitledBorder)) {
                     ((TitledBorder) ((JPanel) component).getBorder()).setTitle(LabelTranslatorSingleton.getInstance().translate(((TitledBorder) ((JPanel) component).getBorder()).getTitle()));
+                }
+
+                if (component instanceof JDialog) {
+                    ((JDialog) component).setTitle(LabelTranslatorSingleton.getInstance().translate(((JDialog) component).getTitle()));
                 }
             }
         }
