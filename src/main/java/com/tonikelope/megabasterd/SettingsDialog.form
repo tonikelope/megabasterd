@@ -51,7 +51,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" max="32767" attributes="0"/>
+              <Component id="jTabbedPane1" pref="479" max="32767" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="status" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -140,7 +140,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="downloads_scroll_pane" pref="514" max="32767" attributes="0"/>
+                      <Component id="downloads_scroll_pane" pref="412" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -623,7 +623,7 @@
                           <Component id="max_up_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="max_up_speed_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="317" max="32767" attributes="0"/>
+                      <EmptySpace pref="215" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -779,7 +779,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="143" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="92" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -788,7 +788,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="142" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="91" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1089,7 +1089,7 @@
                       <Component id="proxy_panel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="rec_zoom_label" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="180" max="32767" attributes="0"/>
+                      <EmptySpace pref="78" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>

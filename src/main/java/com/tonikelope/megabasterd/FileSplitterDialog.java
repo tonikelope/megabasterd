@@ -116,7 +116,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             @Override
             public void run() {
 
-                jProgressBar2.setValue((int) Math.ceil((MAX_VALUE / (double) _file.length()) * _progress));
+                jProgressBar2.setValue((int) Math.floor(MAX_VALUE / ((double) _file.length()) * _progress));
             }
         });
 

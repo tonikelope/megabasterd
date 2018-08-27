@@ -865,7 +865,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 514, Short.MAX_VALUE)
+                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 412, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -956,7 +956,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_up_speed_label)
                     .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(317, Short.MAX_VALUE))
+                .addContainerGap(215, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_panel); // NOI18N
@@ -1137,7 +1137,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 92, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1145,7 +1145,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1385,7 +1385,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rec_zoom_label)
-                .addContainerGap(180, Short.MAX_VALUE))
+                .addContainerGap(78, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Advanced", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-administrative-tools-30.png")), advanced_panel); // NOI18N
@@ -1415,7 +1415,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 479, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(status)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

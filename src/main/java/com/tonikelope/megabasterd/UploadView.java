@@ -480,7 +480,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             @Override
             public void run() {
 
-                progress_pbar.setValue((int) Math.ceil(bar_rate * progress));
+                progress_pbar.setValue((int) Math.floor(bar_rate * progress));
             }
         });
     }

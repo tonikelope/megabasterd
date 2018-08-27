@@ -87,7 +87,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                     @Override
                     public void run() {
 
-                        jProgressBar2.setValue((int) Math.ceil((MAX_VALUE / (double) _file_size * _progress)));
+                        jProgressBar2.setValue((int) Math.floor(MAX_VALUE / ((double) _file_size * _progress)));
                     }
                 });
             }

@@ -495,7 +495,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             @Override
             public void run() {
 
-                progress_pbar.setValue((int) Math.ceil(bar_rate * progress));
+                progress_pbar.setValue((int) Math.floor(bar_rate * progress));
             }
         });
     }

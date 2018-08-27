@@ -660,8 +660,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                 throw new IOException("El tamaño del fichero es incorrecto!");
                             }
 
-                            getView().updateProgressBar(MAX_VALUE);
-
                             _file.renameTo(new File(filename));
 
                             String verify_file = selectSettingValue("verify_down_file");
@@ -718,8 +716,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                         getView().getStop_button().setVisible(false);
                                     }
                                 });
-
-                                getView().updateProgressBar(MAX_VALUE);
 
                             } else {
 
