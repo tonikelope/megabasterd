@@ -168,8 +168,9 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/images/icons8-copy-to-clipboard-30.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Copy MegaBasterd download URL"/>
+        <Property name="text" type="java.lang.String" value="Download latest version"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="mcdown_url_buttonActionPerformed"/>

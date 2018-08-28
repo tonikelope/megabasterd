@@ -957,39 +957,66 @@ public final class MiscTools {
         return public_ip;
     }
 
-    public static String checkNewVersion(String folder_node, String folder_key) {
+    public static String checkNewVersion(String url) {
 
         String new_version_major = null, new_version_minor = null, current_version_major = null, current_version_minor = null;
 
+        URL mb_url;
+
+        HttpURLConnection con = null;
+
         try {
-            MegaAPI ma = new MegaAPI();
 
-            HashMap<String, Object> folder_nodes = ma.getFolderNodes(folder_node, folder_key);
+            mb_url = new URL(url);
 
-            if (folder_nodes != null && !folder_nodes.isEmpty()) {
+            if (MainPanel.isUse_proxy()) {
 
-                for (Object o : folder_nodes.values()) {
+                con = (HttpURLConnection) mb_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                    HashMap<String, Object> current_node = (HashMap<String, Object>) o;
+                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                    new_version_major = findFirstRegex("([0-9]+)\\.[0-9]+\\.run", (String) current_node.get("name"), 1);
-
-                    new_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)\\.run", (String) current_node.get("name"), 1);
-
-                    current_version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", VERSION, 1);
-
-                    current_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", VERSION, 1);
-
-                    if (new_version_major != null && (Integer.parseInt(current_version_major) < Integer.parseInt(new_version_major) || (Integer.parseInt(current_version_major) == Integer.parseInt(new_version_major) && Integer.parseInt(current_version_minor) < Integer.parseInt(new_version_minor)))) {
-
-                        return new_version_major + "." + new_version_minor;
-
-                    }
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                 }
+            } else {
 
+                con = (HttpURLConnection) mb_url.openConnection();
             }
 
-        } catch (Exception ex) {
+            InputStream is = con.getInputStream();
+
+            try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                int reads;
+
+                while ((reads = is.read(buffer)) != -1) {
+
+                    byte_res.write(buffer, 0, reads);
+                }
+
+                String latest_version_res = new String(byte_res.toByteArray());
+
+                String latest_version = findFirstRegex("releases\\/tag\\/v?([0-9]+\\.[0-9]+)", latest_version_res, 1);
+
+                new_version_major = findFirstRegex("([0-9]+)\\.[0-9]+", latest_version, 1);
+
+                new_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)", latest_version, 1);
+
+                current_version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", VERSION, 1);
+
+                current_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", VERSION, 1);
+
+                if (new_version_major != null && (Integer.parseInt(current_version_major) < Integer.parseInt(new_version_major) || (Integer.parseInt(current_version_major) == Integer.parseInt(new_version_major) && Integer.parseInt(current_version_minor) < Integer.parseInt(new_version_minor)))) {
+
+                    return new_version_major + "." + new_version_minor;
+
+                }
+            }
+
+        } catch (MalformedURLException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
 

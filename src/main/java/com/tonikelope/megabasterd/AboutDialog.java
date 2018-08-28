@@ -13,7 +13,7 @@ import java.awt.Color;
 public final class AboutDialog extends javax.swing.JDialog {
 
     public static final String MEGA_URL = "https://mega.nz/";
-    public static final String MEGABASTERD_URL = "https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A";
+    public static final String MEGABASTERD_URL = "https://github.com/tonikelope/megabasterd/releases/latest";
     public static final String TONIKELOPE_URL = "https://github.com/tonikelope/";
     public static final String MEGACRYPTER_URL = "https://tonikelope.github.io/megacrypter/";
     public static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
@@ -110,8 +110,9 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         mcdown_url_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         mcdown_url_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-copy-to-clipboard-30.png"))); // NOI18N
-        mcdown_url_button.setText("Copy MegaBasterd download URL");
+        mcdown_url_button.setText("Download latest version");
         mcdown_url_button.setDoubleBuffered(true);
+        mcdown_url_button.setEnabled(false);
         mcdown_url_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 mcdown_url_buttonActionPerformed(evt);
@@ -220,9 +221,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
     private void mcdown_url_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_mcdown_url_buttonActionPerformed
 
-        copyTextToClipboard(MEGABASTERD_URL);
-
-        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("MEGA URL was copied to clipboard!"));
+        openBrowserURL(MEGABASTERD_URL);
     }//GEN-LAST:event_mcdown_url_buttonActionPerformed
 
     private void check_version_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_check_version_buttonActionPerformed
@@ -241,17 +240,19 @@ public final class AboutDialog extends javax.swing.JDialog {
             @Override
             public void run() {
 
-                String[] mega_url_parts = MEGABASTERD_URL.split("!");
-
-                String new_version = checkNewVersion(mega_url_parts[1], mega_url_parts[2]);
+                String new_version = checkNewVersion(MEGABASTERD_URL);
 
                 if (new_version != null) {
 
                     JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + new_version);
 
+                    mcdown_url_button.setEnabled(true);
+
                 } else {
 
                     JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("You have the latest version ;)"));
+
+                    mcdown_url_button.setEnabled(false);
                 }
 
                 check_version_button.setText(old_check_version_button_text);

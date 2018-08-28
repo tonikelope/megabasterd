@@ -41,6 +41,7 @@ public final class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _addTranslation("Download latest version", "Descargar la última versión");
         _addTranslation("PROVISION FAILED", "ERROR AL APROVISIONAR");
         _addTranslation("Error registering download: file is already downloading.", "Error al registrar la descarga: el archivo ya se está descargando.");
         _addTranslation("FATAL ERROR! ", "¡ERROR FATAL! ");
