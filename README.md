@@ -1,5 +1,5 @@
 <p align="center"><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/src/main/resources/images/mbasterd_logo_git.png"></p>
-<h2 align="center"><a href="https://mega.nz/#F!lYsRWaQB!uVhntmyKcVECRaOxAbcL4A" target="_blank"><b>Download latest build</b></a></h2>
+<h2 align="center"><a href="https://github.com/tonikelope/megabasterd/releases/latest" target="_blank"><b>Download latest build</b></a></h2>
 
 ![Screnshot](/src/main/resources/images/mbasterd_screen.png)
 
