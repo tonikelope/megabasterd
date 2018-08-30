@@ -214,7 +214,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         final Dialog tthis = this;
 
-        swingInvoke(new Runnable() {
+        THREAD_POOL.execute(new Runnable() {
 
             @Override
             public void run() {
@@ -223,7 +223,13 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
                     if (Arrays.equals(new_pass_textfield.getPassword(), confirm_pass_textfield.getPassword())) {
 
-                        status_label.setText(LabelTranslatorSingleton.getInstance().translate("Processing your password, please wait..."));
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                status_label.setText(LabelTranslatorSingleton.getInstance().translate("Processing your password, please wait..."));
+                            }
+                        });
 
                         if (new_pass_textfield.getPassword().length > 0) {
 
@@ -234,19 +240,33 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
                         _pass_ok = true;
 
-                        tthis.setVisible(false);
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+
+                                tthis.setVisible(false);
+                            }
+                        });
 
                     } else {
 
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
 
-                        status_label.setText("");
+                                status_label.setText("");
 
-                        new_pass_textfield.setText("");
+                                new_pass_textfield.setText("");
 
-                        confirm_pass_textfield.setText("");
+                                confirm_pass_textfield.setText("");
 
-                        new_pass_textfield.grabFocus();
+                                new_pass_textfield.grabFocus();
+                            }
+                        });
+
                     }
 
                 } catch (Exception ex) {

@@ -314,7 +314,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
             final File file = filechooser.getSelectedFile();
 
-            swingInvoke(new Runnable() {
+            THREAD_POOL.execute(new Runnable() {
                 @Override
                 public void run() {
 
@@ -347,17 +347,23 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
                             if (!links.isEmpty()) {
 
-                                links_textarea.setText("");
+                                swingInvoke(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        links_textarea.setText("");
 
-                                for (Iterator<String> i = links.iterator(); i.hasNext();) {
+                                        for (Iterator<String> i = links.iterator(); i.hasNext();) {
 
-                                    links_textarea.append(i.next());
+                                            links_textarea.append(i.next());
 
-                                    if (i.hasNext()) {
+                                            if (i.hasNext()) {
 
-                                        links_textarea.append("\r\n");
+                                                links_textarea.append("\r\n");
+                                            }
+                                        }
                                     }
-                                }
+                                });
+
                             }
                         }
 
@@ -367,15 +373,21 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     }
 
-                    dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
+                    swingInvoke(new Runnable() {
+                        @Override
+                        public void run() {
+                            dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
 
-                    dlc_button.setEnabled(true);
+                            dlc_button.setEnabled(true);
 
-                    links_textarea.setEnabled(true);
+                            links_textarea.setEnabled(true);
 
-                    dance_button.setEnabled(true);
+                            dance_button.setEnabled(true);
 
-                    pack();
+                            pack();
+                        }
+                    });
+
                 }
             });
 

@@ -202,7 +202,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
         final Dialog tthis = this;
 
-        swingInvoke(new Runnable() {
+        THREAD_POOL.execute(new Runnable() {
 
             @Override
             public void run() {
@@ -211,28 +211,34 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
                     String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
 
-                    if (!pass_hash.equals(_current_pass_hash)) {
+                    swingInvoke(
+                            new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!pass_hash.equals(_current_pass_hash)) {
 
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
 
-                        status_label.setText("");
+                                status_label.setText("");
 
-                        pack();
+                                pack();
 
-                        current_pass_textfield.setText("");
+                                current_pass_textfield.setText("");
 
-                        current_pass_textfield.grabFocus();
+                                current_pass_textfield.grabFocus();
 
-                    } else {
+                            } else {
 
-                        _pass = pass;
+                                _pass = pass;
 
-                        _current_pass_hash = pass_hash;
+                                _current_pass_hash = pass_hash;
 
-                        _pass_ok = true;
+                                _pass_ok = true;
 
-                        tthis.setVisible(false);
-                    }
+                                tthis.setVisible(false);
+                            }
+                        }
+                    });
 
                 } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);

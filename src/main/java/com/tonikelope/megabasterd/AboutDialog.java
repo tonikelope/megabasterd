@@ -236,34 +236,40 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         final Dialog tthis = this;
 
-        swingInvoke(new Runnable() {
+        THREAD_POOL.execute(new Runnable() {
             @Override
             public void run() {
 
-                String new_version = checkNewVersion(MEGABASTERD_URL);
+                final String new_version = checkNewVersion(MEGABASTERD_URL);
 
-                if (new_version != null) {
+                swingInvoke(new Runnable() {
+                    @Override
+                    public void run() {
 
-                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + new_version);
+                        if (new_version != null) {
 
-                    mcdown_url_button.setEnabled(true);
+                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + new_version);
 
-                } else {
+                            mcdown_url_button.setEnabled(true);
 
-                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("You have the latest version ;)"));
+                        } else {
 
-                    mcdown_url_button.setEnabled(false);
-                }
+                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("You have the latest version ;)"));
 
-                check_version_button.setText(old_check_version_button_text);
+                            mcdown_url_button.setEnabled(false);
+                        }
 
-                check_version_button.setEnabled(true);
+                        check_version_button.setText(old_check_version_button_text);
 
-                pack();
+                        check_version_button.setEnabled(true);
+
+                        pack();
+
+                    }
+                });
 
             }
         });
-
     }//GEN-LAST:event_check_version_buttonActionPerformed
 
     private void mb_labelMouseReleased(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mb_labelMouseReleased
