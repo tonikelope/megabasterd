@@ -109,14 +109,14 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             toChannel.transferFrom(sourceChannel, 0, byteSize);
         }
 
-        this._progress += byteSize;
+        _progress += byteSize;
 
         swingInvoke(
                 new Runnable() {
             @Override
             public void run() {
 
-                jProgressBar2.setValue((int) Math.floor(MAX_VALUE / ((double) _file.length()) * _progress));
+                jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _file.length()) * _progress));
             }
         });
 
@@ -361,55 +361,69 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
                     try {
                         if (_splitFile()) {
+                            swingInvoke(
+                                    new Runnable() {
+                                @Override
+                                public void run() {
 
-                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully splitted!"));
+                                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully splitted!"));
 
-                            if (Desktop.isDesktopSupported()) {
-                                try {
-                                    Desktop.getDesktop().open(_output_dir);
-                                } catch (IOException ex) {
+                                    if (Desktop.isDesktopSupported()) {
+                                        try {
+                                            Desktop.getDesktop().open(_output_dir);
+                                        } catch (IOException ex) {
+
+                                        }
+                                    }
+
+                                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+                                    setVisible(false);
 
                                 }
-                            }
-
-                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-                            setVisible(false);
+                            });
 
                         } else {
                             _file = null;
 
                             _output_dir = null;
 
-                            file_name_label.setText("");
+                            swingInvoke(
+                                    new Runnable() {
+                                @Override
+                                public void run() {
 
-                            output_folder_label.setText("");
+                                    file_name_label.setText("");
 
-                            split_size_text.setText("");
+                                    output_folder_label.setText("");
 
-                            file_size_label.setText("");
+                                    split_size_text.setText("");
 
-                            _progress = 0L;
+                                    file_size_label.setText("");
 
-                            jProgressBar2.setMinimum(0);
-                            jProgressBar2.setMaximum(MAX_VALUE);
-                            jProgressBar2.setStringPainted(true);
-                            jProgressBar2.setValue(0);
-                            jProgressBar2.setVisible(false);
+                                    _progress = 0L;
 
-                            split_button.setText(LabelTranslatorSingleton.getInstance().translate("SPLIT FILE"));
+                                    jProgressBar2.setMinimum(0);
+                                    jProgressBar2.setMaximum(MAX_VALUE);
+                                    jProgressBar2.setStringPainted(true);
+                                    jProgressBar2.setValue(0);
+                                    jProgressBar2.setVisible(false);
 
-                            file_button.setEnabled(true);
+                                    split_button.setText(LabelTranslatorSingleton.getInstance().translate("SPLIT FILE"));
 
-                            output_button.setEnabled(true);
+                                    file_button.setEnabled(true);
 
-                            split_button.setEnabled(true);
+                                    output_button.setEnabled(true);
 
-                            split_size_text.setEnabled(true);
+                                    split_button.setEnabled(true);
 
-                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                                    split_size_text.setEnabled(true);
 
-                            pack();
+                                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+                                    pack();
+                                }
+                            });
                         }
                     } catch (IOException ex) {
                         Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);

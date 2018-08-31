@@ -47,7 +47,7 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.33";
+    public static final String VERSION = "5.34";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -68,6 +68,7 @@ public final class MainPanel {
     private static boolean _use_smart_proxy;
     private static SmartMegaProxyManager _proxy_manager;
     private static String _language;
+    private static String _new_version;
 
     public static void main(String args[]) {
 
@@ -119,6 +120,8 @@ public final class MainPanel {
     private volatile boolean _exit;
 
     public MainPanel() {
+
+        _new_version = null;
 
         _exit = false;
 
@@ -198,11 +201,11 @@ public final class MainPanel {
             @Override
             public void run() {
 
-                String new_version = checkNewVersion(AboutDialog.MEGABASTERD_URL);
+                _new_version = checkNewVersion(AboutDialog.MEGABASTERD_URL);
 
-                if (new_version != null) {
+                if (_new_version != null) {
 
-                    JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + new_version);
+                    JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + _new_version);
                 }
             }
         });
@@ -269,6 +272,10 @@ public final class MainPanel {
         resumeDownloads();
 
         resumeUploads();
+    }
+
+    public static String getNew_version() {
+        return _new_version;
     }
 
     public static String getLanguage() {

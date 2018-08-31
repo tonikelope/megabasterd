@@ -80,14 +80,14 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
                 targetChannel.transferFrom(rfile.getChannel(), this._progress, rfile.length());
 
-                this._progress += rfile.length();
+                _progress += rfile.length();
 
                 swingInvoke(
                         new Runnable() {
                     @Override
                     public void run() {
 
-                        jProgressBar2.setValue((int) Math.floor(MAX_VALUE / ((double) _file_size * _progress)));
+                        jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _file_size) * _progress));
                     }
                 });
             }
@@ -370,57 +370,71 @@ public class FileMergerDialog extends javax.swing.JDialog {
                             if (delete_parts_checkbox.isSelected()) {
                                 _deleteParts();
                             }
+                            swingInvoke(
+                                    new Runnable() {
+                                @Override
+                                public void run() {
 
-                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
+                                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
 
-                            if (Desktop.isDesktopSupported()) {
-                                try {
-                                    Desktop.getDesktop().open(new File(file_name_label.getText()).getParentFile());
-                                } catch (IOException ex) {
+                                    if (Desktop.isDesktopSupported()) {
+                                        try {
+                                            Desktop.getDesktop().open(new File(file_name_label.getText()).getParentFile());
+                                        } catch (IOException ex) {
 
+                                        }
+                                    }
+
+                                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+                                    setVisible(false);
                                 }
-                            }
-
-                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-                            setVisible(false);
+                            });
 
                         } else {
                             _file_parts.clear();
 
-                            file_name_label.setText("");
+                            swingInvoke(
+                                    new Runnable() {
+                                @Override
+                                public void run() {
 
-                            file_size_label.setText("");
+                                    file_name_label.setText("");
 
-                            output_folder_label.setText("");
+                                    file_size_label.setText("");
 
-                            _output_dir = null;
+                                    output_folder_label.setText("");
 
-                            _file_name = null;
+                                    _output_dir = null;
 
-                            _file_size = 0L;
+                                    _file_name = null;
 
-                            _progress = 0L;
+                                    _file_size = 0L;
 
-                            jProgressBar2.setMinimum(0);
-                            jProgressBar2.setMaximum(MAX_VALUE);
-                            jProgressBar2.setStringPainted(true);
-                            jProgressBar2.setValue(0);
-                            jProgressBar2.setVisible(false);
+                                    _progress = 0L;
 
-                            merge_button.setText(LabelTranslatorSingleton.getInstance().translate("MERGE FILE"));
+                                    jProgressBar2.setMinimum(0);
+                                    jProgressBar2.setMaximum(MAX_VALUE);
+                                    jProgressBar2.setStringPainted(true);
+                                    jProgressBar2.setValue(0);
+                                    jProgressBar2.setVisible(false);
 
-                            file_button.setEnabled(true);
+                                    merge_button.setText(LabelTranslatorSingleton.getInstance().translate("MERGE FILE"));
 
-                            output_button.setEnabled(true);
+                                    file_button.setEnabled(true);
 
-                            merge_button.setEnabled(true);
+                                    output_button.setEnabled(true);
 
-                            delete_parts_checkbox.setEnabled(true);
+                                    merge_button.setEnabled(true);
 
-                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                                    delete_parts_checkbox.setEnabled(true);
 
-                            pack();
+                                    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+
+                                    pack();
+
+                                }
+                            });
                         }
                     } catch (IOException ex) {
                         Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, null, ex);

@@ -30,6 +30,10 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         translateLabels(this);
 
+        if (MainPanel.getNew_version() != null) {
+            mcdown_url_button.setEnabled(true);
+        }
+
         pack();
     }
 
