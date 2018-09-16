@@ -251,7 +251,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         _updateStatus(THREAD_START);
 
-        StreamChunkWriter chunkwriter = null;
+        StreamChunkManager chunkwriter = null;
         ArrayList<StreamChunkDownloader> chunkworkers = new ArrayList<>();
         final PipedOutputStream pipeout = new PipedOutputStream();
         final PipedInputStream pipein = new PipedInputStream(pipeout);
@@ -421,13 +421,13 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                     xchg.sendResponseHeaders(206, clength);
 
-                    chunkwriter = new StreamChunkWriter(this, link, file_info, mega_account, pipeout, temp_url, ranges[0] - sync_bytes, ranges[1] >= 0 ? ranges[1] : file_size - 1);
+                    chunkwriter = new StreamChunkManager(this, link, file_info, mega_account, pipeout, temp_url, ranges[0] - sync_bytes, ranges[1] >= 0 ? ranges[1] : file_size - 1);
 
                 } else {
 
                     xchg.sendResponseHeaders(200, file_size);
 
-                    chunkwriter = new StreamChunkWriter(this, link, file_info, mega_account, pipeout, temp_url, 0, file_size - 1);
+                    chunkwriter = new StreamChunkManager(this, link, file_info, mega_account, pipeout, temp_url, 0, file_size - 1);
                 }
 
                 THREAD_POOL.execute(chunkwriter);

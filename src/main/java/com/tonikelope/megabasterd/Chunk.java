@@ -45,24 +45,13 @@ public final class Chunk {
 
         _id = id;
 
-        _offset = calculateOffset();
+        _offset = calculateOffset(_id, _size_multi);
 
-        if (file_size > 0) {
-            if (_offset >= file_size) {
-                throw new ChunkInvalidException(valueOf(id));
-            }
+        Chunk.checkChunkID(_id, file_size, _offset);
 
-        } else {
+        _size = calculateSize(_id, file_size, _offset, _size_multi);
 
-            if (id > 1) {
-
-                throw new ChunkInvalidException(valueOf(id));
-            }
-        }
-
-        _size = calculateSize(file_size);
-
-        _url = file_url != null ? file_url + "/" + _offset + "-" + (_offset + _size - 1) : null;
+        _url = Chunk.genUrl(file_url, file_size, _offset, _size);
 
         _data_os = new ByteArrayOutInputStream((int) _size);
     }
@@ -75,24 +64,13 @@ public final class Chunk {
 
         _id = id;
 
-        _offset = calculateOffset();
+        _offset = calculateOffset(_id, _size_multi);
 
-        if (file_size > 0) {
-            if (_offset >= file_size) {
-                throw new ChunkInvalidException(valueOf(id));
-            }
+        Chunk.checkChunkID(_id, file_size, _offset);
 
-        } else {
+        _size = Chunk.calculateSize(_id, file_size, _offset, _size_multi);
 
-            if (id > 1) {
-
-                throw new ChunkInvalidException(valueOf(id));
-            }
-        }
-
-        _size = calculateSize(file_size);
-
-        _url = file_url != null ? file_url + "/" + _offset + (_offset + _size == file_size ? "" : "-" + (_offset + _size - 1)) : null;
+        _url = Chunk.genUrl(file_url, file_size, _offset, _size);
 
         _data_os = new ByteArrayOutInputStream((int) _size);
     }
@@ -134,20 +112,40 @@ public final class Chunk {
         return _data_os.toInputStream();
     }
 
-    private long calculateSize(long file_size) {
-        long chunk_size = (_id >= 1 && _id <= 7) ? _id * 128 * 1024 : 1024 * 1024 * _size_multi;
+    public static long calculateSize(long chunk_id, long file_size, long offset, int size_multi) {
+        long chunk_size = (chunk_id >= 1 && chunk_id <= 7) ? chunk_id * 128 * 1024 : 1024 * 1024 * size_multi;
 
-        if (_offset + chunk_size > file_size) {
-            chunk_size = file_size - _offset;
+        if (offset + chunk_size > file_size) {
+            chunk_size = file_size - offset;
         }
 
         return chunk_size;
     }
 
-    private long calculateOffset() {
+    public static long calculateOffset(long chunk_id, int size_multi) {
         long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
 
-        return (_id <= 7 ? offs[(int) _id - 1] : (3584 + (_id - 8) * 1024 * _size_multi)) * 1024;
+        return (chunk_id <= 7 ? offs[(int) chunk_id - 1] : (3584 + (chunk_id - 8) * 1024 * size_multi)) * 1024;
+    }
+
+    public static String genUrl(String file_url, long file_size, long offset, long chunk_size) {
+        return file_url != null ? file_url + "/" + offset + (offset + chunk_size == file_size ? "" : "-" + (offset + chunk_size - 1)) : null;
+    }
+
+    public static void checkChunkID(long chunk_id, long file_size, long offset) throws ChunkInvalidException {
+
+        if (file_size > 0) {
+            if (offset >= file_size) {
+                throw new ChunkInvalidException(valueOf(chunk_id));
+            }
+
+        } else {
+
+            if (chunk_id > 1) {
+
+                throw new ChunkInvalidException(valueOf(chunk_id));
+            }
+        }
     }
 
 }

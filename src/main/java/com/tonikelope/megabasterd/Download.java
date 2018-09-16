@@ -72,7 +72,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private volatile boolean _pause;
     private final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
     private volatile long _progress;
-    private ChunkWriter _chunkwriter;
+    private ChunkManager _chunkwriter;
     private String _last_download_url;
     private boolean _provision_ok;
     private boolean _finishing_download;
@@ -250,7 +250,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _pause = pause;
     }
 
-    public ChunkWriter getChunkwriter() {
+    public ChunkManager getChunkwriter() {
         return _chunkwriter;
     }
 
@@ -537,7 +537,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         _output_stream = new BufferedOutputStream(new FileOutputStream(_file, (_progress > 0)));
 
-                        _chunkwriter = new ChunkWriter(this);
+                        _chunkwriter = new ChunkManager(this);
 
                         _thread_pool.execute(_chunkwriter);
 

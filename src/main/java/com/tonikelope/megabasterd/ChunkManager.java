@@ -11,12 +11,14 @@ import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
 import javax.crypto.NoSuchPaddingException;
 import static com.tonikelope.megabasterd.CryptTools.*;
+import java.io.File;
+import java.io.FileInputStream;
 
 /**
  *
  * @author tonikelope
  */
-public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable {
+public final class ChunkManager implements Runnable, SecureSingleThreadNotifiable {
 
     private long _last_chunk_id_written;
     private long _bytes_written;
@@ -30,7 +32,7 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
     private final Object _secure_notify_lock;
     private boolean _notified;
 
-    public ChunkWriter(Download downloader) throws Exception {
+    public ChunkManager(Download downloader) throws Exception {
         _notified = false;
         _exit = false;
         _download = downloader;
@@ -117,15 +119,20 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
 
             if (_file_size > 0) {
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
-                    while (_chunk_queue.containsKey(_last_chunk_id_written + 1)) {
 
-                        Chunk current_chunk = _chunk_queue.remove(_last_chunk_id_written + 1);
+                    File chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+
+                    while (_chunk_queue.containsKey(_last_chunk_id_written + 1) || chunk_file.exists()) {
+
+                        if (_chunk_queue.containsKey(_last_chunk_id_written + 1)) {
+                            Chunk current_chunk = _chunk_queue.remove(_last_chunk_id_written + 1);
+                        }
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
                         int reads;
 
-                        try (CipherInputStream cis = new CipherInputStream(current_chunk.getInputStream(), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
+                        try (CipherInputStream cis = new CipherInputStream(new FileInputStream(chunk_file), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
                             while ((reads = cis.read(buffer)) != -1) {
                                 _download.getOutput_stream().write(buffer, 0, reads);
                             }
@@ -133,10 +140,13 @@ public final class ChunkWriter implements Runnable, SecureSingleThreadNotifiable
                             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                         }
 
-                        _bytes_written += current_chunk.getSize();
+                        _bytes_written += chunk_file.length();
 
-                        _last_chunk_id_written = current_chunk.getId();
+                        _last_chunk_id_written++;
 
+                        chunk_file.delete();
+
+                        chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
                     }
 
                     if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {

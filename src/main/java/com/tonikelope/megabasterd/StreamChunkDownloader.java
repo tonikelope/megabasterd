@@ -18,11 +18,11 @@ import java.net.URL;
 public class StreamChunkDownloader implements Runnable {
 
     private final int _id;
-    private final StreamChunkWriter _chunkwriter;
+    private final StreamChunkManager _chunkwriter;
     private volatile boolean _exit;
     private SmartMegaProxyManager _proxy_manager;
 
-    public StreamChunkDownloader(int id, StreamChunkWriter chunkwriter) {
+    public StreamChunkDownloader(int id, StreamChunkManager chunkwriter) {
         _id = id;
         _chunkwriter = chunkwriter;
         _proxy_manager = null;
@@ -58,7 +58,7 @@ public class StreamChunkDownloader implements Runnable {
 
                 }
 
-                while (!_exit && !_chunkwriter.isExit() && _chunkwriter.getChunk_queue().size() >= StreamChunkWriter.BUFFER_CHUNKS_SIZE) {
+                while (!_exit && !_chunkwriter.isExit() && _chunkwriter.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
 
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: Chunk buffer is full. I pause myself.", new Object[]{Thread.currentThread().getName(), _id});
 

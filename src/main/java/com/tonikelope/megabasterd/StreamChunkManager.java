@@ -14,7 +14,7 @@ import static com.tonikelope.megabasterd.MiscTools.*;
  *
  * @author tonikelope
  */
-public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable {
+public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable {
 
     public static final int CHUNK_SIZE = 1048576;
     public static final int BUFFER_CHUNKS_SIZE = 20;
@@ -34,7 +34,7 @@ public class StreamChunkWriter implements Runnable, SecureMultiThreadNotifiable 
     private final KissVideoStreamServer _server;
     private volatile boolean _exit;
 
-    public StreamChunkWriter(KissVideoStreamServer server, String link, HashMap file_info, String mega_account, PipedOutputStream pipeos, String url, long start_offset, long end_offset) {
+    public StreamChunkManager(KissVideoStreamServer server, String link, HashMap file_info, String mega_account, PipedOutputStream pipeos, String url, long start_offset, long end_offset) {
         _server = server;
         _link = link;
         _mega_account = mega_account;
