@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -13,6 +12,7 @@ import javax.crypto.NoSuchPaddingException;
 import static com.tonikelope.megabasterd.CryptTools.*;
 import java.io.File;
 import java.io.FileInputStream;
+import static java.lang.String.valueOf;
 
 /**
  *
@@ -23,7 +23,6 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
     private long _last_chunk_id_written;
     private long _bytes_written;
     private final long _file_size;
-    private final ConcurrentHashMap<Long, Chunk> _chunk_queue;
     private final Download _download;
     private final byte[] _byte_file_key;
     private final byte[] _byte_iv;
@@ -40,7 +39,6 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
         _file_size = _download.getFile_size();
         _byte_file_key = initMEGALinkKey(_download.getFile_key());
         _byte_iv = initMEGALinkKeyIV(_download.getFile_key());
-        _chunk_queue = new ConcurrentHashMap();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
 
         if (_download.getProgress() == 0) {
@@ -90,6 +88,10 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
         return _byte_file_key;
     }
 
+    public byte[] getByte_iv() {
+        return _byte_iv;
+    }
+
     public ConcurrentLinkedQueue getRejectedChunkIds() {
         return _rejectedChunkIds;
     }
@@ -106,10 +108,6 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
         return _last_chunk_id_written;
     }
 
-    public ConcurrentHashMap getChunk_queue() {
-        return _chunk_queue;
-    }
-
     @Override
     public void run() {
 
@@ -122,11 +120,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
                     File chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
 
-                    while (_chunk_queue.containsKey(_last_chunk_id_written + 1) || chunk_file.exists()) {
-
-                        if (_chunk_queue.containsKey(_last_chunk_id_written + 1)) {
-                            Chunk current_chunk = _chunk_queue.remove(_last_chunk_id_written + 1);
-                        }
+                    while (chunk_file.canRead()) {
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -154,6 +148,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter waiting for chunk [{1}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written});
 
                         secureWait();
+
                     }
                 }
             }
@@ -185,4 +180,41 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
             return i;
         }
     }
+
+    public static long calculateChunkOffset(long chunk_id, int size_multi) {
+        long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
+
+        return (chunk_id <= 7 ? offs[(int) chunk_id - 1] : (3584 + (chunk_id - 8) * 1024 * size_multi)) * 1024;
+    }
+
+    public static String genChunkUrl(String file_url, long file_size, long offset, long chunk_size) {
+        return file_url != null ? file_url + "/" + offset + (offset + chunk_size == file_size ? "" : "-" + (offset + chunk_size - 1)) : null;
+    }
+
+    public static void checkChunkID(long chunk_id, long file_size, long offset) throws ChunkInvalidException {
+
+        if (file_size > 0) {
+            if (offset >= file_size) {
+                throw new ChunkInvalidException(valueOf(chunk_id));
+            }
+
+        } else {
+
+            if (chunk_id > 1) {
+
+                throw new ChunkInvalidException(valueOf(chunk_id));
+            }
+        }
+    }
+
+    public static long calculateChunkSize(long chunk_id, long file_size, long offset, int size_multi) {
+        long chunk_size = (chunk_id >= 1 && chunk_id <= 7) ? chunk_id * 128 * 1024 : 1024 * 1024 * size_multi;
+
+        if (offset + chunk_size > file_size) {
+            chunk_size = file_size - offset;
+        }
+
+        return chunk_size;
+    }
+
 }

@@ -103,19 +103,28 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                     long chunk_id = 1L;
                     long tot = 0L;
+                    int[] chunk_mac = new int[4];
+                    byte[] byte_block = new byte[16];
 
                     try {
                         while (!_exit && !_upload.isStopped() && !_upload.getMain_panel().isExit()) {
 
-                            Chunk current_chunk = new Chunk(chunk_id++, _upload.getFile_size(), null);
                             int reads;
+
+                            long chunk_offset = ChunkManager.calculateChunkOffset(chunk_id, 1);
+
+                            long chunk_size = ChunkManager.calculateChunkSize(chunk_id, _upload.getFile_size(), chunk_offset, 1);
+
+                            ChunkManager.checkChunkID(chunk_id, _upload.getFile_size(), chunk_offset);
 
                             try {
 
-                                int[] chunk_mac = {file_iv[0], file_iv[1], file_iv[0], file_iv[1]};
-                                byte[] byte_block = new byte[16];
+                                chunk_mac[0] = file_iv[0];
+                                chunk_mac[1] = file_iv[1];
+                                chunk_mac[2] = file_iv[0];
+                                chunk_mac[3] = file_iv[1];
+
                                 long conta_chunk = 0L;
-                                long chunk_size = current_chunk.getSize();
 
                                 while (conta_chunk < chunk_size && (reads = is.read(byte_block)) != -1) {
 
@@ -148,6 +157,8 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                             } catch (IOException | IllegalBlockSizeException | BadPaddingException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                             }
+
+                            chunk_id++;
 
                         }
 

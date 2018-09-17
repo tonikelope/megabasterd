@@ -72,7 +72,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private volatile boolean _pause;
     private final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
     private volatile long _progress;
-    private ChunkManager _chunkwriter;
+    private ChunkManager _chunkmanager;
     private String _last_download_url;
     private boolean _provision_ok;
     private boolean _finishing_download;
@@ -250,8 +250,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _pause = pause;
     }
 
-    public ChunkManager getChunkwriter() {
-        return _chunkwriter;
+    public ChunkManager getChunkmanager() {
+        return _chunkmanager;
     }
 
     public ConcurrentLinkedQueue<Integer> getPartialProgressQueue() {
@@ -537,10 +537,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         _output_stream = new BufferedOutputStream(new FileOutputStream(_file, (_progress > 0)));
 
-                        _chunkwriter = new ChunkManager(this);
-
-                        _thread_pool.execute(_chunkwriter);
-
                         _thread_pool.execute(getProgress_meter());
 
                         getMain_panel().getGlobal_dl_speed().attachTransference(this);
@@ -548,6 +544,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         synchronized (_workers_lock) {
 
                             if (_use_slots) {
+
+                                _chunkmanager = new ChunkManager(this);
+
+                                _thread_pool.execute(_chunkmanager);
 
                                 for (int t = 1; t <= _slots; t++) {
                                     ChunkDownloader c = new ChunkDownloader(t, this);
@@ -1230,7 +1230,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         int[] file_mac = {0, 0, 0, 0};
         int[] cbc_iv = {0, 0, 0, 0};
 
-        Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", _chunkwriter.getByte_file_key(), i32a2bin(cbc_iv));
+        byte[] byte_file_key = initMEGALinkKey(getFile_key());
+
+        Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", byte_file_key, i32a2bin(cbc_iv));
 
         try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(filename))) {
 
@@ -1239,18 +1241,25 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             byte[] byte_block = new byte[16];
             int[] int_block;
             int reads;
+            int[] chunk_mac = new int[4];
 
             try {
                 while (!_exit) {
 
-                    Chunk chunk = new Chunk(chunk_id++, _file_size, null);
+                    long chunk_offset = ChunkManager.calculateChunkOffset(chunk_id, 1);
 
-                    tot += chunk.getSize();
+                    long chunk_size = ChunkManager.calculateChunkSize(chunk_id, this.getFile_size(), chunk_offset, 1);
 
-                    int[] chunk_mac = {iv[0], iv[1], iv[0], iv[1]};
+                    ChunkManager.checkChunkID(chunk_id, this.getFile_size(), chunk_offset);
+
+                    tot += chunk_size;
+
+                    chunk_mac[0] = iv[0];
+                    chunk_mac[1] = iv[1];
+                    chunk_mac[2] = iv[0];
+                    chunk_mac[3] = iv[1];
 
                     long conta_chunk = 0L;
-                    long chunk_size = chunk.getSize();
 
                     while (conta_chunk < chunk_size && (reads = is.read(byte_block)) != -1) {
 
@@ -1279,6 +1288,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
 
                     setProgress(tot);
+
+                    chunk_id++;
 
                 }
 

@@ -117,13 +117,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 chunk_id = _download.nextChunkId();
 
-                long chunk_offset = Chunk.calculateOffset(chunk_id, Download.CHUNK_SIZE_MULTI);
+                long chunk_offset = ChunkManager.calculateChunkOffset(chunk_id, Download.CHUNK_SIZE_MULTI);
 
-                long chunk_size = Chunk.calculateSize(chunk_id, _download.getFile_size(), chunk_offset, Download.CHUNK_SIZE_MULTI);
+                long chunk_size = ChunkManager.calculateChunkSize(chunk_id, _download.getFile_size(), chunk_offset, Download.CHUNK_SIZE_MULTI);
 
-                Chunk.checkChunkID(chunk_id, _download.getFile_size(), chunk_offset);
+                ChunkManager.checkChunkID(chunk_id, _download.getFile_size(), chunk_offset);
 
-                String chunk_url = Chunk.genUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
+                String chunk_url = ChunkManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
 
                 if (con == null || error) {
 
@@ -245,12 +245,19 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 int reads;
 
-                                if (!new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id).exists()) {
+                                File old_chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id);
+
+                                if (!old_chunk_file.exists() || old_chunk_file.length() == 0) {
+
+                                    if (old_chunk_file.exists()) {
+                                        old_chunk_file.delete();
+                                    }
+
                                     File chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
 
                                     FileOutputStream fo = new FileOutputStream(chunk_file);
 
-                                    while (!_exit && !_download.isStopped() && !_download.getChunkwriter().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer)) != -1) {
+                                    while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer)) != -1) {
 
                                         fo.write(buffer, 0, reads);
 
@@ -325,7 +332,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
 
-                            _download.getChunkwriter().secureNotify();
+                            _download.getChunkmanager().secureNotify();
 
                             conta_error = 0;
                         }
@@ -374,6 +381,12 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         con.disconnect();
                         con = null;
                     }
+
+                    File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
+
+                    if (chunk_file_tmp.exists()) {
+                        chunk_file_tmp.delete();
+                    }
                 }
             }
 
@@ -392,7 +405,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         _download.stopThisSlot(this);
 
-        _download.getChunkwriter().secureNotify();
+        _download.getChunkmanager().secureNotify();
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
     }

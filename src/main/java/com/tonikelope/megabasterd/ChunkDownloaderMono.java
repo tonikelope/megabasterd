@@ -1,7 +1,10 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.CryptTools.forwardMEGALinkKeyIV;
+import static com.tonikelope.megabasterd.CryptTools.genDecrypter;
+import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
+import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKeyIV;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static com.tonikelope.megabasterd.MiscTools.*;
@@ -10,6 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import javax.crypto.CipherInputStream;
 
 /**
  *
@@ -33,10 +37,14 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             String worker_url = null;
             int conta_error = 0, http_status = 200;
             boolean error = false, error403 = false;
+            long chunk_id = 0;
+            long bytes_written = getDownload().getProgress();
+            byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
+            byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
 
             getDownload().getView().set509Error(false);
 
-            InputStream is = null;
+            CipherInputStream cis = null;
 
             while (!isExit() && !getDownload().isStopped()) {
 
@@ -45,13 +53,21 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     worker_url = getDownload().getDownloadUrlForWorker();
                 }
 
-                Chunk chunk = new Chunk(getDownload().nextChunkId(), getDownload().getFile_size(), null);
+                chunk_id = getDownload().nextChunkId();
+
+                long chunk_offset = ChunkManager.calculateChunkOffset(chunk_id, 1);
+
+                long chunk_size = ChunkManager.calculateChunkSize(chunk_id, getDownload().getFile_size(), chunk_offset, 1);
+
+                ChunkManager.checkChunkID(chunk_id, getDownload().getFile_size(), chunk_offset);
+
+                long chunk_reads = 0;
 
                 try {
 
                     if (con == null || error) {
 
-                        URL url = new URL(worker_url + "/" + chunk.getOffset());
+                        URL url = new URL(worker_url + "/" + chunk_offset);
 
                         if (MainPanel.isUse_proxy()) {
 
@@ -74,7 +90,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         http_status = con.getResponseCode();
 
-                        is = new ThrottledInputStream(con.getInputStream(), getDownload().getMain_panel().getStream_supervisor());
+                        cis = new CipherInputStream(new ThrottledInputStream(con.getInputStream(), getDownload().getMain_panel().getStream_supervisor()), genDecrypter("AES", "AES/CTR/NoPadding", byte_file_key, forwardMEGALinkKeyIV(byte_iv, bytes_written)));
                     }
 
                     error = false;
@@ -100,7 +116,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             error403 = true;
                         }
 
-                        getDownload().rejectChunkId(chunk.getId());
+                        getDownload().rejectChunkId(chunk_id);
 
                         conta_error++;
 
@@ -115,14 +131,17 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     } else {
 
-                        if (!isExit() && !getDownload().isStopped() && is != null) {
+                        if (!isExit() && !getDownload().isStopped() && cis != null) {
 
                             byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
                             int reads;
 
-                            while (!getDownload().isStopped() && !getDownload().getChunkwriter().isExit() && chunk.getOutputStream().size() < chunk.getSize() && (reads = is.read(buffer, 0, Math.min((int) (chunk.getSize() - chunk.getOutputStream().size()), buffer.length))) != -1) {
-                                chunk.getOutputStream().write(buffer, 0, reads);
+                            while (!getDownload().isStopped() && chunk_reads < chunk_size && bytes_written + chunk_reads < getDownload().getFile_size() && (reads = cis.read(buffer, 0, Math.min(Math.min((int) (chunk_size - chunk_reads), (int) (getDownload().getFile_size() - (bytes_written + chunk_reads))), buffer.length))) != -1) {
+
+                                getDownload().getOutput_stream().write(buffer, 0, reads);
+
+                                chunk_reads += reads;
 
                                 getDownload().getPartialProgressQueue().add(reads);
 
@@ -142,12 +161,13 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                     secureWait();
                                 }
+
                             }
 
-                            if (chunk.getOutputStream().size() < chunk.getSize()) {
+                            if (chunk_reads < chunk_size) {
 
-                                if (chunk.getOutputStream().size() > 0) {
-                                    getDownload().getPartialProgressQueue().add(-1 * chunk.getOutputStream().size());
+                                if (chunk_reads > 0) {
+                                    getDownload().getPartialProgressQueue().add(-1 * (int) chunk_reads);
 
                                     getDownload().getProgress_meter().secureNotify();
                                 }
@@ -157,7 +177,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             if (error && !getDownload().isStopped()) {
 
-                                getDownload().rejectChunkId(chunk.getId());
+                                getDownload().rejectChunkId(chunk_id);
 
                                 conta_error++;
 
@@ -172,16 +192,14 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             } else if (!error) {
 
-                                getDownload().getChunkwriter().getChunk_queue().put(chunk.getId(), chunk);
-
-                                getDownload().getChunkwriter().secureNotify();
+                                bytes_written += chunk_reads;
 
                                 conta_error = 0;
                             }
 
                         } else if (isExit()) {
 
-                            getDownload().rejectChunkId(chunk.getId());
+                            getDownload().rejectChunkId(chunk_id);
                         }
 
                     }
@@ -189,10 +207,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                 } catch (IOException ex) {
                     error = true;
 
-                    getDownload().rejectChunkId(chunk.getId());
+                    getDownload().rejectChunkId(chunk_id);
 
-                    if (chunk.getOutputStream().size() > 0) {
-                        getDownload().getPartialProgressQueue().add(-1 * chunk.getOutputStream().size());
+                    if (chunk_reads > 0) {
+                        getDownload().getPartialProgressQueue().add(-1 * (int) chunk_reads);
 
                         getDownload().getProgress_meter().secureNotify();
                     }
@@ -205,6 +223,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     if (error && con != null) {
                         con.disconnect();
                         con = null;
+
+                        if (cis != null) {
+                            cis.close();
+                        }
                     }
                 }
 
@@ -219,7 +241,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         getDownload().stopThisSlot(this);
 
-        getDownload().getChunkwriter().secureNotify();
+        getDownload().secureNotify();
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), getId()});
 
