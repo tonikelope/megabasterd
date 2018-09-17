@@ -214,6 +214,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         }
     }
 
+    public ConcurrentLinkedQueue<Long> getRejectedChunkIds() {
+        return _rejectedChunkIds;
+    }
+
     public boolean isError509() {
         return _error509;
     }

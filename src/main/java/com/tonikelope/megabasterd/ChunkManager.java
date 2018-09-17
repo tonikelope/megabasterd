@@ -120,7 +120,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
                     File chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
 
-                    while (chunk_file.canRead()) {
+                    while (chunk_file.exists() && chunk_file.canRead()) {
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -145,7 +145,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
                     if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter waiting for chunk [{1}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written});
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter waiting for chunk [{1}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1});
 
                         secureWait();
 

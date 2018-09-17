@@ -249,7 +249,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 if (!old_chunk_file.exists() || old_chunk_file.length() == 0) {
 
-                                    if (old_chunk_file.exists()) {
+                                    if (old_chunk_file.length() == 0) {
                                         old_chunk_file.delete();
                                     }
 
@@ -260,6 +260,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                     while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer)) != -1) {
 
                                         fo.write(buffer, 0, reads);
+
+                                        chunk_reads += reads;
 
                                         _download.getPartialProgressQueue().add(reads);
 
@@ -280,7 +282,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                             secureWait();
                                         }
 
-                                        chunk_reads += reads;
                                     }
 
                                     fo.close();
@@ -311,6 +312,12 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (error && !_download.isStopped()) {
 
+                            File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
+
+                            if (chunk_file_tmp.exists()) {
+                                chunk_file_tmp.delete();
+                            }
+
                             _download.rejectChunkId(chunk_id);
 
                             conta_error++;
@@ -339,11 +346,23 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     } else if (_exit) {
 
+                        File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
+
+                        if (chunk_file_tmp.exists()) {
+                            chunk_file_tmp.delete();
+                        }
+
                         _download.rejectChunkId(chunk_id);
                     }
                 } catch (IOException ex) {
 
                     error = true;
+
+                    File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
+
+                    if (chunk_file_tmp.exists()) {
+                        chunk_file_tmp.delete();
+                    }
 
                     _download.rejectChunkId(chunk_id);
 
@@ -380,12 +399,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     if (con != null) {
                         con.disconnect();
                         con = null;
-                    }
-
-                    File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
-
-                    if (chunk_file_tmp.exists()) {
-                        chunk_file_tmp.delete();
                     }
                 }
             }
