@@ -1199,7 +1199,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     public long calculateLastUploadedChunk(long bytes_read) {
 
         if (bytes_read > 3584 * 1024) {
-            return 7 + (long) Math.ceil((float) (bytes_read - 3584 * 1024) / (1024 * 1024 * Upload.CHUNK_SIZE_MULTI));
+            return 7 + (long) Math.floor((float) (bytes_read - 3584 * 1024) / (1024 * 1024 * Upload.CHUNK_SIZE_MULTI));
         } else {
             long i = 0, tot = 0;
 
