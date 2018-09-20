@@ -286,7 +286,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     fo.close();
 
-                                    chunk_file.renameTo(new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id));
+                                    if (chunk_reads == chunk_size) {
+                                        chunk_file.renameTo(new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id));
+                                    }
+
                                 } else {
 
                                     chunk_reads = chunk_size;

@@ -523,6 +523,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                             long max_size = calculateMaxTempFileSize(_file.length());
 
                             if (max_size != _file.length()) {
+
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Downloader truncating mctemp file {1} -> {2} ", new Object[]{Thread.currentThread().getName(), _file.length(), max_size});
+
                                 getView().printStatusNormal("Truncating temp file...");
 
                                 try (FileChannel out_truncate = new FileOutputStream(filename + ".mctemp", true).getChannel()) {
@@ -1353,7 +1356,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             return reminder == 0 ? size : (size - reminder);
         } else {
-            int i = 0, tot = 0;
+            long i = 0, tot = 0;
 
             while (tot < size) {
                 i++;

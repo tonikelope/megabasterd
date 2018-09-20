@@ -54,6 +54,9 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
             _bytes_written = _download.getProgress();
         }
+
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager hello LAST CHUNK WRITTEN -> [{1}] {2}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written});
+
     }
 
     @Override
@@ -113,7 +116,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
         try {
 
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter: let''s do some work!", Thread.currentThread().getName());
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager: let's do some work!", Thread.currentThread().getName());
 
             if (_file_size > 0) {
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
@@ -136,6 +139,8 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
                         _bytes_written += chunk_file.length();
 
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager has written to disk chunk [{1}] {2} {3}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _bytes_written, calculateLastWrittenChunk(_bytes_written)});
+
                         _last_chunk_id_written++;
 
                         chunk_file.delete();
@@ -145,7 +150,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
                     if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter waiting for chunk [{1}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1});
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager waiting for chunk [{1}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1});
 
                         secureWait();
 
@@ -163,14 +168,14 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
         _download.secureNotify();
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Filewriter: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile().getName()});
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile().getName()});
     }
 
     private long calculateLastWrittenChunk(long temp_file_size) {
         if (temp_file_size > 3584 * 1024) {
-            return 7 + (long) Math.ceil((float) (temp_file_size - 3584 * 1024) / (1024 * 1024 * (_download.isUse_slots() ? Download.CHUNK_SIZE_MULTI : 1)));
+            return 7 + (long) Math.floor((float) (temp_file_size - 3584 * 1024) / (1024 * 1024 * (_download.isUse_slots() ? Download.CHUNK_SIZE_MULTI : 1)));
         } else {
-            int i = 0, tot = 0;
+            long i = 0, tot = 0;
 
             while (tot < temp_file_size) {
                 i++;
