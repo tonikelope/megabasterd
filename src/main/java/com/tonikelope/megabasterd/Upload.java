@@ -25,7 +25,7 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 public final class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final int WORKERS_DEFAULT = 6;
-    public static final int CHUNK_SIZE_MULTI = 1; //OBLIGATORIO
+    public static final int CHUNK_SIZE_MULTI = 10;
     private final MainPanel _main_panel;
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
@@ -117,7 +117,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _ma = upload.getMa();
         _file_name = upload.getFile_name();
         _parent_node = upload.getParent_node();
-        _ul_key = upload.getUl_key();
+        _ul_key = null;
         _ul_url = null;
         _root_node = upload.getRoot_node();
         _share_key = upload.getShare_key();
