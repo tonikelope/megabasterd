@@ -47,7 +47,7 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.41";
+    public static final String VERSION = "5.42";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -55,7 +55,7 @@ public final class MainPanel {
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = true;
-    public static final Font DEFAULT_FONT = createAndRegisterFont("/fonts/Kalam-Regular.ttf");
+    public static Font DEFAULT_FONT = createAndRegisterFont("/fonts/Kalam-Regular.ttf");
     public static final float ZOOM_FACTOR = 1.0f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/mbasterd_32.png";
@@ -66,6 +66,7 @@ public final class MainPanel {
     private static String _proxy_user;
     private static String _proxy_pass;
     private static boolean _use_smart_proxy;
+    private static String _font;
     private static SmartMegaProxyManager _proxy_manager;
     private static String _language;
     private static String _new_version;
@@ -272,6 +273,10 @@ public final class MainPanel {
         resumeDownloads();
 
         resumeUploads();
+    }
+
+    public static String getFont() {
+        return _font;
     }
 
     public static String getNew_version() {
@@ -500,6 +505,23 @@ public final class MainPanel {
             _zoom_factor = Float.parseFloat(zoom_factor) / 100;
         } else {
             _zoom_factor = ZOOM_FACTOR;
+        }
+
+        String _font = selectSettingValue("font");
+
+        if (_font != null) {
+            if (_font.equals("DEFAULT")) {
+
+                DEFAULT_FONT = createAndRegisterFont("/fonts/Kalam-Regular.ttf");
+
+            } else {
+
+                DEFAULT_FONT = createAndRegisterFont("/fonts/NotoSansCJKtc-Regular.otf");
+
+            }
+        } else {
+
+            DEFAULT_FONT = createAndRegisterFont("/fonts/Kalam-Regular.ttf");
         }
 
         String def_slots = selectSettingValue("default_slots_down");

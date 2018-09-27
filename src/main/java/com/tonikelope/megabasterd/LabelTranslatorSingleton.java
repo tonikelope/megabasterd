@@ -41,6 +41,9 @@ public final class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _addTranslation("Font:", "Fuente:");
+        _addTranslation("DEFAULT", "POR DEFECTO");
+        _addTranslation("ALTERNATIVE", "ALTERNATIVA");
         _addTranslation("Download latest version", "Descargar la última versión");
         _addTranslation("PROVISION FAILED", "ERROR AL APROVISIONAR");
         _addTranslation("Error registering download: file is already downloading.", "Error al registrar la descarga: el archivo ya se está descargando.");

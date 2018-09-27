@@ -469,6 +469,18 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         proxy_pass_textfield.setText(DBTools.selectSettingValue("proxy_pass"));
 
+        String font = DBTools.selectSettingValue("font");
+
+        this.font_combo.addItem(LabelTranslatorSingleton.getInstance().translate("DEFAULT"));
+
+        this.font_combo.addItem(LabelTranslatorSingleton.getInstance().translate("ALTERNATIVE"));
+
+        if (font == null) {
+            this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("DEFAULT"));
+        } else {
+            this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate(font));
+        }
+
         String language = DBTools.selectSettingValue("language");
 
         this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("English"));
@@ -591,6 +603,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
         jSeparator2 = new javax.swing.JSeparator();
         jLabel2 = new javax.swing.JLabel();
         language_combo = new javax.swing.JComboBox<>();
+        font_label = new javax.swing.JLabel();
+        font_combo = new javax.swing.JComboBox<>();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -1222,11 +1236,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(proxy_user_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
+                .addComponent(proxy_user_textfield)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(proxy_pass_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 446, Short.MAX_VALUE))
+                .addComponent(proxy_pass_textfield))
         );
         proxy_auth_panelLayout.setVerticalGroup(
             proxy_auth_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1248,7 +1262,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(proxy_panelLayout.createSequentialGroup()
                         .addComponent(use_proxy_checkbox)
-                        .addGap(0, 811, Short.MAX_VALUE))
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(proxy_panelLayout.createSequentialGroup()
                         .addGroup(proxy_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, proxy_panelLayout.createSequentialGroup()
@@ -1329,6 +1343,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         language_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
+        font_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        font_label.setText("Font:");
+
+        font_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
         advanced_panelLayout.setHorizontalGroup(
@@ -1341,15 +1360,22 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
                                 .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(language_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(zoom_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(rec_zoom_label))
-                        .addGap(18, 18, 18)
-                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(rec_zoom_label)
+                                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                                        .addComponent(zoom_label)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                                        .addComponent(font_label)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(font_combo, javax.swing.GroupLayout.PREFERRED_SIZE, 444, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                .addGap(0, 0, Short.MAX_VALUE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(18, 18, 18)
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
@@ -1365,27 +1391,35 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator2)
                     .addGroup(advanced_panelLayout.createSequentialGroup()
-                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(export_settings_button)
-                            .addComponent(import_settings_button)
-                            .addComponent(zoom_label)
-                            .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jButton1)
-                            .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel2)
-                                .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(22, 22, 22))
-                    .addComponent(jSeparator2))
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(export_settings_button)
+                                    .addComponent(import_settings_button))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jButton1))
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(font_label)
+                                    .addComponent(font_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(zoom_label)
+                                    .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                    .addComponent(jLabel2)
+                                    .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                        .addGap(0, 39, Short.MAX_VALUE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rec_zoom_label)
-                .addContainerGap(78, Short.MAX_VALUE))
+                .addGap(47, 47, 47))
         );
 
         jTabbedPane1.addTab("Advanced", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-administrative-tools-30.png")), advanced_panel); // NOI18N
@@ -1415,7 +1449,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 479, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(status)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1462,6 +1496,22 @@ public final class SettingsDialog extends javax.swing.JDialog {
             settings.put("megacrypter_reverse", megacrypter_reverse_checkbox.isSelected() ? "yes" : "no");
             settings.put("megacrypter_reverse_port", String.valueOf(megacrypter_reverse_port_spinner.getValue()));
             settings.put("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
+
+            String old_font = DBTools.selectSettingValue("font");
+
+            if (old_font == null) {
+                old_font = "DEFAULT";
+            }
+
+            String font = (String) font_combo.getSelectedItem();
+
+            if (font.equals(LabelTranslatorSingleton.getInstance().translate("DEFAULT"))) {
+                font = "DEFAULT";
+            } else if (font.equals(LabelTranslatorSingleton.getInstance().translate("ALTERNATIVE"))) {
+                font = "ALTERNATIVE";
+            }
+
+            settings.put("font", font);
 
             String old_language = DBTools.selectSettingValue("language");
 
@@ -1543,7 +1593,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             insertSettingsValues(settings);
 
-            if (!language.equals(old_language) || !zoom.equals(old_zoom)
+            if (!font.equals(old_font) || !language.equals(old_language) || !zoom.equals(old_zoom)
                     || use_proxy != old_use_proxy
                     || !proxy_host.equals(old_proxy_host)
                     || !proxy_port.equals(old_proxy_port)
@@ -2527,6 +2577,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JTable elc_accounts_table;
     private javax.swing.JCheckBox encrypt_pass_checkbox;
     private javax.swing.JButton export_settings_button;
+    private javax.swing.JComboBox<String> font_combo;
+    private javax.swing.JLabel font_label;
     private javax.swing.JButton import_settings_button;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
