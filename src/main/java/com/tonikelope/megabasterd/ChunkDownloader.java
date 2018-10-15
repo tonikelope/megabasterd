@@ -106,9 +106,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             String worker_url = null, current_proxy = null;
 
-            boolean error = false, error509 = false, error403 = false, error503 = false;
+            boolean error = false, error509 = false, error403 = false, chunk_downloaded_ok = false;
 
             while (!_exit && !_download.isStopped()) {
+
+                chunk_downloaded_ok = false;
 
                 if (worker_url == null || error403) {
 
@@ -200,8 +202,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 error509 = false;
 
-                error503 = false;
-
                 if (getDownload().isError509()) {
                     getDownload().getView().set509Error(false);
 
@@ -219,8 +219,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                            error = true;
-
                             if (http_status == 509) {
 
                                 error509 = true;
@@ -232,9 +230,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 error403 = true;
 
-                            } else if (http_status == 503) {
-
-                                error503 = true;
                             }
 
                         } else {
@@ -301,53 +296,31 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             }
                         }
 
-                        if (chunk_reads < chunk_size) {
-
-                            if (chunk_reads > 0) {
-                                _download.getPartialProgressQueue().add(-1 * (int) chunk_reads);
-
-                                _download.getProgress_meter().secureNotify();
-
-                            }
-
-                            error = true;
-                        }
-
-                        if (error && !_download.isStopped()) {
-
-                            File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
-
-                            if (chunk_file_tmp.exists()) {
-                                chunk_file_tmp.delete();
-                            }
-
-                            _download.rejectChunkId(chunk_id);
-
-                            conta_error++;
-
-                            if (!_exit && (!error509 || !MainPanel.isUse_smart_proxy()) && !error403) {
-
-                                _error_wait = true;
-
-                                _download.getView().updateSlotsStatus();
-
-                                Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-
-                                _error_wait = false;
-
-                                _download.getView().updateSlotsStatus();
-                            }
-
-                        } else if (!error) {
+                        if (chunk_reads == chunk_size) {
 
                             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
 
                             _download.getChunkmanager().secureNotify();
 
                             conta_error = 0;
-                        }
 
-                    } else if (_exit) {
+                            chunk_downloaded_ok = true;
+                        }
+                    }
+
+                } catch (IOException ex) {
+
+                    if (!(ex instanceof SocketTimeoutException)) {
+                        conta_error++;
+                    }
+
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+
+                } finally {
+
+                    if (!chunk_downloaded_ok) {
+
+                        error = true;
 
                         File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
 
@@ -356,48 +329,25 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         }
 
                         _download.rejectChunkId(chunk_id);
+
+                        if (chunk_reads > 0) {
+                            _download.getPartialProgressQueue().add(-1 * (int) chunk_reads);
+                            _download.getProgress_meter().secureNotify();
+                        }
+
+                        if (!_exit && (!error509 || !MainPanel.isUse_smart_proxy()) && !error403) {
+
+                            _error_wait = true;
+
+                            _download.getView().updateSlotsStatus();
+
+                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+
+                            _error_wait = false;
+
+                            _download.getView().updateSlotsStatus();
+                        }
                     }
-                } catch (IOException ex) {
-
-                    error = true;
-
-                    File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
-
-                    if (chunk_file_tmp.exists()) {
-                        chunk_file_tmp.delete();
-                    }
-
-                    _download.rejectChunkId(chunk_id);
-
-                    if (chunk_reads > 0) {
-                        _download.getPartialProgressQueue().add(-1 * (int) chunk_reads);
-
-                        _download.getProgress_meter().secureNotify();
-                    }
-
-                    if (!(ex instanceof SocketTimeoutException)) {
-                        conta_error++;
-                    }
-
-                    if (!_exit && (!error509 || !MainPanel.isUse_smart_proxy()) && !error403) {
-
-                        _error_wait = true;
-
-                        _download.getView().updateSlotsStatus();
-
-                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-
-                        _error_wait = false;
-
-                        _download.getView().updateSlotsStatus();
-                    }
-
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-
-                } finally {
 
                     if (con != null) {
                         con.disconnect();
@@ -409,14 +359,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         } catch (ChunkInvalidException e) {
 
         } catch (OutOfMemoryError | Exception error) {
+
             _download.stopDownloader(error.getMessage());
+
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, error.getMessage());
-        }
 
-        File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
-
-        if (chunk_file_tmp.exists()) {
-            chunk_file_tmp.delete();
         }
 
         _download.stopThisSlot(this);
