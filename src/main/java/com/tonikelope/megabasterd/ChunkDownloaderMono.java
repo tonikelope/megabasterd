@@ -36,7 +36,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             String worker_url = null;
             int conta_error = 0, http_status = 200;
-            boolean error = false, error403 = false;
+            boolean chunk_error = false, error403 = false;
             long chunk_id = 0;
             long bytes_written = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
@@ -65,7 +65,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                 try {
 
-                    if (con == null || error) {
+                    if (con == null || chunk_error) {
 
                         URL url = new URL(worker_url + "/" + chunk_offset);
 
@@ -93,7 +93,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                         cis = new CipherInputStream(new ThrottledInputStream(con.getInputStream(), getDownload().getMain_panel().getStream_supervisor()), genDecrypter("AES", "AES/CTR/NoPadding", byte_file_key, forwardMEGALinkKeyIV(byte_iv, bytes_written)));
                     }
 
-                    error = false;
+                    chunk_error = true;
 
                     error403 = false;
 
@@ -104,8 +104,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     if (http_status != 200) {
 
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
-
-                        error = true;
 
                         if (http_status == 509) {
 
@@ -164,70 +162,57 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             }
 
-                            if (chunk_reads < chunk_size) {
-
-                                if (chunk_reads > 0) {
-                                    getDownload().getPartialProgressQueue().add(-1 * (int) chunk_reads);
-
-                                    getDownload().getProgress_meter().secureNotify();
-                                }
-
-                                error = true;
-                            }
-
-                            if (error && !getDownload().isStopped()) {
-
-                                getDownload().rejectChunkId(chunk_id);
-
-                                conta_error++;
-
-                                if (!isExit() && !error403) {
-
-                                    setError_wait(true);
-
-                                    Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-
-                                    setError_wait(false);
-                                }
-
-                            } else if (!error) {
+                            if (chunk_reads == chunk_size) {
 
                                 bytes_written += chunk_reads;
 
                                 conta_error = 0;
+
+                                chunk_error = false;
+
                             }
-
-                        } else if (isExit()) {
-
-                            getDownload().rejectChunkId(chunk_id);
                         }
 
                     }
 
                 } catch (IOException ex) {
-                    error = true;
-
-                    getDownload().rejectChunkId(chunk_id);
-
-                    if (chunk_reads > 0) {
-                        getDownload().getPartialProgressQueue().add(-1 * (int) chunk_reads);
-
-                        getDownload().getProgress_meter().secureNotify();
-                    }
 
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 } catch (InterruptedException ex) {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 } finally {
-                    if (error && con != null) {
-                        con.disconnect();
-                        con = null;
 
-                        if (cis != null) {
-                            cis.close();
+                    if (chunk_error) {
+
+                        getDownload().rejectChunkId(chunk_id);
+
+                        if (chunk_reads > 0) {
+                            getDownload().getPartialProgressQueue().add(-1 * (int) chunk_reads);
+
+                            getDownload().getProgress_meter().secureNotify();
                         }
+
+                        if (!isExit() && !error403) {
+
+                            setError_wait(true);
+
+                            Thread.sleep(getWaitTimeExpBackOff(++conta_error) * 1000);
+
+                            setError_wait(false);
+                        }
+
+                        if (con != null) {
+                            con.disconnect();
+                            con = null;
+
+                            if (cis != null) {
+                                cis.close();
+                            }
+                        }
+
                     }
+
                 }
 
             }

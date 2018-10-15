@@ -106,11 +106,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             String worker_url = null, current_proxy = null;
 
-            boolean error = false, error509 = false, error403 = false, chunk_downloaded_ok = false;
+            boolean chunk_error = false, error509 = false, error403 = false;
 
             while (!_exit && !_download.isStopped()) {
-
-                chunk_downloaded_ok = false;
 
                 if (worker_url == null || error403) {
 
@@ -127,67 +125,63 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 String chunk_url = ChunkManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
 
-                if (con == null || error) {
+                if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                    if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
 
-                        if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
+                        _proxy_manager = new SmartMegaProxyManager(null);
 
-                            _proxy_manager = new SmartMegaProxyManager(null);
+                    }
 
-                        }
+                    if (chunk_error && !error403 && current_proxy != null) {
 
-                        if (error && !error403 && current_proxy != null) {
+                        _proxy_manager.blockProxy(current_proxy);
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
 
-                            _proxy_manager.blockProxy(current_proxy);
-                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
+                    }
 
-                        }
+                    current_proxy = _proxy_manager.getFastestProxy();
 
-                        current_proxy = _proxy_manager.getFastestProxy();
+                    if (current_proxy != null) {
 
-                        if (current_proxy != null) {
+                        String[] proxy_info = current_proxy.split(":");
 
-                            String[] proxy_info = current_proxy.split(":");
+                        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
-                            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+                        URL url = new URL(chunk_url);
 
-                            URL url = new URL(chunk_url);
+                        con = (HttpURLConnection) url.openConnection(proxy);
 
-                            con = (HttpURLConnection) url.openConnection(proxy);
-
-                            getDownload().getMain_panel().getView().setSmartProxy(true);
-                            getDownload().enableProxyTurboMode();
-
-                        } else {
-
-                            URL url = new URL(chunk_url);
-
-                            con = (HttpURLConnection) url.openConnection();
-
-                            getDownload().getMain_panel().getView().setSmartProxy(false);
-                        }
+                        getDownload().getMain_panel().getView().setSmartProxy(true);
+                        getDownload().enableProxyTurboMode();
 
                     } else {
 
                         URL url = new URL(chunk_url);
 
-                        if (MainPanel.isUse_proxy()) {
-
-                            con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-
-                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
-
-                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
-                            }
-                        } else {
-
-                            con = (HttpURLConnection) url.openConnection();
-                        }
+                        con = (HttpURLConnection) url.openConnection();
 
                         getDownload().getMain_panel().getView().setSmartProxy(false);
                     }
 
+                } else {
+
+                    URL url = new URL(chunk_url);
+
+                    if (MainPanel.isUse_proxy()) {
+
+                        con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+
+                        if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+
+                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                        }
+                    } else {
+
+                        con = (HttpURLConnection) url.openConnection();
+                    }
+
+                    getDownload().getMain_panel().getView().setSmartProxy(false);
                 }
 
                 con.setConnectTimeout(Download.HTTP_TIMEOUT);
@@ -195,8 +189,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 con.setReadTimeout(Download.HTTP_TIMEOUT);
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
-
-                error = false;
 
                 error403 = false;
 
@@ -208,6 +200,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 }
 
                 long chunk_reads = 0;
+
+                chunk_error = true;
 
                 try {
 
@@ -304,23 +298,21 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             conta_error = 0;
 
-                            chunk_downloaded_ok = true;
+                            chunk_error = false;
                         }
                     }
 
                 } catch (IOException ex) {
 
-                    if (!(ex instanceof SocketTimeoutException)) {
-                        conta_error++;
+                    if (ex instanceof SocketTimeoutException) {
+                        conta_error = -1;
                     }
 
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 } finally {
 
-                    if (!chunk_downloaded_ok) {
-
-                        error = true;
+                    if (chunk_error) {
 
                         File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
 
@@ -335,13 +327,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit && (!error509 || !MainPanel.isUse_smart_proxy()) && !error403) {
+                        if (conta_error>=0 && !_exit && (!error509 || !MainPanel.isUse_smart_proxy()) && !error403) {
 
                             _error_wait = true;
 
                             _download.getView().updateSlotsStatus();
 
-                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                            Thread.sleep(getWaitTimeExpBackOff(++conta_error) * 1000);
 
                             _error_wait = false;
 
