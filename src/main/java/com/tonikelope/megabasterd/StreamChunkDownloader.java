@@ -44,7 +44,7 @@ public class StreamChunkDownloader implements Runnable {
 
             String url = _chunkwriter.getUrl();
 
-            boolean error = false, error509 = false, error403 = false;
+            int error = 0;
 
             String current_proxy = null;
 
@@ -65,11 +65,11 @@ public class StreamChunkDownloader implements Runnable {
                     _chunkwriter.secureWait();
                 }
 
-                if (!error) {
+                if (error == 0) {
 
                     offset = _chunkwriter.nextOffset();
 
-                } else if (error403) {
+                } else if (error == 403) {
 
                     url = _chunkwriter.getUrl();
                 }
@@ -78,11 +78,11 @@ public class StreamChunkDownloader implements Runnable {
 
                     StreamChunk chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
 
-                    if (con == null || error) {
+                    if (con == null || error != 0) {
 
-                        if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                        if (error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                            if (error && current_proxy != null) {
+                            if (error != 0 && current_proxy != null) {
 
                                 _proxy_manager.blockProxy(current_proxy);
                             }
@@ -137,11 +137,7 @@ public class StreamChunkDownloader implements Runnable {
 
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: offset: {2} size: {3}", new Object[]{Thread.currentThread().getName(), _id, offset, chunk_stream.getSize()});
 
-                    error = false;
-
-                    error509 = false;
-
-                    error403 = false;
+                    error = 0;
 
                     try {
 
@@ -153,16 +149,7 @@ public class StreamChunkDownloader implements Runnable {
 
                                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                                error = true;
-
-                                if (http_status == 509) {
-
-                                    error509 = true;
-
-                                } else if (http_status == 403) {
-
-                                    error403 = true;
-                                }
+                                error = http_status;
 
                             } else {
 
@@ -175,26 +162,19 @@ public class StreamChunkDownloader implements Runnable {
 
                                 is.close();
 
-                                if (chunk_stream.getSize() != chunk_stream.getOutputStream().size()) {
-                                    error = true;
+                                if (chunk_stream.getSize() == chunk_stream.getOutputStream().size()) {
+
+                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
+
+                                    _chunkwriter.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
+
+                                    _chunkwriter.secureNotifyAll();
+
                                 }
                             }
-
-                            if (!error) {
-
-                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
-
-                                _chunkwriter.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
-
-                                _chunkwriter.secureNotifyAll();
-                            }
-
                         }
 
                     } catch (IOException ex) {
-
-                        error = true;
-
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     } finally {
                         if (con != null) {

@@ -98,24 +98,22 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         HttpURLConnection con = null;
 
-        long chunk_id = 0;
-
         try {
 
-            int conta_error = 0;
+            int error = 0, conta_error = 0;
+
+            boolean timeout = false, chunk_error = false;
 
             String worker_url = null, current_proxy = null;
 
-            boolean chunk_error = false, error509 = false, error403 = false;
-
             while (!_exit && !_download.isStopped()) {
 
-                if (worker_url == null || error403) {
+                if (worker_url == null || error == 403) {
 
                     worker_url = _download.getDownloadUrlForWorker();
                 }
 
-                chunk_id = _download.nextChunkId();
+                long chunk_id = _download.nextChunkId();
 
                 long chunk_offset = ChunkManager.calculateChunkOffset(chunk_id, Download.CHUNK_SIZE_MULTI);
 
@@ -125,7 +123,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 String chunk_url = ChunkManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
 
-                if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                if (error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                     if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
 
@@ -133,7 +131,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     }
 
-                    if (chunk_error && !error403 && current_proxy != null) {
+                    if (chunk_error && error != 403 && current_proxy != null) {
 
                         _proxy_manager.blockProxy(current_proxy);
                         Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
@@ -190,18 +188,18 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                error403 = false;
-
-                error509 = false;
-
                 if (getDownload().isError509()) {
                     getDownload().getView().set509Error(false);
 
                 }
 
+                error = 0;
+
                 long chunk_reads = 0;
 
                 chunk_error = true;
+
+                timeout = false;
 
                 try {
 
@@ -213,17 +211,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                            if (http_status == 509) {
+                            error = http_status;
 
-                                error509 = true;
-
-                                if (MainPanel.isUse_smart_proxy()) {
-                                    getDownload().getView().set509Error(true);
-                                }
-                            } else if (http_status == 403) {
-
-                                error403 = true;
-
+                            if (error == 509 && MainPanel.isUse_smart_proxy()) {
+                                getDownload().getView().set509Error(true);
                             }
 
                         } else {
@@ -305,7 +296,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 } catch (IOException ex) {
 
                     if (ex instanceof SocketTimeoutException) {
-                        conta_error = -1;
+                        timeout = true;
                     }
 
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -327,7 +318,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (conta_error>=0 && !_exit && (!error509 || !MainPanel.isUse_smart_proxy()) && !error403) {
+                        if (!_exit && !timeout && (error != 509 || !MainPanel.isUse_smart_proxy()) && error != 403) {
 
                             _error_wait = true;
 

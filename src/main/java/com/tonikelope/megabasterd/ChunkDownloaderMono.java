@@ -35,10 +35,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         try {
 
             String worker_url = null;
-            int conta_error = 0, http_status = 200;
-            boolean chunk_error = false, error403 = false;
-            long chunk_id = 0;
-            long bytes_written = getDownload().getProgress();
+            int conta_error = 0, error = 0;
+            boolean chunk_error = false;
+            long chunk_id = 0, bytes_written = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
             byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
 
@@ -48,7 +47,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             while (!isExit() && !getDownload().isStopped()) {
 
-                if (worker_url == null || error403) {
+                int http_status = 0;
+
+                if (worker_url == null || error == 403) {
 
                     worker_url = getDownload().getDownloadUrlForWorker();
                 }
@@ -95,7 +96,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     chunk_error = true;
 
-                    error403 = false;
+                    error = 0;
 
                     if (getDownload().isError509()) {
                         getDownload().getView().set509Error(false);
@@ -105,20 +106,19 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                        if (http_status == 509) {
+                        error = http_status;
+
+                        if (error == 509) {
 
                             getDownload().getView().set509Error(true);
 
-                        } else if (http_status == 403) {
-
-                            error403 = true;
                         }
 
                         getDownload().rejectChunkId(chunk_id);
 
                         conta_error++;
 
-                        if (!isExit() && !error403) {
+                        if (!isExit() && error != 403) {
 
                             setError_wait(true);
 
@@ -193,7 +193,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             getDownload().getProgress_meter().secureNotify();
                         }
 
-                        if (!isExit() && !error403) {
+                        if (!isExit() && error != 403) {
 
                             setError_wait(true);
 
