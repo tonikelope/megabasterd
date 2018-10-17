@@ -54,11 +54,13 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
 import static com.tonikelope.megabasterd.MainPanel.VERSION;
+import java.awt.Dialog;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
-import javax.swing.JButton;
+import javax.swing.AbstractButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -292,15 +294,15 @@ public final class MiscTools {
 
             } else if (component instanceof javax.swing.JButton) {
 
-                ((JButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((JButton) component).getText()));
+                ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
 
             } else if (component instanceof javax.swing.JCheckBox) {
 
-                ((javax.swing.JCheckBox) component).setText(LabelTranslatorSingleton.getInstance().translate(((javax.swing.JCheckBox) component).getText()));
+                ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
 
             } else if ((component instanceof JMenuItem) && !(component instanceof JMenu)) {
 
-                ((JMenuItem) component).setText(LabelTranslatorSingleton.getInstance().translate(((JMenuItem) component).getText()));
+                ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
 
             } else if (component instanceof JMenu) {
 
@@ -310,7 +312,7 @@ public final class MiscTools {
                     }
                 }
 
-                ((JMenu) component).setText(LabelTranslatorSingleton.getInstance().translate(((JMenu) component).getText()));
+                ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
 
             } else if (component instanceof Container) {
 
@@ -321,12 +323,12 @@ public final class MiscTools {
                     }
                 }
 
-                if ((component instanceof JPanel) && (((JPanel) component).getBorder() instanceof TitledBorder)) {
-                    ((TitledBorder) ((JPanel) component).getBorder()).setTitle(LabelTranslatorSingleton.getInstance().translate(((TitledBorder) ((JPanel) component).getBorder()).getTitle()));
+                if ((component instanceof JPanel) && (((JComponent) component).getBorder() instanceof TitledBorder)) {
+                    ((TitledBorder) ((JComponent) component).getBorder()).setTitle(LabelTranslatorSingleton.getInstance().translate(((TitledBorder) ((JComponent) component).getBorder()).getTitle()));
                 }
 
                 if (component instanceof JDialog) {
-                    ((JDialog) component).setTitle(LabelTranslatorSingleton.getInstance().translate(((JDialog) component).getTitle()));
+                    ((Dialog) component).setTitle(LabelTranslatorSingleton.getInstance().translate(((Dialog) component).getTitle()));
                 }
             }
         }

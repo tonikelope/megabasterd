@@ -320,7 +320,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit && !timeout && (error != 509 || !MainPanel.isUse_smart_proxy()) && error != 403) {
+                        if (!_exit && !_download.isStopped() && !timeout && (error != 509 || !MainPanel.isUse_smart_proxy()) && error != 403) {
 
                             _error_wait = true;
 

@@ -274,6 +274,6 @@ public final class LabelTranslatorSingleton {
 
     public String translate(String orig) {
 
-        return _rosetta.containsKey(orig) ? (String) _rosetta.get(orig) : orig;
+        return _rosetta.containsKey(orig) ? _rosetta.get(orig) : orig;
     }
 }

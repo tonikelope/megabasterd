@@ -195,7 +195,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             getDownload().getProgress_meter().secureNotify();
                         }
 
-                        if (!isExit() && error != 403) {
+                        if (!isExit() && !getDownload().isStopped() && error != 403) {
 
                             setError_wait(true);
 
