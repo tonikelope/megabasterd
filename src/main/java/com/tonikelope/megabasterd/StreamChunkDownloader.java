@@ -170,6 +170,8 @@ public class StreamChunkDownloader implements Runnable {
 
                                     _chunkwriter.secureNotifyAll();
 
+                                    error = 0;
+
                                 }
                             }
                         }

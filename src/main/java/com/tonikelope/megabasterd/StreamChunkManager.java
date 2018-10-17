@@ -81,7 +81,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
         try {
 
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter: let''s do some work! Start: {1}   End: {2}", new Object[]{Thread.currentThread().getName(), _start_offset, _end_offset});
+            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkManager: let''s do some work! Start: {1}   End: {2}", new Object[]{Thread.currentThread().getName(), _start_offset, _end_offset});
 
             while (!_exit && _bytes_written < _end_offset) {
 
@@ -104,13 +104,13 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
                     secureNotifyAll();
 
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter has written {1} / {2} ...", new Object[]{Thread.currentThread().getName(), _bytes_written, _end_offset});
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkManager has written {1} / {2} ...", new Object[]{Thread.currentThread().getName(), _bytes_written, _end_offset});
 
                 }
 
                 if (!_exit && _bytes_written < _end_offset) {
 
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter waiting for offset {1}...", new Object[]{Thread.currentThread().getName(), _bytes_written});
+                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkManager waiting for offset {1}...", new Object[]{Thread.currentThread().getName(), _bytes_written});
 
                     secureWait();
                 }
@@ -131,7 +131,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
         secureNotifyAll();
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkWriter: bye bye", Thread.currentThread().getName());
+        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} StreamChunkManager: bye bye", Thread.currentThread().getName());
     }
 
     public long nextOffset() {

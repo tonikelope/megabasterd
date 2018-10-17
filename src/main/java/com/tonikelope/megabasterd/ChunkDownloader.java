@@ -125,7 +125,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 if (error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                    if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
+                    if (_proxy_manager == null) {
 
                         _proxy_manager = new SmartMegaProxyManager(null);
 
@@ -290,6 +290,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             conta_error = 0;
 
                             chunk_error = false;
+
+                            error = 0;
                         }
                     }
 

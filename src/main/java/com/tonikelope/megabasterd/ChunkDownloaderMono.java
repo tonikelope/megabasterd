@@ -170,6 +170,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                 chunk_error = false;
 
+                                error = 0;
+
                             }
                         }
 
