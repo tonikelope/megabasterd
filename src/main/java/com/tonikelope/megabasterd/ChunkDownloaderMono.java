@@ -35,7 +35,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         try {
 
             String worker_url = null;
-            int conta_error = 0, error = 0;
+            int conta_error = 0, http_error = 0;
             boolean chunk_error = false;
             long chunk_id = 0, bytes_written = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
@@ -49,7 +49,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                 int http_status = 0;
 
-                if (worker_url == null || error == 403) {
+                if (worker_url == null || http_error == 403) {
 
                     worker_url = getDownload().getDownloadUrlForWorker();
                 }
@@ -96,7 +96,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     chunk_error = true;
 
-                    error = 0;
+                    http_error = 0;
 
                     if (getDownload().isError509()) {
                         getDownload().getView().set509Error(false);
@@ -106,9 +106,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                        error = http_status;
+                        http_error = http_status;
 
-                        if (error == 509) {
+                        if (http_error == 509) {
 
                             getDownload().getView().set509Error(true);
 
@@ -118,7 +118,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         conta_error++;
 
-                        if (!isExit() && error != 403) {
+                        if (!isExit() && http_error != 403) {
 
                             setError_wait(true);
 
@@ -170,7 +170,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                 chunk_error = false;
 
-                                error = 0;
+                                http_error = 0;
 
                             }
                         }
@@ -195,7 +195,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             getDownload().getProgress_meter().secureNotify();
                         }
 
-                        if (!isExit() && !getDownload().isStopped() && error != 403) {
+                        if (!isExit() && !getDownload().isStopped() && http_error != 403) {
 
                             setError_wait(true);
 

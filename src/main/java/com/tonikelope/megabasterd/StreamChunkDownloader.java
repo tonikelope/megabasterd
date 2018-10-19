@@ -44,7 +44,7 @@ public class StreamChunkDownloader implements Runnable {
 
             String url = _chunkwriter.getUrl();
 
-            int error = 0;
+            int http_error = 0;
 
             String current_proxy = null;
 
@@ -65,11 +65,11 @@ public class StreamChunkDownloader implements Runnable {
                     _chunkwriter.secureWait();
                 }
 
-                if (error == 0) {
+                if (http_error == 0) {
 
                     offset = _chunkwriter.nextOffset();
 
-                } else if (error == 403) {
+                } else if (http_error == 403) {
 
                     url = _chunkwriter.getUrl();
                 }
@@ -78,11 +78,11 @@ public class StreamChunkDownloader implements Runnable {
 
                     StreamChunk chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
 
-                    if (con == null || error != 0) {
+                    if (con == null || http_error != 0) {
 
-                        if (error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                        if (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                            if (error != 0 && current_proxy != null) {
+                            if (http_error != 0 && current_proxy != null) {
 
                                 _proxy_manager.blockProxy(current_proxy);
                             }
@@ -137,7 +137,7 @@ public class StreamChunkDownloader implements Runnable {
 
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: offset: {2} size: {3}", new Object[]{Thread.currentThread().getName(), _id, offset, chunk_stream.getSize()});
 
-                    error = 0;
+                    http_error = 0;
 
                     try {
 
@@ -149,7 +149,7 @@ public class StreamChunkDownloader implements Runnable {
 
                                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                                error = http_status;
+                                http_error = http_status;
 
                             } else {
 
@@ -170,7 +170,7 @@ public class StreamChunkDownloader implements Runnable {
 
                                     _chunkwriter.secureNotifyAll();
 
-                                    error = 0;
+                                    http_error = 0;
 
                                 }
                             }

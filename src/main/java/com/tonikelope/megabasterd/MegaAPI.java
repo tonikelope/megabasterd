@@ -17,9 +17,9 @@ import java.util.logging.Logger;
 import javax.crypto.Cipher;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.CryptTools.*;
-import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import javax.net.ssl.HttpsURLConnection;
 
 /**
  *
@@ -124,7 +124,7 @@ public final class MegaAPI {
 
     private void _realLogin() throws Exception {
 
-        String request = "[{\"a\":\"us\", \"user\":\"" + _email + "\", \"uh\":\"" + _user_hash + "\"}]";
+        String request = "[{\"a\":\"us\",\"user\":\"" + _email + "\",\"uh\":\"" + _user_hash + "\"}]";
 
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
@@ -280,19 +280,18 @@ public final class MegaAPI {
     private String _rawRequest(String request, URL url_api) throws MegaAPIException {
 
         String response = null;
-        boolean error509 = false;
         String current_proxy = null;
-        int error = 0, conta_error = 0;
+        int mega_error = 0, http_error = 0, conta_error = 0;
 
-        HttpURLConnection con = null;
+        HttpsURLConnection con = null;
 
         do {
 
             try {
 
-                if (con == null || error != 0) {
+                if (con == null || mega_error != 0 || http_error != 0) {
 
-                    if (error509 && !MainPanel.isUse_proxy()) {
+                    if (http_error == 509 && !MainPanel.isUse_proxy()) {
 
                         if (current_proxy != null) {
 
@@ -309,18 +308,18 @@ public final class MegaAPI {
 
                             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
-                            con = (HttpURLConnection) url_api.openConnection(proxy);
+                            con = (HttpsURLConnection) url_api.openConnection(proxy);
 
                         } else {
 
-                            con = (HttpURLConnection) url_api.openConnection();
+                            con = (HttpsURLConnection) url_api.openConnection();
                         }
 
                     } else {
 
                         if (MainPanel.isUse_proxy()) {
 
-                            con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                            con = (HttpsURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
                             if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
@@ -328,17 +327,19 @@ public final class MegaAPI {
                             }
                         } else {
 
-                            con = (HttpURLConnection) url_api.openConnection();
+                            con = (HttpsURLConnection) url_api.openConnection();
                         }
 
                     }
                 }
 
-                error = 0;
+                http_error = 0;
 
-                error509 = false;
+                mega_error = 0;
 
-                con.setRequestProperty("Content-type", "application/json");
+                con.setRequestMethod("POST");
+
+                con.setRequestProperty("Content-type", "text/plain;charset=UTF-8");
 
                 con.setConnectTimeout(Transference.HTTP_TIMEOUT);
 
@@ -346,11 +347,13 @@ public final class MegaAPI {
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                con.setRequestMethod("POST");
-
                 con.setDoOutput(true);
 
-                con.getOutputStream().write(request.getBytes());
+                con.getOutputStream().write(request.getBytes("UTF-8"));
+
+                con.getOutputStream().flush();
+
+                con.getOutputStream().close();
 
                 if (con.getResponseCode() != 200) {
 
@@ -358,7 +361,7 @@ public final class MegaAPI {
 
                     Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), con.getResponseCode()});
 
-                    error509 = (con.getResponseCode() == 509);;
+                    http_error = con.getResponseCode();
 
                 } else {
 
@@ -379,10 +382,11 @@ public final class MegaAPI {
 
                         if (response.length() > 0) {
 
-                            error = checkMEGAError(response);
+                            mega_error = checkMEGAError(response);
 
                         } else {
-                            error = 1337;
+
+                            mega_error = 1337;
                         }
 
                     }
@@ -390,7 +394,7 @@ public final class MegaAPI {
 
             } catch (Exception ex) {
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
-                error = 1337;
+                mega_error = 1337;
             } finally {
 
                 if (con != null) {
@@ -399,14 +403,14 @@ public final class MegaAPI {
                 }
             }
 
-            if (error != 0 && !error509) {
+            if (mega_error != 0 && http_error != 509) {
 
-                if (Arrays.asList(MEGA_ERROR_EXCEPTION_CODES).contains(error)) {
+                if (Arrays.asList(MEGA_ERROR_EXCEPTION_CODES).contains(mega_error)) {
 
-                    throw new MegaAPIException(error);
+                    throw new MegaAPIException(mega_error);
                 }
 
-                Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(error)});
+                Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(mega_error)});
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
@@ -414,12 +418,12 @@ public final class MegaAPI {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
-            } else if (error == 0) {
+            } else if (mega_error == 0) {
 
                 conta_error = 0;
             }
 
-        } while (error != 0 || (error509 && MainPanel.isUse_smart_proxy()));
+        } while (mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy()));
 
         _seqno++;
 
