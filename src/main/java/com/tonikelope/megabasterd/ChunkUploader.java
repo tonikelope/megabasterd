@@ -111,7 +111,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 String worker_url = _upload.getUl_url();
 
-                int reads, http_status, tot_bytes_up;
+                int reads, http_status;
+
+                long tot_bytes_up;
 
                 chunk_id = _upload.nextChunkId();
 
@@ -177,7 +179,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                 while (!_exit && !_upload.isStopped() && tot_bytes_up < chunk_size && (reads = cis.read(buffer)) != -1) {
                                     out.write(buffer, 0, reads);
 
-                                    _upload.getPartialProgress().add(reads);
+                                    _upload.getPartialProgress().add((long) reads);
 
                                     _upload.getProgress_meter().secureNotify();
 

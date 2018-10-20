@@ -41,7 +41,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private byte[] _byte_file_iv;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private long _last_chunk_id_dispatched;
-    private final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
+    private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private final ExecutorService _thread_pool;
     private int[] _file_meta_mac;
     private int[] _file_temp_mac;
@@ -186,10 +186,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public long getLast_chunk_id_dispatched() {
         return _last_chunk_id_dispatched;
-    }
-
-    public ConcurrentLinkedQueue<Integer> getPartialProgressQueue() {
-        return _partialProgressQueue;
     }
 
     public ExecutorService getThread_pool() {
@@ -589,8 +585,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     }
 
     @Override
-    public ConcurrentLinkedQueue<Integer> getPartialProgress() {
-        return getPartialProgressQueue();
+    public ConcurrentLinkedQueue<Long> getPartialProgress() {
+        return _partialProgressQueue;
     }
 
     @Override

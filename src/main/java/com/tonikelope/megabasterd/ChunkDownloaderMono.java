@@ -37,7 +37,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             String worker_url = null;
             int conta_error = 0, http_error = 0;
             boolean chunk_error = false;
-            long chunk_id = 0, bytes_written = getDownload().getProgress();
+            long chunk_id, bytes_written = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
             byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
 
@@ -141,7 +141,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                 chunk_reads += reads;
 
-                                getDownload().getPartialProgressQueue().add(reads);
+                                getDownload().getPartialProgress().add((long) reads);
 
                                 getDownload().getProgress_meter().secureNotify();
 
@@ -190,7 +190,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                         getDownload().rejectChunkId(chunk_id);
 
                         if (chunk_reads > 0) {
-                            getDownload().getPartialProgressQueue().add(-1 * (int) chunk_reads);
+                            getDownload().getPartialProgress().add(-1 * chunk_reads);
 
                             getDownload().getProgress_meter().secureNotify();
                         }

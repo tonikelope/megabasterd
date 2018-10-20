@@ -96,19 +96,19 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 
-        HttpURLConnection con = null;
+        HttpURLConnection con;
 
         try {
 
             int http_error = 0, conta_error = 0;
 
-            boolean timeout = false, chunk_error = false;
+            boolean timeout, chunk_error = false;
 
             String worker_url = null, current_smart_proxy = null;
 
             while (!_exit && !_download.isStopped()) {
 
-                if (worker_url == null || (http_error != 0 && http_error != 509) || (timeout && current_smart_proxy != null)) {
+                if (worker_url == null || http_error == 403) {
 
                     worker_url = _download.getDownloadUrlForWorker();
                 }
@@ -131,7 +131,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     }
 
-                    if ((chunk_error || (http_error != 0 && http_error != 403)) && current_smart_proxy != null) {
+                    if (chunk_error && current_smart_proxy != null) {
 
                         _proxy_manager.blockProxy(current_smart_proxy);
 
@@ -195,7 +195,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 if (getDownload().isError509()) {
                     getDownload().getView().set509Error(false);
-
                 }
 
                 http_error = 0;
@@ -205,6 +204,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 chunk_error = true;
 
                 timeout = false;
+
+                File tmp_chunk_file = null, chunk_file = null;
 
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] is downloading chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
 
@@ -232,17 +233,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 int reads;
 
-                                File old_chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id);
+                                chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id);
 
-                                if (!old_chunk_file.exists() || old_chunk_file.length() == 0) {
+                                if (!chunk_file.exists() || chunk_file.length() != chunk_size) {
 
-                                    if (old_chunk_file.length() == 0) {
-                                        old_chunk_file.delete();
-                                    }
+                                    tmp_chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
 
-                                    File chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
-
-                                    FileOutputStream fo = new FileOutputStream(chunk_file);
+                                    FileOutputStream fo = new FileOutputStream(tmp_chunk_file);
 
                                     while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer)) != -1) {
 
@@ -250,7 +247,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                         chunk_reads += reads;
 
-                                        _download.getPartialProgressQueue().add(reads);
+                                        _download.getPartialProgress().add((long) reads);
 
                                         _download.getProgress_meter().secureNotify();
 
@@ -273,15 +270,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     fo.close();
 
-                                    if (chunk_reads == chunk_size) {
-                                        chunk_file.renameTo(new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id));
-                                    }
-
                                 } else {
 
                                     chunk_reads = chunk_size;
 
-                                    _download.getPartialProgressQueue().add((int) chunk_size);
+                                    _download.getPartialProgress().add(chunk_size);
 
                                     _download.getProgress_meter().secureNotify();
                                 }
@@ -290,7 +283,25 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (chunk_reads == chunk_size) {
 
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has DOWNLOADED chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+
+                            if (tmp_chunk_file != null && chunk_file != null && (!chunk_file.exists() || chunk_file.length() != chunk_size)) {
+
+                                boolean rename_ok;
+
+                                do {
+
+                                    rename_ok = tmp_chunk_file.renameTo(chunk_file);
+
+                                    if (!rename_ok) {
+
+                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] ERROR RENAMING chunk TEMP FILE [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+
+                                        Thread.sleep(1000);
+                                    }
+
+                                } while (!rename_ok);
+                            }
 
                             _download.getChunkmanager().secureNotify();
 
@@ -314,18 +325,20 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (chunk_error) {
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] HAS FAILED DOWNLOADING CHUNK [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+                        if (!_exit && !_download.isStopped()) {
 
-                        File chunk_file_tmp = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has FAILED downloading chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
 
-                        if (chunk_file_tmp.exists()) {
-                            chunk_file_tmp.delete();
+                        }
+
+                        if (tmp_chunk_file != null && tmp_chunk_file.exists()) {
+                            tmp_chunk_file.delete();
                         }
 
                         _download.rejectChunkId(chunk_id);
 
                         if (chunk_reads > 0) {
-                            _download.getPartialProgressQueue().add(-1 * (int) chunk_reads);
+                            _download.getPartialProgress().add(-1 * chunk_reads);
                             _download.getProgress_meter().secureNotify();
                         }
 
@@ -343,10 +356,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         }
                     }
 
-                    if (con != null) {
-                        con.disconnect();
-                        con = null;
-                    }
+                    con.disconnect();
                 }
             }
 

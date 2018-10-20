@@ -34,7 +34,7 @@ public interface Transference {
 
     void checkSlotsAndWorkers();
 
-    ConcurrentLinkedQueue<Integer> getPartialProgress();
+    ConcurrentLinkedQueue<Long> getPartialProgress();
 
     long getProgress();
 

@@ -63,7 +63,7 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
         _progress = _transference.getProgress();
 
         while (!_exit || !_transference.getPartialProgress().isEmpty()) {
-            Integer reads;
+            Long reads;
 
             while ((reads = _transference.getPartialProgress().poll()) != null) {
                 _progress += reads;

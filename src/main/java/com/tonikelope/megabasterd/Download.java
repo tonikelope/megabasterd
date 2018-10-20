@@ -70,7 +70,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private final ExecutorService _thread_pool;
     private volatile boolean _exit;
     private volatile boolean _pause;
-    private final ConcurrentLinkedQueue<Integer> _partialProgressQueue;
+    private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private volatile long _progress;
     private ChunkManager _chunkmanager;
     private String _last_download_url;
@@ -256,10 +256,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public ChunkManager getChunkmanager() {
         return _chunkmanager;
-    }
-
-    public ConcurrentLinkedQueue<Integer> getPartialProgressQueue() {
-        return _partialProgressQueue;
     }
 
     public String getFile_key() {
@@ -467,7 +463,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     }
 
     @Override
-    public ConcurrentLinkedQueue<Integer> getPartialProgress() {
+    public ConcurrentLinkedQueue<Long> getPartialProgress() {
         return _partialProgressQueue;
     }
 
@@ -804,6 +800,23 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         if (_file != null && !getView().isKeepTempFileSelected()) {
             _file.delete();
+
+            long chunk_id = getChunkmanager().getLast_chunk_id_written() + 1;
+
+            while (chunk_id < _last_chunk_id_dispatched) {
+                File chunk_file = new File(getDownload_path() + "/" + getFile_name() + ".chunk" + String.valueOf(chunk_id++));
+
+                if (chunk_file.exists()) {
+                    chunk_file.delete();
+                }
+            }
+
+            File parent_download_dir = new File(getDownload_path() + "/" + getFile_name()).getParentFile();
+
+            while (!parent_download_dir.getAbsolutePath().equals(getDownload_path()) && parent_download_dir.listFiles().length == 0) {
+                parent_download_dir.delete();
+                parent_download_dir = parent_download_dir.getParentFile();
+            }
         }
 
         if (!_status_error) {
