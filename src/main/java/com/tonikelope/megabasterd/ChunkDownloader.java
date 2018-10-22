@@ -272,6 +272,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 } else {
 
+                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has RECOVERED PREVIOUS chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+
                                     chunk_reads = chunk_size;
 
                                     _download.getPartialProgress().add(chunk_size);
@@ -287,21 +289,20 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             if (tmp_chunk_file != null && chunk_file != null && (!chunk_file.exists() || chunk_file.length() != chunk_size)) {
 
-                                if (tmp_chunk_file.renameTo(chunk_file)) {
-
-                                    _download.getChunkmanager().secureNotify();
-
-                                    conta_error = 0;
-
-                                    chunk_error = false;
-
-                                    http_error = 0;
-
-                                } else {
-                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] ERROR RENAMING chunk TEMP FILE [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
-
+                                if (chunk_file.exists()) {
+                                    chunk_file.delete();
                                 }
+
+                                tmp_chunk_file.renameTo(chunk_file);
                             }
+
+                            conta_error = 0;
+
+                            chunk_error = false;
+
+                            http_error = 0;
+
+                            _download.getChunkmanager().secureNotify();
                         }
                     }
 
