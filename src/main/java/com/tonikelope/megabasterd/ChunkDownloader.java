@@ -239,36 +239,36 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     tmp_chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
 
-                                    FileOutputStream fo = new FileOutputStream(tmp_chunk_file);
+                                    try (FileOutputStream tmp_chunk_file_os = new FileOutputStream(tmp_chunk_file)) {
 
-                                    while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer)) != -1) {
+                                        while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer)) != -1) {
 
-                                        fo.write(buffer, 0, reads);
+                                            tmp_chunk_file_os.write(buffer, 0, reads);
 
-                                        chunk_reads += reads;
+                                            chunk_reads += reads;
 
-                                        _download.getPartialProgress().add((long) reads);
+                                            _download.getPartialProgress().add((long) reads);
 
-                                        _download.getProgress_meter().secureNotify();
+                                            _download.getProgress_meter().secureNotify();
 
-                                        if (_download.isPaused() && !_download.isStopped()) {
+                                            if (_download.isPaused() && !_download.isStopped()) {
 
-                                            _download.pause_worker();
+                                                _download.pause_worker();
 
-                                            secureWait();
+                                                secureWait();
 
-                                        } else if (!_download.isPaused() && _download.getMain_panel().getDownload_manager().isPaused_all()) {
+                                            } else if (!_download.isPaused() && _download.getMain_panel().getDownload_manager().isPaused_all()) {
 
-                                            _download.pause();
+                                                _download.pause();
 
-                                            _download.pause_worker();
+                                                _download.pause_worker();
 
-                                            secureWait();
+                                                secureWait();
+                                            }
+
                                         }
 
                                     }
-
-                                    fo.close();
 
                                 } else {
 
@@ -287,29 +287,21 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             if (tmp_chunk_file != null && chunk_file != null && (!chunk_file.exists() || chunk_file.length() != chunk_size)) {
 
-                                boolean rename_ok;
+                                if (tmp_chunk_file.renameTo(chunk_file)) {
 
-                                do {
+                                    _download.getChunkmanager().secureNotify();
 
-                                    rename_ok = tmp_chunk_file.renameTo(chunk_file);
+                                    conta_error = 0;
 
-                                    if (!rename_ok) {
+                                    chunk_error = false;
 
-                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] ERROR RENAMING chunk TEMP FILE [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+                                    http_error = 0;
 
-                                        Thread.sleep(1000);
-                                    }
+                                } else {
+                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] ERROR RENAMING chunk TEMP FILE [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
 
-                                } while (!rename_ok);
+                                }
                             }
-
-                            _download.getChunkmanager().secureNotify();
-
-                            conta_error = 0;
-
-                            chunk_error = false;
-
-                            http_error = 0;
                         }
                     }
 

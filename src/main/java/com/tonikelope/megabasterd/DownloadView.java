@@ -3,7 +3,6 @@ package com.tonikelope.megabasterd;
 import java.awt.Color;
 import java.awt.Desktop;
 import java.io.File;
-import java.io.IOException;
 import static java.lang.Integer.MAX_VALUE;
 import java.util.concurrent.Callable;
 import javax.swing.JButton;
@@ -16,6 +15,8 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -391,8 +392,8 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         if (Desktop.isDesktopSupported()) {
             try {
                 Desktop.getDesktop().open(new File(_download.getDownload_path() + "/" + _download.getFile_name()).getParentFile());
-            } catch (IOException ex) {
-                JOptionPane.showMessageDialog(_download.getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("Folder not found"));
+            } catch (Exception ex) {
+                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage());
             }
         }
 

@@ -817,6 +817,11 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 parent_download_dir.delete();
                 parent_download_dir = parent_download_dir.getParentFile();
             }
+
+            if (!(new File(getDownload_path() + "/" + getFile_name()).getParentFile().exists())) {
+
+                getView().getOpen_folder_button().setEnabled(false);
+            }
         }
 
         if (!_status_error) {
