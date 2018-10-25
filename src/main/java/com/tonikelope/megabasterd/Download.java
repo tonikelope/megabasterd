@@ -1216,6 +1216,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         @Override
                         public void run() {
 
+                            getView().getSlots_spinner().setEnabled(false);
+
+                            getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
+
                             getView().getSlots_spinner().setEnabled(true);
                         }
                     });
