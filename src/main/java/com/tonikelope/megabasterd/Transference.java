@@ -52,4 +52,6 @@ public interface Transference {
 
     boolean isStatusError();
 
+    int getSlotsCount();
+
 }

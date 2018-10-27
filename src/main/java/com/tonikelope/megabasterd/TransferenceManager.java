@@ -208,6 +208,19 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         secureNotify();
     }
 
+    public int calcTotalSlotsCount() {
+
+        int slots = 0;
+
+        for (Transference trans : _transference_running_list) {
+
+            slots += trans.getSlotsCount();
+        }
+
+        return slots;
+
+    }
+
     public void closeAllPreProWaiting() {
         _transference_preprocess_queue.clear();
 

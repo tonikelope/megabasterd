@@ -1624,4 +1624,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         return _status_error;
     }
 
+    @Override
+    public int getSlotsCount() {
+        return getChunkworkers().size();
+    }
+
 }

@@ -20,7 +20,7 @@ import java.net.URL;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final double SLOW_CHUNK_PER = 0.5;
+    public static final double SLOW_PROXY_PERC = 0.5;
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
@@ -103,7 +103,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             int http_error = 0, conta_error = 0;
 
-            boolean timeout, chunk_error = false, slow_chunk = false;
+            boolean timeout, chunk_error = false, slow_proxy = false;
 
             String worker_url = null, current_smart_proxy = null;
 
@@ -126,7 +126,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 String chunk_url = ChunkManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
 
-                if ((http_error == 509 || slow_chunk) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                if ((http_error == 509 || slow_proxy) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                     if (_proxy_manager == null) {
 
@@ -208,7 +208,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 timeout = false;
 
-                slow_chunk = false;
+                slow_proxy = false;
 
                 File tmp_chunk_file = null, chunk_file = null;
 
@@ -322,14 +322,17 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             _download.getChunkmanager().secureNotify();
 
-                            //Chunk download speed benchmark
-                            long chunk_speed = Math.round((double) chunk_size / ((double) (finish_chunk_time - init_chunk_time - paused) / 1000));
+                            if (current_smart_proxy != null) {
 
-                            if (chunk_speed < Math.round(((double) _download.getMain_panel().getGlobal_dl_speed().getMaxAverageGlobalSpeed() / _download.getChunkworkers().size()) * SLOW_CHUNK_PER)) {
+                                //Proxy speed benchmark
+                                long chunk_speed = Math.round((double) chunk_size / ((double) (finish_chunk_time - init_chunk_time - paused) / 1000));
 
-                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker WARNING -> CHUNK DL SPEED: {1}/s is SLOW", new Object[]{_id, formatBytes(chunk_speed)});
+                                if (chunk_speed < Math.round(((double) _download.getMain_panel().getGlobal_dl_speed().getMaxAverageGlobalSpeed() / _download.getMain_panel().getDownload_manager().calcTotalSlotsCount()) * SLOW_PROXY_PERC)) {
 
-                                slow_chunk = true;
+                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker WARNING -> PROXY SPEED: {1}/s is SLOW", new Object[]{_id, formatBytes(chunk_speed)});
+
+                                    slow_proxy = true;
+                                }
                             }
                         }
                     }

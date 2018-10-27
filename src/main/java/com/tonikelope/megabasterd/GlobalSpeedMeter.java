@@ -22,7 +22,7 @@ public final class GlobalSpeedMeter implements Runnable {
     private final ConcurrentHashMap<Transference, HashMap> _transferences;
     private long _speed_counter;
     private long _speed_acumulator;
-    private long _max_avg_speed;
+    private volatile long _max_avg_speed;
 
     GlobalSpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
         _speed_label = sp_label;
@@ -34,8 +34,8 @@ public final class GlobalSpeedMeter implements Runnable {
         _max_avg_speed = 0L;
     }
 
-    public long getAverageGlobalSpeed() {
-        return Math.round((double) _speed_acumulator / (_speed_counter));
+    private long _getAverageGlobalSpeed() {
+        return Math.round((double) _speed_acumulator / _speed_counter);
     }
 
     public void attachTransference(Transference transference) {
@@ -173,7 +173,7 @@ public final class GlobalSpeedMeter implements Runnable {
                         _speed_counter++;
                         _speed_acumulator += sp;
 
-                        long avg_speed = getAverageGlobalSpeed();
+                        long avg_speed = _getAverageGlobalSpeed();
 
                         if (avg_speed > _max_avg_speed) {
                             _max_avg_speed = avg_speed;

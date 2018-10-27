@@ -1219,4 +1219,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         }
     }
 
+    @Override
+    public int getSlotsCount() {
+        return getChunkworkers().size();
+    }
+
 }
