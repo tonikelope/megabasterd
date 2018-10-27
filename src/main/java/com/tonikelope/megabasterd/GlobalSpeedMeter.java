@@ -20,19 +20,29 @@ public final class GlobalSpeedMeter implements Runnable {
     private final JLabel _rem_label;
     private final TransferenceManager _trans_manager;
     private final ConcurrentHashMap<Transference, HashMap> _transferences;
+    private long _speed_counter;
+    private long _speed_acumulator;
+    private long _max_avg_speed;
 
     GlobalSpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
         _speed_label = sp_label;
         _rem_label = rem_label;
         _trans_manager = trans_manager;
         _transferences = new ConcurrentHashMap<>();
+        _speed_counter = 0L;
+        _speed_acumulator = 0L;
+        _max_avg_speed = 0L;
+    }
+
+    public long getAverageGlobalSpeed() {
+        return Math.round((double) _speed_acumulator / (_speed_counter));
     }
 
     public void attachTransference(Transference transference) {
 
         HashMap<String, Object> properties = new HashMap<>();
 
-        properties.put("last_progress", -1L);
+        properties.put("last_progress", transference.getProgress());
         properties.put("no_data_count", 0);
 
         _transferences.put(transference, properties);
@@ -44,6 +54,11 @@ public final class GlobalSpeedMeter implements Runnable {
         if (_transferences.containsKey(transference)) {
             _transferences.remove(transference);
         }
+    }
+
+    public long getMaxAverageGlobalSpeed() {
+
+        return _max_avg_speed;
     }
 
     private String calculateRemTime(long seconds) {
@@ -155,6 +170,16 @@ public final class GlobalSpeedMeter implements Runnable {
                     }
 
                     if (sp > 0) {
+                        _speed_counter++;
+                        _speed_acumulator += sp;
+
+                        long avg_speed = getAverageGlobalSpeed();
+
+                        if (avg_speed > _max_avg_speed) {
+                            _max_avg_speed = avg_speed;
+                        }
+
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "AVG DL SPEED: {0}/s", formatBytes(avg_speed));
 
                         _speed_label.setText(formatBytes(sp) + "/s");
                         _rem_label.setText(formatBytes(progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ " + calculateRemTime((long) Math.floor((_trans_manager.getTotal_transferences_size() - progress) / sp)));
