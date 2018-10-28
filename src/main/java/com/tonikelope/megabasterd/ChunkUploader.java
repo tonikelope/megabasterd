@@ -13,7 +13,6 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.channels.Channels;
 
@@ -23,7 +22,7 @@ import java.nio.channels.Channels;
  */
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int MAX_SLOT_ERROR = 3;
+    public static final int MAX_CHUNK_ERROR = 10;
     private final int _id;
     private final Upload _upload;
     private volatile boolean _exit;
@@ -103,7 +102,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
             int conta_error = 0;
 
-            while (!_upload.getMain_panel().isExit() && !_exit && !_upload.isStopped() && conta_error < MAX_SLOT_ERROR) {
+            while (!_upload.getMain_panel().isExit() && !_exit && !_upload.isStopped() && conta_error < MAX_CHUNK_ERROR) {
 
                 String worker_url = _upload.getUl_url();
 
@@ -152,7 +151,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 tot_bytes_up = 0;
 
-                boolean chunk_error = true, timeout = false;
+                boolean chunk_error = true;
 
                 try {
 
@@ -251,9 +250,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 } catch (IOException ex) {
 
-                    if (ex instanceof SocketTimeoutException) {
-                        timeout = true;
-                    }
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                 } finally {
 
@@ -270,27 +267,27 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                             _upload.getProgress_meter().secureNotify();
                         }
 
-                        conta_error++;
+                        if (!_exit) {
 
-                        if (conta_error == MAX_SLOT_ERROR) {
+                            if (++conta_error == MAX_CHUNK_ERROR) {
 
-                            _upload.setStatus_error(true);
+                                _upload.stopUploader("UPLOAD FAILED: too many errors");
 
-                            _upload.stopUploader("UPLOAD FAILED: too many errors");
+                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, "UPLOAD FAILED: too many errors");
 
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, "UPLOAD FAILED: too many errors");
+                            } else {
 
-                        } else if (!_exit && !timeout) {
+                                _error_wait = true;
 
-                            _error_wait = true;
+                                _upload.getView().updateSlotsStatus();
 
-                            _upload.getView().updateSlotsStatus();
+                                Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
 
-                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                                _error_wait = false;
 
-                            _error_wait = false;
+                                _upload.getView().updateSlotsStatus();
 
-                            _upload.getView().updateSlotsStatus();
+                            }
                         }
 
                     } else {
