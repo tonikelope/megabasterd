@@ -47,7 +47,7 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.55";
+    public static final String VERSION = "5.56";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -96,7 +96,7 @@ public final class MainPanel {
     }
 
     private volatile MainPanelView _view;
-    private final GlobalSpeedMeter _global_dl_speed, _global_up_speed;
+    private final SpeedMeter _global_dl_speed, _global_up_speed;
     private final DownloadManager _download_manager;
     private final UploadManager _upload_manager;
     private final StreamThrottlerSupervisor _stream_supervisor;
@@ -183,9 +183,9 @@ public final class MainPanel {
 
         THREAD_POOL.execute((_upload_manager = new UploadManager(this)));
 
-        THREAD_POOL.execute((_global_dl_speed = new GlobalSpeedMeter(_download_manager, getView().getGlobal_speed_down_label(), getView().getDown_remtime_label())));
+        THREAD_POOL.execute((_global_dl_speed = new SpeedMeter(_download_manager, getView().getGlobal_speed_down_label(), getView().getDown_remtime_label())));
 
-        THREAD_POOL.execute((_global_up_speed = new GlobalSpeedMeter(_upload_manager, getView().getGlobal_speed_up_label(), getView().getUp_remtime_label())));
+        THREAD_POOL.execute((_global_up_speed = new SpeedMeter(_upload_manager, getView().getGlobal_speed_up_label(), getView().getUp_remtime_label())));
 
         THREAD_POOL.execute((_stream_supervisor = new StreamThrottlerSupervisor(_limit_download_speed ? _max_dl_speed * 1024 : 0, _limit_upload_speed ? _max_up_speed * 1024 : 0, THROTTLE_SLICE_SIZE)));
 
@@ -417,11 +417,11 @@ public final class MainPanel {
         return _view;
     }
 
-    public GlobalSpeedMeter getGlobal_dl_speed() {
+    public SpeedMeter getGlobal_dl_speed() {
         return _global_dl_speed;
     }
 
-    public GlobalSpeedMeter getGlobal_up_speed() {
+    public SpeedMeter getGlobal_up_speed() {
         return _global_up_speed;
     }
 

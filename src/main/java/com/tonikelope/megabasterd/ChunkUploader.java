@@ -3,13 +3,9 @@ package com.tonikelope.megabasterd;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
-import javax.crypto.NoSuchPaddingException;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.CryptTools.*;
 import java.io.ByteArrayOutputStream;
@@ -125,11 +121,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 String chunk_url = ChunkManager.genChunkUrl(worker_url, _upload.getFile_size(), chunk_offset, chunk_size);
 
-                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} Uploading -> {2}", new Object[]{Thread.currentThread().getName(), _id, chunk_url});
-
                 URL url = new URL(chunk_url);
 
-                HttpURLConnection con = null;
+                HttpURLConnection con;
 
                 if (MainPanel.isUse_proxy()) {
 
@@ -158,7 +152,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 tot_bytes_up = 0;
 
-                boolean error = false;
+                boolean chunk_error = true, timeout = false;
 
                 try {
 
@@ -200,11 +194,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                         secureWait();
                                     }
                                 }
-
-                                out.flush();
-
-                                out.close();
-
                             }
 
                             if (!_upload.isStopped() && !_exit) {
@@ -213,132 +202,45 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                                    error = true;
+                                } else if (tot_bytes_up == chunk_size) {
 
-                                } else {
+                                    String httpresponse;
 
-                                    if (tot_bytes_up < chunk_size) {
+                                    InputStream is = con.getInputStream();
 
-                                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} {1} bytes uploaded < {2}", new Object[]{Thread.currentThread().getName(), tot_bytes_up, chunk_size});
+                                    try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                        error = true;
+                                        while ((reads = is.read(buffer)) != -1) {
+
+                                            byte_res.write(buffer, 0, reads);
+                                        }
+
+                                        httpresponse = new String(byte_res.toByteArray());
+
+                                    }
+
+                                    if (httpresponse.length() > 0) {
+
+                                        if (MegaAPI.checkMEGAError(httpresponse) != 0) {
+
+                                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} UPLOAD FAILED! (MEGA ERROR: {1})", new Object[]{Thread.currentThread().getName(), MegaAPI.checkMEGAError(httpresponse)});
+
+                                        } else {
+
+                                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), httpresponse});
+
+                                            _upload.setCompletion_handle(httpresponse);
+
+                                            chunk_error = false;
+                                        }
 
                                     } else {
 
-                                        String httpresponse = null;
-
-                                        InputStream is = con.getInputStream();
-
-                                        try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                                            while ((reads = is.read(buffer)) != -1) {
-
-                                                byte_res.write(buffer, 0, reads);
-                                            }
-
-                                            httpresponse = new String(byte_res.toByteArray());
-
-                                        }
-
-                                        if (httpresponse != null && httpresponse.length() > 0) {
-
-                                            if (MegaAPI.checkMEGAError(httpresponse) != 0) {
-
-                                                Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} UPLOAD FAILED! (MEGA ERROR: {1})", new Object[]{Thread.currentThread().getName(), MegaAPI.checkMEGAError(httpresponse)});
-
-                                                error = true;
-
-                                            } else {
-
-                                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), httpresponse});
-
-                                                _upload.setCompletion_handle(httpresponse);
-                                            }
-                                        }
-
+                                        chunk_error = false;
                                     }
                                 }
 
-                                if (error && !_upload.isStopped()) {
-
-                                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk_id, _id});
-
-                                    _upload.rejectChunkId(chunk_id);
-
-                                    if (tot_bytes_up > 0) {
-
-                                        _upload.getPartialProgress().add(-1 * tot_bytes_up);
-
-                                        _upload.getProgress_meter().secureNotify();
-                                    }
-
-                                    conta_error++;
-
-                                    if (!_exit) {
-
-                                        _error_wait = true;
-
-                                        _upload.getView().updateSlotsStatus();
-
-                                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-
-                                        _error_wait = false;
-
-                                        _upload.getView().updateSlotsStatus();
-                                    }
-
-                                } else if (!error) {
-
-                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} has uploaded chunk {2}", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
-
-                                    conta_error = 0;
-                                }
-
-                            } else if (_exit) {
-
-                                _upload.rejectChunkId(chunk_id);
                             }
-
-                        } catch (IOException ex) {
-
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, ex.getMessage());
-
-                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk_id, _id});
-
-                            _upload.rejectChunkId(chunk_id);
-
-                            if (tot_bytes_up > 0) {
-
-                                _upload.getPartialProgress().add(-1 * tot_bytes_up);
-
-                                _upload.getProgress_meter().secureNotify();
-                            }
-
-                            if (!(ex instanceof SocketTimeoutException)) {
-                                conta_error++;
-                            }
-
-                            if (!_exit) {
-
-                                _error_wait = true;
-
-                                _upload.getView().updateSlotsStatus();
-
-                                try {
-                                    Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
-                                } catch (InterruptedException exception) {
-                                    Logger.getLogger(ChunkUploader.class.getName()).log(Level.SEVERE, null, exception);
-                                }
-
-                                _error_wait = false;
-
-                                _upload.getView().updateSlotsStatus();
-                            }
-
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-
-                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
                         }
 
@@ -347,28 +249,64 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                         }
                     }
 
-                    if (conta_error == MAX_SLOT_ERROR) {
+                } catch (IOException ex) {
 
-                        _upload.setStatus_error(true);
-
-                        _upload.stopUploader("UPLOAD FAILED: too many errors");
-
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, "UPLOAD FAILED: too many errors");
+                    if (ex instanceof SocketTimeoutException) {
+                        timeout = true;
                     }
 
-                } catch (Exception ex) {
-
-                    _upload.stopUploader();
-
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 } finally {
+
+                    if (chunk_error) {
+
+                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Uploading chunk {1} from worker {2} FAILED!...", new Object[]{Thread.currentThread().getName(), chunk_id, _id});
+
+                        _upload.rejectChunkId(chunk_id);
+
+                        if (tot_bytes_up > 0) {
+
+                            _upload.getPartialProgress().add(-1 * tot_bytes_up);
+
+                            _upload.getProgress_meter().secureNotify();
+                        }
+
+                        conta_error++;
+
+                        if (conta_error == MAX_SLOT_ERROR) {
+
+                            _upload.setStatus_error(true);
+
+                            _upload.stopUploader("UPLOAD FAILED: too many errors");
+
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, "UPLOAD FAILED: too many errors");
+
+                        } else if (!_exit && !timeout) {
+
+                            _error_wait = true;
+
+                            _upload.getView().updateSlotsStatus();
+
+                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+
+                            _error_wait = false;
+
+                            _upload.getView().updateSlotsStatus();
+                        }
+
+                    } else {
+
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker {1} has uploaded chunk {2}", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+
+                        conta_error = 0;
+                    }
+
                     con.disconnect();
-                    con = null;
                 }
 
             }
 
         } catch (ChunkInvalidException ex) {
+
         } catch (OutOfMemoryError | Exception error) {
             _upload.stopUploader(error.getMessage());
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, error.getMessage());

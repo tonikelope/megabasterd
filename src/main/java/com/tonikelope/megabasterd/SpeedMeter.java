@@ -13,7 +13,7 @@ import static com.tonikelope.megabasterd.MiscTools.*;
  *
  * @author tonikelope
  */
-public final class GlobalSpeedMeter implements Runnable {
+public final class SpeedMeter implements Runnable {
 
     public static final int SLEEP = 3000;
     private final JLabel _speed_label;
@@ -22,19 +22,19 @@ public final class GlobalSpeedMeter implements Runnable {
     private final ConcurrentHashMap<Transference, HashMap> _transferences;
     private long _speed_counter;
     private long _speed_acumulator;
-    private volatile long _max_avg_speed;
+    private volatile long _max_avg_global_speed;
 
-    GlobalSpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
+    SpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
         _speed_label = sp_label;
         _rem_label = rem_label;
         _trans_manager = trans_manager;
         _transferences = new ConcurrentHashMap<>();
         _speed_counter = 0L;
         _speed_acumulator = 0L;
-        _max_avg_speed = 0L;
+        _max_avg_global_speed = 0L;
     }
 
-    private long _getAverageGlobalSpeed() {
+    private long _getAvgGlobalSpeed() {
         return Math.round((double) _speed_acumulator / _speed_counter);
     }
 
@@ -56,12 +56,12 @@ public final class GlobalSpeedMeter implements Runnable {
         }
     }
 
-    public long getMaxAverageGlobalSpeed() {
+    public long getMaxAvgGlobalSpeed() {
 
-        return _max_avg_speed;
+        return _max_avg_global_speed;
     }
 
-    private String calculateRemTime(long seconds) {
+    private String calcRemTime(long seconds) {
         int days = (int) TimeUnit.SECONDS.toDays(seconds);
 
         long hours = TimeUnit.SECONDS.toHours(seconds)
@@ -82,13 +82,12 @@ public final class GlobalSpeedMeter implements Runnable {
     private long calcTransferenceSpeed(Transference transference, HashMap properties) {
 
         long sp, progress = transference.getProgress(), last_progress = (long) properties.get("last_progress");
+
         int no_data_count = (int) properties.get("no_data_count");
 
         if (transference.isPaused()) {
 
-            transference.getView().updateSpeed("------", true);
-
-            sp = 0L;
+            sp = 0;
 
         } else if (progress > last_progress) {
 
@@ -98,28 +97,19 @@ public final class GlobalSpeedMeter implements Runnable {
 
             sp = last_progress > 0 ? Math.round(current_speed) : 0;
 
-            if (sp > 0) {
-
-                transference.getView().updateSpeed(formatBytes(sp) + "/s", true);
-            }
-
             last_progress = progress;
 
             no_data_count = 0;
 
         } else if (transference instanceof Download && ((Download) transference).isError509()) {
 
-            transference.getView().updateSpeed("BANDWIDTH LIMIT ERROR!", true);
-
-            sp = 0L;
+            sp = -1;
 
             no_data_count++;
 
         } else {
 
-            transference.getView().updateSpeed("------", true);
-
-            sp = 0L;
+            sp = 0;
 
             no_data_count++;
         }
@@ -135,7 +125,7 @@ public final class GlobalSpeedMeter implements Runnable {
 
     @Override
     public void run() {
-        long sp, progress;
+        long global_speed, global_progress;
         boolean visible = false;
 
         _speed_label.setVisible(true);
@@ -151,43 +141,61 @@ public final class GlobalSpeedMeter implements Runnable {
 
                     visible = true;
 
-                    sp = 0L;
+                    global_speed = 0L;
 
-                    progress = 0L;
+                    global_progress = 0L;
 
-                    for (Map.Entry<Transference, HashMap> entry : _transferences.entrySet()) {
+                    for (Map.Entry<Transference, HashMap> trans_info : _transferences.entrySet()) {
 
-                        sp += calcTransferenceSpeed(entry.getKey(), entry.getValue());
-                        progress += entry.getKey().getProgress();
+                        long trans_sp = calcTransferenceSpeed(trans_info.getKey(), trans_info.getValue());
+
+                        if (trans_sp >= 0) {
+                            global_speed += trans_sp;
+                        }
+
+                        global_progress += trans_info.getKey().getProgress();
+
+                        if (trans_sp > 0) {
+
+                            trans_info.getKey().getView().updateSpeed(formatBytes(trans_sp) + "/s", true);
+
+                        } else if (trans_sp == 0) {
+
+                            trans_info.getKey().getView().updateSpeed("------", true);
+
+                        } else {
+
+                            trans_info.getKey().getView().updateSpeed("BANDWIDTH LIMIT ERROR!", true);
+                        }
                     }
 
                     for (Transference transference : _trans_manager.getTransference_finished_queue()) {
 
                         if (!transference.isStatusError()) {
 
-                            progress += transference.getProgress();
+                            global_progress += transference.getProgress();
                         }
                     }
 
-                    if (sp > 0) {
+                    if (global_speed > 0) {
+
                         _speed_counter++;
-                        _speed_acumulator += sp;
+                        _speed_acumulator += global_speed;
 
-                        long avg_speed = _getAverageGlobalSpeed();
+                        long avg_global_speed = _getAvgGlobalSpeed();
 
-                        if (avg_speed > _max_avg_speed) {
-                            _max_avg_speed = avg_speed;
+                        if (avg_global_speed > _max_avg_global_speed) {
+                            _max_avg_global_speed = avg_global_speed;
                         }
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "AVG DL SPEED: {0}/s", formatBytes(avg_speed));
+                        _speed_label.setText(formatBytes(global_speed) + "/s");
 
-                        _speed_label.setText(formatBytes(sp) + "/s");
-                        _rem_label.setText(formatBytes(progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ " + calculateRemTime((long) Math.floor((_trans_manager.getTotal_transferences_size() - progress) / sp)));
+                        _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ " + formatBytes(avg_global_speed) + "/s @ " + calcRemTime((long) Math.floor((_trans_manager.getTotal_transferences_size() - global_progress) / avg_global_speed)));
 
                     } else {
 
                         _speed_label.setText("------");
-                        _rem_label.setText(formatBytes(progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ --d --:--:--");
+                        _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(_trans_manager.getTotal_transferences_size()) + " @ --d --:--:--");
 
                     }
 

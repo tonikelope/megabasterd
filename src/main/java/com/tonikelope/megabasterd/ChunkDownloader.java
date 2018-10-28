@@ -327,7 +327,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                 //Proxy speed benchmark
                                 long chunk_speed = Math.round((double) chunk_size / ((double) (finish_chunk_time - init_chunk_time - paused) / 1000));
 
-                                if (chunk_speed < Math.round(((double) _download.getMain_panel().getGlobal_dl_speed().getMaxAverageGlobalSpeed() / _download.getMain_panel().getDownload_manager().calcTotalSlotsCount()) * SLOW_PROXY_PERC)) {
+                                if (chunk_speed < Math.round(((double) _download.getMain_panel().getGlobal_dl_speed().getMaxAvgGlobalSpeed() / _download.getMain_panel().getDownload_manager().calcTotalSlotsCount()) * SLOW_PROXY_PERC)) {
 
                                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker WARNING -> PROXY SPEED: {1}/s is SLOW", new Object[]{_id, formatBytes(chunk_speed)});
 
