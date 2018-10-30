@@ -290,7 +290,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         total_file_size_label.setEnabled(false);
 
         warning_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
-        warning_label.setText("If you DO NOT want to upload some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).");
+        warning_label.setText("If you DO NOT want to transfer some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).");
         warning_label.setDoubleBuffered(true);
         warning_label.setEnabled(false);
 

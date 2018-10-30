@@ -193,7 +193,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Spanish", "Español");
         _addTranslation("Checking account quota, please wait...", "Comprobando espacio utilizado de la cuenta, por favor espera...");
         _addTranslation("ERROR checking account quota!", "ERROR al comprobar el espacio utilizado.");
-        _addTranslation("If you DO NOT want to upload some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).", "Si no quieres subir alguna carpeta o archivo puedes quitarlo de la lista (para seleccionar varios elementos al mismo tiempo usa CTRL + RATÓN_IZQ)");
+        _addTranslation("If you DO NOT want to transfer some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).", "Si no quieres transferir alguna carpeta o archivo puedes quitarlo de la lista (para seleccionar varios elementos al mismo tiempo usa CTRL + RATÓN_IZQ)");
         _addTranslation("Upload name:", "Nombre de la subida:");
         _addTranslation("Account:", "Cuenta:");
         _addTranslation("Folder link detected!", "¡Enlace de carpeta detectado!");
