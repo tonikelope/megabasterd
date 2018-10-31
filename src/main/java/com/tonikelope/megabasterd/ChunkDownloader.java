@@ -294,6 +294,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     chunk_reads = chunk_size;
 
+                                    finish_chunk_time = -1;
+
                                     _download.getPartialProgress().add(chunk_size);
 
                                     _download.getProgress_meter().secureNotify();
@@ -322,7 +324,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             _download.getChunkmanager().secureNotify();
 
-                            if (current_smart_proxy != null) {
+                            if (current_smart_proxy != null && finish_chunk_time > 0) {
 
                                 //Proxy speed benchmark
                                 long chunk_speed = Math.round(chunk_size / ((double) (finish_chunk_time - init_chunk_time - paused) / 1000));
