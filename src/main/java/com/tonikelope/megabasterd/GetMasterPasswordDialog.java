@@ -1,5 +1,7 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Dialog;
 import java.awt.HeadlessException;
 import java.awt.event.KeyEvent;
@@ -11,8 +13,6 @@ import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JOptionPane;
 import javax.swing.JPasswordField;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
 
 /**
  *

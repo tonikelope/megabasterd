@@ -1,9 +1,23 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.DBTools.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
+import static com.tonikelope.megabasterd.Transference.*;
+import java.awt.AWTException;
 import java.awt.Color;
 import static java.awt.EventQueue.invokeLater;
 import java.awt.Font;
 import static java.awt.Frame.NORMAL;
+import java.awt.MenuItem;
+import java.awt.PopupMenu;
+import static java.awt.SystemTray.getSystemTray;
+import static java.awt.Toolkit.getDefaultToolkit;
+import java.awt.TrayIcon;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
+import static java.awt.event.WindowEvent.WINDOW_CLOSING;
+import java.io.File;
 import java.io.IOException;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.exit;
@@ -26,20 +40,6 @@ import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.UIManager;
-import static com.tonikelope.megabasterd.DBTools.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.Transference.*;
-import java.awt.AWTException;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
-import static java.awt.SystemTray.getSystemTray;
-import static java.awt.Toolkit.getDefaultToolkit;
-import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowEvent;
-import static java.awt.event.WindowEvent.WINDOW_CLOSING;
-import java.io.File;
 
 /**
  *
@@ -47,7 +47,7 @@ import java.io.File;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.59";
+    public static final String VERSION = "5.60";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -93,6 +93,50 @@ public final class MainPanel {
                 main_panel.getView().setVisible(true);
             }
         });
+    }
+
+    public static String getFont() {
+        return _font;
+    }
+
+    public static String getNew_version() {
+        return _new_version;
+    }
+
+    public static String getLanguage() {
+        return _language;
+    }
+
+    public static String getProxy_user() {
+        return _proxy_user;
+    }
+
+    public static String getProxy_pass() {
+        return _proxy_pass;
+    }
+
+    public static void setProxy_manager(SmartMegaProxyManager proxy_manager) {
+        _proxy_manager = proxy_manager;
+    }
+
+    public static String getProxy_host() {
+        return _proxy_host;
+    }
+
+    public static int getProxy_port() {
+        return _proxy_port;
+    }
+
+    public static boolean isUse_proxy() {
+        return _use_proxy;
+    }
+
+    public static boolean isUse_smart_proxy() {
+        return _use_smart_proxy;
+    }
+
+    public static SmartMegaProxyManager getProxy_manager() {
+        return _proxy_manager;
     }
 
     private volatile MainPanelView _view;
@@ -275,26 +319,6 @@ public final class MainPanel {
         resumeUploads();
     }
 
-    public static String getFont() {
-        return _font;
-    }
-
-    public static String getNew_version() {
-        return _new_version;
-    }
-
-    public static String getLanguage() {
-        return _language;
-    }
-
-    public static String getProxy_user() {
-        return _proxy_user;
-    }
-
-    public static String getProxy_pass() {
-        return _proxy_pass;
-    }
-
     public boolean isExit() {
         return _exit;
     }
@@ -305,30 +329,6 @@ public final class MainPanel {
 
     public float getZoom_factor() {
         return _zoom_factor;
-    }
-
-    public static void setProxy_manager(SmartMegaProxyManager proxy_manager) {
-        _proxy_manager = proxy_manager;
-    }
-
-    public static String getProxy_host() {
-        return _proxy_host;
-    }
-
-    public static int getProxy_port() {
-        return _proxy_port;
-    }
-
-    public static boolean isUse_proxy() {
-        return _use_proxy;
-    }
-
-    public static boolean isUse_smart_proxy() {
-        return _use_smart_proxy;
-    }
-
-    public static SmartMegaProxyManager getProxy_manager() {
-        return _proxy_manager;
     }
 
     public MegaProxyServer getMega_proxy_server() {

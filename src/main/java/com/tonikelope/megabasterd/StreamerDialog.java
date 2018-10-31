@@ -1,5 +1,7 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Dialog;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
@@ -11,8 +13,6 @@ import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
 
 /**
  *

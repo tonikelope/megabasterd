@@ -1,12 +1,16 @@
 package com.tonikelope.megabasterd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import static com.tonikelope.megabasterd.CryptTools.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
+import java.net.Proxy;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -15,10 +19,6 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.Cipher;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.CryptTools.*;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import javax.net.ssl.HttpsURLConnection;
 
 /**

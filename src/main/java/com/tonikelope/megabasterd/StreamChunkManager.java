@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedOutputStream;
@@ -8,7 +9,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import static com.tonikelope.megabasterd.MiscTools.*;
 
 /**
  *

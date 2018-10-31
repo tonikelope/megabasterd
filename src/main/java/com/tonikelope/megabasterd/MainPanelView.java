@@ -1,6 +1,11 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.CryptTools.*;
+import static com.tonikelope.megabasterd.DBTools.*;
+import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
@@ -14,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -25,12 +31,6 @@ import javax.swing.JMenuItem;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.CryptTools.*;
-import static com.tonikelope.megabasterd.DBTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
-import java.awt.Dimension;
-import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 

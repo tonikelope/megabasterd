@@ -1,5 +1,8 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.DBTools.*;
+import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.File;
@@ -8,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -29,12 +33,8 @@ import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.table.DefaultTableModel;
-import static com.tonikelope.megabasterd.DBTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.nio.file.Paths;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *

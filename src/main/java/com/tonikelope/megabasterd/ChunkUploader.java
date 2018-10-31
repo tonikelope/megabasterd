@@ -1,20 +1,20 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.CryptTools.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.crypto.CipherInputStream;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.CryptTools.*;
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.channels.Channels;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.crypto.CipherInputStream;
 
 /**
  *

@@ -1,5 +1,8 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
+import static com.tonikelope.megabasterd.Transference.*;
 import java.awt.Color;
 import static java.lang.Integer.MAX_VALUE;
 import java.util.concurrent.Callable;
@@ -10,9 +13,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.Transference.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
 
 /**
  *

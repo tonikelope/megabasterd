@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,7 +8,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import static com.tonikelope.megabasterd.MiscTools.*;
 
 /**
  *

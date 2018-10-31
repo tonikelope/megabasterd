@@ -1,10 +1,10 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
+import java.awt.Color;
 import java.awt.Dialog;
 import javax.swing.JOptionPane;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
-import java.awt.Color;
 
 /**
  *

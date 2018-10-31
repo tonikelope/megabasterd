@@ -1,16 +1,16 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Component;
 import java.awt.TrayIcon;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
+import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import javax.swing.JPanel;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static java.util.logging.Level.SEVERE;
 
 /**
  *

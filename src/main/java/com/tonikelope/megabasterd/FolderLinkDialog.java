@@ -1,5 +1,7 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -11,8 +13,6 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
 
 /**
  *

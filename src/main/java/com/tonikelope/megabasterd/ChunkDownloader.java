@@ -1,18 +1,18 @@
 package com.tonikelope.megabasterd;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.SocketTimeoutException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -325,7 +325,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             if (current_smart_proxy != null) {
 
                                 //Proxy speed benchmark
-                                long chunk_speed = Math.round((double) chunk_size / ((double) (finish_chunk_time - init_chunk_time - paused) / 1000));
+                                long chunk_speed = Math.round(chunk_size / ((double) (finish_chunk_time - init_chunk_time - paused) / 1000));
 
                                 if (chunk_speed < Math.round(((double) _download.getMain_panel().getGlobal_dl_speed().getMaxAvgGlobalSpeed() / _download.getMain_panel().getDownload_manager().calcTotalSlotsCount()) * SLOW_PROXY_PERC)) {
 

@@ -34,11 +34,6 @@ public final class LabelTranslatorSingleton {
 
     }
 
-    private final static class LazyHolder {
-
-        private static final LabelTranslatorSingleton INSTANCE = new LabelTranslatorSingleton();
-    }
-
     private void Spanish() {
 
         _addTranslation("Font:", "Fuente:");
@@ -275,5 +270,10 @@ public final class LabelTranslatorSingleton {
     public String translate(String orig) {
 
         return _rosetta.containsKey(orig) ? _rosetta.get(orig) : orig;
+    }
+
+    private final static class LazyHolder {
+
+        private static final LabelTranslatorSingleton INSTANCE = new LabelTranslatorSingleton();
     }
 }

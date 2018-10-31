@@ -1,8 +1,8 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.util.HashMap;
 import javax.swing.tree.DefaultMutableTreeNode;
-import static com.tonikelope.megabasterd.MiscTools.*;
 
 /**
  *
@@ -35,6 +35,11 @@ public final class MegaMutableTreeNode extends DefaultMutableTreeNode {
 
             return "";
         }
+    }
+
+    @Override
+    public Object clone() {
+        return super.clone(); //To change body of generated methods, choose Tools | Templates.
     }
 
 }

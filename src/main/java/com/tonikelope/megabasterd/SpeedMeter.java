@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MiscTools.*;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -7,7 +8,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JLabel;
-import static com.tonikelope.megabasterd.MiscTools.*;
 
 /**
  *

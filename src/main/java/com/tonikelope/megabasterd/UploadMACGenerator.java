@@ -1,5 +1,9 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.CryptTools.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -7,10 +11,6 @@ import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
-import static com.tonikelope.megabasterd.CryptTools.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 
 /**
  *

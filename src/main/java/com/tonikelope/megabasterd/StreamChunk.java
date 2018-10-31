@@ -10,23 +10,6 @@ import java.io.IOException;
  */
 public final class StreamChunk {
 
-    public class ByteArrayOutInputStream extends ByteArrayOutputStream {
-
-        public ByteArrayOutInputStream(int size) {
-            super(size);
-        }
-
-        /**
-         * Get an input stream based on the contents of this output stream. Do
-         * not use the output stream after calling this method.
-         *
-         * @return an {@link InputStream}
-         */
-        public ByteArrayInputStream toInputStream() {
-            return new ByteArrayInputStream(this.buf, 0, this.count);
-        }
-    }
-
     private final long _offset;
     private final long _size;
     private final String _url;
@@ -70,6 +53,23 @@ public final class StreamChunk {
             throw new IOException("Chunk outputstream is not available!");
         }
         return _data_os;
+    }
+
+    public class ByteArrayOutInputStream extends ByteArrayOutputStream {
+
+        public ByteArrayOutInputStream(int size) {
+            super(size);
+        }
+
+        /**
+         * Get an input stream based on the contents of this output stream. Do
+         * not use the output stream after calling this method.
+         *
+         * @return an {@link InputStream}
+         */
+        public ByteArrayInputStream toInputStream() {
+            return new ByteArrayInputStream(this.buf, 0, this.count);
+        }
     }
 
 }

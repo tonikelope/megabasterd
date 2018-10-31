@@ -4,15 +4,15 @@ import static com.tonikelope.megabasterd.CryptTools.forwardMEGALinkKeyIV;
 import static com.tonikelope.megabasterd.CryptTools.genDecrypter;
 import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
 import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKeyIV;
-import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.*;
+import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
 
 /**
