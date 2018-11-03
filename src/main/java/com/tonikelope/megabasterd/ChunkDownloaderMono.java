@@ -35,9 +35,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         try {
 
             String worker_url = null;
-            int conta_error = 0, http_error = 0;
+            int conta_error = 0, http_error = 0, http_status = 0;
             boolean chunk_error = false;
-            long chunk_id, bytes_written = getDownload().getProgress();
+            long chunk_id, bytes_downloaded = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
             byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
 
@@ -46,8 +46,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             CipherInputStream cis = null;
 
             while (!isExit() && !getDownload().isStopped()) {
-
-                int http_status = 0;
 
                 if (worker_url == null || http_error == 403) {
 
@@ -91,7 +89,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         http_status = con.getResponseCode();
 
-                        cis = new CipherInputStream(new ThrottledInputStream(con.getInputStream(), getDownload().getMain_panel().getStream_supervisor()), genDecrypter("AES", "AES/CTR/NoPadding", byte_file_key, forwardMEGALinkKeyIV(byte_iv, bytes_written)));
+                        cis = new CipherInputStream(new ThrottledInputStream(con.getInputStream(), getDownload().getMain_panel().getStream_supervisor()), genDecrypter("AES", "AES/CTR/NoPadding", byte_file_key, forwardMEGALinkKeyIV(byte_iv, bytes_downloaded)));
+
                     }
 
                     chunk_error = true;
@@ -133,9 +132,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
-                            int reads;
+                            int reads = 0;
 
-                            while (!getDownload().isStopped() && chunk_reads < chunk_size && bytes_written + chunk_reads < getDownload().getFile_size() && (reads = cis.read(buffer, 0, Math.min(Math.min((int) (chunk_size - chunk_reads), (int) (getDownload().getFile_size() - (bytes_written + chunk_reads))), buffer.length))) != -1) {
+                            while (!getDownload().isStopped() && chunk_reads < chunk_size && (reads = cis.read(buffer, 0, Math.min(Math.min((int) (chunk_size - chunk_reads), (int) (getDownload().getFile_size() - (bytes_downloaded + chunk_reads))), buffer.length))) != -1) {
 
                                 getDownload().getOutput_stream().write(buffer, 0, reads);
 
@@ -162,9 +161,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             }
 
-                            if (chunk_reads == chunk_size) {
+                            if (chunk_reads == chunk_size || reads == -1) {
 
-                                bytes_written += chunk_reads;
+                                bytes_downloaded += chunk_reads;
 
                                 conta_error = 0;
 
@@ -207,10 +206,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                         if (con != null) {
                             con.disconnect();
                             con = null;
-
-                            if (cis != null) {
-                                cis.close();
-                            }
                         }
 
                     }

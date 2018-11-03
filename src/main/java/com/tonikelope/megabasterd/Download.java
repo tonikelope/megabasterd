@@ -801,26 +801,28 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         if (_file != null && !getView().isKeepTempFileSelected()) {
             _file.delete();
 
-            long chunk_id = getChunkmanager().getLast_chunk_id_written() + 1;
+            if (getChunkmanager() != null) {
+                long chunk_id = getChunkmanager().getLast_chunk_id_written() + 1;
 
-            while (chunk_id < _last_chunk_id_dispatched) {
-                File chunk_file = new File(getDownload_path() + "/" + getFile_name() + ".chunk" + String.valueOf(chunk_id++));
+                while (chunk_id < _last_chunk_id_dispatched) {
+                    File chunk_file = new File(getDownload_path() + "/" + getFile_name() + ".chunk" + String.valueOf(chunk_id++));
 
-                if (chunk_file.exists()) {
-                    chunk_file.delete();
+                    if (chunk_file.exists()) {
+                        chunk_file.delete();
+                    }
                 }
-            }
 
-            File parent_download_dir = new File(getDownload_path() + "/" + getFile_name()).getParentFile();
+                File parent_download_dir = new File(getDownload_path() + "/" + getFile_name()).getParentFile();
 
-            while (!parent_download_dir.getAbsolutePath().equals(getDownload_path()) && parent_download_dir.listFiles().length == 0) {
-                parent_download_dir.delete();
-                parent_download_dir = parent_download_dir.getParentFile();
-            }
+                while (!parent_download_dir.getAbsolutePath().equals(getDownload_path()) && parent_download_dir.listFiles().length == 0) {
+                    parent_download_dir.delete();
+                    parent_download_dir = parent_download_dir.getParentFile();
+                }
 
-            if (!(new File(getDownload_path() + "/" + getFile_name()).getParentFile().exists())) {
+                if (!(new File(getDownload_path() + "/" + getFile_name()).getParentFile().exists())) {
 
-                getView().getOpen_folder_button().setEnabled(false);
+                    getView().getOpen_folder_button().setEnabled(false);
+                }
             }
         }
 

@@ -218,7 +218,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (!_exit && !_download.isStopped()) {
 
-                        int http_status = con.getResponseCode();
+                        int reads = 0, http_status = con.getResponseCode();
 
                         if (http_status != 200) {
 
@@ -235,8 +235,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             try (InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor())) {
 
                                 byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
-
-                                int reads;
 
                                 chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id);
 
@@ -292,7 +290,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has RECOVERED PREVIOUS chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
 
-                                    chunk_reads = chunk_size;
+                                    reads = -1;
 
                                     finish_chunk_time = -1;
 
@@ -303,7 +301,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             }
                         }
 
-                        if (chunk_reads == chunk_size) {
+                        if (chunk_reads == chunk_size || reads == -1) {
 
                             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has DOWNLOADED chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
 
