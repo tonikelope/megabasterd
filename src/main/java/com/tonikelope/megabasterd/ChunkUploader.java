@@ -106,7 +106,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 String worker_url = _upload.getUl_url();
 
-                int reads, http_status;
+                int reads = 0, http_status;
 
                 long tot_bytes_up;
 
@@ -201,7 +201,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                                } else if (tot_bytes_up == chunk_size) {
+                                } else if (tot_bytes_up == chunk_size || reads == -1) {
 
                                     String httpresponse;
 

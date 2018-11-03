@@ -18,13 +18,13 @@ import java.util.logging.Logger;
 public class StreamChunkDownloader implements Runnable {
 
     private final int _id;
-    private final StreamChunkManager _chunkwriter;
+    private final StreamChunkManager _chunkmanager;
     private volatile boolean _exit;
     private SmartMegaProxyManager _proxy_manager;
 
-    public StreamChunkDownloader(int id, StreamChunkManager chunkwriter) {
+    public StreamChunkDownloader(int id, StreamChunkManager chunkmanager) {
         _id = id;
-        _chunkwriter = chunkwriter;
+        _chunkmanager = chunkmanager;
         _proxy_manager = null;
         _exit = false;
     }
@@ -42,15 +42,15 @@ public class StreamChunkDownloader implements Runnable {
 
         try {
 
-            String url = _chunkwriter.getUrl();
+            String url = _chunkmanager.getUrl();
 
             int http_error = 0;
 
-            String current_proxy = null;
+            String current_smart_proxy = null;
 
             long offset = -1;
 
-            while (!_exit && !_chunkwriter.isExit()) {
+            while (!_exit && !_chunkmanager.isExit()) {
 
                 if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
 
@@ -58,70 +58,67 @@ public class StreamChunkDownloader implements Runnable {
 
                 }
 
-                while (!_exit && !_chunkwriter.isExit() && _chunkwriter.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
+                while (!_exit && !_chunkmanager.isExit() && _chunkmanager.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
 
                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: Chunk buffer is full. I pause myself.", new Object[]{Thread.currentThread().getName(), _id});
 
-                    _chunkwriter.secureWait();
+                    _chunkmanager.secureWait();
                 }
 
                 if (http_error == 0) {
 
-                    offset = _chunkwriter.nextOffset();
+                    offset = _chunkmanager.nextOffset();
 
                 } else if (http_error == 403) {
 
-                    url = _chunkwriter.getUrl();
+                    url = _chunkmanager.getUrl();
                 }
 
                 if (offset >= 0) {
 
-                    StreamChunk chunk_stream = new StreamChunk(offset, _chunkwriter.calculateChunkSize(offset), url);
+                    StreamChunk chunk_stream = new StreamChunk(offset, _chunkmanager.calculateChunkSize(offset), url);
 
-                    if (con == null || http_error != 0) {
+                    if (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                        if (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                        if (current_smart_proxy != null) {
 
-                            if (http_error != 0 && current_proxy != null) {
+                            _proxy_manager.blockProxy(current_smart_proxy);
+                        }
 
-                                _proxy_manager.blockProxy(current_proxy);
-                            }
+                        current_smart_proxy = _proxy_manager.getFastestProxy();
 
-                            current_proxy = _proxy_manager.getFastestProxy();
+                        if (current_smart_proxy != null) {
 
-                            if (current_proxy != null) {
+                            String[] proxy_info = current_smart_proxy.split(":");
 
-                                String[] proxy_info = current_proxy.split(":");
+                            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
-                                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+                            URL chunk_url = new URL(chunk_stream.getUrl());
 
-                                URL chunk_url = new URL(chunk_stream.getUrl());
-
-                                con = (HttpURLConnection) chunk_url.openConnection(proxy);
-
-                            } else {
-
-                                URL chunk_url = new URL(chunk_stream.getUrl());
-
-                                con = (HttpURLConnection) chunk_url.openConnection();
-                            }
+                            con = (HttpURLConnection) chunk_url.openConnection(proxy);
 
                         } else {
 
                             URL chunk_url = new URL(chunk_stream.getUrl());
 
-                            if (MainPanel.isUse_proxy()) {
+                            con = (HttpURLConnection) chunk_url.openConnection();
+                        }
 
-                                con = (HttpURLConnection) chunk_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                    } else {
 
-                                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                        URL chunk_url = new URL(chunk_stream.getUrl());
 
-                                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
-                                }
-                            } else {
+                        if (MainPanel.isUse_proxy()) {
 
-                                con = (HttpURLConnection) chunk_url.openConnection();
+                            con = (HttpURLConnection) chunk_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+
+                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+
+                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
                             }
+                        } else {
+
+                            con = (HttpURLConnection) chunk_url.openConnection();
                         }
                     }
 
@@ -153,25 +150,25 @@ public class StreamChunkDownloader implements Runnable {
 
                             } else {
 
-                                InputStream is = con.getInputStream();
+                                try (InputStream is = con.getInputStream()) {
 
-                                while (!_exit && !_chunkwriter.isExit() && (reads = is.read(buffer)) != -1) {
+                                    int chunk_writes = 0;
 
-                                    chunk_stream.getOutputStream().write(buffer, 0, reads);
-                                }
+                                    while (!_exit && !_chunkmanager.isExit() && (reads = is.read(buffer)) != -1) {
 
-                                is.close();
+                                        chunk_stream.getOutputStream().write(buffer, 0, reads);
 
-                                if (chunk_stream.getSize() == chunk_stream.getOutputStream().size()) {
+                                        chunk_writes += reads;
+                                    }
 
-                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
+                                    if (chunk_stream.getSize() == chunk_writes) {
 
-                                    _chunkwriter.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
+                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
 
-                                    _chunkwriter.secureNotifyAll();
+                                        _chunkmanager.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
 
-                                    http_error = 0;
-
+                                        _chunkmanager.secureNotifyAll();
+                                    }
                                 }
                             }
                         }
@@ -179,10 +176,7 @@ public class StreamChunkDownloader implements Runnable {
                     } catch (IOException ex) {
                         Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                     } finally {
-                        if (con != null) {
-                            con.disconnect();
-                            con = null;
-                        }
+                        con.disconnect();
                     }
 
                 } else {
@@ -197,7 +191,7 @@ public class StreamChunkDownloader implements Runnable {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         }
 
-        _chunkwriter.secureNotifyAll();
+        _chunkmanager.secureNotifyAll();
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
     }
