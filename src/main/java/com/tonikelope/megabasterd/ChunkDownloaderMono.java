@@ -161,7 +161,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             }
 
-                            if (chunk_reads == chunk_size || reads == -1) {
+                            if (chunk_reads == chunk_size) {
 
                                 bytes_downloaded += chunk_reads;
 
@@ -176,12 +176,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     }
 
-                } catch (IOException ex) {
+                } catch (IOException | InterruptedException ex) {
 
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 } finally {
 
                     if (chunk_error) {

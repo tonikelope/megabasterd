@@ -78,15 +78,13 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
 
         if (_download.getProgress() == 0) {
-            _download.setLast_chunk_id_dispatched(0);
 
             _last_chunk_id_written = 0;
 
             _bytes_written = 0;
-        } else {
-            _last_chunk_id_written = calculateLastWrittenChunk(_download.getProgress());
 
-            _download.setLast_chunk_id_dispatched(_last_chunk_id_written);
+        } else {
+            _last_chunk_id_written = _download.getLast_chunk_id_dispatched();
 
             _bytes_written = _download.getProgress();
         }
@@ -159,7 +157,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
                         _bytes_written += chunk_file.length();
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager has written to disk chunk [{1}] {2} {3}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _bytes_written, calculateLastWrittenChunk(_bytes_written)});
+                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager has written to disk chunk [{1}] {2} {3}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _bytes_written, _download.calculateLastWrittenChunk(_bytes_written)});
 
                         _last_chunk_id_written++;
 
@@ -189,21 +187,6 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
         _download.secureNotify();
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile().getName()});
-    }
-
-    private long calculateLastWrittenChunk(long temp_file_size) {
-        if (temp_file_size > 3584 * 1024) {
-            return 7 + (long) Math.floor((float) (temp_file_size - 3584 * 1024) / (1024 * 1024 * (_download.isUse_slots() ? Download.CHUNK_SIZE_MULTI : 1)));
-        } else {
-            long i = 0, tot = 0;
-
-            while (tot < temp_file_size) {
-                i++;
-                tot += i * 128 * 1024;
-            }
-
-            return i;
-        }
     }
 
 }

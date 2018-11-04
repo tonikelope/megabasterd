@@ -290,9 +290,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has RECOVERED PREVIOUS chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
 
-                                    reads = -1;
-
                                     finish_chunk_time = -1;
+
+                                    chunk_reads = chunk_size;
 
                                     _download.getPartialProgress().add(chunk_size);
 
@@ -301,7 +301,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             }
                         }
 
-                        if (chunk_reads == chunk_size || reads == -1) {
+                        if (chunk_reads == chunk_size) {
 
                             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has DOWNLOADED chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
 
@@ -322,7 +322,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             _download.getChunkmanager().secureNotify();
 
-                            if (current_smart_proxy != null && finish_chunk_time > 0) {
+                            if (current_smart_proxy != null && finish_chunk_time != -1) {
 
                                 //Proxy speed benchmark
                                 long chunk_speed = Math.round(chunk_size / ((double) (finish_chunk_time - init_chunk_time - paused) / 1000));

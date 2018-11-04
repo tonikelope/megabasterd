@@ -176,6 +176,25 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     }
 
+    public long getLast_chunk_id_dispatched() {
+        return _last_chunk_id_dispatched;
+    }
+
+    public long calculateLastWrittenChunk(long temp_file_size) {
+        if (temp_file_size > 3584 * 1024) {
+            return 7 + (long) Math.floor((float) (temp_file_size - 3584 * 1024) / (1024 * 1024 * (this.isUse_slots() ? Download.CHUNK_SIZE_MULTI : 1)));
+        } else {
+            long i = 0, tot = 0;
+
+            while (tot < temp_file_size) {
+                i++;
+                tot += i * 128 * 1024;
+            }
+
+            return i;
+        }
+    }
+
     public void enableProxyTurboMode() {
 
         synchronized (_turbo_proxy_lock) {
@@ -530,6 +549,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                             }
 
                             _progress = _file.length();
+
+                            _last_chunk_id_dispatched = calculateLastWrittenChunk(_progress);
 
                             getView().updateProgressBar(_progress, _progress_bar_rate);
 
