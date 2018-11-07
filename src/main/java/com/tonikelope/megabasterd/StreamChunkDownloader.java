@@ -154,7 +154,7 @@ public class StreamChunkDownloader implements Runnable {
 
                                     int chunk_writes = 0;
 
-                                    while (!_exit && !_chunkmanager.isExit() && (reads = is.read(buffer)) != -1) {
+                                    while (!_exit && !_chunkmanager.isExit() && chunk_writes < chunk_stream.getSize() && (reads = is.read(buffer, 0, Math.min((int) (chunk_stream.getSize() - chunk_writes), buffer.length))) != -1) {
 
                                         chunk_stream.getOutputStream().write(buffer, 0, reads);
 
