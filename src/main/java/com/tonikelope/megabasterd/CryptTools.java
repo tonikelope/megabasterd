@@ -637,7 +637,7 @@ public final class CryptTools {
 
     public static int[] MEGAPrepareMasterKey(int[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
-        int[] pkey = {0x93C467E3, 0x7DB0_C7A4, 0xD1BE_3F81, 0x0152_CB56};
+        int[] pkey = {0x93C467E3, 0x7DB0C7A4, 0xD1BE3F81, 0x0152CB56};
 
         int[] iv = {0, 0, 0, 0};
 
@@ -665,6 +665,15 @@ public final class CryptTools {
     public static byte[] PBKDF2HMACSHA256(String password, byte[] salt, int iterations) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
+
+        KeySpec ks = new PBEKeySpec(password.toCharArray(), salt, iterations, 256);
+
+        return f.generateSecret(ks).getEncoded();
+    }
+
+    public static byte[] PBKDF2HMACSHA512(String password, byte[] salt, int iterations) throws NoSuchAlgorithmException, InvalidKeySpecException {
+
+        SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
 
         KeySpec ks = new PBEKeySpec(password.toCharArray(), salt, iterations, 256);
 

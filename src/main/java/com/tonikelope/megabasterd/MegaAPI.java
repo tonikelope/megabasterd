@@ -31,6 +31,7 @@ public final class MegaAPI {
     public static final String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
     public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16};
+    public static final int PBKDF2_ITERATIONS = 100000;
 
     public static int checkMEGAError(String data) {
         String error = findFirstRegex("^\\[?(\\-[0-9]+)\\]?$", data, 1);
@@ -62,6 +63,10 @@ public final class MegaAPI {
 
     private String _req_id;
 
+    private int _account_version;
+
+    private String _salt;
+
     public MegaAPI() {
         _req_id = null;
         _trashbin_id = null;
@@ -73,13 +78,19 @@ public final class MegaAPI {
         _password_aes = null;
         _rsa_priv_key = null;
         _master_key = null;
+        _salt = null;
         _sid = null;
+        _account_version = -1;
         _req_id = genID(REQ_ID_LENGTH);
 
         Random randomno = new Random();
 
         _seqno = randomno.nextLong() & 0xffffffffL;
 
+    }
+
+    public int getAccount_version() {
+        return _account_version;
     }
 
     public String getFull_email() {
@@ -158,6 +169,24 @@ public final class MegaAPI {
         fetchNodes();
     }
 
+    private void _getAccountVersion() throws Exception {
+
+        String request = "[{\"a\":\"us0\",\"user\":\"" + _email + "\"}]";
+
+        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
+
+        String res = _rawRequest(request, url_api);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
+
+        _account_version = (Integer) res_map[0].get("v");
+
+        _salt = (String) res_map[0].get("s");
+
+    }
+
     public void login(String email, String password) throws Exception {
 
         _full_email = email;
@@ -166,9 +195,24 @@ public final class MegaAPI {
 
         _email = email_split[0];
 
-        _password_aes = MEGAPrepareMasterKey(bin2i32a(password.getBytes()));
+        if (_account_version == -1) {
+            _getAccountVersion();
+        }
 
-        _user_hash = MEGAUserHash(_email.toLowerCase().getBytes(), _password_aes);
+        if (_account_version == 1) {
+
+            _password_aes = MEGAPrepareMasterKey(bin2i32a(password.getBytes("UTF-8")));
+
+            _user_hash = MEGAUserHash(_email.toLowerCase().getBytes("UTF-8"), _password_aes);
+
+        } else {
+
+            byte[] pbkdf2_key = CryptTools.PBKDF2HMACSHA512(password, MiscTools.UrlBASE642Bin(_salt), PBKDF2_ITERATIONS);
+
+            _password_aes = bin2i32a(Arrays.copyOfRange(pbkdf2_key, 0, 16));
+
+            _user_hash = MiscTools.Bin2UrlBASE64(Arrays.copyOfRange(pbkdf2_key, 16, 32));
+        }
 
         _realLogin();
     }
@@ -180,6 +224,10 @@ public final class MegaAPI {
         String[] email_split = email.split(" *# *");
 
         _email = email_split[0];
+
+        if (_account_version == -1) {
+            _getAccountVersion();
+        }
 
         _password_aes = password_aes;
 
@@ -279,9 +327,11 @@ public final class MegaAPI {
 
     private String _rawRequest(String request, URL url_api) throws MegaAPIException {
 
-        String response = null;
-        String current_proxy = null;
-        int mega_error = 0, http_error = 0, conta_error = 0;
+        String response = null, current_smart_proxy = null;
+
+        int mega_error = 0, http_error = 0, conta_error = 0, http_status;
+
+        boolean empty_response = false;
 
         HttpsURLConnection con = null;
 
@@ -289,53 +339,52 @@ public final class MegaAPI {
 
             try {
 
-                if (con == null || mega_error != 0 || http_error != 0) {
+                if (http_error == 509 && !MainPanel.isUse_proxy()) {
 
-                    if (http_error == 509 && !MainPanel.isUse_proxy()) {
+                    if (current_smart_proxy != null) {
 
-                        if (current_proxy != null) {
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_smart_proxy});
 
-                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
+                        MainPanel.getProxy_manager().blockProxy(current_smart_proxy);
+                    }
 
-                            MainPanel.getProxy_manager().blockProxy(current_proxy);
-                        }
+                    current_smart_proxy = MainPanel.getProxy_manager().getFastestProxy();
 
-                        current_proxy = MainPanel.getProxy_manager().getFastestProxy();
+                    if (current_smart_proxy != null) {
 
-                        if (current_proxy != null) {
+                        String[] proxy_info = current_smart_proxy.split(":");
 
-                            String[] proxy_info = current_proxy.split(":");
+                        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
-                            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
-
-                            con = (HttpsURLConnection) url_api.openConnection(proxy);
-
-                        } else {
-
-                            con = (HttpsURLConnection) url_api.openConnection();
-                        }
+                        con = (HttpsURLConnection) url_api.openConnection(proxy);
 
                     } else {
 
-                        if (MainPanel.isUse_proxy()) {
-
-                            con = (HttpsURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-
-                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
-
-                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
-                            }
-                        } else {
-
-                            con = (HttpsURLConnection) url_api.openConnection();
-                        }
-
+                        con = (HttpsURLConnection) url_api.openConnection();
                     }
+
+                } else {
+
+                    if (MainPanel.isUse_proxy()) {
+
+                        con = (HttpsURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+
+                        if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+
+                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                        }
+                    } else {
+
+                        con = (HttpsURLConnection) url_api.openConnection();
+                    }
+
                 }
 
                 http_error = 0;
 
                 mega_error = 0;
+
+                empty_response = true;
 
                 con.setRequestMethod("POST");
 
@@ -355,19 +404,19 @@ public final class MegaAPI {
 
                 con.getOutputStream().close();
 
-                if (con.getResponseCode() != 200) {
+                http_status = con.getResponseCode();
+
+                if (http_status != 200) {
 
                     Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
 
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), con.getResponseCode()});
+                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                    http_error = con.getResponseCode();
+                    http_error = http_status;
 
                 } else {
 
-                    InputStream is = con.getInputStream();
-
-                    try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -382,28 +431,28 @@ public final class MegaAPI {
 
                         if (response.length() > 0) {
 
+                            empty_response = false;
+
                             mega_error = checkMEGAError(response);
 
-                        } else {
-
-                            mega_error = 1337;
                         }
-
                     }
+
                 }
 
             } catch (Exception ex) {
+
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
-                mega_error = 1337;
+
             } finally {
 
                 if (con != null) {
                     con.disconnect();
-                    con = null;
                 }
+
             }
 
-            if (mega_error != 0 && http_error != 509) {
+            if (!empty_response && mega_error != 0 && http_error != 509) {
 
                 if (Arrays.asList(MEGA_ERROR_EXCEPTION_CODES).contains(mega_error)) {
 
@@ -418,12 +467,12 @@ public final class MegaAPI {
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
                 }
 
-            } else if (mega_error == 0) {
+            } else if (!empty_response && mega_error == 0 && http_error == 0) {
 
                 conta_error = 0;
             }
 
-        } while (mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy()));
+        } while (empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy()));
 
         _seqno++;
 

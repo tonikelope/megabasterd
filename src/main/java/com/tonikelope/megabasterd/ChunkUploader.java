@@ -205,9 +205,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     String httpresponse;
 
-                                    InputStream is = con.getInputStream();
-
-                                    try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                                         while ((reads = is.read(buffer)) != -1) {
 
