@@ -280,7 +280,17 @@ public final class MiscTools {
 
             Font new_font = font.deriveFont(old_font.getStyle(), Math.round(old_font.getSize() * zoom_factor));
 
-            component.setFont(new_font);
+            boolean error;
+
+            do {
+                try {
+                    component.setFont(new_font);
+                    error = false;
+                } catch (Exception ex) {
+                    error = true;
+                }
+            } while (error);
+
         }
     }
 

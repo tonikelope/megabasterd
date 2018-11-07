@@ -134,7 +134,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             int reads = 0;
 
-                            while (!getDownload().isStopped() && chunk_reads < chunk_size && (reads = cis.read(buffer, 0, Math.min(Math.min((int) (chunk_size - chunk_reads), (int) (getDownload().getFile_size() - (bytes_downloaded + chunk_reads))), buffer.length))) != -1) {
+                            while (!getDownload().isStopped() && chunk_reads < chunk_size && (reads = cis.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
 
                                 getDownload().getOutput_stream().write(buffer, 0, reads);
 

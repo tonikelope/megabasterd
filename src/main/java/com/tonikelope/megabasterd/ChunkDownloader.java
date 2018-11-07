@@ -101,13 +101,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         try {
 
-            int http_error = 0, conta_error = 0;
+            int http_error = 0, conta_error = 0, http_status = -1;
 
-            boolean timeout, chunk_error = false, slow_proxy = false;
+            boolean timeout, chunk_error, slow_proxy = false;
 
             String worker_url = null, current_smart_proxy = null;
 
-            long init_chunk_time = -1, finish_chunk_time = -1, pause_init_time = -1, paused = 0L;
+            long init_chunk_time = -1, finish_chunk_time = -1, pause_init_time, paused = 0L;
 
             while (!_exit && !_download.isStopped()) {
 
@@ -218,7 +218,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (!_exit && !_download.isStopped()) {
 
-                        int reads = 0, http_status = con.getResponseCode();
+                        http_status = con.getResponseCode();
 
                         if (http_status != 200) {
 
@@ -248,7 +248,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                         paused = 0L;
 
-                                        while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer)) != -1) {
+                                        int reads = 0;
+
+                                        while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
 
                                             tmp_chunk_file_os.write(buffer, 0, reads);
 
