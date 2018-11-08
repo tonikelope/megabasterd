@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -32,9 +33,13 @@ import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JSpinner;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SpinnerNumberModel;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -395,6 +400,30 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         }
 
+        TableRowSorter<TableModel> sorter_mega = new TableRowSorter<>(mega_accounts_table.getModel());
+
+        mega_accounts_table.setRowSorter(sorter_mega);
+
+        List<RowSorter.SortKey> sortKeys_mega = new ArrayList<>();
+
+        sortKeys_mega.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+
+        sorter_mega.setSortKeys(sortKeys_mega);
+
+        sorter_mega.sort();
+
+        TableRowSorter<TableModel> sorter_elc = new TableRowSorter<>(elc_accounts_table.getModel());
+
+        elc_accounts_table.setRowSorter(sorter_elc);
+
+        List<RowSorter.SortKey> sortKeys_elc = new ArrayList<>();
+
+        sortKeys_elc.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+
+        sorter_elc.setSortKeys(sortKeys_elc);
+
+        sorter_elc.sort();
+
         boolean use_mc_reverse = false;
 
         String megacrypter_reverse = DBTools.selectSettingValue("megacrypter_reverse");
@@ -754,13 +783,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(jSeparator6, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(jSeparator11, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(jPanel3Layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(megacrypter_reverse_warning_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addComponent(rec_download_slots_label)
-                                .addGap(0, 99, Short.MAX_VALUE))))
-                    .addGroup(jPanel3Layout.createSequentialGroup()
                         .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(jPanel3Layout.createSequentialGroup()
                                 .addComponent(change_download_dir_button)
@@ -778,27 +800,31 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             .addComponent(use_mega_account_down_checkbox)
                             .addComponent(megacrypter_reverse_checkbox)
                             .addComponent(smart_proxy_checkbox)
-                            .addComponent(rec_smart_proxy_label)
+                            .addComponent(rec_smart_proxy_label))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel3Layout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(megacrypter_reverse_warning_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(jPanel3Layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addGroup(jPanel3Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addComponent(megacrypter_reverse_port_label)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(megacrypter_reverse_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addComponent(max_down_speed_label)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addComponent(use_mega_label)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                        .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 500, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(jPanel3Layout.createSequentialGroup()
-                                        .addComponent(default_slots_down_label)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(default_slots_down_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                                .addComponent(rec_download_slots_label)
+                                .addGap(0, 99, Short.MAX_VALUE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(megacrypter_reverse_port_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(megacrypter_reverse_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(max_down_speed_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(use_mega_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(use_mega_account_down_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(jPanel3Layout.createSequentialGroup()
+                                .addComponent(default_slots_down_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(default_slots_down_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                 .addGap(0, 0, 0))
         );
         jPanel3Layout.setVerticalGroup(
@@ -1449,7 +1475,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 440, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(status)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1710,8 +1736,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 encrypt_pass_checkbox.setEnabled(false);
 
-                pack();
-
                 final Dialog tthis = this;
 
                 THREAD_POOL.execute(new Runnable() {
@@ -1720,6 +1744,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         ArrayList<String> email_error = new ArrayList<>();
 
+                        ArrayList<String> new_valid_mega_accounts = new ArrayList<>();
+
                         for (int i = 0; i < model_row_count; i++) {
 
                             String email = (String) model.getValueAt(i, 0);
@@ -1727,6 +1753,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             String pass = (String) model.getValueAt(i, 1);
 
                             if (!email.isEmpty() && !pass.isEmpty()) {
+
+                                new_valid_mega_accounts.add(email);
 
                                 MegaAPI ma;
 
@@ -1827,8 +1855,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                     status.setText("");
 
-                                    pack();
-
                                     JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n") + final_email_error, "Mega Account Check Error", JOptionPane.ERROR_MESSAGE);
 
                                     save_button.setEnabled(true);
@@ -1853,12 +1879,19 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-                                    pack();
-
                                 }
                             });
 
                         } else {
+
+                            for (Map.Entry<String, Object> entry : _main_panel.getMega_accounts().entrySet()) {
+                                String email = entry.getKey();
+
+                                if (!new_valid_mega_accounts.contains(email)) {
+                                    _deleted_mega_accounts.add(email);
+                                }
+                            }
+
                             swingInvoke(new Runnable() {
                                 @Override
                                 public void run() {
@@ -2450,8 +2483,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
             _download_path = file.getAbsolutePath();
 
             default_dir_label.setText(truncateText(_download_path, 80));
-
-            pack();
         }
     }//GEN-LAST:event_change_download_dir_buttonActionPerformed
 

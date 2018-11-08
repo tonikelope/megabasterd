@@ -62,7 +62,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         setResizable(false);
 
         title_label.setFont(new java.awt.Font("Dialog", 1, 48)); // NOI18N
-        title_label.setText("MegaBasterd " + VERSION);
+        title_label.setText("MegaBasterd " + VERSION + " ");
         title_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         title_label.setDoubleBuffered(true);
         title_label.addMouseListener(new java.awt.event.MouseAdapter() {

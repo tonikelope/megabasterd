@@ -99,7 +99,7 @@
           <Font name="Dialog" size="48" style="1"/>
         </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-          <Connection code="&quot;MegaBasterd &quot; + VERSION" type="code"/>
+          <Connection code="&quot;MegaBasterd &quot; + VERSION + &quot; &quot;" type="code"/>
         </Property>
         <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
           <Color id="Cursor de Mano"/>
