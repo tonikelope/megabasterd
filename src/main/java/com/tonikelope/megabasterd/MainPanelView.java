@@ -486,7 +486,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         new_stream_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         new_stream_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-video-playlist-30.png"))); // NOI18N
-        new_stream_menu.setText("New stream");
+        new_stream_menu.setText("New streaming");
         new_stream_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 new_stream_menuActionPerformed(evt);

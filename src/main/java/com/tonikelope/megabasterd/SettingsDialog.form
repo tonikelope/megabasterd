@@ -51,10 +51,10 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" max="32767" attributes="0"/>
+              <Component id="jTabbedPane1" pref="440" max="32767" attributes="0"/>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Component id="status" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="cancel_button" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="save_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -140,7 +140,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="downloads_scroll_pane" pref="391" max="32767" attributes="0"/>
+                      <Component id="downloads_scroll_pane" pref="373" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                   </Group>
               </Group>
@@ -385,7 +385,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="18" style="1"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Use MEGA accounts for download/stream"/>
+                        <Property name="text" type="java.lang.String" value="Allow to use MEGA accounts for download/streaming"/>
                       </Properties>
                       <Events>
                         <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="use_mega_account_down_checkboxStateChanged"/>
@@ -623,7 +623,7 @@
                           <Component id="max_up_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="max_up_speed_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace pref="194" max="32767" attributes="0"/>
+                      <EmptySpace pref="176" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
@@ -779,7 +779,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="81" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="72" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -788,7 +788,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="81" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="72" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1102,7 +1102,7 @@
                                       </Group>
                                   </Group>
                               </Group>
-                              <EmptySpace min="0" pref="18" max="32767" attributes="0"/>
+                              <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>

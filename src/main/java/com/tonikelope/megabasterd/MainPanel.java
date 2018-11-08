@@ -47,7 +47,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.66";
+    public static final String VERSION = "5.67";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -629,7 +629,7 @@ public final class MainPanel {
 
             try {
 
-                _master_pass_salt = Bin2BASE64(genRandomByteArray(CryptTools.PBKDF2_SALT_BYTE_LENGTH));
+                _master_pass_salt = Bin2BASE64(genRandomByteArray(CryptTools.MASTER_PASSWORD_PBKDF2_SALT_BYTE_LENGTH));
 
                 DBTools.insertSettingValue("master_pass_salt", _master_pass_salt);
 

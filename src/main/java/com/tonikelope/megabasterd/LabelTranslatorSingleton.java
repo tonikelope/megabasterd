@@ -60,7 +60,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Remove selected", "Quitar seleccionado");
         _addTranslation("SPLIT FILE", "PARTIR ARCHIVO");
         _addTranslation("Encrypt on disk sensitive information", "Cifrar en disco datos sensibles");
-        _addTranslation("Use MEGA accounts for download/stream", "Utilizar cuentas de MEGA para descargar/subir");
+        _addTranslation("Allow to use MEGA accounts for download/streaming", "Permitir utilizar cuentas de MEGA para descargar/streaming");
         _addTranslation("Please wait...", "Por favor espera...");
         _addTranslation("CANCEL RETRY", "CANCELAR REINTENTO");
         _addTranslation("SPLITTING FILE...", "PARTIENDO ARCHIVO...");
@@ -111,7 +111,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("SAVE", "GUARDAR");
         _addTranslation("New download", "Nueva descarga");
         _addTranslation("New upload", "Nueva subida");
-        _addTranslation("New stream", "Nuevo stream");
+        _addTranslation("New streaming", "Nuevo streaming");
         _addTranslation("Split file", "Partir un archivo");
         _addTranslation("Merge file", "Juntar las partes de un archivo");
         _addTranslation("Remove all no running downloads", "Cancelar las descargas en espera");

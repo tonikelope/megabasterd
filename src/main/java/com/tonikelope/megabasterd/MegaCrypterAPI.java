@@ -250,7 +250,7 @@ public final class MegaCrypterAPI {
 
                         try {
 
-                            info_key = PBKDF2HMACSHA256(password, salt, (int) Math.pow(2, iterations));
+                            info_key = PBKDF2HMACSHA256(password, salt, (int) Math.pow(2, iterations), 256);
 
                             decrypter = genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 

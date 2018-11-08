@@ -46,9 +46,11 @@ public final class CryptTools {
 
     public static final byte[] AES_ZERO_IV = i32a2bin(AES_ZERO_IV_I32A);
 
-    public static final int PBKDF2_SALT_BYTE_LENGTH = 16;
+    public static final int MASTER_PASSWORD_PBKDF2_SALT_BYTE_LENGTH = 16;
 
-    public static final int PBKDF2_ITERATIONS = 0x10000;
+    public static final int MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH = 256;
+
+    public static final int MASTER_PASSWORD_PBKDF2_ITERATIONS = 65536;
 
     public static Cipher genDecrypter(String algo, String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
         SecretKeySpec skeySpec = new SecretKeySpec(key, algo);
@@ -662,20 +664,20 @@ public final class CryptTools {
         return pkey;
     }
 
-    public static byte[] PBKDF2HMACSHA256(String password, byte[] salt, int iterations) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static byte[] PBKDF2HMACSHA256(String password, byte[] salt, int iterations, int output_length) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 
-        KeySpec ks = new PBEKeySpec(password.toCharArray(), salt, iterations, 256);
+        KeySpec ks = new PBEKeySpec(password.toCharArray(), salt, iterations, output_length);
 
         return f.generateSecret(ks).getEncoded();
     }
 
-    public static byte[] PBKDF2HMACSHA512(String password, byte[] salt, int iterations) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static byte[] PBKDF2HMACSHA512(String password, byte[] salt, int iterations, int output_length) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
 
-        KeySpec ks = new PBEKeySpec(password.toCharArray(), salt, iterations, 256);
+        KeySpec ks = new PBEKeySpec(password.toCharArray(), salt, iterations, output_length);
 
         return f.generateSecret(ks).getEncoded();
     }

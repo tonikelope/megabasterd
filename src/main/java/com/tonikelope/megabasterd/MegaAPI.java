@@ -32,6 +32,7 @@ public final class MegaAPI {
     public static final int REQ_ID_LENGTH = 10;
     public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16};
     public static final int PBKDF2_ITERATIONS = 100000;
+    public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
 
     public static int checkMEGAError(String data) {
         String error = findFirstRegex("^\\[?(\\-[0-9]+)\\]?$", data, 1);
@@ -84,7 +85,6 @@ public final class MegaAPI {
         _req_id = genID(REQ_ID_LENGTH);
 
         Random randomno = new Random();
-
         _seqno = randomno.nextLong() & 0xffffffffL;
 
     }
@@ -169,7 +169,7 @@ public final class MegaAPI {
         fetchNodes();
     }
 
-    private void _getAccountVersion() throws Exception {
+    private void _readAccountVersionAndSalt() throws Exception {
 
         String request = "[{\"a\":\"us0\",\"user\":\"" + _email + "\"}]";
 
@@ -196,7 +196,7 @@ public final class MegaAPI {
         _email = email_split[0];
 
         if (_account_version == -1) {
-            _getAccountVersion();
+            _readAccountVersionAndSalt();
         }
 
         if (_account_version == 1) {
@@ -207,7 +207,7 @@ public final class MegaAPI {
 
         } else {
 
-            byte[] pbkdf2_key = CryptTools.PBKDF2HMACSHA512(password, MiscTools.UrlBASE642Bin(_salt), PBKDF2_ITERATIONS);
+            byte[] pbkdf2_key = CryptTools.PBKDF2HMACSHA512(password, MiscTools.UrlBASE642Bin(_salt), PBKDF2_ITERATIONS, PBKDF2_OUTPUT_BIT_LENGTH);
 
             _password_aes = bin2i32a(Arrays.copyOfRange(pbkdf2_key, 0, 16));
 
@@ -226,7 +226,7 @@ public final class MegaAPI {
         _email = email_split[0];
 
         if (_account_version == -1) {
-            _getAccountVersion();
+            _readAccountVersionAndSalt();
         }
 
         _password_aes = password_aes;
