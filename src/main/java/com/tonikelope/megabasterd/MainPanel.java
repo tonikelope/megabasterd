@@ -39,6 +39,7 @@ import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 /**
@@ -47,7 +48,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.69";
+    public static final String VERSION = "5.70";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -74,6 +75,9 @@ public final class MainPanel {
     public static void main(String args[]) {
 
         setNimbusLookAndFeel();
+
+        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+        defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
 
         if (args.length > 0) {
 

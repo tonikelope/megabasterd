@@ -22,7 +22,7 @@ import javax.crypto.CipherInputStream;
  */
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int MAX_CHUNK_ERROR = 10;
+    public static final int MAX_CHUNK_ERROR = 20;
     private final int _id;
     private final Upload _upload;
     private volatile boolean _exit;

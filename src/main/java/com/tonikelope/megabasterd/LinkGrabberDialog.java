@@ -424,10 +424,20 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                     @Override
                     public void run() {
 
+                        boolean use_account = true;
+
                         try {
-                            checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item);
+
+                            if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item) == null) {
+                                use_account = false;
+                            }
+
                         } catch (Exception ex) {
 
+                            use_account = false;
+                        }
+
+                        if (!use_account) {
                             swingInvoke(new Runnable() {
                                 @Override
                                 public void run() {

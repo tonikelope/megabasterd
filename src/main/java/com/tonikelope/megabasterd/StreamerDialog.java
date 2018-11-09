@@ -294,15 +294,24 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                     @Override
                     public void run() {
 
+                        boolean use_account = true;
+
                         try {
-                            checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item);
+
+                            if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item) == null) {
+                                use_account = false;
+                            }
+
                         } catch (Exception ex) {
 
+                            use_account = false;
+                        }
+
+                        if (!use_account) {
                             swingInvoke(new Runnable() {
                                 @Override
                                 public void run() {
                                     use_mega_account_down_combobox.setSelectedIndex(_main_panel.getMega_accounts().size());
-                                    pack();
 
                                 }
                             });
