@@ -318,53 +318,50 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                 @Override
                 public void run() {
 
-                    try (FileInputStream is = new FileInputStream(file)) {
+                    try (FileInputStream is = new FileInputStream(file); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
-                        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
-                            byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+                        int reads;
 
-                            int reads;
+                        while ((reads = is.read(buffer)) != -1) {
 
-                            while ((reads = is.read(buffer)) != -1) {
+                            out.write(buffer, 0, reads);
+                        }
 
-                                out.write(buffer, 0, reads);
+                        String dlc = new String(out.toByteArray());
+
+                        Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView) getParent()).getMain_panel());
+
+                        for (Iterator<String> i = links.iterator(); i.hasNext();) {
+
+                            String link = i.next();
+
+                            if (findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) == null) {
+
+                                i.remove();
                             }
+                        }
 
-                            String dlc = new String(out.toByteArray());
+                        if (!links.isEmpty()) {
 
-                            Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView) getParent()).getMain_panel());
+                            swingInvoke(new Runnable() {
+                                @Override
+                                public void run() {
+                                    links_textarea.setText("");
 
-                            for (Iterator<String> i = links.iterator(); i.hasNext();) {
+                                    for (Iterator<String> i = links.iterator(); i.hasNext();) {
 
-                                String link = i.next();
+                                        links_textarea.append(i.next());
 
-                                if (findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) == null) {
+                                        if (i.hasNext()) {
 
-                                    i.remove();
-                                }
-                            }
-
-                            if (!links.isEmpty()) {
-
-                                swingInvoke(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        links_textarea.setText("");
-
-                                        for (Iterator<String> i = links.iterator(); i.hasNext();) {
-
-                                            links_textarea.append(i.next());
-
-                                            if (i.hasNext()) {
-
-                                                links_textarea.append("\r\n");
-                                            }
+                                            links_textarea.append("\r\n");
                                         }
                                     }
-                                });
+                                }
+                            });
 
-                            }
                         }
 
                     } catch (FileNotFoundException ex) {

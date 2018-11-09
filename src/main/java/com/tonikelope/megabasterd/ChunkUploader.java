@@ -163,80 +163,76 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
-                        try (CipherInputStream cis = new CipherInputStream(Channels.newInputStream(f.getChannel()), genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset)))) {
+                        try (CipherInputStream cis = new CipherInputStream(Channels.newInputStream(f.getChannel()), genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset))); OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
 
-                            try (OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploading chunk {1} from worker {2}...", new Object[]{Thread.currentThread().getName(), chunk_id, _id});
 
-                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploading chunk {1} from worker {2}...", new Object[]{Thread.currentThread().getName(), chunk_id, _id});
+                            while (!_exit && !_upload.isStopped() && tot_bytes_up < chunk_size && (reads = cis.read(buffer)) != -1) {
+                                out.write(buffer, 0, reads);
 
-                                while (!_exit && !_upload.isStopped() && tot_bytes_up < chunk_size && (reads = cis.read(buffer)) != -1) {
-                                    out.write(buffer, 0, reads);
+                                _upload.getPartialProgress().add((long) reads);
 
-                                    _upload.getPartialProgress().add((long) reads);
+                                _upload.getProgress_meter().secureNotify();
 
-                                    _upload.getProgress_meter().secureNotify();
+                                tot_bytes_up += reads;
 
-                                    tot_bytes_up += reads;
+                                if (_upload.isPaused() && !_upload.isStopped()) {
 
-                                    if (_upload.isPaused() && !_upload.isStopped()) {
+                                    _upload.pause_worker();
 
-                                        _upload.pause_worker();
+                                    secureWait();
 
-                                        secureWait();
+                                } else if (!_upload.isPaused() && _upload.getMain_panel().getUpload_manager().isPaused_all()) {
 
-                                    } else if (!_upload.isPaused() && _upload.getMain_panel().getUpload_manager().isPaused_all()) {
+                                    _upload.pause();
 
-                                        _upload.pause();
+                                    _upload.pause_worker();
 
-                                        _upload.pause_worker();
-
-                                        secureWait();
-                                    }
+                                    secureWait();
                                 }
                             }
+                        }
 
-                            if (!_upload.isStopped() && !_exit) {
+                        if (!_upload.isStopped() && !_exit) {
 
-                                if ((http_status = con.getResponseCode()) != 200) {
+                            if ((http_status = con.getResponseCode()) != 200) {
 
-                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
-                                } else if (tot_bytes_up == chunk_size || reads == -1) {
+                            } else if (tot_bytes_up == chunk_size || reads == -1) {
 
-                                    String httpresponse;
+                                String httpresponse;
 
-                                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                        while ((reads = is.read(buffer)) != -1) {
+                                    while ((reads = is.read(buffer)) != -1) {
 
-                                            byte_res.write(buffer, 0, reads);
-                                        }
-
-                                        httpresponse = new String(byte_res.toByteArray());
-
+                                        byte_res.write(buffer, 0, reads);
                                     }
 
-                                    if (httpresponse.length() > 0) {
+                                    httpresponse = new String(byte_res.toByteArray());
 
-                                        if (MegaAPI.checkMEGAError(httpresponse) != 0) {
+                                }
 
-                                            Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} UPLOAD FAILED! (MEGA ERROR: {1})", new Object[]{Thread.currentThread().getName(), MegaAPI.checkMEGAError(httpresponse)});
+                                if (httpresponse.length() > 0) {
 
-                                        } else {
+                                    if (MegaAPI.checkMEGAError(httpresponse) != 0) {
 
-                                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), httpresponse});
-
-                                            _upload.setCompletion_handle(httpresponse);
-
-                                            chunk_error = false;
-                                        }
+                                        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} UPLOAD FAILED! (MEGA ERROR: {1})", new Object[]{Thread.currentThread().getName(), MegaAPI.checkMEGAError(httpresponse)});
 
                                     } else {
 
+                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Completion handle -> {1}", new Object[]{Thread.currentThread().getName(), httpresponse});
+
+                                        _upload.setCompletion_handle(httpresponse);
+
                                         chunk_error = false;
                                     }
-                                }
 
+                                } else {
+
+                                    chunk_error = false;
+                                }
                             }
 
                         }

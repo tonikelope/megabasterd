@@ -940,9 +940,7 @@ public final class MiscTools {
                 con = (HttpURLConnection) url_api.openConnection();
             }
 
-            InputStream is = con.getInputStream();
-
-            try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+            try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                 byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -994,9 +992,7 @@ public final class MiscTools {
                 con = (HttpURLConnection) mb_url.openConnection();
             }
 
-            InputStream is = con.getInputStream();
-
-            try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+            try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                 byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -1030,6 +1026,10 @@ public final class MiscTools {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
         }
 
         return null;

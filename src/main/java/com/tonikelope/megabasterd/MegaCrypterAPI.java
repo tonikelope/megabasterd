@@ -65,14 +65,14 @@ public final class MegaCrypterAPI {
 
             con.getOutputStream().write(request.getBytes());
 
+            con.getOutputStream().close();
+
             if (con.getResponseCode() != 200) {
                 Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), con.getResponseCode()});
 
             } else {
 
-                InputStream is = con.getInputStream();
-
-                try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                     byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -103,7 +103,6 @@ public final class MegaCrypterAPI {
 
             if (con != null) {
                 con.disconnect();
-                con = null;
             }
         }
 

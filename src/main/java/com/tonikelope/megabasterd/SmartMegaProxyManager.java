@@ -62,13 +62,15 @@ public class SmartMegaProxyManager {
 
         String data;
 
+        HttpURLConnection con = null;
+
         try {
 
             if (this._proxy_list_url != null && this._proxy_list_url.length() > 0) {
 
                 URL url = new URL(this._proxy_list_url);
 
-                HttpURLConnection con = (HttpURLConnection) url.openConnection();
+                con = (HttpURLConnection) url.openConnection();
 
                 con.setConnectTimeout(Transference.HTTP_TIMEOUT);
 
@@ -76,9 +78,7 @@ public class SmartMegaProxyManager {
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                InputStream is = con.getInputStream();
-
-                try (ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                     byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -113,6 +113,11 @@ public class SmartMegaProxyManager {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
+
         }
     }
 

@@ -310,6 +310,8 @@ public final class CryptTools {
 
         if ((elc = findFirstRegex("mega://elc\\?([0-9a-zA-Z,_-]+)", link, 1)) != null) {
 
+            HttpURLConnection con = null;
+
             try {
 
                 byte[] elc_byte = UrlBASE642Bin(elc);
@@ -329,9 +331,7 @@ public final class CryptTools {
 
                 if (compression) {
 
-                    InputStream is = new GZIPInputStream(new ByteArrayInputStream(elc_byte));
-
-                    try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    try (InputStream is = new GZIPInputStream(new ByteArrayInputStream(elc_byte)); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -365,8 +365,6 @@ public final class CryptTools {
                 byte[] pass_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2 + url_bin_length + 2, 4 + bin_links_length + 2 + url_bin_length + 2 + pass_bin_length);
 
                 URL url = new URL(new String(url_bin).trim());
-
-                HttpURLConnection con = null;
 
                 if (MainPanel.isUse_proxy()) {
 
@@ -461,9 +459,9 @@ public final class CryptTools {
 
                 con.getOutputStream().write(postdata.getBytes());
 
-                InputStream is = con.getInputStream();
+                con.getOutputStream().close();
 
-                try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                try (InputStream is = con.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
                     byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -512,7 +510,12 @@ public final class CryptTools {
             } catch (Exception ex) {
                 Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, null, ex);
                 JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "ELC ERROR", JOptionPane.ERROR_MESSAGE);
+            } finally {
+                if (con != null) {
+                    con.disconnect();
+                }
             }
+
         }
 
         return links;
@@ -532,11 +535,11 @@ public final class CryptTools {
 
         String enc_dlc_data = data.substring(0, data.length() - 88).trim();
 
+        HttpURLConnection con = null;
+
         try {
 
             URL url = new URL(dlc_url);
-
-            HttpURLConnection con = null;
 
             if (MainPanel.isUse_proxy()) {
 
@@ -577,11 +580,11 @@ public final class CryptTools {
 
             con.getOutputStream().write(postdata.getBytes());
 
-            InputStream is = con.getInputStream();
+            con.getOutputStream().close();
 
             String enc_dlc_key;
 
-            try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            try (InputStream is = con.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
                 int reads;
                 while ((reads = is.read(buffer)) != -1) {
@@ -609,6 +612,10 @@ public final class CryptTools {
             Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, null, ex);
 
             JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "DLC ERROR", JOptionPane.ERROR_MESSAGE);
+        } finally {
+            if (con != null) {
+                con.disconnect();
+            }
         }
 
         return links;

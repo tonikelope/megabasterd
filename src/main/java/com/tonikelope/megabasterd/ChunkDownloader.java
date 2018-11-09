@@ -232,75 +232,73 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         } else {
 
-                            try (InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor())) {
+                            chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id);
 
-                                byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
+                            if (!chunk_file.exists() || chunk_file.length() != chunk_size) {
 
-                                chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id);
+                                tmp_chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
 
-                                if (!chunk_file.exists() || chunk_file.length() != chunk_size) {
+                                try (InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor()); FileOutputStream tmp_chunk_file_os = new FileOutputStream(tmp_chunk_file)) {
 
-                                    tmp_chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + chunk_id + ".tmp");
+                                    init_chunk_time = System.currentTimeMillis();
 
-                                    try (FileOutputStream tmp_chunk_file_os = new FileOutputStream(tmp_chunk_file)) {
+                                    paused = 0L;
 
-                                        init_chunk_time = System.currentTimeMillis();
+                                    int reads = 0;
 
-                                        paused = 0L;
+                                    byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
-                                        int reads = 0;
+                                    while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
 
-                                        while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
+                                        tmp_chunk_file_os.write(buffer, 0, reads);
 
-                                            tmp_chunk_file_os.write(buffer, 0, reads);
+                                        chunk_reads += reads;
 
-                                            chunk_reads += reads;
+                                        _download.getPartialProgress().add((long) reads);
 
-                                            _download.getPartialProgress().add((long) reads);
+                                        _download.getProgress_meter().secureNotify();
 
-                                            _download.getProgress_meter().secureNotify();
+                                        if (_download.isPaused() && !_download.isStopped()) {
 
-                                            if (_download.isPaused() && !_download.isStopped()) {
+                                            _download.pause_worker();
 
-                                                _download.pause_worker();
+                                            pause_init_time = System.currentTimeMillis();
 
-                                                pause_init_time = System.currentTimeMillis();
+                                            secureWait();
 
-                                                secureWait();
+                                            paused += System.currentTimeMillis() - pause_init_time;
 
-                                                paused += System.currentTimeMillis() - pause_init_time;
+                                        } else if (!_download.isPaused() && _download.getMain_panel().getDownload_manager().isPaused_all()) {
 
-                                            } else if (!_download.isPaused() && _download.getMain_panel().getDownload_manager().isPaused_all()) {
+                                            _download.pause();
 
-                                                _download.pause();
+                                            _download.pause_worker();
 
-                                                _download.pause_worker();
+                                            pause_init_time = System.currentTimeMillis();
 
-                                                pause_init_time = System.currentTimeMillis();
+                                            secureWait();
 
-                                                secureWait();
-
-                                                paused += System.currentTimeMillis() - pause_init_time;
-                                            }
-
+                                            paused += System.currentTimeMillis() - pause_init_time;
                                         }
 
-                                        finish_chunk_time = System.currentTimeMillis();
                                     }
 
-                                } else {
-
-                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has RECOVERED PREVIOUS chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
-
-                                    finish_chunk_time = -1;
-
-                                    chunk_reads = chunk_size;
-
-                                    _download.getPartialProgress().add(chunk_size);
-
-                                    _download.getProgress_meter().secureNotify();
+                                    finish_chunk_time = System.currentTimeMillis();
                                 }
+
+                            } else {
+
+                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has RECOVERED PREVIOUS chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+
+                                finish_chunk_time = -1;
+
+                                chunk_reads = chunk_size;
+
+                                _download.getPartialProgress().add(chunk_size);
+
+                                _download.getProgress_meter().secureNotify();
                             }
+
                         }
 
                         if (chunk_reads == chunk_size) {
