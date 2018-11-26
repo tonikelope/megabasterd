@@ -44,7 +44,7 @@ public final class DownloadManager extends TransferenceManager {
 
             if (((Download) d).isProvision_ok()) {
 
-                _total_transferences_size -= d.getFile_size();
+                increment_total_size(-1 * d.getFile_size());
 
                 delete_down.add(((Download) d).getUrl());
             }
@@ -106,7 +106,7 @@ public final class DownloadManager extends TransferenceManager {
 
         if (download.isProvision_ok()) {
 
-            _total_transferences_size += download.getFile_size();
+            increment_total_size(download.getFile_size());
 
             getTransference_waitstart_queue().add(download);
 

@@ -40,7 +40,7 @@ public final class UploadManager extends TransferenceManager {
 
         if (((Upload) upload).isProvision_ok()) {
 
-            _total_transferences_size += upload.getFile_size();
+            increment_total_size(upload.getFile_size());
 
             getTransference_waitstart_queue().add(upload);
 
@@ -102,7 +102,7 @@ public final class UploadManager extends TransferenceManager {
 
             getTransference_finished_queue().remove(u);
 
-            _total_transferences_size -= u.getFile_size();
+            increment_total_size(-1 * u.getFile_size());
 
             delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
         }
