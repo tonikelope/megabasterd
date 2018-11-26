@@ -44,6 +44,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private boolean _tray_icon_finish;
     protected volatile long _total_size;
     protected final Object _total_size_lock;
+    protected volatile long _total_progress;
+    protected final Object _total_progress_lock;
 
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
@@ -61,8 +63,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _pause_all_button = pause_all_button;
         _clean_all_menu = clean_all_menu;
         _total_size = 0L;
+        _total_progress = 0L;
         _secure_notify_lock = new Object();
         _total_size_lock = new Object();
+        _total_progress_lock = new Object();
         _queue_sort_lock = new Object();
         _transference_preprocess_global_queue = new ConcurrentLinkedQueue<>();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
@@ -111,7 +115,21 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             _total_size += val;
         }
+    }
 
+    public long get_total_progress() {
+
+        synchronized (_total_progress_lock) {
+            return _total_progress;
+        }
+    }
+
+    public void increment_total_progress(long val) {
+
+        synchronized (_total_progress_lock) {
+
+            _total_progress += val;
+        }
     }
 
     public boolean isProvisioning_transferences() {

@@ -1183,8 +1183,10 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     @Override
     public void setProgress(long progress) {
+        long old_progress = _progress;
         _progress = progress;
         getView().updateProgressBar(_progress, _progress_bar_rate);
+        getMain_panel().getUpload_manager().increment_total_progress(_progress - old_progress);
     }
 
     @Override

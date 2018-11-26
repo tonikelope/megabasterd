@@ -1637,9 +1637,13 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     @Override
     public void setProgress(long progress) {
 
+        long old_progress = _progress;
+
         _progress = progress;
 
         getView().updateProgressBar(_progress, _progress_bar_rate);
+
+        getMain_panel().getDownload_manager().increment_total_progress(_progress - old_progress);
     }
 
     @Override
