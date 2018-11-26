@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
@@ -598,6 +599,8 @@ public final class MegaAPI {
             String att = new String(decrypted_at).replaceAll("[\0]+$", "").replaceAll("^MEGA", "");
 
             ObjectMapper objectMapper = new ObjectMapper();
+
+            objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
             res_map = objectMapper.readValue(att, HashMap.class);
 

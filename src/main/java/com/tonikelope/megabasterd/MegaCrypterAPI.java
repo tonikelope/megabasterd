@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd;
 
+import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
@@ -151,6 +152,8 @@ public final class MegaCrypterAPI {
         String res = MegaCrypterAPI._rawRequest(request, url_api);
 
         ObjectMapper objectMapper = new ObjectMapper();
+
+        objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
         HashMap res_map = objectMapper.readValue(res, HashMap.class);
 
