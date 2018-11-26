@@ -113,6 +113,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         synchronized (_total_size_lock) {
 
+            if (val < 0) {
+                increment_total_progress(val);
+            }
+
             _total_size += val;
         }
     }

@@ -46,8 +46,6 @@ public final class DownloadManager extends TransferenceManager {
 
                 increment_total_size(-1 * d.getFile_size());
 
-                increment_total_progress(-1 * d.getFile_size());
-
                 delete_down.add(((Download) d).getUrl());
             }
         }
