@@ -56,7 +56,9 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     public FileSplitterDialog(MainPanelView parent, boolean modal) {
         super(parent, modal);
         _main_panel = parent.getMain_panel();
+
         initComponents();
+
         updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
 
         translateLabels(this);
@@ -89,20 +91,20 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                 FileChannel sourceChannel = sourceFile.getChannel()) {
 
             for (; position < numSplits; position++, conta_split++) {
-                _writePartToFile(bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split);
+                _writePartToFile(bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
             }
 
             if (remainingBytes > 0) {
-                _writePartToFile(remainingBytes, position * bytesPerSplit, sourceChannel, conta_split);
+                _writePartToFile(remainingBytes, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
             }
         }
 
         return true;
     }
 
-    private void _writePartToFile(long byteSize, long position, FileChannel sourceChannel, int conta_split) throws IOException {
+    private void _writePartToFile(long byteSize, long position, FileChannel sourceChannel, int conta_split, long num_splits) throws IOException {
 
-        Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._file.getName() + ".part" + String.valueOf(conta_split));
+        Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._file.getName() + ".part" + String.valueOf(conta_split) + "-" + String.valueOf(num_splits));
         try (RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");
                 FileChannel toChannel = toFile.getChannel()) {
             sourceChannel.position(position);

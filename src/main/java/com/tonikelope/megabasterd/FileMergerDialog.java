@@ -241,7 +241,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION && filechooser.getSelectedFile().canRead()) {
 
-            this._file_name = MiscTools.findFirstRegex("^(.+)\\.part[0-9]+$", filechooser.getSelectedFile().getName(), 1);
+            this._file_name = MiscTools.findFirstRegex("^(.+)\\.part[0-9]+\\-[0-9]+$", filechooser.getSelectedFile().getName(), 1);
 
             if (this._file_name != null) {
 
