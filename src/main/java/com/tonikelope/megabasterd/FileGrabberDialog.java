@@ -758,7 +758,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                     path += "/" + p;
                 }
 
-                path = path.replaceAll("^//", "/").trim().replaceAll(" \\[[0-9,]+ [A-Z]+\\]$", "");
+                path = path.replaceAll("^//", "/").trim().replaceAll(" \\[[0-9,.]+ [A-Z]+\\]$", "");
 
                 File file = new File(path);
 
