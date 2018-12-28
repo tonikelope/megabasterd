@@ -88,7 +88,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         subtitle_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
-        subtitle_label.setText("Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite.");
+        subtitle_label.setText("Yet another unofficial (and ugly) cross-platform MEGA downloader/uploader/streaming suite.");
         subtitle_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         subtitle_label.setDoubleBuffered(true);
         subtitle_label.addMouseListener(new java.awt.event.MouseAdapter() {

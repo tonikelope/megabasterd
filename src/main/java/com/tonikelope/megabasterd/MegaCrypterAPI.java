@@ -128,11 +128,7 @@ public final class MegaCrypterAPI {
             try {
                 String pass = (String) res_map.get("pass");
 
-                byte[] iv = BASE642Bin(pass);
-
-                Cipher decrypter = genDecrypter("AES", "AES/CBC/PKCS5Padding", BASE642Bin(pass_hash), iv);
-
-                byte[] decrypted_url = decrypter.doFinal(BASE642Bin(dl_url));
+                byte[] decrypted_url = aes_cbc_decrypt_pkcs7(BASE642Bin(dl_url), BASE642Bin(pass_hash), BASE642Bin(pass));
 
                 dl_url = new String(decrypted_url);
 

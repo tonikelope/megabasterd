@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.Cipher;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
@@ -575,7 +574,7 @@ public final class MegaAPI {
 
         try {
 
-            ret = aes_cbc_encrypt(new_attr_byte, key, AES_ZERO_IV);
+            ret = aes_cbc_encrypt_nopadding(new_attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
             Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
@@ -591,12 +590,10 @@ public final class MegaAPI {
         byte[] decrypted_at;
 
         try {
+            
+            decrypted_at = aes_cbc_decrypt_nopadding(UrlBASE642Bin(encAttr), key, AES_ZERO_IV);
 
-            Cipher decrypter = genDecrypter("AES", "AES/CBC/NoPadding", key, AES_ZERO_IV);
-
-            decrypted_at = decrypter.doFinal(UrlBASE642Bin(encAttr));
-
-            String att = new String(decrypted_at).replaceAll("[\0]+$", "").replaceAll("^MEGA", "");
+            String att = new String(decrypted_at).replaceAll("\0+$", "").replaceAll("^MEGA", "");
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -666,12 +663,12 @@ public final class MegaAPI {
 
     public byte[] encryptKey(byte[] a, byte[] key) throws Exception {
 
-        return aes_ecb_encrypt(a, key);
+        return aes_ecb_encrypt_nopadding(a, key);
     }
 
     public byte[] decryptKey(byte[] a, byte[] key) throws Exception {
 
-        return aes_ecb_decrypt(a, key);
+        return aes_ecb_decrypt_nopadding(a, key);
     }
 
     private BigInteger[] _extractRSAPrivKey(byte[] rsa_data) {

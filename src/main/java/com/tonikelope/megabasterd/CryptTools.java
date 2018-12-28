@@ -90,7 +90,7 @@ public final class CryptTools {
         return cryptor;
     }
 
-    public static byte[] aes_cbc_encrypt(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_cbc_encrypt_nopadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher cryptor = CryptTools.genCrypter("AES", "AES/CBC/NoPadding", key, iv);
 
@@ -104,7 +104,7 @@ public final class CryptTools {
         return cryptor.doFinal(data);
     }
 
-    public static byte[] aes_cbc_decrypt(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_cbc_decrypt_nopadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher decryptor = CryptTools.genDecrypter("AES", "AES/CBC/NoPadding", key, iv);
 
@@ -118,14 +118,14 @@ public final class CryptTools {
         return decryptor.doFinal(data);
     }
 
-    public static byte[] aes_ecb_encrypt(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_ecb_encrypt_nopadding(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher cryptor = CryptTools.genCrypter("AES", "AES/ECB/NoPadding", key, null);
 
         return cryptor.doFinal(data);
     }
 
-    public static byte[] aes_ecb_decrypt(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_ecb_decrypt_nopadding(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher decryptor = CryptTools.genDecrypter("AES", "AES/ECB/NoPadding", key, null);
 
@@ -146,14 +146,14 @@ public final class CryptTools {
         return decryptor.doFinal(data);
     }
 
-    public static byte[] aes_ctr_encrypt(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_ctr_encrypt_nopadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher cryptor = CryptTools.genCrypter("AES", "AES/CTR/NoPadding", key, iv);
 
         return cryptor.doFinal(data);
     }
 
-    public static byte[] aes_ctr_decrypt(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_ctr_decrypt_nopadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher decryptor = CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", key, iv);
 
@@ -162,44 +162,12 @@ public final class CryptTools {
 
     public static int[] aes_cbc_encrypt_ia32(int[] data, int[] key, int[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
-        Cipher cryptor = CryptTools.genCrypter("AES", "AES/CBC/NoPadding", i32a2bin(key), i32a2bin(iv));
-
-        return bin2i32a(cryptor.doFinal(i32a2bin(data)));
+        return bin2i32a(CryptTools.aes_cbc_encrypt_nopadding(i32a2bin(data), i32a2bin(key), i32a2bin(iv)));
     }
 
     public static int[] aes_cbc_decrypt_ia32(int[] data, int[] key, int[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
-        Cipher decryptor = CryptTools.genDecrypter("AES", "AES/CBC/NoPadding", i32a2bin(key), i32a2bin(iv));
-
-        return bin2i32a(decryptor.doFinal(i32a2bin(data)));
-    }
-
-    public static int[] aes_ecb_encrypt_ia32(int[] data, int[] key, int[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-
-        Cipher cryptor = CryptTools.genCrypter("AES", "AES/ECB/NoPadding", i32a2bin(key), i32a2bin(iv));
-
-        return bin2i32a(cryptor.doFinal(i32a2bin(data)));
-    }
-
-    public static int[] aes_ecb_decrypt_ia32(int[] data, int[] key, int[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-
-        Cipher decryptor = CryptTools.genDecrypter("AES", "AES/ECB/NoPadding", i32a2bin(key), i32a2bin(iv));
-
-        return bin2i32a(decryptor.doFinal(i32a2bin(data)));
-    }
-
-    public static int[] aes_ctr_encrypt_ia32(int[] data, int[] key, int[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-
-        Cipher cryptor = CryptTools.genCrypter("AES", "AES/CTR/NoPadding", i32a2bin(key), i32a2bin(iv));
-
-        return bin2i32a(cryptor.doFinal(i32a2bin(data)));
-    }
-
-    public static int[] aes_ctr_decrypt_ia32(int[] data, int[] key, int[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
-
-        Cipher decryptor = CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", i32a2bin(key), i32a2bin(iv));
-
-        return bin2i32a(decryptor.doFinal(i32a2bin(data)));
+        return bin2i32a(CryptTools.aes_cbc_decrypt_nopadding(i32a2bin(data), i32a2bin(key), i32a2bin(iv)));
     }
 
     public static byte[] rsaDecrypt(BigInteger enc_data, BigInteger p, BigInteger q, BigInteger d) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
@@ -492,7 +460,7 @@ public final class CryptTools {
 
                         System.arraycopy(pass_dec_byte, 16, iv, 0, 8);
 
-                        byte[] bin_links_dec = CryptTools.aes_cbc_decrypt(bin_links, key, iv);
+                        byte[] bin_links_dec = CryptTools.aes_cbc_decrypt_nopadding(bin_links, key, iv);
 
                         String[] links_string = (new String(bin_links_dec).trim()).split("\\|");
 
@@ -594,9 +562,9 @@ public final class CryptTools {
                 enc_dlc_key = findFirstRegex("< *rc *>(.+?)< */ *rc *>", new String(out.toByteArray()), 1);
             }
 
-            String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key))).trim();
+            String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt_nopadding(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key))).trim();
 
-            String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key))).trim();
+            String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt_nopadding(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key))).trim();
 
             String dec_dlc_data_file = findFirstRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), "UTF-8"), 1);
 

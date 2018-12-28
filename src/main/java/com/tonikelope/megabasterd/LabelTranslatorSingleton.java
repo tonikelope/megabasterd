@@ -51,7 +51,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("You have the latest version ;)", "Tienes la versión más reciente ;)");
         _addTranslation("Copy MegaBasterd download URL", "Copiar la URL de descarga de MegaBasterd");
         _addTranslation("Made with love (and with no warranty) by tonikelope.", "Fabricado con amor (y sin ninguna garantía) por tonikelope.");
-        _addTranslation("Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite.", "Ni más ni menos que otra suite multiplataforma (no oficial) de descarga/subida/streaming para MEGA.");
+        _addTranslation("Yet another unofficial (and ugly) cross-platform MEGA downloader/uploader/streaming suite.", "Ni más ni menos que otra suite multiplataforma no oficial (y fea) de descarga/subida/streaming para MEGA.");
         _addTranslation("MEGA URL was copied to clipboard!", "¡URL de MEGA copiada en el portapapeles!");
         _addTranslation("MegaBasterd NEW VERSION is available! -> ", "¡Hay una versión nueva de MegaBasterd disponible! -> ");
         _addTranslation("Selecting folder...", "Seleccionando carpeta...");
