@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tonikelope</groupId>
     <artifactId>MegaBasterd</artifactId>
-    <version>5.77</version>
+    <version>5.78</version>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
@@ -19,7 +19,7 @@
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.9.6</version>
+            <version>2.9.8</version>
         </dependency>
     </dependencies>
     <properties>
@@ -58,5 +58,5 @@
         </plugins>
     </build>
     <name>MegaBasterd</name>
-    <description>Yet another (unofficial) cross-platform MEGA downloader/uploader/streaming suite.</description>
+    <description>Yet another unofficial (and ugly) cross-platform MEGA downloader/uploader/streaming suite.</description>
 </project>
