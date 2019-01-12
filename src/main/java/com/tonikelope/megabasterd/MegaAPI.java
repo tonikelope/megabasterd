@@ -590,7 +590,7 @@ public final class MegaAPI {
         byte[] decrypted_at;
 
         try {
-            
+
             decrypted_at = aes_cbc_decrypt_nopadding(UrlBASE642Bin(encAttr), key, AES_ZERO_IV);
 
             String att = new String(decrypted_at).replaceAll("\0+$", "").replaceAll("^MEGA", "");

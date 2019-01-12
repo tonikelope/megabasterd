@@ -11,6 +11,8 @@ import java.util.Map;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
+import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
@@ -68,12 +70,24 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
         restore_button.setVisible(false);
 
-        _loadMegaDirTree();
+        THREAD_POOL.execute(
+                new Runnable() {
+            @Override
+            public void run() {
 
-        if (!_mega_error) {
+                _loadMegaDirTree();
 
-            _genDownloadLiks();
-        }
+                if (!_mega_error) {
+
+                    _genDownloadLiks();
+                }
+
+                dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
+
+                pack();
+
+            }
+        });
 
         pack();
     }
@@ -88,7 +102,6 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
     private void initComponents() {
 
         file_tree_scrollpane = new javax.swing.JScrollPane();
-        file_tree = new javax.swing.JTree();
         skip_button = new javax.swing.JButton();
         link_detected_label = new javax.swing.JLabel();
         dance_button = new javax.swing.JButton();
@@ -127,7 +140,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
         dance_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
-        dance_button.setText("Let's dance, baby");
+        dance_button.setText("Loading...");
         dance_button.setDoubleBuffered(true);
         dance_button.setEnabled(false);
         dance_button.addActionListener(new java.awt.event.ActionListener() {
@@ -278,7 +291,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
         dance_button.setEnabled(false);
 
-        swingInvoke(
+        THREAD_POOL.execute(
                 new Runnable() {
             @Override
             public void run() {
@@ -287,22 +300,40 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
                 _genDownloadLiks();
 
-                restore_button.setVisible(false);
-                restore_button.setText(LabelTranslatorSingleton.getInstance().translate("Restore folder data"));
-                boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
 
-                for (JComponent c : new JComponent[]{restore_button, dance_button, skip_button, skip_rest_button, file_tree}) {
+                        restore_button.setVisible(false);
+                        restore_button.setText(LabelTranslatorSingleton.getInstance().translate("Restore folder data"));
+                        boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
-                    c.setEnabled(root_childs);
-                }
+                        for (JComponent c : new JComponent[]{restore_button, dance_button, skip_button, skip_rest_button, file_tree}) {
+
+                            c.setEnabled(root_childs);
+                        }
+
+                    }
+                });
 
             }
-        });
+        }
+        );
+
     }//GEN-LAST:event_restore_buttonActionPerformed
 
     private void _loadMegaDirTree() {
 
         try {
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+                    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+                }
+            });
+
             HashMap<String, Object> folder_nodes;
 
             MegaAPI ma = new MegaAPI();
@@ -313,67 +344,75 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
             folder_nodes = ma.getFolderNodes(folder_id, folder_key);
 
-            MegaMutableTreeNode root = null;
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
 
-            for (Object o : folder_nodes.values()) {
+                    MegaMutableTreeNode root = null;
 
-                HashMap<String, Object> current_hashmap_node = (HashMap<String, Object>) o;
+                    for (Object o : folder_nodes.values()) {
 
-                MegaMutableTreeNode current_node;
+                        HashMap<String, Object> current_hashmap_node = (HashMap<String, Object>) o;
 
-                if (current_hashmap_node.get("jtree_node") == null) {
+                        MegaMutableTreeNode current_node;
 
-                    current_node = new MegaMutableTreeNode(current_hashmap_node);
+                        if (current_hashmap_node.get("jtree_node") == null) {
 
-                    current_hashmap_node.put("jtree_node", current_node);
+                            current_node = new MegaMutableTreeNode(current_hashmap_node);
 
-                } else {
-
-                    current_node = (MegaMutableTreeNode) current_hashmap_node.get("jtree_node");
-                }
-
-                String parent_id = (String) current_hashmap_node.get("parent");
-
-                root = null;
-
-                do {
-
-                    if (folder_nodes.get(parent_id) != null) {
-
-                        HashMap<String, Object> parent_hashmap_node = (HashMap) folder_nodes.get(parent_id);
-
-                        MegaMutableTreeNode parent_node;
-
-                        if (parent_hashmap_node.get("jtree_node") == null) {
-
-                            parent_node = new MegaMutableTreeNode(parent_hashmap_node);
-
-                            parent_hashmap_node.put("jtree_node", parent_node);
+                            current_hashmap_node.put("jtree_node", current_node);
 
                         } else {
 
-                            parent_node = (MegaMutableTreeNode) parent_hashmap_node.get("jtree_node");
+                            current_node = (MegaMutableTreeNode) current_hashmap_node.get("jtree_node");
                         }
 
-                        parent_node.add(current_node);
+                        String parent_id = (String) current_hashmap_node.get("parent");
 
-                        parent_id = (String) parent_hashmap_node.get("parent");
+                        root = null;
 
-                        current_node = parent_node;
+                        do {
 
-                    } else {
+                            if (folder_nodes.get(parent_id) != null) {
 
-                        root = current_node;
+                                HashMap<String, Object> parent_hashmap_node = (HashMap) folder_nodes.get(parent_id);
+
+                                MegaMutableTreeNode parent_node;
+
+                                if (parent_hashmap_node.get("jtree_node") == null) {
+
+                                    parent_node = new MegaMutableTreeNode(parent_hashmap_node);
+
+                                    parent_hashmap_node.put("jtree_node", parent_node);
+
+                                } else {
+
+                                    parent_node = (MegaMutableTreeNode) parent_hashmap_node.get("jtree_node");
+                                }
+
+                                parent_node.add(current_node);
+
+                                parent_id = (String) parent_hashmap_node.get("parent");
+
+                                current_node = parent_node;
+
+                            } else {
+
+                                root = current_node;
+                            }
+
+                        } while (current_node != root);
                     }
 
-                } while (current_node != root);
-            }
+                    file_tree.setModel(new DefaultTreeModel(sortTree(root)));
 
-            file_tree.setModel(new DefaultTreeModel(sortTree(root)));
+                    file_tree.setRootVisible(root != null ? root.getChildCount() > 0 : false);
 
-            file_tree.setRootVisible(root != null ? root.getChildCount() > 0 : false);
+                    file_tree.setEnabled(true);
 
-            file_tree.setEnabled(true);
+                }
+            });
 
         } catch (Exception ex) {
 
@@ -382,66 +421,86 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             _mega_error = true;
         }
 
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+                setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            }
+        });
+
     }
 
     private void _genDownloadLiks() {
 
-        String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
 
-        _download_links.clear();
+                setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-        MegaMutableTreeNode root = (MegaMutableTreeNode) file_tree.getModel().getRoot();
+                String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
 
-        Enumeration files_tree = root.depthFirstEnumeration();
+                _download_links.clear();
 
-        _total_space = 0L;
+                MegaMutableTreeNode root = (MegaMutableTreeNode) file_tree.getModel().getRoot();
 
-        while (files_tree.hasMoreElements()) {
+                Enumeration files_tree = root.depthFirstEnumeration();
 
-            MegaMutableTreeNode node = (MegaMutableTreeNode) files_tree.nextElement();
+                _total_space = 0L;
 
-            if (node.isLeaf() && node != root && ((HashMap<String, Object>) node.getUserObject()).get("size") != null) {
+                while (files_tree.hasMoreElements()) {
 
-                String path = "";
+                    MegaMutableTreeNode node = (MegaMutableTreeNode) files_tree.nextElement();
 
-                Object[] object_path = node.getUserObjectPath();
+                    if (node.isLeaf() && node != root && ((HashMap<String, Object>) node.getUserObject()).get("size") != null) {
 
-                for (Object p : object_path) {
+                        String path = "";
 
-                    path += "/" + ((Map<String, Object>) p).get("name");
+                        Object[] object_path = node.getUserObjectPath();
+
+                        for (Object p : object_path) {
+
+                            path += "/" + ((Map<String, Object>) p).get("name");
+                        }
+
+                        path = path.replaceAll("^/+", "").trim();
+
+                        String url = "https://mega.nz/#N!" + ((Map<String, Object>) node.getUserObject()).get("h") + "!" + ((Map<String, Object>) node.getUserObject()).get("key") + "###n=" + folder_id;
+
+                        HashMap<String, Object> download_link = new HashMap<>();
+
+                        download_link.put("url", url);
+
+                        download_link.put("filename", cleanFilePath(path));
+
+                        download_link.put("filekey", ((Map<String, Object>) node.getUserObject()).get("key"));
+
+                        download_link.put("filesize", ((Map<String, Object>) node.getUserObject()).get("size"));
+
+                        _total_space += (long) download_link.get("filesize");
+
+                        _download_links.add(download_link);
+                    }
                 }
 
-                path = path.replaceAll("^/+", "").trim();
+                total_space_label.setText("[" + formatBytes(_total_space) + "]");
 
-                String url = "https://mega.nz/#N!" + ((Map<String, Object>) node.getUserObject()).get("h") + "!" + ((Map<String, Object>) node.getUserObject()).get("key") + "###n=" + folder_id;
+                for (JComponent c : new JComponent[]{dance_button, warning_label, skip_button, skip_rest_button, total_space_label}) {
 
-                HashMap<String, Object> download_link = new HashMap<>();
+                    c.setEnabled(root.getChildCount() > 0);
+                }
 
-                download_link.put("url", url);
+                setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-                download_link.put("filename", cleanFilePath(path));
-
-                download_link.put("filekey", ((Map<String, Object>) node.getUserObject()).get("key"));
-
-                download_link.put("filesize", ((Map<String, Object>) node.getUserObject()).get("size"));
-
-                _total_space += (long) download_link.get("filesize");
-
-                _download_links.add(download_link);
             }
-        }
-
-        total_space_label.setText("[" + formatBytes(_total_space) + "]");
-
-        for (JComponent c : new JComponent[]{dance_button, warning_label, skip_button, skip_rest_button, total_space_label}) {
-
-            c.setEnabled(root.getChildCount() > 0);
-        }
+        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton dance_button;
-    private javax.swing.JTree file_tree;
+    private final javax.swing.JTree file_tree = new javax.swing.JTree();
     private javax.swing.JScrollPane file_tree_scrollpane;
     private javax.swing.JLabel folder_link_label;
     private javax.swing.JLabel link_detected_label;

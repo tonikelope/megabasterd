@@ -18,6 +18,8 @@ import javax.swing.JPanel;
  */
 abstract public class TransferenceManager implements Runnable, SecureSingleThreadNotifiable {
 
+    public static final int MAX_WAIT_QUEUE = 1000;
+
     private final ConcurrentLinkedQueue<Object> _transference_preprocess_global_queue;
     private final ConcurrentLinkedQueue<Runnable> _transference_preprocess_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_provision_queue;
@@ -35,12 +37,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private final MainPanel _main_panel;
     private final Object _secure_notify_lock;
     private final Object _queue_sort_lock;
+    private final Object _wait_queue_lock;
     private boolean _notified;
     private volatile boolean _removing_transferences;
     private volatile boolean _provisioning_transferences;
     private volatile boolean _starting_transferences;
     private volatile boolean _preprocessing_transferences;
     private volatile boolean _paused_all;
+    private volatile boolean _pausing_all;
     private boolean _tray_icon_finish;
     protected volatile long _total_size;
     protected final Object _total_size_lock;
@@ -50,6 +54,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
         _paused_all = false;
+        _pausing_all = false;
         _removing_transferences = false;
         _provisioning_transferences = false;
         _starting_transferences = false;
@@ -68,6 +73,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _total_size_lock = new Object();
         _total_progress_lock = new Object();
         _queue_sort_lock = new Object();
+        _wait_queue_lock = new Object();
         _transference_preprocess_global_queue = new ConcurrentLinkedQueue<>();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
         _transference_provision_queue = new ConcurrentLinkedQueue<>();
@@ -79,6 +85,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public boolean isPaused_all() {
         return _paused_all;
+    }
+
+    public Object getWait_queue_lock() {
+        return _wait_queue_lock;
     }
 
     public void setPaused_all(boolean paused_all) {
@@ -268,7 +278,15 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         getTransference_waitstart_queue().clear();
 
+        synchronized (getWait_queue_lock()) {
+            getWait_queue_lock().notifyAll();
+        }
+
         secureNotify();
+    }
+
+    public boolean isPausing_all() {
+        return _pausing_all;
     }
 
     public void start(final Transference transference) {
@@ -289,6 +307,27 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     }
 
     public void pauseAll() {
+        _pausing_all = true;
+
+        THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                while (!_paused_all) {
+
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                _pausing_all = false;
+
+                secureNotify();
+            }
+        });
+
         for (Transference transference : _transference_running_list) {
 
             if (!transference.isPaused()) {
@@ -502,7 +541,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             }
 
-            if (!_main_panel.isExit() && !isRemoving_transferences() && !isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
+            if (!_main_panel.isExit() && !_pausing_all && !_paused_all && !isRemoving_transferences() && !isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
 
                 setStarting_transferences(true);
 
@@ -517,6 +556,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                             if (transference != null) {
 
                                 start(transference);
+                            }
+
+                            synchronized (getWait_queue_lock()) {
+                                getWait_queue_lock().notifyAll();
                             }
                         }
 

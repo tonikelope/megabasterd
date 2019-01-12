@@ -37,6 +37,7 @@ public final class LabelTranslatorSingleton {
     private void Spanish() {
 
         _addTranslation("Font:", "Fuente:");
+        _addTranslation("Loading...", "Cargando...");
         _addTranslation("DEFAULT", "POR DEFECTO");
         _addTranslation("ALTERNATIVE", "ALTERNATIVA");
         _addTranslation("Download latest version", "Descargar la última versión");

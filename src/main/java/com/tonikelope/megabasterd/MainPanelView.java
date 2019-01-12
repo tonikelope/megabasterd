@@ -747,9 +747,23 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                             for (HashMap folder_link : folder_links) {
 
-                                                download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
+                                                while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
 
-                                                getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                                    synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
+                                                        getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
+                                                    }
+                                                }
+
+                                                if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+
+                                                    download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
+
+                                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+
+                                                    getMain_panel().getDownload_manager().secureNotify();
+                                                } else {
+                                                    break;
+                                                }
                                             }
                                         }
 
@@ -759,9 +773,22 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 } else {
 
-                                    download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
+                                    while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
 
-                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                        synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
+                                            getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
+                                        }
+                                    }
+
+                                    if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+
+                                        download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
+
+                                        getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+
+                                        getMain_panel().getDownload_manager().secureNotify();
+                                    }
+
                                 }
 
                                 getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().remove(url);
@@ -770,6 +797,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             } catch (UnsupportedEncodingException ex) {
                                 Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
                             }
 
                         }
@@ -1067,13 +1096,26 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     }
                                 }
 
-                                Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, getMain_panel().getDefault_slots_up());
+                                while (getMain_panel().getUpload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
 
-                                getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+                                    synchronized (getMain_panel().getUpload_manager().getWait_queue_lock()) {
+                                        getMain_panel().getUpload_manager().getWait_queue_lock().wait(1000);
+                                    }
+                                }
 
-                                getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
+                                if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                getMain_panel().getUpload_manager().secureNotify();
+                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, getMain_panel().getDefault_slots_up());
+
+                                    getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+
+                                    getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
+
+                                    getMain_panel().getUpload_manager().secureNotify();
+
+                                } else {
+                                    break;
+                                }
 
                             }
 

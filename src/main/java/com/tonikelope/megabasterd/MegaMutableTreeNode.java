@@ -8,7 +8,7 @@ import javax.swing.tree.DefaultMutableTreeNode;
  *
  * @author tonikelope
  */
-public final class MegaMutableTreeNode extends DefaultMutableTreeNode {
+public class MegaMutableTreeNode extends DefaultMutableTreeNode {
 
     public MegaMutableTreeNode() {
         super();
