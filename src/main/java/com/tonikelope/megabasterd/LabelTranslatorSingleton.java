@@ -36,6 +36,8 @@ public final class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _addTranslation("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd", "Hay muchos archivos en esta carpeta.\nNo se aprovisionarán todos los enlaces de una vez para evitar saturar MegaBasterd");
+        _addTranslation("MEGA LINK ERROR!", "¡ENLACE DE MEGA ERRÓNEO!");
         _addTranslation("Font:", "Fuente:");
         _addTranslation("Loading...", "Cargando...");
         _addTranslation("DEFAULT", "POR DEFECTO");

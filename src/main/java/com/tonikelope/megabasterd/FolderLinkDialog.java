@@ -2,6 +2,7 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import java.awt.Dialog;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -11,6 +12,7 @@ import java.util.Map;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
+import javax.swing.JOptionPane;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 import javax.swing.tree.DefaultTreeModel;
@@ -70,6 +72,8 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
         restore_button.setVisible(false);
 
+        final Dialog tthis = this;
+
         THREAD_POOL.execute(
                 new Runnable() {
             @Override
@@ -80,12 +84,16 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                 if (!_mega_error) {
 
                     _genDownloadLiks();
+
+                    dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
+
+                    pack();
+
+                } else {
+                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
+
+                    setVisible(false);
                 }
-
-                dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
-
-                pack();
-
             }
         });
 

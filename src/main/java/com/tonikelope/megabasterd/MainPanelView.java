@@ -28,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
@@ -669,6 +670,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         if (dialog.isDownload()) {
 
+            final MainPanelView tthis = this;
+
             Runnable run = new Runnable() {
                 @Override
                 public void run() {
@@ -722,9 +725,14 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         getMain_panel().getDownload_manager().secureNotify();
 
+                        boolean link_warning;
+
                         for (String url : urls) {
 
                             try {
+
+                                link_warning = false;
+
                                 url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
 
                                 Download download;
@@ -748,6 +756,12 @@ public final class MainPanelView extends javax.swing.JFrame {
                                             for (HashMap folder_link : folder_links) {
 
                                                 while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
+
+                                                    if (!link_warning) {
+                                                        link_warning = true;
+
+                                                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd"), "Warning", JOptionPane.WARNING_MESSAGE);
+                                                    }
 
                                                     synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
                                                         getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
