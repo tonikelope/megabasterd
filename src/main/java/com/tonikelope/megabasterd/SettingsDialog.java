@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -33,13 +32,9 @@ import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JSpinner;
-import javax.swing.RowSorter;
-import javax.swing.SortOrder;
 import javax.swing.SpinnerNumberModel;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 
 /**
  *
@@ -270,6 +265,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
             use_mega_account_down_combobox.setEnabled(false);
         }
 
+        mega_accounts_table.setAutoCreateRowSorter(true);
+
+        elc_accounts_table.setAutoCreateRowSorter(true);
+
         DefaultTableModel mega_model = (DefaultTableModel) mega_accounts_table.getModel();
 
         DefaultTableModel elc_model = (DefaultTableModel) elc_accounts_table.getModel();
@@ -399,30 +398,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
             remove_elc_account_button.setEnabled((elc_model.getRowCount() > 0));
 
         }
-
-        TableRowSorter<TableModel> sorter_mega = new TableRowSorter<>(mega_accounts_table.getModel());
-
-        mega_accounts_table.setRowSorter(sorter_mega);
-
-        List<RowSorter.SortKey> sortKeys_mega = new ArrayList<>();
-
-        sortKeys_mega.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-
-        sorter_mega.setSortKeys(sortKeys_mega);
-
-        sorter_mega.sort();
-
-        TableRowSorter<TableModel> sorter_elc = new TableRowSorter<>(elc_accounts_table.getModel());
-
-        elc_accounts_table.setRowSorter(sorter_elc);
-
-        List<RowSorter.SortKey> sortKeys_elc = new ArrayList<>();
-
-        sortKeys_elc.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-
-        sorter_elc.setSortKeys(sortKeys_elc);
-
-        sorter_elc.sort();
 
         boolean use_mc_reverse = false;
 
@@ -1763,7 +1738,23 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                     ma = new MegaAPI();
 
                                     try {
-                                        ma.login(email, pass);
+
+                                        String pincode = null;
+
+                                        if (ma.check2FA(email)) {
+
+                                            Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
+
+                                            dialog.setLocationRelativeTo(tthis);
+
+                                            dialog.setVisible(true);
+
+                                            if (dialog.isCode_ok()) {
+                                                pincode = dialog.getPin_code();
+                                            }
+                                        }
+
+                                        ma.login(email, pass, pincode);
 
                                         _main_panel.getMega_active_accounts().put(email, ma);
 
@@ -1808,7 +1799,23 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         ma = new MegaAPI();
 
                                         try {
-                                            ma.login(email, pass);
+
+                                            String pincode = null;
+
+                                            if (ma.check2FA(email)) {
+
+                                                Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
+
+                                                dialog.setLocationRelativeTo(tthis);
+
+                                                dialog.setVisible(true);
+
+                                                if (dialog.isCode_ok()) {
+                                                    pincode = dialog.getPin_code();
+                                                }
+                                            }
+
+                                            ma.login(email, pass, pincode);
 
                                             _main_panel.getMega_active_accounts().put(email, ma);
 
@@ -2060,6 +2067,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_add_elc_account_buttonActionPerformed
 
     private void remove_elc_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_elc_account_buttonActionPerformed
+
         DefaultTableModel model = (DefaultTableModel) elc_accounts_table.getModel();
 
         int selected = elc_accounts_table.getSelectedRow();
@@ -2420,8 +2428,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
         model.addRow(new Object[]{"", ""});
 
         mega_accounts_table.clearSelection();
-
-        remove_mega_account_button.setEnabled(true);
     }//GEN-LAST:event_add_mega_account_buttonActionPerformed
 
     private void remove_mega_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_mega_account_buttonActionPerformed
@@ -2447,6 +2453,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             remove_mega_account_button.setEnabled(false);
         }
+
     }//GEN-LAST:event_remove_mega_account_buttonActionPerformed
 
     private void multi_slot_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multi_slot_down_checkboxStateChanged

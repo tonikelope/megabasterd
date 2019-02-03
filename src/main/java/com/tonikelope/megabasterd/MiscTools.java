@@ -1147,7 +1147,22 @@ public final class MiscTools {
                     user_hash = (String) account_info.get("user_hash");
                 }
 
-                ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash);
+                String pincode = null;
+
+                if (ma.check2FA(email)) {
+
+                    Get2FACode dialog = new Get2FACode((Frame) container.getParent(), true, email, main_panel);
+
+                    dialog.setLocationRelativeTo(container);
+
+                    dialog.setVisible(true);
+
+                    if (dialog.isCode_ok()) {
+                        pincode = dialog.getPin_code();
+                    }
+                }
+
+                ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash, pincode);
 
                 main_panel.getMega_active_accounts().put(email, ma);
 

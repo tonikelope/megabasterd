@@ -30,7 +30,7 @@ public final class MegaAPI {
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
-    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -8, -9, -10, -11, -12, -13, -14, -15, -16};
+    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -5, -8, -9, -10, -11, -12, -13, -14, -15, -16, -26};
     public static final int PBKDF2_ITERATIONS = 100000;
     public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
 
@@ -133,9 +133,15 @@ public final class MegaAPI {
         return _trashbin_id;
     }
 
-    private void _realLogin() throws Exception {
+    private void _realLogin(String pincode) throws Exception {
 
-        String request = "[{\"a\":\"us\",\"user\":\"" + _email + "\",\"uh\":\"" + _user_hash + "\"}]";
+        String request;
+
+        if (pincode != null) {
+            request = "[{\"a\":\"us\", \"mfa\":\"" + pincode + "\", \"user\":\"" + _email + "\",\"uh\":\"" + _user_hash + "\"}]";
+        } else {
+            request = "[{\"a\":\"us\",\"user\":\"" + _email + "\",\"uh\":\"" + _user_hash + "\"}]";
+        }
 
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
@@ -187,7 +193,23 @@ public final class MegaAPI {
 
     }
 
-    public void login(String email, String password) throws Exception {
+    public boolean check2FA(String email) throws Exception {
+
+        String request = "[{\"a\":\"mfag\",\"e\":\"" + email + "\"}]";
+
+        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
+
+        String res = _rawRequest(request, url_api);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        Integer[] res_map = objectMapper.readValue(res, Integer[].class);
+
+        return (res_map[0] == 1);
+
+    }
+
+    public void login(String email, String password, String pincode) throws Exception {
 
         _full_email = email;
 
@@ -214,10 +236,10 @@ public final class MegaAPI {
             _user_hash = MiscTools.Bin2UrlBASE64(Arrays.copyOfRange(pbkdf2_key, 16, 32));
         }
 
-        _realLogin();
+        _realLogin(pincode);
     }
 
-    public void fastLogin(String email, int[] password_aes, String user_hash) throws Exception {
+    public void fastLogin(String email, int[] password_aes, String user_hash, String pincode) throws Exception {
 
         _full_email = email;
 
@@ -233,7 +255,7 @@ public final class MegaAPI {
 
         _user_hash = user_hash;
 
-        _realLogin();
+        _realLogin(pincode);
     }
 
     public Long[] getQuota() {
