@@ -92,8 +92,13 @@ public class Get2FACode extends javax.swing.JDialog {
         please_label.setText("Please enter 2FA PIN CODE:");
         please_label.setDoubleBuffered(true);
 
-        current_code_textfield.setFont(new java.awt.Font("Dialog", 0, 36)); // NOI18N
+        current_code_textfield.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        current_code_textfield.setToolTipText("");
+        current_code_textfield.setDoubleBuffered(true);
         current_code_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyTyped(java.awt.event.KeyEvent evt) {
+                current_code_textfieldKeyTyped(evt);
+            }
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 current_code_textfieldKeyPressed(evt);
             }
@@ -125,16 +130,15 @@ public class Get2FACode extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(email_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(please_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(current_code_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(7, 7, 7))
+                        .addComponent(current_code_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(lock_label))
-                .addGap(18, 18, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(ok_button)
@@ -164,10 +168,17 @@ public class Get2FACode extends javax.swing.JDialog {
 
     private void current_code_textfieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_current_code_textfieldKeyPressed
         if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
-
             ok_buttonActionPerformed(null);
         }
     }//GEN-LAST:event_current_code_textfieldKeyPressed
+
+    private void current_code_textfieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_current_code_textfieldKeyTyped
+
+        if (!Character.isDigit(evt.getKeyChar()) && evt.getKeyCode() != KeyEvent.VK_BACK_SPACE && evt.getKeyCode() != KeyEvent.VK_DELETE) {
+            evt.consume();
+        }
+
+    }//GEN-LAST:event_current_code_textfieldKeyTyped
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancel_button;

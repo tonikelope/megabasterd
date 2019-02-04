@@ -27,11 +27,14 @@ import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.swing.DefaultRowSorter;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JSpinner;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SpinnerNumberModel;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import javax.swing.table.DefaultTableModel;
@@ -266,8 +269,18 @@ public final class SettingsDialog extends javax.swing.JDialog {
         }
 
         mega_accounts_table.setAutoCreateRowSorter(true);
+        DefaultRowSorter sorter_mega = ((DefaultRowSorter) mega_accounts_table.getRowSorter());
+        ArrayList list_mega = new ArrayList();
+        list_mega.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        sorter_mega.setSortKeys(list_mega);
+        sorter_mega.sort();
 
         elc_accounts_table.setAutoCreateRowSorter(true);
+        DefaultRowSorter sorter_elc = ((DefaultRowSorter) elc_accounts_table.getRowSorter());
+        ArrayList list_elc = new ArrayList();
+        list_elc.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        sorter_elc.setSortKeys(list_elc);
+        sorter_elc.sort();
 
         DefaultTableModel mega_model = (DefaultTableModel) mega_accounts_table.getModel();
 
