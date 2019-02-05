@@ -57,6 +57,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
@@ -1149,6 +1150,8 @@ public final class MiscTools {
 
                 String pincode = null;
 
+                boolean error_2FA = false;
+
                 if (ma.check2FA(email)) {
 
                     Get2FACode dialog = new Get2FACode((Frame) container.getParent(), true, email, main_panel);
@@ -1162,10 +1165,18 @@ public final class MiscTools {
                     }
                 }
 
-                ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash, pincode);
+                if (!error_2FA) {
+                    try {
+                        ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash, pincode);
+                        main_panel.getMega_active_accounts().put(email, ma);
 
-                main_panel.getMega_active_accounts().put(email, ma);
+                    } catch (MegaAPIException exception) {
 
+                        if (exception.getCode() == -6) {
+                            JOptionPane.showMessageDialog((Frame) container.getParent(), LabelTranslatorSingleton.getInstance().translate("You've entered an incorrect code too many times. Test within an hour."), "Error", JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
             }
         }
 

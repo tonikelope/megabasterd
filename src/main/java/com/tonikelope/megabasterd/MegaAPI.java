@@ -30,7 +30,7 @@ public final class MegaAPI {
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
-    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -5, -8, -9, -10, -11, -12, -13, -14, -15, -16, -26};
+    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -5, -6, -8, -9, -10, -11, -12, -13, -14, -15, -16, -26};
     public static final int PBKDF2_ITERATIONS = 100000;
     public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
 

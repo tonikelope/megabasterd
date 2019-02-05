@@ -550,7 +550,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         String selected_item = (String) account_combobox.getSelectedItem();
 
-        if (!_inserting_mega_accounts && selected_item != null) {
+        if (account_combobox.getSelectedIndex() != -1 && !_inserting_mega_accounts && selected_item != null) {
 
             final String email = selected_item;
 
@@ -578,78 +578,93 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                     MegaAPI ma = null;
                     try {
+
                         ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
-                    } catch (Exception ex) {
 
-                    }
+                        Long[] quota = ma.getQuota();
 
-                    Long[] quota = null;
+                        if (isDisplayable()) {
+                            if (quota != null) {
 
-                    if (ma != null) {
-                        quota = ma.getQuota();
-                    }
+                                final Color used_space_color;
 
-                    if (isDisplayable()) {
-                        if (quota != null) {
+                                if (quota[0] <= Math.round((double) quota[1] / 2)) {
 
-                            final Color used_space_color;
+                                    used_space_color = new Color(0, 170, 0);
 
-                            if (quota[0] <= Math.round((double) quota[1] / 2)) {
+                                } else if (quota[0] < quota[1]) {
 
-                                used_space_color = new Color(0, 170, 0);
+                                    used_space_color = new Color(230, 115, 0);
 
-                            } else if (quota[0] < quota[1]) {
+                                } else {
 
-                                used_space_color = new Color(230, 115, 0);
+                                    used_space_color = Color.red;
+                                }
+
+                                final String quota_m = LabelTranslatorSingleton.getInstance().translate("Quota used: ") + formatBytes(quota[0]) + "/" + formatBytes(quota[1]);
+
+                                swingInvoke(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
+
+                                        used_space_label.setText(quota_m);
+
+                                        used_space_label.setForeground(used_space_color);
+
+                                        for (JComponent c : new JComponent[]{add_files_button, add_folder_button, account_combobox, account_label}) {
+
+                                            c.setEnabled(true);
+                                        }
+
+                                        for (JComponent c : new JComponent[]{dir_name_textfield, dir_name_label, warning_label, dance_button, file_tree, total_file_size_label, skip_button, skip_rest_button}) {
+
+                                            c.setEnabled(root_childs);
+                                        }
+                                    }
+                                });
 
                             } else {
 
-                                used_space_color = Color.red;
+                                swingInvoke(new Runnable() {
+                                    @Override
+                                    public void run() {
+
+                                        account_combobox.setEnabled(true);
+
+                                        account_label.setEnabled(true);
+
+                                        account_combobox.setSelectedIndex(-1);
+
+                                        used_space_label.setForeground(Color.red);
+
+                                        used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+                                    }
+                                });
+
                             }
-
-                            final String quota_m = LabelTranslatorSingleton.getInstance().translate("Quota used: ") + formatBytes(quota[0]) + "/" + formatBytes(quota[1]);
-
-                            swingInvoke(new Runnable() {
-                                @Override
-                                public void run() {
-                                    boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
-
-                                    used_space_label.setText(quota_m);
-
-                                    used_space_label.setForeground(used_space_color);
-
-                                    for (JComponent c : new JComponent[]{add_files_button, add_folder_button, account_combobox, account_label}) {
-
-                                        c.setEnabled(true);
-                                    }
-
-                                    for (JComponent c : new JComponent[]{dir_name_textfield, dir_name_label, warning_label, dance_button, file_tree, total_file_size_label, skip_button, skip_rest_button}) {
-
-                                        c.setEnabled(root_childs);
-                                    }
-                                }
-                            });
-
-                        } else {
-
-                            swingInvoke(new Runnable() {
-                                @Override
-                                public void run() {
-
-                                    account_combobox.setEnabled(true);
-
-                                    account_label.setEnabled(true);
-
-                                    account_combobox.setSelectedIndex(-1);
-
-                                    used_space_label.setForeground(Color.red);
-
-                                    used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
-                                }
-                            });
-
                         }
+
+                    } catch (Exception ex) {
+
+                        swingInvoke(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                account_combobox.setEnabled(true);
+
+                                account_label.setEnabled(true);
+
+                                account_combobox.setSelectedIndex(-1);
+
+                                used_space_label.setForeground(Color.red);
+
+                                used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+                            }
+                        });
+
                     }
+
                 }
             });
         }

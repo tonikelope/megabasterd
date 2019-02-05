@@ -1754,6 +1754,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                         String pincode = null;
 
+                                        boolean error_2FA = false;
+
                                         if (ma.check2FA(email)) {
 
                                             Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
@@ -1764,25 +1766,31 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                             if (dialog.isCode_ok()) {
                                                 pincode = dialog.getPin_code();
+                                            } else {
+                                                error_2FA = true;
                                             }
                                         }
 
-                                        ma.login(email, pass, pincode);
+                                        if (!error_2FA) {
+                                            ma.login(email, pass, pincode);
 
-                                        _main_panel.getMega_active_accounts().put(email, ma);
+                                            _main_panel.getMega_active_accounts().put(email, ma);
 
-                                        String password = pass, password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
+                                            String password = pass, password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
 
-                                        if (_main_panel.getMaster_pass_hash() != null) {
+                                            if (_main_panel.getMaster_pass_hash() != null) {
 
-                                            password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                            }
+
+                                            DBTools.insertMegaAccount(email, password, password_aes, user_hash);
+                                        } else {
+                                            email_error.add(email);
                                         }
-
-                                        DBTools.insertMegaAccount(email, password, password_aes, user_hash);
 
                                     } catch (Exception ex) {
 
@@ -1815,6 +1823,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                             String pincode = null;
 
+                                            boolean error_2FA = false;
+
                                             if (ma.check2FA(email)) {
 
                                                 Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
@@ -1825,27 +1835,34 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                                                 if (dialog.isCode_ok()) {
                                                     pincode = dialog.getPin_code();
+                                                } else {
+                                                    error_2FA = true;
                                                 }
                                             }
 
-                                            ma.login(email, pass, pincode);
+                                            if (!error_2FA) {
 
-                                            _main_panel.getMega_active_accounts().put(email, ma);
+                                                ma.login(email, pass, pincode);
 
-                                            password = pass;
+                                                _main_panel.getMega_active_accounts().put(email, ma);
 
-                                            String password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
+                                                password = pass;
 
-                                            if (_main_panel.getMaster_pass() != null) {
+                                                String password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
 
-                                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                if (_main_panel.getMaster_pass() != null) {
 
-                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                    password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                }
+
+                                                DBTools.insertMegaAccount(email, password, password_aes, user_hash);
+                                            } else {
+                                                email_error.add(email);
                                             }
-
-                                            DBTools.insertMegaAccount(email, password, password_aes, user_hash);
 
                                         } catch (Exception ex) {
 
