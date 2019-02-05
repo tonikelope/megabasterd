@@ -93,6 +93,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         setResizable(false);
 
         confirm_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        confirm_pass_textfield.setBorder(null);
         confirm_pass_textfield.setDoubleBuffered(true);
         confirm_pass_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
@@ -137,6 +138,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         new_pass_label.setDoubleBuffered(true);
 
         new_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        new_pass_textfield.setBorder(null);
         new_pass_textfield.setDoubleBuffered(true);
 
         status_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N

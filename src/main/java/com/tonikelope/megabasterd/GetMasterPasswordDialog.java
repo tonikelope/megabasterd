@@ -99,6 +99,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
         setTitle("Master password unlock");
 
         current_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        current_pass_textfield.setBorder(null);
         current_pass_textfield.setDoubleBuffered(true);
         current_pass_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {

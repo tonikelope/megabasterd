@@ -183,6 +183,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         split_size_label.setEnabled(false);
 
         split_size_text.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        split_size_text.setBorder(null);
         split_size_text.setDoubleBuffered(true);
         split_size_text.setEnabled(false);
 

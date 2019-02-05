@@ -14,6 +14,8 @@ public class Get2FACode extends javax.swing.JDialog {
 
     private String _pin_code;
 
+    private static final int MAX_CODE_LENGTH = 6;
+
     public boolean isCode_ok() {
         return _code_ok;
     }
@@ -89,11 +91,15 @@ public class Get2FACode extends javax.swing.JDialog {
         status_label.setDoubleBuffered(true);
 
         please_label.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
-        please_label.setText("Please enter 2FA PIN CODE:");
+        please_label.setText(LabelTranslatorSingleton.getInstance().translate("Please enter 2FA PIN CODE"));
         please_label.setDoubleBuffered(true);
 
+        current_code_textfield.setBackground(new java.awt.Color(0, 102, 153));
         current_code_textfield.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        current_code_textfield.setForeground(new java.awt.Color(255, 255, 255));
+        current_code_textfield.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         current_code_textfield.setToolTipText("");
+        current_code_textfield.setBorder(null);
         current_code_textfield.setDoubleBuffered(true);
         current_code_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
@@ -122,8 +128,8 @@ public class Get2FACode extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(email_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(please_label, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(current_code_textfield))))
+                            .addComponent(current_code_textfield)
+                            .addComponent(please_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -174,7 +180,7 @@ public class Get2FACode extends javax.swing.JDialog {
 
     private void current_code_textfieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_current_code_textfieldKeyTyped
 
-        if (!Character.isDigit(evt.getKeyChar()) && evt.getKeyCode() != KeyEvent.VK_BACK_SPACE && evt.getKeyCode() != KeyEvent.VK_DELETE) {
+        if (current_code_textfield.getText().length() == MAX_CODE_LENGTH || (!Character.isDigit(evt.getKeyChar()) && evt.getKeyCode() != KeyEvent.VK_BACK_SPACE && evt.getKeyCode() != KeyEvent.VK_DELETE)) {
             evt.consume();
         }
 

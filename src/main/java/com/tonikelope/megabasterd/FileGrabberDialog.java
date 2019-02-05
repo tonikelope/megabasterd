@@ -178,7 +178,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 224, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 228, Short.MAX_VALUE)
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Upload info"));
@@ -189,6 +189,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         dir_name_label.setEnabled(false);
 
         dir_name_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        dir_name_textfield.setBorder(null);
         dir_name_textfield.setDoubleBuffered(true);
         dir_name_textfield.setEnabled(false);
 
