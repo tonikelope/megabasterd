@@ -552,7 +552,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         String selected_item = (String) account_combobox.getSelectedItem();
 
-        if (selected_item != null && (_last_selected_item == null || !selected_item.equals(_last_selected_item)) && account_combobox.getSelectedIndex() != -1 && !_inserting_mega_accounts) {
+        if (selected_item != null && (_last_selected_item == null || !selected_item.equals(_last_selected_item)) && !_inserting_mega_accounts) {
 
             final String email = selected_item;
 
@@ -669,9 +669,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                 }
             });
-        }
 
-        _last_selected_item = selected_item;
+            _last_selected_item = selected_item;
+        }
     }//GEN-LAST:event_account_comboboxItemStateChanged
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
