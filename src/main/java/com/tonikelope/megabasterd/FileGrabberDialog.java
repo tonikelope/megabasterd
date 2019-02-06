@@ -29,7 +29,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private final MainPanel _main_panel;
     private final boolean _remember_master_pass;
     private boolean _inserting_mega_accounts;
-    private String _last_selected_item;
+    private int _last_selected_index;
 
     public boolean isUpload() {
         return _upload;
@@ -77,7 +77,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         _inserting_mega_accounts = false;
         _remember_master_pass = true;
         _files = new ArrayList<>();
-        _last_selected_item = null;
+        _last_selected_index = -1;
 
         dir_name_textfield.addMouseListener(new ContextMenuMouseListener());
 
@@ -552,7 +552,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         String selected_item = (String) account_combobox.getSelectedItem();
 
-        if (selected_item != null && (_last_selected_item == null || !selected_item.equals(_last_selected_item)) && !_inserting_mega_accounts) {
+        if (!_inserting_mega_accounts && selected_item != null && account_combobox.getSelectedIndex() != _last_selected_index) {
+
+            _last_selected_index = account_combobox.getSelectedIndex();
 
             final String email = selected_item;
 
@@ -641,6 +643,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                                         used_space_label.setForeground(Color.red);
 
                                         used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+
+                                        _last_selected_index = account_combobox.getSelectedIndex();
                                     }
                                 });
 
@@ -662,6 +666,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                                 used_space_label.setForeground(Color.red);
 
                                 used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+
+                                _last_selected_index = account_combobox.getSelectedIndex();
                             }
                         });
 
@@ -670,7 +676,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 }
             });
 
-            _last_selected_item = selected_item;
         }
     }//GEN-LAST:event_account_comboboxItemStateChanged
 
