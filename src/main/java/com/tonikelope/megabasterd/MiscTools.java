@@ -1162,6 +1162,8 @@ public final class MiscTools {
 
                     if (dialog.isCode_ok()) {
                         pincode = dialog.getPin_code();
+                    } else {
+                        error_2FA = true;
                     }
                 }
 
@@ -1174,8 +1176,12 @@ public final class MiscTools {
 
                         if (exception.getCode() == -6) {
                             JOptionPane.showMessageDialog((Frame) container.getParent(), LabelTranslatorSingleton.getInstance().translate("You've entered an incorrect code too many times. Test within an hour."), "Error", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            throw exception;
                         }
                     }
+                } else {
+                    throw new MegaAPIException(-26);
                 }
             }
         }

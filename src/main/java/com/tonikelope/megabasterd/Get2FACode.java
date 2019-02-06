@@ -94,11 +94,11 @@ public class Get2FACode extends javax.swing.JDialog {
         please_label.setText(LabelTranslatorSingleton.getInstance().translate("Please enter 2FA PIN CODE"));
         please_label.setDoubleBuffered(true);
 
-        current_code_textfield.setBackground(new java.awt.Color(0, 102, 153));
+        current_code_textfield.setBackground(new java.awt.Color(0, 153, 255));
         current_code_textfield.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         current_code_textfield.setForeground(new java.awt.Color(255, 255, 255));
         current_code_textfield.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        current_code_textfield.setToolTipText("");
+        current_code_textfield.setToolTipText("PIN CODE");
         current_code_textfield.setBorder(null);
         current_code_textfield.setDoubleBuffered(true);
         current_code_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
