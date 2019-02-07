@@ -99,8 +99,8 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
         setTitle("Master password unlock");
 
         current_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        current_pass_textfield.setBorder(null);
         current_pass_textfield.setDoubleBuffered(true);
+        current_pass_textfield.setMargin(new java.awt.Insets(2, 2, 2, 2));
         current_pass_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 current_pass_textfieldKeyPressed(evt);
@@ -163,7 +163,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(remember_checkbox)
                                 .addGap(0, 0, Short.MAX_VALUE))
-                            .addComponent(please_label, javax.swing.GroupLayout.DEFAULT_SIZE, 524, Short.MAX_VALUE))))
+                            .addComponent(please_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -173,12 +173,12 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(please_label)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(current_pass_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(remember_checkbox))
                     .addComponent(lock_label))
-                .addGap(18, 18, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 16, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(ok_button)

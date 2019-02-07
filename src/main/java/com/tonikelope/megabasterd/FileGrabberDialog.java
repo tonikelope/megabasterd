@@ -191,9 +191,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         dir_name_label.setEnabled(false);
 
         dir_name_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        dir_name_textfield.setBorder(null);
         dir_name_textfield.setDoubleBuffered(true);
         dir_name_textfield.setEnabled(false);
+        dir_name_textfield.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
         account_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         account_label.setText("Account:");

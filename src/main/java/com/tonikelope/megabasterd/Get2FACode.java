@@ -37,6 +37,8 @@ public class Get2FACode extends javax.swing.JDialog {
 
         this.email_label.setText(email);
 
+        this.ok_button.setEnabled(false);
+
         pack();
 
     }
@@ -85,6 +87,7 @@ public class Get2FACode extends javax.swing.JDialog {
         lock_label.setDoubleBuffered(true);
 
         email_label.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        email_label.setForeground(new java.awt.Color(255, 102, 0));
         email_label.setDoubleBuffered(true);
 
         status_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
@@ -98,15 +101,17 @@ public class Get2FACode extends javax.swing.JDialog {
         current_code_textfield.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
         current_code_textfield.setForeground(new java.awt.Color(255, 255, 255));
         current_code_textfield.setHorizontalAlignment(javax.swing.JTextField.CENTER);
-        current_code_textfield.setToolTipText("PIN CODE");
-        current_code_textfield.setBorder(null);
         current_code_textfield.setDoubleBuffered(true);
+        current_code_textfield.setMargin(new java.awt.Insets(2, 2, 2, 2));
         current_code_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
             public void keyTyped(java.awt.event.KeyEvent evt) {
                 current_code_textfieldKeyTyped(evt);
             }
             public void keyPressed(java.awt.event.KeyEvent evt) {
                 current_code_textfieldKeyPressed(evt);
+            }
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                current_code_textfieldKeyReleased(evt);
             }
         });
 
@@ -141,7 +146,7 @@ public class Get2FACode extends javax.swing.JDialog {
                         .addComponent(email_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(please_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(current_code_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(lock_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -173,7 +178,7 @@ public class Get2FACode extends javax.swing.JDialog {
     }//GEN-LAST:event_ok_buttonActionPerformed
 
     private void current_code_textfieldKeyPressed(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_current_code_textfieldKeyPressed
-        if (evt.getKeyCode() == KeyEvent.VK_ENTER) {
+        if (evt.getKeyCode() == KeyEvent.VK_ENTER && this.ok_button.isEnabled()) {
             ok_buttonActionPerformed(null);
         }
     }//GEN-LAST:event_current_code_textfieldKeyPressed
@@ -183,8 +188,11 @@ public class Get2FACode extends javax.swing.JDialog {
         if (current_code_textfield.getText().length() == MAX_CODE_LENGTH || (!Character.isDigit(evt.getKeyChar()) && evt.getKeyCode() != KeyEvent.VK_BACK_SPACE && evt.getKeyCode() != KeyEvent.VK_DELETE)) {
             evt.consume();
         }
-
     }//GEN-LAST:event_current_code_textfieldKeyTyped
+
+    private void current_code_textfieldKeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_current_code_textfieldKeyReleased
+        this.ok_button.setEnabled((current_code_textfield.getText().length() >= MAX_CODE_LENGTH));
+    }//GEN-LAST:event_current_code_textfieldKeyReleased
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton cancel_button;
