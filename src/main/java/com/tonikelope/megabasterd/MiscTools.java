@@ -1155,7 +1155,9 @@ public final class MiscTools {
 
                 boolean error_2FA = false;
 
-                if (ma.check2FA(email)) {
+                HashMap<String, Object> old_session_data = DBTools.selectMegaSession(email);
+
+                if (old_session_data != null && ma.check2FA(email)) {
 
                     Get2FACode dialog = new Get2FACode((Frame) container.getParent(), true, email, main_panel);
 
@@ -1172,8 +1174,6 @@ public final class MiscTools {
 
                 if (!error_2FA) {
                     try {
-
-                        HashMap<String, Object> old_session_data = DBTools.selectMegaSession(email);
 
                         boolean unserialization_error = false;
 
