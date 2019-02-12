@@ -2339,6 +2339,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     try {
 
+                        DBTools.truncateMegaSessions();
+
                         if (dialog.getNew_pass() != null && dialog.getNew_pass().length > 0) {
 
                             _main_panel.setMaster_pass_hash(dialog.getNew_pass_hash());

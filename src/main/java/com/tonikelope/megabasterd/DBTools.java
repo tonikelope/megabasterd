@@ -26,6 +26,7 @@ public final class DBTools {
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS settings(key VARCHAR(255), value TEXT, PRIMARY KEY('key'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS mega_accounts(email TEXT, password TEXT, password_aes TEXT, user_hash TEXT, PRIMARY KEY('email'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS elc_accounts(host TEXT, user TEXT, apikey TEXT, PRIMARY KEY('host'));");
+            stat.executeUpdate("CREATE TABLE IF NOT EXISTS mega_sessions(email TEXT, ma BLOB, crypt INT, PRIMARY KEY('email'));");
         }
     }
 
@@ -35,6 +36,53 @@ public final class DBTools {
 
             stat.execute("VACUUM");
         }
+    }
+
+    public static synchronized void insertMegaSession(String email, byte[] ma, boolean crypt) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO mega_sessions (email, ma, crypt) VALUES (?,?,?)")) {
+
+            ps.setString(1, email);
+            ps.setBytes(2, ma);
+            ps.setInt(3, crypt ? 1 : 0);
+
+            ps.executeUpdate();
+        }
+    }
+
+    public static synchronized void truncateMegaSessions() throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+
+            stat.execute("DELETE FROM mega_sessions");
+        }
+    }
+
+    public static synchronized HashMap<String, Object> selectMegaSession(String email) {
+
+        HashMap<String, Object> session = null;
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT * from mega_sessions WHERE email=?")) {
+
+            ps.setString(1, email);
+
+            ResultSet res = ps.executeQuery();
+
+            if (res.next()) {
+
+                session = new HashMap<>();
+
+                session.put("email", email);
+                session.put("ma", res.getBytes(2));
+                session.put("crypt", (res.getInt(3) == 1));
+
+                return session;
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return session;
     }
 
     public static synchronized void insertDownload(String url, String email, String path, String filename, String filekey, Long size, String filepass, String filenoexpire) throws SQLException {

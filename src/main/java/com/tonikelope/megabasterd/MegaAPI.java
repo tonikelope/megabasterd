@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
@@ -25,7 +26,7 @@ import javax.net.ssl.HttpsURLConnection;
  *
  * @author tonikelope
  */
-public final class MegaAPI {
+public final class MegaAPI implements Serializable {
 
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
