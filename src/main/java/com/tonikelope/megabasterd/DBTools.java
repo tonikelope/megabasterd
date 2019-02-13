@@ -40,7 +40,7 @@ public final class DBTools {
 
     public static synchronized void insertMegaSession(String email, byte[] ma, boolean crypt) throws SQLException {
 
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO mega_sessions (email, ma, crypt) VALUES (?,?,?)")) {
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO mega_sessions (email, ma, crypt) VALUES (?,?,?)")) {
 
             ps.setString(1, email);
             ps.setBytes(2, ma);

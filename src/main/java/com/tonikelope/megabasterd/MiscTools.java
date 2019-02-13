@@ -1181,13 +1181,15 @@ public final class MiscTools {
 
                             Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Reutilizando sesión de MEGA guardada para {0}", email);
 
+                            MegaAPI old_ma = new MegaAPI();
+
                             if ((boolean) old_session_data.get("crypt")) {
 
                                 ByteArrayInputStream bs = new ByteArrayInputStream(CryptTools.aes_cbc_decrypt_pkcs7((byte[]) old_session_data.get("ma"), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                 try (ObjectInputStream is = new ObjectInputStream(bs)) {
 
-                                    ma = (MegaAPI) is.readObject();
+                                    old_ma = (MegaAPI) is.readObject();
 
                                 } catch (Exception ex) {
                                     unserialization_error = true;
@@ -1198,11 +1200,20 @@ public final class MiscTools {
                                 ByteArrayInputStream bs = new ByteArrayInputStream((byte[]) old_session_data.get("ma"));
 
                                 try (ObjectInputStream is = new ObjectInputStream(bs)) {
-                                    ma = (MegaAPI) is.readObject();
+                                    old_ma = (MegaAPI) is.readObject();
                                 } catch (Exception ex) {
                                     unserialization_error = true;
                                 }
 
+                            }
+
+                            if (old_ma.getQuota() == null) {
+
+                                unserialization_error = true;
+
+                            } else {
+
+                                ma = old_ma;
                             }
                         }
 
