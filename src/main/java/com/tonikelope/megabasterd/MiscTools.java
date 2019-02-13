@@ -1151,105 +1151,100 @@ public final class MiscTools {
                     user_hash = (String) account_info.get("user_hash");
                 }
 
-                String pincode = null;
+                try {
 
-                boolean error_2FA = false;
+                    HashMap<String, Object> old_session_data = DBTools.selectMegaSession(email);
 
-                HashMap<String, Object> old_session_data = DBTools.selectMegaSession(email);
+                    boolean unserialization_error = false;
 
-                if (old_session_data == null && ma.check2FA(email)) {
+                    if (old_session_data != null) {
 
-                    Get2FACode dialog = new Get2FACode((Frame) container.getParent(), true, email, main_panel);
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Reutilizando sesión de MEGA guardada para {0}", email);
 
-                    dialog.setLocationRelativeTo(container);
+                        MegaAPI old_ma = new MegaAPI();
 
-                    dialog.setVisible(true);
+                        if ((boolean) old_session_data.get("crypt")) {
 
-                    if (dialog.isCode_ok()) {
-                        pincode = dialog.getPin_code();
-                    } else {
-                        error_2FA = true;
-                    }
-                }
+                            ByteArrayInputStream bs = new ByteArrayInputStream(CryptTools.aes_cbc_decrypt_pkcs7((byte[]) old_session_data.get("ma"), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                if (!error_2FA) {
-                    try {
+                            try (ObjectInputStream is = new ObjectInputStream(bs)) {
 
-                        boolean unserialization_error = false;
+                                old_ma = (MegaAPI) is.readObject();
 
-                        if (old_session_data != null) {
-
-                            Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Reutilizando sesión de MEGA guardada para {0}", email);
-
-                            MegaAPI old_ma = new MegaAPI();
-
-                            if ((boolean) old_session_data.get("crypt")) {
-
-                                ByteArrayInputStream bs = new ByteArrayInputStream(CryptTools.aes_cbc_decrypt_pkcs7((byte[]) old_session_data.get("ma"), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                try (ObjectInputStream is = new ObjectInputStream(bs)) {
-
-                                    old_ma = (MegaAPI) is.readObject();
-
-                                } catch (Exception ex) {
-                                    unserialization_error = true;
-                                }
-
-                            } else {
-
-                                ByteArrayInputStream bs = new ByteArrayInputStream((byte[]) old_session_data.get("ma"));
-
-                                try (ObjectInputStream is = new ObjectInputStream(bs)) {
-                                    old_ma = (MegaAPI) is.readObject();
-                                } catch (Exception ex) {
-                                    unserialization_error = true;
-                                }
-
-                            }
-
-                            if (old_ma.getQuota() == null) {
-
+                            } catch (Exception ex) {
                                 unserialization_error = true;
-
-                            } else {
-
-                                ma = old_ma;
-                            }
-                        }
-
-                        if (old_session_data == null || unserialization_error) {
-
-                            ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash, pincode);
-
-                            ByteArrayOutputStream bs = new ByteArrayOutputStream();
-
-                            try (ObjectOutputStream os = new ObjectOutputStream(bs)) {
-                                os.writeObject(ma);
                             }
 
-                            if (main_panel.getMaster_pass() != null) {
-
-                                DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
-
-                            } else {
-
-                                DBTools.insertMegaSession(email, bs.toByteArray(), false);
-                            }
-                        }
-
-                        main_panel.getMega_active_accounts().put(email, ma);
-
-                    } catch (MegaAPIException exception) {
-
-                        if (exception.getCode() == -6) {
-                            JOptionPane.showMessageDialog((Frame) container.getParent(), LabelTranslatorSingleton.getInstance().translate("You've tried to login too many times. Wait an hour."), "Error", JOptionPane.ERROR_MESSAGE);
                         } else {
-                            throw exception;
+
+                            ByteArrayInputStream bs = new ByteArrayInputStream((byte[]) old_session_data.get("ma"));
+
+                            try (ObjectInputStream is = new ObjectInputStream(bs)) {
+                                old_ma = (MegaAPI) is.readObject();
+                            } catch (Exception ex) {
+                                unserialization_error = true;
+                            }
+
+                        }
+
+                        if (old_ma.getQuota() == null) {
+
+                            unserialization_error = true;
+
+                        } else {
+
+                            ma = old_ma;
                         }
                     }
-                } else {
-                    throw new MegaAPIException(-26);
+
+                    if (old_session_data == null || unserialization_error) {
+
+                        String pincode = null;
+
+                        if (ma.check2FA(email)) {
+
+                            Get2FACode dialog = new Get2FACode((Frame) container.getParent(), true, email, main_panel);
+
+                            dialog.setLocationRelativeTo(container);
+
+                            dialog.setVisible(true);
+
+                            if (dialog.isCode_ok()) {
+                                pincode = dialog.getPin_code();
+                            } else {
+                                throw new MegaAPIException(-26);
+                            }
+                        }
+
+                        ma.fastLogin(email, bin2i32a(BASE642Bin(password_aes)), user_hash, pincode);
+
+                        ByteArrayOutputStream bs = new ByteArrayOutputStream();
+
+                        try (ObjectOutputStream os = new ObjectOutputStream(bs)) {
+                            os.writeObject(ma);
+                        }
+
+                        if (main_panel.getMaster_pass() != null) {
+
+                            DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
+
+                        } else {
+
+                            DBTools.insertMegaSession(email, bs.toByteArray(), false);
+                        }
+                    }
+
+                    main_panel.getMega_active_accounts().put(email, ma);
+
+                } catch (MegaAPIException exception) {
+
+                    if (exception.getCode() == -6) {
+                        JOptionPane.showMessageDialog((Frame) container.getParent(), LabelTranslatorSingleton.getInstance().translate("You've tried to login too many times. Wait an hour."), "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+
+                    throw exception;
                 }
+
             }
         }
 
