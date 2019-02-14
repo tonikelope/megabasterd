@@ -2296,23 +2296,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                 elc_accounts_table.setModel(new_elc_model);
 
-                for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+                DBTools.truncateMegaAccounts();
 
-                    try {
-                        DBTools.deleteMegaAccount((String) pair.getKey());
-                    } catch (SQLException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+                DBTools.truncateELCAccounts();
 
-                for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
-
-                    try {
-                        DBTools.deleteELCAccount((String) pair.getKey());
-                    } catch (SQLException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
+                DBTools.truncateMegaSessions();
 
                 _main_panel.setMaster_pass_hash(null);
 

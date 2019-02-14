@@ -494,6 +494,22 @@ public final class DBTools {
         }
     }
 
+    public static synchronized void truncateMegaAccounts() throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+
+            stat.execute("DELETE FROM mega_accounts");
+        }
+    }
+
+    public static synchronized void truncateELCAccounts() throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+
+            stat.execute("DELETE FROM elc_accounts");
+        }
+    }
+
     private DBTools() {
     }
 
