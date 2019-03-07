@@ -216,7 +216,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         file_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         file_name_label.setForeground(new java.awt.Color(0, 102, 153));
-        file_name_label.setText("Archivo de prueba xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx");
+        file_name_label.setText("---");
         file_name_label.setDoubleBuffered(true);
 
         close_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
@@ -251,7 +251,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         file_size_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
         file_size_label.setForeground(new java.awt.Color(0, 102, 153));
-        file_size_label.setText("500 MB");
+        file_size_label.setText("---");
         file_size_label.setDoubleBuffered(true);
 
         slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N

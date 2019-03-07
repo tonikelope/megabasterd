@@ -137,6 +137,10 @@ public final class MegaCrypterAPI {
             }
         }
 
+        if (dl_url == null || "".equals(dl_url)) {
+            throw new MegaCrypterAPIException(-101);
+        }
+
         return dl_url;
     }
 

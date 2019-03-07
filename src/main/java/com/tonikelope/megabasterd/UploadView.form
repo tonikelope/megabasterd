@@ -201,7 +201,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="99" green="66" red="0" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="Archivo de prueba xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+        <Property name="text" type="java.lang.String" value="---"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
@@ -243,7 +243,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="99" green="66" red="0" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="500 MB"/>
+        <Property name="text" type="java.lang.String" value="---"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>

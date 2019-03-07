@@ -817,6 +817,10 @@ public final class MiscTools {
 
     public static boolean checkMegaDownloadUrl(String string_url) {
 
+        if (string_url == null || "".equals(string_url)) {
+            return false;
+        }
+
         boolean url_ok = false;
 
         HttpURLConnection con = null;

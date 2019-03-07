@@ -530,7 +530,13 @@ public final class MegaAPI implements Serializable {
 
         HashMap[] res_map = objectMapper.readValue(data, HashMap[].class);
 
-        return (String) res_map[0].get("g");
+        String download_url = (String) res_map[0].get("g");
+
+        if (download_url == null || "".equals(download_url)) {
+            throw new MegaAPIException(-101);
+        }
+
+        return download_url;
     }
 
     public String[] getMegaFileMetadata(String link) throws MegaAPIException, MalformedURLException, IOException {
