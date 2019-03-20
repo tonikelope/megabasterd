@@ -261,6 +261,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Quota used: ", "Espacio usado: ");
         _addTranslation("Streaming server: ON (port ", "Servidor de streaming: ON (puerto ");
         _addTranslation("MC reverse mode: ON (port ", "MC reverse mode: ON (puerto ");
+        _addTranslation("Joining file chunks, please wait...", "Juntando chunks, por favor espera...");
 
     }
 

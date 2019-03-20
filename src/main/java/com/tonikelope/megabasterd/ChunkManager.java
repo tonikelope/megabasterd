@@ -136,12 +136,22 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
             Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager: let's do some work!", Thread.currentThread().getName());
 
+            boolean chunkworkers_empty = false;
+
             if (_file_size > 0) {
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
                     File chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
 
                     while (chunk_file.exists() && chunk_file.canRead()) {
+
+                        if (!chunkworkers_empty && _download.getChunkworkers().isEmpty()) {
+                            _download.getView().printStatusNormal("Joining file chunks, please wait...");
+                            _download.getView().getPause_button().setVisible(false);
+                            _download.getMain_panel().getGlobal_dl_speed().detachTransference(_download);
+                            _download.getView().getSpeed_label().setVisible(false);
+                            chunkworkers_empty = true;
+                        }
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 

@@ -103,7 +103,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             int http_error = 0, conta_error = 0, http_status = -1;
 
-            boolean timeout, chunk_error, slow_proxy = false;
+            boolean timeout = false, chunk_error = false, slow_proxy = false;
 
             String worker_url = null, current_smart_proxy = null;
 
@@ -126,7 +126,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 String chunk_url = ChunkManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
 
-                if ((http_error == 509 || slow_proxy) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                if ((chunk_error || slow_proxy) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                     if (_proxy_manager == null) {
 
@@ -190,9 +190,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     getDownload().getMain_panel().getView().setSmartProxy(false);
                 }
 
-                con.setConnectTimeout(Download.HTTP_TIMEOUT);
-
-                con.setReadTimeout(Download.HTTP_TIMEOUT);
+                if (current_smart_proxy != null) {
+                    con.setConnectTimeout(Download.HTTP_PROXY_TIMEOUT);
+                    con.setReadTimeout(Download.HTTP_PROXY_TIMEOUT);
+                } else {
+                    con.setConnectTimeout(Download.HTTP_TIMEOUT);
+                    con.setReadTimeout(Download.HTTP_TIMEOUT);
+                }
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
