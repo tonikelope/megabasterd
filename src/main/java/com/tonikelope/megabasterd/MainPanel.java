@@ -48,7 +48,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "5.97";
+    public static final String VERSION = "5.98";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -194,6 +194,8 @@ public final class MainPanel {
 
         _use_smart_proxy = false;
 
+        _proxy_manager = null;
+
         try {
 
             setupSqliteTables();
@@ -280,21 +282,13 @@ public final class MainPanel {
 
         if (_use_smart_proxy) {
 
+            MainPanel tthis = this;
+
             THREAD_POOL.execute(
                     new Runnable() {
                 @Override
                 public void run() {
-
-                    _proxy_manager = new SmartMegaProxyManager(null);
-
-                    swingInvoke(
-                            new Runnable() {
-                        @Override
-                        public void run() {
-                            getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(_proxy_manager.getProxyCount()) + ")");
-                        }
-                    });
-
+                    _proxy_manager = new SmartMegaProxyManager(null, tthis);
                 }
             });
 

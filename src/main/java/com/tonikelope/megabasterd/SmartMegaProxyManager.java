@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MiscTools.swingInvoke;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -15,17 +16,19 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public class SmartMegaProxyManager {
+public final class SmartMegaProxyManager {
 
     public static String DEFAULT_SMART_PROXY_URL = "https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt";
     public static final int BLOCK_TIME = 600;
     private volatile String _proxy_list_url;
     private final LinkedHashMap<String, Long> _proxy_list;
+    private final MainPanel _main_panel;
 
-    public SmartMegaProxyManager(String proxy_list_url) {
+    public SmartMegaProxyManager(String proxy_list_url, MainPanel main_panel) {
         _proxy_list_url = (proxy_list_url != null && !"".equals(proxy_list_url)) ? proxy_list_url : DEFAULT_SMART_PROXY_URL;
         _proxy_list = new LinkedHashMap<>();
-        _refreshProxyList();
+        _main_panel = main_panel;
+        refreshProxyList();
     }
 
     public synchronized int getProxyCount() {
@@ -45,9 +48,11 @@ public class SmartMegaProxyManager {
             }
         }
 
-        _refreshProxyList();
+        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!!", new Object[]{Thread.currentThread().getName()});
 
-        return null;
+        refreshProxyList();
+
+        return getProxyCount() > 0 ? getFastestProxy() : null;
     }
 
     public synchronized void blockProxy(String proxy) {
@@ -58,7 +63,7 @@ public class SmartMegaProxyManager {
         }
     }
 
-    private void _refreshProxyList() {
+    public synchronized void refreshProxyList() {
 
         String data;
 
@@ -105,6 +110,14 @@ public class SmartMegaProxyManager {
                         }
                     }
                 }
+
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+                        _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
+                    }
+                });
 
                 Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
             }

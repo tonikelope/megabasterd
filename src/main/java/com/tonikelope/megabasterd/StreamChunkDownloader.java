@@ -20,12 +20,10 @@ public class StreamChunkDownloader implements Runnable {
     private final int _id;
     private final StreamChunkManager _chunkmanager;
     private volatile boolean _exit;
-    private SmartMegaProxyManager _proxy_manager;
 
     public StreamChunkDownloader(int id, StreamChunkManager chunkmanager) {
         _id = id;
         _chunkmanager = chunkmanager;
-        _proxy_manager = null;
         _exit = false;
     }
 
@@ -50,13 +48,9 @@ public class StreamChunkDownloader implements Runnable {
 
             long offset = -1;
 
+            SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
+
             while (!_exit && !_chunkmanager.isExit()) {
-
-                if (MainPanel.isUse_smart_proxy() && _proxy_manager == null) {
-
-                    _proxy_manager = new SmartMegaProxyManager(null);
-
-                }
 
                 while (!_exit && !_chunkmanager.isExit() && _chunkmanager.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
 
@@ -82,10 +76,10 @@ public class StreamChunkDownloader implements Runnable {
 
                         if (current_smart_proxy != null) {
 
-                            _proxy_manager.blockProxy(current_smart_proxy);
+                            proxy_manager.blockProxy(current_smart_proxy);
                         }
 
-                        current_smart_proxy = _proxy_manager.getFastestProxy();
+                        current_smart_proxy = proxy_manager.getFastestProxy();
 
                         if (current_smart_proxy != null) {
 

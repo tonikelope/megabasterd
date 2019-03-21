@@ -90,7 +90,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private volatile boolean _canceled;
     private volatile boolean _error509;
     private volatile boolean _turbo_proxy_mode;
-    private SmartMegaProxyManager _proxy_manager;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart) {
 
@@ -173,10 +172,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
 
-    }
-
-    public SmartMegaProxyManager getProxy_manager() {
-        return _proxy_manager;
     }
 
     public long getLast_chunk_id_dispatched() {
@@ -567,8 +562,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         _thread_pool.execute(getProgress_meter());
 
                         getMain_panel().getGlobal_dl_speed().attachTransference(this);
-
-                        _proxy_manager = new SmartMegaProxyManager(null);
 
                         synchronized (_workers_lock) {
 

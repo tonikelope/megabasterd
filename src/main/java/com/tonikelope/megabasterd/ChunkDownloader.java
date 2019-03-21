@@ -107,7 +107,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             long init_chunk_time = -1, finish_chunk_time = -1, pause_init_time, paused = 0L;
 
-            SmartMegaProxyManager proxy_manager = _download.getProxy_manager();
+            SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
             while (!_exit && !_download.isStopped()) {
 
