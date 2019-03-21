@@ -64,7 +64,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private String _file_pass;
     private String _file_noexpire;
     private final boolean _use_slots;
-    private final int _slots;
+    private int _slots;
     private final boolean _restart;
     private final ArrayList<ChunkDownloader> _chunkworkers;
     private final ExecutorService _thread_pool;
@@ -90,8 +90,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private volatile boolean _canceled;
     private volatile boolean _error509;
     private volatile boolean _turbo_proxy_mode;
+    private SmartMegaProxyManager _proxy_manager;
 
-    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, int slots, boolean restart) {
+    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart) {
 
         _paused_workers = 0;
         _ma = ma;
@@ -117,7 +118,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _file_pass = file_pass;
         _file_noexpire = file_noexpire;
         _use_slots = use_slots;
-        _slots = slots;
         _error509 = false;
         _turbo_proxy_mode = false;
         _restart = restart;
@@ -160,7 +160,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _file_pass = download.getFile_pass();
         _file_noexpire = download.getFile_noexpire();
         _use_slots = download.getMain_panel().isUse_slots_down();
-        _slots = download.getMain_panel().getDefault_slots_down();
         _restart = true;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
@@ -174,6 +173,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
 
+    }
+
+    public SmartMegaProxyManager getProxy_manager() {
+        return _proxy_manager;
     }
 
     public long getLast_chunk_id_dispatched() {
@@ -565,6 +568,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         getMain_panel().getGlobal_dl_speed().attachTransference(this);
 
+                        _proxy_manager = new SmartMegaProxyManager(null);
+
                         synchronized (_workers_lock) {
 
                             if (_use_slots) {
@@ -572,6 +577,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                 _chunkmanager = new ChunkManager(this);
 
                                 _thread_pool.execute(_chunkmanager);
+
+                                _slots = getMain_panel().getDefault_slots_down();
 
                                 for (int t = 1; t <= _slots; t++) {
                                     ChunkDownloader c = new ChunkDownloader(t, this);

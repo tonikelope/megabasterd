@@ -32,7 +32,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private String _status_error_message;
     private String _dir_name;
     private volatile boolean _exit;
-    private final int _slots;
+    private int _slots;
     private final Object _secure_notify_lock;
     private final Object _workers_lock;
     private final Object _chunkid_lock;
@@ -71,7 +71,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private volatile boolean _closed;
     private volatile boolean _canceled;
 
-    public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, int slots) {
+    public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link) {
 
         _notified = false;
         _provision_ok = true;
@@ -87,7 +87,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _root_node = root_node;
         _share_key = share_key;
         _folder_link = folder_link;
-        _slots = slots;
         _restart = false;
         _progress = 0L;
         _last_chunk_id_dispatched = 0L;
@@ -122,7 +121,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _root_node = upload.getRoot_node();
         _share_key = upload.getShare_key();
         _folder_link = upload.getFolder_link();
-        _slots = upload.getMain_panel().getDefault_slots_up();
         _progress = 0L;
         _last_chunk_id_dispatched = 0L;
         _completion_handle = null;
@@ -757,6 +755,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 _thread_pool.execute(_mac_generator);
 
                 synchronized (_workers_lock) {
+
+                    _slots = getMain_panel().getDefault_slots_up();
 
                     for (int t = 1; t <= _slots; t++) {
                         ChunkUploader c = new ChunkUploader(t, this);

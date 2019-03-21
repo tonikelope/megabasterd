@@ -150,6 +150,9 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
                             _download.getView().getPause_button().setVisible(false);
                             _download.getMain_panel().getGlobal_dl_speed().detachTransference(_download);
                             _download.getView().getSpeed_label().setVisible(false);
+                            _download.getView().getSlots_label().setVisible(false);
+                            _download.getView().getSlot_status_label().setVisible(false);
+                            _download.getView().getSlots_spinner().setVisible(false);
                             chunkworkers_empty = true;
                         }
 

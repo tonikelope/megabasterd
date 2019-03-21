@@ -27,7 +27,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private boolean _notified;
-    private SmartMegaProxyManager _proxy_manager;
 
     public ChunkDownloader(int id, Download download) {
         _notified = false;
@@ -35,7 +34,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _secure_notify_lock = new Object();
         _id = id;
         _download = download;
-        _proxy_manager = null;
         _error_wait = false;
 
     }
@@ -109,6 +107,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             long init_chunk_time = -1, finish_chunk_time = -1, pause_init_time, paused = 0L;
 
+            SmartMegaProxyManager proxy_manager = _download.getProxy_manager();
+
             while (!_exit && !_download.isStopped()) {
 
                 if (worker_url == null || http_error == 403) {
@@ -128,21 +128,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 if ((chunk_error || slow_proxy) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                    if (_proxy_manager == null) {
-
-                        _proxy_manager = new SmartMegaProxyManager(null);
-
-                    }
-
                     if (current_smart_proxy != null) {
 
-                        _proxy_manager.blockProxy(current_smart_proxy);
+                        proxy_manager.blockProxy(current_smart_proxy);
 
                         Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_smart_proxy});
 
                     }
 
-                    current_smart_proxy = _proxy_manager.getFastestProxy();
+                    current_smart_proxy = proxy_manager.getFastestProxy();
 
                     if (current_smart_proxy != null) {
 

@@ -212,7 +212,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     if (_smart_proxy_threads.isEmpty()) {
                         getGlobal_speed_down_label().setForeground(new Color(0, 128, 255));
                     } else {
-                        getGlobal_speed_down_label().setForeground(Color.BLACK);
+                        getGlobal_speed_down_label().setForeground(new Color(255, 102, 0));
                     }
                 }
 
@@ -770,7 +770,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                                 if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                                    download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), true);
+                                                    download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), true);
 
                                                     getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
@@ -796,7 +796,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                     if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                        download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), getMain_panel().getDefault_slots_down(), false);
+                                        download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false);
 
                                         getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
@@ -1119,7 +1119,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, getMain_panel().getDefault_slots_up());
+                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link);
 
                                     getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
 
