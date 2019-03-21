@@ -580,6 +580,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                                 _slots = getMain_panel().getDefault_slots_down();
 
+                                _view.getSlots_spinner().setValue(_slots);
+
                                 for (int t = 1; t <= _slots; t++) {
                                     ChunkDownloader c = new ChunkDownloader(t, this);
 
