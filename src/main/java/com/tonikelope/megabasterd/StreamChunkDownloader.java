@@ -120,6 +120,8 @@ public class StreamChunkDownloader implements Runnable {
 
                     con.setReadTimeout(Transference.HTTP_TIMEOUT);
 
+                    con.setUseCaches(false);
+
                     con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                     int reads, http_status;

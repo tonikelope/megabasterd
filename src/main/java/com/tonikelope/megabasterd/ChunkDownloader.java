@@ -192,6 +192,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     con.setReadTimeout(Download.HTTP_TIMEOUT);
                 }
 
+                con.setUseCaches(false);
+
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 if (getDownload().isError509()) {

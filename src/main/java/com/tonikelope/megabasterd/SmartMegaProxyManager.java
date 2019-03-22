@@ -81,6 +81,8 @@ public final class SmartMegaProxyManager {
 
                 con.setReadTimeout(Transference.HTTP_TIMEOUT);
 
+                con.setUseCaches(false);
+
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {

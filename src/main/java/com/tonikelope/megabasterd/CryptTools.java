@@ -351,6 +351,8 @@ public final class CryptTools {
 
                 con.setDoOutput(true);
 
+                con.setUseCaches(false);
+
                 con.setConnectTimeout(Upload.HTTP_TIMEOUT);
 
                 con.setReadTimeout(Upload.HTTP_TIMEOUT);
@@ -525,6 +527,8 @@ public final class CryptTools {
             con.setRequestMethod("POST");
 
             con.setDoOutput(true);
+
+            con.setUseCaches(false);
 
             con.setConnectTimeout(Upload.HTTP_TIMEOUT);
 

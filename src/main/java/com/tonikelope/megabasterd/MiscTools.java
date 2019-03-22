@@ -902,6 +902,8 @@ public final class MiscTools {
 
                 con.setReadTimeout(Transference.HTTP_TIMEOUT);
 
+                con.setUseCaches(false);
+
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 int http_status = con.getResponseCode();
@@ -947,6 +949,8 @@ public final class MiscTools {
 
                 con = (HttpURLConnection) url_api.openConnection();
             }
+
+            con.setUseCaches(false);
 
             try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
@@ -999,6 +1003,8 @@ public final class MiscTools {
 
                 con = (HttpURLConnection) mb_url.openConnection();
             }
+
+            con.setUseCaches(false);
 
             try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
