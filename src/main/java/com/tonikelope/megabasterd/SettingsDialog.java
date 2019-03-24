@@ -111,7 +111,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         String default_download_dir = DBTools.selectSettingValue("default_down_dir");
 
-        default_download_dir = Paths.get(default_download_dir == null ? "." : default_download_dir).toAbsolutePath().normalize().toString();
+        default_download_dir = Paths.get(default_download_dir == null ? System.getProperty("user.home") : default_download_dir).toAbsolutePath().normalize().toString();
 
         _download_path = default_download_dir;
 

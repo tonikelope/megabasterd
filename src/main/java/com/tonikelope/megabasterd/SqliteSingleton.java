@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd;
 
+import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -26,6 +27,10 @@ public final class SqliteSingleton {
     private SqliteSingleton() {
 
         _connections_map = new ConcurrentHashMap();
+
+        File database_path = new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION);
+
+        database_path.mkdirs();
     }
 
     public Connection getConn() {
@@ -38,7 +43,7 @@ public final class SqliteSingleton {
 
                 Class.forName("org.sqlite.JDBC");
 
-                conn = DriverManager.getConnection("jdbc:sqlite:" + SQLITE_FILE + "?journal_mode=WAL&synchronous=OFF&journal_size_limit=500");
+                conn = DriverManager.getConnection("jdbc:sqlite:" + System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SQLITE_FILE + "?journal_mode=WAL&synchronous=OFF&journal_size_limit=500");
 
                 _connections_map.put(Thread.currentThread(), conn);
             }
