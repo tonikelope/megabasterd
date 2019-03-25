@@ -1076,28 +1076,30 @@ public final class MiscTools {
         }
     }
 
-    public static void restartApplication(int delay) {
-        StringBuilder cmd = new StringBuilder();
+    public static void restartApplication() {
 
-        cmd.append(System.getProperty("java.home")).append(File.separator).append("bin").append(File.separator).append("java ");
+        if (!MainPanel.getApp_image()) {
 
-        for (String jvmArg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
-            cmd.append(jvmArg).append(" ");
+            StringBuilder cmd = new StringBuilder();
+
+            cmd.append(System.getProperty("java.home")).append(File.separator).append("bin").append(File.separator).append("java ");
+
+            for (String jvmArg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+                cmd.append(jvmArg).append(" ");
+            }
+
+            cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
+
+            cmd.append(MainPanel.class.getName()).append(" native 1");
+
+            try {
+                Runtime.getRuntime().exec(cmd.toString());
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
-        cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
-
-        cmd.append(MainPanel.class.getName()).append(" ");
-
-        cmd.append(String.valueOf(delay));
-
-        try {
-            Runtime.getRuntime().exec(cmd.toString());
-        } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        System.exit(0);
+        System.exit(2);
     }
 
     public static MegaAPI checkMegaAccountLoginAndShowMasterPassDialog(MainPanel main_panel, Container container, String email) throws Exception {

@@ -48,7 +48,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.1";
+    public static final String VERSION = "6.2";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -61,6 +61,7 @@ public final class MainPanel {
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/mbasterd_32.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
+    private static Boolean _app_image;
     private static String _proxy_host;
     private static int _proxy_port;
     private static boolean _use_proxy;
@@ -79,14 +80,21 @@ public final class MainPanel {
         UIDefaults defaults = UIManager.getLookAndFeelDefaults();
         defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
 
+        _app_image = false;
+
         if (args.length > 0) {
 
-            try {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "{0} Waiting {1} seconds before start...", new Object[]{Thread.currentThread().getName(), args[0]});
-                Thread.sleep(Long.parseLong(args[0]) * 1000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            _app_image = args[0].equals("appimage");
+
+            if (args.length > 1) {
+                try {
+                    Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "{0} Waiting {1} seconds before start...", new Object[]{Thread.currentThread().getName(), args[1]});
+                    Thread.sleep(Long.parseLong(args[1]) * 1000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
+
         }
 
         final MainPanel main_panel = new MainPanel();
@@ -97,6 +105,10 @@ public final class MainPanel {
                 main_panel.getView().setVisible(true);
             }
         });
+    }
+
+    public static Boolean getApp_image() {
+        return _app_image;
     }
 
     public static String getFont() {
@@ -759,7 +771,7 @@ public final class MainPanel {
 
             if (restart) {
                 JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
-                restartApplication(1);
+                restartApplication();
             } else {
                 exit(0);
             }
@@ -787,7 +799,7 @@ public final class MainPanel {
 
             if (restart) {
                 JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
-                restartApplication(1);
+                restartApplication();
             } else {
                 exit(0);
             }
