@@ -825,15 +825,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             _file.delete();
 
             if (getChunkmanager() != null) {
-                long chunk_id = getChunkmanager().getLast_chunk_id_written() + 1;
 
-                while (chunk_id < _last_chunk_id_dispatched) {
-                    File chunk_file = new File(getDownload_path() + "/" + getFile_name() + ".chunk" + String.valueOf(chunk_id++));
-
-                    if (chunk_file.exists()) {
-                        chunk_file.delete();
-                    }
-                }
+                getChunkmanager().delete_chunks_temp_dir();
 
                 File parent_download_dir = new File(getDownload_path() + "/" + getFile_name()).getParentFile();
 

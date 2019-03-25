@@ -5,10 +5,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import static java.lang.String.valueOf;
+import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
@@ -63,19 +63,23 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
     private final byte[] _byte_file_key;
     private final byte[] _byte_iv;
     private volatile boolean _exit;
-    private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private final Object _secure_notify_lock;
     private boolean _notified;
+    private final String _chunks_dir;
+
+    public String getChunks_dir() {
+        return _chunks_dir;
+    }
 
     public ChunkManager(Download downloader) throws Exception {
         _notified = false;
         _exit = false;
         _download = downloader;
+        _chunks_dir = _download.getDownload_path() + "/.mb_chunks_" + _download.getFile_name();
         _secure_notify_lock = new Object();
         _file_size = _download.getFile_size();
         _byte_file_key = initMEGALinkKey(_download.getFile_key());
         _byte_iv = initMEGALinkKeyIV(_download.getFile_key());
-        _rejectedChunkIds = new ConcurrentLinkedQueue<>();
 
         if (_download.getProgress() == 0) {
 
@@ -88,6 +92,8 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
             _bytes_written = _download.getProgress();
         }
+
+        _create_chunks_temp_dir();
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager hello LAST CHUNK WRITTEN -> [{1}] {2}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written});
 
@@ -129,6 +135,21 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
         return _last_chunk_id_written;
     }
 
+    private void _create_chunks_temp_dir() {
+
+        File chunks_temp_dir = new File(getChunks_dir());
+        chunks_temp_dir.mkdirs();
+    }
+
+    public void delete_chunks_temp_dir() {
+
+        try {
+            MiscTools.deleteDirectoryRecursion(Paths.get(getChunks_dir()));
+        } catch (IOException ex) {
+            Logger.getLogger(ChunkManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
     @Override
     public void run() {
 
@@ -141,7 +162,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
             if (_file_size > 0) {
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                    File chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+                    File chunk_file = new File(getChunks_dir() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
 
                     while (chunk_file.exists() && chunk_file.canRead()) {
 
@@ -176,7 +197,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
                         chunk_file.delete();
 
-                        chunk_file = new File(_download.getDownload_path() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+                        chunk_file = new File(getChunks_dir() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
                     }
 
                     if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
@@ -186,6 +207,10 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
                         secureWait();
 
                     }
+                }
+
+                if (_bytes_written == _file_size) {
+                    delete_chunks_temp_dir();
                 }
             }
 
