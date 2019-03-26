@@ -83,6 +83,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_preprocess_queue = new ConcurrentLinkedQueue<>();
     }
 
+    public boolean no_transferences() {
+        return getTransference_preprocess_queue().isEmpty() && getTransference_provision_queue().isEmpty() && getTransference_waitstart_queue().isEmpty() && getTransference_running_list().isEmpty();
+    }
+
     public boolean isPaused_all() {
         return _paused_all;
     }

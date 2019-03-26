@@ -262,6 +262,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Streaming server: ON (port ", "Servidor de streaming: ON (puerto ");
         _addTranslation("MC reverse mode: ON (port ", "MC reverse mode: ON (puerto ");
         _addTranslation("Joining file chunks, please wait...", "Juntando chunks, por favor espera...");
+        _addTranslation("Close MegaBasterd when all transfers finish", "Cerrar MegaBasterd cuando todas las transferencias terminen");
 
     }
 

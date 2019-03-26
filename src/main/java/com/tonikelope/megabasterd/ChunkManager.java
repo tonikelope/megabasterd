@@ -75,7 +75,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
         _notified = false;
         _exit = false;
         _download = downloader;
-        _chunks_dir = _download.getDownload_path() + "/.mb_chunks_" + _download.getFile_name();
+        _chunks_dir = _create_chunks_temp_dir();
         _secure_notify_lock = new Object();
         _file_size = _download.getFile_size();
         _byte_file_key = initMEGALinkKey(_download.getFile_key());
@@ -92,8 +92,6 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
             _bytes_written = _download.getProgress();
         }
-
-        _create_chunks_temp_dir();
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager hello LAST CHUNK WRITTEN -> [{1}] {2}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written});
 
@@ -135,10 +133,15 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
         return _last_chunk_id_written;
     }
 
-    private void _create_chunks_temp_dir() {
+    private String _create_chunks_temp_dir() {
 
-        File chunks_temp_dir = new File(getChunks_dir());
+        File chunks_temp_dir = new File(_download.getDownload_path() + "/.mb_chunks_" + new File(_download.getFile_name()).getName());
+
         chunks_temp_dir.mkdirs();
+
+        System.out.println(chunks_temp_dir.getAbsolutePath());
+
+        return chunks_temp_dir.getAbsolutePath();
     }
 
     public void delete_chunks_temp_dir() {
@@ -162,7 +165,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
             if (_file_size > 0) {
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                    File chunk_file = new File(getChunks_dir() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+                    File chunk_file = new File(getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
 
                     while (chunk_file.exists() && chunk_file.canRead()) {
 
@@ -197,7 +200,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
                         chunk_file.delete();
 
-                        chunk_file = new File(getChunks_dir() + "/" + _download.getFile_name() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+                        chunk_file = new File(getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
                     }
 
                     if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {

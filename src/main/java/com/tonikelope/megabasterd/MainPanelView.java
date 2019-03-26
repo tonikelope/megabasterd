@@ -25,6 +25,7 @@ import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
@@ -126,6 +127,10 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public JLabel getMc_reverse_status() {
         return mc_reverse_status;
+    }
+
+    public JCheckBoxMenuItem getAuto_close_menu() {
+        return auto_close_menu;
     }
 
     public void updateKissStreamServerStatus(final String status) {
@@ -294,6 +299,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         clean_all_up_menu = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         hide_tray_menu = new javax.swing.JMenuItem();
+        auto_close_menu = new javax.swing.JCheckBoxMenuItem();
         exit_menu = new javax.swing.JMenuItem();
         edit_menu = new javax.swing.JMenu();
         settings_menu = new javax.swing.JMenuItem();
@@ -547,6 +553,12 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
         file_menu.add(hide_tray_menu);
+
+        auto_close_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        auto_close_menu.setText("Close MegaBasterd when all transfers finish");
+        auto_close_menu.setDoubleBuffered(true);
+        auto_close_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
+        file_menu.add(auto_close_menu);
 
         exit_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         exit_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-shutdown-30.png"))); // NOI18N
@@ -1215,6 +1227,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem about_menu;
+    private javax.swing.JCheckBoxMenuItem auto_close_menu;
     private javax.swing.JMenuItem clean_all_down_menu;
     private javax.swing.JMenuItem clean_all_up_menu;
     private javax.swing.JButton close_all_finished_down_button;
