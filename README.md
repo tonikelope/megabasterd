@@ -3,6 +3,6 @@
 
 ![Screnshot](/src/main/resources/images/mbasterd_screen.png)
 
-<p align="center"><i>Note: MegaBasterd requires <a href="https://java.com" target="_blank">Java</a></i></p>
+<p align="center"><i>Note: MegaBasterd uses <a href="https://java.com" target="_blank">Java</a></i></p>
 
 <p align="center"><a href="https://youtu.be/5TkBXT7osQI">Watch demo</a></p>
