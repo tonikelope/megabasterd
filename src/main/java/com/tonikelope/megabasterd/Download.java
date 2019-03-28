@@ -540,6 +540,12 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         _file = new File(temp_filename);
 
+                        if (_file.getParent() != null) {
+                            File path = new File(_file.getParent());
+
+                            path.mkdirs();
+                        }
+
                         if (_file.exists()) {
                             getView().printStatusNormal("File exists, resuming download...");
 
@@ -697,6 +703,17 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                             }
 
                             Files.move(Paths.get(_file.getAbsolutePath()), Paths.get(filename), StandardCopyOption.REPLACE_EXISTING);
+
+                            if (_custom_chunks_dir != null) {
+
+                                File temp_parent_download_dir = new File(temp_filename).getParentFile();
+
+                                while (!temp_parent_download_dir.getAbsolutePath().equals(_custom_chunks_dir) && temp_parent_download_dir.listFiles().length == 0) {
+                                    temp_parent_download_dir.delete();
+                                    temp_parent_download_dir = temp_parent_download_dir.getParentFile();
+                                }
+
+                            }
 
                             String verify_file = selectSettingValue("verify_down_file");
 
