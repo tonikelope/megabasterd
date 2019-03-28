@@ -135,7 +135,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
     private String _create_chunks_temp_dir() {
 
-        File chunks_temp_dir = new File(_download.getDownload_path() + "/.mb_chunks_" + new File(_download.getFile_name()).getName());
+        File chunks_temp_dir = new File((_download.getCustom_chunks_dir() != null ? _download.getCustom_chunks_dir() : _download.getDownload_path()) + "/.mb_chunks_" + new File(_download.getFile_name()).getName());
 
         chunks_temp_dir.mkdirs();
 

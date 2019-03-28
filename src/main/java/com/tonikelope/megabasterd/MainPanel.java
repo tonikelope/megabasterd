@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.4";
+    public static final String VERSION = "6.5";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -166,6 +166,8 @@ public final class MainPanel {
     private boolean _use_slots_down, _limit_download_speed, _limit_upload_speed, _use_mega_account_down;
     private String _mega_account_down;
     private String _default_download_path;
+    private boolean _use_custom_chunks_dir;
+    private String _custom_chunks_dir;
     private HashMap<String, Object> _mega_accounts;
     private HashMap<String, Object> _elc_accounts;
     private final HashMap<String, MegaAPI> _mega_active_accounts;
@@ -374,6 +376,14 @@ public final class MainPanel {
 
     }
 
+    public boolean isUse_custom_chunks_dir() {
+        return _use_custom_chunks_dir;
+    }
+
+    public String getCustom_chunks_dir() {
+        return _custom_chunks_dir;
+    }
+
     public boolean isExit() {
         return _exit;
     }
@@ -553,6 +563,28 @@ public final class MainPanel {
     }
 
     public void loadUserSettings() {
+
+        String use_custom_chunks_dir = DBTools.selectSettingValue("use_custom_chunks_dir");
+
+        if (use_custom_chunks_dir != null) {
+
+            if (use_custom_chunks_dir.equals("yes")) {
+
+                _use_custom_chunks_dir = true;
+
+                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+
+            } else {
+
+                _use_custom_chunks_dir = false;
+
+                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+            }
+
+        } else {
+
+            _custom_chunks_dir = null;
+        }
 
         String zoom_factor = selectSettingValue("font_zoom");
 
@@ -1072,7 +1104,7 @@ public final class MainPanel {
 
                             if (!tthis.isUse_mega_account_down() || (_mega_accounts.get(email) != null && (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null)) {
 
-                                Download download = new Download(tthis, ma, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false);
+                                Download download = new Download(tthis, ma, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"));
 
                                 getDownload_manager().getTransference_provision_queue().add(download);
 

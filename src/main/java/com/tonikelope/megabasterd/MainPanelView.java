@@ -253,6 +253,14 @@ public final class MainPanelView extends javax.swing.JFrame {
         jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
         jTabbedPane1.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
 
+        String auto_close = selectSettingValue("auto_close");
+
+        if (auto_close != null) {
+            getAuto_close_menu().setSelected(auto_close.equals("yes"));
+        } else {
+            getAuto_close_menu().setSelected(false);
+        }
+
         pack();
     }
 
@@ -558,6 +566,11 @@ public final class MainPanelView extends javax.swing.JFrame {
         auto_close_menu.setText("Close MegaBasterd when all transfers finish");
         auto_close_menu.setDoubleBuffered(true);
         auto_close_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
+        auto_close_menu.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                auto_close_menuActionPerformed(evt);
+            }
+        });
         file_menu.add(auto_close_menu);
 
         exit_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
@@ -782,7 +795,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                                 if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                                    download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), true);
+                                                    download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), true, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null);
 
                                                     getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
@@ -808,7 +821,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                     if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                        download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false);
+                                        download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null);
 
                                         getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
@@ -1224,6 +1237,14 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         dialog.setVisible(true);
     }//GEN-LAST:event_merge_file_menuActionPerformed
+
+    private void auto_close_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_auto_close_menuActionPerformed
+        try {
+            DBTools.insertSettingValue("auto_close", getAuto_close_menu().isSelected() ? "yes" : "no");
+        } catch (SQLException ex) {
+            Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }//GEN-LAST:event_auto_close_menuActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem about_menu;

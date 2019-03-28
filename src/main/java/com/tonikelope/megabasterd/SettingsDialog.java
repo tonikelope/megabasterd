@@ -48,6 +48,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
     public static final String DEFAULT_SMART_PROXY_URL = "https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt";
     private String _download_path;
+    private String _custom_chunks_dir;
     private boolean _settings_ok;
     private final Set<String> _deleted_mega_accounts;
     private final Set<String> _deleted_elc_accounts;
@@ -108,6 +109,46 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         zoom_spinner.setModel(new SpinnerNumberModel(int_zoom_factor, 50, 250, 10));
         ((JSpinner.DefaultEditor) zoom_spinner.getEditor()).getTextField().setEditable(false);
+
+        String use_custom_chunks_dir = DBTools.selectSettingValue("use_custom_chunks_dir");
+
+        if (use_custom_chunks_dir != null) {
+
+            if (use_custom_chunks_dir.equals("yes")) {
+
+                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+
+                custom_chunks_dir_current_label.setText(_custom_chunks_dir != null ? truncateText(_custom_chunks_dir, 80) : "");
+
+                custom_chunks_dir_checkbox.setSelected(true);
+
+                custom_chunks_dir_button.setEnabled(true);
+
+            } else {
+
+                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+
+                custom_chunks_dir_current_label.setText(_custom_chunks_dir != null ? truncateText(_custom_chunks_dir, 80) : "");
+
+                custom_chunks_dir_checkbox.setSelected(false);
+
+                custom_chunks_dir_button.setEnabled(false);
+
+                custom_chunks_dir_current_label.setEnabled(false);
+            }
+
+        } else {
+
+            _custom_chunks_dir = null;
+
+            custom_chunks_dir_current_label.setText("");
+
+            custom_chunks_dir_checkbox.setSelected(false);
+
+            custom_chunks_dir_button.setEnabled(false);
+
+            custom_chunks_dir_current_label.setEnabled(false);
+        }
 
         String default_download_dir = DBTools.selectSettingValue("default_down_dir");
 
@@ -623,6 +664,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
         language_combo = new javax.swing.JComboBox<>();
         font_label = new javax.swing.JLabel();
         font_combo = new javax.swing.JComboBox<>();
+        custom_chunks_dir_button = new javax.swing.JButton();
+        custom_chunks_dir_current_label = new javax.swing.JLabel();
+        custom_chunks_dir_checkbox = new javax.swing.JCheckBox();
+        jSeparator12 = new javax.swing.JSeparator();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -895,7 +940,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 373, Short.MAX_VALUE)
+                .addComponent(downloads_scroll_pane, javax.swing.GroupLayout.DEFAULT_SIZE, 492, Short.MAX_VALUE)
                 .addContainerGap())
         );
 
@@ -986,7 +1031,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_up_speed_label)
                     .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap(176, Short.MAX_VALUE))
+                .addContainerGap(295, Short.MAX_VALUE))
         );
 
         jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_panel); // NOI18N
@@ -1167,7 +1212,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 72, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 131, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1175,7 +1220,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 72, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 132, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1364,6 +1409,25 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         font_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
+        custom_chunks_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        custom_chunks_dir_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-folder-30.png"))); // NOI18N
+        custom_chunks_dir_button.setText("Change it");
+        custom_chunks_dir_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                custom_chunks_dir_buttonActionPerformed(evt);
+            }
+        });
+
+        custom_chunks_dir_current_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+
+        custom_chunks_dir_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        custom_chunks_dir_checkbox.setText("Use custom temporary directory for chunks storage");
+        custom_chunks_dir_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                custom_chunks_dir_checkboxActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
         advanced_panelLayout.setHorizontalGroup(
@@ -1371,6 +1435,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jSeparator1)
                     .addComponent(proxy_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, advanced_panelLayout.createSequentialGroup()
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1399,7 +1464,15 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(export_settings_button))
                             .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(jSeparator1))
+                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(custom_chunks_dir_checkbox)
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addComponent(custom_chunks_dir_button)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(custom_chunks_dir_current_label)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jSeparator12))
                 .addContainerGap())
         );
         advanced_panelLayout.setVerticalGroup(
@@ -1407,31 +1480,36 @@ public final class SettingsDialog extends javax.swing.JDialog {
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator2)
                     .addGroup(advanced_panelLayout.createSequentialGroup()
-                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(export_settings_button)
-                                    .addComponent(import_settings_button))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jButton1))
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(font_label)
-                                    .addComponent(font_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(zoom_label)
-                                    .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                    .addComponent(jLabel2)
-                                    .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(export_settings_button)
+                            .addComponent(import_settings_button))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jButton1))
+                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(font_label)
+                            .addComponent(font_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(zoom_label)
+                            .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel2)
+                            .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jSeparator2, javax.swing.GroupLayout.PREFERRED_SIZE, 112, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 13, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(custom_chunks_dir_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(custom_chunks_dir_button)
+                    .addComponent(custom_chunks_dir_current_label))
                 .addGap(18, 18, 18)
+                .addComponent(jSeparator12, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rec_zoom_label)
@@ -1463,7 +1541,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 440, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1510,6 +1588,8 @@ public final class SettingsDialog extends javax.swing.JDialog {
             settings.put("megacrypter_reverse", megacrypter_reverse_checkbox.isSelected() ? "yes" : "no");
             settings.put("megacrypter_reverse_port", String.valueOf(megacrypter_reverse_port_spinner.getValue()));
             settings.put("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
+            settings.put("use_custom_chunks_dir", custom_chunks_dir_checkbox.isSelected() ? "yes" : "no");
+            settings.put("custom_chunks_dir", _custom_chunks_dir);
 
             String old_font = DBTools.selectSettingValue("font");
 
@@ -2644,6 +2724,40 @@ public final class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_jButton1ActionPerformed
 
+    private void custom_chunks_dir_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_custom_chunks_dir_checkboxActionPerformed
+
+        if (custom_chunks_dir_checkbox.isSelected()) {
+
+            custom_chunks_dir_button.setEnabled(true);
+            custom_chunks_dir_current_label.setEnabled(true);
+
+        } else {
+
+            custom_chunks_dir_button.setEnabled(false);
+            custom_chunks_dir_current_label.setEnabled(false);
+
+        }
+    }//GEN-LAST:event_custom_chunks_dir_checkboxActionPerformed
+
+    private void custom_chunks_dir_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_custom_chunks_dir_buttonActionPerformed
+        javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
+        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+
+        filechooser.setCurrentDirectory(new java.io.File(_download_path));
+        filechooser.setDialogTitle("Temporary chunks directory");
+        filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+        filechooser.setAcceptAllFileFilterUsed(false);
+
+        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+            File file = filechooser.getSelectedFile();
+
+            _custom_chunks_dir = file.getAbsolutePath();
+
+            this.custom_chunks_dir_current_label.setText(truncateText(_custom_chunks_dir, 80));
+        }
+    }//GEN-LAST:event_custom_chunks_dir_buttonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -2651,6 +2765,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JPanel advanced_panel;
     private javax.swing.JButton cancel_button;
     private javax.swing.JButton change_download_dir_button;
+    private javax.swing.JButton custom_chunks_dir_button;
+    private javax.swing.JCheckBox custom_chunks_dir_checkbox;
+    private javax.swing.JLabel custom_chunks_dir_current_label;
     private javax.swing.JLabel default_dir_label;
     private javax.swing.JLabel default_slots_down_label;
     private javax.swing.JSpinner default_slots_down_spinner;
@@ -2676,6 +2793,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator10;
     private javax.swing.JSeparator jSeparator11;
+    private javax.swing.JSeparator jSeparator12;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
     private javax.swing.JSeparator jSeparator4;

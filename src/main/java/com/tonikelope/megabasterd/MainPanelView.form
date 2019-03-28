@@ -142,6 +142,9 @@
                   <Image iconType="3" name="/images/icons8-cancel-30.png"/>
                 </Property>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="auto_close_menuActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="exit_menu">
               <Properties>

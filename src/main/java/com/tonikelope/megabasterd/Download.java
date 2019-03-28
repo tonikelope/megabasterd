@@ -16,6 +16,9 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Long.valueOf;
 import static java.lang.Thread.sleep;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -58,6 +61,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private boolean _notified;
     private final String _url;
     private final String _download_path;
+    private final String _custom_chunks_dir;
     private String _file_name;
     private String _file_key;
     private Long _file_size;
@@ -91,7 +95,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private volatile boolean _error509;
     private volatile boolean _turbo_proxy_mode;
 
-    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart) {
+    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir) {
 
         _paused_workers = 0;
         _ma = ma;
@@ -131,6 +135,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _thread_pool = newCachedThreadPool();
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
+        _custom_chunks_dir = custom_chunks_dir;
     }
 
     public Download(Download download) {
@@ -171,7 +176,12 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _thread_pool = newCachedThreadPool();
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
+        _custom_chunks_dir = download.getCustom_chunks_dir();
 
+    }
+
+    public String getCustom_chunks_dir() {
+        return _custom_chunks_dir;
     }
 
     public long getLast_chunk_id_dispatched() {
@@ -526,9 +536,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         _progress_bar_rate = MAX_VALUE / (double) _file_size;
 
-                        filename = _download_path + "/" + _file_name;
+                        String temp_filename = (getCustom_chunks_dir() != null ? getCustom_chunks_dir() : _download_path) + "/" + _file_name + ".mctemp";
 
-                        _file = new File(filename + ".mctemp");
+                        _file = new File(temp_filename);
 
                         if (_file.exists()) {
                             getView().printStatusNormal("File exists, resuming download...");
@@ -541,7 +551,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                                 getView().printStatusNormal("Truncating temp file...");
 
-                                try (FileChannel out_truncate = new FileOutputStream(filename + ".mctemp", true).getChannel()) {
+                                try (FileChannel out_truncate = new FileOutputStream(temp_filename, true).getChannel()) {
                                     out_truncate.truncate(max_size);
                                 }
                             }
@@ -686,7 +696,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                 throw new IOException("El tamaño del fichero es incorrecto!");
                             }
 
-                            _file.renameTo(new File(filename));
+                            Files.move(Paths.get(_file.getAbsolutePath()), Paths.get(filename), StandardCopyOption.REPLACE_EXISTING);
 
                             String verify_file = selectSettingValue("verify_down_file");
 
@@ -930,7 +940,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     try {
 
-                        insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
+                        insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
 
                         _provision_ok = true;
 
@@ -947,7 +957,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 try {
 
-                    insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire);
+                    insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
 
                     _provision_ok = true;
 
