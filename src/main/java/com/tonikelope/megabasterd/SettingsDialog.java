@@ -854,9 +854,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.Alignment.LEADING, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.LEADING, downloads_panelLayout.createSequentialGroup()
                                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(downloads_panelLayout.createSequentialGroup()
-                                        .addGap(21, 21, 21)
-                                        .addComponent(use_mega_label))
                                     .addComponent(smart_proxy_checkbox)
                                     .addGroup(downloads_panelLayout.createSequentialGroup()
                                         .addComponent(max_downloads_label)
@@ -864,9 +861,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         .addComponent(max_downloads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(multi_slot_down_checkbox)
                                     .addComponent(limit_download_speed_checkbox)
+                                    .addComponent(rec_smart_proxy_label)
                                     .addGroup(downloads_panelLayout.createSequentialGroup()
                                         .addGap(21, 21, 21)
                                         .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(use_mega_label)
                                             .addComponent(rec_download_slots_label)
                                             .addGroup(downloads_panelLayout.createSequentialGroup()
                                                 .addComponent(default_slots_down_label)
@@ -875,8 +874,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                             .addGroup(downloads_panelLayout.createSequentialGroup()
                                                 .addComponent(max_down_speed_label)
                                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                                .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                                    .addComponent(rec_smart_proxy_label))
+                                                .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))
                                 .addGap(0, 73, Short.MAX_VALUE)))
                         .addGap(12, 12, 12))))
         );
@@ -945,7 +943,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         downloads_scrollpane.setViewportView(downloads_panel);
 
-        jTabbedPane1.addTab("Downloads", downloads_scrollpane);
+        jTabbedPane1.addTab("Downloads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-download-from-ftp-30.png")), downloads_scrollpane); // NOI18N
 
         uploads_scrollpane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
@@ -1037,7 +1035,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         uploads_scrollpane.setViewportView(uploads_panel);
 
-        jTabbedPane1.addTab("Uploads", uploads_scrollpane);
+        jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_scrollpane); // NOI18N
 
         accounts_panel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
@@ -1215,7 +1213,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1223,7 +1221,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 76, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 86, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1521,7 +1519,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
         advanced_scrollpane.setViewportView(advanced_panel);
 
-        jTabbedPane1.addTab("Advanced", advanced_scrollpane);
+        jTabbedPane1.addTab("Advanced", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-administrative-tools-30.png")), advanced_scrollpane); // NOI18N
 
         status.setFont(new java.awt.Font("Dialog", 3, 14)); // NOI18N
         status.setForeground(new java.awt.Color(102, 102, 102));
@@ -1546,7 +1544,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 448, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 468, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
