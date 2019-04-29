@@ -545,7 +545,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             }
 
-            if (!_main_panel.isExit() && !_pausing_all && !_paused_all && !isRemoving_transferences() && !isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
+            if (!_main_panel.isExit() && !isPausing_all() && !isRemoving_transferences() && !isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
 
                 setStarting_transferences(true);
 

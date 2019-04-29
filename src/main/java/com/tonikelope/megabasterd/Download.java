@@ -818,7 +818,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     getView().printStatusError("File already exists!");
 
-                    _status_error = true;
                 }
 
             } else if (_status_error) {
