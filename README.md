@@ -6,3 +6,5 @@
 <p align="center"><i>Note: MegaBasterd uses <a href="https://java.com" target="_blank">Java</a></i></p>
 
 <p align="center"><a href="https://youtu.be/5TkBXT7osQI">Watch demo</a></p>
+
+<p align="center"><i>"If it compiles, it is good, if it boots up it is perfect." (Linus Torvalds)</i></p>
