@@ -1520,6 +1520,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         }
 
+        _retrying_request = false;
+
         return file_info;
 
     }
@@ -1596,6 +1598,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             });
 
         }
+
+        _retrying_request = false;
 
         return dl_url;
     }
