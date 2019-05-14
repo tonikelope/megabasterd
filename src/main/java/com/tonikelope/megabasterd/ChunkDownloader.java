@@ -126,7 +126,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 String chunk_url = ChunkManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
 
-                if ((chunk_error || slow_proxy) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                if ((http_error == 509 || slow_proxy || (chunk_error && current_smart_proxy != null)) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
                     if (current_smart_proxy != null) {
 
