@@ -77,7 +77,7 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        made_in_spain_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/made_in_spain.jpg"))); // NOI18N
+        made_in_spain_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/m_in_spain.png"))); // NOI18N
         made_in_spain_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         made_in_spain_label.setDoubleBuffered(true);
         made_in_spain_label.addMouseListener(new java.awt.event.MouseAdapter() {

@@ -115,7 +115,7 @@
     <Component class="javax.swing.JLabel" name="made_in_spain_label">
       <Properties>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/images/made_in_spain.jpg"/>
+          <Image iconType="3" name="/images/m_in_spain.png"/>
         </Property>
         <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
           <Color id="Cursor de Mano"/>
