@@ -19,7 +19,7 @@ import java.util.logging.Logger;
 public final class SmartMegaProxyManager {
 
     public static String DEFAULT_SMART_PROXY_URL = "https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt";
-    public static final int BLOCK_TIME = 600;
+    public static final int BLOCK_TIME = 300;
     private volatile String _proxy_list_url;
     private final LinkedHashMap<String, Long> _proxy_list;
     private final MainPanel _main_panel;
@@ -40,9 +40,11 @@ public final class SmartMegaProxyManager {
 
         Set<String> keys = _proxy_list.keySet();
 
+        Long current_time = System.currentTimeMillis();
+
         for (String k : keys) {
 
-            if (_proxy_list.get(k) < System.currentTimeMillis()) {
+            if (_proxy_list.get(k) < current_time) {
 
                 return k;
             }
@@ -105,10 +107,12 @@ public final class SmartMegaProxyManager {
 
                     _proxy_list.clear();
 
+                    Long current_time = System.currentTimeMillis();
+
                     for (String proxy : proxy_list) {
 
                         if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            _proxy_list.put(proxy, System.currentTimeMillis());
+                            _proxy_list.put(proxy, current_time);
                         }
                     }
                 }

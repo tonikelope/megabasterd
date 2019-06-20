@@ -1266,7 +1266,7 @@ public final class MiscTools {
                 } catch (MegaAPIException exception) {
 
                     if (exception.getCode() == -6) {
-                        JOptionPane.showMessageDialog((Frame) container.getParent(), LabelTranslatorSingleton.getInstance().translate("You've tried to login too many times. Wait an hour."), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(container.getParent(), LabelTranslatorSingleton.getInstance().translate("You've tried to login too many times. Wait an hour."), "Error", JOptionPane.ERROR_MESSAGE);
                     }
 
                     throw exception;

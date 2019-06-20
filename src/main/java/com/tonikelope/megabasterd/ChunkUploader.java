@@ -184,13 +184,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     secureWait();
 
-                                } else if (!_upload.isPaused() && _upload.getMain_panel().getUpload_manager().isPaused_all()) {
-
-                                    _upload.pause();
-
-                                    _upload.pause_worker();
-
-                                    secureWait();
                                 }
                             }
                         }

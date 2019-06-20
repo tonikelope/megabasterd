@@ -2,12 +2,14 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JLabel;
+import org.apache.commons.collections4.queue.CircularFifoQueue;
 
 /**
  *
@@ -16,6 +18,7 @@ import javax.swing.JLabel;
 public final class SpeedMeter implements Runnable {
 
     public static final int SLEEP = 3000;
+    public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 5;
     private final JLabel _speed_label;
     private final JLabel _rem_label;
     private final TransferenceManager _trans_manager;
@@ -23,19 +26,50 @@ public final class SpeedMeter implements Runnable {
     private long _speed_counter;
     private long _speed_acumulator;
     private volatile long _max_avg_global_speed;
+    private volatile long _avg_chunk_speed;
+    private final CircularFifoQueue _chunk_speed_queue;
 
     SpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
         _speed_label = sp_label;
         _rem_label = rem_label;
         _trans_manager = trans_manager;
         _transferences = new ConcurrentHashMap<>();
+        _chunk_speed_queue = new CircularFifoQueue(CHUNK_SPEED_QUEUE_MAX_SIZE);
         _speed_counter = 0L;
         _speed_acumulator = 0L;
         _max_avg_global_speed = 0L;
+        _avg_chunk_speed = -1;
     }
 
     private long _getAvgGlobalSpeed() {
         return Math.round((double) _speed_acumulator / _speed_counter);
+    }
+
+    public void setAvg_chunk_speed(long _avg_chunk_speed) {
+        this._avg_chunk_speed = _avg_chunk_speed;
+    }
+
+    public long getAvg_chunk_speed() {
+        return _avg_chunk_speed;
+    }
+
+    public void update_avg_chunk_speed(long speed) {
+
+        synchronized (this._chunk_speed_queue) {
+
+            this._chunk_speed_queue.add(speed);
+
+            long acumulador = 0;
+
+            Iterator i = this._chunk_speed_queue.iterator();
+
+            while (i.hasNext()) {
+
+                acumulador += (long) i.next();
+            }
+
+            this._avg_chunk_speed = Math.round(((double) acumulador) / this._chunk_speed_queue.size());
+        }
     }
 
     public void attachTransference(Transference transference) {

@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tonikelope</groupId>
     <artifactId>MegaBasterd</artifactId>
-    <version>6.12</version>
+    <version>6.13</version>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
@@ -28,6 +28,11 @@
             <artifactId>jackson-annotations</artifactId>
             <version>2.9.9</version>
             <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-collections4</artifactId>
+            <version>4.3</version>
         </dependency>
     </dependencies>
     <properties>

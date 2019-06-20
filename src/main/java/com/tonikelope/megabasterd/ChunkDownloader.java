@@ -20,7 +20,7 @@ import java.util.logging.Logger;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final double SLOW_PROXY_PERC = 0.5;
+    public static final double SLOW_PROXY_PERC = 0.1;
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
@@ -248,7 +248,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
-                                    while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
+                                    while (!_exit && !slow_proxy && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
 
                                         tmp_chunk_file_os.write(buffer, 0, reads);
 
@@ -268,19 +268,24 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                             paused += System.currentTimeMillis() - pause_init_time;
 
-                                        } else if (!_download.isPaused() && _download.getMain_panel().getDownload_manager().isPaused_all()) {
-
-                                            _download.pause();
-
-                                            _download.pause_worker();
-
-                                            pause_init_time = System.currentTimeMillis();
-
-                                            secureWait();
-
-                                            paused += System.currentTimeMillis() - pause_init_time;
                                         }
 
+                                        if (current_smart_proxy != null) {
+
+                                            long avg_chunk_speed = _download.getMain_panel().getGlobal_dl_speed().getAvg_chunk_speed();
+
+                                            if (avg_chunk_speed != -1) {
+                                                //Proxy speed benchmark
+                                                long chunk_speed = Math.round(chunk_reads / (((double) (System.currentTimeMillis() - init_chunk_time - paused)) / 1000));
+
+                                                if (chunk_speed < Math.round(avg_chunk_speed * SLOW_PROXY_PERC)) {
+
+                                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker WARNING -> PROXY {1} CHUNK DOWNLOAD SPEED: {2}/s IS VERY SLOW (average is {3}/s)", new Object[]{_id, current_smart_proxy, formatBytes(chunk_speed), formatBytes(avg_chunk_speed)});
+
+                                                    slow_proxy = true;
+                                                }
+                                            }
+                                        }
                                     }
 
                                     finish_chunk_time = System.currentTimeMillis();
@@ -320,20 +325,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             http_error = 0;
 
-                            _download.getChunkmanager().secureNotify();
+                            if (current_smart_proxy != null) {
 
-                            if (current_smart_proxy != null && finish_chunk_time != -1) {
+                                //Update average chunk download speed using SmartProxy
+                                long chunk_speed = Math.round(chunk_size / (((double) (finish_chunk_time - init_chunk_time - paused)) / 1000));
+                                _download.getMain_panel().getGlobal_dl_speed().update_avg_chunk_speed(chunk_speed);
 
-                                //Proxy speed benchmark
-                                long chunk_speed = Math.round(chunk_size / ((double) (finish_chunk_time - init_chunk_time - paused) / 1000));
-
-                                if (chunk_speed < Math.round(((double) _download.getMain_panel().getGlobal_dl_speed().getMaxAvgGlobalSpeed() / _download.getMain_panel().getDownload_manager().calcTotalSlotsCount()) * SLOW_PROXY_PERC)) {
-
-                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker WARNING -> PROXY SPEED: {1}/s is SLOW", new Object[]{_id, formatBytes(chunk_speed)});
-
-                                    slow_proxy = true;
-                                }
                             }
+
+                            _download.getChunkmanager().secureNotify();
                         }
                     }
 
