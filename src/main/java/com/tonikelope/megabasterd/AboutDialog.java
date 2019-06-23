@@ -55,6 +55,7 @@ public final class AboutDialog extends javax.swing.JDialog {
         mb_label = new javax.swing.JLabel();
         check_version_button = new javax.swing.JButton();
         dot_com_label = new javax.swing.JLabel();
+        java_version = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("About");
@@ -167,6 +168,11 @@ public final class AboutDialog extends javax.swing.JDialog {
             }
         });
 
+        java_version.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        java_version.setForeground(new java.awt.Color(102, 102, 102));
+        java_version.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        java_version.setText(System.getProperty("java.vm.name")+" "+System.getProperty("java.version"));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -174,7 +180,14 @@ public final class AboutDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(subtitle_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(mcdown_url_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(check_version_button))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(made_in_spain_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(dot_com_label)
@@ -185,13 +198,9 @@ public final class AboutDialog extends javax.swing.JDialog {
                                 .addGap(18, 18, 18)
                                 .addComponent(mc_logo_label))
                             .addComponent(author_webpage_label, javax.swing.GroupLayout.Alignment.TRAILING)))
-                    .addComponent(subtitle_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(mcdown_url_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(check_version_button)))
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(java_version, javax.swing.GroupLayout.PREFERRED_SIZE, 481, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -207,7 +216,7 @@ public final class AboutDialog extends javax.swing.JDialog {
                             .addComponent(check_version_button))))
                 .addGap(18, 18, 18)
                 .addComponent(subtitle_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(made_in_spain_label)
                     .addComponent(dot_com_label)
@@ -217,7 +226,9 @@ public final class AboutDialog extends javax.swing.JDialog {
                             .addComponent(mc_logo_label))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(author_webpage_label)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(java_version)
+                .addContainerGap())
         );
 
         pack();
@@ -340,6 +351,7 @@ public final class AboutDialog extends javax.swing.JDialog {
     private javax.swing.JLabel author_webpage_label;
     private javax.swing.JButton check_version_button;
     private javax.swing.JLabel dot_com_label;
+    private javax.swing.JLabel java_version;
     private javax.swing.JLabel made_in_spain_label;
     private javax.swing.JLabel mb_label;
     private javax.swing.JLabel mc_logo_label;

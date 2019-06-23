@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.13";
+    public static final String VERSION = "6.14";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -1016,56 +1016,57 @@ public final class MainPanel {
     }
 
     private boolean checkAppIsRunning() {
-        boolean app_is_running = false;
+
+        boolean app_is_running = true;
 
         try {
+            Socket clientSocket = new Socket(InetAddress.getLoopbackAddress(), WATCHDOG_PORT);
 
-            final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
+            clientSocket.close();
 
-            THREAD_POOL.execute(new Runnable() {
+        } catch (Exception ex) {
 
-                @Override
-                public void run() {
-
-                    final ServerSocket socket = serverSocket;
-
-                    while (true) {
-
-                        try {
-                            socket.accept();
-
-                            swingInvoke(
-                                    new Runnable() {
-                                @Override
-                                public void run() {
-                                    getView().setExtendedState(NORMAL);
-
-                                    getView().setVisible(true);
-                                }
-                            });
-
-                        } catch (IOException ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
-                        }
-                    }
-
-                }
-            });
-
-        } catch (IOException ex) {
-
-            app_is_running = true;
+            app_is_running = false;
 
             try {
 
-                Socket clientSocket = new Socket(InetAddress.getLoopbackAddress(), WATCHDOG_PORT);
+                final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
 
-                clientSocket.close();
+                THREAD_POOL.execute(new Runnable() {
 
-            } catch (IOException ex1) {
+                    @Override
+                    public void run() {
 
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex1);
+                        final ServerSocket socket = serverSocket;
+
+                        while (true) {
+
+                            try {
+                                socket.accept();
+
+                                swingInvoke(
+                                        new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        getView().setExtendedState(NORMAL);
+
+                                        getView().setVisible(true);
+                                    }
+                                });
+
+                            } catch (Exception ex) {
+                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+
+                    }
+                });
+            } catch (Exception ex2) {
+
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex2);
+
             }
+
         }
 
         return app_is_running;

@@ -138,7 +138,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Default account:", "Cuenta por defecto:");
         _addTranslation("TCP Port:", "Puerto TCP:");
         _addTranslation("Note: you MUST \"OPEN\" this port in your router/firewall.", "Nota: es OBLIGATORIO \"ABRIR\" este puerto en tu router/firewall.");
-        _addTranslation("Note: enable it in order to mitigate bandwidth limit. (Multi slot required).", "Nota: actívalo para mitigar el límite de descarga de MEGA.");
+        _addTranslation("Note: enable it in order to mitigate bandwidth limit. (Multi slot required).", "Nota: actívalo para mitigar el límite de descarga de MEGA. (Se requiere muti slot).");
         _addTranslation("Max parallel downloads:", "Máximas descargas simultáneas:");
         _addTranslation("Max parallel uploads:", "Máximas subidas simultáneas:");
         _addTranslation("Note: slots consume RAM, so use them moderately.", "Nota: los slots consumen RAM, así que úsalos con moderación");
