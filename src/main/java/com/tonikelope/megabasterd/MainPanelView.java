@@ -199,34 +199,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     }
 
-    public void setSmartProxy(boolean enabled) {
-
-        if (enabled) {
-            _smart_proxy_threads.put(Thread.currentThread(), true);
-        } else {
-            _smart_proxy_threads.remove(Thread.currentThread());
-        }
-
-        if (!_main_panel.isLimit_download_speed()) {
-
-            swingInvoke(
-                    new Runnable() {
-                @Override
-                public void run() {
-
-                    if (_smart_proxy_threads.isEmpty()) {
-                        getGlobal_speed_down_label().setForeground(new Color(0, 128, 255));
-                    } else {
-                        getGlobal_speed_down_label().setForeground(new Color(255, 102, 0));
-                    }
-                }
-
-            });
-
-        }
-
-    }
-
     public MainPanelView(MainPanel main_panel) {
 
         _main_panel = main_panel;
@@ -553,7 +525,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(jSeparator2);
 
         hide_tray_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        hide_tray_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/mbasterd_32.png"))); // NOI18N
         hide_tray_menu.setText("Hide to tray");
         hide_tray_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

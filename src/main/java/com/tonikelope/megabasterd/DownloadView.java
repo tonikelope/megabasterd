@@ -621,11 +621,16 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
         });
     }
 
-    public void set509Error(boolean error) {
+    public void set509Error() {
 
-        _download.setError509(error);
+        if (!_download.isError509()) {
 
-        speed_label.setIcon(error ? new javax.swing.ImageIcon(getClass().getResource("/images/icons8-error-40.png")) : null);
+            _download.setError509(true);
+
+            speed_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-error-40.png")));
+
+        }
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

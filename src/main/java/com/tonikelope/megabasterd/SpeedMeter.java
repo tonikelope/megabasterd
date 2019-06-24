@@ -55,20 +55,23 @@ public final class SpeedMeter implements Runnable {
 
     public void update_avg_chunk_speed(long speed) {
 
-        synchronized (this._chunk_speed_queue) {
+        synchronized (_chunk_speed_queue) {
 
             this._chunk_speed_queue.add(speed);
 
-            long acumulador = 0;
+            if (_chunk_speed_queue.size() == _chunk_speed_queue.maxSize()) {
 
-            Iterator i = this._chunk_speed_queue.iterator();
+                long acumulador = 0;
 
-            while (i.hasNext()) {
+                Iterator i = _chunk_speed_queue.iterator();
 
-                acumulador += (long) i.next();
+                while (i.hasNext()) {
+
+                    acumulador += (long) i.next();
+                }
+
+                _avg_chunk_speed = Math.round(((double) acumulador) / _chunk_speed_queue.size());
             }
-
-            this._avg_chunk_speed = Math.round(((double) acumulador) / this._chunk_speed_queue.size());
         }
     }
 

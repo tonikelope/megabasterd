@@ -122,9 +122,6 @@
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="0"/>
                 </Property>
-                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/images/mbasterd_32.png"/>
-                </Property>
                 <Property name="text" type="java.lang.String" value="Hide to tray"/>
               </Properties>
               <Events>

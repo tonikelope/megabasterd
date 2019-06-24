@@ -5,7 +5,6 @@ import static com.tonikelope.megabasterd.CryptTools.genDecrypter;
 import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
 import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKeyIV;
 import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -40,8 +39,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             long chunk_id, bytes_downloaded = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
             byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
-
-            getDownload().getView().set509Error(false);
 
             CipherInputStream cis = null;
 
@@ -99,10 +96,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     http_error = 0;
 
-                    if (getDownload().isError509()) {
-                        getDownload().getView().set509Error(false);
-                    }
-
                     if (http_status != 200) {
 
                         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
@@ -111,7 +104,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         if (http_error == 509) {
 
-                            getDownload().getView().set509Error(true);
+                            getDownload().getView().set509Error();
 
                         }
 
@@ -123,7 +116,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             setError_wait(true);
 
-                            Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException excep) {
+                            }
 
                             setError_wait(false);
                         }
@@ -152,13 +148,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                     secureWait();
 
-                                } else if (!getDownload().isPaused() && getDownload().getMain_panel().getDownload_manager().isPaused_all()) {
-
-                                    getDownload().pause();
-
-                                    getDownload().pause_worker_mono();
-
-                                    secureWait();
                                 }
 
                             }
@@ -178,7 +167,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     }
 
-                } catch (IOException | InterruptedException ex) {
+                } catch (IOException ex) {
 
                     Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
 
@@ -198,7 +187,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             setError_wait(true);
 
-                            Thread.sleep(getWaitTimeExpBackOff(++conta_error) * 1000);
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException excep) {
+                            }
 
                             setError_wait(false);
                         }

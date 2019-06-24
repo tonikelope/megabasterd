@@ -2,6 +2,7 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import java.awt.Color;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -20,7 +21,7 @@ import java.util.logging.Logger;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final double SLOW_PROXY_PERC = 0.1;
+    public static final double SLOW_PROXY_PERC = 0.3;
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
@@ -99,7 +100,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         try {
 
-            int http_error = 0, conta_error = 0, http_status = -1;
+            int http_error = 0, http_status = -1;
 
             boolean timeout = false, chunk_error = false, slow_proxy = false;
 
@@ -132,7 +133,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         proxy_manager.blockProxy(current_smart_proxy);
 
-                        Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_smart_proxy});
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_smart_proxy});
 
                     }
 
@@ -148,7 +149,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         con = (HttpURLConnection) url.openConnection(proxy);
 
-                        getDownload().getMain_panel().getView().setSmartProxy(true);
+                        getDownload().getView().getSpeed_label().setForeground(new Color(255, 102, 0));
 
                         getDownload().enableProxyTurboMode();
 
@@ -157,8 +158,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         URL url = new URL(chunk_url);
 
                         con = (HttpURLConnection) url.openConnection();
-
-                        getDownload().getMain_panel().getView().setSmartProxy(false);
                     }
 
                 } else {
@@ -180,8 +179,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     }
 
                     current_smart_proxy = null;
-
-                    getDownload().getMain_panel().getView().setSmartProxy(false);
                 }
 
                 if (current_smart_proxy != null) {
@@ -195,12 +192,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 con.setUseCaches(false);
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
-
-                if (getDownload().isError509()) {
-                    getDownload().getView().set509Error(false);
-                }
-
-                http_error = 0;
 
                 long chunk_reads = 0;
 
@@ -222,12 +213,12 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (http_status != 200) {
 
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] Failed chunk download : HTTP error code : {2}", new Object[]{Thread.currentThread().getName(), _id, http_status});
 
                             http_error = http_status;
 
                             if (http_error == 509 && MainPanel.isUse_smart_proxy()) {
-                                getDownload().getView().set509Error(true);
+                                getDownload().getView().set509Error();
                             }
 
                         } else {
@@ -248,7 +239,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
-                                    while (!_exit && !slow_proxy && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
+                                    while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
 
                                         tmp_chunk_file_os.write(buffer, 0, reads);
 
@@ -270,22 +261,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                         }
 
-                                        if (current_smart_proxy != null) {
-
-                                            long avg_chunk_speed = _download.getMain_panel().getGlobal_dl_speed().getAvg_chunk_speed();
-
-                                            if (avg_chunk_speed != -1) {
-                                                //Proxy speed benchmark
-                                                long chunk_speed = Math.round(chunk_reads / (((double) (System.currentTimeMillis() - init_chunk_time - paused)) / 1000));
-
-                                                if (chunk_speed < Math.round(avg_chunk_speed * SLOW_PROXY_PERC)) {
-
-                                                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker WARNING -> PROXY {1} CHUNK DOWNLOAD SPEED: {2}/s IS VERY SLOW (average is {3}/s)", new Object[]{_id, current_smart_proxy, formatBytes(chunk_speed), formatBytes(avg_chunk_speed)});
-
-                                                    slow_proxy = true;
-                                                }
-                                            }
-                                        }
                                     }
 
                                     finish_chunk_time = System.currentTimeMillis();
@@ -319,8 +294,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                 tmp_chunk_file.renameTo(chunk_file);
                             }
 
-                            conta_error = 0;
-
                             chunk_error = false;
 
                             http_error = 0;
@@ -329,8 +302,21 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 //Update average chunk download speed using SmartProxy
                                 long chunk_speed = Math.round(chunk_size / (((double) (finish_chunk_time - init_chunk_time - paused)) / 1000));
+
                                 _download.getMain_panel().getGlobal_dl_speed().update_avg_chunk_speed(chunk_speed);
 
+                                long avg_chunk_speed = _download.getMain_panel().getGlobal_dl_speed().getAvg_chunk_speed();
+
+                                if (avg_chunk_speed != -1) {
+                                    //Proxy speed benchmark
+
+                                    if (chunk_speed < Math.round(avg_chunk_speed * SLOW_PROXY_PERC)) {
+
+                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] WARNING -> PROXY {2} CHUNK DOWNLOAD SPEED: {3}/s SEEMS TO BE SLOW (average is {4}/s)", new Object[]{Thread.currentThread().getName(), _id, current_smart_proxy, formatBytes(chunk_speed), formatBytes(avg_chunk_speed)});
+
+                                        slow_proxy = true;
+                                    }
+                                }
                             }
 
                             _download.getChunkmanager().secureNotify();
@@ -366,13 +352,16 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit && !_download.isStopped() && !timeout && (http_error != 509 || !MainPanel.isUse_smart_proxy()) && http_error != 403) {
+                        if (!_exit && !_download.isStopped() && !timeout && (http_error != 509 || current_smart_proxy != null) && http_error != 403) {
 
                             _error_wait = true;
 
                             _download.getView().updateSlotsStatus();
 
-                            Thread.sleep(getWaitTimeExpBackOff(++conta_error) * 1000);
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException excep) {
+                            }
 
                             _error_wait = false;
 

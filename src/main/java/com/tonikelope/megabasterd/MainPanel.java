@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.14";
+    public static final String VERSION = "6.15";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -61,7 +61,7 @@ public final class MainPanel {
     public static Font DEFAULT_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
     public static final float ZOOM_FACTOR = 1.0f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
-    public static final String ICON_FILE = "/images/mbasterd_32.png";
+    public static final String ICON_FILE = "/images/pica_roja_big.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
     private static Boolean _app_image;
     private static String _proxy_host;
