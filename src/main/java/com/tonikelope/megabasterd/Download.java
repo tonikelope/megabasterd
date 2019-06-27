@@ -4,6 +4,7 @@ import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -92,8 +93,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private long _last_chunk_id_dispatched;
     private final MegaAPI _ma;
     private volatile boolean _canceled;
-    private volatile boolean _error509;
-    private volatile boolean _turbo_proxy_mode;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir) {
 
@@ -121,8 +120,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _file_pass = file_pass;
         _file_noexpire = file_noexpire;
         _use_slots = use_slots;
-        _error509 = false;
-        _turbo_proxy_mode = false;
         _restart = restart;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
@@ -207,9 +204,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         synchronized (_turbo_proxy_lock) {
 
-            if (!_turbo_proxy_mode) {
-
-                _turbo_proxy_mode = true;
+            if (getChunkworkers().size() < Transference.MAX_WORKERS) {
 
                 Download tthis = this;
 
@@ -219,6 +214,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     public void run() {
 
                         synchronized (_workers_lock) {
+
+                            getView().getSpeed_label().setForeground(Color.BLACK);
 
                             getView().getSlots_spinner().setEnabled(false);
 
@@ -243,14 +240,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public ConcurrentLinkedQueue<Long> getRejectedChunkIds() {
         return _rejectedChunkIds;
-    }
-
-    public boolean isError509() {
-        return _error509;
-    }
-
-    public void setError509(boolean error509) {
-        _error509 = error509;
     }
 
     public Object getWorkers_lock() {

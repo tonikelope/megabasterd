@@ -102,12 +102,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         http_error = http_status;
 
-                        if (http_error == 509) {
-
-                            getDownload().getView().set509Error();
-
-                        }
-
                         getDownload().rejectChunkId(chunk_id);
 
                         conta_error++;

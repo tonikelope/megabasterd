@@ -112,7 +112,17 @@ public class StreamChunkDownloader implements Runnable {
                             }
                         } else {
 
-                            con = (HttpURLConnection) chunk_url.openConnection();
+                            if (current_smart_proxy != null) {
+
+                                String[] proxy_info = current_smart_proxy.split(":");
+
+                                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+
+                                con = (HttpURLConnection) chunk_url.openConnection(proxy);
+
+                            } else {
+                                con = (HttpURLConnection) chunk_url.openConnection();
+                            }
                         }
                     }
 

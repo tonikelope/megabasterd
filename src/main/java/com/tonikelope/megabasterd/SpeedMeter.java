@@ -139,7 +139,7 @@ public final class SpeedMeter implements Runnable {
 
             no_data_count = 0;
 
-        } else if (transference instanceof Download && ((Download) transference).isError509()) {
+        } else if (transference instanceof Download) {
 
             sp = -1;
 
@@ -193,13 +193,10 @@ public final class SpeedMeter implements Runnable {
 
                             trans_info.getKey().getView().updateSpeed(formatBytes(trans_sp) + "/s", true);
 
-                        } else if (trans_sp == 0) {
+                        } else {
 
                             trans_info.getKey().getView().updateSpeed("------", true);
 
-                        } else {
-
-                            trans_info.getKey().getView().updateSpeed("BANDWIDTH LIMIT ERROR!", true);
                         }
                     }
 
