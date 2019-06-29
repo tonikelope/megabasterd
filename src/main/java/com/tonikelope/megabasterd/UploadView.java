@@ -9,7 +9,6 @@ import java.util.concurrent.Callable;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -369,8 +368,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         folder_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Copy folder link"));
 
-        JOptionPane.showMessageDialog(_upload.getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("MEGA folder link was copied to clipboard!"));
-
         folder_link_button.setEnabled(true);
     }//GEN-LAST:event_folder_link_buttonActionPerformed
 
@@ -383,8 +380,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         copyTextToClipboard(_upload.getFile_link());
 
         file_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Copy file link"));
-
-        JOptionPane.showMessageDialog(_upload.getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("MEGA file link was copied to clipboard!"));
 
         file_link_button.setEnabled(true);
 

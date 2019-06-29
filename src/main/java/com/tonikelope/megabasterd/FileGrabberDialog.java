@@ -7,6 +7,7 @@ import java.awt.Dialog;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFileChooser;
@@ -30,6 +31,10 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private final boolean _remember_master_pass;
     private boolean _inserting_mega_accounts;
     private int _last_selected_index;
+
+    public JCheckBox getUpload_log_checkbox() {
+        return upload_log_checkbox;
+    }
 
     public boolean isUpload() {
         return _upload;
@@ -153,6 +158,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         used_space_label = new javax.swing.JLabel();
         add_folder_button = new javax.swing.JButton();
         add_files_button = new javax.swing.JButton();
+        upload_log_checkbox = new javax.swing.JCheckBox();
         dance_button = new javax.swing.JButton();
         total_file_size_label = new javax.swing.JLabel();
         warning_label = new javax.swing.JLabel();
@@ -180,7 +186,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Upload info"));
@@ -235,6 +241,12 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             }
         });
 
+        upload_log_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        upload_log_checkbox.setSelected(true);
+        upload_log_checkbox.setText("Enable upload log file");
+        upload_log_checkbox.setDoubleBuffered(true);
+        upload_log_checkbox.setEnabled(false);
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -242,17 +254,22 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(dir_name_label)
-                    .addComponent(account_label))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(add_files_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(add_folder_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(dir_name_textfield)
-                    .addComponent(account_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(used_space_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(upload_log_checkbox)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(dir_name_label)
+                            .addComponent(account_label))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(add_files_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(add_folder_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addComponent(dir_name_textfield)
+                            .addComponent(account_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(used_space_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -272,6 +289,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(add_files_button)
                     .addComponent(add_folder_button))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(upload_log_checkbox)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -373,6 +392,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         dance_button.setEnabled(false);
         dir_name_textfield.setEnabled(false);
         dir_name_label.setEnabled(false);
+        upload_log_checkbox.setEnabled(false);
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -428,6 +448,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             total_file_size_label.setEnabled(root_childs);
             skip_button.setEnabled(root_childs);
             skip_rest_button.setEnabled(root_childs);
+            upload_log_checkbox.setEnabled(root_childs);
 
         } else {
 
@@ -450,6 +471,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             skip_rest_button.setEnabled(root_childs);
             dir_name_textfield.setEnabled(root_childs);
             dir_name_label.setEnabled(root_childs);
+            upload_log_checkbox.setEnabled(root_childs);
         }
     }//GEN-LAST:event_add_files_buttonActionPerformed
 
@@ -465,6 +487,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         dance_button.setEnabled(false);
         dir_name_textfield.setEnabled(false);
         dir_name_label.setEnabled(false);
+        upload_log_checkbox.setEnabled(false);
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -515,6 +538,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             total_file_size_label.setEnabled(root_childs);
             skip_button.setEnabled(root_childs);
             skip_rest_button.setEnabled(root_childs);
+            upload_log_checkbox.setEnabled(root_childs);
 
         } else {
 
@@ -537,6 +561,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             skip_rest_button.setEnabled(root_childs);
             dir_name_textfield.setEnabled(root_childs);
             dir_name_label.setEnabled(root_childs);
+            upload_log_checkbox.setEnabled(root_childs);
         }
 
     }//GEN-LAST:event_add_folder_buttonActionPerformed
@@ -813,6 +838,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private javax.swing.JButton skip_button;
     private javax.swing.JButton skip_rest_button;
     private javax.swing.JLabel total_file_size_label;
+    private javax.swing.JCheckBox upload_log_checkbox;
     private javax.swing.JLabel used_space_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables

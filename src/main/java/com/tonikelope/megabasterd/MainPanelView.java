@@ -9,6 +9,7 @@ import java.awt.Dimension;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -19,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -43,7 +43,6 @@ import javax.swing.JTabbedPane;
 public final class MainPanelView extends javax.swing.JFrame {
 
     private final MainPanel _main_panel;
-    private final ConcurrentHashMap<Thread, Boolean> _smart_proxy_threads;
 
     public JLabel getKiss_server_status() {
         return kiss_server_status;
@@ -202,8 +201,6 @@ public final class MainPanelView extends javax.swing.JFrame {
     public MainPanelView(MainPanel main_panel) {
 
         _main_panel = main_panel;
-
-        _smart_proxy_threads = new ConcurrentHashMap<>();
 
         initComponents();
 
@@ -1074,6 +1071,22 @@ public final class MainPanelView extends javax.swing.JFrame {
                             ma.shareFolder(parent_node, parent_key, share_key);
 
                             String folder_link = ma.getPublicFolderLink(parent_node, share_key);
+
+                            if (dialog.getUpload_log_checkbox().isSelected()) {
+
+                                File upload_log = new File(System.getProperty("user.home") + "/megabasterd_upload_" + parent_node + ".log");
+                                upload_log.createNewFile();
+
+                                FileWriter fr;
+                                try {
+                                    fr = new FileWriter(upload_log, true);
+                                    fr.write("***** MegaBasterd UPLOAD LOG FILE *****\n\n");
+                                    fr.write(dir_name + "   " + folder_link + "\n\n");
+                                    fr.close();
+                                } catch (IOException ex) {
+                                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
 
                             MegaDirNode file_paths = new MegaDirNode(parent_node);
 

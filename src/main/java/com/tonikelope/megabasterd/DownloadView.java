@@ -13,7 +13,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
@@ -366,8 +365,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     private void copy_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_link_buttonActionPerformed
 
         copyTextToClipboard(_download.getUrl());
-
-        JOptionPane.showMessageDialog(_download.getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("Link was copied to clipboard!"));
     }//GEN-LAST:event_copy_link_buttonActionPerformed
 
     private void restart_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restart_buttonActionPerformed

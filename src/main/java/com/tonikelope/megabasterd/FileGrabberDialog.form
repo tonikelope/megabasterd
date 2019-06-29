@@ -86,7 +86,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="file_tree_scrollpane" alignment="0" pref="171" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" alignment="0" pref="305" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -130,19 +130,27 @@
               <Group type="102" alignment="0" attributes="0">
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Component id="dir_name_label" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="account_label" alignment="0" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <EmptySpace max="-2" attributes="0"/>
-                  <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
-                          <Component id="add_files_button" max="32767" attributes="0"/>
-                          <EmptySpace max="32767" attributes="0"/>
-                          <Component id="add_folder_button" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Component id="upload_log_checkbox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                       </Group>
-                      <Component id="dir_name_textfield" max="32767" attributes="0"/>
-                      <Component id="account_combobox" max="32767" attributes="0"/>
-                      <Component id="used_space_label" alignment="0" max="32767" attributes="0"/>
+                      <Group type="102" attributes="0">
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="dir_name_label" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="account_label" alignment="0" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="add_files_button" max="32767" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
+                                  <Component id="add_folder_button" max="32767" attributes="0"/>
+                              </Group>
+                              <Component id="dir_name_textfield" max="32767" attributes="0"/>
+                              <Component id="account_combobox" max="32767" attributes="0"/>
+                              <Component id="used_space_label" alignment="0" max="32767" attributes="0"/>
+                          </Group>
+                      </Group>
                   </Group>
                   <EmptySpace max="-2" attributes="0"/>
               </Group>
@@ -168,6 +176,8 @@
                       <Component id="add_files_button" min="-2" max="-2" attributes="0"/>
                       <Component id="add_folder_button" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                  <Component id="upload_log_checkbox" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="32767" attributes="0"/>
               </Group>
           </Group>
@@ -264,6 +274,17 @@
           <Events>
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="add_files_buttonActionPerformed"/>
           </Events>
+        </Component>
+        <Component class="javax.swing.JCheckBox" name="upload_log_checkbox">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Dialog" size="18" style="1"/>
+            </Property>
+            <Property name="selected" type="boolean" value="true"/>
+            <Property name="text" type="java.lang.String" value="Enable upload log file"/>
+            <Property name="doubleBuffered" type="boolean" value="true"/>
+            <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
         </Component>
       </SubComponents>
     </Container>

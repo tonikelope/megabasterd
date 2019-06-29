@@ -3,6 +3,8 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import static java.lang.Integer.MAX_VALUE;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -30,7 +32,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
     private String _status_error_message;
-    private String _dir_name;
     private volatile boolean _exit;
     private int _slots;
     private final Object _secure_notify_lock;
@@ -139,10 +140,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public Object getWorkers_lock() {
         return _workers_lock;
-    }
-
-    public String getDir_name() {
-        return _dir_name;
     }
 
     public boolean isExit() {
@@ -906,6 +903,21 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                             }
 
                             getView().printStatusOK(LabelTranslatorSingleton.getInstance().translate("File successfully uploaded! (") + _ma.getFull_email() + ")");
+
+                            File upload_log = new File(System.getProperty("user.home") + "/megabasterd_upload_" + _parent_node + ".log");
+
+                            if (upload_log.exists()) {
+
+                                FileWriter fr;
+                                try {
+                                    fr = new FileWriter(upload_log, true);
+                                    fr.write(this._file_name + "   " + this._file_link + "\n");
+                                    fr.close();
+                                } catch (IOException ex) {
+                                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+
+                            }
 
                         }
 
