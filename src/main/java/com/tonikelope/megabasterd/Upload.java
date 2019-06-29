@@ -904,21 +904,23 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                             getView().printStatusOK(LabelTranslatorSingleton.getInstance().translate("File successfully uploaded! (") + _ma.getFull_email() + ")");
 
-                            File upload_log = new File(System.getProperty("user.home") + "/megabasterd_upload_" + _parent_node + ".log");
+                            synchronized (this.getMain_panel().getUpload_manager().getLog_file_lock()) {
 
-                            if (upload_log.exists()) {
+                                File upload_log = new File(System.getProperty("user.home") + "/megabasterd_upload_" + _root_node + ".log");
 
-                                FileWriter fr;
-                                try {
-                                    fr = new FileWriter(upload_log, true);
-                                    fr.write(this._file_name + "   " + this._file_link + "\n");
-                                    fr.close();
-                                } catch (IOException ex) {
-                                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                                if (upload_log.exists()) {
+
+                                    FileWriter fr;
+                                    try {
+                                        fr = new FileWriter(upload_log, true);
+                                        fr.write(_file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
+                                        fr.close();
+                                    } catch (IOException ex) {
+                                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+
                                 }
-
                             }
-
                         }
 
                     } else {
