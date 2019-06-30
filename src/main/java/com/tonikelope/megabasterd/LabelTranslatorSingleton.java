@@ -40,6 +40,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("You've tried to login too many times. Wait an hour.", "Has intentado hacer login demasiadas veces. Prueba dentro de una hora.");
         _addTranslation("MEGA LINK ERROR!", "¡ENLACE DE MEGA ERRÓNEO!");
         _addTranslation("Please enter 2FA PIN CODE", "Por favor, introduce el CÓDIGO 2FA");
+        _addTranslation("Enable log file", "Activar fichero de log");
         _addTranslation("Font:", "Fuente:");
         _addTranslation("Loading...", "Cargando...");
         _addTranslation("DEFAULT", "POR DEFECTO");

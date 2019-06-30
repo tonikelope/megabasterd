@@ -28,11 +28,13 @@ public final class DownloadManager extends TransferenceManager {
 
         for (final Transference d : downloads) {
 
-            swingInvoke(
+            swingInvokeAndWait(
                     new Runnable() {
                 @Override
                 public void run() {
                     getScroll_panel().remove(((Download) d).getView());
+                    ((Download) d).getView().revalidate();
+                    ((Download) d).getView().repaint();
                 }
             });
 
@@ -61,11 +63,13 @@ public final class DownloadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference download) {
-        swingInvoke(
+        swingInvokeAndWait(
                 new Runnable() {
             @Override
             public void run() {
                 getScroll_panel().add(((Download) download).getView());
+                ((Download) download).getView().revalidate();
+                ((Download) download).getView().repaint();
             }
         });
 
@@ -125,12 +129,16 @@ public final class DownloadManager extends TransferenceManager {
 
                                 getScroll_panel().remove((Component) down.getView());
                                 getScroll_panel().add((Component) down.getView());
+                                ((Download) down).getView().revalidate();
+                                ((Download) down).getView().repaint();
                             }
 
                             for (final Transference down : getTransference_finished_queue()) {
 
                                 getScroll_panel().remove((Component) down.getView());
                                 getScroll_panel().add((Component) down.getView());
+                                ((Download) down).getView().revalidate();
+                                ((Download) down).getView().repaint();
                             }
 
                         }
