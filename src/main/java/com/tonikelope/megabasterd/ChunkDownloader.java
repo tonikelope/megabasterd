@@ -27,7 +27,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private boolean _notified;
-    private boolean _force_smartproxy;
+    private final boolean _force_smartproxy = false; //True for debugging SmartProxy
     private String _current_smart_proxy;
 
     public ChunkDownloader(int id, Download download) {
@@ -38,7 +38,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _download = download;
         _current_smart_proxy = null;
         _error_wait = false;
-        _force_smartproxy = true;
 
     }
 
@@ -151,6 +150,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
 
+                    } else if (_current_smart_proxy == null) {
+
+                        _current_smart_proxy = proxy_manager.getFastestProxy();
+
+                        getDownload().enableProxyTurboMode();
                     }
 
                     if (_current_smart_proxy != null) {
