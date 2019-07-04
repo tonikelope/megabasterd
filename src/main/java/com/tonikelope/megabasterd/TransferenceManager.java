@@ -297,13 +297,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         _transference_running_list.add(transference);
 
-        swingInvokeAndWait(
+        swingInvoke(
                 new Runnable() {
             @Override
             public void run() {
                 getScroll_panel().add((Component) transference.getView(), 0);
-                _main_panel.getView().revalidate();
-                _main_panel.getView().repaint();
             }
         });
 

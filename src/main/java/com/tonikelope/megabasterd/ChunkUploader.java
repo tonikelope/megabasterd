@@ -1,7 +1,6 @@
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.CryptTools.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -239,7 +238,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 } catch (IOException ex) {
 
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex.getMessage());
 
                 } finally {
 
@@ -270,7 +269,11 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 _upload.getView().updateSlotsStatus();
 
-                                Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException excep) {
+
+                                }
 
                                 _error_wait = false;
 

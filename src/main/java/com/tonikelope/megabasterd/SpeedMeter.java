@@ -18,7 +18,7 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
 public final class SpeedMeter implements Runnable {
 
     public static final int SLEEP = 3000;
-    public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 5;
+    public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 10;
     private final JLabel _speed_label;
     private final JLabel _rem_label;
     private final TransferenceManager _trans_manager;

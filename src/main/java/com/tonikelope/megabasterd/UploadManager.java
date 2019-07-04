@@ -41,8 +41,6 @@ public final class UploadManager extends TransferenceManager {
             @Override
             public void run() {
                 getScroll_panel().add(((Upload) upload).getView());
-                ((Upload) upload).getView().revalidate();
-                ((Upload) upload).getView().repaint();
             }
         });
 
@@ -69,16 +67,12 @@ public final class UploadManager extends TransferenceManager {
 
                                 getScroll_panel().remove((Component) up.getView());
                                 getScroll_panel().add((Component) up.getView());
-                                ((Upload) up).getView().revalidate();
-                                ((Upload) up).getView().repaint();
                             }
 
                             for (Transference up : getTransference_finished_queue()) {
 
                                 getScroll_panel().remove((Component) up.getView());
                                 getScroll_panel().add((Component) up.getView());
-                                ((Upload) up).getView().revalidate();
-                                ((Upload) up).getView().repaint();
                             }
                         }
                     });
@@ -107,8 +101,6 @@ public final class UploadManager extends TransferenceManager {
                 @Override
                 public void run() {
                     getScroll_panel().remove(((Upload) u).getView());
-                    ((Upload) u).getView().revalidate();
-                    ((Upload) u).getView().repaint();
                 }
             });
 

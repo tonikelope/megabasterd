@@ -93,6 +93,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private long _last_chunk_id_dispatched;
     private final MegaAPI _ma;
     private volatile boolean _canceled;
+    private volatile boolean _turbo;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir) {
 
@@ -133,6 +134,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
         _custom_chunks_dir = custom_chunks_dir;
+        _turbo = false;
     }
 
     public Download(Download download) {
@@ -174,6 +176,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _view = new DownloadView(this);
         _progress_meter = new ProgressMeter(this);
         _custom_chunks_dir = download.getCustom_chunks_dir();
+        _turbo = false;
 
     }
 
@@ -204,7 +207,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         synchronized (_turbo_proxy_lock) {
 
-            if (getChunkworkers().size() < Transference.MAX_WORKERS) {
+            if (!_turbo) {
+
+                _turbo = true;
 
                 Download tthis = this;
 
@@ -213,29 +218,40 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     @Override
                     public void run() {
 
-                        synchronized (_workers_lock) {
+                        getView().getSpeed_label().setForeground(Color.BLACK);
 
-                            getView().getSpeed_label().setForeground(Color.BLACK);
-
-                            getView().getSlots_spinner().setEnabled(false);
-
-                            for (int t = getChunkworkers().size(); t <= Transference.MAX_WORKERS; t++) {
-
-                                ChunkDownloader c = new ChunkDownloader(t, tthis);
-
-                                _chunkworkers.add(c);
-
-                                _thread_pool.execute(c);
-                            }
-
-                            getView().getSlots_spinner().setValue(Transference.MAX_WORKERS);
-
-                            getView().getSlots_spinner().setEnabled(true);
-                        }
+                        getView().getSlots_spinner().setEnabled(false);
                     }
                 });
+
+                synchronized (_workers_lock) {
+
+                    for (int t = getChunkworkers().size(); t <= Transference.MAX_WORKERS; t++) {
+
+                        ChunkDownloader c = new ChunkDownloader(t, tthis);
+
+                        _chunkworkers.add(c);
+
+                        _thread_pool.execute(c);
+                    }
+
+                }
+
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+
+                        getView().getSlots_spinner().setValue(Transference.MAX_WORKERS);
+
+                        getView().getSlots_spinner().setEnabled(true);
+                    }
+                });
+
             }
+
         }
+
     }
 
     public ConcurrentLinkedQueue<Long> getRejectedChunkIds() {
