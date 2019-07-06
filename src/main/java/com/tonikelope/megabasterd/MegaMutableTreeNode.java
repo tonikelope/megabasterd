@@ -1,8 +1,11 @@
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MiscTools.*;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.MutableTreeNode;
 
 /**
  *
@@ -41,5 +44,24 @@ public class MegaMutableTreeNode extends DefaultMutableTreeNode {
     public Object clone() {
         return super.clone(); //To change body of generated methods, choose Tools | Templates.
     }
+
+    @Override
+    public void insert(MutableTreeNode newChild, int childIndex) {
+        super.insert(newChild, childIndex);
+        Collections.sort(this.children, nodeComparator);
+    }
+
+    protected Comparator nodeComparator = new Comparator() {
+        @Override
+        public int compare(Object o1, Object o2) {
+            return o1.toString().compareToIgnoreCase(o2.toString());
+        }
+
+        @Override
+        @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+        public boolean equals(Object obj) {
+            return false;
+        }
+    };
 
 }
