@@ -112,6 +112,8 @@ public final class UploadManager extends TransferenceManager {
 
             increment_total_size(-1 * u.getFile_size());
 
+            increment_total_progress(-1 * u.getProgress());
+
             delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
         }
 

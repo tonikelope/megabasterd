@@ -31,6 +31,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final MainPanel _main_panel;
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
+    private final Object _progress_lock;
     private String _status_error_message;
     private volatile boolean _exit;
     private int _slots;
@@ -96,6 +97,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _workers_lock = new Object();
         _chunkid_lock = new Object();
         _chunkworkers = new ArrayList<>();
+        _progress_lock = new Object();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = Executors.newCachedThreadPool();
@@ -117,6 +119,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _ma = upload.getMa();
         _file_name = upload.getFile_name();
         _parent_node = upload.getParent_node();
+        _progress_lock = new Object();
         _ul_key = null;
         _ul_url = null;
         _root_node = upload.getRoot_node();
@@ -1199,10 +1202,25 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     @Override
     public void setProgress(long progress) {
-        long old_progress = _progress;
-        _progress = progress;
-        getView().updateProgressBar(_progress, _progress_bar_rate);
-        getMain_panel().getUpload_manager().increment_total_progress(_progress - old_progress);
+
+        synchronized (_progress_lock) {
+
+            long old_progress = _progress;
+
+            _progress = progress;
+
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+
+                    getView().updateProgressBar(_progress, _progress_bar_rate);
+                }
+            });
+
+            getMain_panel().getUpload_manager().increment_total_progress(_progress - old_progress);
+
+        }
     }
 
     @Override

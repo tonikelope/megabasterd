@@ -125,6 +125,14 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             while (!_exit && !_download.isStopped()) {
 
+                if (_download.isPaused() && !_download.isStopped()) {
+
+                    _download.pause_worker();
+
+                    secureWait();
+
+                }
+
                 if (worker_url == null || http_error == 403) {
 
                     worker_url = _download.getDownloadUrlForWorker();
@@ -142,7 +150,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 if ((_current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                    if (slow_proxy || chunk_error) {
+                    if (_current_smart_proxy != null && (slow_proxy || chunk_error)) {
 
                         proxy_manager.blockProxy(_current_smart_proxy);
 

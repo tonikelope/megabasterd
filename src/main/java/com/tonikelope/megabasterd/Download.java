@@ -55,6 +55,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private volatile DownloadView _view;
     private volatile ProgressMeter _progress_meter;
     private final Object _secure_notify_lock;
+    private final Object _progress_lock;
     private final Object _workers_lock;
     private final Object _chunkid_lock;
     private final Object _dl_url_lock;
@@ -123,6 +124,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _use_slots = use_slots;
         _restart = restart;
         _secure_notify_lock = new Object();
+        _progress_lock = new Object();
         _workers_lock = new Object();
         _chunkid_lock = new Object();
         _dl_url_lock = new Object();
@@ -165,6 +167,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         _use_slots = download.getMain_panel().isUse_slots_down();
         _restart = true;
         _secure_notify_lock = new Object();
+        _progress_lock = new Object();
         _workers_lock = new Object();
         _chunkid_lock = new Object();
         _dl_url_lock = new Object();
@@ -567,15 +570,12 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                 }
                             }
 
-                            _progress = _file.length();
+                            setProgress(_file.length());
 
                             _last_chunk_id_dispatched = calculateLastWrittenChunk(_progress);
 
-                            getView().updateProgressBar(_progress, _progress_bar_rate);
-
                         } else {
-                            _progress = 0;
-                            getView().updateProgressBar(0);
+                            setProgress(0);
                         }
 
                         _output_stream = new BufferedOutputStream(new FileOutputStream(_file, (_progress > 0)));
@@ -727,9 +727,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                                 getView().printStatusNormal("Waiting to check file integrity...");
 
-                                _progress = 0;
-
-                                getView().updateProgressBar(0);
+                                setProgress(0);
 
                                 getView().printStatusNormal("Checking file integrity, please wait...");
 
@@ -1667,13 +1665,26 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     @Override
     public void setProgress(long progress) {
 
-        long old_progress = _progress;
+        synchronized (_progress_lock) {
 
-        _progress = progress;
+            long old_progress = _progress;
 
-        getView().updateProgressBar(_progress, _progress_bar_rate);
+            _progress = progress;
 
-        getMain_panel().getDownload_manager().increment_total_progress(_progress - old_progress);
+            swingInvoke(
+                    new Runnable() {
+                @Override
+                public void run() {
+
+                    getView().updateProgressBar(_progress, _progress_bar_rate);
+                }
+            });
+
+            if (!isChecking_cbc()) {
+
+                getMain_panel().getDownload_manager().increment_total_progress(_progress - old_progress);
+            }
+        }
     }
 
     @Override

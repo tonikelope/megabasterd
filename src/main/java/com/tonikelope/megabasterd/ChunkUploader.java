@@ -103,6 +103,14 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
             while (!_upload.getMain_panel().isExit() && !_exit && !_upload.isStopped() && conta_error < MAX_CHUNK_ERROR) {
 
+                if (_upload.isPaused() && !_upload.isStopped()) {
+
+                    _upload.pause_worker();
+
+                    secureWait();
+
+                }
+
                 String worker_url = _upload.getUl_url();
 
                 int reads = 0, http_status;
