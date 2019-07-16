@@ -21,13 +21,14 @@ import java.util.logging.Logger;
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     public static final double SLOW_PROXY_PERC = 0.3;
+    private final boolean FORCE_SMART_PROXY = false; //True for debugging SmartProxy
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private boolean _notified;
-    private final boolean _force_smartproxy = false; //True for debugging SmartProxy
+
     private String _current_smart_proxy;
 
     public ChunkDownloader(int id, Download download) {
@@ -108,7 +109,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             int http_error = 0, http_status = -1;
 
-            boolean timeout = false, chunk_error = false, slow_proxy = false;
+            boolean timeout = false, chunk_error = false, slow_proxy = false, turbo_mode = false;
 
             String worker_url = null;
 
@@ -116,11 +117,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
-            if (_force_smartproxy) {
+            if (FORCE_SMART_PROXY) {
 
                 _current_smart_proxy = proxy_manager.getFastestProxy();
 
-                getDownload().enableProxyTurboMode();
+                getDownload().enableTurboMode();
+
+                turbo_mode = true;
             }
 
             while (!_exit && !_download.isStopped()) {
@@ -162,7 +165,12 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         _current_smart_proxy = proxy_manager.getFastestProxy();
 
-                        getDownload().enableProxyTurboMode();
+                        if (!turbo_mode) {
+                            getDownload().enableTurboMode();
+
+                            turbo_mode = true;
+                        }
+
                     }
 
                     if (_current_smart_proxy != null) {
@@ -337,6 +345,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                         slow_proxy = true;
                                     }
                                 }
+                            }
+
+                            if (!FORCE_SMART_PROXY) {
+                                _current_smart_proxy = null;
                             }
 
                             _download.getChunkmanager().secureNotify();

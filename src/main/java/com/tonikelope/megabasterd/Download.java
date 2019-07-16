@@ -206,7 +206,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         }
     }
 
-    public void enableProxyTurboMode() {
+    public void enableTurboMode() {
 
         synchronized (_turbo_proxy_lock) {
 
@@ -221,7 +221,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     @Override
                     public void run() {
 
-                        getView().getSpeed_label().setForeground(Color.BLACK);
+                        getView().getSlots_label().setForeground(Color.BLUE);
 
                         getView().getSlots_spinner().setEnabled(false);
                     }
