@@ -313,7 +313,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         close_all_finished_down_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
-        close_all_finished_down_button.setText("Close all OK finished");
+        close_all_finished_down_button.setText("Clear finished");
         close_all_finished_down_button.setDoubleBuffered(true);
         close_all_finished_down_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -383,7 +383,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         close_all_finished_up_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         close_all_finished_up_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
-        close_all_finished_up_button.setText("Close all OK finished");
+        close_all_finished_up_button.setText("Clear finished");
         close_all_finished_up_button.setDoubleBuffered(true);
         close_all_finished_up_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
