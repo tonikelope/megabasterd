@@ -56,7 +56,7 @@ public final class UploadManager extends TransferenceManager {
 
                 if (!isPreprocessing_transferences() && !isProvisioning_transferences()) {
 
-                    sortTransferenceStartQueue();
+                    sortTransferenceWaitStartQueue();
 
                     swingInvoke(
                             new Runnable() {
@@ -105,6 +105,10 @@ public final class UploadManager extends TransferenceManager {
             });
 
             getTransference_waitstart_queue().remove(u);
+
+            if (getTransference_waitstart_queue().isEmpty()) {
+                _frozen = false;
+            }
 
             getTransference_running_list().remove(u);
 

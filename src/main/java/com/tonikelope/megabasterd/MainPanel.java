@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.24";
+    public static final String VERSION = "6.25";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -58,7 +58,7 @@ public final class MainPanel {
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = true;
-    public static Font DEFAULT_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
+    public static Font GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
     public static final float ZOOM_FACTOR = 1.0f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
@@ -163,7 +163,7 @@ public final class MainPanel {
     private final UploadManager _upload_manager;
     private final StreamThrottlerSupervisor _stream_supervisor;
     private int _max_dl, _max_ul, _default_slots_down, _default_slots_up, _max_dl_speed, _max_up_speed;
-    private boolean _use_slots_down, _limit_download_speed, _limit_upload_speed, _use_mega_account_down;
+    private boolean _use_slots_down, _limit_download_speed, _limit_upload_speed, _use_mega_account_down, _init_paused;
     private String _mega_account_down;
     private String _default_download_path;
     private boolean _use_custom_chunks_dir;
@@ -222,9 +222,9 @@ public final class MainPanel {
 
         loadUserSettings();
 
-        UIManager.put("OptionPane.messageFont", DEFAULT_FONT.deriveFont(15f * getZoom_factor()));
+        UIManager.put("OptionPane.messageFont", GUI_FONT.deriveFont(15f * getZoom_factor()));
 
-        UIManager.put("OptionPane.buttonFont", DEFAULT_FONT.deriveFont(15f * getZoom_factor()));
+        UIManager.put("OptionPane.buttonFont", GUI_FONT.deriveFont(15f * getZoom_factor()));
 
         UIManager.put("OptionPane.cancelButtonText", LabelTranslatorSingleton.getInstance().translate("Cancel"));
 
@@ -562,6 +562,10 @@ public final class MainPanel {
         return _limit_upload_speed;
     }
 
+    public boolean isInit_paused() {
+        return _init_paused;
+    }
+
     public void loadUserSettings() {
 
         String use_custom_chunks_dir = DBTools.selectSettingValue("use_custom_chunks_dir");
@@ -599,16 +603,16 @@ public final class MainPanel {
         if (_font != null) {
             if (_font.equals("DEFAULT")) {
 
-                DEFAULT_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
+                GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
 
             } else {
 
-                DEFAULT_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttc");
+                GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttc");
 
             }
         } else {
 
-            DEFAULT_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
+            GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
         }
 
         String def_slots = selectSettingValue("default_slots_down");
@@ -693,6 +697,15 @@ public final class MainPanel {
             _max_up_speed = parseInt(max_upload_speed);
         } else {
             _max_up_speed = MAX_TRANSFERENCE_SPEED_DEFAULT;
+        }
+
+        String init_paused_string = DBTools.selectSettingValue("start_frozen");
+
+        if (init_paused_string != null) {
+
+            _init_paused = init_paused_string.equals("yes");
+        } else {
+            _init_paused = false;
         }
 
         try {
@@ -846,7 +859,6 @@ public final class MainPanel {
             }
 
             if (restart) {
-                JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
                 restartApplication();
             } else {
                 exit(0);
@@ -874,7 +886,6 @@ public final class MainPanel {
             }
 
             if (restart) {
-                JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
                 restartApplication();
             } else {
                 exit(0);
@@ -886,6 +897,10 @@ public final class MainPanel {
     public void byebye(boolean restart) {
 
         if (!_exit && checkByeBye()) {
+
+            if (restart) {
+                JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
+            }
 
             _exit = true;
 
@@ -1155,7 +1170,7 @@ public final class MainPanel {
 
             PopupMenu menu = new PopupMenu();
 
-            Font new_font = DEFAULT_FONT;
+            Font new_font = GUI_FONT;
 
             menu.setFont(new_font.deriveFont(Font.BOLD, Math.round(14 * ZOOM_FACTOR)));
 

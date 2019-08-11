@@ -50,7 +50,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
         translateLabels(this);
 

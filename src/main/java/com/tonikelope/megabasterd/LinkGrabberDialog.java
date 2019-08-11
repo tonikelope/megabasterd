@@ -61,7 +61,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
         translateLabels(this);
 
@@ -204,12 +204,12 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 622, Short.MAX_VALUE)
+                        .addGap(0, 746, Short.MAX_VALUE)
                         .addComponent(dance_button))
                     .addComponent(links_scrollpane)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(links_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 57, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 181, Short.MAX_VALUE)
                         .addComponent(dlc_button))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(use_mega_account_down_label)
@@ -263,7 +263,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
         filechooser.setDialogTitle("Download folder");
@@ -300,7 +300,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
         javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setDialogTitle("Select DLC container");
 

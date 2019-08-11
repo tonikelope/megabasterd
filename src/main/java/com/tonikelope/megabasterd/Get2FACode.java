@@ -29,7 +29,7 @@ public class Get2FACode extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, main_panel.getZoom_factor());
+        updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
 
         translateLabels(this);
 

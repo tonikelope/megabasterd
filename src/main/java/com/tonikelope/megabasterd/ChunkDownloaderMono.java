@@ -42,7 +42,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             CipherInputStream cis = null;
 
-            while (!isExit() && !getDownload().isStopped()) {
+            while (!getDownload().getMain_panel().isExit() && !isExit() && !getDownload().isStopped()) {
 
                 if (worker_url == null || http_error == 403) {
 

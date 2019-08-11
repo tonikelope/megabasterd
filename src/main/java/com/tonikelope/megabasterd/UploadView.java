@@ -77,11 +77,19 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         return status_label;
     }
 
+    public JButton getQueue_down_button() {
+        return queue_down_button;
+    }
+
+    public JButton getQueue_up_button() {
+        return queue_up_button;
+    }
+
     public UploadView(Upload upload) {
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, upload.getMain_panel().getZoom_factor());
+        updateFonts(this, GUI_FONT, upload.getMain_panel().getZoom_factor());
 
         translateLabels(this);
 
@@ -128,6 +136,8 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         slot_status_label = new javax.swing.JLabel();
         folder_link_button = new javax.swing.JButton();
         file_link_button = new javax.swing.JButton();
+        queue_up_button = new javax.swing.JButton();
+        queue_down_button = new javax.swing.JButton();
 
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 3, true));
 
@@ -232,6 +242,22 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
+        queue_up_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        queue_up_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/arriba_1.png"))); // NOI18N
+        queue_up_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                queue_up_buttonActionPerformed(evt);
+            }
+        });
+
+        queue_down_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        queue_down_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/abajo_1.png"))); // NOI18N
+        queue_down_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                queue_down_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -264,14 +290,23 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                         .addComponent(close_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(restart_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(stop_button)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 327, Short.MAX_VALUE)
+                        .addComponent(stop_button))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(queue_up_button, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(queue_down_button, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(queue_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(queue_up_button, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(slots_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(slots_label)
@@ -287,7 +322,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                     .addComponent(file_size_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progress_pbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(speed_label)
                     .addComponent(pause_button))
@@ -384,6 +419,49 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         file_link_button.setEnabled(true);
 
     }//GEN-LAST:event_file_link_buttonActionPerformed
+
+    private void queue_up_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queue_up_buttonActionPerformed
+        // TODO add your handling code here:
+
+        queue_up_button.setEnabled(false);
+
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _upload.upWaitQueue();
+
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+
+                        queue_up_button.setEnabled(true);
+                    }
+                });
+
+            }
+        });
+    }//GEN-LAST:event_queue_up_buttonActionPerformed
+
+    private void queue_down_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queue_down_buttonActionPerformed
+        // TODO add your handling code here:
+
+        queue_down_button.setEnabled(false);
+
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _upload.downWaitQueue();
+
+                queue_down_button.setEnabled(true);
+
+            }
+        });
+    }//GEN-LAST:event_queue_down_buttonActionPerformed
 
     @Override
     public void pause() {
@@ -595,6 +673,8 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     private javax.swing.JButton folder_link_button;
     private javax.swing.JButton pause_button;
     private javax.swing.JProgressBar progress_pbar;
+    private javax.swing.JButton queue_down_button;
+    private javax.swing.JButton queue_up_button;
     private javax.swing.JButton restart_button;
     private javax.swing.JLabel slot_status_label;
     private javax.swing.JLabel slots_label;

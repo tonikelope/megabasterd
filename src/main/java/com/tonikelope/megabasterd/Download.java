@@ -69,6 +69,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     private Long _file_size;
     private String _file_pass;
     private String _file_noexpire;
+    private volatile boolean _frozen;
     private final boolean _use_slots;
     private int _slots;
     private final boolean _restart;
@@ -100,6 +101,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         _paused_workers = 0;
         _ma = ma;
+        _frozen = main_panel.isInit_paused();
         _last_chunk_id_dispatched = 0L;
         _status_error = false;
         _canceled = false;
@@ -515,6 +517,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             @Override
             public void run() {
                 getView().getClose_button().setVisible(false);
+                getView().getCopy_link_button().setVisible(false);
+                getView().getOpen_folder_button().setVisible(false);
             }
         });
 
@@ -1041,7 +1045,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
         } else {
 
-            getView().printStatusNormal("Waiting to start...");
+            getView().printStatusNormal(_frozen ? "(FROZEN) Waiting to start..." : "Waiting to start...");
 
             swingInvoke(
                     new Runnable() {
@@ -1067,6 +1071,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             public void run() {
 
                 getView().getClose_button().setVisible(true);
+                getView().getQueue_up_button().setVisible(true);
+                getView().getQueue_down_button().setVisible(true);
             }
         });
 
@@ -1697,4 +1703,23 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         return getChunkworkers().size();
     }
 
+    @Override
+    public boolean isFrozen() {
+        return this._frozen;
+    }
+
+    @Override
+    public void unfreeze() {
+        this._frozen = false;
+    }
+
+    @Override
+    public void upWaitQueue() {
+        _main_panel.getDownload_manager().upWaitQueue(this);
+    }
+
+    @Override
+    public void downWaitQueue() {
+        _main_panel.getDownload_manager().downWaitQueue(this);
+    }
 }

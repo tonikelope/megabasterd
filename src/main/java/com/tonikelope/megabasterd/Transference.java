@@ -33,6 +33,14 @@ public interface Transference {
 
     boolean isStopped();
 
+    boolean isFrozen();
+
+    void unfreeze();
+
+    void upWaitQueue();
+
+    void downWaitQueue();
+
     void checkSlotsAndWorkers();
 
     ConcurrentLinkedQueue<Long> getPartialProgress();

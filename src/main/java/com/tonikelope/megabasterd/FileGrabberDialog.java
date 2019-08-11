@@ -68,11 +68,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
-        updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel1.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel1.getBorder()), GUI_FONT, _main_panel.getZoom_factor());
 
-        updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel2.getBorder()), DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel2.getBorder()), GUI_FONT, _main_panel.getZoom_factor());
 
         translateLabels(this);
 
@@ -396,7 +396,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setDialogTitle("Add files");
 
@@ -491,7 +491,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.2));
+        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.2));
 
         filechooser.setDialogTitle("Add directory");
 

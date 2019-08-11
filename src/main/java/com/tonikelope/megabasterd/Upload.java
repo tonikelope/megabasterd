@@ -34,6 +34,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final Object _progress_lock;
     private String _status_error_message;
     private volatile boolean _exit;
+    private volatile boolean _frozen;
     private int _slots;
     private final Object _secure_notify_lock;
     private final Object _workers_lock;
@@ -76,6 +77,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link) {
 
         _notified = false;
+        _frozen = main_panel.isInit_paused();
         _provision_ok = true;
         _status_error = false;
         _canceled = false;
@@ -443,7 +445,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         } else {
 
-            getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate("Waiting to start (") + _ma.getFull_email() + ") ...");
+            getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate(_frozen ? "(FROZEN) Waiting to start (" : "Waiting to start (") + _ma.getFull_email() + ") ...");
 
             swingInvoke(
                     new Runnable() {
@@ -472,6 +474,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             public void run() {
 
                 getView().getClose_button().setVisible(true);
+                getView().getQueue_down_button().setVisible(true);
+                getView().getQueue_up_button().setVisible(true);
             }
         });
 
@@ -676,6 +680,16 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     public void run() {
 
         Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Uploader hello! {1}", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
+
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+
+                getView().getQueue_down_button().setVisible(false);
+                getView().getQueue_up_button().setVisible(false);
+            }
+        });
 
         getView().printStatusNormal("Starting upload, please wait...");
 
@@ -1260,4 +1274,23 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         return getChunkworkers().size();
     }
 
+    @Override
+    public boolean isFrozen() {
+        return this._frozen;
+    }
+
+    @Override
+    public void unfreeze() {
+        this._frozen = false;
+    }
+
+    @Override
+    public void upWaitQueue() {
+        _main_panel.getUpload_manager().upWaitQueue(this);
+    }
+
+    @Override
+    public void downWaitQueue() {
+        _main_panel.getUpload_manager().downWaitQueue(this);
+    }
 }

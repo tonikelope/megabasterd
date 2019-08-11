@@ -126,7 +126,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 turbo_mode = true;
             }
 
-            while (!_exit && !_download.isStopped()) {
+            while (!_download.getMain_panel().isExit() && !_exit && !_download.isStopped()) {
 
                 if (_download.isPaused() && !_download.isStopped()) {
 

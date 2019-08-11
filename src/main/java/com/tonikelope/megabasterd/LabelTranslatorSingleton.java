@@ -36,6 +36,10 @@ public final class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _addTranslation("Freeze transferences before start", "Congelar transferencias antes de empezar");
+        _addTranslation("UNFREEZE WAITING TRANSFERENCES", "DESCONGELAR TRANSFERENCIAS A LA ESPERA");
+        _addTranslation("(FROZEN) Waiting to start...", "(CONGELADA) Esperando para empezar...");
+        _addTranslation("(FROZEN) Waiting to start (", "(CONGELADA) Esperando para empezar (");
         _addTranslation("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd", "Hay muchos archivos en esta carpeta.\nNo se aprovisionarán todos los enlaces de una vez para evitar saturar MegaBasterd");
         _addTranslation("You've tried to login too many times. Wait an hour.", "Has intentado hacer login demasiadas veces. Prueba dentro de una hora.");
         _addTranslation("MEGA LINK ERROR!", "¡ENLACE DE MEGA ERRÓNEO!");
@@ -52,7 +56,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("ERROR: FILE NOT FOUND", "ERROR: ARCHIVO NO ENCONTRADO");
         _addTranslation("Mega link is not valid! ", "Enlace de MEGA incorrecto! ");
         _addTranslation("Checking your MEGA accounts, please wait...", "Comprobando tus cuentas de MEGA, por favor espera...");
-        _addTranslation("Check version", "Comprobar versión");
+        _addTranslation("Check for updates", "Comprobar actualización");
         _addTranslation("Checking, please wait...", "Comprobando, por favor espera...");
         _addTranslation("You have the latest version ;)", "Tienes la versión más reciente ;)");
         _addTranslation("Copy MegaBasterd download URL", "Copiar la URL de descarga de MegaBasterd");
@@ -131,7 +135,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Restoring data, please wait...", "Restaurando datos, por favor espera...");
         _addTranslation("File", "Archivo");
         _addTranslation("Hide to tray", "Ocultar en la bandeja");
-        _addTranslation("Close all OK finished", "Cerrar las que finalizaron OK");
+        _addTranslation("Clear finished", "Cerrar las que finalizaron");
         _addTranslation("Exit", "Salir");
         _addTranslation("Default slots per file:", "Slots por archivo por defecto:");
         _addTranslation("Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it. (Slots consume RAM, so use them moderately).", "Nota: si quieres descargar sin utilizar una cuenta de MEGA PREMIUM es recomendable activarlo. (Los slots consumen RAM, así que úsalos con moderación).");

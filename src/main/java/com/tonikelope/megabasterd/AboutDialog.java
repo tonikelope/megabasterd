@@ -26,7 +26,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, parent.getMain_panel().getZoom_factor());
+        updateFonts(this, GUI_FONT, parent.getMain_panel().getZoom_factor());
 
         translateLabels(this);
 
@@ -152,7 +152,7 @@ public final class AboutDialog extends javax.swing.JDialog {
 
         check_version_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         check_version_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-restart-30.png"))); // NOI18N
-        check_version_button.setText("Check version");
+        check_version_button.setText("Check for updates");
         check_version_button.setDoubleBuffered(true);
         check_version_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

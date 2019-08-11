@@ -16,7 +16,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.DEFAULT_FONT;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.swingInvoke;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
@@ -36,6 +35,7 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 
 /**
  *
@@ -57,7 +57,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
         super(parent, modal);
         _main_panel = parent.getMain_panel();
         initComponents();
-        updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
         translateLabels(this);
         jProgressBar2.setMinimum(0);
         jProgressBar2.setMaximum(MAX_VALUE);
@@ -233,7 +233,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setDialogTitle("Select any part of the original file");
 
@@ -308,7 +308,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setDialogTitle("Add directory");
 

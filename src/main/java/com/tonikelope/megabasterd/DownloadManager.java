@@ -38,6 +38,10 @@ public final class DownloadManager extends TransferenceManager {
 
             getTransference_waitstart_queue().remove(d);
 
+            if (getTransference_waitstart_queue().isEmpty()) {
+                _frozen = false;
+            }
+
             getTransference_running_list().remove(d);
 
             getTransference_finished_queue().remove(d);
@@ -116,7 +120,7 @@ public final class DownloadManager extends TransferenceManager {
 
                 if (!isPreprocessing_transferences() && !isProvisioning_transferences()) {
 
-                    sortTransferenceStartQueue();
+                    sortTransferenceWaitStartQueue();
 
                     swingInvoke(
                             new Runnable() {

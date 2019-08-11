@@ -16,7 +16,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.DEFAULT_FONT;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.swingInvoke;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
@@ -38,6 +37,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 
 /**
  *
@@ -59,7 +59,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
         translateLabels(this);
 
@@ -259,7 +259,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setDialogTitle("Select file");
 
@@ -307,7 +307,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, DEFAULT_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setDialogTitle("Add directory");
 

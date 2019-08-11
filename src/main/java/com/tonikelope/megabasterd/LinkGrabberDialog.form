@@ -28,13 +28,13 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="0" pref="622" max="32767" attributes="0"/>
+                      <EmptySpace min="0" pref="746" max="32767" attributes="0"/>
                       <Component id="dance_button" max="-2" attributes="0"/>
                   </Group>
                   <Component id="links_scrollpane" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="links_label" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="57" max="32767" attributes="0"/>
+                      <EmptySpace pref="181" max="32767" attributes="0"/>
                       <Component id="dlc_button" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">

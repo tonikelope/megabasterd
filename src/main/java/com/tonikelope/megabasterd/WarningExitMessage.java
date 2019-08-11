@@ -16,9 +16,9 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.DEFAULT_FONT;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
 import static com.tonikelope.megabasterd.MiscTools.updateFonts;
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 
 /**
  *
@@ -36,7 +36,7 @@ public class WarningExitMessage extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, main_panel.getZoom_factor());
+        updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
 
         translateLabels(this);
 

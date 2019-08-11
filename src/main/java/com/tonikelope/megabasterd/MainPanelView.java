@@ -112,6 +112,10 @@ public final class MainPanelView extends javax.swing.JFrame {
         return status_up_label;
     }
 
+    public JButton getUnfreeze_transferences_button() {
+        return unfreeze_transferences_button;
+    }
+
     public MainPanel getMain_panel() {
         return _main_panel;
     }
@@ -204,11 +208,11 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         initComponents();
 
-        updateFonts(this, DEFAULT_FONT, _main_panel.getZoom_factor());
+        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
         translateLabels(this);
 
-        for (JComponent c : new JComponent[]{global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
+        for (JComponent c : new JComponent[]{unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
 
             c.setVisible(false);
         }
@@ -263,6 +267,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         jPanel_scroll_up = new javax.swing.JPanel();
         pause_all_up_button = new javax.swing.JButton();
         up_remtime_label = new javax.swing.JLabel();
+        unfreeze_transferences_button = new javax.swing.JButton();
         main_menubar = new javax.swing.JMenuBar();
         file_menu = new javax.swing.JMenu();
         new_download_menu = new javax.swing.JMenuItem();
@@ -313,7 +318,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         close_all_finished_down_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
-        close_all_finished_down_button.setText("Close all OK finished");
+        close_all_finished_down_button.setText("Clear finished");
         close_all_finished_down_button.setDoubleBuffered(true);
         close_all_finished_down_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -363,7 +368,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
+                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(down_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -383,7 +388,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         close_all_finished_up_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         close_all_finished_up_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
-        close_all_finished_up_button.setText("Close all OK finished");
+        close_all_finished_up_button.setText("Clear finished");
         close_all_finished_up_button.setDoubleBuffered(true);
         close_all_finished_up_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -433,7 +438,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 290, Short.MAX_VALUE)
+                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(up_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -443,6 +448,17 @@ public final class MainPanelView extends javax.swing.JFrame {
         );
 
         jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_panel); // NOI18N
+
+        unfreeze_transferences_button.setBackground(new java.awt.Color(255, 255, 255));
+        unfreeze_transferences_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        unfreeze_transferences_button.setForeground(new java.awt.Color(0, 153, 255));
+        unfreeze_transferences_button.setText("UNFREEZE WAITING TRANSFERENCES");
+        unfreeze_transferences_button.setDoubleBuffered(true);
+        unfreeze_transferences_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                unfreeze_transferences_buttonActionPerformed(evt);
+            }
+        });
 
         file_menu.setText("File");
         file_menu.setDoubleBuffered(true);
@@ -595,21 +611,27 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                        .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, 210, Short.MAX_VALUE)
+                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
                         .addGap(271, 271, 271))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(logo_label)))
+                        .addComponent(logo_label))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(unfreeze_transferences_button)
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(unfreeze_transferences_button)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jTabbedPane1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -863,106 +885,107 @@ public final class MainPanelView extends javax.swing.JFrame {
                 _main_panel.getElc_accounts().remove(host);
             }
 
-            _main_panel.loadUserSettings();
+            if (_main_panel.isRestart()) {
 
-            if (_main_panel.isLimit_download_speed()) {
-
-                _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.getMax_dl_speed() * 1024);
-
-                global_speed_down_label.setForeground(new Color(255, 0, 0));
-
+                _main_panel.byebye(true);
             } else {
+                _main_panel.loadUserSettings();
 
-                _main_panel.getStream_supervisor().setMaxBytesPerSecInput(0);
+                if (_main_panel.isLimit_download_speed()) {
 
-                global_speed_down_label.setForeground(new Color(0, 128, 255));
+                    _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.getMax_dl_speed() * 1024);
 
-            }
+                    global_speed_down_label.setForeground(new Color(255, 0, 0));
 
-            if (_main_panel.isLimit_upload_speed()) {
+                } else {
 
-                _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(_main_panel.getMax_up_speed() * 1024);
+                    _main_panel.getStream_supervisor().setMaxBytesPerSecInput(0);
 
-                global_speed_up_label.setForeground(new Color(255, 0, 0));
+                    global_speed_down_label.setForeground(new Color(0, 128, 255));
 
-            } else {
+                }
 
-                _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(0);
+                if (_main_panel.isLimit_upload_speed()) {
 
-                global_speed_up_label.setForeground(new Color(0, 128, 255));
+                    _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(_main_panel.getMax_up_speed() * 1024);
 
-            }
+                    global_speed_up_label.setForeground(new Color(255, 0, 0));
 
-            _main_panel.getDownload_manager().setMax_running_trans(_main_panel.getMax_dl());
+                } else {
 
-            _main_panel.getUpload_manager().setMax_running_trans(_main_panel.getMax_ul());
+                    _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(0);
 
-            _main_panel.getDownload_manager().secureNotify();
+                    global_speed_up_label.setForeground(new Color(0, 128, 255));
 
-            _main_panel.getUpload_manager().secureNotify();
+                }
 
-            if (_main_panel.isMegacrypter_reverse()) {
+                _main_panel.getDownload_manager().setMax_running_trans(_main_panel.getMax_dl());
 
-                if (_main_panel.getMega_proxy_server() == null) {
+                _main_panel.getUpload_manager().setMax_running_trans(_main_panel.getMax_ul());
 
-                    _main_panel.setMega_proxy_server(new MegaProxyServer(_main_panel, UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
+                _main_panel.getDownload_manager().secureNotify();
 
-                    THREAD_POOL.execute(_main_panel.getMega_proxy_server());
+                _main_panel.getUpload_manager().secureNotify();
 
-                } else if (_main_panel.getMega_proxy_server().getPort() != _main_panel.getMegacrypter_reverse_port()) {
+                if (_main_panel.isMegacrypter_reverse()) {
 
-                    try {
+                    if (_main_panel.getMega_proxy_server() == null) {
 
-                        _main_panel.getMega_proxy_server().stopServer();
                         _main_panel.setMega_proxy_server(new MegaProxyServer(_main_panel, UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
+
                         THREAD_POOL.execute(_main_panel.getMega_proxy_server());
 
-                    } catch (IOException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    } else if (_main_panel.getMega_proxy_server().getPort() != _main_panel.getMegacrypter_reverse_port()) {
+
+                        try {
+
+                            _main_panel.getMega_proxy_server().stopServer();
+                            _main_panel.setMega_proxy_server(new MegaProxyServer(_main_panel, UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
+                            THREAD_POOL.execute(_main_panel.getMega_proxy_server());
+
+                        } catch (IOException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        }
                     }
+
+                } else {
+
+                    if (_main_panel.getMega_proxy_server() != null) {
+
+                        try {
+                            _main_panel.getMega_proxy_server().stopServer();
+                        } catch (IOException ex) {
+                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+
+                    _main_panel.setMega_proxy_server(null);
                 }
 
-            } else {
+                if (MainPanel.isUse_smart_proxy()) {
 
-                if (_main_panel.getMega_proxy_server() != null) {
-
-                    try {
-                        _main_panel.getMega_proxy_server().stopServer();
-                    } catch (IOException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    if (MainPanel.getProxy_manager() == null) {
+                        MainPanel.setProxy_manager(new SmartMegaProxyManager(null, _main_panel));
                     }
-                }
 
-                _main_panel.setMega_proxy_server(null);
+                    MainPanel.getProxy_manager().refreshProxyList();
+
+                    updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(MainPanel.getProxy_manager().getProxyCount()) + ")");
+
+                } else {
+
+                    updateSmartProxyStatus("SmartProxy: OFF");
+                }
             }
 
-            if (MainPanel.isUse_smart_proxy()) {
+            if (!dialog.isRemember_master_pass()) {
 
-                if (MainPanel.getProxy_manager() == null) {
-                    MainPanel.setProxy_manager(new SmartMegaProxyManager(null, _main_panel));
-                }
-
-                MainPanel.getProxy_manager().refreshProxyList();
-
-                updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(MainPanel.getProxy_manager().getProxyCount()) + ")");
-
-            } else {
-
-                updateSmartProxyStatus("SmartProxy: OFF");
+                _main_panel.setMaster_pass(null);
             }
+
+            dialog.dispose();
+
         }
-
-        if (_main_panel.isRestart()) {
-
-            _main_panel.byebye(true);
-        }
-
-        if (!dialog.isRemember_master_pass()) {
-
-            _main_panel.setMaster_pass(null);
-        }
-
-        dialog.dispose();
     }//GEN-LAST:event_settings_menuActionPerformed
 
     private void hide_tray_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hide_tray_menuActionPerformed
@@ -1230,6 +1253,32 @@ public final class MainPanelView extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_auto_close_menuActionPerformed
 
+    private void unfreeze_transferences_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unfreeze_transferences_buttonActionPerformed
+        // TODO add your handling code here:
+
+        unfreeze_transferences_button.setVisible(false);
+
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _main_panel.getDownload_manager().unfreezeTransferenceWaitStartQueue();
+
+            }
+        });
+
+        THREAD_POOL.execute(new Runnable() {
+
+            @Override
+            public void run() {
+
+                _main_panel.getUpload_manager().unfreezeTransferenceWaitStartQueue();
+
+            }
+        });
+    }//GEN-LAST:event_unfreeze_transferences_buttonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem about_menu;
     private javax.swing.JCheckBoxMenuItem auto_close_menu;
@@ -1269,6 +1318,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JMenuItem split_file_menu;
     private javax.swing.JLabel status_down_label;
     private javax.swing.JLabel status_up_label;
+    private javax.swing.JButton unfreeze_transferences_button;
     private javax.swing.JLabel up_remtime_label;
     private javax.swing.JPanel uploads_panel;
     // End of variables declaration//GEN-END:variables
