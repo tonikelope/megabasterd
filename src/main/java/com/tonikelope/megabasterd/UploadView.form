@@ -86,9 +86,9 @@
                   <Component id="status_label" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="slot_status_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="file_name_label" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="file_name_label" min="-2" max="-2" attributes="0"/>
+                  <Component id="slot_status_label" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -264,6 +264,7 @@
           <Font name="Dialog" size="14" style="1"/>
         </Property>
         <Property name="horizontalAlignment" type="int" value="4"/>
+        <Property name="text" type="java.lang.String" value="status"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>

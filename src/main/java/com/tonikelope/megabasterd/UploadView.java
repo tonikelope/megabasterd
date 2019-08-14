@@ -221,6 +221,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         slot_status_label.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        slot_status_label.setText("status");
         slot_status_label.setDoubleBuffered(true);
 
         folder_link_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
@@ -312,9 +313,9 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                     .addComponent(slots_label)
                     .addComponent(status_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(slot_status_label)
-                    .addComponent(file_name_label))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(file_name_label)
+                    .addComponent(slot_status_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(folder_link_button)

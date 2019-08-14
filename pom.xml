@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tonikelope</groupId>
     <artifactId>MegaBasterd</artifactId>
-    <version>6.26</version>
+    <version>6.27</version>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>

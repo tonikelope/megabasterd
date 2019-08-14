@@ -48,7 +48,8 @@
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="file_name_label" max="32767" attributes="0"/>
-                      <EmptySpace min="6" pref="6" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="slot_status_label" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="file_size_label" max="32767" attributes="0"/>
@@ -72,8 +73,6 @@
                       <Component id="stop_button" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
-              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-              <Component id="slot_status_label" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -81,24 +80,20 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" attributes="0">
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                  <Component id="queue_down_button" pref="39" max="32767" attributes="0"/>
+                  <Component id="queue_up_button" max="32767" attributes="0"/>
+              </Group>
+              <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="slots_spinner" alignment="3" min="-2" pref="32" max="-2" attributes="0"/>
+                  <Component id="slots_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="status_label" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace min="-2" pref="50" max="-2" attributes="0"/>
-                      <Component id="slot_status_label" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                          <Component id="queue_down_button" pref="39" max="32767" attributes="0"/>
-                          <Component id="queue_up_button" max="32767" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="slots_spinner" alignment="3" min="-2" pref="32" max="-2" attributes="0"/>
-                          <Component id="slots_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="status_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                  <Group type="102" attributes="0">
                       <Component id="file_name_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
@@ -110,22 +105,26 @@
                       </Group>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="progress_pbar" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
+                      <Group type="103" groupAlignment="3" attributes="0">
+                          <Component id="speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="pause_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace type="separate" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                              <Component id="close_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="restart_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                              <Component id="stop_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="keep_temp_checkbox" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                      </Group>
                   </Group>
-              </Group>
-              <EmptySpace max="32767" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="pause_button" alignment="3" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace type="separate" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
-                      <Component id="close_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="restart_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="103" alignment="0" groupAlignment="3" attributes="0">
-                      <Component id="stop_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="keep_temp_checkbox" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Group type="102" attributes="0">
+                      <Component id="slot_status_label" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -300,15 +299,6 @@
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
-    <Component class="javax.swing.JLabel" name="slot_status_label">
-      <Properties>
-        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="14" style="1"/>
-        </Property>
-        <Property name="horizontalAlignment" type="int" value="4"/>
-        <Property name="doubleBuffered" type="boolean" value="true"/>
-      </Properties>
-    </Component>
     <Component class="javax.swing.JButton" name="open_folder_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -323,6 +313,16 @@
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="open_folder_buttonActionPerformed"/>
       </Events>
+    </Component>
+    <Component class="javax.swing.JLabel" name="slot_status_label">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="14" style="1"/>
+        </Property>
+        <Property name="horizontalAlignment" type="int" value="4"/>
+        <Property name="text" type="java.lang.String" value="status"/>
+        <Property name="doubleBuffered" type="boolean" value="true"/>
+      </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="queue_up_button">
       <Properties>
