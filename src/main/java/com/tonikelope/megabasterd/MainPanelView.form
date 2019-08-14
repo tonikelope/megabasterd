@@ -415,7 +415,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/images/icons8-ok-30.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Close all OK finished"/>
+                <Property name="text" type="java.lang.String" value="Clear finished"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
               <Events>
@@ -549,7 +549,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/images/icons8-ok-30.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="Close all OK finished"/>
+                <Property name="text" type="java.lang.String" value="Clear finished"/>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
               <Events>

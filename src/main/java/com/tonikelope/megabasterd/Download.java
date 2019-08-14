@@ -516,6 +516,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                 new Runnable() {
             @Override
             public void run() {
+                getView().getQueue_down_button().setVisible(false);
+                getView().getQueue_up_button().setVisible(false);
                 getView().getClose_button().setVisible(false);
                 getView().getCopy_link_button().setVisible(false);
                 getView().getOpen_folder_button().setVisible(false);
