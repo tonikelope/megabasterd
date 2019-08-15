@@ -275,7 +275,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
         slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         slot_status_label.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        slot_status_label.setText("status");
         slot_status_label.setDoubleBuffered(true);
 
         queue_up_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
@@ -375,9 +374,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
                             .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                                 .addComponent(stop_button)
                                 .addComponent(keep_temp_checkbox))))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(slot_status_label)
-                        .addGap(0, 0, 0)))
+                    .addComponent(slot_status_label))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents

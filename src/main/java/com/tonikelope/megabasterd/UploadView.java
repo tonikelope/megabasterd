@@ -221,7 +221,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
         slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         slot_status_label.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
-        slot_status_label.setText("status");
         slot_status_label.setDoubleBuffered(true);
 
         folder_link_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
