@@ -4,6 +4,7 @@ import static com.tonikelope.megabasterd.MiscTools.*;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.logging.Logger;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 
@@ -63,5 +64,6 @@ public class MegaMutableTreeNode extends DefaultMutableTreeNode {
             return false;
         }
     };
+    private static final Logger LOG = Logger.getLogger(MegaMutableTreeNode.class.getName());
 
 }

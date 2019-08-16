@@ -67,10 +67,6 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
     private boolean _notified;
     private final String _chunks_dir;
 
-    public String getChunks_dir() {
-        return _chunks_dir;
-    }
-
     public ChunkManager(Download downloader) throws Exception {
         _notified = false;
         _exit = false;
@@ -93,8 +89,12 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
             _bytes_written = _download.getProgress();
         }
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager hello LAST CHUNK WRITTEN -> [{1}] {2}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written});
+        LOG.log(Level.INFO, "{0} Chunkmanager hello LAST CHUNK WRITTEN -> [{1}] {2}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written});
 
+    }
+
+    public String getChunks_dir() {
+        return _chunks_dir;
     }
 
     @Override
@@ -117,7 +117,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -139,8 +139,6 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
         chunks_temp_dir.mkdirs();
 
-        System.out.println(chunks_temp_dir.getAbsolutePath());
-
         return chunks_temp_dir.getAbsolutePath();
     }
 
@@ -158,7 +156,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
         try {
 
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager: let's do some work!", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{0} Chunkmanager: let's do some work!", Thread.currentThread().getName());
 
             boolean download_finished = false;
 
@@ -189,12 +187,12 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
                                 _download.getOutput_stream().write(buffer, 0, reads);
                             }
                         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         }
 
                         _bytes_written += chunk_file.length();
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager has written to disk chunk [{1}] {2} {3}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _bytes_written, _download.calculateLastWrittenChunk(_bytes_written)});
+                        LOG.log(Level.INFO, "{0} Chunkmanager has written to disk chunk [{1}] {2} {3}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _bytes_written, _download.calculateLastWrittenChunk(_bytes_written)});
 
                         _last_chunk_id_written++;
 
@@ -205,7 +203,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
                     if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager waiting for chunk [{1}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1});
+                        LOG.log(Level.INFO, "{0} Chunkmanager waiting for chunk [{1}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1});
 
                         secureWait();
 
@@ -219,7 +217,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
         } catch (IOException ex) {
 
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
             _download.stopDownloader(ex.getMessage());
         }
 
@@ -227,7 +225,8 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
         _download.secureNotify();
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkmanager: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile().getName()});
+        LOG.log(Level.INFO, "{0} Chunkmanager: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile().getName()});
     }
+    private static final Logger LOG = Logger.getLogger(ChunkManager.class.getName());
 
 }

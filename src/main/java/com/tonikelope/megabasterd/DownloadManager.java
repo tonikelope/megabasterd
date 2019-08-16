@@ -59,7 +59,7 @@ public final class DownloadManager extends TransferenceManager {
         try {
             deleteDownloads(delete_down.toArray(new String[delete_down.size()]));
         } catch (SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+            LOG.log(SEVERE, null, ex);
         }
 
         secureNotify();
@@ -83,7 +83,7 @@ public final class DownloadManager extends TransferenceManager {
 
         } catch (APIException ex) {
 
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Provision failed! Retrying in separated thread...", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{0} Provision failed! Retrying in separated thread...", Thread.currentThread().getName());
 
             THREAD_POOL.execute(new Runnable() {
                 @Override
@@ -95,7 +95,7 @@ public final class DownloadManager extends TransferenceManager {
 
                     } catch (APIException ex1) {
 
-                        Logger.getLogger(getClass().getName()).log(SEVERE, null, ex1);
+                        LOG.log(SEVERE, null, ex1);
                     }
 
                     secureNotify();
@@ -149,5 +149,6 @@ public final class DownloadManager extends TransferenceManager {
             getTransference_finished_queue().add(download);
         }
     }
+    private static final Logger LOG = Logger.getLogger(DownloadManager.class.getName());
 
 }

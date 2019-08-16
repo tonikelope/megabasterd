@@ -48,7 +48,7 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                    LOG.log(SEVERE, null, ex);
                 }
             }
 
@@ -58,7 +58,7 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
 
     @Override
     public void run() {
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} ProgressMeter hello!", Thread.currentThread().getName());
+        LOG.log(Level.INFO, "{0} ProgressMeter hello!", Thread.currentThread().getName());
 
         _progress = _transference.getProgress();
 
@@ -76,5 +76,6 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
         }
 
     }
+    private static final Logger LOG = Logger.getLogger(ProgressMeter.class.getName());
 
 }

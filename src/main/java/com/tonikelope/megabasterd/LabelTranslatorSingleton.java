@@ -289,4 +289,5 @@ public final class LabelTranslatorSingleton {
 
         private static final LabelTranslatorSingleton INSTANCE = new LabelTranslatorSingleton();
     }
+    private static final Logger LOG = Logger.getLogger(LabelTranslatorSingleton.class.getName());
 }

@@ -428,7 +428,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
             try {
                 Desktop.getDesktop().open(new File(_download.getDownload_path() + "/" + _download.getFile_name()).getParentFile());
             } catch (Exception ex) {
-                Logger.getLogger(getClass().getName()).log(Level.INFO, ex.getMessage());
+                LOG.log(Level.INFO, ex.getMessage());
             }
         }
 
@@ -471,7 +471,14 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
                 _download.downWaitQueue();
 
-                queue_down_button.setEnabled(true);
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+
+                        queue_down_button.setEnabled(true);
+                    }
+                });
 
             }
         });
@@ -718,5 +725,6 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
     private javax.swing.JLabel status_label;
     private javax.swing.JButton stop_button;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(DownloadView.class.getName());
 
 }

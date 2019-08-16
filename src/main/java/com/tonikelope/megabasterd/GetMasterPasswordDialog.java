@@ -242,7 +242,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                     });
 
                 } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
 
             }
@@ -267,4 +267,5 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox remember_checkbox;
     private javax.swing.JLabel status_label;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(GetMasterPasswordDialog.class.getName());
 }

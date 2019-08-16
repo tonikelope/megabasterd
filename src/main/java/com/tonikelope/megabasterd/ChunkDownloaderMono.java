@@ -27,7 +27,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), getId()});
+        LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), getId()});
 
         HttpURLConnection con = null;
 
@@ -98,7 +98,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     if (http_status != 200) {
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                        LOG.log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                         http_error = http_status;
 
@@ -164,7 +164,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                 } catch (IOException ex) {
 
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
 
                 } finally {
 
@@ -205,14 +205,15 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         } catch (OutOfMemoryError | Exception error) {
             getDownload().stopDownloader(error.getMessage());
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, error.getMessage());
+            LOG.log(Level.SEVERE, null, error.getMessage());
         }
 
         getDownload().stopThisSlot(this);
 
         getDownload().secureNotify();
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), getId()});
+        LOG.log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), getId()});
 
     }
+    private static final Logger LOG = Logger.getLogger(ChunkDownloaderMono.class.getName());
 }

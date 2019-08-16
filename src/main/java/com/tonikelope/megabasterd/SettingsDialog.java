@@ -391,9 +391,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                     } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     } catch (Exception ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
 
                     String[] new_row_data = {(String) pair.getKey(), pass};
@@ -414,9 +414,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                     } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     } catch (Exception ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
 
                     String[] new_row_data = {(String) pair.getKey(), user, apikey};
@@ -1769,7 +1769,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                     apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(apikey), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                 } catch (Exception ex) {
-                                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                    LOG.log(Level.SEVERE, null, ex);
                                 }
                             }
 
@@ -1908,7 +1908,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                     } catch (Exception ex) {
 
                                         email_error.add(email);
-                                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                        LOG.log(Level.SEVERE, null, ex);
                                     }
 
                                 } else {
@@ -1924,7 +1924,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                             password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(password), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                                         } catch (Exception ex) {
-                                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                            LOG.log(Level.SEVERE, null, ex);
                                         }
                                     }
 
@@ -1995,7 +1995,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                                         } catch (Exception ex) {
 
                                             email_error.add(email);
-                                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                            LOG.log(Level.SEVERE, null, ex);
 
                                         }
                                     }
@@ -2080,11 +2080,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
             }
 
         } catch (SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
     }//GEN-LAST:event_save_buttonActionPerformed
 
@@ -2144,11 +2144,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         setVisible(false);
 
                     } catch (SQLException | ClassNotFoundException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
 
                 } catch (IOException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -2202,11 +2202,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         setVisible(false);
 
                     } catch (SQLException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
 
                 } catch (IOException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -2308,9 +2308,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         }
 
                         String[] new_row_data = {(String) pair.getKey(), pass};
@@ -2331,9 +2331,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
                             apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
                         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         }
 
                         String[] new_row_data = {(String) pair.getKey(), user, apikey};
@@ -2419,7 +2419,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                 setVisible(false);
 
             } catch (SQLException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
         }
     }//GEN-LAST:event_delete_all_accounts_buttonActionPerformed
@@ -2554,7 +2554,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         }
 
                     } catch (Exception ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
 
                 }
@@ -2876,4 +2876,5 @@ public final class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel zoom_label;
     private javax.swing.JSpinner zoom_spinner;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(SettingsDialog.class.getName());
 }

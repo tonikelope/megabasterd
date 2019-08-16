@@ -3,6 +3,7 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.event.KeyEvent;
+import java.util.logging.Logger;
 
 /**
  *
@@ -203,4 +204,5 @@ public class Get2FACode extends javax.swing.JDialog {
     private javax.swing.JLabel please_label;
     private javax.swing.JLabel status_label;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(Get2FACode.class.getName());
 }

@@ -3,6 +3,7 @@ package com.tonikelope.megabasterd;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.logging.Logger;
 
 /**
  *
@@ -71,5 +72,6 @@ public final class StreamChunk {
             return new ByteArrayInputStream(this.buf, 0, this.count);
         }
     }
+    private static final Logger LOG = Logger.getLogger(StreamChunk.class.getName());
 
 }

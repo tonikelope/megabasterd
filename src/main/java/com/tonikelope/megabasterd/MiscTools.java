@@ -1286,5 +1286,6 @@ public final class MiscTools {
 
     private MiscTools() {
     }
+    private static final Logger LOG = Logger.getLogger(MiscTools.class.getName());
 
 }

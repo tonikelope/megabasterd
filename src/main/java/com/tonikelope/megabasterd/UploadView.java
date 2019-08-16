@@ -6,6 +6,7 @@ import static com.tonikelope.megabasterd.Transference.*;
 import java.awt.Color;
 import static java.lang.Integer.MAX_VALUE;
 import java.util.concurrent.Callable;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -457,7 +458,14 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
                 _upload.downWaitQueue();
 
-                queue_down_button.setEnabled(true);
+                swingInvoke(
+                        new Runnable() {
+                    @Override
+                    public void run() {
+
+                        queue_down_button.setEnabled(true);
+                    }
+                });
 
             }
         });
@@ -683,5 +691,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     private javax.swing.JLabel status_label;
     private javax.swing.JButton stop_button;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(UploadView.class.getName());
 
 }

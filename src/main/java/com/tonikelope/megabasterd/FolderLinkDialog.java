@@ -424,7 +424,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
         } catch (Exception ex) {
 
-            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+            LOG.log(SEVERE, null, ex);
 
             _mega_error = true;
         }
@@ -518,4 +518,5 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
     private javax.swing.JLabel total_space_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(FolderLinkDialog.class.getName());
 }

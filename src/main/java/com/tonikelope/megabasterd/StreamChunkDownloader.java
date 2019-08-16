@@ -34,7 +34,7 @@ public class StreamChunkDownloader implements Runnable {
     @Override
     public void run() {
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
+        LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 
         HttpURLConnection con = null;
 
@@ -54,7 +54,7 @@ public class StreamChunkDownloader implements Runnable {
 
                 while (!_exit && !_chunkmanager.isExit() && _chunkmanager.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
 
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: Chunk buffer is full. I pause myself.", new Object[]{Thread.currentThread().getName(), _id});
+                    LOG.log(Level.INFO, "{0} Worker [{1}]: Chunk buffer is full. I pause myself.", new Object[]{Thread.currentThread().getName(), _id});
 
                     _chunkmanager.secureWait();
                 }
@@ -138,7 +138,7 @@ public class StreamChunkDownloader implements Runnable {
 
                     byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: offset: {2} size: {3}", new Object[]{Thread.currentThread().getName(), _id, offset, chunk_stream.getSize()});
+                    LOG.log(Level.INFO, "{0} Worker [{1}]: offset: {2} size: {3}", new Object[]{Thread.currentThread().getName(), _id, offset, chunk_stream.getSize()});
 
                     http_error = 0;
 
@@ -150,7 +150,7 @@ public class StreamChunkDownloader implements Runnable {
 
                             if (http_status != 200) {
 
-                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                                LOG.log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                                 http_error = http_status;
 
@@ -169,7 +169,7 @@ public class StreamChunkDownloader implements Runnable {
 
                                     if (chunk_stream.getSize() == chunk_writes) {
 
-                                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
+                                        LOG.log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
 
                                         _chunkmanager.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
 
@@ -180,7 +180,7 @@ public class StreamChunkDownloader implements Runnable {
                         }
 
                     } catch (IOException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     } finally {
                         con.disconnect();
                     }
@@ -192,14 +192,15 @@ public class StreamChunkDownloader implements Runnable {
             }
 
         } catch (IOException | URISyntaxException | ChunkInvalidException | InterruptedException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (OutOfMemoryError | Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         _chunkmanager.secureNotifyAll();
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
+        LOG.log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
     }
+    private static final Logger LOG = Logger.getLogger(StreamChunkDownloader.class.getName());
 
 }

@@ -1,6 +1,7 @@
 package com.tonikelope.megabasterd;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  *
@@ -26,5 +27,6 @@ public final class MegaDirNode {
     public HashMap<String, MegaDirNode> getChildren() {
         return _children;
     }
+    private static final Logger LOG = Logger.getLogger(MegaDirNode.class.getName());
 
 }

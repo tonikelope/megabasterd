@@ -365,9 +365,9 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         }
 
                     } catch (FileNotFoundException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     } catch (IOException ex) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, null, ex);
                     }
 
                     swingInvoke(new Runnable() {
@@ -494,4 +494,5 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
             }
         });
     }
+    private static final Logger LOG = Logger.getLogger(LinkGrabberDialog.class.getName());
 }

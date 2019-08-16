@@ -663,4 +663,5 @@ public final class CryptTools {
 
     private CryptTools() {
     }
+    private static final Logger LOG = Logger.getLogger(CryptTools.class.getName());
 }

@@ -4,6 +4,7 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Color;
 import java.awt.Dialog;
+import java.util.logging.Logger;
 import javax.swing.JOptionPane;
 
 /**
@@ -359,4 +360,5 @@ public final class AboutDialog extends javax.swing.JDialog {
     private javax.swing.JLabel subtitle_label;
     private javax.swing.JLabel title_label;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(AboutDialog.class.getName());
 }

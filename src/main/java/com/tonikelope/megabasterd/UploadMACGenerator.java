@@ -50,7 +50,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -155,7 +155,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                                 file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
 
                             } catch (IOException | IllegalBlockSizeException | BadPaddingException ex) {
-                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                LOG.log(Level.SEVERE, null, ex);
                             }
 
                             chunk_id++;
@@ -178,7 +178,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                 }
             }
 
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
+            LOG.log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
 
             while (!_exit && !_upload.isStopped() && !_upload.getChunkworkers().isEmpty()) {
                 while (_upload.getMain_panel().isExit()) {
@@ -193,12 +193,13 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
             _upload.secureNotify();
 
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} MAC GENERATOR {1} BYE BYE...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
+            LOG.log(Level.INFO, "{0} MAC GENERATOR {1} BYE BYE...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
     }
+    private static final Logger LOG = Logger.getLogger(UploadMACGenerator.class.getName());
 
 }

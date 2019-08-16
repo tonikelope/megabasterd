@@ -88,7 +88,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                    LOG.log(SEVERE, null, ex);
                 }
             }
 
@@ -165,12 +165,12 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 error = true;
 
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex.getMessage());
+                LOG.log(Level.SEVERE, null, ex.getMessage());
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex2) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex2);
+                    LOG.log(Level.SEVERE, null, ex2);
                 }
 
             }
@@ -210,12 +210,12 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 error = true;
 
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex.getMessage());
+                LOG.log(Level.SEVERE, null, ex.getMessage());
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex2) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex2);
+                    LOG.log(Level.SEVERE, null, ex2);
                 }
 
             }
@@ -286,7 +286,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
             link = url_parts[1];
 
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), link, mega_account});
+            LOG.log(Level.INFO, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), link, mega_account});
 
             HashMap cache_info, file_info;
 
@@ -459,11 +459,11 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         } catch (Exception ex) {
 
             if (!(ex instanceof IOException)) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
 
         } finally {
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} KissVideoStreamerHandle: bye bye", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{0} KissVideoStreamerHandle: bye bye", Thread.currentThread().getName());
 
             if (chunkwriter != null) {
 
@@ -484,4 +484,5 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         _updateStatus(THREAD_STOP);
     }
+    private static final Logger LOG = Logger.getLogger(KissVideoStreamServer.class.getName());
 }

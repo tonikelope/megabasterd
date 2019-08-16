@@ -298,7 +298,7 @@ public final class MegaAPI implements Serializable {
 
         } catch (Exception ex) {
 
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return quota;
@@ -343,7 +343,7 @@ public final class MegaAPI implements Serializable {
             }
 
         } catch (IOException | MegaAPIException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
     }
@@ -431,9 +431,9 @@ public final class MegaAPI implements Serializable {
 
                 if (http_status != 200) {
 
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
+                    LOG.log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
 
-                    Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                    LOG.log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
                     http_error = http_status;
 
@@ -482,12 +482,12 @@ public final class MegaAPI implements Serializable {
                     throw new MegaAPIException(mega_error);
                 }
 
-                Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(mega_error)});
+                LOG.log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(mega_error)});
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
 
             } else if (!empty_response && mega_error == 0 && http_error == 0) {
@@ -606,7 +606,7 @@ public final class MegaAPI implements Serializable {
             ret = aes_cbc_encrypt_nopadding(new_attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return ret;
@@ -631,7 +631,7 @@ public final class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(att, HashMap.class);
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
 
         }
 
@@ -659,7 +659,7 @@ public final class MegaAPI implements Serializable {
             ul_url = (String) res_map[0].get("p");
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return ul_url;
@@ -684,7 +684,7 @@ public final class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return res_map != null ? res_map[0] : null;
@@ -737,7 +737,7 @@ public final class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return res_map != null ? res_map[0] : null;
@@ -767,7 +767,7 @@ public final class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return res_map != null ? res_map[0] : null;
@@ -799,7 +799,7 @@ public final class MegaAPI implements Serializable {
             public_link = "https://mega.nz/#!" + file_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return public_link;
@@ -830,7 +830,7 @@ public final class MegaAPI implements Serializable {
             public_link = "https://mega.nz/#F!" + folder_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return public_link;
@@ -868,7 +868,7 @@ public final class MegaAPI implements Serializable {
             return _rawRequest(request, url_api);
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return null;
@@ -883,7 +883,7 @@ public final class MegaAPI implements Serializable {
             ch = Bin2UrlBASE64(encryptKey((h + h).getBytes(), i32a2bin(getMaster_key())));
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return ch;
@@ -966,10 +966,11 @@ public final class MegaAPI implements Serializable {
             }
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return null;
     }
+    private static final Logger LOG = Logger.getLogger(MegaAPI.class.getName());
 
 }

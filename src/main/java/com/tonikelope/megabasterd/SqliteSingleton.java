@@ -49,7 +49,7 @@ public final class SqliteSingleton {
             }
 
         } catch (ClassNotFoundException | SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         return conn;
@@ -59,5 +59,6 @@ public final class SqliteSingleton {
 
         private static final SqliteSingleton INSTANCE = new SqliteSingleton();
     }
+    private static final Logger LOG = Logger.getLogger(SqliteSingleton.class.getName());
 
 }

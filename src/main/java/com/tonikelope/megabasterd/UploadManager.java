@@ -124,10 +124,11 @@ public final class UploadManager extends TransferenceManager {
         try {
             DBTools.deleteUploads(delete_up.toArray(new String[delete_up.size()][]));
         } catch (SQLException ex) {
-            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+            LOG.log(SEVERE, null, ex);
         }
 
         secureNotify();
     }
+    private static final Logger LOG = Logger.getLogger(UploadManager.class.getName());
 
 }

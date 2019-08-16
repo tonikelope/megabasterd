@@ -50,7 +50,7 @@ public final class SmartMegaProxyManager {
             }
         }
 
-        Logger.getLogger(getClass().getName()).log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!!", new Object[]{Thread.currentThread().getName()});
+        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!!", new Object[]{Thread.currentThread().getName()});
 
         refreshProxyList();
 
@@ -125,13 +125,13 @@ public final class SmartMegaProxyManager {
                     }
                 });
 
-                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
+                LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
             }
 
         } catch (MalformedURLException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } finally {
             if (con != null) {
                 con.disconnect();
@@ -139,5 +139,6 @@ public final class SmartMegaProxyManager {
 
         }
     }
+    private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
 
 }

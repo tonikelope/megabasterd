@@ -272,7 +272,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
         });
@@ -297,4 +297,5 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
     private javax.swing.JLabel status_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(SetMasterPasswordDialog.class.getName());
 }

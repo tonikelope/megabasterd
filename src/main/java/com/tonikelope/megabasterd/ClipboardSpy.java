@@ -56,10 +56,10 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
 
             gainOwnership(_contents);
 
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Monitoring clipboard ON...", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{0} Monitoring clipboard ON...", Thread.currentThread().getName());
 
         } else {
-            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Monitoring clipboard OFF...", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{0} Monitoring clipboard OFF...", Thread.currentThread().getName());
         }
     }
 
@@ -82,7 +82,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                    LOG.log(SEVERE, null, ex);
                 }
             }
 
@@ -129,7 +129,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex1);
+                    LOG.log(SEVERE, null, ex1);
                 }
             }
 
@@ -156,7 +156,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex1);
+                    LOG.log(SEVERE, null, ex1);
                 }
             }
 
@@ -200,5 +200,6 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
             o.notifyClipboardChange();
         }
     }
+    private static final Logger LOG = Logger.getLogger(ClipboardSpy.class.getName());
 
 }

@@ -702,7 +702,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                             urls.add(decryptMegaDownloaderLink(link));
 
                         } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                            LOG.log(SEVERE, null, ex);
                         }
                     }
 
@@ -715,7 +715,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                             urls.addAll(CryptTools.decryptELC(link, getMain_panel()));
 
                         } catch (Exception ex) {
-                            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                            LOG.log(SEVERE, null, ex);
                         }
                     }
 
@@ -825,7 +825,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                 getMain_panel().getDownload_manager().secureNotify();
 
                             } catch (UnsupportedEncodingException ex) {
-                                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                                LOG.log(Level.SEVERE, null, ex);
                             } catch (InterruptedException ex) {
                                 Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
                             }
@@ -866,7 +866,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 try {
                     deleteMegaAccount(email);
                 } catch (SQLException ex) {
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                    LOG.log(SEVERE, null, ex);
                 }
 
                 _main_panel.getMega_accounts().remove(email);
@@ -879,7 +879,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 try {
                     deleteELCAccount(host);
                 } catch (SQLException ex) {
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                    LOG.log(SEVERE, null, ex);
                 }
 
                 _main_panel.getElc_accounts().remove(host);
@@ -944,7 +944,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                             THREAD_POOL.execute(_main_panel.getMega_proxy_server());
 
                         } catch (IOException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         }
                     }
 
@@ -955,7 +955,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                         try {
                             _main_panel.getMega_proxy_server().stopServer();
                         } catch (IOException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         }
                     }
 
@@ -1089,7 +1089,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Dir {1} created", new Object[]{Thread.currentThread().getName(), parent_node});
+                            LOG.log(Level.INFO, "{0} Dir {1} created", new Object[]{Thread.currentThread().getName(), parent_node});
 
                             ma.shareFolder(parent_node, parent_key, share_key);
 
@@ -1171,7 +1171,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         } catch (Exception ex) {
 
-                            Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                            LOG.log(SEVERE, null, ex);
                         }
                     }
 
@@ -1322,5 +1322,6 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JLabel up_remtime_label;
     private javax.swing.JPanel uploads_panel;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(MainPanelView.class.getName());
 
 }

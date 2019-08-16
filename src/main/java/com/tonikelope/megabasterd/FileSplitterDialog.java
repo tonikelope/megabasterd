@@ -449,4 +449,5 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private javax.swing.JLabel split_size_label;
     private javax.swing.JTextField split_size_text;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(FileSplitterDialog.class.getName());
 }

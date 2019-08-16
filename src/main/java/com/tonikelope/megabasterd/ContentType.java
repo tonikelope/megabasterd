@@ -1,6 +1,7 @@
 package com.tonikelope.megabasterd;
 
 import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  *
@@ -59,4 +60,5 @@ public final class ContentType {
     public String getMIME(String ext) {
         return _content_type.get(ext);
     }
+    private static final Logger LOG = Logger.getLogger(ContentType.class.getName());
 }

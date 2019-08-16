@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JPopupMenu;
@@ -127,4 +128,5 @@ public final class ContextMenuMouseListener extends MouseAdapter {
     private enum _Actions {
         UNDO, CUT, COPY, PASTE, SELECT_ALL
     }
+    private static final Logger LOG = Logger.getLogger(ContextMenuMouseListener.class.getName());
 }

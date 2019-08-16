@@ -16,9 +16,10 @@
  */
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
 import static com.tonikelope.megabasterd.MiscTools.updateFonts;
-import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import java.util.logging.Logger;
 
 /**
  *
@@ -133,4 +134,5 @@ public class WarningExitMessage extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(WarningExitMessage.class.getName());
 }

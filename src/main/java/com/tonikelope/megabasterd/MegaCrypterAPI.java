@@ -327,4 +327,5 @@ public final class MegaCrypterAPI {
 
     private MegaCrypterAPI() {
     }
+    private static final Logger LOG = Logger.getLogger(MegaCrypterAPI.class.getName());
 }

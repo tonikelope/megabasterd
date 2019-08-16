@@ -236,9 +236,10 @@ public final class SpeedMeter implements Runnable {
                 Thread.sleep(SLEEP);
 
             } catch (InterruptedException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
 
         } while (true);
     }
+    private static final Logger LOG = Logger.getLogger(SpeedMeter.class.getName());
 }

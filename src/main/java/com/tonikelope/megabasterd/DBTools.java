@@ -514,5 +514,6 @@ public final class DBTools {
 
     private DBTools() {
     }
+    private static final Logger LOG = Logger.getLogger(DBTools.class.getName());
 
 }

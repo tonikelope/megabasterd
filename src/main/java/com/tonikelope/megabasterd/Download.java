@@ -367,7 +367,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
         }
 
@@ -381,7 +381,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, null, ex);
             }
         }
 
@@ -567,7 +567,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                             if (max_size != _file.length()) {
 
-                                Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Downloader truncating mctemp file {1} -> {2} ", new Object[]{Thread.currentThread().getName(), _file.length(), max_size});
+                                LOG.log(Level.INFO, "{0} Downloader truncating mctemp file {1} -> {2} ", new Object[]{Thread.currentThread().getName(), _file.length(), max_size});
 
                                 getView().printStatusNormal("Truncating temp file...");
 
@@ -664,7 +664,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         _thread_pool.shutdown();
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Chunkdownloaders finished!", Thread.currentThread().getName());
+                        LOG.log(Level.INFO, "{0} Chunkdownloaders finished!", Thread.currentThread().getName());
 
                         getProgress_meter().setExit(true);
 
@@ -672,22 +672,22 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         try {
 
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Waiting all threads to finish...", Thread.currentThread().getName());
+                            LOG.log(Level.INFO, "{0} Waiting all threads to finish...", Thread.currentThread().getName());
 
                             _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
                         } catch (InterruptedException ex) {
-                            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, null, ex);
                         }
 
                         if (!_thread_pool.isTerminated()) {
 
-                            Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Closing thread pool ''mecag\u00fcen'' style...", Thread.currentThread().getName());
+                            LOG.log(Level.INFO, "{0} Closing thread pool ''mecag\u00fcen'' style...", Thread.currentThread().getName());
 
                             _thread_pool.shutdownNow();
                         }
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0} Downloader thread pool finished!", Thread.currentThread().getName());
+                        LOG.log(Level.INFO, "{0} Downloader thread pool finished!", Thread.currentThread().getName());
 
                         getMain_panel().getGlobal_dl_speed().detachTransference(this);
 
@@ -850,10 +850,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             _status_error = true;
 
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
 
         } catch (Exception ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         }
 
         if (_file != null && !getView().isKeepTempFileSelected()) {
@@ -882,7 +882,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             try {
                 deleteDownload(_url);
             } catch (SQLException ex) {
-                Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                LOG.log(SEVERE, null, ex);
             }
 
         }
@@ -922,7 +922,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             }
         });
 
-        Logger.getLogger(getClass().getName()).log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
+        LOG.log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
     }
 
     public void provisionIt(boolean retry) throws APIException {
@@ -971,7 +971,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                     } catch (SQLException ex) {
 
-                        Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                        LOG.log(SEVERE, null, ex);
 
                         _status_error_message = "Error registering download: file is already downloading.";
                     }
@@ -1162,7 +1162,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     try {
                         Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                     } catch (InterruptedException ex2) {
-                        Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex2);
+                        LOG.log(Level.SEVERE, null, ex2);
                     }
                 }
 
@@ -1190,7 +1190,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     _thread_pool.execute(c);
 
                 } catch (java.util.concurrent.RejectedExecutionException e) {
-                    Logger.getLogger(getClass().getName()).log(Level.INFO, e.getMessage());
+                    LOG.log(Level.INFO, e.getMessage());
                 }
             }
         }
@@ -1662,7 +1662,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                    LOG.log(SEVERE, null, ex);
                 }
             }
 
@@ -1724,4 +1724,5 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public void downWaitQueue() {
         _main_panel.getDownload_manager().downWaitQueue(this);
     }
+    private static final Logger LOG = Logger.getLogger(Download.class.getName());
 }

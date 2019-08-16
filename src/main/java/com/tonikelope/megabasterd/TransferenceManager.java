@@ -204,7 +204,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -630,7 +630,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                         run.run();
                                     } catch (Exception ex) {
                                         run_error = true;
-                                        Logger.getLogger(getClass().getName()).log(SEVERE, null, ex);
+                                        LOG.log(SEVERE, null, ex);
                                     }
                                 } while (run_error);
                             }
@@ -717,5 +717,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         }
 
     }
+
+    private static final Logger LOG = Logger.getLogger(TransferenceManager.class.getName());
 
 }

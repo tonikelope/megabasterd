@@ -2,6 +2,7 @@ package com.tonikelope.megabasterd;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.logging.Logger;
 
 /**
  *
@@ -170,5 +171,6 @@ public final class ThrottledInputStream extends InputStream {
             _slice_size = req_slice_size;
         }
     }
+    private static final Logger LOG = Logger.getLogger(ThrottledInputStream.class.getName());
 
 }

@@ -97,7 +97,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
 
@@ -172,7 +172,7 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
                 try {
                     _timer_lock.wait();
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -198,5 +198,6 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
 
         return queue;
     }
+    private static final Logger LOG = Logger.getLogger(StreamThrottlerSupervisor.class.getName());
 
 }

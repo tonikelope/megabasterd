@@ -65,14 +65,14 @@ public class MegaProxyServer implements Runnable {
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, null, ex);
         } finally {
 
             if (!_serverSocket.isClosed()) {
                 try {
                     _serverSocket.close();
                 } catch (IOException ex) {
-                    Logger.getLogger(getClass().getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, null, ex);
                 }
             }
         }
@@ -131,7 +131,7 @@ public class MegaProxyServer implements Runnable {
             try {
                 String request = readLine(_clientSocket);
 
-                Logger.getLogger(getClass().getName()).log(Level.INFO, request);
+                LOG.log(Level.INFO, request);
 
                 Matcher matcher = CONNECT_PATTERN.matcher(request);
 
@@ -153,7 +153,7 @@ public class MegaProxyServer implements Runnable {
 
                         }
 
-                        Logger.getLogger(getClass().getName()).log(Level.INFO, header);
+                        LOG.log(Level.INFO, header);
 
                     } while (!"".equals(header));
 
@@ -266,4 +266,5 @@ public class MegaProxyServer implements Runnable {
             return byteArrayOutputStream.toString("UTF-8");
         }
     }
+    private static final Logger LOG = Logger.getLogger(MegaProxyServer.class.getName());
 }

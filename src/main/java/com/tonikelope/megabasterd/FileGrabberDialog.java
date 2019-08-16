@@ -7,6 +7,7 @@ import java.awt.Dialog;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -842,4 +843,5 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private javax.swing.JLabel used_space_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
+    private static final Logger LOG = Logger.getLogger(FileGrabberDialog.class.getName());
 }
