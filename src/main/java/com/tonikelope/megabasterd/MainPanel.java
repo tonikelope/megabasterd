@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.30";
+    public static final String VERSION = "6.31";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -873,7 +873,7 @@ public final class MainPanel {
 
             if (delete_db) {
 
-                File db_file = new File(SqliteSingleton.SQLITE_FILE);
+                File db_file = new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE);
 
                 db_file.delete();
 
