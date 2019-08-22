@@ -873,7 +873,7 @@ public final class MainPanel {
 
             if (delete_db) {
 
-                File db_file = new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE);
+                File db_file = new File(System.getProperty("user.home") + "/.megabasterd" + "/" + SqliteSingleton.SQLITE_FILE);
 
                 db_file.delete();
 
