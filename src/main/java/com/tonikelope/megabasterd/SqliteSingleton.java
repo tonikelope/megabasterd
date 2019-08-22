@@ -28,7 +28,7 @@ public final class SqliteSingleton {
 
         _connections_map = new ConcurrentHashMap();
 
-        File database_path = new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION);
+        File database_path = new File(System.getProperty("user.home") + "/.megabasterd");
 
         database_path.mkdirs();
     }
@@ -43,7 +43,7 @@ public final class SqliteSingleton {
 
                 Class.forName("org.sqlite.JDBC");
 
-                conn = DriverManager.getConnection("jdbc:sqlite:" + System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SQLITE_FILE + "?journal_mode=WAL&synchronous=OFF&journal_size_limit=500");
+                conn = DriverManager.getConnection("jdbc:sqlite:" + System.getProperty("user.home") + "/.megabasterd" + "/" + SQLITE_FILE + "?journal_mode=WAL&synchronous=OFF&journal_size_limit=500");
 
                 _connections_map.put(Thread.currentThread(), conn);
             }
