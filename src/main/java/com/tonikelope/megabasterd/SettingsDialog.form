@@ -150,39 +150,37 @@
                               </Group>
                               <Group type="102" alignment="1" attributes="0">
                                   <Group type="103" groupAlignment="1" attributes="0">
-                                      <Component id="jSeparator10" alignment="0" pref="1235" max="32767" attributes="0"/>
+                                      <Component id="jSeparator10" alignment="0" pref="1683" max="32767" attributes="0"/>
+                                      <Component id="smart_proxy_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Group type="102" alignment="0" attributes="0">
-                                          <Group type="103" groupAlignment="1" attributes="0">
-                                              <Component id="smart_proxy_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Component id="max_downloads_label" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="max_downloads_spinner" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Component id="multi_slot_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="limit_download_speed_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="rec_smart_proxy_label" alignment="0" max="-2" attributes="0"/>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <EmptySpace min="21" pref="21" max="-2" attributes="0"/>
+                                          <Group type="103" groupAlignment="0" attributes="0">
+                                              <Component id="rec_download_slots_label" alignment="0" min="-2" max="-2" attributes="0"/>
                                               <Group type="102" alignment="0" attributes="0">
-                                                  <Component id="max_downloads_label" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="default_slots_down_label" min="-2" max="-2" attributes="0"/>
                                                   <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="max_downloads_spinner" min="-2" max="-2" attributes="0"/>
+                                                  <Component id="default_slots_down_spinner" min="-2" max="-2" attributes="0"/>
                                               </Group>
-                                              <Component id="multi_slot_down_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                              <Component id="limit_download_speed_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                              <Component id="rec_smart_proxy_label" alignment="0" max="-2" attributes="0"/>
                                               <Group type="102" alignment="0" attributes="0">
-                                                  <EmptySpace min="21" pref="21" max="-2" attributes="0"/>
-                                                  <Group type="103" groupAlignment="0" attributes="0">
-                                                      <Component id="use_mega_label" min="-2" max="-2" attributes="0"/>
-                                                      <Component id="rec_download_slots_label" min="-2" max="-2" attributes="0"/>
-                                                      <Group type="102" attributes="0">
-                                                          <Component id="default_slots_down_label" min="-2" max="-2" attributes="0"/>
-                                                          <EmptySpace max="-2" attributes="0"/>
-                                                          <Component id="default_slots_down_spinner" min="-2" max="-2" attributes="0"/>
-                                                      </Group>
-                                                      <Group type="102" attributes="0">
-                                                          <Component id="max_down_speed_label" min="-2" max="-2" attributes="0"/>
-                                                          <EmptySpace max="-2" attributes="0"/>
-                                                          <Component id="max_down_speed_spinner" min="-2" max="-2" attributes="0"/>
-                                                      </Group>
-                                                  </Group>
+                                                  <Component id="max_down_speed_label" min="-2" max="-2" attributes="0"/>
+                                                  <EmptySpace max="-2" attributes="0"/>
+                                                  <Component id="max_down_speed_spinner" min="-2" max="-2" attributes="0"/>
+                                              </Group>
+                                              <Group type="102" alignment="0" attributes="0">
+                                                  <Component id="use_mega_label" min="-2" max="-2" attributes="0"/>
+                                                  <EmptySpace max="-2" attributes="0"/>
+                                                  <Component id="use_mega_account_down_combobox" min="-2" pref="700" max="-2" attributes="0"/>
                                               </Group>
                                           </Group>
-                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                                       </Group>
-                                      <Component id="use_mega_account_down_combobox" alignment="0" max="32767" attributes="0"/>
                                   </Group>
                                   <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                               </Group>
@@ -367,7 +365,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="18" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Allow to use MEGA accounts for download/streaming"/>
+                    <Property name="text" type="java.lang.String" value="Allow using MEGA accounts for download/streaming"/>
                   </Properties>
                   <Events>
                     <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="use_mega_account_down_checkboxStateChanged"/>
@@ -1008,64 +1006,57 @@
               <Layout>
                 <DimensionLayout dim="0">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" alignment="0" attributes="0">
+                      <Group type="102" alignment="1" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="jSeparator15" alignment="1" max="32767" attributes="0"/>
+                              <Component id="jSeparator12" alignment="1" max="32767" attributes="0"/>
+                              <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
+                              <Component id="proxy_panel" alignment="0" max="32767" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
-                                  <Component id="rec_zoom_label" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                              </Group>
-                              <Group type="102" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="jSeparator1" max="32767" attributes="0"/>
-                                      <Component id="proxy_panel" max="32767" attributes="0"/>
-                                      <Component id="jSeparator15" alignment="0" max="32767" attributes="0"/>
-                                      <Component id="jSeparator12" alignment="0" max="32767" attributes="0"/>
-                                      <Group type="102" attributes="0">
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="start_frozen_checkbox" min="-2" max="-2" attributes="0"/>
-                                              <Component id="custom_chunks_dir_checkbox" min="-2" max="-2" attributes="0"/>
-                                              <Group type="102" alignment="0" attributes="0">
-                                                  <Component id="custom_chunks_dir_button" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="custom_chunks_dir_current_label" min="-2" max="-2" attributes="0"/>
-                                              </Group>
-                                          </Group>
-                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                      </Group>
+                                  <Group type="103" groupAlignment="1" attributes="0">
+                                      <Component id="rec_zoom_label" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="start_frozen_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="custom_chunks_dir_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Group type="102" alignment="0" attributes="0">
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Group type="102" alignment="0" attributes="0">
-                                                  <Component id="font_label" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="font_combo" max="32767" attributes="0"/>
-                                              </Group>
-                                              <Group type="102" attributes="0">
-                                                  <Component id="zoom_label" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="zoom_spinner" min="-2" pref="100" max="-2" attributes="0"/>
-                                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                                              </Group>
-                                              <Group type="102" alignment="0" attributes="0">
-                                                  <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace max="-2" attributes="0"/>
-                                                  <Component id="language_combo" max="32767" attributes="0"/>
-                                              </Group>
-                                          </Group>
-                                          <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
-                                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                              <Group type="102" attributes="0">
-                                                  <Component id="import_settings_button" min="-2" max="-2" attributes="0"/>
-                                                  <EmptySpace type="separate" max="-2" attributes="0"/>
-                                                  <Component id="export_settings_button" min="-2" max="-2" attributes="0"/>
-                                              </Group>
-                                              <Component id="jButton1" max="32767" attributes="0"/>
-                                          </Group>
+                                          <Component id="custom_chunks_dir_button" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="custom_chunks_dir_current_label" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                   </Group>
-                                  <EmptySpace max="-2" attributes="0"/>
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <Component id="font_label" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="font_combo" max="32767" attributes="0"/>
+                                      </Group>
+                                      <Group type="102" attributes="0">
+                                          <Component id="zoom_label" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="zoom_spinner" min="-2" pref="100" max="-2" attributes="0"/>
+                                          <EmptySpace min="0" pref="227" max="32767" attributes="0"/>
+                                      </Group>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="language_combo" max="32767" attributes="0"/>
+                                      </Group>
+                                  </Group>
+                                  <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                      <Group type="102" attributes="0">
+                                          <Component id="import_settings_button" max="-2" attributes="0"/>
+                                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                                          <Component id="export_settings_button" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Component id="jButton1" max="32767" attributes="0"/>
+                                  </Group>
                               </Group>
                           </Group>
+                          <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1073,28 +1064,22 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="0" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                              <Group type="103" groupAlignment="3" attributes="0">
-                                  <Component id="font_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="font_combo" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  <Component id="export_settings_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <Component id="import_settings_button" max="32767" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="font_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="font_combo" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="import_settings_button" alignment="3" max="-2" attributes="0"/>
+                              <Component id="export_settings_button" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
-                          <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" attributes="0">
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="zoom_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="zoom_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="language_combo" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                              </Group>
-                              <Component id="jButton1" alignment="1" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="zoom_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="zoom_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jLabel2" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="language_combo" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="jSeparator1" min="-2" pref="8" max="-2" attributes="0"/>
@@ -1264,11 +1249,11 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="proxy_user_label" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="proxy_user_textfield" pref="389" max="32767" attributes="0"/>
+                                  <Component id="proxy_user_textfield" max="32767" attributes="0"/>
                                   <EmptySpace min="-2" max="-2" attributes="0"/>
                                   <Component id="proxy_pass_label" min="-2" max="-2" attributes="0"/>
                                   <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="proxy_pass_textfield" pref="552" max="32767" attributes="0"/>
+                                  <Component id="proxy_pass_textfield" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                         </DimensionLayout>

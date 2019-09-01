@@ -70,7 +70,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Remove selected", "Quitar seleccionado");
         _addTranslation("SPLIT FILE", "PARTIR ARCHIVO");
         _addTranslation("Encrypt on disk sensitive information", "Cifrar en disco datos sensibles");
-        _addTranslation("Allow to use MEGA accounts for download/streaming", "Permitir utilizar cuentas de MEGA para descargar/streaming");
+        _addTranslation("Allow using MEGA accounts for download/streaming", "Permitir utilizar cuentas de MEGA para descargar/streaming");
         _addTranslation("Please wait...", "Por favor espera...");
         _addTranslation("CANCEL RETRY", "CANCELAR REINTENTO");
         _addTranslation("SPLITTING FILE...", "PARTIENDO ARCHIVO...");
