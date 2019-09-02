@@ -329,7 +329,7 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                             out.write(buffer, 0, reads);
                         }
 
-                        String dlc = new String(out.toByteArray());
+                        String dlc = new String(out.toByteArray(), "UTF-8");
 
                         Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView) getParent()).getMain_panel());
 

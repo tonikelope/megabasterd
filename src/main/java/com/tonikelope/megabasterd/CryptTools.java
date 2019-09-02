@@ -261,7 +261,7 @@ public final class CryptTools {
 
             byte[] decrypted_data = decrypter.doFinal(UrlBASE642Bin(findFirstRegex("mega://f?enc[0-9]*\\?([\\da-zA-Z_,-]*)", link, 1)));
 
-            dec_link = new String(decrypted_data).trim();
+            dec_link = new String(decrypted_data, "UTF-8").trim();
 
             return "https://mega.nz/#" + (folder != null ? "f" : "") + dec_link;
 
@@ -323,7 +323,7 @@ public final class CryptTools {
 
                 byte[] url_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2, 4 + bin_links_length + 2 + url_bin_length);
 
-                if (!new String(url_bin).contains("http")) {
+                if (!new String(url_bin, "UTF-8").contains("http")) {
 
                     throw new Exception("BAD ELC HOST URL!");
                 }
@@ -332,7 +332,7 @@ public final class CryptTools {
 
                 byte[] pass_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2 + url_bin_length + 2, 4 + bin_links_length + 2 + url_bin_length + 2 + pass_bin_length);
 
-                URL url = new URL(new String(url_bin).trim());
+                URL url = new URL(new String(url_bin, "UTF-8").trim());
 
                 if (MainPanel.isUse_proxy()) {
 
@@ -340,7 +340,7 @@ public final class CryptTools {
 
                     if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                        con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                        con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                     }
                 } else {
 
@@ -389,9 +389,9 @@ public final class CryptTools {
 
                                 dialog.dispose();
 
-                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
 
-                                api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
 
                                 if (!remember_master_pass) {
 
@@ -407,9 +407,9 @@ public final class CryptTools {
 
                         } else {
 
-                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
 
-                            api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
 
                         }
 
@@ -425,9 +425,9 @@ public final class CryptTools {
                     throw new Exception("NO valid ELC account available!");
                 }
 
-                String postdata = "OPERATION_TYPE=D&DATA=" + new String(pass_bin) + "&USER=" + user + "&APIKEY=" + api_key;
+                String postdata = "OPERATION_TYPE=D&DATA=" + new String(pass_bin, "UTF-8") + "&USER=" + user + "&APIKEY=" + api_key;
 
-                con.getOutputStream().write(postdata.getBytes());
+                con.getOutputStream().write(postdata.getBytes("UTF-8"));
 
                 con.getOutputStream().close();
 
@@ -444,7 +444,7 @@ public final class CryptTools {
 
                     ObjectMapper objectMapper = new ObjectMapper();
 
-                    HashMap res_map = objectMapper.readValue(new String(out.toByteArray()), HashMap.class);
+                    HashMap res_map = objectMapper.readValue(new String(out.toByteArray(), "UTF-8"), HashMap.class);
 
                     String dec_pass = (String) res_map.get("d");
 
@@ -464,7 +464,7 @@ public final class CryptTools {
 
                         byte[] bin_links_dec = CryptTools.aes_cbc_decrypt_nopadding(bin_links, key, iv);
 
-                        String[] links_string = (new String(bin_links_dec).trim()).split("\\|");
+                        String[] links_string = (new String(bin_links_dec, "UTF-8").trim()).split("\\|");
 
                         for (String s : links_string) {
 
@@ -472,7 +472,7 @@ public final class CryptTools {
                         }
 
                     } else {
-                        throw new Exception(url.getAuthority() + " ELC SERVER ERROR " + new String(out.toByteArray()));
+                        throw new Exception(url.getAuthority() + " ELC SERVER ERROR " + new String(out.toByteArray(), "UTF-8"));
                     }
 
                 }
@@ -517,7 +517,7 @@ public final class CryptTools {
 
                 if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                 }
             } else {
 
@@ -550,7 +550,7 @@ public final class CryptTools {
 
             String postdata = "destType=jdtc6&b=JD&srcType=dlc&data=" + dlc_id + "&v=" + dlc_rev;
 
-            con.getOutputStream().write(postdata.getBytes());
+            con.getOutputStream().write(postdata.getBytes("UTF-8"));
 
             con.getOutputStream().close();
 
@@ -563,12 +563,12 @@ public final class CryptTools {
 
                     out.write(buffer, 0, reads);
                 }
-                enc_dlc_key = findFirstRegex("< *rc *>(.+?)< */ *rc *>", new String(out.toByteArray()), 1);
+                enc_dlc_key = findFirstRegex("< *rc *>(.+?)< */ *rc *>", new String(out.toByteArray(), "UTF-8"), 1);
             }
 
-            String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt_nopadding(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key))).trim();
+            String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt_nopadding(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key)), "UTF-8").trim();
 
-            String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt_nopadding(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key))).trim();
+            String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt_nopadding(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key)), "UTF-8").trim();
 
             String dec_dlc_data_file = findFirstRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), "UTF-8"), 1);
 
@@ -576,7 +576,7 @@ public final class CryptTools {
 
             for (String s : urls) {
 
-                links.add(new String(BASE642Bin(s)));
+                links.add(new String(BASE642Bin(s), "UTF-8"));
             }
 
         } catch (Exception ex) {

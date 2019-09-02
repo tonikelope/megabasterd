@@ -98,7 +98,7 @@ public final class SmartMegaProxyManager {
                         byte_res.write(buffer, 0, reads);
                     }
 
-                    data = new String(byte_res.toByteArray());
+                    data = new String(byte_res.toByteArray(), "UTF-8");
                 }
 
                 String[] proxy_list = data.split("\n");

@@ -149,7 +149,7 @@ public class MegaProxyServer implements Runnable {
 
                         if (matcher_auth.matches()) {
 
-                            proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()));
+                            proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()), "UTF-8");
 
                         }
 

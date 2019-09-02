@@ -233,7 +233,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                             String selected_account = (String) use_mega_account_down_combobox.getSelectedItem();
 
-                            data = Bin2UrlBASE64(((selected_account != null ? selected_account : "") + "|" + link).getBytes());
+                            data = Bin2UrlBASE64(((selected_account != null ? selected_account : "") + "|" + link).getBytes("UTF-8"));
 
                             stream_link = "http://localhost:1337/video/" + data;
 

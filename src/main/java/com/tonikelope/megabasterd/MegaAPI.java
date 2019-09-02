@@ -394,7 +394,7 @@ public final class MegaAPI implements Serializable {
 
                         if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                         }
                     } else {
 
@@ -450,7 +450,7 @@ public final class MegaAPI implements Serializable {
                             byte_res.write(buffer, 0, reads);
                         }
 
-                        response = new String(byte_res.toByteArray());
+                        response = new String(byte_res.toByteArray(), "UTF-8");
 
                         if (response.length() > 0) {
 
@@ -593,15 +593,15 @@ public final class MegaAPI implements Serializable {
 
     private byte[] _encAttr(String attr, byte[] key) {
 
-        byte[] attr_byte = ("MEGA" + attr).getBytes();
-
-        int l = (int) (16 * Math.ceil((double) attr_byte.length / 16));
-
-        byte[] new_attr_byte = Arrays.copyOfRange(attr_byte, 0, l);
-
         byte[] ret = null;
 
         try {
+
+            byte[] attr_byte = ("MEGA" + attr).getBytes("UTF-8");
+
+            int l = (int) (16 * Math.ceil((double) attr_byte.length / 16));
+
+            byte[] new_attr_byte = Arrays.copyOfRange(attr_byte, 0, l);
 
             ret = aes_cbc_encrypt_nopadding(new_attr_byte, key, AES_ZERO_IV);
 
@@ -622,7 +622,7 @@ public final class MegaAPI implements Serializable {
 
             decrypted_at = aes_cbc_decrypt_nopadding(UrlBASE642Bin(encAttr), key, AES_ZERO_IV);
 
-            String att = new String(decrypted_at).replaceAll("\0+$", "").replaceAll("^MEGA", "");
+            String att = new String(decrypted_at, "UTF-8").replaceAll("\0+$", "").replaceAll("^MEGA", "");
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -880,7 +880,7 @@ public final class MegaAPI implements Serializable {
 
         try {
 
-            ch = Bin2UrlBASE64(encryptKey((h + h).getBytes(), i32a2bin(getMaster_key())));
+            ch = Bin2UrlBASE64(encryptKey((h + h).getBytes("UTF-8"), i32a2bin(getMaster_key())));
 
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, null, ex);

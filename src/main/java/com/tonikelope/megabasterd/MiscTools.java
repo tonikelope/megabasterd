@@ -887,7 +887,7 @@ public final class MiscTools {
 
                                 if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                                 }
                             } else {
 
@@ -903,7 +903,7 @@ public final class MiscTools {
 
                             if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                             }
                         } else {
 
@@ -958,7 +958,7 @@ public final class MiscTools {
 
                 if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                 }
             } else {
 
@@ -978,7 +978,7 @@ public final class MiscTools {
                     byte_res.write(buffer, 0, reads);
                 }
 
-                public_ip = new String(byte_res.toByteArray());
+                public_ip = new String(byte_res.toByteArray(), "UTF-8");
             }
 
         } catch (MalformedURLException ex) {
@@ -1012,7 +1012,7 @@ public final class MiscTools {
 
                 if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                 }
             } else {
 
@@ -1032,7 +1032,7 @@ public final class MiscTools {
                     byte_res.write(buffer, 0, reads);
                 }
 
-                String latest_version_res = new String(byte_res.toByteArray());
+                String latest_version_res = new String(byte_res.toByteArray(), "UTF-8");
 
                 String latest_version = findFirstRegex("releases\\/tag\\/v?([0-9]+\\.[0-9]+)", latest_version_res, 1);
 

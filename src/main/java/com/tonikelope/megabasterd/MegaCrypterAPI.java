@@ -45,7 +45,7 @@ public final class MegaCrypterAPI {
 
                 if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes()));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                 }
             } else {
 
@@ -66,7 +66,7 @@ public final class MegaCrypterAPI {
 
             con.setDoOutput(true);
 
-            con.getOutputStream().write(request.getBytes());
+            con.getOutputStream().write(request.getBytes("UTF-8"));
 
             con.getOutputStream().close();
 
@@ -86,7 +86,7 @@ public final class MegaCrypterAPI {
                         byte_res.write(buffer, 0, reads);
                     }
 
-                    response = new String(byte_res.toByteArray());
+                    response = new String(byte_res.toByteArray(), "UTF-8");
 
                     if (response.length() > 0) {
 
@@ -132,7 +132,7 @@ public final class MegaCrypterAPI {
 
                 byte[] decrypted_url = aes_cbc_decrypt_pkcs7(BASE642Bin(dl_url), BASE642Bin(pass_hash), BASE642Bin(pass));
 
-                dl_url = new String(decrypted_url);
+                dl_url = new String(decrypted_url, "UTF-8");
 
             } catch (Exception ex) {
                 throw new MegaCrypterAPIException(25);
@@ -292,12 +292,12 @@ public final class MegaCrypterAPI {
 
                     byte[] decrypted_name = decrypter.doFinal(BASE642Bin(fname));
 
-                    fname = new String(decrypted_name);
+                    fname = new String(decrypted_name, "UTF-8");
 
                     if (fpath != null) {
                         byte[] decrypted_fpath = decrypter.doFinal(BASE642Bin(fpath));
 
-                        fpath = new String(decrypted_fpath);
+                        fpath = new String(decrypted_fpath, "UTF-8");
                     }
 
                     pass = Bin2BASE64(info_key);
