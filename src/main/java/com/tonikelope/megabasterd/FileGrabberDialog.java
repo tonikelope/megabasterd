@@ -7,6 +7,7 @@ import java.awt.Dialog;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.logging.Logger;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -22,7 +23,7 @@ import javax.swing.tree.TreeNode;
  *
  * @author tonikelope
  */
-public final class FileGrabberDialog extends javax.swing.JDialog {
+public final class FileGrabberDialog extends javax.swing.JDialog implements FileDropHandlerNotifiable {
 
     private boolean _upload;
     private final ArrayList<File> _files;
@@ -32,6 +33,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private final boolean _remember_master_pass;
     private boolean _inserting_mega_accounts;
     private int _last_selected_index;
+    private List<File> _drag_drop_files;
 
     public JCheckBox getUpload_log_checkbox() {
         return upload_log_checkbox;
@@ -61,11 +63,13 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         return _remember_master_pass;
     }
 
-    public FileGrabberDialog(MainPanelView parent, boolean modal) {
+    public FileGrabberDialog(MainPanelView parent, boolean modal, List<File> files) {
 
         super(parent, modal);
 
         _main_panel = parent.getMain_panel();
+
+        _drag_drop_files = files;
 
         initComponents();
 
@@ -77,6 +81,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         translateLabels(this);
 
+        jPanel1.setTransferHandler(new FileDropHandler(this));
+
         _total_space = 0L;
         _base_path = null;
         _upload = false;
@@ -87,55 +93,63 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
         dir_name_textfield.addMouseListener(new ContextMenuMouseListener());
 
+        pack();
+
+    }
+
+    public void init_dialog() {
+
         if (_main_panel.getMega_accounts().size() > 0) {
 
-            THREAD_POOL.execute(new Runnable() {
+            swingInvoke(new Runnable() {
                 @Override
                 public void run() {
 
-                    swingInvoke(new Runnable() {
-                        @Override
-                        public void run() {
+                    if (!_main_panel.getMega_active_accounts().isEmpty()) {
+                        _inserting_mega_accounts = true;
 
-                            if (!_main_panel.getMega_active_accounts().isEmpty()) {
-                                _inserting_mega_accounts = true;
+                        for (Object o : _main_panel.getMega_accounts().keySet()) {
 
-                                for (Object o : _main_panel.getMega_accounts().keySet()) {
-
-                                    account_combobox.addItem((String) o);
-                                }
-
-                                _inserting_mega_accounts = false;
-
-                                for (Object o : _main_panel.getMega_active_accounts().keySet()) {
-
-                                    account_combobox.setSelectedItem(o);
-
-                                    account_comboboxItemStateChanged(null);
-
-                                    break;
-                                }
-
-                            } else {
-
-                                for (Object o : _main_panel.getMega_accounts().keySet()) {
-
-                                    account_combobox.addItem((String) o);
-                                }
-                            }
+                            account_combobox.addItem((String) o);
                         }
-                    });
-                }
 
+                        _inserting_mega_accounts = false;
+
+                        for (Object o : _main_panel.getMega_active_accounts().keySet()) {
+
+                            account_combobox.setSelectedItem(o);
+
+                            account_comboboxItemStateChanged(null);
+
+                            break;
+                        }
+
+                    } else {
+
+                        for (Object o : _main_panel.getMega_accounts().keySet()) {
+
+                            account_combobox.addItem((String) o);
+                        }
+                    }
+
+                    if (_drag_drop_files != null) {
+
+                        file_drop_notify(_drag_drop_files);
+                    }
+                }
             });
 
         } else {
+            swingInvoke(new Runnable() {
+                @Override
+                public void run() {
 
-            used_space_label.setForeground(Color.red);
-            used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("No MEGA accounts available (Go to Settings > Accounts)"));
+                    used_space_label.setForeground(Color.red);
+                    used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("No MEGA accounts available (Go to Settings > Accounts)"));
+
+                }
+            });
         }
-
-        pack();
 
     }
 
@@ -451,6 +465,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             skip_rest_button.setEnabled(root_childs);
             upload_log_checkbox.setEnabled(root_childs);
 
+            revalidate();
+            repaint();
+
         } else {
 
             if (filechooser.getSelectedFile() != null && !filechooser.getSelectedFile().canRead()) {
@@ -514,7 +531,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
             DefaultMutableTreeNode root = new DefaultMutableTreeNode(filechooser.getSelectedFile().getAbsolutePath());
 
-            _genFileTree(filechooser.getSelectedFile().getAbsolutePath(), root);
+            _genFileTree(filechooser.getSelectedFile().getAbsolutePath(), root, null);
 
             DefaultTreeModel tree_model = new DefaultTreeModel(sortTree(root));
 
@@ -531,8 +548,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             boolean root_childs = ((TreeNode) tree_model.getRoot()).getChildCount() > 0;
 
             file_tree.setRootVisible(root_childs);
-
-            file_tree.setRootVisible(root_childs);
             file_tree.setEnabled(root_childs);
             warning_label.setEnabled(root_childs);
             dance_button.setEnabled(root_childs);
@@ -540,6 +555,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
             skip_button.setEnabled(root_childs);
             skip_rest_button.setEnabled(root_childs);
             upload_log_checkbox.setEnabled(root_childs);
+
+            revalidate();
+            repaint();
 
         } else {
 
@@ -642,7 +660,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                                         used_space_label.setForeground(used_space_color);
 
-                                        for (JComponent c : new JComponent[]{add_files_button, add_folder_button, account_combobox, account_label}) {
+                                        for (JComponent c : new JComponent[]{add_files_button, add_folder_button, account_combobox, account_label, upload_log_checkbox}) {
 
                                             c.setEnabled(true);
                                         }
@@ -671,6 +689,16 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                                         used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
 
                                         _last_selected_index = account_combobox.getSelectedIndex();
+
+                                        dance_button.setEnabled(false);
+                                        total_file_size_label.setEnabled(false);
+                                        skip_button.setEnabled(false);
+                                        skip_rest_button.setEnabled(false);
+                                        warning_label.setEnabled(false);
+                                        file_tree.setEnabled(false);
+                                        add_files_button.setEnabled(false);
+                                        add_folder_button.setEnabled(false);
+                                        upload_log_checkbox.setEnabled(false);
                                     }
                                 });
 
@@ -694,6 +722,16 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
                                 used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
 
                                 _last_selected_index = account_combobox.getSelectedIndex();
+
+                                dance_button.setEnabled(false);
+                                total_file_size_label.setEnabled(false);
+                                skip_button.setEnabled(false);
+                                skip_rest_button.setEnabled(false);
+                                warning_label.setEnabled(false);
+                                file_tree.setEnabled(false);
+                                add_files_button.setEnabled(false);
+                                add_folder_button.setEnabled(false);
+                                upload_log_checkbox.setEnabled(false);
                             }
                         });
 
@@ -752,11 +790,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_skip_buttonActionPerformed
 
-    private void _genFileTree(String directoryName, DefaultMutableTreeNode root) {
+    private void _genFileTree(String directoryName, DefaultMutableTreeNode root, File[] files) {
 
         File directory = new File(directoryName);
 
-        File[] fList = directory.listFiles();
+        File[] fList = files == null ? directory.listFiles() : files;
 
         if (fList != null) {
 
@@ -770,11 +808,18 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
 
                 } else if (file.isDirectory() && file.canRead() && file.listFiles().length > 0) {
 
-                    DefaultMutableTreeNode current_dir = new DefaultMutableTreeNode(file.getName());
+                    if (files == null || files.length > 1) {
 
-                    root.add(current_dir);
+                        DefaultMutableTreeNode current_dir = new DefaultMutableTreeNode(file.getName());
 
-                    _genFileTree(file.getAbsolutePath(), current_dir);
+                        root.add(current_dir);
+
+                        _genFileTree(file.getAbsolutePath(), current_dir, null);
+
+                    } else {
+                        _genFileTree(file.getAbsolutePath(), root, null);
+                    }
+
                 }
             }
 
@@ -844,4 +889,58 @@ public final class FileGrabberDialog extends javax.swing.JDialog {
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
     private static final Logger LOG = Logger.getLogger(FileGrabberDialog.class.getName());
+
+    @Override
+    public void file_drop_notify(List<File> files) {
+
+        add_files_button.setEnabled(false);
+        add_folder_button.setEnabled(false);
+        warning_label.setEnabled(false);
+        skip_button.setEnabled(false);
+        skip_rest_button.setEnabled(false);
+        dance_button.setEnabled(false);
+        dir_name_textfield.setEnabled(false);
+        dir_name_label.setEnabled(false);
+        upload_log_checkbox.setEnabled(false);
+
+        total_file_size_label.setText("[0 B]");
+
+        _base_path = (files.size() == 1 && files.get(0).isDirectory()) ? files.get(0).getAbsolutePath() : files.get(0).getParentFile().getAbsolutePath();
+
+        dir_name_textfield.setText(((files.size() == 1 && files.get(0).isDirectory()) ? files.get(0).getName() : files.get(0).getParentFile().getName()) + "_" + genID(10));
+
+        dir_name_textfield.setEnabled(true);
+
+        dir_name_label.setEnabled(true);
+
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(_base_path);
+
+        _genFileTree(_base_path, root, files.toArray(new File[files.size()]));
+
+        DefaultTreeModel tree_model = new DefaultTreeModel(sortTree(root));
+
+        file_tree.setModel(tree_model);
+
+        _genFileList();
+
+        add_files_button.setEnabled(true);
+
+        add_folder_button.setEnabled(true);
+
+        add_folder_button.setText(LabelTranslatorSingleton.getInstance().translate("Add folder"));
+
+        boolean root_childs = ((TreeNode) tree_model.getRoot()).getChildCount() > 0;
+
+        file_tree.setRootVisible(root_childs);
+        file_tree.setEnabled(root_childs);
+        warning_label.setEnabled(root_childs);
+        dance_button.setEnabled(root_childs);
+        total_file_size_label.setEnabled(root_childs);
+        skip_button.setEnabled(root_childs);
+        skip_rest_button.setEnabled(root_childs);
+        upload_log_checkbox.setEnabled(root_childs);
+        revalidate();
+        repaint();
+
+    }
 }
