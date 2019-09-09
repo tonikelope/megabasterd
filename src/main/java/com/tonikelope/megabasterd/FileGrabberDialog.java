@@ -877,7 +877,13 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
             }
         }
 
-        total_file_size_label.setText("[" + formatBytes(_total_space) + "]");
+        swingInvoke(new Runnable() {
+            @Override
+            public void run() {
+                total_file_size_label.setText("[" + formatBytes(_total_space) + "]");
+            }
+        });
+
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
