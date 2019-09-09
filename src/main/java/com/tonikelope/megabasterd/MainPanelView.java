@@ -358,14 +358,24 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
             @Override
             public void run() {
 
-                Object[] options = {LabelTranslatorSingleton.getInstance().translate("Split content in different uploads"), LabelTranslatorSingleton.getInstance().translate("Merge content in the same upload")};
+                int n;
 
-                int n = showOptionDialog(_main_panel.getView(),
-                        LabelTranslatorSingleton.getInstance().translate("How do you want to proceed?"),
-                        LabelTranslatorSingleton.getInstance().translate("File Grabber"), DEFAULT_OPTION, INFORMATION_MESSAGE,
-                        null,
-                        options,
-                        null);
+                if (files.size() > 1) {
+
+                    Object[] options = {LabelTranslatorSingleton.getInstance().translate("Split content in different uploads"), LabelTranslatorSingleton.getInstance().translate("Merge content in the same upload")};
+
+                    n = showOptionDialog(_main_panel.getView(),
+                            LabelTranslatorSingleton.getInstance().translate("How do you want to proceed?"),
+                            LabelTranslatorSingleton.getInstance().translate("File Grabber"), DEFAULT_OPTION, INFORMATION_MESSAGE,
+                            null,
+                            options,
+                            null);
+
+                } else {
+
+                    n = 1;
+
+                }
 
                 if (n == 0) {
 
