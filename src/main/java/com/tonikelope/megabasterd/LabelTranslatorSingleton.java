@@ -243,6 +243,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***", "Creando nuevo nodo de MEGA ... ***NO CIERRES MEGABASTERD EN ESTE MOMENTO***");
         _addTranslation("File successfully uploaded! (", "¡Archivo subido correctamente! (");
         _addTranslation("PAUSE ALL", "PAUSAR TODO");
+        _addTranslation("RESUME ALL", "CONTINUAR TODO");
         _addTranslation("MEGA folder link was copied to clipboard!", "¡Enlace de carpeta de MEGA copiado al portapapeles!");
         _addTranslation("MEGA file link was copied to clipboard!", "¡Enlace de fichero de MEGA copiado al portapapeles!");
         _addTranslation("Pausing download ...", "Pausando descarga ...");

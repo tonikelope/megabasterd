@@ -45,7 +45,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private volatile boolean _starting_transferences;
     private volatile boolean _preprocessing_transferences;
     private volatile boolean _paused_all;
-    private volatile boolean _pausing_all;
     protected volatile boolean _frozen;
     private boolean _tray_icon_finish;
     protected volatile long _total_size;
@@ -56,7 +55,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
         _paused_all = false;
-        _pausing_all = false;
         _frozen = false;
         _removing_transferences = false;
         _provisioning_transferences = false;
@@ -292,10 +290,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         secureNotify();
     }
 
-    public boolean isPausing_all() {
-        return _pausing_all;
-    }
-
     public void upWaitQueue(Transference t) {
 
         synchronized (getWait_queue_lock()) {
@@ -417,33 +411,12 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     }
 
     public void pauseAll() {
-        _pausing_all = true;
 
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                while (!_paused_all) {
-
-                    try {
-                        Thread.sleep(500);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-                _pausing_all = false;
-
-                secureNotify();
-            }
-        });
+        _paused_all = !_paused_all;
 
         for (Transference transference : _transference_running_list) {
 
-            if (!transference.isPaused()) {
-
-                transference.pause();
-            }
+            transference.pause();
         }
 
         secureNotify();
@@ -496,26 +469,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 new Runnable() {
             @Override
             public void run() {
-                if (!_transference_running_list.isEmpty()) {
 
-                    boolean show_pause_all = false;
-
-                    for (Transference trans : _transference_running_list) {
-
-                        if ((show_pause_all = !trans.isPaused())) {
-
-                            break;
-                        }
-                    }
-
-                    _pause_all_button.setVisible(show_pause_all);
-
-                    _paused_all = !show_pause_all;
-
+                if (_paused_all) {
+                    _pause_all_button.setText("RESUME ALL");
                 } else {
-
-                    _pause_all_button.setVisible(false);
+                    _pause_all_button.setText("PAUSE ALL");
                 }
+
+                _pause_all_button.setVisible(!getTransference_running_list().isEmpty());
 
                 _clean_all_menu.getComponent().setEnabled(!_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty() || !getTransference_waitstart_queue().isEmpty());
 
@@ -675,7 +636,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             }
 
-            if (!_frozen && !_main_panel.isExit() && !isPausing_all() && !isRemoving_transferences() && !isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
+            if (!_frozen && !_main_panel.isExit() && !_paused_all && !isRemoving_transferences() && !isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
 
                 setStarting_transferences(true);
 

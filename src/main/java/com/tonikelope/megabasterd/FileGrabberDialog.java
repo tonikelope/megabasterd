@@ -95,62 +95,73 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
 
         pack();
 
+        _post_constructor();
+
     }
 
-    public void init_dialog() {
+    private void _post_constructor() {
 
-        if (_main_panel.getMega_accounts().size() > 0) {
+        THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
 
-            swingInvoke(new Runnable() {
-                @Override
-                public void run() {
+                if (_main_panel.getMega_accounts().size() > 0) {
 
-                    if (!_main_panel.getMega_active_accounts().isEmpty()) {
-                        _inserting_mega_accounts = true;
+                    swingInvoke(new Runnable() {
+                        @Override
+                        public void run() {
 
-                        for (Object o : _main_panel.getMega_accounts().keySet()) {
+                            if (!_main_panel.getMega_active_accounts().isEmpty()) {
+                                _inserting_mega_accounts = true;
 
-                            account_combobox.addItem((String) o);
+                                for (Object o : _main_panel.getMega_accounts().keySet()) {
+
+                                    account_combobox.addItem((String) o);
+                                }
+
+                                _inserting_mega_accounts = false;
+
+                                for (Object o : _main_panel.getMega_active_accounts().keySet()) {
+
+                                    account_combobox.setSelectedItem(o);
+
+                                    account_comboboxItemStateChanged(null);
+
+                                    break;
+                                }
+
+                            } else {
+
+                                for (Object o : _main_panel.getMega_accounts().keySet()) {
+
+                                    account_combobox.addItem((String) o);
+                                }
+                            }
+
+                            pack();
+
                         }
-
-                        _inserting_mega_accounts = false;
-
-                        for (Object o : _main_panel.getMega_active_accounts().keySet()) {
-
-                            account_combobox.setSelectedItem(o);
-
-                            account_comboboxItemStateChanged(null);
-
-                            break;
-                        }
-
-                    } else {
-
-                        for (Object o : _main_panel.getMega_accounts().keySet()) {
-
-                            account_combobox.addItem((String) o);
-                        }
-                    }
+                    });
 
                     if (_drag_drop_files != null) {
 
                         file_drop_notify(_drag_drop_files);
                     }
+
+                } else {
+                    swingInvoke(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            used_space_label.setForeground(Color.red);
+                            used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("No MEGA accounts available (Go to Settings > Accounts)"));
+
+                        }
+                    });
                 }
-            });
 
-        } else {
-            swingInvoke(new Runnable() {
-                @Override
-                public void run() {
-
-                    used_space_label.setForeground(Color.red);
-                    used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("No MEGA accounts available (Go to Settings > Accounts)"));
-
-                }
-            });
-        }
-
+            }
+        });
     }
 
     /**
@@ -893,17 +904,22 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
     @Override
     public void file_drop_notify(List<File> files) {
 
-        add_files_button.setEnabled(false);
-        add_folder_button.setEnabled(false);
-        warning_label.setEnabled(false);
-        skip_button.setEnabled(false);
-        skip_rest_button.setEnabled(false);
-        dance_button.setEnabled(false);
-        dir_name_textfield.setEnabled(false);
-        dir_name_label.setEnabled(false);
-        upload_log_checkbox.setEnabled(false);
+        swingInvoke(new Runnable() {
+            @Override
+            public void run() {
+                add_files_button.setEnabled(false);
+                add_folder_button.setEnabled(false);
+                warning_label.setEnabled(false);
+                skip_button.setEnabled(false);
+                skip_rest_button.setEnabled(false);
+                dance_button.setEnabled(false);
+                dir_name_textfield.setEnabled(false);
+                dir_name_label.setEnabled(false);
+                upload_log_checkbox.setEnabled(false);
+                total_file_size_label.setText("[0 B]");
 
-        total_file_size_label.setText("[0 B]");
+            }
+        });
 
         _base_path = (files.size() == 1 && files.get(0).isDirectory()) ? files.get(0).getAbsolutePath() : files.get(0).getParentFile().getAbsolutePath();
 
@@ -923,24 +939,30 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
 
         _genFileList();
 
-        add_files_button.setEnabled(true);
+        swingInvoke(new Runnable() {
+            @Override
+            public void run() {
 
-        add_folder_button.setEnabled(true);
+                add_files_button.setEnabled(true);
 
-        add_folder_button.setText(LabelTranslatorSingleton.getInstance().translate("Add folder"));
+                add_folder_button.setEnabled(true);
 
-        boolean root_childs = ((TreeNode) tree_model.getRoot()).getChildCount() > 0;
+                add_folder_button.setText(LabelTranslatorSingleton.getInstance().translate("Add folder"));
 
-        file_tree.setRootVisible(root_childs);
-        file_tree.setEnabled(root_childs);
-        warning_label.setEnabled(root_childs);
-        dance_button.setEnabled(root_childs);
-        total_file_size_label.setEnabled(root_childs);
-        skip_button.setEnabled(root_childs);
-        skip_rest_button.setEnabled(root_childs);
-        upload_log_checkbox.setEnabled(root_childs);
-        revalidate();
-        repaint();
+                boolean root_childs = ((TreeNode) tree_model.getRoot()).getChildCount() > 0;
 
+                file_tree.setRootVisible(root_childs);
+                file_tree.setEnabled(root_childs);
+                warning_label.setEnabled(root_childs);
+                dance_button.setEnabled(root_childs);
+                total_file_size_label.setEnabled(root_childs);
+                skip_button.setEnabled(root_childs);
+                skip_rest_button.setEnabled(root_childs);
+                upload_log_checkbox.setEnabled(root_childs);
+
+                revalidate();
+                repaint();
+            }
+        });
     }
 }
