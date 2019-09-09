@@ -199,6 +199,7 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Language:", "Idioma:");
         _addTranslation("English", "Inglés");
         _addTranslation("Spanish", "Español");
+        _addTranslation("Loading files, please wait...", "Cargando ficheros, por favor espera...");
         _addTranslation("Checking account quota, please wait...", "Comprobando espacio utilizado de la cuenta, por favor espera...");
         _addTranslation("ERROR checking account quota!", "ERROR al comprobar el espacio utilizado.");
         _addTranslation("If you DO NOT want to transfer some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).", "Si no quieres transferir alguna carpeta o archivo puedes quitarlo de la lista (para seleccionar varios elementos al mismo tiempo usa CTRL + RATÓN_IZQ)");

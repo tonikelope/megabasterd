@@ -13,6 +13,7 @@ import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
+import javax.swing.JTree;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 import javax.swing.tree.DefaultTreeModel;
@@ -352,73 +353,76 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
 
             folder_nodes = ma.getFolderNodes(folder_id, folder_key);
 
+            MegaMutableTreeNode root = null;
+
+            for (Object o : folder_nodes.values()) {
+
+                HashMap<String, Object> current_hashmap_node = (HashMap<String, Object>) o;
+
+                MegaMutableTreeNode current_node;
+
+                if (current_hashmap_node.get("jtree_node") == null) {
+
+                    current_node = new MegaMutableTreeNode(current_hashmap_node);
+
+                    current_hashmap_node.put("jtree_node", current_node);
+
+                } else {
+
+                    current_node = (MegaMutableTreeNode) current_hashmap_node.get("jtree_node");
+                }
+
+                String parent_id = (String) current_hashmap_node.get("parent");
+
+                root = null;
+
+                do {
+
+                    if (folder_nodes.get(parent_id) != null) {
+
+                        HashMap<String, Object> parent_hashmap_node = (HashMap) folder_nodes.get(parent_id);
+
+                        MegaMutableTreeNode parent_node;
+
+                        if (parent_hashmap_node.get("jtree_node") == null) {
+
+                            parent_node = new MegaMutableTreeNode(parent_hashmap_node);
+
+                            parent_hashmap_node.put("jtree_node", parent_node);
+
+                        } else {
+
+                            parent_node = (MegaMutableTreeNode) parent_hashmap_node.get("jtree_node");
+                        }
+
+                        parent_node.add(current_node);
+
+                        parent_id = (String) parent_hashmap_node.get("parent");
+
+                        current_node = parent_node;
+
+                    } else {
+
+                        root = current_node;
+                    }
+
+                } while (current_node != root);
+            }
+
+            final JTree ftree = file_tree;
+
+            final MegaMutableTreeNode roott = root;
+
             swingInvoke(
                     new Runnable() {
                 @Override
                 public void run() {
 
-                    MegaMutableTreeNode root = null;
+                    ftree.setModel(new DefaultTreeModel(sortTree(roott)));
 
-                    for (Object o : folder_nodes.values()) {
+                    ftree.setRootVisible(roott != null ? roott.getChildCount() > 0 : false);
 
-                        HashMap<String, Object> current_hashmap_node = (HashMap<String, Object>) o;
-
-                        MegaMutableTreeNode current_node;
-
-                        if (current_hashmap_node.get("jtree_node") == null) {
-
-                            current_node = new MegaMutableTreeNode(current_hashmap_node);
-
-                            current_hashmap_node.put("jtree_node", current_node);
-
-                        } else {
-
-                            current_node = (MegaMutableTreeNode) current_hashmap_node.get("jtree_node");
-                        }
-
-                        String parent_id = (String) current_hashmap_node.get("parent");
-
-                        root = null;
-
-                        do {
-
-                            if (folder_nodes.get(parent_id) != null) {
-
-                                HashMap<String, Object> parent_hashmap_node = (HashMap) folder_nodes.get(parent_id);
-
-                                MegaMutableTreeNode parent_node;
-
-                                if (parent_hashmap_node.get("jtree_node") == null) {
-
-                                    parent_node = new MegaMutableTreeNode(parent_hashmap_node);
-
-                                    parent_hashmap_node.put("jtree_node", parent_node);
-
-                                } else {
-
-                                    parent_node = (MegaMutableTreeNode) parent_hashmap_node.get("jtree_node");
-                                }
-
-                                parent_node.add(current_node);
-
-                                parent_id = (String) parent_hashmap_node.get("parent");
-
-                                current_node = parent_node;
-
-                            } else {
-
-                                root = current_node;
-                            }
-
-                        } while (current_node != root);
-                    }
-
-                    file_tree.setModel(new DefaultTreeModel(sortTree(root)));
-
-                    file_tree.setRootVisible(root != null ? root.getChildCount() > 0 : false);
-
-                    file_tree.setEnabled(true);
-
+                    ftree.setEnabled(true);
                 }
             });
 
