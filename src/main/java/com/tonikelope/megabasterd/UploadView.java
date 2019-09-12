@@ -540,17 +540,22 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     }
 
     @Override
-    public void updateSpeed(String sp, Boolean visible) {
+    public void updateSpeed(final String speed, final Boolean visible) {
 
-        if (sp != null) {
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
 
-            speed_label.setText(sp);
-        }
+                if (speed != null) {
+                    speed_label.setText(speed);
+                }
 
-        if (visible != null) {
-
-            speed_label.setVisible(visible);
-        }
+                if (visible != null) {
+                    speed_label.setVisible(visible);
+                }
+            }
+        });
     }
 
     @Override
@@ -646,17 +651,17 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                 }
             }
 
-            if (conta_error > 0) {
+            final Color status_color = conta_error > 0 ? Color.red : Color.black;
 
-                slot_status_label.setForeground(Color.red);
+            final String status = (conta_exit > 0 ? "Removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Error: " + conta_error) : "");
 
-            } else {
-
-                slot_status_label.setForeground(Color.black);
-            }
-
-            slot_status_label.setText((conta_exit > 0 ? "Removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Error: " + conta_error) : ""));
-
+            swingInvoke(new Runnable() {
+                @Override
+                public void run() {
+                    slot_status_label.setForeground(status_color);
+                    slot_status_label.setText(LabelTranslatorSingleton.getInstance().translate(status));
+                }
+            });
         }
     }
 

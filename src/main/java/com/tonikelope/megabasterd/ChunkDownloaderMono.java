@@ -27,6 +27,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
 
+        Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
+
         LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), getId()});
 
         HttpURLConnection con = null;

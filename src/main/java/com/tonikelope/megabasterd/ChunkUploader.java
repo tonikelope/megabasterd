@@ -93,6 +93,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
     @Override
     public void run() {
 
+        Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
+
         LOG.log(Level.INFO, "{0} ChunkUploader {1} hello! {2}", new Object[]{Thread.currentThread().getName(), getId(), getUpload().getFile_name()});
 
         long chunk_id = 0;

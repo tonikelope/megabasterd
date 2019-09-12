@@ -73,6 +73,8 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
     @Override
     public void run() {
 
+        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+
         try {
 
             boolean mac = false;
