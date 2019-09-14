@@ -33,6 +33,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
     private final MainPanel _main_panel;
     private final boolean _remember_master_pass;
     private boolean _inserting_mega_accounts;
+    private boolean _quota_ok;
     private int _last_selected_index;
     private List<File> _drag_drop_files;
 
@@ -71,6 +72,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
         _main_panel = parent.getMain_panel();
 
         _drag_drop_files = files;
+
+        _quota_ok = false;
 
         initComponents();
 
@@ -665,6 +668,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                     MegaAPI ma = null;
                     try {
 
+                        _quota_ok = false;
+
                         ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
 
                         Long[] quota = ma.getQuota();
@@ -688,6 +693,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                                 }
 
                                 final String quota_m = LabelTranslatorSingleton.getInstance().translate("Quota used: ") + formatBytes(quota[0]) + "/" + formatBytes(quota[1]);
+
+                                _quota_ok = true;
 
                                 swingInvoke(new Runnable() {
                                     @Override
@@ -986,7 +993,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
 
                 dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance baby"));
 
-                if (_last_selected_index != -1) {
+                if (_last_selected_index != -1 && _quota_ok) {
                     add_files_button.setEnabled(true);
                     add_folder_button.setEnabled(true);
                     file_tree.setRootVisible(true);
@@ -999,7 +1006,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                     dir_name_textfield.setEnabled(true);
                     dir_name_label.setEnabled(true);
                 }
-
             }
         });
     }
