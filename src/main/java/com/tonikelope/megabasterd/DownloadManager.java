@@ -89,6 +89,8 @@ public final class DownloadManager extends TransferenceManager {
                 @Override
                 public void run() {
 
+                    Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
+
                     try {
 
                         _provision((Download) download, true);

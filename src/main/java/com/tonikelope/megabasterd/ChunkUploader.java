@@ -21,7 +21,7 @@ import javax.crypto.CipherInputStream;
  */
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int MAX_CHUNK_ERROR = 20;
+    public static final int MAX_CHUNK_ERROR = 50;
     private final int _id;
     private final Upload _upload;
     private volatile boolean _exit;
@@ -93,7 +93,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
     @Override
     public void run() {
 
-        Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
+        Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
 
         LOG.log(Level.INFO, "{0} ChunkUploader {1} hello! {2}", new Object[]{Thread.currentThread().getName(), getId(), getUpload().getFile_name()});
 

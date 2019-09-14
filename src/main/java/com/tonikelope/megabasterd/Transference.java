@@ -11,7 +11,7 @@ public interface Transference {
     int MIN_WORKERS = 1;
     int MAX_WORKERS = 20;
     int HTTP_TIMEOUT = 15000;
-    int HTTP_PROXY_TIMEOUT = 10000;
+    int HTTP_PROXY_TIMEOUT = 15000;
     int MAX_SIM_TRANSFERENCES = 20;
     int SIM_TRANSFERENCES_DEFAULT = 4;
     boolean LIMIT_TRANSFERENCE_SPEED_DEFAULT = false;

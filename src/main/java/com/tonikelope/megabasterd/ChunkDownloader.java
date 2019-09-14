@@ -101,7 +101,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     @Override
     public void run() {
 
-        Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
+        Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
 
         LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 

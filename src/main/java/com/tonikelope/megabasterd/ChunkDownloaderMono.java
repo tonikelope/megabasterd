@@ -27,7 +27,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
 
-        Thread.currentThread().setPriority(Thread.NORM_PRIORITY - 1);
+        Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
 
         LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), getId()});
 
@@ -36,7 +36,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         try {
 
             String worker_url = null;
-            int conta_error = 0, http_error = 0, http_status = 0;
+            int http_error = 0, http_status = 0;
             boolean chunk_error = false;
             long chunk_id, bytes_downloaded = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
@@ -106,8 +106,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         getDownload().rejectChunkId(chunk_id);
 
-                        conta_error++;
-
                         if (!isExit() && http_error != 403) {
 
                             setError_wait(true);
@@ -152,8 +150,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             if (chunk_reads == chunk_size) {
 
                                 bytes_downloaded += chunk_reads;
-
-                                conta_error = 0;
 
                                 chunk_error = false;
 

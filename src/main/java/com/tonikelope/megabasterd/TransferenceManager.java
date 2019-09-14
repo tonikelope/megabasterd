@@ -553,6 +553,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     @Override
                     public void run() {
 
+                        Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
+
                         if (!getTransference_remove_queue().isEmpty()) {
 
                             ArrayList<Transference> transferences = new ArrayList(getTransference_remove_queue());
@@ -576,6 +578,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 THREAD_POOL.execute(new Runnable() {
                     @Override
                     public void run() {
+
+                        Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
 
                         while (!getTransference_preprocess_queue().isEmpty()) {
                             Runnable run = getTransference_preprocess_queue().poll();
@@ -615,6 +619,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     @Override
                     public void run() {
 
+                        Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
+
                         while (!getTransference_provision_queue().isEmpty()) {
                             Transference transference = getTransference_provision_queue().poll();
 
@@ -643,6 +649,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 THREAD_POOL.execute(new Runnable() {
                     @Override
                     public void run() {
+
+                        Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
 
                         while (!_frozen && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
 

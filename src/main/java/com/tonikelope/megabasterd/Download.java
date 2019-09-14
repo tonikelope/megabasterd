@@ -1304,6 +1304,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     private boolean verifyFileCBCMAC(String filename) throws FileNotFoundException, Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
+        int old_thread_priority = Thread.currentThread().getPriority();
+
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
         int[] int_key = bin2i32a(UrlBASE642Bin(_file_key));
@@ -1381,7 +1383,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             int[] cbc = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};
 
-            Thread.currentThread().setPriority(Thread.NORM_PRIORITY);
+            Thread.currentThread().setPriority(old_thread_priority);
 
             return (cbc[0] == meta_mac[0] && cbc[1] == meta_mac[1]);
         }

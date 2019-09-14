@@ -451,6 +451,33 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
         }
 
         pack();
+
+        THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                Runtime instance = Runtime.getRuntime();
+
+                while (true) {
+
+                    swingInvoke(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            memory_status.setText(MiscTools.formatBytes(instance.totalMemory() - instance.freeMemory()) + " / " + MiscTools.formatBytes(instance.maxMemory()));
+
+                        }
+                    });
+
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+            }
+        });
     }
 
     /**
@@ -466,6 +493,7 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
         kiss_server_status = new javax.swing.JLabel();
         mc_reverse_status = new javax.swing.JLabel();
         smart_proxy_status = new javax.swing.JLabel();
+        memory_status = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
         downloads_panel = new javax.swing.JPanel();
         global_speed_down_label = new javax.swing.JLabel();
@@ -520,6 +548,10 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
         smart_proxy_status.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         smart_proxy_status.setForeground(new java.awt.Color(102, 102, 102));
         smart_proxy_status.setDoubleBuffered(true);
+
+        memory_status.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        memory_status.setForeground(new java.awt.Color(102, 102, 102));
+        memory_status.setDoubleBuffered(true);
 
         jTabbedPane1.setDoubleBuffered(true);
         jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
@@ -827,19 +859,19 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, 202, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, 204, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, 203, Short.MAX_VALUE)
-                        .addGap(271, 271, 271))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addComponent(logo_label))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGap(0, 282, Short.MAX_VALUE)
                         .addComponent(unfreeze_transferences_button)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 282, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, 167, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(memory_status, javax.swing.GroupLayout.DEFAULT_SIZE, 174, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(logo_label)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -852,9 +884,11 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(logo_label)
-                    .addComponent(smart_proxy_status)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                        .addComponent(mc_reverse_status)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(mc_reverse_status)
+                            .addComponent(smart_proxy_status)
+                            .addComponent(memory_status))
                         .addComponent(kiss_server_status)))
                 .addGap(2, 2, 2))
         );
@@ -1378,6 +1412,7 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
     private javax.swing.JLabel logo_label;
     private javax.swing.JMenuBar main_menubar;
     private javax.swing.JLabel mc_reverse_status;
+    private javax.swing.JLabel memory_status;
     private javax.swing.JMenuItem merge_file_menu;
     private javax.swing.JMenuItem new_download_menu;
     private javax.swing.JMenuItem new_stream_menu;

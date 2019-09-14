@@ -100,6 +100,8 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
             @Override
             public void run() {
 
+                Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
+
                 if (_main_panel.getMega_accounts().size() > 0) {
 
                     swingInvoke(new Runnable() {
