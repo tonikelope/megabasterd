@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.42";
+    public static final String VERSION = "6.43";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -183,6 +183,7 @@ public final class MainPanel {
     private boolean _megacrypter_reverse;
     private float _zoom_factor;
     private volatile boolean _exit;
+    private volatile boolean _forcing_gc;
 
     public MainPanel() {
 
@@ -376,6 +377,8 @@ public final class MainPanel {
 
                 Runtime instance = Runtime.getRuntime();
 
+                _forcing_gc = false;
+
                 while (true) {
 
                     long used_memory = instance.totalMemory() - instance.freeMemory();
@@ -392,19 +395,49 @@ public final class MainPanel {
 
                             }
                         });
-                    } else {
 
-                        Logger.getLogger(MainPanelView.class.getName()).log(Level.INFO, "Forcing garbage collection...");
+                    } else {
 
                         swingInvoke(new Runnable() {
                             @Override
                             public void run() {
-                                _view.getMemory_status().setText("---------");
+                                _view.getMemory_status().setText("(!) " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
                             }
                         });
 
-                        MiscTools.force_garbage_collection();
+                        if (!_forcing_gc) {
 
+                            _forcing_gc = true;
+
+                            THREAD_POOL.execute(new Runnable() {
+                                @Override
+                                public void run() {
+
+                                    long used_memory = instance.totalMemory() - instance.freeMemory();
+
+                                    long max_memory = instance.maxMemory();
+
+                                    while (used_memory >= ((double) max_memory) * 0.7) {
+
+                                        Logger.getLogger(MainPanelView.class.getName()).log(Level.INFO, "Forcing garbage collection...");
+
+                                        MiscTools.force_garbage_collection();
+
+                                        try {
+                                            Thread.sleep(15000);
+                                        } catch (InterruptedException ex) {
+                                            Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                                        }
+
+                                        used_memory = instance.totalMemory() - instance.freeMemory();
+
+                                        max_memory = instance.maxMemory();
+                                    }
+
+                                    _forcing_gc = false;
+                                }
+                            });
+                        }
                     }
 
                     try {
