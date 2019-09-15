@@ -58,6 +58,7 @@ public final class MainPanel {
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = true;
+    public static final double FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT = 0.7;
     public static Font GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
     public static final float ZOOM_FACTOR = 1.0f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
@@ -385,7 +386,7 @@ public final class MainPanel {
 
                     long max_memory = instance.maxMemory();
 
-                    if (used_memory < ((double) max_memory) * 0.7) {
+                    if (used_memory < ((double) max_memory) * FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT) {
 
                         swingInvoke(new Runnable() {
                             @Override
@@ -417,7 +418,7 @@ public final class MainPanel {
 
                                     long max_memory = instance.maxMemory();
 
-                                    while (used_memory >= ((double) max_memory) * 0.7) {
+                                    while (used_memory >= ((double) max_memory) * FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT) {
 
                                         Logger.getLogger(MainPanelView.class.getName()).log(Level.INFO, "Forcing garbage collection...");
 
