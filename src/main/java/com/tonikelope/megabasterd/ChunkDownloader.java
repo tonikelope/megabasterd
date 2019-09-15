@@ -117,6 +117,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             long init_chunk_time = -1, finish_chunk_time = -1, pause_init_time, paused = 0L;
 
+            byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
+
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
             if (FORCE_SMART_PROXY) {
@@ -266,8 +268,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                     paused = 0L;
 
                                     int reads = 0;
-
-                                    byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
                                     while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
 

@@ -67,6 +67,10 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
         return close_all_finished_up_button;
     }
 
+    public JLabel getMemory_status() {
+        return memory_status;
+    }
+
     public JLabel getGlobal_speed_down_label() {
         return global_speed_down_label;
     }
@@ -452,32 +456,6 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
         pack();
 
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                Runtime instance = Runtime.getRuntime();
-
-                while (true) {
-
-                    swingInvoke(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            memory_status.setText(MiscTools.formatBytes(instance.totalMemory() - instance.freeMemory()) + " / " + MiscTools.formatBytes(instance.maxMemory()));
-
-                        }
-                    });
-
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-            }
-        });
     }
 
     /**

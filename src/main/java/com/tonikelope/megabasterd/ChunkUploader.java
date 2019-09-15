@@ -99,6 +99,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         long chunk_id = 0;
 
+        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
         try {
 
             int conta_error = 0;
@@ -171,8 +173,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                         RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");
 
                         f.seek(chunk_offset);
-
-                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
                         try (CipherInputStream cis = new CipherInputStream(Channels.newInputStream(f.getChannel()), genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset))); OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
 

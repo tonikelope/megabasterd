@@ -23,6 +23,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
+import java.lang.ref.WeakReference;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
@@ -113,6 +114,22 @@ public final class MiscTools {
             }
         }
         Files.delete(path);
+    }
+
+    public static void force_garbage_collection() {
+
+        Object obj = new Object();
+
+        WeakReference ref = new WeakReference<Object>(obj);
+
+        do {
+
+            System.gc();
+
+            obj = null;
+
+        } while (ref.get() != null);
+
     }
 
     public static Font createAndRegisterFont(String name) {

@@ -668,7 +668,7 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
             final Color status_color = conta_error > 0 ? Color.red : Color.black;
 
-            final String status = (conta_exit > 0 ? "Removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Error: " + conta_error) : "");
+            final String status = (conta_exit > 0 ? "Tot removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Tot error: " + conta_error) : "");
 
             swingInvoke(new Runnable() {
                 @Override

@@ -41,6 +41,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             long chunk_id, bytes_downloaded = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
             byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
+            byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
             CipherInputStream cis = null;
 
@@ -122,8 +123,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     } else {
 
                         if (!isExit() && !getDownload().isStopped() && cis != null) {
-
-                            byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
                             int reads = 0;
 

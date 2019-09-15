@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.41";
+    public static final String VERSION = "6.42";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -367,6 +367,53 @@ public final class MainPanel {
                 getView().getGlobal_speed_down_label().setForeground(_limit_download_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
 
                 getView().getGlobal_speed_up_label().setForeground(_limit_upload_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
+            }
+        });
+
+        THREAD_POOL.execute(new Runnable() {
+            @Override
+            public void run() {
+
+                Runtime instance = Runtime.getRuntime();
+
+                while (true) {
+
+                    long used_memory = instance.totalMemory() - instance.freeMemory();
+
+                    long max_memory = instance.maxMemory();
+
+                    if (used_memory < ((double) max_memory) * 0.7) {
+
+                        swingInvoke(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                _view.getMemory_status().setText(MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
+
+                            }
+                        });
+                    } else {
+
+                        Logger.getLogger(MainPanelView.class.getName()).log(Level.INFO, "Forcing garbage collection...");
+
+                        swingInvoke(new Runnable() {
+                            @Override
+                            public void run() {
+                                _view.getMemory_status().setText("---------");
+                            }
+                        });
+
+                        MiscTools.force_garbage_collection();
+
+                    }
+
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
             }
         });
 

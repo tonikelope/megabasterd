@@ -261,6 +261,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             skip_button.setEnabled(root_childs);
 
             skip_rest_button.setEnabled(root_childs);
+
         }
 
     }//GEN-LAST:event_skip_buttonActionPerformed
@@ -287,6 +288,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
             skip_button.setEnabled(root_childs);
 
             skip_rest_button.setEnabled(root_childs);
+
         }
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
@@ -423,6 +425,7 @@ public final class FolderLinkDialog extends javax.swing.JDialog {
                     ftree.setRootVisible(roott != null ? roott.getChildCount() > 0 : false);
 
                     ftree.setEnabled(true);
+
                 }
             });
 

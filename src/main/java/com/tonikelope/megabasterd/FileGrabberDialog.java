@@ -105,6 +105,11 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
 
                 Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
 
+                if (_drag_drop_files != null) {
+
+                    file_drop_notify(_drag_drop_files);
+                }
+
                 if (_main_panel.getMega_accounts().size() > 0) {
 
                     swingInvoke(new Runnable() {
@@ -142,11 +147,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
 
                         }
                     });
-
-                    if (_drag_drop_files != null) {
-
-                        file_drop_notify(_drag_drop_files);
-                    }
 
                 } else {
                     swingInvoke(new Runnable() {
@@ -483,6 +483,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                             skip_button.setEnabled(root_childs);
                             skip_rest_button.setEnabled(root_childs);
                             upload_log_checkbox.setEnabled(root_childs);
+
                         }
                     });
 
@@ -511,6 +512,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
             dir_name_textfield.setEnabled(root_childs);
             dir_name_label.setEnabled(root_childs);
             upload_log_checkbox.setEnabled(root_childs);
+
         }
     }//GEN-LAST:event_add_files_buttonActionPerformed
 
@@ -569,6 +571,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                         @Override
                         public void run() {
                             file_tree.setModel(tree_model);
+
                         }
                     });
 
@@ -594,6 +597,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                             skip_button.setEnabled(root_childs);
                             skip_rest_button.setEnabled(root_childs);
                             upload_log_checkbox.setEnabled(root_childs);
+
                         }
                     });
 
@@ -622,6 +626,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
             dir_name_textfield.setEnabled(root_childs);
             dir_name_label.setEnabled(root_childs);
             upload_log_checkbox.setEnabled(root_childs);
+
         }
 
     }//GEN-LAST:event_add_folder_buttonActionPerformed
@@ -982,6 +987,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
             @Override
             public void run() {
                 file_tree.setModel(tree_model);
+
             }
         });
 
@@ -1006,6 +1012,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                     dir_name_textfield.setEnabled(true);
                     dir_name_label.setEnabled(true);
                 }
+
             }
         });
     }
