@@ -646,8 +646,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate("Downloading file from mega ") + (_ma.getFull_email() != null ? "(" + _ma.getFull_email() + ")" : "") + " ...");
 
-                        getMain_panel().getDownload_manager().secureNotify();
-
                         swingInvoke(
                                 new Runnable() {
                             @Override
@@ -704,8 +702,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                                 }
                             }
                         });
-
-                        getMain_panel().getDownload_manager().secureNotify();
 
                         if (_progress == _file_size) {
                             if (_file.length() != _file_size) {

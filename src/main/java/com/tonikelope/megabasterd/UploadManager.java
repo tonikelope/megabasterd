@@ -1,7 +1,6 @@
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Component;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -51,35 +50,6 @@ public final class UploadManager extends TransferenceManager {
             increment_total_size(upload.getFile_size());
 
             getTransference_waitstart_queue().add(upload);
-
-            synchronized (getQueue_sort_lock()) {
-
-                if (!isPreprocessing_transferences() && !isProvisioning_transferences()) {
-
-                    sortTransferenceWaitStartQueue();
-
-                    swingInvoke(
-                            new Runnable() {
-                        @Override
-                        public void run() {
-
-                            for (Transference up : getTransference_waitstart_queue()) {
-
-                                getScroll_panel().remove((Component) up.getView());
-                                getScroll_panel().add((Component) up.getView());
-                            }
-
-                            for (Transference up : getTransference_finished_queue()) {
-
-                                getScroll_panel().remove((Component) up.getView());
-                                getScroll_panel().add((Component) up.getView());
-                            }
-                        }
-                    });
-
-                }
-
-            }
 
         } else {
 

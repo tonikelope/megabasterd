@@ -801,8 +801,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate("Uploading file to mega (") + _ma.getFull_email() + ") ...");
 
-                getMain_panel().getUpload_manager().secureNotify();
-
                 swingInvoke(
                         new Runnable() {
                     @Override
@@ -855,8 +853,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                         }
                     }
                 });
-
-                getMain_panel().getUpload_manager().secureNotify();
 
                 if (!_exit) {
 

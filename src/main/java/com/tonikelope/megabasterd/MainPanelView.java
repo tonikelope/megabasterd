@@ -383,29 +383,16 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
                 if (n == 0) {
 
-                    List<File> single_files = new ArrayList<>();
-
                     for (File file : files) {
 
                         List<File> aux = new ArrayList<>();
 
-                        if (file.isDirectory()) {
+                        aux.add(file);
 
-                            aux.add(file);
-
-                            final FileGrabberDialog dialog = new FileGrabberDialog(tthis, true, aux);
-
-                            _new_upload_dialog(dialog);
-                        } else {
-                            single_files.add(file);
-                        }
-
-                    }
-
-                    if (single_files.size() > 0) {
-                        final FileGrabberDialog dialog = new FileGrabberDialog(tthis, true, single_files);
+                        final FileGrabberDialog dialog = new FileGrabberDialog(tthis, true, aux);
 
                         _new_upload_dialog(dialog);
+
                     }
 
                 } else if (n == 1) {

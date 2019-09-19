@@ -103,8 +103,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
             @Override
             public void run() {
 
-                Thread.currentThread().setPriority(Math.max(Thread.currentThread().getPriority() - 1, Thread.MIN_PRIORITY));
-
                 if (_drag_drop_files != null) {
 
                     file_drop_notify(_drag_drop_files);
