@@ -280,7 +280,6 @@
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
               <Font name="Dialog" size="18" style="1"/>
             </Property>
-            <Property name="selected" type="boolean" value="true"/>
             <Property name="text" type="java.lang.String" value="Enable log file"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
             <Property name="enabled" type="boolean" value="false"/>

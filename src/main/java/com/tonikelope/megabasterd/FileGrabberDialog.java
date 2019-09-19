@@ -267,7 +267,6 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
         });
 
         upload_log_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        upload_log_checkbox.setSelected(true);
         upload_log_checkbox.setText("Enable log file");
         upload_log_checkbox.setDoubleBuffered(true);
         upload_log_checkbox.setEnabled(false);
