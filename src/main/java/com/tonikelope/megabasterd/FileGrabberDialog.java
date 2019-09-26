@@ -1008,6 +1008,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                     skip_rest_button.setEnabled(true);
                     dir_name_textfield.setEnabled(true);
                     dir_name_label.setEnabled(true);
+                    upload_log_checkbox.setEnabled(true);
                 }
 
             }

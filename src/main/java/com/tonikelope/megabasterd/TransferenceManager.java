@@ -700,7 +700,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                 _frozen = true;
 
                             }
-
                         }
 
                         synchronized (getWait_queue_lock()) {

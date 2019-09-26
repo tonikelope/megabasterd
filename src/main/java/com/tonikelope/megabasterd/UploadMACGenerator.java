@@ -180,7 +180,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                 }
             }
 
-            LOG.log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
+            LOG.log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
 
             while (!_exit && !_upload.isStopped() && !_upload.getChunkworkers().isEmpty()) {
                 while (_upload.getMain_panel().isExit()) {

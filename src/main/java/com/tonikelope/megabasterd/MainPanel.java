@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.44";
+    public static final String VERSION = "6.45";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -386,60 +386,14 @@ public final class MainPanel {
 
                     long max_memory = instance.maxMemory();
 
-                    if (used_memory < ((double) max_memory) * FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT) {
+                    swingInvoke(new Runnable() {
+                        @Override
+                        public void run() {
 
-                        swingInvoke(new Runnable() {
-                            @Override
-                            public void run() {
+                            _view.getMemory_status().setText(MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
 
-                                _view.getMemory_status().setText(MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
-
-                            }
-                        });
-
-                    } else {
-
-                        swingInvoke(new Runnable() {
-                            @Override
-                            public void run() {
-                                _view.getMemory_status().setText("(!) " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
-                            }
-                        });
-
-                        if (!_forcing_gc) {
-
-                            _forcing_gc = true;
-
-                            THREAD_POOL.execute(new Runnable() {
-                                @Override
-                                public void run() {
-
-                                    long used_memory = instance.totalMemory() - instance.freeMemory();
-
-                                    long max_memory = instance.maxMemory();
-
-                                    while (used_memory >= ((double) max_memory) * FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT) {
-
-                                        Logger.getLogger(MainPanelView.class.getName()).log(Level.INFO, "Forcing garbage collection...");
-
-                                        MiscTools.force_garbage_collection();
-
-                                        try {
-                                            Thread.sleep(15000);
-                                        } catch (InterruptedException ex) {
-                                            Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
-                                        }
-
-                                        used_memory = instance.totalMemory() - instance.freeMemory();
-
-                                        max_memory = instance.maxMemory();
-                                    }
-
-                                    _forcing_gc = false;
-                                }
-                            });
                         }
-                    }
+                    });
 
                     try {
                         Thread.sleep(2000);
