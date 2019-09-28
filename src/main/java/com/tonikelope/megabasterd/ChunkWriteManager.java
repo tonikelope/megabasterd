@@ -18,7 +18,7 @@ import javax.crypto.NoSuchPaddingException;
  *
  * @author tonikelope
  */
-public final class ChunkManager implements Runnable, SecureSingleThreadNotifiable {
+public final class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable {
 
     public static long calculateChunkOffset(long chunk_id, int size_multi) {
         long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
@@ -67,7 +67,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
     private boolean _notified;
     private final String _chunks_dir;
 
-    public ChunkManager(Download downloader) throws Exception {
+    public ChunkWriteManager(Download downloader) throws Exception {
         _notified = false;
         _exit = false;
         _download = downloader;
@@ -147,7 +147,7 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
         try {
             MiscTools.deleteDirectoryRecursion(Paths.get(getChunks_dir()));
         } catch (IOException ex) {
-            Logger.getLogger(ChunkManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ChunkWriteManager.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
@@ -227,6 +227,6 @@ public final class ChunkManager implements Runnable, SecureSingleThreadNotifiabl
 
         LOG.log(Level.INFO, "{0} Chunkmanager: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile().getName()});
     }
-    private static final Logger LOG = Logger.getLogger(ChunkManager.class.getName());
+    private static final Logger LOG = Logger.getLogger(ChunkWriteManager.class.getName());
 
 }

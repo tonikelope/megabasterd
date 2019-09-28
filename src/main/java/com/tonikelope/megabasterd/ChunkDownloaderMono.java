@@ -52,11 +52,11 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                 chunk_id = getDownload().nextChunkId();
 
-                long chunk_offset = ChunkManager.calculateChunkOffset(chunk_id, 1);
+                long chunk_offset = ChunkWriteManager.calculateChunkOffset(chunk_id, 1);
 
-                long chunk_size = ChunkManager.calculateChunkSize(chunk_id, getDownload().getFile_size(), chunk_offset, 1);
+                long chunk_size = ChunkWriteManager.calculateChunkSize(chunk_id, getDownload().getFile_size(), chunk_offset, 1);
 
-                ChunkManager.checkChunkID(chunk_id, getDownload().getFile_size(), chunk_offset);
+                ChunkWriteManager.checkChunkID(chunk_id, getDownload().getFile_size(), chunk_offset);
 
                 long chunk_reads = 0;
 

@@ -36,6 +36,7 @@ public final class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _addTranslation("Finishing calculating CBC-MAC code (this could take a while) ... ***DO NOT EXIT MEGABASTERD NOW***", "Terminando de calcular código CBC-MAC (esto podría llevar tiempo) ... ***NO CIERRES MEGABASTERD EN ESTE MOMENTO***");
         _addTranslation("Split content in different uploads", "Separar contenido en diferentes subidas");
         _addTranslation("Merge content in the same upload", "Juntar todo en la misma subida");
         _addTranslation("How do you want to proceed?", "¿Qué quieres hacer?");

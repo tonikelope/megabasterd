@@ -145,13 +145,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 long chunk_id = _download.nextChunkId();
 
-                long chunk_offset = ChunkManager.calculateChunkOffset(chunk_id, Download.CHUNK_SIZE_MULTI);
+                long chunk_offset = ChunkWriteManager.calculateChunkOffset(chunk_id, Download.CHUNK_SIZE_MULTI);
 
-                long chunk_size = ChunkManager.calculateChunkSize(chunk_id, _download.getFile_size(), chunk_offset, Download.CHUNK_SIZE_MULTI);
+                long chunk_size = ChunkWriteManager.calculateChunkSize(chunk_id, _download.getFile_size(), chunk_offset, Download.CHUNK_SIZE_MULTI);
 
-                ChunkManager.checkChunkID(chunk_id, _download.getFile_size(), chunk_offset);
+                ChunkWriteManager.checkChunkID(chunk_id, _download.getFile_size(), chunk_offset);
 
-                String chunk_url = ChunkManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
+                String chunk_url = ChunkWriteManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
 
                 if ((_current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
