@@ -3,8 +3,10 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import java.awt.Component;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -113,8 +115,50 @@ public final class DownloadManager extends TransferenceManager {
 
             increment_total_size(download.getFile_size());
 
-            getTransference_waitstart_queue().add(download);
+            if (download.isRestart()) {
 
+                synchronized (getWait_queue_lock()) {
+
+                    ConcurrentLinkedQueue<Transference> aux = new ConcurrentLinkedQueue<>();
+
+                    aux.addAll(getTransference_waitstart_queue());
+
+                    getTransference_waitstart_queue().clear();
+
+                    getTransference_waitstart_queue().add(download);
+
+                    getTransference_waitstart_queue().addAll(aux);
+
+                    for (final Transference t1 : getTransference_waitstart_queue()) {
+
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                getScroll_panel().remove((Component) t1.getView());
+                                getScroll_panel().add((Component) t1.getView());
+                            }
+                        });
+
+                    }
+
+                    for (final Transference t2 : getTransference_finished_queue()) {
+
+                        swingInvoke(
+                                new Runnable() {
+                            @Override
+                            public void run() {
+                                getScroll_panel().remove((Component) t2.getView());
+                                getScroll_panel().add((Component) t2.getView());
+                            }
+                        });
+                    }
+
+                }
+
+            } else {
+                getTransference_waitstart_queue().add(download);
+            }
         }
     }
 

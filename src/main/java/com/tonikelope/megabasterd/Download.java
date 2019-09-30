@@ -1726,5 +1726,11 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public void downWaitQueue() {
         _main_panel.getDownload_manager().downWaitQueue(this);
     }
+
+    @Override
+    public boolean isRestart() {
+        return _restart;
+    }
+
     private static final Logger LOG = Logger.getLogger(Download.class.getName());
 }

@@ -679,7 +679,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     @Override
                     public void run() {
 
-                        while (!_frozen && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
+                        while (!_frozen && !_main_panel.isExit() && !_paused_all && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
 
                             Transference transference = getTransference_waitstart_queue().peek();
 

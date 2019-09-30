@@ -1289,5 +1289,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     public void downWaitQueue() {
         _main_panel.getUpload_manager().downWaitQueue(this);
     }
+
     private static final Logger LOG = Logger.getLogger(Upload.class.getName());
 }
