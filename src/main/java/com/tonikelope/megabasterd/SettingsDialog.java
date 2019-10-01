@@ -318,20 +318,6 @@ public final class SettingsDialog extends javax.swing.JDialog {
             use_mega_account_down_combobox.setEnabled(false);
         }
 
-        mega_accounts_table.setAutoCreateRowSorter(true);
-        DefaultRowSorter sorter_mega = ((DefaultRowSorter) mega_accounts_table.getRowSorter());
-        ArrayList list_mega = new ArrayList();
-        list_mega.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-        sorter_mega.setSortKeys(list_mega);
-        sorter_mega.sort();
-
-        elc_accounts_table.setAutoCreateRowSorter(true);
-        DefaultRowSorter sorter_elc = ((DefaultRowSorter) elc_accounts_table.getRowSorter());
-        ArrayList list_elc = new ArrayList();
-        list_elc.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-        sorter_elc.setSortKeys(list_elc);
-        sorter_elc.sort();
-
         DefaultTableModel mega_model = (DefaultTableModel) mega_accounts_table.getModel();
 
         DefaultTableModel elc_model = (DefaultTableModel) elc_accounts_table.getModel();
@@ -461,6 +447,20 @@ public final class SettingsDialog extends javax.swing.JDialog {
             remove_elc_account_button.setEnabled((elc_model.getRowCount() > 0));
 
         }
+
+        mega_accounts_table.setAutoCreateRowSorter(true);
+        DefaultRowSorter sorter_mega = ((DefaultRowSorter) mega_accounts_table.getRowSorter());
+        ArrayList list_mega = new ArrayList();
+        list_mega.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        sorter_mega.setSortKeys(list_mega);
+        sorter_mega.sort();
+
+        elc_accounts_table.setAutoCreateRowSorter(true);
+        DefaultRowSorter sorter_elc = ((DefaultRowSorter) elc_accounts_table.getRowSorter());
+        ArrayList list_elc = new ArrayList();
+        list_elc.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+        sorter_elc.setSortKeys(list_elc);
+        sorter_elc.sort();
 
         boolean use_mc_reverse = false;
 
@@ -2336,6 +2336,20 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         elc_model.addRow(new_row_data);
                     }
+
+                    mega_accounts_table.setAutoCreateRowSorter(true);
+                    DefaultRowSorter sorter_mega = ((DefaultRowSorter) mega_accounts_table.getRowSorter());
+                    ArrayList list_mega = new ArrayList();
+                    list_mega.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+                    sorter_mega.setSortKeys(list_mega);
+                    sorter_mega.sort();
+
+                    elc_accounts_table.setAutoCreateRowSorter(true);
+                    DefaultRowSorter sorter_elc = ((DefaultRowSorter) elc_accounts_table.getRowSorter());
+                    ArrayList list_elc = new ArrayList();
+                    list_elc.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+                    sorter_elc.setSortKeys(list_elc);
+                    sorter_elc.sort();
 
                 }
 

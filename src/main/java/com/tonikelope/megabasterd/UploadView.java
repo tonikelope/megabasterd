@@ -22,6 +22,10 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
     private final Upload _upload;
 
+    public JLabel getCbc_label() {
+        return cbc_label;
+    }
+
     public JLabel getSlot_status_label() {
         return slot_status_label;
     }
@@ -139,6 +143,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
         file_link_button = new javax.swing.JButton();
         queue_up_button = new javax.swing.JButton();
         queue_down_button = new javax.swing.JButton();
+        cbc_label = new javax.swing.JLabel();
 
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 3, true));
 
@@ -259,6 +264,10 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
 
+        cbc_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        cbc_label.setForeground(new java.awt.Color(102, 102, 102));
+        cbc_label.setText("CBC-MAC 0%");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -277,12 +286,6 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                         .addComponent(file_name_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(slot_status_label))
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(status_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(slots_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(slots_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(speed_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -291,13 +294,23 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                         .addComponent(close_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(restart_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 327, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(stop_button))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(queue_up_button, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(queue_down_button, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(queue_up_button, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(queue_down_button, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(231, 231, 231))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(status_label, javax.swing.GroupLayout.DEFAULT_SIZE, 467, Short.MAX_VALUE)
+                                .addGap(18, 18, 18)
+                                .addComponent(cbc_label, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(18, 18, 18)))
+                        .addComponent(slots_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(slots_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -307,11 +320,11 @@ public final class UploadView extends javax.swing.JPanel implements Transference
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addComponent(queue_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(queue_up_button, javax.swing.GroupLayout.PREFERRED_SIZE, 39, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, 0)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(slots_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(slots_label)
-                    .addComponent(status_label))
+                    .addComponent(status_label)
+                    .addComponent(cbc_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(file_name_label)
@@ -381,7 +394,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             @Override
             public void run() {
 
-                for (JComponent c : new JComponent[]{speed_label, slots_spinner, slots_label, slot_status_label, pause_button, stop_button, progress_pbar}) {
+                for (JComponent c : new JComponent[]{speed_label, slots_spinner, slots_label, slot_status_label, pause_button, stop_button, progress_pbar, cbc_label}) {
 
                     c.setVisible(false);
                 }
@@ -470,6 +483,19 @@ public final class UploadView extends javax.swing.JPanel implements Transference
             }
         });
     }//GEN-LAST:event_queue_down_buttonActionPerformed
+
+    public void updateCBC(String status) {
+
+        swingInvoke(
+                new Runnable() {
+            @Override
+            public void run() {
+
+                cbc_label.setText(status);
+
+            }
+        });
+    }
 
     @Override
     public void pause() {
@@ -679,6 +705,7 @@ public final class UploadView extends javax.swing.JPanel implements Transference
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel cbc_label;
     private javax.swing.JButton close_button;
     private javax.swing.JButton file_link_button;
     private javax.swing.JLabel file_name_label;

@@ -47,7 +47,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private final ExecutorService _thread_pool;
     private int[] _file_meta_mac;
-    private int[] _file_temp_mac;
     private boolean _finishing_upload;
     private String _fid;
     private boolean _notified;
@@ -73,6 +72,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private final boolean _restart;
     private volatile boolean _closed;
     private volatile boolean _canceled;
+    private volatile String _temp_mac_data;
 
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link) {
 
@@ -106,7 +106,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _view = new UploadView(this);
         _progress_meter = new ProgressMeter(this);
         _file_meta_mac = null;
-        _file_temp_mac = null;
+        _temp_mac_data = null;
     }
 
     public Upload(Upload upload) {
@@ -140,7 +140,15 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _view = new UploadView(this);
         _progress_meter = new ProgressMeter(this);
         _file_meta_mac = null;
-        _file_temp_mac = null;
+        _temp_mac_data = null;
+    }
+
+    public String getTemp_mac_data() {
+        return _temp_mac_data;
+    }
+
+    public void setTemp_mac_data(String temp_mac_data) {
+        _temp_mac_data = temp_mac_data;
     }
 
     public Object getWorkers_lock() {
@@ -161,14 +169,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public byte[] getByte_file_key() {
         return _byte_file_key;
-    }
-
-    public int[] getFile_temp_mac() {
-        return _file_temp_mac;
-    }
-
-    public void setFile_temp_mac(int[] file_temp_mac) {
-        _file_temp_mac = file_temp_mac;
     }
 
     @Override
@@ -388,7 +388,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                     _last_chunk_id_dispatched = calculateLastUploadedChunk((long) upload_progress.get("bytes_uploaded"));
 
-                    _progress = (long) upload_progress.get("bytes_uploaded");
+                    setProgress((long) upload_progress.get("bytes_uploaded"));
 
                     _provision_ok = true;
 
@@ -848,7 +848,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     @Override
                     public void run() {
 
-                        for (JComponent c : new JComponent[]{getView().getSpeed_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner()}) {
+                        for (JComponent c : new JComponent[]{getView().getSpeed_label(), getView().getCbc_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner()}) {
                             c.setVisible(false);
                         }
                     }

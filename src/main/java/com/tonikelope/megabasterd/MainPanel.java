@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.47";
+    public static final String VERSION = "6.48";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -1029,7 +1029,7 @@ public final class MainPanel {
                                         });
                                     } else {
                                         try {
-                                            DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getFile_meta_mac() != null ? Bin2BASE64(i32a2bin(upload.getFile_meta_mac())) : null);
+                                            DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
                                         } catch (SQLException ex) {
                                             Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
                                         }
