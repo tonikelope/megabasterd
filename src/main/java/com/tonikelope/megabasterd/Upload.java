@@ -305,7 +305,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -319,7 +319,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -346,7 +346,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
 
@@ -396,7 +396,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 }
 
             } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -714,7 +714,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                         } catch (InterruptedException ex) {
 
-                            LOG.log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, ex.getMessage());
                         }
                     }
 
@@ -727,7 +727,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                         DBTools.updateUploadUrl(_file_name, _ma.getFull_email(), _ul_url);
 
                     } catch (SQLException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, ex.getMessage());
                     }
                 }
             }
@@ -829,7 +829,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                     _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
 
                 if (!_thread_pool.isTerminated()) {
@@ -887,7 +887,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                                 } catch (InterruptedException ex) {
 
-                                    LOG.log(Level.SEVERE, null, ex);
+                                    LOG.log(Level.SEVERE, ex.getMessage());
                                 }
                             }
 
@@ -912,7 +912,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                                 });
 
                             } catch (Exception ex) {
-                                LOG.log(Level.SEVERE, null, ex);
+                                LOG.log(Level.SEVERE, ex.getMessage());
                             }
 
                             getView().printStatusOK(LabelTranslatorSingleton.getInstance().translate("File successfully uploaded! (") + _ma.getFull_email() + ")");
@@ -929,7 +929,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                                         fr.write(_file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
                                         fr.close();
                                     } catch (IOException ex) {
-                                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
                                     }
 
                                 }
@@ -977,7 +977,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
             try {
                 DBTools.deleteUpload(_file_name, _ma.getFull_email());
             } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -1047,11 +1047,12 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                         try {
                             Thread.sleep(1000);
                         } catch (InterruptedException ex) {
-                            Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
                         }
                     }
 
                     if (!_closed) {
+                        LOG.log(Level.INFO, "{0} Uploader {1} AUTO RESTARTING UPLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
                         restart();
                     }
                 }

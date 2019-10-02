@@ -367,7 +367,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -381,7 +381,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -675,7 +675,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                             _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
                         } catch (InterruptedException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, ex.getMessage());
                         }
 
                         if (!_thread_pool.isTerminated()) {
@@ -846,10 +846,10 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             _status_error = true;
 
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         if (_file != null && !getView().isKeepTempFileSelected()) {
@@ -1158,7 +1158,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                     try {
                         Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                     } catch (InterruptedException ex2) {
-                        LOG.log(Level.SEVERE, null, ex2);
+                        LOG.log(Level.SEVERE, ex2.getMessage());
                     }
                 }
 

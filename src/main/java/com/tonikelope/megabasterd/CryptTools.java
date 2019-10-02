@@ -478,7 +478,7 @@ public final class CryptTools {
                 }
 
             } catch (Exception ex) {
-                Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, ex.getMessage());
                 JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "ELC ERROR", JOptionPane.ERROR_MESSAGE);
             } finally {
                 if (con != null) {
@@ -581,7 +581,7 @@ public final class CryptTools {
 
         } catch (Exception ex) {
 
-            Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, ex.getMessage());
 
             JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "DLC ERROR", JOptionPane.ERROR_MESSAGE);
         } finally {

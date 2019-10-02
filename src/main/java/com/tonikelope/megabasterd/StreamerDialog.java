@@ -224,7 +224,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                             error = true;
 
-                            LOG.log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, ex.getMessage());
                         }
 
                         String data;
@@ -266,7 +266,7 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
                         getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
                     }
                 } catch (UnsupportedEncodingException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
 
             }

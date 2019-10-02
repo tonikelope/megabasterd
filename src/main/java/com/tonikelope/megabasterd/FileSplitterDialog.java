@@ -429,7 +429,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                             });
                         }
                     } catch (IOException ex) {
-                        Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
                     }
 
                 }

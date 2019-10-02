@@ -365,9 +365,9 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
                         }
 
                     } catch (FileNotFoundException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, ex.getMessage());
                     } catch (IOException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, ex.getMessage());
                     }
 
                     swingInvoke(new Runnable() {

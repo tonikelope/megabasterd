@@ -90,7 +90,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
 
@@ -363,7 +363,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         timeout = true;
                     }
 
-                    LOG.log(Level.SEVERE, null, ex.getMessage());
+                    LOG.log(Level.SEVERE, ex.getMessage());
 
                 } finally {
 
@@ -413,7 +413,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             _download.stopDownloader(error.getMessage());
 
-            LOG.log(Level.SEVERE, null, error.getMessage());
+            LOG.log(Level.SEVERE, error.getMessage());
 
         }
 

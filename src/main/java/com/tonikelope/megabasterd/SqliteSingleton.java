@@ -49,7 +49,7 @@ public final class SqliteSingleton {
             }
 
         } catch (ClassNotFoundException | SQLException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return conn;

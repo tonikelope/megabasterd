@@ -50,7 +50,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
 
@@ -167,7 +167,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
                             file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
 
                         } catch (IOException | IllegalBlockSizeException | BadPaddingException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, ex.getMessage());
                         }
 
                         chunk_id++;
@@ -217,7 +217,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
             LOG.log(Level.INFO, "{0} MAC GENERATOR {1} BYE BYE...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
     }

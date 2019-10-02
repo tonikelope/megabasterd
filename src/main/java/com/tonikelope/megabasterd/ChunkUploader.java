@@ -67,7 +67,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
 
@@ -100,11 +100,13 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
+        boolean fatal_error = false;
+
+        int conta_error = 0;
+
         try {
 
-            int conta_error = 0;
-
-            while (!_upload.getMain_panel().isExit() && !_exit && !_upload.isStopped() && conta_error < MAX_CHUNK_ERROR) {
+            while (!_upload.getMain_panel().isExit() && !_exit && !_upload.isStopped() && conta_error < MAX_CHUNK_ERROR && !fatal_error) {
 
                 if (_upload.isPaused() && !_upload.isStopped()) {
 
@@ -229,6 +231,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                         LOG.log(Level.WARNING, "{0} Worker {1} UPLOAD FAILED! (MEGA ERROR: {2})", new Object[]{Thread.currentThread().getName(), _id, MegaAPI.checkMEGAError(httpresponse)});
 
+                                        fatal_error = true;
+
                                     } else {
 
                                         LOG.log(Level.INFO, "{0} Worker {1} Completion handler -> {2}", new Object[]{Thread.currentThread().getName(), _id, httpresponse});
@@ -270,31 +274,34 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                             _upload.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit) {
+                        if (fatal_error) {
 
-                            if (++conta_error == MAX_CHUNK_ERROR) {
+                            _upload.stopUploader("UPLOAD FAILED: FATAL ERROR");
 
-                                _upload.stopUploader("UPLOAD FAILED: too many errors");
+                            LOG.log(Level.SEVERE, "UPLOAD FAILED: FATAL ERROR");
 
-                                LOG.log(Level.SEVERE, null, "UPLOAD FAILED: too many errors");
+                        } else if (++conta_error == MAX_CHUNK_ERROR) {
 
-                            } else {
+                            _upload.stopUploader("UPLOAD FAILED: too many errors");
 
-                                _error_wait = true;
+                            LOG.log(Level.SEVERE, "UPLOAD FAILED: too many errors");
 
-                                _upload.getView().updateSlotsStatus();
+                        } else if (!_exit && !_upload.isStopped()) {
 
-                                try {
-                                    Thread.sleep(MiscTools.getWaitTimeExpBackOff(conta_error) * 1000);
-                                } catch (InterruptedException exc) {
+                            _error_wait = true;
 
-                                }
+                            _upload.getView().updateSlotsStatus();
 
-                                _error_wait = false;
-
-                                _upload.getView().updateSlotsStatus();
+                            try {
+                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(conta_error) * 1000);
+                            } catch (InterruptedException exc) {
 
                             }
+
+                            _error_wait = false;
+
+                            _upload.getView().updateSlotsStatus();
+
                         }
 
                     } else {
@@ -313,7 +320,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         } catch (OutOfMemoryError | Exception error) {
             _upload.stopUploader(error.getMessage());
-            LOG.log(Level.SEVERE, null, error.getMessage());
+            LOG.log(Level.SEVERE, error.getMessage());
         }
 
         _upload.stopThisSlot(this);

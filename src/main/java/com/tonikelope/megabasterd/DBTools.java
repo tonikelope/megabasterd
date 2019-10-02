@@ -79,7 +79,7 @@ public final class DBTools {
                 return session;
             }
         } catch (SQLException ex) {
-            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
 
         return session;
@@ -233,7 +233,7 @@ public final class DBTools {
                 value = res.getString(1);
             }
         } catch (SQLException ex) {
-            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
 
         return value;

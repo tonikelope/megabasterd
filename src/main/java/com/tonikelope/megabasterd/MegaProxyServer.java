@@ -65,14 +65,14 @@ public class MegaProxyServer implements Runnable {
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         } finally {
 
             if (!_serverSocket.isClosed()) {
                 try {
                     _serverSocket.close();
                 } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
         }

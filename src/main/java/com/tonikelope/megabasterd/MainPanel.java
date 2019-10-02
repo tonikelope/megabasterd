@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.50";
+    public static final String VERSION = "6.51";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -94,7 +94,7 @@ public final class MainPanel {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "{0} Waiting {1} seconds before start...", new Object[]{Thread.currentThread().getName(), args[1]});
                     Thread.sleep(Long.parseLong(args[1]) * 1000);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
             }
 
@@ -244,7 +244,7 @@ public final class MainPanel {
         try {
             trayIcon();
         } catch (AWTException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
 
         THREAD_POOL.execute((_download_manager = new DownloadManager(this)));
@@ -292,7 +292,7 @@ public final class MainPanel {
 
                             timer_lock.wait();
                         } catch (InterruptedException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, ex.getMessage());
                         }
                     }
 
@@ -398,7 +398,7 @@ public final class MainPanel {
                     try {
                         Thread.sleep(2000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
                     }
                 }
 
@@ -510,7 +510,7 @@ public final class MainPanel {
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -769,7 +769,7 @@ public final class MainPanel {
                 DBTools.insertSettingValue("master_pass_salt", _master_pass_salt);
 
             } catch (SQLException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -890,7 +890,7 @@ public final class MainPanel {
             try {
                 DBTools.vaccum();
             } catch (SQLException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
 
             if (restart) {
@@ -916,7 +916,7 @@ public final class MainPanel {
                 try {
                     DBTools.vaccum();
                 } catch (SQLException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
             }
 
@@ -1031,7 +1031,7 @@ public final class MainPanel {
                                         try {
                                             DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
                                         } catch (SQLException ex) {
-                                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                                         }
                                     }
 
@@ -1043,7 +1043,7 @@ public final class MainPanel {
                                 try {
                                     Thread.sleep(1000);
                                 } catch (InterruptedException ex) {
-                                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                                 }
                             }
 
@@ -1105,7 +1105,7 @@ public final class MainPanel {
                                 });
 
                             } catch (Exception ex) {
-                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                             }
                         }
 
@@ -1113,7 +1113,7 @@ public final class MainPanel {
                 });
             } catch (Exception ex2) {
 
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex2);
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex2.getMessage());
 
             }
 
@@ -1163,7 +1163,7 @@ public final class MainPanel {
                             }
 
                         } catch (Exception ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                         }
                     }
 

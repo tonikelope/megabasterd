@@ -118,13 +118,13 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
         } catch (Exception ex) {
 
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         try {
             _pipeos.close();
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         _exit = true;
@@ -172,7 +172,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
 

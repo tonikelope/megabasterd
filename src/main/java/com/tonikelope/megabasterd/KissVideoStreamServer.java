@@ -165,12 +165,13 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 error = true;
 
-                LOG.log(Level.SEVERE, null, ex.getMessage());
+                LOG.log(Level.SEVERE, ex.getMessage());
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.log(Level.SEVERE, null, ex2);
+                    LOG.log(Level.SEVERE, ex2.getMessage());
+
                 }
 
             }
@@ -210,12 +211,12 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 error = true;
 
-                LOG.log(Level.SEVERE, null, ex.getMessage());
+                LOG.log(Level.SEVERE, ex.getMessage());
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.log(Level.SEVERE, null, ex2);
+                    LOG.log(Level.SEVERE, ex2.getMessage());
                 }
 
             }
@@ -459,7 +460,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
         } catch (Exception ex) {
 
             if (!(ex instanceof IOException)) {
-                LOG.log(Level.SEVERE, null, ex);
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
 
         } finally {

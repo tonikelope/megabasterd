@@ -243,7 +243,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                     });
 
                 } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
 
             }

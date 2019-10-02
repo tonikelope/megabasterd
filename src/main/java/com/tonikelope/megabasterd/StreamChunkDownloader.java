@@ -180,7 +180,7 @@ public class StreamChunkDownloader implements Runnable {
                         }
 
                     } catch (IOException ex) {
-                        LOG.log(Level.SEVERE, null, ex);
+                        LOG.log(Level.SEVERE, ex.getMessage());
                     } finally {
                         con.disconnect();
                     }
@@ -192,9 +192,9 @@ public class StreamChunkDownloader implements Runnable {
             }
 
         } catch (IOException | URISyntaxException | ChunkInvalidException | InterruptedException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         } catch (OutOfMemoryError | Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         _chunkmanager.secureNotifyAll();

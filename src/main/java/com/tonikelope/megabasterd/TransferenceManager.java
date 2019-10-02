@@ -202,7 +202,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
 
@@ -692,7 +692,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                 try {
                                     Thread.sleep(1000);
                                 } catch (InterruptedException ex) {
-                                    Logger.getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, ex.getMessage());
                                 }
 
                             } else {

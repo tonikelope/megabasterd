@@ -253,7 +253,9 @@ public final class LabelTranslatorSingleton {
         _addTranslation("Pausing upload ...", "Pausando subida ...");
         _addTranslation("File successfully downloaded! (Integrity check PASSED)", "¡Archivo descargado correctamente! (Test de integridad CORRECTO)");
         _addTranslation("File successfully downloaded! (but integrity check CANCELED)", "¡Archivo descargado correctamente! (Test de integridad cancelado)");
-        _addTranslation("UPLOAD FAILED! (Empty completion handle!)", "¡SUBIDA FALLIDA! (Completion handle vacío)");
+        _addTranslation("UPLOAD FAILED! (Empty completion handler!)", "¡SUBIDA FALLIDA! (Manejador de finalización vacío)");
+        _addTranslation("UPLOAD FAILED: too many errors", "LA SUBIDA FALLÓ: demasiados errores");
+        _addTranslation("UPLOAD FAILED: FATAL ERROR", "LA SUBIDA FALLÓ: ERROR FATAL");
         _addTranslation("BAD NEWS :( File is DAMAGED!", "MALAS NOTICIAS :( El archivo está corrupto!");
         _addTranslation("File temporarily unavailable! (Retrying in ", "¡Archivo temporalmente no disponible! (Reintentando en ");
         _addTranslation(" secs...)", " segundos...)");

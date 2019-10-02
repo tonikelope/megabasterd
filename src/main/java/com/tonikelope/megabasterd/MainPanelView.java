@@ -265,7 +265,7 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
                                     fr.write(dir_name + "   " + folder_link + "\n\n");
                                     fr.close();
                                 } catch (IOException ex) {
-                                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
                                 }
                             }
 
@@ -1040,9 +1040,9 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
                                 getMain_panel().getDownload_manager().secureNotify();
 
                             } catch (UnsupportedEncodingException ex) {
-                                LOG.log(Level.SEVERE, null, ex);
+                                LOG.log(Level.SEVERE, ex.getMessage());
                             } catch (InterruptedException ex) {
-                                Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                                Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
                             }
 
                         }
@@ -1159,7 +1159,7 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
                             THREAD_POOL.execute(_main_panel.getMega_proxy_server());
 
                         } catch (IOException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, ex.getMessage());
                         }
                     }
 
@@ -1170,7 +1170,7 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
                         try {
                             _main_panel.getMega_proxy_server().stopServer();
                         } catch (IOException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, ex.getMessage());
                         }
                     }
 
@@ -1319,7 +1319,7 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
         try {
             DBTools.insertSettingValue("auto_close", getAuto_close_menu().isSelected() ? "yes" : "no");
         } catch (SQLException ex) {
-            Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }//GEN-LAST:event_auto_close_menuActionPerformed
 

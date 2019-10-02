@@ -437,7 +437,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                             });
                         }
                     } catch (IOException ex) {
-                        Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
                     }
 
                 }

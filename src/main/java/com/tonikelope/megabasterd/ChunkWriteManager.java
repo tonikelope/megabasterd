@@ -117,7 +117,7 @@ public final class ChunkWriteManager implements Runnable, SecureSingleThreadNoti
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
 
@@ -147,7 +147,7 @@ public final class ChunkWriteManager implements Runnable, SecureSingleThreadNoti
         try {
             MiscTools.deleteDirectoryRecursion(Paths.get(getChunks_dir()));
         } catch (IOException ex) {
-            Logger.getLogger(ChunkWriteManager.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(ChunkWriteManager.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }
 
@@ -187,7 +187,7 @@ public final class ChunkWriteManager implements Runnable, SecureSingleThreadNoti
                                 _download.getOutput_stream().write(buffer, 0, reads);
                             }
                         } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                            LOG.log(Level.SEVERE, null, ex);
+                            LOG.log(Level.SEVERE, ex.getMessage());
                         }
 
                         _bytes_written += chunk_file.length();
@@ -217,7 +217,7 @@ public final class ChunkWriteManager implements Runnable, SecureSingleThreadNoti
 
         } catch (IOException ex) {
 
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
             _download.stopDownloader(ex.getMessage());
         }
 

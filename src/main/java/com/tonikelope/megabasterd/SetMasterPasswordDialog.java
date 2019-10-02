@@ -272,7 +272,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                     }
 
                 } catch (Exception ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
         });

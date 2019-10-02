@@ -161,7 +161,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                 } catch (IOException ex) {
 
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
 
                 } finally {
 
@@ -202,7 +202,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         } catch (OutOfMemoryError | Exception error) {
             getDownload().stopDownloader(error.getMessage());
-            LOG.log(Level.SEVERE, null, error.getMessage());
+            LOG.log(Level.SEVERE, error.getMessage());
         }
 
         getDownload().stopThisSlot(this);

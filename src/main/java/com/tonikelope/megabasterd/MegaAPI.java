@@ -298,7 +298,7 @@ public final class MegaAPI implements Serializable {
 
         } catch (Exception ex) {
 
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return quota;
@@ -343,7 +343,7 @@ public final class MegaAPI implements Serializable {
             }
 
         } catch (IOException | MegaAPIException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
     }
@@ -465,7 +465,7 @@ public final class MegaAPI implements Serializable {
 
             } catch (Exception ex) {
 
-                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, ex.getMessage());
 
             } finally {
 
@@ -487,7 +487,7 @@ public final class MegaAPI implements Serializable {
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, null, ex);
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
 
             } else if (!empty_response && mega_error == 0 && http_error == 0) {
@@ -606,7 +606,7 @@ public final class MegaAPI implements Serializable {
             ret = aes_cbc_encrypt_nopadding(new_attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return ret;
@@ -631,7 +631,7 @@ public final class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(att, HashMap.class);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
 
         }
 
@@ -659,7 +659,7 @@ public final class MegaAPI implements Serializable {
             ul_url = (String) res_map[0].get("p");
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return ul_url;
@@ -684,7 +684,7 @@ public final class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -737,7 +737,7 @@ public final class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -767,7 +767,7 @@ public final class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -799,7 +799,7 @@ public final class MegaAPI implements Serializable {
             public_link = "https://mega.nz/#!" + file_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return public_link;
@@ -830,7 +830,7 @@ public final class MegaAPI implements Serializable {
             public_link = "https://mega.nz/#F!" + folder_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return public_link;
@@ -868,7 +868,7 @@ public final class MegaAPI implements Serializable {
             return _rawRequest(request, url_api);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return null;
@@ -883,7 +883,7 @@ public final class MegaAPI implements Serializable {
             ch = Bin2UrlBASE64(encryptKey((h + h).getBytes("UTF-8"), i32a2bin(getMaster_key())));
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return ch;
@@ -966,7 +966,7 @@ public final class MegaAPI implements Serializable {
             }
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
 
         return null;

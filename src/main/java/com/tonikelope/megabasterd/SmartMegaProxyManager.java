@@ -129,9 +129,9 @@ public final class SmartMegaProxyManager {
             }
 
         } catch (MalformedURLException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, null, ex);
+            LOG.log(Level.SEVERE, ex.getMessage());
         } finally {
             if (con != null) {
                 con.disconnect();

@@ -128,7 +128,7 @@ public final class MiscTools {
             ge.registerFont(font);
 
         } catch (FontFormatException | IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
 
         return font;
@@ -144,7 +144,7 @@ public final class MiscTools {
                 }
             }
         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(MiscTools.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(MiscTools.class.getName()).log(java.util.logging.Level.SEVERE, ex.getMessage());
         }
     }
 
@@ -453,7 +453,7 @@ public final class MiscTools {
                     SwingUtilities.invokeAndWait(r);
 
                 } catch (InterruptedException | InvocationTargetException ex) {
-                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
             }
 
@@ -471,7 +471,7 @@ public final class MiscTools {
             try {
                 ret = c.call();
             } catch (Exception ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
 
         } else {
@@ -483,7 +483,7 @@ public final class MiscTools {
             try {
                 ret = futureTask.get();
             } catch (InterruptedException | ExecutionException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -618,7 +618,7 @@ public final class MiscTools {
                             tree.setEnabled(true);
 
                         } catch (InstantiationException | IllegalAccessException ex) {
-                            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
                         }
 
                         return true;
@@ -656,7 +656,7 @@ public final class MiscTools {
                 ((MutableTreeNode) new_root).setUserObject(((DefaultMutableTreeNode) tree_model.getRoot()).getUserObject());
 
             } catch (InstantiationException | IllegalAccessException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
 
             for (TreePath path : paths) {
@@ -685,7 +685,7 @@ public final class MiscTools {
                                         ((MutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
 
                                     } catch (InstantiationException | IllegalAccessException ex) {
-                                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
                                     }
                                 }
 
@@ -800,7 +800,7 @@ public final class MiscTools {
                     res += s + "\n";
                 }
             } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -823,7 +823,7 @@ public final class MiscTools {
                     res = links.get(0);
                 }
             } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -930,7 +930,7 @@ public final class MiscTools {
                 }
 
             } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             } finally {
 
                 if (con != null) {
@@ -982,9 +982,9 @@ public final class MiscTools {
             }
 
         } catch (MalformedURLException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         } finally {
             if (con != null) {
                 con.disconnect();
@@ -1052,9 +1052,9 @@ public final class MiscTools {
             }
 
         } catch (MalformedURLException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         } finally {
             if (con != null) {
                 con.disconnect();
@@ -1069,7 +1069,7 @@ public final class MiscTools {
         try {
             Desktop.getDesktop().browse(new URI(url));
         } catch (URISyntaxException | IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }
 
@@ -1110,7 +1110,7 @@ public final class MiscTools {
             try {
                 Runtime.getRuntime().exec(cmd.toString());
             } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }
 

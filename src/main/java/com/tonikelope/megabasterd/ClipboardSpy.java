@@ -82,7 +82,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
                 try {
                     _secure_notify_lock.wait();
                 } catch (InterruptedException ex) {
-                    LOG.log(SEVERE, null, ex);
+                    LOG.log(SEVERE, ex.getMessage());
                 }
             }
 
@@ -129,7 +129,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    LOG.log(SEVERE, null, ex1);
+                    LOG.log(SEVERE, ex1.getMessage());
                 }
             }
 
@@ -156,7 +156,7 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    LOG.log(SEVERE, null, ex1);
+                    LOG.log(SEVERE, ex1.getMessage());
                 }
             }
 
