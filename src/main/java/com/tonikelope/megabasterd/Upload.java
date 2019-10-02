@@ -814,8 +814,6 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 secureWait();
 
-                _thread_pool.shutdown();
-
                 LOG.log(Level.INFO, "{0} Chunkuploaders finished! {1}", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
                 getProgress_meter().setExit(true);
@@ -823,6 +821,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                 getProgress_meter().secureNotify();
 
                 try {
+
+                    _thread_pool.shutdown();
 
                     LOG.log(Level.INFO, "{0}Waiting for all threads to finish {1}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 

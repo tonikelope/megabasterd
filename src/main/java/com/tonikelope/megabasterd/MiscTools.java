@@ -84,10 +84,9 @@ public final class MiscTools {
 
     public static final int EXP_BACKOFF_BASE = 2;
     public static final int EXP_BACKOFF_SECS_RETRY = 1;
-    public static final int EXP_BACKOFF_MAX_WAIT_TIME = 16;
+    public static final int EXP_BACKOFF_MAX_WAIT_TIME = 8;
     public static final Object PASS_LOCK = new Object();
     public static final int HTTP_TIMEOUT = 30;
-    private static volatile boolean _forcing_gc = false;
     private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = new Comparator< DefaultMutableTreeNode>() {
 
         @Override

@@ -75,6 +75,8 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
             }
         }
 
+        LOG.log(Level.INFO, "{0} ProgressMeter bye bye!", Thread.currentThread().getName());
+
     }
     private static final Logger LOG = Logger.getLogger(ProgressMeter.class.getName());
 

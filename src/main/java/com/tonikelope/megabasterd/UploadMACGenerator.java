@@ -117,25 +117,9 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                 int[] chunk_mac = new int[4];
                 byte[] byte_block = new byte[16];
-                boolean upload_finished = false;
 
                 try {
                     while (!_exit && !_upload.isStopped() && !_upload.getMain_panel().isExit()) {
-
-                        if (!upload_finished && _upload.getProgress() == _upload.getFile_size()) {
-
-                            _upload.getView().printStatusNormal("Finishing calculating CBC-MAC code (this could take a while) ... ***DO NOT EXIT MEGABASTERD NOW***");
-
-                            _upload.getView().getPause_button().setVisible(false);
-                            _upload.getMain_panel().getGlobal_dl_speed().detachTransference(_upload);
-                            _upload.getView().getSpeed_label().setVisible(false);
-                            _upload.getView().getSlots_label().setVisible(false);
-                            _upload.getView().getSlot_status_label().setVisible(false);
-                            _upload.getView().getSlots_spinner().setVisible(false);
-
-                            upload_finished = true;
-
-                        }
 
                         int reads;
 

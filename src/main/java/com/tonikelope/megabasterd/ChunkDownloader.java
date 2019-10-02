@@ -107,7 +107,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         try {
 
-            int http_error = 0, http_status = -1;
+            int http_error = 0, http_status = -1, conta_error = 0;
 
             boolean timeout = false, chunk_error = false, slow_proxy = false, turbo_mode = false;
 
@@ -324,6 +324,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             chunk_error = false;
 
+                            conta_error = 0;
+
                             http_error = 0;
 
                             if (_current_smart_proxy != null && finish_chunk_time != -1) {
@@ -391,7 +393,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getView().updateSlotsStatus();
 
                             try {
-                                Thread.sleep(1000);
+                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(conta_error));
                             } catch (InterruptedException excep) {
                             }
 

@@ -660,8 +660,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                         secureWait();
 
-                        _thread_pool.shutdown();
-
                         LOG.log(Level.INFO, "{0} Chunkdownloaders finished!", Thread.currentThread().getName());
 
                         getProgress_meter().setExit(true);
@@ -669,6 +667,8 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
                         getProgress_meter().secureNotify();
 
                         try {
+
+                            _thread_pool.shutdown();
 
                             LOG.log(Level.INFO, "{0} Waiting all threads to finish...", Thread.currentThread().getName());
 
