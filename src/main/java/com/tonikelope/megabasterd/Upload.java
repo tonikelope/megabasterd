@@ -50,7 +50,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
     private boolean _finishing_upload;
     private String _fid;
     private boolean _notified;
-    private volatile String _completion_handle;
+    private volatile String _completion_handler;
     private int _paused_workers;
     private Double _progress_bar_rate;
     private volatile boolean _pause;
@@ -94,7 +94,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _restart = false;
         _progress = 0L;
         _last_chunk_id_dispatched = 0L;
-        _completion_handle = null;
+        _completion_handler = null;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
         _chunkid_lock = new Object();
@@ -129,7 +129,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _folder_link = upload.getFolder_link();
         _progress = 0L;
         _last_chunk_id_dispatched = 0L;
-        _completion_handle = null;
+        _completion_handler = null;
         _secure_notify_lock = new Object();
         _workers_lock = new Object();
         _chunkid_lock = new Object();
@@ -200,8 +200,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         return _notified;
     }
 
-    public String getCompletion_handle() {
-        return _completion_handle;
+    public String getCompletion_handler() {
+        return _completion_handler;
     }
 
     public int getPaused_workers() {
@@ -286,8 +286,8 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         return _restart;
     }
 
-    public void setCompletion_handle(String completion_handle) {
-        _completion_handle = completion_handle;
+    public void setCompletion_handler(String completion_handler) {
+        _completion_handler = completion_handler;
     }
 
     public void setFile_meta_mac(int[] file_meta_mac) {
@@ -856,7 +856,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
                 if (!_exit) {
 
-                    if (_completion_handle != null) {
+                    if (_completion_handler != null) {
 
                         LOG.log(Level.INFO, "{0} Uploader creating NEW MEGA NODE {1}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
@@ -873,7 +873,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
                         int conta_error = 0;
 
                         do {
-                            upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handle, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
+                            upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handler, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
 
                             if (upload_res == null && !_exit) {
 

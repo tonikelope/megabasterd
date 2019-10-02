@@ -180,8 +180,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             setError_wait(true);
 
                             try {
-                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++conta_error));
-                            } catch (InterruptedException excep) {
+                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++conta_error) * 1000);
+                            } catch (InterruptedException exc) {
                             }
 
                             setError_wait(false);

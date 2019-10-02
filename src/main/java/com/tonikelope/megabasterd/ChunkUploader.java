@@ -204,8 +204,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                             } else if (tot_bytes_up == chunk_size || reads == -1) {
 
-                                if (_upload.getProgress() == _upload.getFile_size()) {
-                                    _upload.getView().printStatusNormal("Waiting for completion handle ... ***DO NOT EXIT MEGABASTERD NOW***");
+                                if (_upload.getProgress() == _upload.getFile_size() && _upload.getCompletion_handler() == null) {
+                                    LOG.log(Level.INFO, "{0} Worker {1} waiting for completion handler...", new Object[]{Thread.currentThread().getName(), _id});
+                                    _upload.getView().printStatusNormal("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***");
                                     _upload.getView().updateProgressBar(Integer.MAX_VALUE);
                                 }
 
@@ -230,9 +231,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                     } else {
 
-                                        LOG.log(Level.INFO, "{0} Worker {1} Completion handle -> {2}", new Object[]{Thread.currentThread().getName(), _id, httpresponse});
+                                        LOG.log(Level.INFO, "{0} Worker {1} Completion handler -> {2}", new Object[]{Thread.currentThread().getName(), _id, httpresponse});
 
-                                        _upload.setCompletion_handle(httpresponse);
+                                        _upload.setCompletion_handler(httpresponse);
 
                                         chunk_error = false;
                                     }
@@ -284,8 +285,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                 _upload.getView().updateSlotsStatus();
 
                                 try {
-                                    Thread.sleep(MiscTools.getWaitTimeExpBackOff(conta_error));
-                                } catch (InterruptedException excep) {
+                                    Thread.sleep(MiscTools.getWaitTimeExpBackOff(conta_error) * 1000);
+                                } catch (InterruptedException exc) {
 
                                 }
 

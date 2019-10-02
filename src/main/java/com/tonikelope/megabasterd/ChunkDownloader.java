@@ -393,8 +393,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getView().updateSlotsStatus();
 
                             try {
-                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++conta_error));
-                            } catch (InterruptedException excep) {
+                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++conta_error) * 1000);
+                            } catch (InterruptedException exc) {
                             }
 
                             _error_wait = false;
