@@ -34,7 +34,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         try {
 
             String worker_url = null;
-            int http_error = 0, http_status = 0;
+            int http_error = 0, http_status = 0, conta_error = 0;
             boolean chunk_error = false;
             long chunk_id, bytes_downloaded = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
@@ -152,6 +152,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                 http_error = 0;
 
+                                conta_error = 0;
+
                             }
                         }
 
@@ -178,7 +180,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             setError_wait(true);
 
                             try {
-                                Thread.sleep(1000);
+                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++conta_error));
                             } catch (InterruptedException excep) {
                             }
 
