@@ -20,6 +20,8 @@ import javax.crypto.NoSuchPaddingException;
  */
 public final class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable {
 
+    private static final Logger LOG = Logger.getLogger(ChunkWriteManager.class.getName());
+
     public static long calculateChunkOffset(long chunk_id, int size_multi) {
         long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
 
@@ -225,8 +227,7 @@ public final class ChunkWriteManager implements Runnable, SecureSingleThreadNoti
 
         _download.secureNotify();
 
-        LOG.log(Level.INFO, "{0} Chunkmanager: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile().getName()});
+        LOG.log(Level.INFO, "{0} Chunkmanager: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile_name()});
     }
-    private static final Logger LOG = Logger.getLogger(ChunkWriteManager.class.getName());
 
 }

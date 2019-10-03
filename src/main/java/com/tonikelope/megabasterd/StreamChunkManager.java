@@ -18,6 +18,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
     public static final int CHUNK_SIZE = 1048576;
     public static final int BUFFER_CHUNKS_SIZE = 20;
+    private static final Logger LOG = Logger.getLogger(StreamChunkManager.class.getName());
     private long _next_offset_required;
     private long _bytes_written;
     private final long _start_offset;
@@ -193,6 +194,5 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
             _secure_notify_lock.notifyAll();
         }
     }
-    private static final Logger LOG = Logger.getLogger(StreamChunkManager.class.getName());
 
 }

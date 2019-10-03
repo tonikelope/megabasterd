@@ -30,6 +30,7 @@ public final class MegaCrypterAPI {
 
     public static final Set<String> PASS_CACHE = new HashSet<>();
     public static final Object PASS_LOCK = new Object();
+    private static final Logger LOG = Logger.getLogger(MegaCrypterAPI.class.getName());
 
     private static String _rawRequest(String request, URL url_api) throws MegaCrypterAPIException {
 
@@ -327,5 +328,4 @@ public final class MegaCrypterAPI {
 
     private MegaCrypterAPI() {
     }
-    private static final Logger LOG = Logger.getLogger(MegaCrypterAPI.class.getName());
 }

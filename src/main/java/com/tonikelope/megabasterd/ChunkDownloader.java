@@ -21,6 +21,7 @@ import java.util.logging.Logger;
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     public static final double SLOW_PROXY_PERC = 0.3;
+    private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
     private final boolean FORCE_SMART_PROXY = false; //True for debugging SmartProxy
     private final int _id;
     private final Download _download;
@@ -101,7 +102,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
+        LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work! {2}", new Object[]{Thread.currentThread().getName(), _id, _download.getFile_name()});
 
         HttpURLConnection con;
 
@@ -161,7 +162,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         _current_smart_proxy = proxy_manager.getFastestProxy();
 
-                        Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy, _download.getFile_name()});
 
                     } else if (_current_smart_proxy == null) {
 
@@ -187,7 +188,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     } else {
 
-                        LOG.log(Level.INFO, "{0} Worker [{1}] SmartProxy getFastestProxy returned NULL!", new Object[]{Thread.currentThread().getName(), _id});
+                        LOG.log(Level.INFO, "{0} Worker [{1}] SmartProxy getFastestProxy returned NULL! {2}", new Object[]{Thread.currentThread().getName(), _id, _download.getFile_name()});
 
                         URL url = new URL(chunk_url);
 
@@ -237,7 +238,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 File tmp_chunk_file = null, chunk_file = null;
 
-                LOG.log(Level.INFO, "{0} Worker [{1}] is downloading chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+                LOG.log(Level.INFO, "{0} Worker [{1}] is downloading chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
 
                 try {
 
@@ -247,7 +248,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (http_status != 200) {
 
-                            LOG.log(Level.INFO, "{0} Worker [{1}] Failed chunk download : HTTP error code : {2}", new Object[]{Thread.currentThread().getName(), _id, http_status});
+                            LOG.log(Level.INFO, "{0} Worker [{1}] Failed chunk download : HTTP error code : {2} {3}", new Object[]{Thread.currentThread().getName(), _id, http_status, _download.getFile_name()});
 
                             http_error = http_status;
 
@@ -296,7 +297,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             } else {
 
-                                LOG.log(Level.INFO, "{0} Worker [{1}] has RECOVERED PREVIOUS chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+                                LOG.log(Level.INFO, "{0} Worker [{1}] has RECOVERED PREVIOUS chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
 
                                 finish_chunk_time = -1;
 
@@ -311,7 +312,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         if (chunk_reads == chunk_size) {
 
-                            LOG.log(Level.INFO, "{0} Worker [{1}] has DOWNLOADED chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+                            LOG.log(Level.INFO, "{0} Worker [{1}] has DOWNLOADED chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
 
                             if (tmp_chunk_file != null && chunk_file != null && (!chunk_file.exists() || chunk_file.length() != chunk_size)) {
 
@@ -342,7 +343,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     if (chunk_speed < Math.round(avg_chunk_speed * SLOW_PROXY_PERC)) {
 
-                                        LOG.log(Level.INFO, "{0} Worker [{1}] WARNING -> PROXY {2} CHUNK DOWNLOAD SPEED: {3}/s SEEMS TO BE SLOW (average is {4}/s)", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy, formatBytes(chunk_speed), formatBytes(avg_chunk_speed)});
+                                        LOG.log(Level.INFO, "{0} Worker [{1}] WARNING -> PROXY {2} CHUNK DOWNLOAD SPEED: {3}/s SEEMS TO BE SLOW (average is {4}/s) {4}", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy, formatBytes(chunk_speed), formatBytes(avg_chunk_speed), _download.getFile_name()});
 
                                         slow_proxy = true;
                                     }
@@ -369,11 +370,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (chunk_error) {
 
-                        if (!_exit && !_download.isStopped()) {
-
-                            LOG.log(Level.INFO, "{0} Worker [{1}] has FAILED downloading chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_id});
-
-                        }
+                        LOG.log(Level.INFO, "{0} Worker [{1}] has FAILED downloading chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
 
                         if (tmp_chunk_file != null && tmp_chunk_file.exists()) {
                             tmp_chunk_file.delete();
@@ -421,7 +418,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         _download.getChunkmanager().secureNotify();
 
-        LOG.log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
+        LOG.log(Level.INFO, "{0} ChunkDownloader [{1}] {2}: bye bye", new Object[]{Thread.currentThread().getName(), _id, _download.getFile_name()});
     }
-    private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
 }

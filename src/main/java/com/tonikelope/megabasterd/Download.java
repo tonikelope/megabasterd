@@ -50,6 +50,7 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
     public static final int CHUNK_SIZE_MULTI = 10;
+    private static final Logger LOG = Logger.getLogger(Download.class.getName());
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view;
@@ -306,10 +307,6 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
     public OutputStream getOutput_stream() {
         return _output_stream;
-    }
-
-    public File getFile() {
-        return _file;
     }
 
     public ArrayList<ChunkDownloader> getChunkworkers() {
@@ -1732,5 +1729,4 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
         return _restart;
     }
 
-    private static final Logger LOG = Logger.getLogger(Download.class.getName());
 }

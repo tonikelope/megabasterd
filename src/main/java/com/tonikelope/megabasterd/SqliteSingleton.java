@@ -17,6 +17,7 @@ public final class SqliteSingleton {
     public static final String SQLITE_FILE = "megabasterd.db";
 
     public static final int VALIDATION_TIMEOUT = 15;
+    private static final Logger LOG = Logger.getLogger(SqliteSingleton.class.getName());
 
     public static SqliteSingleton getInstance() {
 
@@ -59,6 +60,5 @@ public final class SqliteSingleton {
 
         private static final SqliteSingleton INSTANCE = new SqliteSingleton();
     }
-    private static final Logger LOG = Logger.getLogger(SqliteSingleton.class.getName());
 
 }

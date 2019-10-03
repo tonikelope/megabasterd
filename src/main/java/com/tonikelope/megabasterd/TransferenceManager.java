@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 abstract public class TransferenceManager implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int MAX_WAIT_QUEUE = 1000;
+    private static final Logger LOG = Logger.getLogger(TransferenceManager.class.getName());
 
     private final ConcurrentLinkedQueue<Object> _transference_preprocess_global_queue;
     private final ConcurrentLinkedQueue<Runnable> _transference_preprocess_queue;
@@ -719,7 +720,5 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         }
 
     }
-
-    private static final Logger LOG = Logger.getLogger(TransferenceManager.class.getName());
 
 }

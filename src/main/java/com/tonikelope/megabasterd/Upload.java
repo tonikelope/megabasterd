@@ -28,6 +28,7 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
     public static final int WORKERS_DEFAULT = 6;
     public static final int CHUNK_SIZE_MULTI = 1; //Otra cosa da errores al reanudar una subida (investigar)
+    private static final Logger LOG = Logger.getLogger(Upload.class.getName());
     private final MainPanel _main_panel;
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
@@ -1291,5 +1292,4 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
         _main_panel.getUpload_manager().downWaitQueue(this);
     }
 
-    private static final Logger LOG = Logger.getLogger(Upload.class.getName());
 }

@@ -9,6 +9,8 @@ import java.util.logging.Logger;
  */
 public final class ContentType {
 
+    private static final Logger LOG = Logger.getLogger(ContentType.class.getName());
+
     private final HashMap<String, String> _content_type;
 
     public ContentType() {
@@ -60,5 +62,4 @@ public final class ContentType {
     public String getMIME(String ext) {
         return _content_type.get(ext);
     }
-    private static final Logger LOG = Logger.getLogger(ContentType.class.getName());
 }

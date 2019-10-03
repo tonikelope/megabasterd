@@ -18,6 +18,8 @@ import javax.crypto.IllegalBlockSizeException;
  */
 public final class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiable {
 
+    private static final Logger LOG = Logger.getLogger(UploadMACGenerator.class.getName());
+
     private final Upload _upload;
     private final Object _secure_notify_lock;
     private boolean _notified;
@@ -74,6 +76,8 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
     public void run() {
 
         Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
+
+        LOG.log(Level.INFO, "{0} MAC GENERATOR {1} Hello!", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
 
         try {
 
@@ -193,7 +197,7 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
                     _upload.setFile_meta_mac(meta_mac);
 
-                    LOG.log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
+                    LOG.log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
 
                 } else {
 
@@ -214,13 +218,12 @@ public final class UploadMACGenerator implements Runnable, SecureSingleThreadNot
 
             _upload.secureNotify();
 
-            LOG.log(Level.INFO, "{0} MAC GENERATOR {1} BYE BYE...", new Object[]{Thread.currentThread().getName(), this.getUpload().getFile_name()});
+            LOG.log(Level.INFO, "{0} MAC GENERATOR {1} BYE BYE...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
 
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getMessage());
         }
 
     }
-    private static final Logger LOG = Logger.getLogger(UploadMACGenerator.class.getName());
 
 }

@@ -19,6 +19,7 @@ public final class SpeedMeter implements Runnable {
 
     public static final int SLEEP = 3000;
     public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 10;
+    private static final Logger LOG = Logger.getLogger(SpeedMeter.class.getName());
     private final JLabel _speed_label;
     private final JLabel _rem_label;
     private final TransferenceManager _trans_manager;
@@ -241,5 +242,4 @@ public final class SpeedMeter implements Runnable {
 
         } while (true);
     }
-    private static final Logger LOG = Logger.getLogger(SpeedMeter.class.getName());
 }

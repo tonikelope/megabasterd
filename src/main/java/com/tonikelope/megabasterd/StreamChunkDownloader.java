@@ -17,6 +17,8 @@ import java.util.logging.Logger;
  */
 public class StreamChunkDownloader implements Runnable {
 
+    private static final Logger LOG = Logger.getLogger(StreamChunkDownloader.class.getName());
+
     private final int _id;
     private final StreamChunkManager _chunkmanager;
     private volatile boolean _exit;
@@ -201,6 +203,5 @@ public class StreamChunkDownloader implements Runnable {
 
         LOG.log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
     }
-    private static final Logger LOG = Logger.getLogger(StreamChunkDownloader.class.getName());
 
 }

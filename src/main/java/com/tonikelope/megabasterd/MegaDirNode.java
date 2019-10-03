@@ -9,6 +9,8 @@ import java.util.logging.Logger;
  */
 public final class MegaDirNode {
 
+    private static final Logger LOG = Logger.getLogger(MegaDirNode.class.getName());
+
     private final String _node_id;
 
     private final HashMap<String, MegaDirNode> _children;
@@ -27,6 +29,5 @@ public final class MegaDirNode {
     public HashMap<String, MegaDirNode> getChildren() {
         return _children;
     }
-    private static final Logger LOG = Logger.getLogger(MegaDirNode.class.getName());
 
 }

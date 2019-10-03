@@ -35,6 +35,7 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
     public static final int THREAD_START = 0x01;
     public static final int THREAD_STOP = 0x02;
     public static final int DEFAULT_WORKERS = 10;
+    private static final Logger LOG = Logger.getLogger(KissVideoStreamServer.class.getName());
 
     private final MainPanel _main_panel;
     private final ConcurrentHashMap<String, HashMap<String, Object>> _link_cache;
@@ -485,5 +486,4 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
         _updateStatus(THREAD_STOP);
     }
-    private static final Logger LOG = Logger.getLogger(KissVideoStreamServer.class.getName());
 }

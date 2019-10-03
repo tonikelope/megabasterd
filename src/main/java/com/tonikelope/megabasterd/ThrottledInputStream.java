@@ -10,6 +10,8 @@ import java.util.logging.Logger;
  */
 public final class ThrottledInputStream extends InputStream {
 
+    private static final Logger LOG = Logger.getLogger(ThrottledInputStream.class.getName());
+
     private final InputStream _rawStream;
 
     private final StreamThrottlerSupervisor _stream_supervisor;
@@ -171,6 +173,5 @@ public final class ThrottledInputStream extends InputStream {
             _slice_size = req_slice_size;
         }
     }
-    private static final Logger LOG = Logger.getLogger(ThrottledInputStream.class.getName());
 
 }

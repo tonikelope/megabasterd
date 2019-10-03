@@ -18,6 +18,8 @@ import javax.swing.text.JTextComponent;
  */
 public final class ContextMenuMouseListener extends MouseAdapter {
 
+    private static final Logger LOG = Logger.getLogger(ContextMenuMouseListener.class.getName());
+
     private final JPopupMenu _popup;
     private final Action _cutAction;
     private final Action _copyAction;
@@ -128,5 +130,4 @@ public final class ContextMenuMouseListener extends MouseAdapter {
     private enum _Actions {
         UNDO, CUT, COPY, PASTE, SELECT_ALL
     }
-    private static final Logger LOG = Logger.getLogger(ContextMenuMouseListener.class.getName());
 }

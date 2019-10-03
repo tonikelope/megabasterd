@@ -17,6 +17,7 @@ import java.util.logging.Logger;
 public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThreadNotifiable, ClipboardChangeObservable {
 
     private static final int SLEEP = 250;
+    private static final Logger LOG = Logger.getLogger(ClipboardSpy.class.getName());
 
     private final Clipboard _sysClip;
 
@@ -200,6 +201,5 @@ public final class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingl
             o.notifyClipboardChange();
         }
     }
-    private static final Logger LOG = Logger.getLogger(ClipboardSpy.class.getName());
 
 }

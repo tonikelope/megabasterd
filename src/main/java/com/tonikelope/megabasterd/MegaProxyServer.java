@@ -18,6 +18,8 @@ import java.util.regex.Pattern;
  */
 public class MegaProxyServer implements Runnable {
 
+    private static final Logger LOG = Logger.getLogger(MegaProxyServer.class.getName());
+
     private final String _password;
     private final int _port;
     private ServerSocket _serverSocket;
@@ -266,5 +268,4 @@ public class MegaProxyServer implements Runnable {
             return byteArrayOutputStream.toString("UTF-8");
         }
     }
-    private static final Logger LOG = Logger.getLogger(MegaProxyServer.class.getName());
 }

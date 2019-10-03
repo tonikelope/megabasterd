@@ -10,6 +10,8 @@ import java.util.logging.Logger;
  */
 public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
 
+    private static final Logger LOG = Logger.getLogger(ProgressMeter.class.getName());
+
     private final Transference _transference;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
@@ -58,7 +60,7 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
 
     @Override
     public void run() {
-        LOG.log(Level.INFO, "{0} ProgressMeter hello!", Thread.currentThread().getName());
+        LOG.log(Level.INFO, "{0} ProgressMeter hello! {1}", new Object[]{Thread.currentThread().getName(), _transference.getFile_name()});
 
         _progress = _transference.getProgress();
 
@@ -75,9 +77,8 @@ public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiab
             }
         }
 
-        LOG.log(Level.INFO, "{0} ProgressMeter bye bye!", Thread.currentThread().getName());
+        LOG.log(Level.INFO, "{0} ProgressMeter bye bye! {1}", new Object[]{Thread.currentThread().getName(), _transference.getFile_name()});
 
     }
-    private static final Logger LOG = Logger.getLogger(ProgressMeter.class.getName());
 
 }

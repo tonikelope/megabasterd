@@ -14,6 +14,20 @@ import javax.swing.tree.MutableTreeNode;
  */
 public class MegaMutableTreeNode extends DefaultMutableTreeNode {
 
+    private static final Logger LOG = Logger.getLogger(MegaMutableTreeNode.class.getName());
+    protected Comparator nodeComparator = new Comparator() {
+        @Override
+        public int compare(Object o1, Object o2) {
+            return o1.toString().compareToIgnoreCase(o2.toString());
+        }
+
+        @Override
+        @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
+        public boolean equals(Object obj) {
+            return false;
+        }
+    };
+
     public MegaMutableTreeNode() {
         super();
     }
@@ -51,19 +65,5 @@ public class MegaMutableTreeNode extends DefaultMutableTreeNode {
         super.insert(newChild, childIndex);
         Collections.sort(this.children, nodeComparator);
     }
-
-    protected Comparator nodeComparator = new Comparator() {
-        @Override
-        public int compare(Object o1, Object o2) {
-            return o1.toString().compareToIgnoreCase(o2.toString());
-        }
-
-        @Override
-        @SuppressWarnings("EqualsWhichDoesntCheckParameterClass")
-        public boolean equals(Object obj) {
-            return false;
-        }
-    };
-    private static final Logger LOG = Logger.getLogger(MegaMutableTreeNode.class.getName());
 
 }

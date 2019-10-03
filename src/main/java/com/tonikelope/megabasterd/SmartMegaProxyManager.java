@@ -20,6 +20,7 @@ public final class SmartMegaProxyManager {
 
     public static String DEFAULT_SMART_PROXY_URL = "https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt";
     public static final int BLOCK_TIME = 180;
+    private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
     private final LinkedHashMap<String, Long> _proxy_list;
     private final MainPanel _main_panel;
@@ -139,6 +140,5 @@ public final class SmartMegaProxyManager {
 
         }
     }
-    private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
 
 }

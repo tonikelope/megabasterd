@@ -17,6 +17,8 @@ import java.util.logging.Logger;
  */
 public final class DBTools {
 
+    private static final Logger LOG = Logger.getLogger(DBTools.class.getName());
+
     public static synchronized void setupSqliteTables() throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
@@ -514,6 +516,5 @@ public final class DBTools {
 
     private DBTools() {
     }
-    private static final Logger LOG = Logger.getLogger(DBTools.class.getName());
 
 }

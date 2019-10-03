@@ -50,7 +50,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.51";
+    public static final String VERSION = "6.52";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -75,6 +75,7 @@ public final class MainPanel {
     private static SmartMegaProxyManager _proxy_manager;
     private static String _language;
     private static String _new_version;
+    private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
 
     public static void main(String args[]) {
 
@@ -1381,6 +1382,5 @@ public final class MainPanel {
         });
 
     }
-    private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
 
 }

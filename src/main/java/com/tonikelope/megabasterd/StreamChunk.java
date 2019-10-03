@@ -11,6 +11,8 @@ import java.util.logging.Logger;
  */
 public final class StreamChunk {
 
+    private static final Logger LOG = Logger.getLogger(StreamChunk.class.getName());
+
     private final long _offset;
     private final long _size;
     private final String _url;
@@ -72,6 +74,5 @@ public final class StreamChunk {
             return new ByteArrayInputStream(this.buf, 0, this.count);
         }
     }
-    private static final Logger LOG = Logger.getLogger(StreamChunk.class.getName());
 
 }

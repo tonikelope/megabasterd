@@ -14,6 +14,8 @@ import java.util.logging.Logger;
  */
 public final class UploadManager extends TransferenceManager {
 
+    private static final Logger LOG = Logger.getLogger(UploadManager.class.getName());
+
     private final ConcurrentLinkedQueue<Upload> _finishing_uploads_queue;
 
     private final Object _log_file_lock;
@@ -141,6 +143,5 @@ public final class UploadManager extends TransferenceManager {
 
         secureNotify();
     }
-    private static final Logger LOG = Logger.getLogger(UploadManager.class.getName());
 
 }

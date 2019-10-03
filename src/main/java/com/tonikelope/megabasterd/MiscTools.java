@@ -103,6 +103,7 @@ public final class MiscTools {
             }
         }
     };
+    private static final Logger LOG = Logger.getLogger(MiscTools.class.getName());
 
     public static void deleteDirectoryRecursion(Path path) throws IOException {
         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
@@ -1286,6 +1287,5 @@ public final class MiscTools {
 
     private MiscTools() {
     }
-    private static final Logger LOG = Logger.getLogger(MiscTools.class.getName());
 
 }

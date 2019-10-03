@@ -15,6 +15,8 @@ import java.util.logging.Logger;
  */
 public final class LabelTranslatorSingleton {
 
+    private static final Logger LOG = Logger.getLogger(LabelTranslatorSingleton.class.getName());
+
     public static LabelTranslatorSingleton getInstance() {
 
         return LabelTranslatorSingleton.LazyHolder.INSTANCE;
@@ -298,5 +300,4 @@ public final class LabelTranslatorSingleton {
 
         private static final LabelTranslatorSingleton INSTANCE = new LabelTranslatorSingleton();
     }
-    private static final Logger LOG = Logger.getLogger(LabelTranslatorSingleton.class.getName());
 }

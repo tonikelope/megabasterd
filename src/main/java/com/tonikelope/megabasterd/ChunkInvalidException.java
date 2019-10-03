@@ -8,9 +8,10 @@ import java.util.logging.Logger;
  */
 public final class ChunkInvalidException extends Exception {
 
+    private static final Logger LOG = Logger.getLogger(ChunkInvalidException.class.getName());
+
     public ChunkInvalidException(String message) {
         super(message);
     }
-    private static final Logger LOG = Logger.getLogger(ChunkInvalidException.class.getName());
 
 }

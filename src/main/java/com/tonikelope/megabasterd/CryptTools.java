@@ -51,6 +51,7 @@ public final class CryptTools {
     public static final int MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH = 256;
 
     public static final int MASTER_PASSWORD_PBKDF2_ITERATIONS = 65536;
+    private static final Logger LOG = Logger.getLogger(CryptTools.class.getName());
 
     public static Cipher genDecrypter(String algo, String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
         SecretKeySpec skeySpec = new SecretKeySpec(key, algo);
@@ -663,5 +664,4 @@ public final class CryptTools {
 
     private CryptTools() {
     }
-    private static final Logger LOG = Logger.getLogger(CryptTools.class.getName());
 }
