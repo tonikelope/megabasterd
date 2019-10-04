@@ -112,7 +112,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         status_label.setText("");
 
-        for (JComponent c : new JComponent[]{slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, file_name_label, close_button, restart_button, file_size_label}) {
+        for (JComponent c : new JComponent[]{cbc_label, slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, file_name_label, close_button, restart_button, file_size_label}) {
 
             c.setVisible(false);
         }
@@ -267,6 +267,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
         cbc_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         cbc_label.setForeground(new java.awt.Color(102, 102, 102));
         cbc_label.setText("CBC-MAC 0%");
+        cbc_label.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);

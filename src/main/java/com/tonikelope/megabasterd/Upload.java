@@ -746,6 +746,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                     public void run() {
 
                         getView().getClose_button().setVisible(false);
+
+                        getView().getCbc_label().setVisible(true);
                     }
                 });
 
