@@ -53,7 +53,7 @@ import javax.swing.UIManager;
  */
 public class MainPanel {
 
-    public static final String VERSION = "6.53";
+    public static final String VERSION = "6.54";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -973,24 +973,25 @@ public class MainPanel {
 
                 }
 
-                Object[] options = {"No",
-                    LabelTranslatorSingleton.getInstance().translate("Yes")};
+                if (!old_version.equals("0.0")) {
+                    Object[] options = {"No",
+                        LabelTranslatorSingleton.getInstance().translate("Yes")};
 
-                int n = showOptionDialog(getView(),
-                        LabelTranslatorSingleton.getInstance().translate("An older version (" + old_version + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
-                        LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
-                        null,
-                        options,
-                        options[0]);
+                    int n = showOptionDialog(getView(),
+                            LabelTranslatorSingleton.getInstance().translate("An older version (" + old_version + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
+                            LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
+                            null,
+                            options,
+                            options[0]);
 
-                if (n == 1) {
-                    Files.copy(Paths.get(System.getProperty("user.home") + "/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
+                    if (n == 1) {
+                        Files.copy(Paths.get(System.getProperty("user.home") + "/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
 
-                    JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
+                        JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
 
-                    restartApplication();
+                        restartApplication();
+                    }
                 }
-
             }
 
         } catch (IOException ex) {
