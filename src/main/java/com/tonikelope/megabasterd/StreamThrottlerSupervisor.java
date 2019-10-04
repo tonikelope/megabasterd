@@ -1,6 +1,5 @@
 package com.tonikelope.megabasterd;
 
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
@@ -12,7 +11,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNotifiable {
+public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNotifiable {
 
     private static final Logger LOG = Logger.getLogger(StreamThrottlerSupervisor.class.getName());
 
@@ -112,10 +111,9 @@ public final class StreamThrottlerSupervisor implements Runnable, SecureMultiThr
 
         synchronized (_secure_notify_lock) {
 
-            for (Map.Entry<Thread, Boolean> entry : _notified_threads.entrySet()) {
-
+            _notified_threads.entrySet().forEach((entry) -> {
                 entry.setValue(true);
-            }
+            });
 
             _secure_notify_lock.notifyAll();
         }

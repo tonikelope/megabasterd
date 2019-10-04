@@ -16,7 +16,7 @@ import javax.swing.text.JTextComponent;
  *
  * @author tonikelope
  */
-public final class ContextMenuMouseListener extends MouseAdapter {
+public class ContextMenuMouseListener extends MouseAdapter {
 
     private static final Logger LOG = Logger.getLogger(ContextMenuMouseListener.class.getName());
 

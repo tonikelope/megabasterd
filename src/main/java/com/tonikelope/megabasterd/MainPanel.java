@@ -24,6 +24,9 @@ import static java.lang.System.exit;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -48,9 +51,9 @@ import javax.swing.UIManager;
  *
  * @author tonikelope
  */
-public final class MainPanel {
+public class MainPanel {
 
-    public static final String VERSION = "6.52";
+    public static final String VERSION = "6.53";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -308,6 +311,8 @@ public final class MainPanel {
         } catch (IOException ex) {
             Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
+
+        check_old_version();
 
         THREAD_POOL.execute(new Runnable() {
             @Override
@@ -928,6 +933,70 @@ public final class MainPanel {
             }
 
         }
+    }
+
+    public void check_old_version() {
+
+        try {
+
+            if (!new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").canRead()) {
+
+                new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").createNewFile();
+
+                File directory = new File(System.getProperty("user.home"));
+
+                String old_version = "0.0";
+
+                for (File file : directory.listFiles()) {
+
+                    try {
+                        if (file.isDirectory() && file.canRead() && file.getName().startsWith(".megabasterd")) {
+
+                            String current_dir_version = MiscTools.findFirstRegex("[0-9.]+$", file.getName(), 0);
+
+                            if (current_dir_version != null && !current_dir_version.equals(VERSION)) {
+
+                                String old_version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", old_version, 1);
+                                String old_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", old_version, 1);
+
+                                String current_dir_major = findFirstRegex("([0-9]+)\\.[0-9]+$", current_dir_version, 1);
+                                String current_dir_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", current_dir_version, 1);
+
+                                if (Integer.parseInt(current_dir_major) > Integer.parseInt(old_version_major) || (Integer.parseInt(current_dir_major) == Integer.parseInt(old_version_major) && Integer.parseInt(current_dir_minor) > Integer.parseInt(old_version_minor))) {
+                                    old_version = current_dir_version;
+                                }
+                            }
+
+                        }
+                    } catch (Exception e) {
+                    }
+
+                }
+
+                Object[] options = {"No",
+                    LabelTranslatorSingleton.getInstance().translate("Yes")};
+
+                int n = showOptionDialog(getView(),
+                        LabelTranslatorSingleton.getInstance().translate("An older version (" + old_version + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
+                        LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
+                        null,
+                        options,
+                        options[0]);
+
+                if (n == 1) {
+                    Files.copy(Paths.get(System.getProperty("user.home") + "/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
+
+                    JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
+
+                    restartApplication();
+                }
+
+            }
+
+        } catch (IOException ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+        }
+
     }
 
     public void byebye(boolean restart) {

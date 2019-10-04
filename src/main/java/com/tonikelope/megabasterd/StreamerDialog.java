@@ -18,7 +18,7 @@ import javax.swing.JOptionPane;
  *
  * @author tonikelope
  */
-public final class StreamerDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
+public class StreamerDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
 
     private final ClipboardSpy _clipboardspy;
     private final MainPanelView _mainPanelView;
@@ -73,13 +73,9 @@ public final class StreamerDialog extends javax.swing.JDialog implements Clipboa
 
                             use_mega_account_down_combobox.addItem(mega_default_down);
 
-                            for (Object k : _main_panel.getMega_accounts().keySet()) {
-
-                                if (!mega_default_down.equals(k)) {
-                                    use_mega_account_down_combobox.addItem((String) k);
-                                }
-
-                            }
+                            _main_panel.getMega_accounts().keySet().stream().filter((k) -> (!mega_default_down.equals(k))).forEachOrdered((k) -> {
+                                use_mega_account_down_combobox.addItem((String) k);
+                            });
                             use_mega_account_down_combobox.addItem("");
                             use_mega_account_down_combobox.setSelectedIndex(0);
                         }

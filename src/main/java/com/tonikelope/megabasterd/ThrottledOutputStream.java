@@ -8,7 +8,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class ThrottledOutputStream extends OutputStream {
+public class ThrottledOutputStream extends OutputStream {
 
     private static final Logger LOG = Logger.getLogger(ThrottledOutputStream.class.getName());
 

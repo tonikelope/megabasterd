@@ -6,7 +6,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class ChunkInvalidException extends Exception {
+public class ChunkInvalidException extends Exception {
 
     private static final Logger LOG = Logger.getLogger(ChunkInvalidException.class.getName());
 

@@ -80,7 +80,7 @@ import javax.xml.bind.DatatypeConverter;
  *
  * @author tonikelope
  */
-public final class MiscTools {
+public class MiscTools {
 
     public static final int EXP_BACKOFF_BASE = 2;
     public static final int EXP_BACKOFF_SECS_RETRY = 1;
@@ -559,11 +559,9 @@ public final class MiscTools {
 
         parent.removeAllChildren();
 
-        for (DefaultMutableTreeNode node : children) {
-
+        children.forEach((node) -> {
             parent.add(node);
-
-        }
+        });
     }
 
     public static boolean deleteSelectedTreeItems(JTree tree) {
@@ -796,10 +794,7 @@ public final class MiscTools {
 
                 links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0));
 
-                for (String s : links) {
-
-                    res += s + "\n";
-                }
+                res = links.stream().map((s) -> s + "\n").reduce(res, String::concat);
             } catch (UnsupportedEncodingException ex) {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
@@ -1100,9 +1095,9 @@ public final class MiscTools {
 
             cmd.append(System.getProperty("java.home")).append(File.separator).append("bin").append(File.separator).append("java ");
 
-            for (String jvmArg : ManagementFactory.getRuntimeMXBean().getInputArguments()) {
+            ManagementFactory.getRuntimeMXBean().getInputArguments().forEach((jvmArg) -> {
                 cmd.append(jvmArg).append(" ");
-            }
+            });
 
             cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
 

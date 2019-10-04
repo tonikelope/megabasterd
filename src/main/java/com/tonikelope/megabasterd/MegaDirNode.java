@@ -7,7 +7,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class MegaDirNode {
+public class MegaDirNode {
 
     private static final Logger LOG = Logger.getLogger(MegaDirNode.class.getName());
 

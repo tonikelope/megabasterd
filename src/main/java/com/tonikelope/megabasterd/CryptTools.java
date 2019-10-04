@@ -40,7 +40,7 @@ import javax.swing.JOptionPane;
  *
  * @author tonikelope
  */
-public final class CryptTools {
+public class CryptTools {
 
     public static final int[] AES_ZERO_IV_I32A = {0, 0, 0, 0};
 

@@ -18,7 +18,7 @@ import javax.swing.SpinnerNumberModel;
  *
  * @author tonikelope
  */
-public final class UploadView extends javax.swing.JPanel implements TransferenceView {
+public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
     private final Upload _upload;
 
@@ -659,23 +659,11 @@ public final class UploadView extends javax.swing.JPanel implements Transference
 
             int conta_exit = 0;
 
-            for (ChunkUploader c : _upload.getChunkworkers()) {
-
-                if (c.isExit()) {
-
-                    conta_exit++;
-                }
-            }
+            conta_exit = _upload.getChunkworkers().stream().filter((c) -> (c.isExit())).map((_item) -> 1).reduce(conta_exit, Integer::sum);
 
             int conta_error = 0;
 
-            for (ChunkUploader c : _upload.getChunkworkers()) {
-
-                if (c.isError_wait()) {
-
-                    conta_error++;
-                }
-            }
+            conta_error = _upload.getChunkworkers().stream().filter((c) -> (c.isError_wait())).map((_item) -> 1).reduce(conta_error, Integer::sum);
 
             final Color status_color = conta_error > 0 ? Color.red : Color.black;
 

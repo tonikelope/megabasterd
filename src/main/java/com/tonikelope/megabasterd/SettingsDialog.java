@@ -44,7 +44,7 @@ import javax.swing.table.DefaultTableModel;
  *
  * @author tonikelope
  */
-public final class SettingsDialog extends javax.swing.JDialog {
+public class SettingsDialog extends javax.swing.JDialog {
 
     public static final String DEFAULT_SMART_PROXY_URL = "https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt";
     private String _download_path;
@@ -2003,10 +2003,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                             String email_error_s = "";
 
-                            for (String s : email_error) {
-
-                                email_error_s += s + "\n";
-                            }
+                            email_error_s = email_error.stream().map((s) -> s + "\n").reduce(email_error_s, String::concat);
 
                             final String final_email_error = email_error_s;
 
@@ -2045,13 +2042,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                         } else {
 
-                            for (Map.Entry<String, Object> entry : _main_panel.getMega_accounts().entrySet()) {
-                                String email = entry.getKey();
-
-                                if (!new_valid_mega_accounts.contains(email)) {
-                                    _deleted_mega_accounts.add(email);
-                                }
-                            }
+                            _main_panel.getMega_accounts().entrySet().stream().map((entry) -> entry.getKey()).filter((email) -> (!new_valid_mega_accounts.contains(email))).forEachOrdered((email) -> {
+                                _deleted_mega_accounts.add(email);
+                            });
 
                             swingInvoke(new Runnable() {
                                 @Override
@@ -2095,6 +2088,10 @@ public final class SettingsDialog extends javax.swing.JDialog {
         proxy_pass_label.setEnabled(use_proxy_checkbox.isSelected());
         proxy_pass_textfield.setEnabled(use_proxy_checkbox.isSelected());
         proxy_warning_label.setEnabled(use_proxy_checkbox.isSelected());
+
+        if (use_proxy_checkbox.isSelected()) {
+            smart_proxy_checkbox.setSelected(false);
+        }
     }//GEN-LAST:event_use_proxy_checkboxStateChanged
 
     private void import_settings_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_settings_buttonActionPerformed
@@ -2293,12 +2290,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
                     delete_all_accounts_button.setEnabled(true);
 
-                    for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
-
+                    _main_panel.getMega_accounts().entrySet().stream().map((pair) -> {
                         HashMap<String, Object> data = (HashMap) pair.getValue();
-
                         String pass = null;
-
                         try {
 
                             pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
@@ -2308,18 +2302,14 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         } catch (Exception ex) {
                             LOG.log(Level.SEVERE, ex.getMessage());
                         }
-
                         String[] new_row_data = {(String) pair.getKey(), pass};
-
+                        return new_row_data;
+                    }).forEachOrdered((new_row_data) -> {
                         mega_model.addRow(new_row_data);
-                    }
-
-                    for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
-
+                    });
+                    _main_panel.getElc_accounts().entrySet().stream().map((pair) -> {
                         HashMap<String, Object> data = (HashMap) pair.getValue();
-
                         String user = null, apikey = null;
-
                         try {
 
                             user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
@@ -2331,11 +2321,11 @@ public final class SettingsDialog extends javax.swing.JDialog {
                         } catch (Exception ex) {
                             LOG.log(Level.SEVERE, ex.getMessage());
                         }
-
                         String[] new_row_data = {(String) pair.getKey(), user, apikey};
-
+                        return new_row_data;
+                    }).forEachOrdered((new_row_data) -> {
                         elc_model.addRow(new_row_data);
-                    }
+                    });
 
                     mega_accounts_table.setAutoCreateRowSorter(true);
                     DefaultRowSorter sorter_mega = ((DefaultRowSorter) mega_accounts_table.getRowSorter());
@@ -2669,11 +2659,9 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             if (_main_panel.getMega_accounts().size() > 0) {
 
-                for (Object o : _main_panel.getMega_accounts().keySet()) {
-
+                _main_panel.getMega_accounts().keySet().forEach((o) -> {
                     use_mega_account_down_combobox.addItem((String) o);
-
-                }
+                });
 
                 String use_mega_account_down = DBTools.selectSettingValue("mega_account_down");
 
@@ -2699,6 +2687,7 @@ public final class SettingsDialog extends javax.swing.JDialog {
 
             rec_smart_proxy_label.setEnabled(true);
             multi_slot_down_checkbox.setSelected(true);
+            use_proxy_checkbox.setSelected(false);
 
         } else {
 

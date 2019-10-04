@@ -43,7 +43,7 @@ import javax.swing.JTabbedPane;
  *
  * @author tonikelope
  */
-public final class MainPanelView extends javax.swing.JFrame implements FileDropHandlerNotifiable {
+public class MainPanelView extends javax.swing.JFrame implements FileDropHandlerNotifiable {
 
     private final MainPanel _main_panel;
 
@@ -383,17 +383,13 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
                 if (n == 0) {
 
-                    for (File file : files) {
-
+                    files.stream().map((file) -> {
                         List<File> aux = new ArrayList<>();
-
                         aux.add(file);
-
-                        final FileGrabberDialog dialog = new FileGrabberDialog(tthis, true, aux);
-
+                        return aux;
+                    }).map((aux) -> new FileGrabberDialog(tthis, true, aux)).forEachOrdered((dialog) -> {
                         _new_upload_dialog(dialog);
-
-                    }
+                    });
 
                 } else if (n == 1) {
 
@@ -910,8 +906,7 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
                     Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
 
-                    for (String link : megadownloader) {
-
+                    megadownloader.forEach((link) -> {
                         try {
 
                             urls.add(decryptMegaDownloaderLink(link));
@@ -919,12 +914,11 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
                         } catch (Exception ex) {
                             LOG.log(SEVERE, null, ex);
                         }
-                    }
+                    });
 
                     Set<String> elc = new HashSet(findAllRegex("mega://elc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
 
-                    for (String link : elc) {
-
+                    elc.forEach((link) -> {
                         try {
 
                             urls.addAll(CryptTools.decryptELC(link, getMain_panel()));
@@ -932,22 +926,15 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
                         } catch (Exception ex) {
                             LOG.log(SEVERE, null, ex);
                         }
-                    }
+                    });
 
                     Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", dialog.getLinks_textarea().getText(), 1));
 
-                    for (String d : dlc) {
-
-                        Set<String> links = CryptTools.decryptDLC(d, _main_panel);
-
-                        for (String link : links) {
-
-                            if (findFirstRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", link, 0) != null) {
-
-                                urls.add(link);
-                            }
-                        }
-                    }
+                    dlc.stream().map((d) -> CryptTools.decryptDLC(d, _main_panel)).forEachOrdered((links) -> {
+                        links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", link, 0) != null)).forEachOrdered((link) -> {
+                            urls.add(link);
+                        });
+                    });
 
                     if (!urls.isEmpty()) {
 
@@ -1076,29 +1063,29 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
         if (dialog.isSettings_ok()) {
 
-            for (String email : dialog.getDeleted_mega_accounts()) {
-
+            dialog.getDeleted_mega_accounts().stream().map((email) -> {
                 try {
                     deleteMegaAccount(email);
                 } catch (SQLException ex) {
                     LOG.log(SEVERE, null, ex);
                 }
-
+                return email;
+            }).map((email) -> {
                 _main_panel.getMega_accounts().remove(email);
-
+                return email;
+            }).forEachOrdered((email) -> {
                 _main_panel.getMega_active_accounts().remove(email);
-            }
-
-            for (String host : dialog.getDeleted_elc_accounts()) {
-
+            });
+            dialog.getDeleted_elc_accounts().stream().map((host) -> {
                 try {
                     deleteELCAccount(host);
                 } catch (SQLException ex) {
                     LOG.log(SEVERE, null, ex);
                 }
-
+                return host;
+            }).forEachOrdered((host) -> {
                 _main_panel.getElc_accounts().remove(host);
-            }
+            });
 
             if (_main_panel.isRestart()) {
 

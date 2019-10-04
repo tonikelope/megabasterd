@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class UploadManager extends TransferenceManager {
+public class UploadManager extends TransferenceManager {
 
     private static final Logger LOG = Logger.getLogger(UploadManager.class.getName());
 
@@ -65,8 +65,7 @@ public final class UploadManager extends TransferenceManager {
 
                     getTransference_waitstart_queue().addAll(aux);
 
-                    for (final Transference t1 : getTransference_waitstart_queue()) {
-
+                    getTransference_waitstart_queue().forEach((t1) -> {
                         swingInvoke(
                                 new Runnable() {
                             @Override
@@ -75,11 +74,8 @@ public final class UploadManager extends TransferenceManager {
                                 getScroll_panel().add((Component) t1.getView());
                             }
                         });
-
-                    }
-
-                    for (final Transference t2 : getTransference_finished_queue()) {
-
+                    });
+                    getTransference_finished_queue().forEach((t2) -> {
                         swingInvoke(
                                 new Runnable() {
                             @Override
@@ -88,7 +84,7 @@ public final class UploadManager extends TransferenceManager {
                                 getScroll_panel().add((Component) t2.getView());
                             }
                         });
-                    }
+                    });
 
                 }
             } else {

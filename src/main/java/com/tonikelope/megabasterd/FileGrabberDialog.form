@@ -241,6 +241,7 @@
             </Property>
             <Property name="text" type="java.lang.String" value="Used space: 0.00GB"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
+            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </Component>
         <Component class="javax.swing.JButton" name="add_folder_button">

@@ -30,7 +30,7 @@ import javax.crypto.CipherInputStream;
  *
  * @author tonikelope
  */
-public final class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNotifiable {
+public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNotifiable {
 
     public static final int THREAD_START = 0x01;
     public static final int THREAD_STOP = 0x02;
@@ -471,10 +471,9 @@ public final class KissVideoStreamServer implements HttpHandler, SecureSingleThr
 
                 pipeout.close();
 
-                for (StreamChunkDownloader d : chunkworkers) {
-
+                chunkworkers.forEach((d) -> {
                     d.setExit(true);
-                }
+                });
 
                 chunkwriter.setExit(true);
 

@@ -16,7 +16,7 @@ import javax.crypto.IllegalBlockSizeException;
  *
  * @author tonikelope
  */
-public final class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiable {
+public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiable {
 
     private static final Logger LOG = Logger.getLogger(UploadMACGenerator.class.getName());
 

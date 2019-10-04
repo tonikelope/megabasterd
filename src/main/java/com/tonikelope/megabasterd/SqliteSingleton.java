@@ -12,7 +12,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class SqliteSingleton {
+public class SqliteSingleton {
 
     public static final String SQLITE_FILE = "megabasterd.db";
 
@@ -56,9 +56,12 @@ public final class SqliteSingleton {
         return conn;
     }
 
-    private final static class LazyHolder {
+    private static class LazyHolder {
 
         private static final SqliteSingleton INSTANCE = new SqliteSingleton();
+
+        private LazyHolder() {
+        }
     }
 
 }

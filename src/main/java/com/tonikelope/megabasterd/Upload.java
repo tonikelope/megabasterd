@@ -24,7 +24,7 @@ import javax.swing.JComponent;
  *
  * @author tonikelope
  */
-public final class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
+public class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final int WORKERS_DEFAULT = 6;
     public static final int CHUNK_SIZE_MULTI = 1; //Otra cosa da errores al reanudar una subida (investigar)
@@ -509,10 +509,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             synchronized (_workers_lock) {
 
-                for (ChunkUploader uploader : getChunkworkers()) {
-
+                getChunkworkers().forEach((uploader) -> {
                     uploader.secureNotify();
-                }
+                });
             }
 
             getView().resume();
@@ -1189,10 +1188,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
             synchronized (_workers_lock) {
 
-                for (ChunkUploader uploader : _chunkworkers) {
-
+                _chunkworkers.forEach((uploader) -> {
                     uploader.secureNotify();
-                }
+                });
             }
 
             secureNotify();
@@ -1260,10 +1258,9 @@ public final class Upload implements Transference, Runnable, SecureSingleThreadN
 
         synchronized (_workers_lock) {
 
-            for (ChunkUploader uploader : getChunkworkers()) {
-
+            getChunkworkers().forEach((uploader) -> {
                 uploader.secureNotify();
-            }
+            });
         }
     }
 

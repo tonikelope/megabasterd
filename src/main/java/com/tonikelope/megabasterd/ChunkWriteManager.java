@@ -18,7 +18,7 @@ import javax.crypto.NoSuchPaddingException;
  *
  * @author tonikelope
  */
-public final class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable {
+public class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable {
 
     private static final Logger LOG = Logger.getLogger(ChunkWriteManager.class.getName());
 

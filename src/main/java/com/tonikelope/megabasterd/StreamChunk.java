@@ -9,7 +9,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class StreamChunk {
+public class StreamChunk {
 
     private static final Logger LOG = Logger.getLogger(StreamChunk.class.getName());
 

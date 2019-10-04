@@ -15,7 +15,7 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
  *
  * @author tonikelope
  */
-public final class SpeedMeter implements Runnable {
+public class SpeedMeter implements Runnable {
 
     public static final int SLEEP = 3000;
     public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 10;

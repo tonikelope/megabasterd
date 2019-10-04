@@ -8,7 +8,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
+public class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
 
     private static final Logger LOG = Logger.getLogger(ProgressMeter.class.getName());
 

@@ -26,7 +26,7 @@ import javax.net.ssl.HttpsURLConnection;
  *
  * @author tonikelope
  */
-public final class MegaAPI implements Serializable {
+public class MegaAPI implements Serializable {
 
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;

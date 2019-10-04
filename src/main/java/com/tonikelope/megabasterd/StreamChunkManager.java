@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedOutputStream;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -186,10 +185,9 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
         synchronized (_secure_notify_lock) {
 
-            for (Map.Entry<Thread, Boolean> entry : _notified_threads.entrySet()) {
-
+            _notified_threads.entrySet().forEach((entry) -> {
                 entry.setValue(true);
-            }
+            });
 
             _secure_notify_lock.notifyAll();
         }

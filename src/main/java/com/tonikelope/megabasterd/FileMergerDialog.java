@@ -98,12 +98,9 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
     private void _deleteParts() {
 
-        for (String file_path : this._file_parts) {
-
-            File file = new File(file_path);
-
+        this._file_parts.stream().map((file_path) -> new File(file_path)).forEachOrdered((file) -> {
             file.delete();
-        }
+        });
     }
 
     /**

@@ -22,7 +22,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  *
  * @author tonikelope
  */
-public final class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
+public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
 
     private boolean _download;
     private String _download_path, _selected_item;
@@ -89,13 +89,9 @@ public final class LinkGrabberDialog extends javax.swing.JDialog implements Clip
 
                             use_mega_account_down_combobox.addItem(mega_default_down);
 
-                            for (Object k : _main_panel.getMega_accounts().keySet()) {
-
-                                if (!mega_default_down.equals(k)) {
-                                    use_mega_account_down_combobox.addItem((String) k);
-                                }
-
-                            }
+                            _main_panel.getMega_accounts().keySet().stream().filter((k) -> (!mega_default_down.equals(k))).forEachOrdered((k) -> {
+                                use_mega_account_down_combobox.addItem((String) k);
+                            });
 
                             use_mega_account_down_combobox.addItem("");
                             use_mega_account_down_combobox.setSelectedIndex(0);

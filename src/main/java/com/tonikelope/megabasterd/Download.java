@@ -43,7 +43,7 @@ import javax.swing.JComponent;
  *
  * @author tonikelope
  */
-public final class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
+public class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
     public static final boolean USE_SLOTS_DEFAULT = true;
@@ -418,10 +418,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
             synchronized (_workers_lock) {
 
-                for (ChunkDownloader downloader : getChunkworkers()) {
-
+                getChunkworkers().forEach((downloader) -> {
                     downloader.secureNotify();
-                }
+                });
             }
 
             getView().resume();
@@ -1402,10 +1401,9 @@ public final class Download implements Transference, Runnable, SecureSingleThrea
 
                 synchronized (_workers_lock) {
 
-                    for (ChunkDownloader downloader : _chunkworkers) {
-
+                    _chunkworkers.forEach((downloader) -> {
                         downloader.secureNotify();
-                    }
+                    });
                 }
 
                 secureNotify();

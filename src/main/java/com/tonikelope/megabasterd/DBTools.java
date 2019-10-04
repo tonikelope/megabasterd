@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class DBTools {
+public class DBTools {
 
     private static final Logger LOG = Logger.getLogger(DBTools.class.getName());
 

@@ -15,7 +15,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class DownloadManager extends TransferenceManager {
+public class DownloadManager extends TransferenceManager {
 
     private static final Logger LOG = Logger.getLogger(DownloadManager.class.getName());
 
@@ -131,8 +131,7 @@ public final class DownloadManager extends TransferenceManager {
 
                     getTransference_waitstart_queue().addAll(aux);
 
-                    for (final Transference t1 : getTransference_waitstart_queue()) {
-
+                    getTransference_waitstart_queue().forEach((t1) -> {
                         swingInvoke(
                                 new Runnable() {
                             @Override
@@ -141,11 +140,8 @@ public final class DownloadManager extends TransferenceManager {
                                 getScroll_panel().add((Component) t1.getView());
                             }
                         });
-
-                    }
-
-                    for (final Transference t2 : getTransference_finished_queue()) {
-
+                    });
+                    getTransference_finished_queue().forEach((t2) -> {
                         swingInvoke(
                                 new Runnable() {
                             @Override
@@ -154,7 +150,7 @@ public final class DownloadManager extends TransferenceManager {
                                 getScroll_panel().add((Component) t2.getView());
                             }
                         });
-                    }
+                    });
 
                 }
 

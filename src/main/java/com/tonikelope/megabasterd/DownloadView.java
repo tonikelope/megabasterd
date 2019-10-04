@@ -21,7 +21,7 @@ import javax.swing.SpinnerNumberModel;
  *
  * @author tonikelope
  */
-public final class DownloadView extends javax.swing.JPanel implements TransferenceView {
+public class DownloadView extends javax.swing.JPanel implements TransferenceView {
 
     private final Download _download;
 
@@ -648,23 +648,11 @@ public final class DownloadView extends javax.swing.JPanel implements Transferen
 
             int conta_exit = 0;
 
-            for (ChunkDownloader c : _download.getChunkworkers()) {
-
-                if (c.isExit()) {
-
-                    conta_exit++;
-                }
-            }
+            conta_exit = _download.getChunkworkers().stream().filter((c) -> (c.isExit())).map((_item) -> 1).reduce(conta_exit, Integer::sum);
 
             int conta_error = 0;
 
-            for (ChunkDownloader c : _download.getChunkworkers()) {
-
-                if (c.isError_wait()) {
-
-                    conta_error++;
-                }
-            }
+            conta_error = _download.getChunkworkers().stream().filter((c) -> (c.isError_wait())).map((_item) -> 1).reduce(conta_error, Integer::sum);
 
             final Color status_color = conta_error > 0 ? Color.red : Color.black;
 

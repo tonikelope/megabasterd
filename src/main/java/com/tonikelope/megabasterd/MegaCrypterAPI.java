@@ -26,7 +26,7 @@ import javax.swing.JOptionPane;
  *
  * @author tonikelope
  */
-public final class MegaCrypterAPI {
+public class MegaCrypterAPI {
 
     public static final Set<String> PASS_CACHE = new HashSet<>();
     public static final Object PASS_LOCK = new Object();

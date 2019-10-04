@@ -22,6 +22,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 import javax.swing.TransferHandler;
 
 /**
@@ -30,11 +31,11 @@ import javax.swing.TransferHandler;
  *
  * Thanks to -> https://stackoverflow.com/users/6286694/abika
  */
-final class FileDropHandler extends TransferHandler {
+class FileDropHandler extends TransferHandler {
 
     final FileDropHandlerNotifiable _notifiable;
 
-    public FileDropHandler(FileDropHandlerNotifiable notifiable) {
+    FileDropHandler(FileDropHandlerNotifiable notifiable) {
         super();
 
         _notifiable = notifiable;
@@ -75,4 +76,5 @@ final class FileDropHandler extends TransferHandler {
 
         return true;
     }
+    private static final Logger LOG = Logger.getLogger(FileDropHandler.class.getName());
 }

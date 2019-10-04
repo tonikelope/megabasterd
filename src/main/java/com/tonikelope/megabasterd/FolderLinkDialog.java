@@ -23,7 +23,7 @@ import javax.swing.tree.TreeNode;
  *
  * @author tonikelope
  */
-public final class FolderLinkDialog extends javax.swing.JDialog {
+public class FolderLinkDialog extends javax.swing.JDialog {
 
     private final String _link;
 

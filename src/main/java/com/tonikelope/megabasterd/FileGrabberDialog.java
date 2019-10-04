@@ -24,7 +24,7 @@ import javax.swing.tree.TreeNode;
  *
  * @author tonikelope
  */
-public final class FileGrabberDialog extends javax.swing.JDialog implements FileDropHandlerNotifiable {
+public class FileGrabberDialog extends javax.swing.JDialog implements FileDropHandlerNotifiable {
 
     private boolean _upload;
     private final ArrayList<File> _files;
@@ -117,10 +117,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                             if (!_main_panel.getMega_active_accounts().isEmpty()) {
                                 _inserting_mega_accounts = true;
 
-                                for (Object o : _main_panel.getMega_accounts().keySet()) {
-
+                                _main_panel.getMega_accounts().keySet().forEach((o) -> {
                                     account_combobox.addItem((String) o);
-                                }
+                                });
 
                                 _inserting_mega_accounts = false;
 
@@ -135,10 +134,9 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
 
                             } else {
 
-                                for (Object o : _main_panel.getMega_accounts().keySet()) {
-
+                                _main_panel.getMega_accounts().keySet().forEach((o) -> {
                                     account_combobox.addItem((String) o);
-                                }
+                                });
                             }
 
                             pack();
@@ -152,6 +150,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                         public void run() {
 
                             used_space_label.setForeground(Color.red);
+                            used_space_label.setEnabled(true);
                             used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("No MEGA accounts available (Go to Settings > Accounts)"));
 
                         }
@@ -243,6 +242,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
         used_space_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         used_space_label.setText("Used space: 0.00GB");
         used_space_label.setDoubleBuffered(true);
+        used_space_label.setEnabled(false);
 
         add_folder_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         add_folder_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-add-folder-30.png"))); // NOI18N
@@ -657,6 +657,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
             add_files_button.setEnabled(false);
             add_folder_button.setEnabled(false);
             dir_name_textfield.setEnabled(false);
+            dir_name_label.setEnabled(false);
             total_file_size_label.setEnabled(false);
             skip_button.setEnabled(false);
             skip_rest_button.setEnabled(false);
@@ -707,7 +708,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
 
                                         used_space_label.setForeground(used_space_color);
 
-                                        for (JComponent c : new JComponent[]{add_files_button, add_folder_button, account_combobox, account_label, upload_log_checkbox}) {
+                                        for (JComponent c : new JComponent[]{used_space_label, add_files_button, add_folder_button, account_combobox, account_label, upload_log_checkbox}) {
 
                                             c.setEnabled(true);
                                         }
@@ -730,6 +731,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                                         account_combobox.setSelectedIndex(-1);
                                         used_space_label.setForeground(Color.red);
                                         used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+                                        used_space_label.setEnabled(true);
                                         _last_selected_index = account_combobox.getSelectedIndex();
                                         dance_button.setEnabled(false);
                                         total_file_size_label.setEnabled(false);
@@ -759,6 +761,7 @@ public final class FileGrabberDialog extends javax.swing.JDialog implements File
                                 account_combobox.setSelectedIndex(-1);
                                 used_space_label.setForeground(Color.red);
                                 used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+                                used_space_label.setEnabled(true);
                                 _last_selected_index = account_combobox.getSelectedIndex();
                                 dance_button.setEnabled(false);
                                 total_file_size_label.setEnabled(false);

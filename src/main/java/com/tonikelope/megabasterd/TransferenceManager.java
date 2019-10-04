@@ -248,14 +248,12 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void closeAllFinished() {
 
-        for (Transference t : _transference_finished_queue) {
-
-            if (!t.isStatusError()) {
-
-                _transference_finished_queue.remove(t);
-                _transference_remove_queue.add(t);
-            }
-        }
+        _transference_finished_queue.stream().filter((t) -> (!t.isStatusError())).map((t) -> {
+            _transference_finished_queue.remove(t);
+            return t;
+        }).forEachOrdered((t) -> {
+            _transference_remove_queue.add(t);
+        });
 
         secureNotify();
     }
@@ -264,10 +262,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         int slots = 0;
 
-        for (Transference trans : _transference_running_list) {
-
-            slots += trans.getSlotsCount();
-        }
+        slots = _transference_running_list.stream().map((trans) -> trans.getSlotsCount()).reduce(slots, Integer::sum);
 
         return slots;
 
@@ -316,8 +311,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             getTransference_waitstart_queue().addAll(wait_array);
 
-            for (final Transference t1 : getTransference_waitstart_queue()) {
-
+            getTransference_waitstart_queue().forEach((t1) -> {
                 swingInvoke(
                         new Runnable() {
                     @Override
@@ -326,11 +320,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                         getScroll_panel().add((Component) t1.getView());
                     }
                 });
-
-            }
-
-            for (final Transference t1 : getTransference_finished_queue()) {
-
+            });
+            getTransference_finished_queue().forEach((t1) -> {
                 swingInvoke(
                         new Runnable() {
                     @Override
@@ -339,7 +330,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                         getScroll_panel().add((Component) t1.getView());
                     }
                 });
-            }
+            });
 
             _frozen = false;
         }
@@ -373,8 +364,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             getTransference_waitstart_queue().addAll(wait_array);
 
-            for (final Transference t1 : getTransference_waitstart_queue()) {
-
+            getTransference_waitstart_queue().forEach((t1) -> {
                 swingInvoke(
                         new Runnable() {
                     @Override
@@ -383,11 +373,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                         getScroll_panel().add((Component) t1.getView());
                     }
                 });
-
-            }
-
-            for (final Transference t2 : getTransference_finished_queue()) {
-
+            });
+            getTransference_finished_queue().forEach((t2) -> {
                 swingInvoke(
                         new Runnable() {
                     @Override
@@ -396,7 +383,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                         getScroll_panel().add((Component) t2.getView());
                     }
                 });
-            }
+            });
 
             _frozen = false;
         }
@@ -415,10 +402,9 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         _paused_all = !_paused_all;
 
-        for (Transference transference : _transference_running_list) {
-
+        _transference_running_list.forEach((transference) -> {
             transference.pause();
-        }
+        });
 
         secureNotify();
     }
@@ -450,9 +436,9 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             ArrayList<Transference> trans_list = new ArrayList(getTransference_waitstart_queue());
 
-            for (Transference t : trans_list) {
+            trans_list.forEach((t) -> {
                 t.unfreeze();
-            }
+            });
 
             getTransference_waitstart_queue().clear();
 
@@ -530,12 +516,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     private boolean _isOKFinishedInQueue() {
 
-        for (Transference t : _transference_finished_queue) {
-
-            if (!t.isStatusError()) {
-
-                return true;
-            }
+        if (_transference_finished_queue.stream().anyMatch((t) -> (!t.isStatusError()))) {
+            return true;
         }
 
         return false;
@@ -632,8 +614,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                                 sortTransferenceWaitStartQueue();
 
-                                for (Transference up : getTransference_waitstart_queue()) {
-
+                                getTransference_waitstart_queue().forEach((up) -> {
                                     swingInvoke(
                                             new Runnable() {
                                         @Override
@@ -643,10 +624,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                                         }
                                     });
-                                }
-
-                                for (Transference up : getTransference_finished_queue()) {
-
+                                });
+                                getTransference_finished_queue().forEach((up) -> {
                                     swingInvoke(
                                             new Runnable() {
                                         @Override
@@ -656,7 +635,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                                         }
                                     });
-                                }
+                                });
                             }
 
                         }

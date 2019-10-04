@@ -16,6 +16,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.swingInvoke;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
@@ -37,7 +38,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
-import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 
 /**
  *

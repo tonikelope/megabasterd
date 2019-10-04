@@ -7,7 +7,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class ContentType {
+public class ContentType {
 
     private static final Logger LOG = Logger.getLogger(ContentType.class.getName());
 

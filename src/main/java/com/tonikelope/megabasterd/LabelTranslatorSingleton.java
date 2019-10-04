@@ -13,7 +13,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public final class LabelTranslatorSingleton {
+public class LabelTranslatorSingleton {
 
     private static final Logger LOG = Logger.getLogger(LabelTranslatorSingleton.class.getName());
 
@@ -296,8 +296,11 @@ public final class LabelTranslatorSingleton {
         return _rosetta.containsKey(orig) ? _rosetta.get(orig) : orig;
     }
 
-    private final static class LazyHolder {
+    private static class LazyHolder {
 
         private static final LabelTranslatorSingleton INSTANCE = new LabelTranslatorSingleton();
+
+        private LazyHolder() {
+        }
     }
 }
