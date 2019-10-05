@@ -74,7 +74,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
                             use_mega_account_down_combobox.addItem(mega_default_down);
 
                             _main_panel.getMega_accounts().keySet().stream().filter((k) -> (!mega_default_down.equals(k))).forEachOrdered((k) -> {
-                                use_mega_account_down_combobox.addItem((String) k);
+                                use_mega_account_down_combobox.addItem(k);
                             });
                             use_mega_account_down_combobox.addItem("");
                             use_mega_account_down_combobox.setSelectedIndex(0);

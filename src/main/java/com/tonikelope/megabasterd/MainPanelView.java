@@ -43,7 +43,7 @@ import javax.swing.JTabbedPane;
  *
  * @author tonikelope
  */
-public class MainPanelView extends javax.swing.JFrame implements FileDropHandlerNotifiable {
+public final class MainPanelView extends javax.swing.JFrame implements FileDropHandlerNotifiable {
 
     private final MainPanel _main_panel;
 

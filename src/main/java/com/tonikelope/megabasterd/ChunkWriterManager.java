@@ -22,39 +22,6 @@ import javax.crypto.NoSuchPaddingException;
 public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiable {
 
     private static final Logger LOG = Logger.getLogger(ChunkWriterManager.class.getName());
-    private volatile long _last_chunk_id_written;
-    private volatile long _bytes_written;
-    private final long _file_size;
-    private final Download _download;
-    private final byte[] _byte_file_key;
-    private final byte[] _byte_iv;
-    private volatile boolean _exit;
-    private final Object _secure_notify_lock;
-    private boolean _notified;
-    private final String _chunks_dir;
-
-    public ChunkWriterManager(Download downloader) throws Exception {
-        _notified = false;
-        _exit = false;
-        _download = downloader;
-        _chunks_dir = _create_chunks_temp_dir();
-        _secure_notify_lock = new Object();
-        _file_size = _download.getFile_size();
-        _byte_file_key = initMEGALinkKey(_download.getFile_key());
-        _byte_iv = initMEGALinkKeyIV(_download.getFile_key());
-
-        if (_download.getProgress() == 0) {
-
-            _last_chunk_id_written = 0;
-
-            _bytes_written = 0;
-
-        } else {
-            _last_chunk_id_written = _download.getLast_chunk_id_dispatched();
-
-            _bytes_written = _download.getProgress();
-        }
-    }
 
     public static long calculateChunkOffset(long chunk_id, int size_multi) {
         long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
@@ -90,6 +57,39 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
         }
 
         return chunk_size;
+    }
+    private volatile long _last_chunk_id_written;
+    private volatile long _bytes_written;
+    private final long _file_size;
+    private final Download _download;
+    private final byte[] _byte_file_key;
+    private final byte[] _byte_iv;
+    private volatile boolean _exit;
+    private final Object _secure_notify_lock;
+    private boolean _notified;
+    private final String _chunks_dir;
+
+    public ChunkWriterManager(Download downloader) throws Exception {
+        _notified = false;
+        _exit = false;
+        _download = downloader;
+        _chunks_dir = _create_chunks_temp_dir();
+        _secure_notify_lock = new Object();
+        _file_size = _download.getFile_size();
+        _byte_file_key = initMEGALinkKey(_download.getFile_key());
+        _byte_iv = initMEGALinkKeyIV(_download.getFile_key());
+
+        if (_download.getProgress() == 0) {
+
+            _last_chunk_id_written = 0;
+
+            _bytes_written = 0;
+
+        } else {
+            _last_chunk_id_written = _download.getLast_chunk_id_dispatched();
+
+            _bytes_written = _download.getProgress();
+        }
     }
 
     public String getChunks_dir() {

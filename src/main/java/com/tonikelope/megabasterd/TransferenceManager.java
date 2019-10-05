@@ -516,11 +516,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     private boolean _isOKFinishedInQueue() {
 
-        if (_transference_finished_queue.stream().anyMatch((t) -> (!t.isStatusError()))) {
-            return true;
-        }
-
-        return false;
+        return _transference_finished_queue.stream().anyMatch((t) -> (!t.isStatusError()));
     }
 
     @Override

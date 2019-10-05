@@ -33,6 +33,8 @@ import javax.swing.TransferHandler;
  */
 class FileDropHandler extends TransferHandler {
 
+    private static final Logger LOG = Logger.getLogger(FileDropHandler.class.getName());
+
     final FileDropHandlerNotifiable _notifiable;
 
     FileDropHandler(FileDropHandlerNotifiable notifiable) {
@@ -76,5 +78,4 @@ class FileDropHandler extends TransferHandler {
 
         return true;
     }
-    private static final Logger LOG = Logger.getLogger(FileDropHandler.class.getName());
 }

@@ -2663,7 +2663,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             if (_main_panel.getMega_accounts().size() > 0) {
 
                 _main_panel.getMega_accounts().keySet().forEach((o) -> {
-                    use_mega_account_down_combobox.addItem((String) o);
+                    use_mega_account_down_combobox.addItem(o);
                 });
 
                 String use_mega_account_down = DBTools.selectSettingValue("mega_account_down");

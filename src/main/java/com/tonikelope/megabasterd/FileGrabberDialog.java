@@ -118,7 +118,7 @@ public class FileGrabberDialog extends javax.swing.JDialog implements FileDropHa
                                 _inserting_mega_accounts = true;
 
                                 _main_panel.getMega_accounts().keySet().forEach((o) -> {
-                                    account_combobox.addItem((String) o);
+                                    account_combobox.addItem(o);
                                 });
 
                                 _inserting_mega_accounts = false;
@@ -135,7 +135,7 @@ public class FileGrabberDialog extends javax.swing.JDialog implements FileDropHa
                             } else {
 
                                 _main_panel.getMega_accounts().keySet().forEach((o) -> {
-                                    account_combobox.addItem((String) o);
+                                    account_combobox.addItem(o);
                                 });
                             }
 

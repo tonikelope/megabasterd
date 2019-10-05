@@ -51,7 +51,7 @@ import javax.swing.UIManager;
  *
  * @author tonikelope
  */
-public class MainPanel {
+public final class MainPanel {
 
     public static final String VERSION = "6.57";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
