@@ -53,7 +53,7 @@ import javax.swing.UIManager;
  */
 public class MainPanel {
 
-    public static final String VERSION = "6.56";
+    public static final String VERSION = "6.57";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;

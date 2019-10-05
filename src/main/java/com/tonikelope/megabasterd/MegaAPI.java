@@ -31,7 +31,7 @@ public class MegaAPI implements Serializable {
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
-    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -5, -6, -8, -9, -10, -11, -12, -13, -14, -15, -16, -26};
+    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -5, -6, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -26};
     public static final int PBKDF2_ITERATIONS = 100000;
     public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
     private static final Logger LOG = Logger.getLogger(MegaAPI.class.getName());
@@ -639,7 +639,7 @@ public class MegaAPI implements Serializable {
         return res_map;
     }
 
-    public String initUploadFile(String filename) {
+    public String initUploadFile(String filename) throws MegaAPIException {
 
         String ul_url = null;
 
@@ -659,6 +659,10 @@ public class MegaAPI implements Serializable {
 
             ul_url = (String) res_map[0].get("p");
 
+        } catch (MegaAPIException mae) {
+
+            throw mae;
+
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getMessage());
         }
@@ -666,7 +670,7 @@ public class MegaAPI implements Serializable {
         return ul_url;
     }
 
-    public HashMap<String, Object> finishUploadFile(String fbasename, int[] ul_key, int[] fkey, int[] meta_mac, String completion_handle, String mega_parent, byte[] master_key, String root_node, byte[] share_key) {
+    public HashMap<String, Object> finishUploadFile(String fbasename, int[] ul_key, int[] fkey, int[] meta_mac, String completion_handle, String mega_parent, byte[] master_key, String root_node, byte[] share_key) throws MegaAPIException {
 
         HashMap[] res_map = null;
 
@@ -683,6 +687,10 @@ public class MegaAPI implements Serializable {
             ObjectMapper objectMapper = new ObjectMapper();
 
             res_map = objectMapper.readValue(res, HashMap[].class);
+
+        } catch (MegaAPIException mae) {
+
+            throw mae;
 
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getMessage());

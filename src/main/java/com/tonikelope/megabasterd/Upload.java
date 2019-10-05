@@ -33,7 +33,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
     private final Object _progress_lock;
-    private String _status_error_message;
+    private String _status_error;
     private volatile boolean _exit;
     private volatile boolean _frozen;
     private int _slots;
@@ -60,7 +60,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private UploadMACGenerator _mac_generator;
     private boolean _create_dir;
     private boolean _provision_ok;
-    private boolean _status_error;
+    private boolean _fatal_error;
     private String _file_link;
     private final MegaAPI _ma;
     private final String _file_name;
@@ -80,7 +80,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _notified = false;
         _frozen = main_panel.isInit_paused();
         _provision_ok = true;
-        _status_error = false;
+        _status_error = null;
+        _fatal_error = false;
         _canceled = false;
         _closed = false;
         _main_panel = main_panel;
@@ -114,7 +115,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         _notified = false;
         _provision_ok = true;
-        _status_error = false;
+        _status_error = null;
+        _fatal_error = false;
         _canceled = false;
         _closed = false;
         _restart = true;
@@ -242,10 +244,6 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         return _provision_ok;
     }
 
-    public boolean isStatus_error() {
-        return _status_error;
-    }
-
     public String getFile_link() {
         return _file_link;
     }
@@ -365,7 +363,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         if (!the_file.exists()) {
 
-            _status_error_message = "ERROR: FILE NOT FOUND";
+            _status_error = "ERROR: FILE NOT FOUND";
 
         } else {
 
@@ -403,7 +401,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         if (!_provision_ok) {
 
-            _status_error = true;
+            _status_error = "PROVISION FAILED";
 
             if (_file_name != null) {
                 swingInvoke(
@@ -428,12 +426,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
             getView().hideAllExceptStatus();
 
-            if (_status_error_message == null) {
-
-                _status_error_message = "PROVISION FAILED";
-            }
-
-            getView().printStatusError(_status_error_message);
+            getView().printStatusError(_status_error);
 
             swingInvoke(
                     new Runnable() {
@@ -700,7 +693,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                 int conta_error = 0;
 
                 do {
-                    _ul_url = _ma.initUploadFile(_file_name);
+                    try {
+                        _ul_url = _ma.initUploadFile(_file_name);
+                    } catch (MegaAPIException ex) {
+                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        stopUploader(ex.getMessage());
+                        _fatal_error = true;
+                    }
 
                     if (_ul_url == null && !_exit) {
 
@@ -866,7 +865,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                         File f = new File(_file_name);
 
-                        HashMap<String, Object> upload_res;
+                        HashMap<String, Object> upload_res = null;
 
                         int[] ul_key = _ul_key;
 
@@ -875,7 +874,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                         int conta_error = 0;
 
                         do {
-                            upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handler, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
+                            try {
+                                upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handler, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
+                            } catch (MegaAPIException ex) {
+                                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                stopUploader(ex.getMessage());
+                                _fatal_error = true;
+                            }
 
                             if (upload_res == null && !_exit) {
 
@@ -936,15 +941,21 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 }
                             }
+
+                        } else if (_status_error != null) {
+                            getView().hideAllExceptStatus();
+
+                            getView().printStatusError(_status_error);
                         }
 
                     } else {
 
+                        _status_error = "UPLOAD FAILED! (Empty completion handle!)";
+
                         getView().hideAllExceptStatus();
 
-                        getView().printStatusError(_status_error_message != null ? _status_error_message : "UPLOAD FAILED! (Empty completion handle!)");
+                        getView().printStatusError(_status_error);
 
-                        _status_error = true;
                     }
 
                 } else {
@@ -955,6 +966,12 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     getView().printStatusNormal("Upload CANCELED!");
                 }
+
+            } else if (_status_error != null) {
+
+                getView().hideAllExceptStatus();
+
+                getView().printStatusError(_status_error);
 
             } else {
 
@@ -974,7 +991,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             getView().printStatusNormal("Upload CANCELED!");
         }
 
-        if (!_status_error || _main_panel.isExit()) {
+        if (_status_error == null || _main_panel.isExit()) {
 
             try {
                 DBTools.deleteUpload(_file_name, _ma.getFull_email());
@@ -1008,30 +1025,24 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 getView().getClose_button().setVisible(true);
 
-                if (!_status_error && !_canceled) {
+                if (_status_error == null && !_canceled) {
 
                     getView().getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
 
                 }
 
-                if (_canceled) {
+                if (_canceled || _status_error == null) {
 
                     getView().getRestart_button().setVisible(true);
-                }
-
-                if (_status_error) {
-
-                    getView().getRestart_button().setEnabled(false);
                 }
             }
         });
 
-        THREAD_POOL.execute(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                if (_status_error) {
+        if (_status_error != null && !_fatal_error) {
+            THREAD_POOL.execute(
+                    new Runnable() {
+                @Override
+                public void run() {
 
                     for (int i = 3; !_closed && i > 0; i--) {
 
@@ -1057,9 +1068,10 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                         LOG.log(Level.INFO, "{0} Uploader {1} AUTO RESTARTING UPLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
                         restart();
                     }
+
                 }
-            }
-        });
+            });
+        }
 
         getMain_panel().getUpload_manager().getFinishing_uploads_queue().remove(this);
 
@@ -1176,10 +1188,6 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _exit = exit;
     }
 
-    public void setStatus_error(boolean status_error) {
-        _status_error = status_error;
-    }
-
     public void stopUploader() {
 
         if (!_exit) {
@@ -1201,9 +1209,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
     public void stopUploader(String reason) {
 
-        _status_error = true;
-
-        _status_error_message = (reason != null ? LabelTranslatorSingleton.getInstance().translate("FATAL ERROR! ") + reason : LabelTranslatorSingleton.getInstance().translate("FATAL ERROR! "));
+        _status_error = (reason != null ? LabelTranslatorSingleton.getInstance().translate("FATAL ERROR! ") + reason : LabelTranslatorSingleton.getInstance().translate("FATAL ERROR! "));
 
         stopUploader();
     }
@@ -1237,7 +1243,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
     @Override
     public boolean isStatusError() {
-        return _status_error;
+        return _status_error != null;
     }
 
     public long calculateLastUploadedChunk(long bytes_read) {
