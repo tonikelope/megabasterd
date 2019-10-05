@@ -80,7 +80,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile boolean _pause;
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private volatile long _progress;
-    private ChunkWriteManager _chunkmanager;
+    private ChunkWriterManager _chunkmanager;
     private String _last_download_url;
     private boolean _provision_ok;
     private boolean _finishing_download;
@@ -292,7 +292,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _pause = pause;
     }
 
-    public ChunkWriteManager getChunkmanager() {
+    public ChunkWriterManager getChunkmanager() {
         return _chunkmanager;
     }
 
@@ -590,7 +590,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             if (_use_slots) {
 
-                                _chunkmanager = new ChunkWriteManager(this);
+                                _chunkmanager = new ChunkWriterManager(this);
 
                                 _thread_pool.execute(_chunkmanager);
 
@@ -1322,11 +1322,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             try {
                 while (!_exit) {
 
-                    long chunk_offset = ChunkWriteManager.calculateChunkOffset(chunk_id, 1);
+                    long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, 1);
 
-                    long chunk_size = ChunkWriteManager.calculateChunkSize(chunk_id, this.getFile_size(), chunk_offset, 1);
+                    long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, this.getFile_size(), chunk_offset, 1);
 
-                    ChunkWriteManager.checkChunkID(chunk_id, this.getFile_size(), chunk_offset);
+                    ChunkWriterManager.checkChunkID(chunk_id, this.getFile_size(), chunk_offset);
 
                     tot += chunk_size;
 

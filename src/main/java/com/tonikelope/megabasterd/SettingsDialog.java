@@ -5,11 +5,14 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Dialog;
 import java.awt.Frame;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Paths;
@@ -2118,7 +2121,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 try {
 
-                    try (FileInputStream fis = new FileInputStream(file); ObjectInputStream ois = new ObjectInputStream(fis)) {
+                    try (InputStream fis = new BufferedInputStream(new FileInputStream(file)); ObjectInputStream ois = new ObjectInputStream(fis)) {
 
                         HashMap<String, Object> settings = (HashMap<String, Object>) ois.readObject();
 
@@ -2178,7 +2181,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     file.createNewFile();
 
-                    try (FileOutputStream fos = new FileOutputStream(file); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+                    try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(file)); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 
                         HashMap<String, Object> settings = new HashMap<>();
 

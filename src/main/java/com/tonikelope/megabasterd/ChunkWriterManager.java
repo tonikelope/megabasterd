@@ -1,6 +1,7 @@
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.CryptTools.*;
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,9 +19,42 @@ import javax.crypto.NoSuchPaddingException;
  *
  * @author tonikelope
  */
-public class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable {
+public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiable {
 
-    private static final Logger LOG = Logger.getLogger(ChunkWriteManager.class.getName());
+    private static final Logger LOG = Logger.getLogger(ChunkWriterManager.class.getName());
+    private volatile long _last_chunk_id_written;
+    private volatile long _bytes_written;
+    private final long _file_size;
+    private final Download _download;
+    private final byte[] _byte_file_key;
+    private final byte[] _byte_iv;
+    private volatile boolean _exit;
+    private final Object _secure_notify_lock;
+    private boolean _notified;
+    private final String _chunks_dir;
+
+    public ChunkWriterManager(Download downloader) throws Exception {
+        _notified = false;
+        _exit = false;
+        _download = downloader;
+        _chunks_dir = _create_chunks_temp_dir();
+        _secure_notify_lock = new Object();
+        _file_size = _download.getFile_size();
+        _byte_file_key = initMEGALinkKey(_download.getFile_key());
+        _byte_iv = initMEGALinkKeyIV(_download.getFile_key());
+
+        if (_download.getProgress() == 0) {
+
+            _last_chunk_id_written = 0;
+
+            _bytes_written = 0;
+
+        } else {
+            _last_chunk_id_written = _download.getLast_chunk_id_dispatched();
+
+            _bytes_written = _download.getProgress();
+        }
+    }
 
     public static long calculateChunkOffset(long chunk_id, int size_multi) {
         long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
@@ -56,43 +90,6 @@ public class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable
         }
 
         return chunk_size;
-    }
-
-    private volatile long _last_chunk_id_written;
-    private volatile long _bytes_written;
-    private final long _file_size;
-    private final Download _download;
-    private final byte[] _byte_file_key;
-    private final byte[] _byte_iv;
-    private volatile boolean _exit;
-    private final Object _secure_notify_lock;
-    private boolean _notified;
-    private final String _chunks_dir;
-
-    public ChunkWriteManager(Download downloader) throws Exception {
-        _notified = false;
-        _exit = false;
-        _download = downloader;
-        _chunks_dir = _create_chunks_temp_dir();
-        _secure_notify_lock = new Object();
-        _file_size = _download.getFile_size();
-        _byte_file_key = initMEGALinkKey(_download.getFile_key());
-        _byte_iv = initMEGALinkKeyIV(_download.getFile_key());
-
-        if (_download.getProgress() == 0) {
-
-            _last_chunk_id_written = 0;
-
-            _bytes_written = 0;
-
-        } else {
-            _last_chunk_id_written = _download.getLast_chunk_id_dispatched();
-
-            _bytes_written = _download.getProgress();
-        }
-
-        LOG.log(Level.INFO, "{0} Chunkmanager hello LAST CHUNK WRITTEN -> [{1}] {2}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written});
-
     }
 
     public String getChunks_dir() {
@@ -149,7 +146,7 @@ public class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable
         try {
             MiscTools.deleteDirectoryRecursion(Paths.get(getChunks_dir()));
         } catch (IOException ex) {
-            Logger.getLogger(ChunkWriteManager.class.getName()).log(Level.SEVERE, ex.getMessage());
+            Logger.getLogger(ChunkWriterManager.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }
 
@@ -158,7 +155,9 @@ public class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable
 
         try {
 
-            LOG.log(Level.INFO, "{0} Chunkmanager: let's do some work!", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{0} ChunkWriterManager: let's do some work! {1}", new Object[]{Thread.currentThread().getName(), _download.getFile_name()});
+
+            LOG.log(Level.INFO, "{0} ChunkWriterManager LAST CHUNK WRITTEN -> [{1}] {2} {3}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written, _download.getFile_name()});
 
             boolean download_finished = false;
 
@@ -184,7 +183,7 @@ public class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable
 
                         int reads;
 
-                        try (CipherInputStream cis = new CipherInputStream(new FileInputStream(chunk_file), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
+                        try (CipherInputStream cis = new CipherInputStream(new BufferedInputStream(new FileInputStream(chunk_file)), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
                             while ((reads = cis.read(buffer)) != -1) {
                                 _download.getOutput_stream().write(buffer, 0, reads);
                             }
@@ -194,7 +193,7 @@ public class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable
 
                         _bytes_written += chunk_file.length();
 
-                        LOG.log(Level.INFO, "{0} Chunkmanager has written to disk chunk [{1}] {2} {3}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _bytes_written, _download.calculateLastWrittenChunk(_bytes_written)});
+                        LOG.log(Level.INFO, "{0} ChunkWriterManager has written to disk chunk [{1}] {2} {3} {4}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _bytes_written, _download.calculateLastWrittenChunk(_bytes_written), _download.getFile_name()});
 
                         _last_chunk_id_written++;
 
@@ -205,7 +204,7 @@ public class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable
 
                     if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                        LOG.log(Level.INFO, "{0} Chunkmanager waiting for chunk [{1}]...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1});
+                        LOG.log(Level.INFO, "{0} ChunkWriterManager waiting for chunk [{1}] {2}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _download.getFile_name()});
 
                         secureWait();
 
@@ -227,7 +226,7 @@ public class ChunkWriteManager implements Runnable, SecureSingleThreadNotifiable
 
         _download.secureNotify();
 
-        LOG.log(Level.INFO, "{0} Chunkmanager: bye bye{1}", new Object[]{Thread.currentThread().getName(), _download.getFile_name()});
+        LOG.log(Level.INFO, "{0} ChunkWriterManager: bye bye {1}", new Object[]{Thread.currentThread().getName(), _download.getFile_name()});
     }
 
 }

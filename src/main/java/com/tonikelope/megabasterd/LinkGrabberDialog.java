@@ -2,11 +2,13 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
@@ -314,7 +316,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                 @Override
                 public void run() {
 
-                    try (FileInputStream is = new FileInputStream(file); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    try (InputStream is = new BufferedInputStream(new FileInputStream(file)); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 

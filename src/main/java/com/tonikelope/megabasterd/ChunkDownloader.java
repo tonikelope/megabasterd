@@ -2,10 +2,12 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -146,13 +148,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 long chunk_id = _download.nextChunkId();
 
-                long chunk_offset = ChunkWriteManager.calculateChunkOffset(chunk_id, Download.CHUNK_SIZE_MULTI);
+                long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, Download.CHUNK_SIZE_MULTI);
 
-                long chunk_size = ChunkWriteManager.calculateChunkSize(chunk_id, _download.getFile_size(), chunk_offset, Download.CHUNK_SIZE_MULTI);
+                long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, _download.getFile_size(), chunk_offset, Download.CHUNK_SIZE_MULTI);
 
-                ChunkWriteManager.checkChunkID(chunk_id, _download.getFile_size(), chunk_offset);
+                ChunkWriterManager.checkChunkID(chunk_id, _download.getFile_size(), chunk_offset);
 
-                String chunk_url = ChunkWriteManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
+                String chunk_url = ChunkWriterManager.genChunkUrl(worker_url, _download.getFile_size(), chunk_offset, chunk_size);
 
                 if ((_current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
@@ -260,7 +262,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 tmp_chunk_file = new File(_download.getChunkmanager().getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + chunk_id + ".tmp");
 
-                                try (InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor()); FileOutputStream tmp_chunk_file_os = new FileOutputStream(tmp_chunk_file)) {
+                                try (InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor()); OutputStream tmp_chunk_file_os = new BufferedOutputStream(new FileOutputStream(tmp_chunk_file))) {
 
                                     init_chunk_time = System.currentTimeMillis();
 

@@ -127,11 +127,11 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
                         int reads;
 
-                        long chunk_offset = ChunkWriteManager.calculateChunkOffset(chunk_id, 1);
+                        long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, 1);
 
-                        long chunk_size = ChunkWriteManager.calculateChunkSize(chunk_id, _upload.getFile_size(), chunk_offset, 1);
+                        long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, _upload.getFile_size(), chunk_offset, 1);
 
-                        ChunkWriteManager.checkChunkID(chunk_id, _upload.getFile_size(), chunk_offset);
+                        ChunkWriterManager.checkChunkID(chunk_id, _upload.getFile_size(), chunk_offset);
 
                         try {
 

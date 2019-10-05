@@ -125,13 +125,13 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 chunk_id = _upload.nextChunkId();
 
-                long chunk_offset = ChunkWriteManager.calculateChunkOffset(chunk_id, Upload.CHUNK_SIZE_MULTI);
+                long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, Upload.CHUNK_SIZE_MULTI);
 
-                long chunk_size = ChunkWriteManager.calculateChunkSize(chunk_id, _upload.getFile_size(), chunk_offset, Upload.CHUNK_SIZE_MULTI);
+                long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, _upload.getFile_size(), chunk_offset, Upload.CHUNK_SIZE_MULTI);
 
-                ChunkWriteManager.checkChunkID(chunk_id, _upload.getFile_size(), chunk_offset);
+                ChunkWriterManager.checkChunkID(chunk_id, _upload.getFile_size(), chunk_offset);
 
-                String chunk_url = ChunkWriteManager.genChunkUrl(worker_url, _upload.getFile_size(), chunk_offset, chunk_size);
+                String chunk_url = ChunkWriterManager.genChunkUrl(worker_url, _upload.getFile_size(), chunk_offset, chunk_size);
 
                 URL url = new URL(chunk_url);
 
