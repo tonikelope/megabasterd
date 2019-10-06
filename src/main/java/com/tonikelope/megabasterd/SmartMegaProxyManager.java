@@ -118,12 +118,8 @@ public final class SmartMegaProxyManager {
                     }
                 }
 
-                swingInvoke(
-                        new Runnable() {
-                    @Override
-                    public void run() {
-                        _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
-                    }
+                swingInvoke(() -> {
+                    _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
                 });
 
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});

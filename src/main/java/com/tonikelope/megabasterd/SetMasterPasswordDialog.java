@@ -216,64 +216,37 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         final Dialog tthis = this;
 
-        THREAD_POOL.execute(new Runnable() {
+        THREAD_POOL.execute(() -> {
+            try {
+                if (Arrays.equals(new_pass_textfield.getPassword(), confirm_pass_textfield.getPassword())) {
+                    swingInvoke(() -> {
+                        status_label.setText(LabelTranslatorSingleton.getInstance().translate("Processing your password, please wait..."));
+                    });
+                    if (new_pass_textfield.getPassword().length > 0) {
 
-            @Override
-            public void run() {
+                        _new_pass = CryptTools.PBKDF2HMACSHA256(new String(new_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
 
-                try {
-
-                    if (Arrays.equals(new_pass_textfield.getPassword(), confirm_pass_textfield.getPassword())) {
-
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-                                status_label.setText(LabelTranslatorSingleton.getInstance().translate("Processing your password, please wait..."));
-                            }
-                        });
-
-                        if (new_pass_textfield.getPassword().length > 0) {
-
-                            _new_pass = CryptTools.PBKDF2HMACSHA256(new String(new_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
-
-                            _new_pass_hash = Bin2BASE64(HashBin("SHA-1", _new_pass));
-                        }
-
-                        _pass_ok = true;
-
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-
-                                tthis.setVisible(false);
-                            }
-                        });
-
-                    } else {
-
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
-
-                                status_label.setText("");
-
-                                new_pass_textfield.setText("");
-
-                                confirm_pass_textfield.setText("");
-
-                                new_pass_textfield.grabFocus();
-                            }
-                        });
-
+                        _new_pass_hash = Bin2BASE64(HashBin("SHA-1", _new_pass));
                     }
+                    _pass_ok = true;
+                    swingInvoke(() -> {
+                        tthis.setVisible(false);
+                    });
+                } else {
+                    swingInvoke(() -> {
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
 
-                } catch (Exception ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                        status_label.setText("");
+
+                        new_pass_textfield.setText("");
+
+                        confirm_pass_textfield.setText("");
+
+                        new_pass_textfield.grabFocus();
+                    });
                 }
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
         });
     }//GEN-LAST:event_ok_buttonActionPerformed

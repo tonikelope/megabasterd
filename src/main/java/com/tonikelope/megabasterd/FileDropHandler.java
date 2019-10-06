@@ -69,11 +69,8 @@ class FileDropHandler extends TransferHandler {
             return false;
         }
 
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-                _notifiable.file_drop_notify(files);
-            }
+        THREAD_POOL.execute(() -> {
+            _notifiable.file_drop_notify(files);
         });
 
         return true;

@@ -150,16 +150,11 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
         if (!old_status.equals(status + " ")) {
             Dimension frame_size = this.getSize();
 
-            swingInvoke(
-                    new Runnable() {
-                @Override
-                public void run() {
+            swingInvoke(() -> {
+                getKiss_server_status().setText(status + " ");
 
-                    getKiss_server_status().setText(status + " ");
-
-                    pack();
-                    setSize(frame_size);
-                }
+                pack();
+                setSize(frame_size);
             });
         }
 
@@ -172,16 +167,11 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
         if (!old_status.equals(status + " ")) {
             Dimension frame_size = this.getSize();
 
-            swingInvoke(
-                    new Runnable() {
-                @Override
-                public void run() {
+            swingInvoke(() -> {
+                getSmart_proxy_status().setText(status + " ");
 
-                    getSmart_proxy_status().setText(status + " ");
-
-                    pack();
-                    setSize(frame_size);
-                }
+                pack();
+                setSize(frame_size);
             });
         }
 
@@ -194,16 +184,11 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
         if (!old_status.equals(status + " ")) {
             Dimension frame_size = this.getSize();
 
-            swingInvoke(
-                    new Runnable() {
-                @Override
-                public void run() {
+            swingInvoke(() -> {
+                getMc_reverse_status().setText(status + " ");
 
-                    getMc_reverse_status().setText(status + " ");
-
-                    pack();
-                    setSize(frame_size);
-                }
+                pack();
+                setSize(frame_size);
             });
         }
 
@@ -231,108 +216,106 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
                 jTabbedPane1.setSelectedIndex(1);
 
-                Runnable run = new Runnable() {
-                    @Override
-                    public void run() {
+                Runnable run = () -> {
 
-                        MegaAPI ma = getMain_panel().getMega_active_accounts().get(mega_account);
+                    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
-                        try {
+                    MegaAPI ma = getMain_panel().getMega_active_accounts().get(mega_account);
 
-                            byte[] parent_key = ma.genFolderKey();
+                    try {
 
-                            byte[] share_key = ma.genShareKey();
+                        byte[] parent_key = ma.genFolderKey();
 
-                            HashMap<String, Object> res = ma.createDir(dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10), ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
+                        byte[] share_key = ma.genShareKey();
 
-                            String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
+                        HashMap<String, Object> res = ma.createDir(dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10), ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
 
-                            LOG.log(Level.INFO, "{0} Dir {1} created", new Object[]{Thread.currentThread().getName(), parent_node});
+                        String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
-                            ma.shareFolder(parent_node, parent_key, share_key);
+                        LOG.log(Level.INFO, "{0} Dir {1} created", new Object[]{Thread.currentThread().getName(), parent_node});
 
-                            String folder_link = ma.getPublicFolderLink(parent_node, share_key);
+                        ma.shareFolder(parent_node, parent_key, share_key);
 
-                            if (dialog.getUpload_log_checkbox().isSelected()) {
+                        String folder_link = ma.getPublicFolderLink(parent_node, share_key);
 
-                                File upload_log = new File(System.getProperty("user.home") + "/megabasterd_upload_" + parent_node + ".log");
-                                upload_log.createNewFile();
+                        if (dialog.getUpload_log_checkbox().isSelected()) {
 
-                                FileWriter fr;
-                                try {
-                                    fr = new FileWriter(upload_log, true);
-                                    fr.write("***** MegaBasterd UPLOAD LOG FILE *****\n\n");
-                                    fr.write(dir_name + "   " + folder_link + "\n\n");
-                                    fr.close();
-                                } catch (IOException ex) {
-                                    Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
-                                }
+                            File upload_log = new File(System.getProperty("user.home") + "/megabasterd_upload_" + parent_node + ".log");
+                            upload_log.createNewFile();
+
+                            FileWriter fr;
+                            try {
+                                fr = new FileWriter(upload_log, true);
+                                fr.write("***** MegaBasterd UPLOAD LOG FILE *****\n\n");
+                                fr.write(dir_name + "   " + folder_link + "\n\n");
+                                fr.close();
+                            } catch (IOException ex) {
+                                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
                             }
-
-                            MegaDirNode file_paths = new MegaDirNode(parent_node);
-
-                            for (File f : dialog.getFiles()) {
-
-                                String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
-
-                                String[] dirs = file_path.split("/");
-
-                                MegaDirNode current_node = file_paths;
-
-                                String file_parent = current_node.getNode_id();
-
-                                for (String d : dirs) {
-
-                                    if (!d.isEmpty()) {
-
-                                        if (current_node.getChildren().get(d) != null) {
-
-                                            current_node = current_node.getChildren().get(d);
-
-                                            file_parent = current_node.getNode_id();
-
-                                        } else {
-
-                                            res = ma.createDirInsideAnotherSharedDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
-
-                                            file_parent = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
-
-                                            current_node.getChildren().put(d, new MegaDirNode(file_parent));
-
-                                            current_node = current_node.getChildren().get(d);
-                                        }
-                                    }
-                                }
-
-                                while (getMain_panel().getUpload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
-
-                                    synchronized (getMain_panel().getUpload_manager().getWait_queue_lock()) {
-                                        getMain_panel().getUpload_manager().getWait_queue_lock().wait(1000);
-                                    }
-                                }
-
-                                if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
-
-                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link);
-
-                                    getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
-
-                                    getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
-
-                                    getMain_panel().getUpload_manager().secureNotify();
-
-                                } else {
-                                    break;
-                                }
-
-                            }
-
-                        } catch (Exception ex) {
-
-                            LOG.log(SEVERE, null, ex);
                         }
-                    }
 
+                        MegaDirNode file_paths = new MegaDirNode(parent_node);
+
+                        for (File f : dialog.getFiles()) {
+
+                            String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
+
+                            String[] dirs = file_path.split("/");
+
+                            MegaDirNode current_node = file_paths;
+
+                            String file_parent = current_node.getNode_id();
+
+                            for (String d : dirs) {
+
+                                if (!d.isEmpty()) {
+
+                                    if (current_node.getChildren().get(d) != null) {
+
+                                        current_node = current_node.getChildren().get(d);
+
+                                        file_parent = current_node.getNode_id();
+
+                                    } else {
+
+                                        res = ma.createDirInsideAnotherSharedDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
+
+                                        file_parent = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
+
+                                        current_node.getChildren().put(d, new MegaDirNode(file_parent));
+
+                                        current_node = current_node.getChildren().get(d);
+                                    }
+                                }
+                            }
+
+                            while (getMain_panel().getUpload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
+
+                                synchronized (getMain_panel().getUpload_manager().getWait_queue_lock()) {
+                                    getMain_panel().getUpload_manager().getWait_queue_lock().wait(1000);
+                                }
+                            }
+
+                            if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+
+                                Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link);
+
+                                getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+
+                                getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
+
+                                getMain_panel().getUpload_manager().secureNotify();
+
+                            } else {
+                                break;
+                            }
+
+                        }
+
+                    } catch (Exception ex) {
+
+                        LOG.log(SEVERE, null, ex);
+                    }
                 };
 
                 getMain_panel().getUpload_manager().getTransference_preprocess_queue().add(run);
@@ -358,49 +341,43 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
         final MainPanelView tthis = this;
 
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
+        THREAD_POOL.execute(() -> {
+            int n;
 
-                int n;
+            if (files.size() > 1) {
 
-                if (files.size() > 1) {
+                Object[] options = {LabelTranslatorSingleton.getInstance().translate("Split content in different uploads"), LabelTranslatorSingleton.getInstance().translate("Merge content in the same upload")};
 
-                    Object[] options = {LabelTranslatorSingleton.getInstance().translate("Split content in different uploads"), LabelTranslatorSingleton.getInstance().translate("Merge content in the same upload")};
+                n = showOptionDialog(_main_panel.getView(),
+                        LabelTranslatorSingleton.getInstance().translate("How do you want to proceed?"),
+                        LabelTranslatorSingleton.getInstance().translate("File Grabber"), DEFAULT_OPTION, INFORMATION_MESSAGE,
+                        null,
+                        options,
+                        null);
 
-                    n = showOptionDialog(_main_panel.getView(),
-                            LabelTranslatorSingleton.getInstance().translate("How do you want to proceed?"),
-                            LabelTranslatorSingleton.getInstance().translate("File Grabber"), DEFAULT_OPTION, INFORMATION_MESSAGE,
-                            null,
-                            options,
-                            null);
+            } else {
 
-                } else {
-
-                    n = 1;
-
-                }
-
-                if (n == 0) {
-
-                    files.stream().map((file) -> {
-                        List<File> aux = new ArrayList<>();
-                        aux.add(file);
-                        return aux;
-                    }).map((aux) -> new FileGrabberDialog(tthis, true, aux)).forEachOrdered((dialog) -> {
-                        _new_upload_dialog(dialog);
-                    });
-
-                } else if (n == 1) {
-
-                    final FileGrabberDialog dialog = new FileGrabberDialog(tthis, true, files);
-
-                    _new_upload_dialog(dialog);
-
-                }
+                n = 1;
 
             }
 
+            if (n == 0) {
+
+                files.stream().map((file) -> {
+                    List<File> aux = new ArrayList<>();
+                    aux.add(file);
+                    return aux;
+                }).map((aux) -> new FileGrabberDialog(tthis, true, aux)).forEachOrdered((dialog) -> {
+                    _new_upload_dialog(dialog);
+                });
+
+            } else if (n == 1) {
+
+                final FileGrabberDialog dialog = new FileGrabberDialog(tthis, true, files);
+
+                _new_upload_dialog(dialog);
+
+            }
         });
     }
 
@@ -898,143 +875,141 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
             final MainPanelView tthis = this;
 
-            Runnable run = new Runnable() {
-                @Override
-                public void run() {
+            Runnable run = () -> {
 
-                    Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
-                    Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", dialog.getLinks_textarea().getText(), 0));
 
-                    megadownloader.forEach((link) -> {
+                Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+
+                megadownloader.forEach((link) -> {
+                    try {
+
+                        urls.add(decryptMegaDownloaderLink(link));
+
+                    } catch (Exception ex) {
+                        LOG.log(SEVERE, null, ex);
+                    }
+                });
+
+                Set<String> elc = new HashSet(findAllRegex("mega://elc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+
+                elc.forEach((link) -> {
+                    try {
+
+                        urls.addAll(CryptTools.decryptELC(link, getMain_panel()));
+
+                    } catch (Exception ex) {
+                        LOG.log(SEVERE, null, ex);
+                    }
+                });
+
+                Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", dialog.getLinks_textarea().getText(), 1));
+
+                dlc.stream().map((d) -> CryptTools.decryptDLC(d, _main_panel)).forEachOrdered((links) -> {
+                    links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", link, 0) != null)).forEachOrdered((link) -> {
+                        urls.add(link);
+                    });
+                });
+
+                if (!urls.isEmpty()) {
+
+                    getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(urls);
+
+                    getMain_panel().getDownload_manager().secureNotify();
+
+                    boolean link_warning;
+
+                    for (String url : urls) {
+
                         try {
 
-                            urls.add(decryptMegaDownloaderLink(link));
+                            link_warning = false;
 
-                        } catch (Exception ex) {
-                            LOG.log(SEVERE, null, ex);
-                        }
-                    });
+                            url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
 
-                    Set<String> elc = new HashSet(findAllRegex("mega://elc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                            Download download;
 
-                    elc.forEach((link) -> {
-                        try {
+                            if (findFirstRegex("#F!", url, 0) != null) {
 
-                            urls.addAll(CryptTools.decryptELC(link, getMain_panel()));
+                                FolderLinkDialog fdialog = new FolderLinkDialog(_main_panel.getView(), true, url);
 
-                        } catch (Exception ex) {
-                            LOG.log(SEVERE, null, ex);
-                        }
-                    });
+                                if (!fdialog.isMega_error()) {
 
-                    Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", dialog.getLinks_textarea().getText(), 1));
+                                    fdialog.setLocationRelativeTo(_main_panel.getView());
 
-                    dlc.stream().map((d) -> CryptTools.decryptDLC(d, _main_panel)).forEachOrdered((links) -> {
-                        links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", link, 0) != null)).forEachOrdered((link) -> {
-                            urls.add(link);
-                        });
-                    });
+                                    fdialog.setVisible(true);
 
-                    if (!urls.isEmpty()) {
+                                    if (fdialog.isDownload()) {
 
-                        getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(urls);
+                                        List<HashMap> folder_links = fdialog.getDownload_links();
 
-                        getMain_panel().getDownload_manager().secureNotify();
+                                        fdialog.dispose();
 
-                        boolean link_warning;
+                                        for (HashMap folder_link : folder_links) {
 
-                        for (String url : urls) {
+                                            while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
 
-                            try {
+                                                if (!link_warning) {
+                                                    link_warning = true;
 
-                                link_warning = false;
-
-                                url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
-
-                                Download download;
-
-                                if (findFirstRegex("#F!", url, 0) != null) {
-
-                                    FolderLinkDialog fdialog = new FolderLinkDialog(_main_panel.getView(), true, url);
-
-                                    if (!fdialog.isMega_error()) {
-
-                                        fdialog.setLocationRelativeTo(_main_panel.getView());
-
-                                        fdialog.setVisible(true);
-
-                                        if (fdialog.isDownload()) {
-
-                                            List<HashMap> folder_links = fdialog.getDownload_links();
-
-                                            fdialog.dispose();
-
-                                            for (HashMap folder_link : folder_links) {
-
-                                                while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
-
-                                                    if (!link_warning) {
-                                                        link_warning = true;
-
-                                                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd"), "Warning", JOptionPane.WARNING_MESSAGE);
-                                                    }
-
-                                                    synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
-                                                        getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
-                                                    }
+                                                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd"), "Warning", JOptionPane.WARNING_MESSAGE);
                                                 }
 
-                                                if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
-
-                                                    download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), true, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null);
-
-                                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-
-                                                    getMain_panel().getDownload_manager().secureNotify();
-                                                } else {
-                                                    break;
+                                                synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
+                                                    getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
                                                 }
                                             }
+
+                                            if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+
+                                                download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), true, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null);
+
+                                                getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+
+                                                getMain_panel().getDownload_manager().secureNotify();
+                                            } else {
+                                                break;
+                                            }
                                         }
-
-                                    }
-
-                                    fdialog.dispose();
-
-                                } else {
-
-                                    while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
-
-                                        synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
-                                            getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
-                                        }
-                                    }
-
-                                    if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
-
-                                        download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null);
-
-                                        getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-
-                                        getMain_panel().getDownload_manager().secureNotify();
                                     }
 
                                 }
 
-                                getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().remove(url);
+                                fdialog.dispose();
 
-                                getMain_panel().getDownload_manager().secureNotify();
+                            } else {
 
-                            } catch (UnsupportedEncodingException ex) {
-                                LOG.log(Level.SEVERE, ex.getMessage());
-                            } catch (InterruptedException ex) {
-                                Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
+
+                                    synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
+                                        getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
+                                    }
+                                }
+
+                                if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+
+                                    download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null);
+
+                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+
+                                    getMain_panel().getDownload_manager().secureNotify();
+                                }
+
                             }
 
-                        }
-                    }
+                            getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().remove(url);
 
+                            getMain_panel().getDownload_manager().secureNotify();
+
+                        } catch (UnsupportedEncodingException ex) {
+                            LOG.log(Level.SEVERE, ex.getMessage());
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        }
+
+                    }
                 }
             };
 
@@ -1315,25 +1290,9 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
         unfreeze_transferences_button.setVisible(false);
 
-        THREAD_POOL.execute(new Runnable() {
+        THREAD_POOL.execute(_main_panel.getDownload_manager()::unfreezeTransferenceWaitStartQueue);
 
-            @Override
-            public void run() {
-
-                _main_panel.getDownload_manager().unfreezeTransferenceWaitStartQueue();
-
-            }
-        });
-
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                _main_panel.getUpload_manager().unfreezeTransferenceWaitStartQueue();
-
-            }
-        });
+        THREAD_POOL.execute(_main_panel.getUpload_manager()::unfreezeTransferenceWaitStartQueue);
     }//GEN-LAST:event_unfreeze_transferences_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

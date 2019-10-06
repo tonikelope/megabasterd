@@ -353,15 +353,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
     private void slots_spinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_slots_spinnerStateChanged
 
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                _upload.checkSlotsAndWorkers();
-
-            }
-        });
+        THREAD_POOL.execute(_upload::checkSlotsAndWorkers);
     }//GEN-LAST:event_slots_spinnerStateChanged
 
     private void close_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_buttonActionPerformed
@@ -390,20 +382,15 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
     public void hideAllExceptStatus() {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            for (JComponent c : new JComponent[]{speed_label, slots_spinner, slots_label, slot_status_label, pause_button, stop_button, progress_pbar, cbc_label}) {
 
-                for (JComponent c : new JComponent[]{speed_label, slots_spinner, slots_label, slot_status_label, pause_button, stop_button, progress_pbar, cbc_label}) {
+                c.setVisible(false);
+            }
 
-                    c.setVisible(false);
-                }
+            for (JComponent c : new JComponent[]{status_label, file_name_label, file_size_label}) {
 
-                for (JComponent c : new JComponent[]{status_label, file_name_label, file_size_label}) {
-
-                    c.setVisible(true);
-                }
+                c.setVisible(true);
             }
         });
     }
@@ -440,23 +427,11 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         queue_up_button.setEnabled(false);
 
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                _upload.upWaitQueue();
-
-                swingInvoke(
-                        new Runnable() {
-                    @Override
-                    public void run() {
-
-                        queue_up_button.setEnabled(true);
-                    }
-                });
-
-            }
+        THREAD_POOL.execute(() -> {
+            _upload.upWaitQueue();
+            swingInvoke(() -> {
+                queue_up_button.setEnabled(true);
+            });
         });
     }//GEN-LAST:event_queue_up_buttonActionPerformed
 
@@ -465,36 +440,18 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         queue_down_button.setEnabled(false);
 
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                _upload.downWaitQueue();
-
-                swingInvoke(
-                        new Runnable() {
-                    @Override
-                    public void run() {
-
-                        queue_down_button.setEnabled(true);
-                    }
-                });
-
-            }
+        THREAD_POOL.execute(() -> {
+            _upload.downWaitQueue();
+            swingInvoke(() -> {
+                queue_down_button.setEnabled(true);
+            });
         });
     }//GEN-LAST:event_queue_down_buttonActionPerformed
 
     public void updateCBC(String status) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                cbc_label.setText(status);
-
-            }
+        swingInvoke(() -> {
+            cbc_label.setText(status);
         });
     }
 
@@ -503,20 +460,15 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         printStatusNormal("Pausing upload ...");
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
-                for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
+                c.setEnabled(false);
+            }
 
-                    c.setEnabled(false);
-                }
+            for (JComponent c : new JComponent[]{stop_button}) {
 
-                for (JComponent c : new JComponent[]{stop_button}) {
-
-                    c.setVisible(true);
-                }
+                c.setVisible(true);
             }
         });
     }
@@ -526,16 +478,10 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         printStatusNormal(status);
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            for (JComponent c : new JComponent[]{pause_button, stop_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
-                for (JComponent c : new JComponent[]{pause_button, stop_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
-                    c.setEnabled(false);
-                }
-
+                c.setEnabled(false);
             }
         });
     }
@@ -545,42 +491,32 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         printStatusNormal("Uploading file to mega ...");
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
-                for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
-                    c.setEnabled(true);
-                }
-
-                for (JComponent c : new JComponent[]{stop_button}) {
-
-                    c.setVisible(false);
-                }
-
-                pause_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE UPLOAD"));
-                _upload.getMain_panel().getView().getPause_all_up_button().setVisible(true);
+                c.setEnabled(true);
             }
+
+            for (JComponent c : new JComponent[]{stop_button}) {
+
+                c.setVisible(false);
+            }
+
+            pause_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE UPLOAD"));
+            _upload.getMain_panel().getView().getPause_all_up_button().setVisible(true);
         });
     }
 
     @Override
     public void updateSpeed(final String speed, final Boolean visible) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            if (speed != null) {
+                speed_label.setText(speed);
+            }
 
-                if (speed != null) {
-                    speed_label.setText(speed);
-                }
-
-                if (visible != null) {
-                    speed_label.setVisible(visible);
-                }
+            if (visible != null) {
+                speed_label.setVisible(visible);
             }
         });
     }
@@ -588,67 +524,42 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
     @Override
     public void updateProgressBar(final long progress, final double bar_rate) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                progress_pbar.setValue((int) Math.floor(bar_rate * progress));
-            }
+        swingInvoke(() -> {
+            progress_pbar.setValue((int) Math.floor(bar_rate * progress));
         });
     }
 
     @Override
     public void updateProgressBar(final int value) {
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                progress_pbar.setValue(value);
-            }
+        swingInvoke(() -> {
+            progress_pbar.setValue(value);
         });
     }
 
     @Override
     public void printStatusError(final String message) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                status_label.setForeground(Color.red);
-                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
-            }
+        swingInvoke(() -> {
+            status_label.setForeground(Color.red);
+            status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
     }
 
     @Override
     public void printStatusOK(final String message) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                status_label.setForeground(new Color(0, 170, 0));
-                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
-            }
+        swingInvoke(() -> {
+            status_label.setForeground(new Color(0, 170, 0));
+            status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
     }
 
     @Override
     public void printStatusNormal(final String message) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                status_label.setForeground(new Color(102, 102, 102));
-                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
-            }
+        swingInvoke(() -> {
+            status_label.setForeground(new Color(102, 102, 102));
+            status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
 
     }
@@ -670,27 +581,16 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
             final String status = (conta_exit > 0 ? "Tot removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Tot error: " + conta_error) : "");
 
-            swingInvoke(new Runnable() {
-                @Override
-                public void run() {
-                    slot_status_label.setForeground(status_color);
-                    slot_status_label.setText(LabelTranslatorSingleton.getInstance().translate(status));
-                }
+            swingInvoke(() -> {
+                slot_status_label.setForeground(status_color);
+                slot_status_label.setText(LabelTranslatorSingleton.getInstance().translate(status));
             });
         }
     }
 
     @Override
     public int getSlots() {
-        return (int) swingInvokeAndWaitForReturn(new Callable() {
-
-            @Override
-            public Object call() throws Exception {
-
-                return getSlots_spinner().getValue();
-            }
-
-        });
+        return (int) swingInvokeAndWaitForReturn((Callable) getSlots_spinner()::getValue);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

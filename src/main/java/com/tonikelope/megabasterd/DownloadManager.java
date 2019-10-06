@@ -31,12 +31,8 @@ public class DownloadManager extends TransferenceManager {
 
         for (final Transference d : downloads) {
 
-            swingInvoke(
-                    new Runnable() {
-                @Override
-                public void run() {
-                    getScroll_panel().remove(((Download) d).getView());
-                }
+            swingInvoke(() -> {
+                getScroll_panel().remove(((Download) d).getView());
             });
 
             getTransference_waitstart_queue().remove(d);
@@ -70,12 +66,8 @@ public class DownloadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference download) {
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-                getScroll_panel().add(((Download) download).getView());
-            }
+        swingInvoke(() -> {
+            getScroll_panel().add(((Download) download).getView());
         });
 
         try {
@@ -88,22 +80,17 @@ public class DownloadManager extends TransferenceManager {
 
             LOG.log(Level.INFO, "{0} Provision failed! Retrying in separated thread...", Thread.currentThread().getName());
 
-            THREAD_POOL.execute(new Runnable() {
-                @Override
-                public void run() {
+            THREAD_POOL.execute(() -> {
+                try {
 
-                    try {
+                    _provision((Download) download, true);
 
-                        _provision((Download) download, true);
+                } catch (APIException ex1) {
 
-                    } catch (APIException ex1) {
-
-                        LOG.log(SEVERE, null, ex1);
-                    }
-
-                    secureNotify();
-
+                    LOG.log(SEVERE, null, ex1);
                 }
+
+                secureNotify();
             });
         }
 
@@ -132,23 +119,15 @@ public class DownloadManager extends TransferenceManager {
                     getTransference_waitstart_queue().addAll(aux);
 
                     getTransference_waitstart_queue().forEach((t1) -> {
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-                                getScroll_panel().remove((Component) t1.getView());
-                                getScroll_panel().add((Component) t1.getView());
-                            }
+                        swingInvoke(() -> {
+                            getScroll_panel().remove((Component) t1.getView());
+                            getScroll_panel().add((Component) t1.getView());
                         });
                     });
                     getTransference_finished_queue().forEach((t2) -> {
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-                                getScroll_panel().remove((Component) t2.getView());
-                                getScroll_panel().add((Component) t2.getView());
-                            }
+                        swingInvoke(() -> {
+                            getScroll_panel().remove((Component) t2.getView());
+                            getScroll_panel().add((Component) t2.getView());
                         });
                     });
 

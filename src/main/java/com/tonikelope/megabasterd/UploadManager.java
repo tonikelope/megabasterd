@@ -38,12 +38,8 @@ public class UploadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference upload) {
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-                getScroll_panel().add(((Upload) upload).getView());
-            }
+        swingInvoke(() -> {
+            getScroll_panel().add(((Upload) upload).getView());
         });
 
         ((Upload) upload).provisionIt();
@@ -66,23 +62,15 @@ public class UploadManager extends TransferenceManager {
                     getTransference_waitstart_queue().addAll(aux);
 
                     getTransference_waitstart_queue().forEach((t1) -> {
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-                                getScroll_panel().remove((Component) t1.getView());
-                                getScroll_panel().add((Component) t1.getView());
-                            }
+                        swingInvoke(() -> {
+                            getScroll_panel().remove((Component) t1.getView());
+                            getScroll_panel().add((Component) t1.getView());
                         });
                     });
                     getTransference_finished_queue().forEach((t2) -> {
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-                                getScroll_panel().remove((Component) t2.getView());
-                                getScroll_panel().add((Component) t2.getView());
-                            }
+                        swingInvoke(() -> {
+                            getScroll_panel().remove((Component) t2.getView());
+                            getScroll_panel().add((Component) t2.getView());
                         });
                     });
 
@@ -106,12 +94,8 @@ public class UploadManager extends TransferenceManager {
 
         for (final Transference u : uploads) {
 
-            swingInvoke(
-                    new Runnable() {
-                @Override
-                public void run() {
-                    getScroll_panel().remove(((Upload) u).getView());
-                }
+            swingInvoke(() -> {
+                getScroll_panel().remove(((Upload) u).getView());
             });
 
             getTransference_waitstart_queue().remove(u);

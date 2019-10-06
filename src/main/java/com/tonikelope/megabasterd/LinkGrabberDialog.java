@@ -79,28 +79,19 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
         if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
 
-            THREAD_POOL.execute(new Runnable() {
-                @Override
-                public void run() {
+            THREAD_POOL.execute(() -> {
+                swingInvoke(() -> {
+                    String mega_default_down = _main_panel.getMega_account_down();
 
-                    swingInvoke(new Runnable() {
-                        @Override
-                        public void run() {
+                    use_mega_account_down_combobox.addItem(mega_default_down);
 
-                            String mega_default_down = _main_panel.getMega_account_down();
-
-                            use_mega_account_down_combobox.addItem(mega_default_down);
-
-                            _main_panel.getMega_accounts().keySet().stream().filter((k) -> (!mega_default_down.equals(k))).forEachOrdered((k) -> {
-                                use_mega_account_down_combobox.addItem(k);
-                            });
-
-                            use_mega_account_down_combobox.addItem("");
-                            use_mega_account_down_combobox.setSelectedIndex(0);
-                        }
+                    _main_panel.getMega_accounts().keySet().stream().filter((k) -> (!mega_default_down.equals(k))).forEachOrdered((k) -> {
+                        use_mega_account_down_combobox.addItem(k);
                     });
 
-                }
+                    use_mega_account_down_combobox.addItem("");
+                    use_mega_account_down_combobox.setSelectedIndex(0);
+                });
             });
 
         } else {
@@ -312,78 +303,56 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
             final File file = filechooser.getSelectedFile();
 
-            THREAD_POOL.execute(new Runnable() {
-                @Override
-                public void run() {
+            THREAD_POOL.execute(() -> {
+                try (final InputStream is = new BufferedInputStream(new FileInputStream(file)); final ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+                    int reads;
+                    while ((reads = is.read(buffer)) != -1) {
 
-                    try (InputStream is = new BufferedInputStream(new FileInputStream(file)); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-
-                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-
-                        int reads;
-
-                        while ((reads = is.read(buffer)) != -1) {
-
-                            out.write(buffer, 0, reads);
-                        }
-
-                        String dlc = new String(out.toByteArray(), "UTF-8");
-
-                        Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView) getParent()).getMain_panel());
-
-                        for (Iterator<String> i = links.iterator(); i.hasNext();) {
-
-                            String link = i.next();
-
-                            if (findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) == null) {
-
-                                i.remove();
-                            }
-                        }
-
-                        if (!links.isEmpty()) {
-
-                            swingInvoke(new Runnable() {
-                                @Override
-                                public void run() {
-                                    links_textarea.setText("");
-
-                                    for (Iterator<String> i = links.iterator(); i.hasNext();) {
-
-                                        links_textarea.append(i.next());
-
-                                        if (i.hasNext()) {
-
-                                            links_textarea.append("\r\n");
-                                        }
-                                    }
-                                }
-                            });
-
-                        }
-
-                    } catch (FileNotFoundException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    } catch (IOException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
+                        out.write(buffer, 0, reads);
                     }
+                    String dlc = new String(out.toByteArray(), "UTF-8");
+                    Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView) getParent()).getMain_panel());
+                    for (Iterator<String> i = links.iterator(); i.hasNext();) {
 
-                    swingInvoke(new Runnable() {
-                        @Override
-                        public void run() {
-                            dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
+                        String link = i.next();
 
-                            dlc_button.setEnabled(true);
+                        if (findFirstRegex("(?:https?|mega)://[^/]*/(#.*?)?!.+![^\r\n]+", link, 0) == null) {
 
-                            links_textarea.setEnabled(true);
-
-                            dance_button.setEnabled(true);
-
-                            pack();
+                            i.remove();
                         }
-                    });
+                    }
+                    if (!links.isEmpty()) {
+                        swingInvoke(() -> {
+                            links_textarea.setText("");
 
+                            for (Iterator<String> i = links.iterator(); i.hasNext();) {
+
+                                links_textarea.append(i.next());
+
+                                if (i.hasNext()) {
+
+                                    links_textarea.append("\r\n");
+                                }
+                            }
+                        });
+                    }
+                } catch (FileNotFoundException ex) {
+                    LOG.log(Level.SEVERE, ex.getMessage());
+                } catch (IOException ex) {
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
+                swingInvoke(() -> {
+                    dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
+
+                    dlc_button.setEnabled(true);
+
+                    links_textarea.setEnabled(true);
+
+                    dance_button.setEnabled(true);
+
+                    pack();
+                });
             });
 
         } else {
@@ -418,48 +387,32 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
                 final LinkGrabberDialog tthis = this;
 
-                THREAD_POOL.execute(new Runnable() {
-                    @Override
-                    public void run() {
+                THREAD_POOL.execute(() -> {
+                    boolean use_account = true;
+                    try {
 
-                        boolean use_account = true;
-
-                        try {
-
-                            if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item) == null) {
-                                use_account = false;
-                            }
-
-                        } catch (Exception ex) {
-
+                        if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item) == null) {
                             use_account = false;
                         }
 
-                        if (!use_account) {
-                            swingInvoke(new Runnable() {
-                                @Override
-                                public void run() {
-                                    use_mega_account_down_combobox.setSelectedIndex(_main_panel.getMega_accounts().size());
+                    } catch (Exception ex) {
 
-                                }
-                            });
-                        }
-
-                        swingInvoke(new Runnable() {
-                            @Override
-                            public void run() {
-                                getUse_mega_account_down_combobox().setEnabled(true);
-
-                                getDance_button().setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
-
-                                getDance_button().setEnabled(true);
-
-                                pack();
-
-                            }
-                        });
-
+                        use_account = false;
                     }
+                    if (!use_account) {
+                        swingInvoke(() -> {
+                            use_mega_account_down_combobox.setSelectedIndex(_main_panel.getMega_accounts().size());
+                        });
+                    }
+                    swingInvoke(() -> {
+                        getUse_mega_account_down_combobox().setEnabled(true);
+
+                        getDance_button().setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
+
+                        getDance_button().setEnabled(true);
+
+                        pack();
+                    });
                 });
 
             }
@@ -482,14 +435,10 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
     @Override
     public void notifyClipboardChange() {
 
-        swingInvoke(new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            String current_text = links_textarea.getText();
 
-                String current_text = links_textarea.getText();
-
-                links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
-            }
+            links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
         });
     }
     private static final Logger LOG = Logger.getLogger(LinkGrabberDialog.class.getName());

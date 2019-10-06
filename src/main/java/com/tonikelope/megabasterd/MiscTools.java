@@ -87,20 +87,15 @@ public class MiscTools {
     public static final int EXP_BACKOFF_MAX_WAIT_TIME = 8;
     public static final Object PASS_LOCK = new Object();
     public static final int HTTP_TIMEOUT = 30;
-    private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = new Comparator< DefaultMutableTreeNode>() {
-
-        @Override
-        public int compare(DefaultMutableTreeNode a, DefaultMutableTreeNode b) {
-
-            if (a.isLeaf() && !b.isLeaf()) {
-                return 1;
-            } else if (!a.isLeaf() && b.isLeaf()) {
-                return -1;
-            } else {
-                String sa = a.getUserObject().toString();
-                String sb = b.getUserObject().toString();
-                return sa.compareToIgnoreCase(sb);
-            }
+    private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = (DefaultMutableTreeNode a, DefaultMutableTreeNode b) -> {
+        if (a.isLeaf() && !b.isLeaf()) {
+            return 1;
+        } else if (!a.isLeaf() && b.isLeaf()) {
+            return -1;
+        } else {
+            String sa = a.getUserObject().toString();
+            String sb = b.getUserObject().toString();
+            return sa.compareToIgnoreCase(sb);
         }
     };
     private static final Logger LOG = Logger.getLogger(MiscTools.class.getName());

@@ -53,7 +53,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.57";
+    public static final String VERSION = "6.58";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -106,11 +106,8 @@ public final class MainPanel {
 
         final MainPanel main_panel = new MainPanel();
 
-        invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                main_panel.getView().setVisible(true);
-            }
+        invokeLater(() -> {
+            main_panel.getView().setVisible(true);
         });
     }
 
@@ -188,7 +185,6 @@ public final class MainPanel {
     private boolean _megacrypter_reverse;
     private float _zoom_factor;
     private volatile boolean _exit;
-    private volatile boolean _forcing_gc;
 
     public MainPanel() {
 
@@ -263,43 +259,38 @@ public final class MainPanel {
 
         THREAD_POOL.execute((_clipboardspy = new ClipboardSpy()));
 
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
+        THREAD_POOL.execute(() -> {
+            Object timer_lock = new Object();
 
-                Object timer_lock = new Object();
+            Timer timer = new Timer();
 
-                Timer timer = new Timer();
+            TimerTask task = new TimerTask() {
 
-                TimerTask task = new TimerTask() {
-
-                    @Override
-                    public void run() {
-                        synchronized (timer_lock) {
-
-                            timer_lock.notify();
-                        }
-                    }
-                };
-
-                timer.schedule(task, 0, 5000);
-
-                while (true) {
-
+                @Override
+                public void run() {
                     synchronized (timer_lock) {
 
-                        try {
-
-                            if (_download_manager.no_transferences() && _upload_manager.no_transferences() && (!_download_manager.getTransference_finished_queue().isEmpty() || !_upload_manager.getTransference_finished_queue().isEmpty()) && getView().getAuto_close_menu().isSelected()) {
-                                System.exit(0);
-                            }
-
-                            timer_lock.wait();
-                        } catch (InterruptedException ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
-                        }
+                        timer_lock.notify();
                     }
+                }
+            };
 
+            timer.schedule(task, 0, 5000);
+
+            while (true) {
+
+                synchronized (timer_lock) {
+
+                    try {
+
+                        if (_download_manager.no_transferences() && _upload_manager.no_transferences() && (!_download_manager.getTransference_finished_queue().isEmpty() || !_upload_manager.getTransference_finished_queue().isEmpty()) && getView().getAuto_close_menu().isSelected()) {
+                            System.exit(0);
+                        }
+
+                        timer_lock.wait();
+                    } catch (InterruptedException ex) {
+                        LOG.log(Level.SEVERE, ex.getMessage());
+                    }
                 }
 
             }
@@ -314,16 +305,12 @@ public final class MainPanel {
 
         check_old_version();
 
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
+        THREAD_POOL.execute(() -> {
+            _new_version = checkNewVersion(AboutDialog.MEGABASTERD_URL);
 
-                _new_version = checkNewVersion(AboutDialog.MEGABASTERD_URL);
+            if (_new_version != null) {
 
-                if (_new_version != null) {
-
-                    JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + _new_version);
-                }
+                JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + _new_version);
             }
         });
 
@@ -336,12 +323,8 @@ public final class MainPanel {
         } else {
             _mega_proxy_server = null;
 
-            swingInvoke(
-                    new Runnable() {
-                @Override
-                public void run() {
-                    getView().updateMCReverseStatus("MC reverse mode: OFF");
-                }
+            swingInvoke(() -> {
+                getView().updateMCReverseStatus("MC reverse mode: OFF");
             });
 
         }
@@ -350,64 +333,35 @@ public final class MainPanel {
 
             MainPanel tthis = this;
 
-            THREAD_POOL.execute(
-                    new Runnable() {
-                @Override
-                public void run() {
-                    _proxy_manager = new SmartMegaProxyManager(null, tthis);
-                }
+            THREAD_POOL.execute(() -> {
+                _proxy_manager = new SmartMegaProxyManager(null, tthis);
             });
 
         } else {
-            swingInvoke(
-                    new Runnable() {
-                @Override
-                public void run() {
-                    getView().updateSmartProxyStatus("SmartProxy: OFF");
-                }
+            swingInvoke(() -> {
+                getView().updateSmartProxyStatus("SmartProxy: OFF");
             });
         }
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-                getView().getGlobal_speed_down_label().setForeground(_limit_download_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
+        swingInvoke(() -> {
+            getView().getGlobal_speed_down_label().setForeground(_limit_download_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
 
-                getView().getGlobal_speed_up_label().setForeground(_limit_upload_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
-            }
+            getView().getGlobal_speed_up_label().setForeground(_limit_upload_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
         });
 
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
-
-                Runtime instance = Runtime.getRuntime();
-
-                _forcing_gc = false;
-
-                while (true) {
-
-                    long used_memory = instance.totalMemory() - instance.freeMemory();
-
-                    long max_memory = instance.maxMemory();
-
-                    swingInvoke(new Runnable() {
-                        @Override
-                        public void run() {
-
-                            _view.getMemory_status().setText(MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
-
-                        }
-                    });
-
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
-                    }
+        THREAD_POOL.execute(() -> {
+            Runtime instance = Runtime.getRuntime();
+            while (true) {
+                long used_memory = instance.totalMemory() - instance.freeMemory();
+                long max_memory = instance.maxMemory();
+                swingInvoke(() -> {
+                    _view.getMemory_status().setText(MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
+                });
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException ex) {
+                    Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
-
             }
         });
 
@@ -1018,110 +972,73 @@ public final class MainPanel {
 
             if (!_download_manager.getTransference_running_list().isEmpty() || !_upload_manager.getTransference_running_list().isEmpty()) {
 
-                THREAD_POOL.execute(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        boolean wait;
-
-                        do {
-
-                            wait = false;
-
-                            if (!_download_manager.getTransference_running_list().isEmpty()) {
-
-                                for (Transference trans : _download_manager.getTransference_running_list()) {
-
-                                    Download download = (Download) trans;
-
-                                    if (download.isPaused()) {
-                                        download.pause();
-                                    }
-
-                                    if (!download.getChunkworkers().isEmpty()) {
-
-                                        wait = true;
-
-                                        swingInvoke(new Runnable() {
-                                            @Override
-                                            public void run() {
-
-                                                download.getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
-                                                download.getView().getSlots_spinner().setEnabled(false);
-                                                download.getView().getPause_button().setEnabled(false);
-                                                download.getView().getCopy_link_button().setEnabled(false);
-                                                download.getView().getOpen_folder_button().setEnabled(false);
-                                                download.getView().getFile_size_label().setEnabled(false);
-                                                download.getView().getFile_name_label().setEnabled(false);
-                                                download.getView().getSpeed_label().setEnabled(false);
-                                                download.getView().getSlots_label().setEnabled(false);
-                                                download.getView().getProgress_pbar().setEnabled(false);
-
-                                            }
-                                        });
-
-                                    }
+                THREAD_POOL.execute(() -> {
+                    boolean wait;
+                    do {
+                        wait = false;
+                        if (!_download_manager.getTransference_running_list().isEmpty()) {
+                            for (Transference trans : _download_manager.getTransference_running_list()) {
+                                Download download = (Download) trans;
+                                if (download.isPaused()) {
+                                    download.pause();
                                 }
-
-                            }
-
-                            if (!_upload_manager.getTransference_running_list().isEmpty()) {
-
-                                for (Transference trans : _upload_manager.getTransference_running_list()) {
-
-                                    Upload upload = (Upload) trans;
-
-                                    upload.getMac_generator().secureNotify();
-
-                                    if (upload.isPaused()) {
-                                        upload.pause();
-                                    }
-
-                                    if (!upload.getChunkworkers().isEmpty()) {
-
-                                        wait = true;
-
-                                        swingInvoke(new Runnable() {
-                                            @Override
-                                            public void run() {
-
-                                                upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
-                                                upload.getView().getSlots_spinner().setEnabled(false);
-                                                upload.getView().getPause_button().setEnabled(false);
-                                                upload.getView().getFolder_link_button().setEnabled(false);
-                                                upload.getView().getFile_link_button().setEnabled(false);
-                                                upload.getView().getFile_size_label().setEnabled(false);
-                                                upload.getView().getFile_name_label().setEnabled(false);
-                                                upload.getView().getSpeed_label().setEnabled(false);
-                                                upload.getView().getSlots_label().setEnabled(false);
-                                                upload.getView().getProgress_pbar().setEnabled(false);
-
-                                            }
-                                        });
-                                    } else {
-                                        try {
-                                            DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
-                                        } catch (SQLException ex) {
-                                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
-                                        }
-                                    }
-
+                                if (!download.getChunkworkers().isEmpty()) {
+                                    wait = true;
+                                    swingInvoke(() -> {
+                                        download.getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
+                                        download.getView().getSlots_spinner().setEnabled(false);
+                                        download.getView().getPause_button().setEnabled(false);
+                                        download.getView().getCopy_link_button().setEnabled(false);
+                                        download.getView().getOpen_folder_button().setEnabled(false);
+                                        download.getView().getFile_size_label().setEnabled(false);
+                                        download.getView().getFile_name_label().setEnabled(false);
+                                        download.getView().getSpeed_label().setEnabled(false);
+                                        download.getView().getSlots_label().setEnabled(false);
+                                        download.getView().getProgress_pbar().setEnabled(false);
+                                    });
                                 }
                             }
-
-                            if (wait) {
-
-                                try {
-                                    Thread.sleep(1000);
-                                } catch (InterruptedException ex) {
-                                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        }
+                        if (!_upload_manager.getTransference_running_list().isEmpty()) {
+                            for (Transference trans : _upload_manager.getTransference_running_list()) {
+                                Upload upload = (Upload) trans;
+                                upload.getMac_generator().secureNotify();
+                                if (upload.isPaused()) {
+                                    upload.pause();
+                                }
+                                if (!upload.getChunkworkers().isEmpty()) {
+                                    wait = true;
+                                    swingInvoke(() -> {
+                                        upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
+                                        upload.getView().getSlots_spinner().setEnabled(false);
+                                        upload.getView().getPause_button().setEnabled(false);
+                                        upload.getView().getFolder_link_button().setEnabled(false);
+                                        upload.getView().getFile_link_button().setEnabled(false);
+                                        upload.getView().getFile_size_label().setEnabled(false);
+                                        upload.getView().getFile_name_label().setEnabled(false);
+                                        upload.getView().getSpeed_label().setEnabled(false);
+                                        upload.getView().getSlots_label().setEnabled(false);
+                                        upload.getView().getProgress_pbar().setEnabled(false);
+                                    });
+                                } else {
+                                    try {
+                                        DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
+                                    } catch (SQLException ex) {
+                                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                    }
                                 }
                             }
+                        }
+                        if (wait) {
 
-                        } while (wait);
-
-                        byebyenow(restart);
-                    }
+                            try {
+                                Thread.sleep(1000);
+                            } catch (InterruptedException ex) {
+                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                            }
+                        }
+                    } while (wait);
+                    byebyenow(restart);
                 });
 
                 WarningExitMessage exit_message = new WarningExitMessage(getView(), true, this, restart);
@@ -1153,33 +1070,19 @@ public final class MainPanel {
 
                 final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
 
-                THREAD_POOL.execute(new Runnable() {
+                THREAD_POOL.execute(() -> {
+                    final ServerSocket socket = serverSocket;
+                    while (true) {
+                        try {
+                            socket.accept();
+                            swingInvoke(() -> {
+                                getView().setExtendedState(NORMAL);
 
-                    @Override
-                    public void run() {
-
-                        final ServerSocket socket = serverSocket;
-
-                        while (true) {
-
-                            try {
-                                socket.accept();
-
-                                swingInvoke(
-                                        new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        getView().setExtendedState(NORMAL);
-
-                                        getView().setVisible(true);
-                                    }
-                                });
-
-                            } catch (Exception ex) {
-                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
-                            }
+                                getView().setVisible(true);
+                            });
+                        } catch (Exception ex1) {
+                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex1.getMessage());
                         }
-
                     }
                 });
             } catch (Exception ex2) {
@@ -1195,77 +1098,53 @@ public final class MainPanel {
 
     private void resumeDownloads() {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-                getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait..."));
-            }
+        swingInvoke(() -> {
+            getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait..."));
         });
 
         final MainPanel tthis = this;
 
-        THREAD_POOL.execute(new Runnable() {
+        THREAD_POOL.execute(() -> {
+            int conta_downloads = 0;
+            try {
 
-            @Override
-            public void run() {
+                ArrayList<HashMap<String, Object>> res = selectDownloads();
 
-                int conta_downloads = 0;
+                for (HashMap<String, Object> o : res) {
 
-                try {
+                    try {
 
-                    ArrayList<HashMap<String, Object>> res = selectDownloads();
+                        String email = (String) o.get("email");
 
-                    for (HashMap<String, Object> o : res) {
+                        MegaAPI ma = new MegaAPI();
 
-                        try {
+                        if (!tthis.isUse_mega_account_down() || (_mega_accounts.get(email) != null && (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null)) {
 
-                            String email = (String) o.get("email");
+                            Download download = new Download(tthis, ma, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"));
 
-                            MegaAPI ma = new MegaAPI();
+                            getDownload_manager().getTransference_provision_queue().add(download);
 
-                            if (!tthis.isUse_mega_account_down() || (_mega_accounts.get(email) != null && (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null)) {
-
-                                Download download = new Download(tthis, ma, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"));
-
-                                getDownload_manager().getTransference_provision_queue().add(download);
-
-                                conta_downloads++;
-                            }
-
-                        } catch (Exception ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                            conta_downloads++;
                         }
+
+                    } catch (Exception ex) {
+                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                     }
-
-                } catch (SQLException ex) {
-
-                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                 }
 
-                if (conta_downloads > 0) {
+            } catch (SQLException ex) {
 
-                    getDownload_manager().secureNotify();
-
-                    swingInvoke(
-                            new Runnable() {
-                        @Override
-                        public void run() {
-                            getView().getjTabbedPane1().setSelectedIndex(0);
-                        }
-                    });
-
-                }
-
-                swingInvoke(
-                        new Runnable() {
-                    @Override
-                    public void run() {
-                        getView().getStatus_down_label().setText("");
-                    }
-                });
-
+                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
             }
+            if (conta_downloads > 0) {
+                getDownload_manager().secureNotify();
+                swingInvoke(() -> {
+                    getView().getjTabbedPane1().setSelectedIndex(0);
+                });
+            }
+            swingInvoke(() -> {
+                getView().getStatus_down_label().setText("");
+            });
         });
 
     }
@@ -1282,79 +1161,50 @@ public final class MainPanel {
 
             MenuItem messageItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("Restore window"));
 
-            messageItem.addActionListener(new ActionListener() {
+            messageItem.addActionListener((ActionEvent e) -> {
+                swingInvoke(() -> {
+                    getView().setExtendedState(NORMAL);
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
+                    getView().setVisible(true);
 
-                    swingInvoke(
-                            new Runnable() {
-                        @Override
-                        public void run() {
+                    getView().revalidate();
 
-                            getView().setExtendedState(NORMAL);
-
-                            getView().setVisible(true);
-
-                            getView().revalidate();
-
-                            getView().repaint();
-                        }
-                    });
-
-                }
+                    getView().repaint();
+                });
             });
 
             menu.add(messageItem);
 
             MenuItem closeItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("EXIT"));
 
-            closeItem.addActionListener(new ActionListener() {
+            closeItem.addActionListener((ActionEvent e) -> {
+                if (!getView().isVisible()) {
 
-                @Override
-                public void actionPerformed(ActionEvent e) {
+                    getView().setExtendedState(NORMAL);
+                    getView().setVisible(true);
+                    getView().revalidate();
+                    getView().repaint();
 
+                }
+
+                byebye(false);
+            });
+
+            menu.add(closeItem);
+
+            ActionListener actionListener = (ActionEvent e) -> {
+                swingInvoke(() -> {
                     if (!getView().isVisible()) {
-
                         getView().setExtendedState(NORMAL);
                         getView().setVisible(true);
                         getView().revalidate();
                         getView().repaint();
 
+                    } else {
+
+                        getView().dispatchEvent(new WindowEvent(getView(), WINDOW_CLOSING));
                     }
-
-                    byebye(false);
-
-                }
-
-            });
-
-            menu.add(closeItem);
-
-            ActionListener actionListener = new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-
-                    swingInvoke(
-                            new Runnable() {
-                        @Override
-                        public void run() {
-
-                            if (!getView().isVisible()) {
-                                getView().setExtendedState(NORMAL);
-                                getView().setVisible(true);
-                                getView().revalidate();
-                                getView().repaint();
-
-                            } else {
-
-                                getView().dispatchEvent(new WindowEvent(getView(), WINDOW_CLOSING));
-                            }
-                        }
-                    });
-
-                }
+                });
             };
 
             _trayicon = new TrayIcon(getDefaultToolkit().getImage(getClass().getResource(ICON_FILE)), "MegaBasterd", menu);
@@ -1373,81 +1223,55 @@ public final class MainPanel {
 
     private void resumeUploads() {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-                getView().getStatus_up_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous uploads, please wait..."));
-            }
+        swingInvoke(() -> {
+            getView().getStatus_up_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous uploads, please wait..."));
         });
 
         final MainPanel tthis = this;
 
-        THREAD_POOL.execute(new Runnable() {
-            @Override
-            public void run() {
+        THREAD_POOL.execute(() -> {
+            try {
+                int conta_uploads = 0;
+                ArrayList<HashMap<String, Object>> res = selectUploads();
+                for (HashMap<String, Object> o : res) {
 
-                try {
+                    try {
 
-                    int conta_uploads = 0;
+                        String email = (String) o.get("email");
 
-                    ArrayList<HashMap<String, Object>> res = selectUploads();
+                        if (_mega_accounts.get(email) != null) {
 
-                    for (HashMap<String, Object> o : res) {
+                            MegaAPI ma;
 
-                        try {
+                            if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
-                            String email = (String) o.get("email");
+                                Upload upload = new Upload(tthis, ma, (String) o.get("filename"), (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"));
 
-                            if (_mega_accounts.get(email) != null) {
+                                getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                MegaAPI ma;
-
-                                if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
-
-                                    Upload upload = new Upload(tthis, ma, (String) o.get("filename"), (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"));
-
-                                    getUpload_manager().getTransference_provision_queue().add(upload);
-
-                                    conta_uploads++;
-                                }
-
-                            } else {
-
-                                deleteUpload((String) o.get("filename"), email);
+                                conta_uploads++;
                             }
 
-                        } catch (Exception ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                        } else {
+
+                            deleteUpload((String) o.get("filename"), email);
                         }
+
+                    } catch (Exception ex) {
+                        Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                     }
-
-                    if (conta_uploads > 0) {
-
-                        getUpload_manager().secureNotify();
-
-                        swingInvoke(
-                                new Runnable() {
-                            @Override
-                            public void run() {
-                                getView().getjTabbedPane1().setSelectedIndex(1);
-                            }
-                        });
-
-                    }
-
-                    swingInvoke(
-                            new Runnable() {
-                        @Override
-                        public void run() {
-                            getView().getStatus_up_label().setText("");
-                        }
-                    });
-
-                } catch (SQLException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                 }
-
+                if (conta_uploads > 0) {
+                    getUpload_manager().secureNotify();
+                    swingInvoke(() -> {
+                        getView().getjTabbedPane1().setSelectedIndex(1);
+                    });
+                }
+                swingInvoke(() -> {
+                    getView().getStatus_up_label().setText("");
+                });
+            } catch (SQLException ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
             }
         });
 

@@ -204,48 +204,36 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
         final Dialog tthis = this;
 
-        THREAD_POOL.execute(new Runnable() {
+        THREAD_POOL.execute(() -> {
+            try {
+                byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
+                String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
+                swingInvoke(() -> {
+                    if (!pass_hash.equals(_current_pass_hash)) {
 
-            @Override
-            public void run() {
-                try {
-                    byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
 
-                    String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
+                        status_label.setText("");
 
-                    swingInvoke(
-                            new Runnable() {
-                        @Override
-                        public void run() {
-                            if (!pass_hash.equals(_current_pass_hash)) {
+                        pack();
 
-                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        current_pass_textfield.setText("");
 
-                                status_label.setText("");
+                        current_pass_textfield.grabFocus();
 
-                                pack();
+                    } else {
 
-                                current_pass_textfield.setText("");
+                        _pass = pass;
 
-                                current_pass_textfield.grabFocus();
+                        _current_pass_hash = pass_hash;
 
-                            } else {
+                        _pass_ok = true;
 
-                                _pass = pass;
-
-                                _current_pass_hash = pass_hash;
-
-                                _pass_ok = true;
-
-                                tthis.setVisible(false);
-                            }
-                        }
-                    });
-
-                } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
-                }
-
+                        tthis.setVisible(false);
+                    }
+                });
+            } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
         });
 

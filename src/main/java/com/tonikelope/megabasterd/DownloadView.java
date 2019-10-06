@@ -123,20 +123,15 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     public void hideAllExceptStatus() {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            for (JComponent c : new JComponent[]{speed_label, slots_spinner, slots_label, slot_status_label, slot_status_label, pause_button, stop_button, progress_pbar, keep_temp_checkbox}) {
 
-                for (JComponent c : new JComponent[]{speed_label, slots_spinner, slots_label, slot_status_label, slot_status_label, pause_button, stop_button, progress_pbar, keep_temp_checkbox}) {
+                c.setVisible(false);
+            }
 
-                    c.setVisible(false);
-                }
+            for (JComponent c : new JComponent[]{status_label, file_name_label, file_size_label}) {
 
-                for (JComponent c : new JComponent[]{status_label, file_name_label, file_size_label}) {
-
-                    c.setVisible(true);
-                }
+                c.setVisible(true);
             }
         });
     }
@@ -381,15 +376,9 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     private void slots_spinnerStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_slots_spinnerStateChanged
 
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                if (_download.isUse_slots()) {
-                    _download.checkSlotsAndWorkers();
-                }
-
+        THREAD_POOL.execute(() -> {
+            if (_download.isUse_slots()) {
+                _download.checkSlotsAndWorkers();
             }
         });
     }//GEN-LAST:event_slots_spinnerStateChanged
@@ -439,23 +428,11 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         queue_up_button.setEnabled(false);
 
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                _download.upWaitQueue();
-
-                swingInvoke(
-                        new Runnable() {
-                    @Override
-                    public void run() {
-
-                        queue_up_button.setEnabled(true);
-                    }
-                });
-
-            }
+        THREAD_POOL.execute(() -> {
+            _download.upWaitQueue();
+            swingInvoke(() -> {
+                queue_up_button.setEnabled(true);
+            });
         });
     }//GEN-LAST:event_queue_up_buttonActionPerformed
 
@@ -464,23 +441,11 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         queue_down_button.setEnabled(false);
 
-        THREAD_POOL.execute(new Runnable() {
-
-            @Override
-            public void run() {
-
-                _download.downWaitQueue();
-
-                swingInvoke(
-                        new Runnable() {
-                    @Override
-                    public void run() {
-
-                        queue_down_button.setEnabled(true);
-                    }
-                });
-
-            }
+        THREAD_POOL.execute(() -> {
+            _download.downWaitQueue();
+            swingInvoke(() -> {
+                queue_down_button.setEnabled(true);
+            });
         });
     }//GEN-LAST:event_queue_down_buttonActionPerformed
 
@@ -489,20 +454,15 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         printStatusNormal("Pausing download ...");
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
-                for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
+                c.setEnabled(false);
+            }
 
-                    c.setEnabled(false);
-                }
+            for (JComponent c : new JComponent[]{stop_button, keep_temp_checkbox}) {
 
-                for (JComponent c : new JComponent[]{stop_button, keep_temp_checkbox}) {
-
-                    c.setVisible(true);
-                }
+                c.setVisible(true);
             }
         });
     }
@@ -512,24 +472,19 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         printStatusNormal("Downloading file from mega ...");
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
-                for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
-                    c.setEnabled(true);
-                }
-
-                for (JComponent c : new JComponent[]{stop_button, keep_temp_checkbox}) {
-
-                    c.setVisible(false);
-                }
-
-                pause_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE DOWNLOAD"));
-                _download.getMain_panel().getView().getPause_all_down_button().setVisible(true);
+                c.setEnabled(true);
             }
+
+            for (JComponent c : new JComponent[]{stop_button, keep_temp_checkbox}) {
+
+                c.setVisible(false);
+            }
+
+            pause_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE DOWNLOAD"));
+            _download.getMain_panel().getView().getPause_all_down_button().setVisible(true);
         });
 
     }
@@ -539,16 +494,10 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         printStatusNormal(status);
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            for (JComponent c : new JComponent[]{pause_button, keep_temp_checkbox, stop_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
-                for (JComponent c : new JComponent[]{pause_button, keep_temp_checkbox, stop_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
-                    c.setEnabled(false);
-                }
-
+                c.setEnabled(false);
             }
         });
 
@@ -557,18 +506,13 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     @Override
     public void updateSpeed(final String speed, final Boolean visible) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
+        swingInvoke(() -> {
+            if (speed != null) {
+                speed_label.setText(speed);
+            }
 
-                if (speed != null) {
-                    speed_label.setText(speed);
-                }
-
-                if (visible != null) {
-                    speed_label.setVisible(visible);
-                }
+            if (visible != null) {
+                speed_label.setVisible(visible);
             }
         });
     }
@@ -576,67 +520,42 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     @Override
     public void updateProgressBar(final long progress, final double bar_rate) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                progress_pbar.setValue((int) Math.floor(bar_rate * progress));
-            }
+        swingInvoke(() -> {
+            progress_pbar.setValue((int) Math.floor(bar_rate * progress));
         });
     }
 
     @Override
     public void updateProgressBar(final int value) {
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                progress_pbar.setValue(value);
-            }
+        swingInvoke(() -> {
+            progress_pbar.setValue(value);
         });
     }
 
     @Override
     public void printStatusError(final String message) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                status_label.setForeground(Color.red);
-                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
-            }
+        swingInvoke(() -> {
+            status_label.setForeground(Color.red);
+            status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
     }
 
     @Override
     public void printStatusOK(final String message) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                status_label.setForeground(new Color(0, 170, 0));
-                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
-            }
+        swingInvoke(() -> {
+            status_label.setForeground(new Color(0, 170, 0));
+            status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
     }
 
     @Override
     public void printStatusNormal(final String message) {
 
-        swingInvoke(
-                new Runnable() {
-            @Override
-            public void run() {
-
-                status_label.setForeground(new Color(102, 102, 102));
-                status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
-            }
+        swingInvoke(() -> {
+            status_label.setForeground(new Color(102, 102, 102));
+            status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
 
     }
@@ -658,40 +577,21 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
             final String status = (conta_exit > 0 ? "Tot removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Tot error: " + conta_error) : "");
 
-            swingInvoke(new Runnable() {
-                @Override
-                public void run() {
-                    slot_status_label.setForeground(status_color);
-                    slot_status_label.setText(LabelTranslatorSingleton.getInstance().translate(status));
-                }
+            swingInvoke(() -> {
+                slot_status_label.setForeground(status_color);
+                slot_status_label.setText(LabelTranslatorSingleton.getInstance().translate(status));
             });
         }
     }
 
     @Override
     public int getSlots() {
-        return (int) swingInvokeAndWaitForReturn(new Callable() {
-
-            @Override
-            public Object call() throws Exception {
-
-                return getSlots_spinner().getValue();
-            }
-
-        });
+        return (int) swingInvokeAndWaitForReturn((Callable) getSlots_spinner()::getValue);
     }
 
     public boolean isKeepTempFileSelected() {
 
-        return (boolean) swingInvokeAndWaitForReturn(new Callable() {
-
-            @Override
-            public Object call() throws Exception {
-
-                return getKeep_temp_checkbox().isSelected();
-            }
-
-        });
+        return (boolean) swingInvokeAndWaitForReturn((Callable) getKeep_temp_checkbox()::isSelected);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
