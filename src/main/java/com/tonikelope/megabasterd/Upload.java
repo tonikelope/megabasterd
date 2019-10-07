@@ -1181,7 +1181,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
     @Override
     public void unfreeze() {
-        this._frozen = false;
+
+        swingInvoke(() -> {
+
+            getView().printStatusNormal(getView().getStatus_label().getText().replaceFirst("^\\([^)]+\\) ", ""));
+        });
+
+        _frozen = false;
     }
 
     @Override

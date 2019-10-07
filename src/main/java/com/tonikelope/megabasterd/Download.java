@@ -1530,7 +1530,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             _progress = progress;
 
-            getMain_panel().getUpload_manager().increment_total_progress(_progress - old_progress);
+            getMain_panel().getDownload_manager().increment_total_progress(_progress - old_progress);
 
             int old_percent_progress = (int) Math.floor(((double) old_progress / _file_size) * 100);
 
@@ -1559,7 +1559,12 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     @Override
     public void unfreeze() {
-        this._frozen = false;
+        swingInvoke(() -> {
+
+            getView().printStatusNormal(getView().getStatus_label().getText().replaceFirst("^\\([^)]+\\) ", ""));
+        });
+
+        _frozen = false;
     }
 
     @Override
