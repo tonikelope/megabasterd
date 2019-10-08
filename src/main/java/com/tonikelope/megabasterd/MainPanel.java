@@ -53,7 +53,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.59";
+    public static final String VERSION = "6.60";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -303,7 +303,7 @@ public final class MainPanel {
             Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
-        check_old_version();
+        _check_old_version();
 
         THREAD_POOL.execute(() -> {
             _new_version = checkNewVersion(AboutDialog.MEGABASTERD_URL);
@@ -889,7 +889,7 @@ public final class MainPanel {
         }
     }
 
-    public void check_old_version() {
+    private void _check_old_version() {
 
         try {
 
@@ -900,6 +900,12 @@ public final class MainPanel {
                 File directory = new File(System.getProperty("user.home"));
 
                 String old_version = "0.0";
+
+                File old_backups_dir = new File(System.getProperty("user.home") + "/.megabasterd_old_backups");
+
+                if (!old_backups_dir.exists()) {
+                    old_backups_dir.mkdir();
+                }
 
                 for (File file : directory.listFiles()) {
 
@@ -919,6 +925,8 @@ public final class MainPanel {
                                 if (Integer.parseInt(current_dir_major) > Integer.parseInt(old_version_major) || (Integer.parseInt(current_dir_major) == Integer.parseInt(old_version_major) && Integer.parseInt(current_dir_minor) > Integer.parseInt(old_version_minor))) {
                                     old_version = current_dir_version;
                                 }
+
+                                Files.move(Paths.get(file.getAbsolutePath()), Paths.get(old_backups_dir.getAbsolutePath() + "/" + file.getName()));
                             }
 
                         }
@@ -933,13 +941,13 @@ public final class MainPanel {
 
                     int n = showOptionDialog(getView(),
                             LabelTranslatorSingleton.getInstance().translate("An older version (" + old_version + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
-                            LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
+                            LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE,
                             null,
                             options,
                             options[0]);
 
                     if (n == 1) {
-                        Files.copy(Paths.get(System.getProperty("user.home") + "/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(Paths.get(System.getProperty("user.home") + "/.megabasterd_old_backups/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
 
                         JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
 

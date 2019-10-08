@@ -266,7 +266,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         cbc_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         cbc_label.setForeground(new java.awt.Color(102, 102, 102));
-        cbc_label.setText("CBC-MAC 0%");
+        cbc_label.setText("CBC-MAC 000%");
         cbc_label.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
@@ -305,9 +305,9 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
                                 .addComponent(queue_down_button, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(231, 231, 231))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(status_label, javax.swing.GroupLayout.DEFAULT_SIZE, 467, Short.MAX_VALUE)
+                                .addComponent(status_label, javax.swing.GroupLayout.DEFAULT_SIZE, 446, Short.MAX_VALUE)
                                 .addGap(18, 18, 18)
-                                .addComponent(cbc_label, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(cbc_label)
                                 .addGap(18, 18, 18)))
                         .addComponent(slots_label)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

@@ -62,9 +62,9 @@
                               <EmptySpace min="-2" pref="231" max="-2" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
-                              <Component id="status_label" pref="467" max="32767" attributes="0"/>
+                              <Component id="status_label" pref="446" max="32767" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
-                              <Component id="cbc_label" min="-2" pref="133" max="-2" attributes="0"/>
+                              <Component id="cbc_label" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                           </Group>
                       </Group>
@@ -336,7 +336,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="66" green="66" red="66" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="CBC-MAC 0%"/>
+        <Property name="text" type="java.lang.String" value="CBC-MAC 000%"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
