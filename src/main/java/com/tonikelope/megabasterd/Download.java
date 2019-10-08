@@ -84,6 +84,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private String _last_download_url;
     private boolean _provision_ok;
     private boolean _finishing_download;
+    private boolean _auto_retry_on_error;
     private int _paused_workers;
     private File _file;
     private boolean _checking_cbc;
@@ -96,6 +97,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private final MegaAPI _ma;
     private volatile boolean _canceled;
     private volatile boolean _turbo;
+    private volatile boolean _closed;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir) {
 
@@ -104,10 +106,12 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _frozen = main_panel.isInit_paused();
         _last_chunk_id_dispatched = 0L;
         _canceled = false;
+        _auto_retry_on_error = true;
         _status_error = null;
         _retrying_request = false;
         _checking_cbc = false;
         _finishing_download = false;
+        _closed = false;
         _pause = false;
         _exit = false;
         _last_download_url = null;
@@ -148,6 +152,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _canceled = false;
         _status_error = null;
         _retrying_request = false;
+        _auto_retry_on_error = true;
+        _closed = false;
         _checking_cbc = false;
         _finishing_download = false;
         _pause = false;
@@ -476,6 +482,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     @Override
     public void close() {
+
+        _closed = true;
 
         _main_panel.getDownload_manager().getTransference_remove_queue().add(this);
 
@@ -851,6 +859,26 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 getView().getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
             }
         });
+
+        if (_status_error != null && _auto_retry_on_error) {
+            THREAD_POOL.execute(() -> {
+                for (int i = 3; !_closed && i > 0; i--) {
+                    final int j = i;
+                    swingInvoke(() -> {
+                        getView().getRestart_button().setText("Restart (" + String.valueOf(j) + " secs...)");
+                    });
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    }
+                }
+                if (!_closed) {
+                    LOG.log(Level.INFO, "{0} Downloader {1} AUTO RESTARTING DOWNLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
+                    restart();
+                }
+            });
+        }
 
         LOG.log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
     }
@@ -1343,9 +1371,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 error_code = ex.getCode();
 
-                if (Arrays.asList(FATAL_ERROR_API_CODES).contains(error_code)) {
+                if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
+
+                    _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
                 } else {
 
@@ -1425,9 +1455,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 error_code = ex.getCode();
 
-                if (Arrays.asList(FATAL_ERROR_API_CODES).contains(error_code)) {
+                if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
+
+                    _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
                 } else {
 

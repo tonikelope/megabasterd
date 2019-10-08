@@ -31,7 +31,7 @@ public class MegaAPI implements Serializable {
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static final String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
-    public static final Integer[] MEGA_ERROR_EXCEPTION_CODES = {-2, -5, -6, -8, -9, -10, -11, -12, -13, -14, -15, -16, -17, -26};
+    public static final Integer[] MEGA_ERROR_NO_EXCEPTION_CODES = {-1, -3};
     public static final int PBKDF2_ITERATIONS = 100000;
     public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
     private static final Logger LOG = Logger.getLogger(MegaAPI.class.getName());
@@ -478,7 +478,7 @@ public class MegaAPI implements Serializable {
 
             if (!empty_response && mega_error != 0 && http_error != 509) {
 
-                if (Arrays.asList(MEGA_ERROR_EXCEPTION_CODES).contains(mega_error)) {
+                if (!Arrays.asList(MEGA_ERROR_NO_EXCEPTION_CODES).contains(mega_error)) {
 
                     throw new MegaAPIException(mega_error);
                 }

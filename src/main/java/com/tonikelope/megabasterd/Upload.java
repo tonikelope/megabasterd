@@ -60,7 +60,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private UploadMACGenerator _mac_generator;
     private boolean _create_dir;
     private boolean _provision_ok;
-    private boolean _fatal_error;
+    private boolean _auto_retry_on_error;
     private String _file_link;
     private final MegaAPI _ma;
     private final String _file_name;
@@ -81,7 +81,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _frozen = main_panel.isInit_paused();
         _provision_ok = true;
         _status_error = null;
-        _fatal_error = false;
+        _auto_retry_on_error = true;
         _canceled = false;
         _closed = false;
         _main_panel = main_panel;
@@ -116,7 +116,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _notified = false;
         _provision_ok = true;
         _status_error = null;
-        _fatal_error = false;
+        _auto_retry_on_error = true;
         _canceled = false;
         _closed = false;
         _restart = true;
@@ -519,9 +519,9 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         _closed = true;
 
-        getMain_panel().getUpload_manager().getTransference_remove_queue().add(this);
+        _main_panel.getUpload_manager().getTransference_remove_queue().add(this);
 
-        getMain_panel().getUpload_manager().secureNotify();
+        _main_panel.getUpload_manager().secureNotify();
     }
 
     @Override
@@ -669,9 +669,14 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                     try {
                         _ul_url = _ma.initUploadFile(_file_name);
                     } catch (MegaAPIException ex) {
+
                         Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
-                        stopUploader(ex.getMessage());
-                        _fatal_error = true;
+
+                        if (Arrays.asList(FATAL_API_ERROR_CODES).contains(ex.getCode())) {
+                            stopUploader(ex.getMessage());
+                            _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(ex.getCode());
+                        }
+
                     }
 
                     if (_ul_url == null && !_exit) {
@@ -829,8 +834,11 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                 upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handler, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
                             } catch (MegaAPIException ex) {
                                 Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
-                                stopUploader(ex.getMessage());
-                                _fatal_error = true;
+
+                                if (Arrays.asList(FATAL_API_ERROR_CODES).contains(ex.getCode())) {
+                                    stopUploader(ex.getMessage());
+                                    _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(ex.getCode());
+                                }
                             }
 
                             if (upload_res == null && !_exit) {
@@ -961,19 +969,16 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         swingInvoke(() -> {
             getView().getClose_button().setVisible(true);
 
-            if (_status_error == null && !_canceled) {
-
-                getView().getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
-
-            }
-
-            if (_canceled || _status_error == null) {
+            if (_status_error != null || _canceled) {
 
                 getView().getRestart_button().setVisible(true);
+
+            } else {
+                getView().getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
             }
         });
 
-        if (_status_error != null && !_fatal_error) {
+        if (_status_error != null && _auto_retry_on_error) {
             THREAD_POOL.execute(() -> {
                 for (int i = 3; !_closed && i > 0; i--) {
                     final int j = i;
