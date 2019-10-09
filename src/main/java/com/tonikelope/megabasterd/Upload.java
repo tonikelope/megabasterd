@@ -404,7 +404,9 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         if (!_provision_ok) {
 
-            _status_error = "PROVISION FAILED";
+            if (_status_error == null) {
+                _status_error = "PROVISION FAILED";
+            }
 
             if (_file_name != null) {
                 swingInvoke(() -> {

@@ -959,7 +959,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         if (!_provision_ok) {
 
-            _status_error = "PROVISION FAILED";
+            if (_status_error == null) {
+                _status_error = "PROVISION FAILED";
+            }
 
             if (_file_name != null) {
                 swingInvoke(() -> {
