@@ -207,44 +207,45 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                             } else if (tot_bytes_up == chunk_size || reads == -1) {
 
-                                if (_upload.getProgress() == _upload.getFile_size() && _upload.getCompletion_handler() == null) {
-                                    LOG.log(Level.INFO, "{0} Worker {1} {2} waiting for completion handler...", new Object[]{Thread.currentThread().getName(), _id, _upload.getFile_name()});
+                                if (_upload.getProgress() == _upload.getFile_size()) {
                                     _upload.getView().printStatusNormal("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***");
-                                    _upload.getView().updateProgressBar(Integer.MAX_VALUE);
                                 }
 
-                                String httpresponse;
+                                if (chunk_offset + chunk_size == _upload.getFile_size()) {
+                                    LOG.log(Level.INFO, "{0} Worker {1} {2} waiting for completion handler...", new Object[]{Thread.currentThread().getName(), _id, _upload.getFile_name()});
 
-                                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                                    String httpresponse;
 
-                                    while ((reads = is.read(buffer)) != -1) {
+                                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                        byte_res.write(buffer, 0, reads);
+                                        while ((reads = is.read(buffer)) != -1) {
+
+                                            byte_res.write(buffer, 0, reads);
+                                        }
+
+                                        httpresponse = new String(byte_res.toByteArray(), "UTF-8");
+
                                     }
 
-                                    httpresponse = new String(byte_res.toByteArray(), "UTF-8");
+                                    if (httpresponse.length() > 0) {
 
-                                }
+                                        if (MegaAPI.checkMEGAError(httpresponse) != 0) {
 
-                                if (httpresponse.length() > 0) {
+                                            LOG.log(Level.WARNING, "{0} Worker {1} UPLOAD FAILED! (MEGA ERROR: {2}) {3}", new Object[]{Thread.currentThread().getName(), _id, MegaAPI.checkMEGAError(httpresponse), _upload.getFile_name()});
 
-                                    if (MegaAPI.checkMEGAError(httpresponse) != 0) {
+                                            fatal_error = true;
 
-                                        LOG.log(Level.WARNING, "{0} Worker {1} UPLOAD FAILED! (MEGA ERROR: {2}) {3}", new Object[]{Thread.currentThread().getName(), _id, MegaAPI.checkMEGAError(httpresponse), _upload.getFile_name()});
+                                        } else {
 
-                                        fatal_error = true;
+                                            LOG.log(Level.INFO, "{0} Worker {1} Completion handler -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, httpresponse, _upload.getFile_name()});
 
-                                    } else {
+                                            _upload.setCompletion_handler(httpresponse);
 
-                                        LOG.log(Level.INFO, "{0} Worker {1} Completion handler -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, httpresponse, _upload.getFile_name()});
-
-                                        _upload.setCompletion_handler(httpresponse);
-
-                                        chunk_error = false;
+                                            chunk_error = false;
+                                        }
                                     }
 
                                 } else {
-
                                     chunk_error = false;
                                 }
                             }
