@@ -83,8 +83,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         con.setConnectTimeout(Download.HTTP_TIMEOUT);
 
-                        con.setReadTimeout(Download.HTTP_TIMEOUT);
-
                         con.setUseCaches(false);
 
                         con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);

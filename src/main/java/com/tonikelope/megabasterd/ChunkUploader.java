@@ -160,8 +160,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 con.setConnectTimeout(Upload.HTTP_TIMEOUT);
 
-                con.setReadTimeout(Upload.HTTP_TIMEOUT);
-
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 tot_bytes_up = 0;

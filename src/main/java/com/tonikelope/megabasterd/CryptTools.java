@@ -356,8 +356,6 @@ public class CryptTools {
 
                 con.setConnectTimeout(Upload.HTTP_TIMEOUT);
 
-                con.setReadTimeout(Upload.HTTP_TIMEOUT);
-
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 HashMap<String, String> elc_account_data;
@@ -532,8 +530,6 @@ public class CryptTools {
             con.setUseCaches(false);
 
             con.setConnectTimeout(Upload.HTTP_TIMEOUT);
-
-            con.setReadTimeout(Upload.HTTP_TIMEOUT);
 
             con.setRequestProperty("User-Agent", "Mozilla/5.0 (X11; U; Linux amd64; rv:44.0) Gecko/20100101 Firefox/44.0");
 
