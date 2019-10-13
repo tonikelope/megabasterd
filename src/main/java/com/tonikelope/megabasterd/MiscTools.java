@@ -904,7 +904,9 @@ public class MiscTools {
 
                 }
 
-                con.setConnectTimeout(Transference.HTTP_TIMEOUT);
+                con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
+
+                con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
 
                 con.setUseCaches(false);
 

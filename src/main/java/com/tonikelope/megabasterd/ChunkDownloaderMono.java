@@ -81,7 +81,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             con = (HttpURLConnection) url.openConnection();
                         }
 
-                        con.setConnectTimeout(Download.HTTP_TIMEOUT);
+                        con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
+
+                        con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
 
                         con.setUseCaches(false);
 

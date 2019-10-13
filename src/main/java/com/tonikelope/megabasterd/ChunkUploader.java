@@ -158,7 +158,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 con.setFixedLengthStreamingMode(chunk_size);
 
-                con.setConnectTimeout(Upload.HTTP_TIMEOUT);
+                con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
+
+                con.setReadTimeout(Upload.HTTP_READ_TIMEOUT);
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
