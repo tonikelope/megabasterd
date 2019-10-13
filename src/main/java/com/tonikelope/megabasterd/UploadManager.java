@@ -16,24 +16,17 @@ public class UploadManager extends TransferenceManager {
 
     private static final Logger LOG = Logger.getLogger(UploadManager.class.getName());
 
-    private final ConcurrentLinkedQueue<Upload> _finishing_uploads_queue;
-
     private final Object _log_file_lock;
 
     public UploadManager(MainPanel main_panel) {
 
         super(main_panel, main_panel.getMax_ul(), main_panel.getView().getStatus_up_label(), main_panel.getView().getjPanel_scroll_up(), main_panel.getView().getClose_all_finished_up_button(), main_panel.getView().getPause_all_up_button(), main_panel.getView().getClean_all_up_menu());
-        _finishing_uploads_queue = new ConcurrentLinkedQueue<>();
 
         _log_file_lock = new Object();
     }
 
     public Object getLog_file_lock() {
         return _log_file_lock;
-    }
-
-    public ConcurrentLinkedQueue<Upload> getFinishing_uploads_queue() {
-        return _finishing_uploads_queue;
     }
 
     @Override

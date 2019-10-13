@@ -214,8 +214,6 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                 secureWait();
             }
 
-            _upload.getMain_panel().getUpload_manager().getFinishing_uploads_queue().add(_upload);
-
             _upload.secureNotify();
 
             LOG.log(Level.INFO, "{0} MAC GENERATOR {1} BYE BYE...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});

@@ -53,7 +53,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.64";
+    public static final String VERSION = "6.65";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -822,22 +822,6 @@ public final class MainPanel {
                 exit = false;
             }
 
-        } else if (!getUpload_manager().getFinishing_uploads_queue().isEmpty()) {
-
-            Object[] options = {"No",
-                LabelTranslatorSingleton.getInstance().translate("Yes")};
-
-            int n = showOptionDialog(getView(),
-                    LabelTranslatorSingleton.getInstance().translate("It seems MegaBasterd is just finishing uploading some files.\n\nIF YOU EXIT NOW, THOSE UPLOADS WILL FAIL.\n\nDo you want to continue?"),
-                    LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, WARNING_MESSAGE,
-                    null,
-                    options,
-                    options[0]);
-
-            if (n == 0) {
-
-                exit = false;
-            }
         }
 
         return exit;

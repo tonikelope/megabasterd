@@ -268,7 +268,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
-        slot_status_label.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        slot_status_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         slot_status_label.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         slot_status_label.setDoubleBuffered(true);
 
@@ -565,21 +565,15 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         synchronized (_download.getWorkers_lock()) {
 
-            int conta_exit = 0;
-
-            conta_exit = _download.getChunkworkers().stream().filter((c) -> (c.isExit())).map((_item) -> 1).reduce(conta_exit, Integer::sum);
-
             int conta_error = 0;
 
             conta_error = _download.getChunkworkers().stream().filter((c) -> (c.isError_wait())).map((_item) -> 1).reduce(conta_error, Integer::sum);
 
-            final Color status_color = conta_error > 0 ? Color.red : Color.black;
-
-            final String status = (conta_exit > 0 ? "Tot removing: " + conta_exit : "") + (conta_error > 0 ? ((conta_exit > 0 ? " / " : "") + "Tot error: " + conta_error) : "");
+            final String status = conta_error > 0 ? "(" + String.valueOf(conta_error) + ")" : "";
 
             swingInvoke(() -> {
-                slot_status_label.setForeground(status_color);
-                slot_status_label.setText(LabelTranslatorSingleton.getInstance().translate(status));
+                slot_status_label.setForeground(Color.RED);
+                slot_status_label.setText(status);
             });
         }
     }

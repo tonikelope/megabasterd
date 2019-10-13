@@ -383,7 +383,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit && !_download.isStopped() && !timeout && (http_error != 509 || _current_smart_proxy != null) && http_error != 403) {
+                        if (!_exit && !_download.isStopped() && !timeout && (http_error != 509 || _current_smart_proxy != null) && http_error != 403 && http_error != 503) {
 
                             _error_wait = true;
 
@@ -397,6 +397,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _error_wait = false;
 
                             _download.getView().updateSlotsStatus();
+
+                        } else if (http_error == 503 && _current_smart_proxy == null) {
+                            setExit(true);
                         }
                     }
 
