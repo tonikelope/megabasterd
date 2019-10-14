@@ -10,6 +10,7 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.util.logging.Level;
@@ -23,6 +24,7 @@ import javax.crypto.CipherInputStream;
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int MAX_CHUNK_ERROR = 100;
+    public static final int READ_TIMEOUT_RETRY = 3;
     private static final Logger LOG = Logger.getLogger(ChunkUploader.class.getName());
     private final int _id;
     private final Upload _upload;
@@ -214,17 +216,28 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                 if (chunk_offset + chunk_size == _upload.getFile_size()) {
                                     LOG.log(Level.INFO, "{0} Worker {1} {2} waiting for completion handler...", new Object[]{Thread.currentThread().getName(), _id, _upload.getFile_name()});
 
-                                    String httpresponse;
+                                    String httpresponse = null;
 
                                     try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                        while ((reads = is.read(buffer)) != -1) {
+                                        int retry_timeout = 0;
 
-                                            byte_res.write(buffer, 0, reads);
+                                        do {
+                                            try {
+
+                                                if ((reads = is.read(buffer)) != -1) {
+                                                    byte_res.write(buffer, 0, reads);
+                                                }
+                                            } catch (SocketTimeoutException timeout_exception) {
+                                                LOG.log(Level.WARNING, timeout_exception.getMessage());
+                                                retry_timeout++;
+                                            }
+
+                                        } while (reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
+
+                                        if (retry_timeout <= READ_TIMEOUT_RETRY) {
+                                            httpresponse = new String(byte_res.toByteArray(), "UTF-8");
                                         }
-
-                                        httpresponse = new String(byte_res.toByteArray(), "UTF-8");
-
                                     }
 
                                     if (httpresponse.length() > 0) {

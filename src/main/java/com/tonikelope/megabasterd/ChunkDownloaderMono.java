@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,6 +22,8 @@ import javax.crypto.CipherInputStream;
 public class ChunkDownloaderMono extends ChunkDownloader {
 
     private static final Logger LOG = Logger.getLogger(ChunkDownloaderMono.class.getName());
+
+    public static final int READ_TIMEOUT_RETRY = 3;
 
     public ChunkDownloaderMono(Download download) {
         super(1, download);
@@ -124,27 +127,38 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         if (!isExit() && !getDownload().isStopped() && cis != null) {
 
-                            int reads = 0;
+                            int reads = 0, retry_timeout = 0;
 
-                            while (!getDownload().isStopped() && chunk_reads < chunk_size && (reads = cis.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
+                            do {
 
-                                getDownload().getOutput_stream().write(buffer, 0, reads);
+                                try {
 
-                                chunk_reads += reads;
+                                    if ((reads = cis.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
 
-                                getDownload().getPartialProgress().add((long) reads);
+                                        getDownload().getOutput_stream().write(buffer, 0, reads);
 
-                                getDownload().getProgress_meter().secureNotify();
+                                        chunk_reads += reads;
 
-                                if (getDownload().isPaused() && !getDownload().isStopped()) {
+                                        getDownload().getPartialProgress().add((long) reads);
 
-                                    getDownload().pause_worker_mono();
+                                        getDownload().getProgress_meter().secureNotify();
 
-                                    secureWait();
+                                        if (getDownload().isPaused() && !getDownload().isStopped()) {
 
+                                            getDownload().pause_worker_mono();
+
+                                            secureWait();
+
+                                        }
+
+                                    }
+                                } catch (SocketTimeoutException timeout_exception) {
+                                    LOG.log(Level.WARNING, timeout_exception.getMessage());
+
+                                    retry_timeout++;
                                 }
 
-                            }
+                            } while (!getDownload().isStopped() && chunk_reads < chunk_size && reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
 
                             if (chunk_reads == chunk_size) {
 
