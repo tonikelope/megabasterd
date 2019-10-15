@@ -53,7 +53,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.67";
+    public static final String VERSION = "6.69";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -877,11 +877,19 @@ public final class MainPanel {
 
         try {
 
-            if (!new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").canRead()) {
+            if (!new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").exists()) {
 
                 new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").createNewFile();
 
                 File directory = new File(System.getProperty("user.home"));
+
+                String version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", VERSION, 1);
+
+                String version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", VERSION, 1);
+
+                String old_version_major = null;
+
+                String old_version_minor = null;
 
                 String old_version = "0.0";
 
@@ -894,14 +902,14 @@ public final class MainPanel {
                 for (File file : directory.listFiles()) {
 
                     try {
-                        if (file.isDirectory() && file.canRead() && file.getName().startsWith(".megabasterd")) {
+                        if (file.isDirectory() && file.canRead() && file.getName().startsWith(".megabasterd") && !file.getName().endsWith("backups")) {
 
                             String current_dir_version = MiscTools.findFirstRegex("[0-9.]+$", file.getName(), 0);
 
                             if (current_dir_version != null && !current_dir_version.equals(VERSION)) {
 
-                                String old_version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", old_version, 1);
-                                String old_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", old_version, 1);
+                                old_version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", old_version, 1);
+                                old_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", old_version, 1);
 
                                 String current_dir_major = findFirstRegex("([0-9]+)\\.[0-9]+$", current_dir_version, 1);
                                 String current_dir_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", current_dir_version, 1);
@@ -910,7 +918,7 @@ public final class MainPanel {
                                     old_version = current_dir_version;
                                 }
 
-                                Files.move(Paths.get(file.getAbsolutePath()), Paths.get(old_backups_dir.getAbsolutePath() + "/" + file.getName()));
+                                Files.move(Paths.get(file.getAbsolutePath()), Paths.get(old_backups_dir.getAbsolutePath() + "/" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
                             }
 
                         }
@@ -919,7 +927,7 @@ public final class MainPanel {
 
                 }
 
-                if (!old_version.equals("0.0")) {
+                if (!old_version.equals("0.0") && (Integer.parseInt(version_major) > Integer.parseInt(old_version_major) || (Integer.parseInt(version_major) == Integer.parseInt(old_version_major) && Integer.parseInt(version_minor) > Integer.parseInt(old_version_minor)))) {
                     Object[] options = {"No",
                         LabelTranslatorSingleton.getInstance().translate("Yes")};
 

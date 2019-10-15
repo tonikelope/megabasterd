@@ -40,7 +40,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             String worker_url = null;
             int http_error = 0, http_status = 0, conta_error = 0;
-            boolean chunk_error = false;
+            boolean chunk_error = false, timeout = false;
             long chunk_id, bytes_downloaded = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
             byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
@@ -100,6 +100,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     chunk_error = true;
 
+                    timeout = false;
+
                     http_error = 0;
 
                     if (http_status != 200) {
@@ -153,9 +155,14 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                     }
                                 } catch (SocketTimeoutException timeout_exception) {
-                                    LOG.log(Level.WARNING, timeout_exception.getMessage());
 
-                                    retry_timeout++;
+                                    if (++retry_timeout > READ_TIMEOUT_RETRY) {
+
+                                        throw timeout_exception;
+
+                                    } else {
+                                        LOG.log(Level.SEVERE, "{0} TIMEOUT reading chunk {1}", new Object[]{Thread.currentThread().getName(), chunk_id});
+                                    }
                                 }
 
                             } while (!getDownload().isStopped() && chunk_reads < chunk_size && reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
@@ -177,7 +184,12 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                 } catch (IOException ex) {
 
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    if (ex instanceof SocketTimeoutException) {
+                        timeout = true;
+                        LOG.log(Level.SEVERE, "{0} TIMEOUT downloading chunk {1}", new Object[]{Thread.currentThread().getName(), chunk_id});
+                    } else {
+                        LOG.log(Level.SEVERE, ex.getMessage());
+                    }
 
                 } finally {
 
@@ -191,7 +203,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             getDownload().getProgress_meter().secureNotify();
                         }
 
-                        if (!isExit() && !getDownload().isStopped() && http_error != 403) {
+                        if (!isExit() && !getDownload().isStopped() && !timeout && http_error != 403) {
 
                             setError_wait(true);
 

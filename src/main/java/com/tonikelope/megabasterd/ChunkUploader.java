@@ -23,8 +23,7 @@ import javax.crypto.CipherInputStream;
  */
 public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int MAX_CHUNK_ERROR = 100;
-    public static final int READ_TIMEOUT_RETRY = 3;
+    public static final int MAX_CHUNK_ERROR = 50;
     private static final Logger LOG = Logger.getLogger(ChunkUploader.class.getName());
     private final int _id;
     private final Upload _upload;
@@ -170,6 +169,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 boolean chunk_error = true;
 
+                boolean timeout = false;
+
                 try {
 
                     if (!_exit && !_upload.isStopped()) {
@@ -213,54 +214,39 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                                     _upload.getView().printStatusNormal("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***");
                                 }
 
-                                if (chunk_offset + chunk_size == _upload.getFile_size()) {
-                                    LOG.log(Level.INFO, "{0} Worker {1} {2} waiting for completion handler...", new Object[]{Thread.currentThread().getName(), _id, _upload.getFile_name()});
+                                String httpresponse;
 
-                                    String httpresponse = null;
+                                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                                        int retry_timeout = 0;
-
-                                        do {
-                                            try {
-
-                                                if ((reads = is.read(buffer)) != -1) {
-                                                    byte_res.write(buffer, 0, reads);
-                                                }
-                                            } catch (SocketTimeoutException timeout_exception) {
-                                                LOG.log(Level.WARNING, timeout_exception.getMessage());
-                                                retry_timeout++;
-                                            }
-
-                                        } while (reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
-
-                                        if (retry_timeout <= READ_TIMEOUT_RETRY) {
-                                            httpresponse = new String(byte_res.toByteArray(), "UTF-8");
-                                        }
+                                    while ((reads = is.read(buffer)) != -1) {
+                                        byte_res.write(buffer, 0, reads);
                                     }
 
-                                    if (httpresponse.length() > 0) {
+                                    httpresponse = new String(byte_res.toByteArray(), "UTF-8");
+                                }
 
-                                        if (MegaAPI.checkMEGAError(httpresponse) != 0) {
+                                if (httpresponse.length() > 0) {
 
-                                            LOG.log(Level.WARNING, "{0} Worker {1} UPLOAD FAILED! (MEGA ERROR: {2}) {3}", new Object[]{Thread.currentThread().getName(), _id, MegaAPI.checkMEGAError(httpresponse), _upload.getFile_name()});
+                                    if (MegaAPI.checkMEGAError(httpresponse) != 0) {
 
-                                            fatal_error = true;
+                                        LOG.log(Level.WARNING, "{0} Worker {1} UPLOAD FAILED! (MEGA ERROR: {2}) {3}", new Object[]{Thread.currentThread().getName(), _id, MegaAPI.checkMEGAError(httpresponse), _upload.getFile_name()});
 
-                                        } else {
+                                        fatal_error = true;
 
-                                            LOG.log(Level.INFO, "{0} Worker {1} Completion handler -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, httpresponse, _upload.getFile_name()});
+                                    } else {
 
-                                            _upload.setCompletion_handler(httpresponse);
+                                        LOG.log(Level.INFO, "{0} Worker {1} Completion handler -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, httpresponse, _upload.getFile_name()});
 
-                                            chunk_error = false;
-                                        }
+                                        _upload.setCompletion_handler(httpresponse);
+
+                                        chunk_error = false;
                                     }
 
-                                } else {
+                                } else if (_upload.getProgress() != _upload.getFile_size() || _upload.getCompletion_handler() != null) {
+
                                     chunk_error = false;
                                 }
+
                             }
 
                         }
@@ -272,7 +258,13 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 } catch (IOException ex) {
 
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    if (ex instanceof SocketTimeoutException) {
+                        timeout = true;
+                        LOG.log(Level.SEVERE, "{0} Worker {1} {2} timeout reading chunk {3}", new Object[]{Thread.currentThread().getName(), _id, _upload.getFile_name(), chunk_id});
+
+                    } else {
+                        LOG.log(Level.SEVERE, ex.getMessage());
+                    }
 
                 } finally {
 
@@ -301,7 +293,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                             LOG.log(Level.SEVERE, "UPLOAD FAILED: too many errors {0}", new Object[]{_upload.getFile_name()});
 
-                        } else if (!_exit && !_upload.isStopped()) {
+                        } else if (!_exit && !_upload.isStopped() && !timeout) {
 
                             _error_wait = true;
 

@@ -113,7 +113,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             int http_error = 0, http_status = -1, conta_error = 0;
 
-            boolean chunk_error = false, slow_proxy = false, turbo_mode = false;
+            boolean chunk_error = false, slow_proxy = false, turbo_mode = false, timeout = false;
 
             String worker_url = null;
 
@@ -302,8 +302,14 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                                 }
 
                                             } catch (SocketTimeoutException timeout_exception) {
-                                                LOG.log(Level.WARNING, timeout_exception.getMessage());
-                                                retry_timeout++;
+
+                                                if (++retry_timeout > READ_TIMEOUT_RETRY) {
+
+                                                    throw timeout_exception;
+
+                                                } else {
+                                                    LOG.log(Level.WARNING, "{0} Worker [{1}] TIMEOUT reading chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
+                                                }
                                             }
 
                                         } while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
@@ -378,7 +384,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 } catch (IOException ex) {
 
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    if (ex instanceof SocketTimeoutException) {
+                        timeout = true;
+                        LOG.log(Level.WARNING, "{0} Worker [{1}] TIMEOUT downloading chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
+
+                    } else {
+                        LOG.log(Level.SEVERE, ex.getMessage());
+                    }
 
                 } finally {
 
@@ -397,7 +409,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit && !_download.isStopped() && (http_error != 509 || _current_smart_proxy != null) && http_error != 403 && http_error != 503) {
+                        if (!_exit && !_download.isStopped() && !timeout && (http_error != 509 || _current_smart_proxy != null) && http_error != 403 && http_error != 503) {
 
                             _error_wait = true;
 
