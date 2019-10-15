@@ -170,6 +170,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 boolean chunk_error = true;
 
+                boolean timeout = false;
+
                 try {
 
                     if (!_exit && !_upload.isStopped()) {
@@ -215,52 +217,55 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 if (chunk_offset + chunk_size == _upload.getFile_size()) {
                                     LOG.log(Level.INFO, "{0} Worker {1} {2} waiting for completion handler...", new Object[]{Thread.currentThread().getName(), _id, _upload.getFile_name()});
+                                }
 
-                                    String httpresponse = null;
+                                String httpresponse = null;
 
-                                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
-                                        int retry_timeout = 0;
+                                    int retry_timeout = 0;
 
-                                        do {
-                                            try {
+                                    do {
+                                        try {
 
-                                                if ((reads = is.read(buffer)) != -1) {
-                                                    byte_res.write(buffer, 0, reads);
-                                                }
-                                            } catch (SocketTimeoutException timeout_exception) {
-                                                LOG.log(Level.WARNING, timeout_exception.getMessage());
-                                                retry_timeout++;
+                                            if ((reads = is.read(buffer)) != -1) {
+                                                byte_res.write(buffer, 0, reads);
                                             }
-
-                                        } while (reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
-
-                                        if (retry_timeout <= READ_TIMEOUT_RETRY) {
-                                            httpresponse = new String(byte_res.toByteArray(), "UTF-8");
+                                        } catch (SocketTimeoutException timeout_exception) {
+                                            LOG.log(Level.WARNING, timeout_exception.getMessage());
+                                            retry_timeout++;
                                         }
+
+                                    } while (reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
+
+                                    if (retry_timeout <= READ_TIMEOUT_RETRY) {
+                                        httpresponse = new String(byte_res.toByteArray(), "UTF-8");
+                                    } else {
+                                        timeout = true;
+                                    }
+                                }
+
+                                if (httpresponse != null && httpresponse.length() > 0) {
+
+                                    if (MegaAPI.checkMEGAError(httpresponse) != 0) {
+
+                                        LOG.log(Level.WARNING, "{0} Worker {1} UPLOAD FAILED! (MEGA ERROR: {2}) {3}", new Object[]{Thread.currentThread().getName(), _id, MegaAPI.checkMEGAError(httpresponse), _upload.getFile_name()});
+
+                                        fatal_error = true;
+
+                                    } else {
+
+                                        LOG.log(Level.INFO, "{0} Worker {1} Completion handler -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, httpresponse, _upload.getFile_name()});
+
+                                        _upload.setCompletion_handler(httpresponse);
+
+                                        chunk_error = false;
                                     }
 
-                                    if (httpresponse.length() > 0) {
-
-                                        if (MegaAPI.checkMEGAError(httpresponse) != 0) {
-
-                                            LOG.log(Level.WARNING, "{0} Worker {1} UPLOAD FAILED! (MEGA ERROR: {2}) {3}", new Object[]{Thread.currentThread().getName(), _id, MegaAPI.checkMEGAError(httpresponse), _upload.getFile_name()});
-
-                                            fatal_error = true;
-
-                                        } else {
-
-                                            LOG.log(Level.INFO, "{0} Worker {1} Completion handler -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, httpresponse, _upload.getFile_name()});
-
-                                            _upload.setCompletion_handler(httpresponse);
-
-                                            chunk_error = false;
-                                        }
-                                    }
-
-                                } else {
+                                } else if (chunk_offset + chunk_size != _upload.getFile_size()) {
                                     chunk_error = false;
                                 }
+
                             }
 
                         }
@@ -271,6 +276,10 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                     }
 
                 } catch (IOException ex) {
+
+                    if (ex instanceof SocketTimeoutException) {
+                        timeout = true;
+                    }
 
                     LOG.log(Level.SEVERE, ex.getMessage());
 
@@ -301,7 +310,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                             LOG.log(Level.SEVERE, "UPLOAD FAILED: too many errors {0}", new Object[]{_upload.getFile_name()});
 
-                        } else if (!_exit && !_upload.isStopped()) {
+                        } else if (!_exit && !_upload.isStopped() && !timeout) {
 
                             _error_wait = true;
 

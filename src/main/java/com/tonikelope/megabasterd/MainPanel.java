@@ -53,7 +53,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.67";
+    public static final String VERSION = "6.68";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -920,22 +920,32 @@ public final class MainPanel {
                 }
 
                 if (!old_version.equals("0.0")) {
-                    Object[] options = {"No",
-                        LabelTranslatorSingleton.getInstance().translate("Yes")};
 
-                    int n = showOptionDialog(getView(),
-                            LabelTranslatorSingleton.getInstance().translate("An older version (" + old_version + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
-                            LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE,
-                            null,
-                            options,
-                            options[0]);
+                    String old_version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", old_version, 1);
+                    String old_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", old_version, 1);
 
-                    if (n == 1) {
-                        Files.copy(Paths.get(System.getProperty("user.home") + "/.megabasterd_old_backups/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
+                    String version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", VERSION, 1);
+                    String version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", VERSION, 1);
 
-                        JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
+                    if (Integer.parseInt(version_major) > Integer.parseInt(old_version_major) || (Integer.parseInt(version_major) == Integer.parseInt(old_version_major) && Integer.parseInt(version_minor) > Integer.parseInt(old_version_minor))) {
 
-                        restartApplication();
+                        Object[] options = {"No",
+                            LabelTranslatorSingleton.getInstance().translate("Yes")};
+
+                        int n = showOptionDialog(getView(),
+                                LabelTranslatorSingleton.getInstance().translate("An older version (" + old_version + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
+                                LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE,
+                                null,
+                                options,
+                                options[0]);
+
+                        if (n == 1) {
+                            Files.copy(Paths.get(System.getProperty("user.home") + "/.megabasterd_old_backups/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
+
+                            JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
+
+                            restartApplication();
+                        }
                     }
                 }
             }

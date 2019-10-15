@@ -113,7 +113,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             int http_error = 0, http_status = -1, conta_error = 0;
 
-            boolean chunk_error = false, slow_proxy = false, turbo_mode = false;
+            boolean timeout, chunk_error = false, slow_proxy = false, turbo_mode = false;
 
             String worker_url = null;
 
@@ -235,6 +235,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 chunk_error = true;
 
+                timeout = false;
+
                 slow_proxy = false;
 
                 File tmp_chunk_file = null, chunk_file = null;
@@ -308,6 +310,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                         } while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
 
+                                        if (retry_timeout > READ_TIMEOUT_RETRY) {
+                                            timeout = true;
+                                        }
                                     }
 
                                     finish_chunk_time = System.currentTimeMillis();
@@ -378,6 +383,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 } catch (IOException ex) {
 
+                    if (ex instanceof SocketTimeoutException) {
+                        timeout = true;
+                    }
+
                     LOG.log(Level.SEVERE, ex.getMessage());
 
                 } finally {
@@ -397,7 +406,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit && !_download.isStopped() && (http_error != 509 || _current_smart_proxy != null) && http_error != 403 && http_error != 503) {
+                        if (!_exit && !_download.isStopped() && !timeout && (http_error != 509 || _current_smart_proxy != null) && http_error != 403 && http_error != 503) {
 
                             _error_wait = true;
 
