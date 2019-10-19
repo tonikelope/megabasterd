@@ -222,9 +222,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 if (_current_smart_proxy != null) {
                     con.setConnectTimeout(Transference.HTTP_PROXY_CONNECT_TIMEOUT);
                     con.setReadTimeout(Transference.HTTP_PROXY_READ_TIMEOUT);
-                } else {
-                    con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
-                    con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
                 }
 
                 con.setUseCaches(false);
@@ -271,48 +268,27 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     if (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit()) {
 
-                                        int retry_timeout = 0;
+                                        while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && (reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
+                                            tmp_chunk_file_os.write(buffer, 0, reads);
 
-                                        do {
+                                            chunk_reads += reads;
 
-                                            try {
+                                            _download.getPartialProgress().add((long) reads);
 
-                                                if ((reads = is.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
+                                            _download.getProgress_meter().secureNotify();
 
-                                                    tmp_chunk_file_os.write(buffer, 0, reads);
+                                            if (_download.isPaused() && !_download.isStopped()) {
 
-                                                    chunk_reads += reads;
+                                                _download.pause_worker();
 
-                                                    _download.getPartialProgress().add((long) reads);
+                                                pause_init_time = System.currentTimeMillis();
 
-                                                    _download.getProgress_meter().secureNotify();
+                                                secureWait();
 
-                                                    if (_download.isPaused() && !_download.isStopped()) {
+                                                paused += System.currentTimeMillis() - pause_init_time;
 
-                                                        _download.pause_worker();
-
-                                                        pause_init_time = System.currentTimeMillis();
-
-                                                        secureWait();
-
-                                                        paused += System.currentTimeMillis() - pause_init_time;
-
-                                                    }
-
-                                                }
-
-                                            } catch (SocketTimeoutException timeout_exception) {
-
-                                                if (++retry_timeout > READ_TIMEOUT_RETRY) {
-
-                                                    throw timeout_exception;
-
-                                                } else {
-                                                    LOG.log(Level.WARNING, "{0} Worker [{1}] TIMEOUT reading chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
-                                                }
                                             }
-
-                                        } while (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size && reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
+                                        }
 
                                     }
 

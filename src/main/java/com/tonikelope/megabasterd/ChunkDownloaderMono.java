@@ -84,10 +84,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             con = (HttpURLConnection) url.openConnection();
                         }
 
-                        con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
-
-                        con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
-
                         con.setUseCaches(false);
 
                         con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
@@ -129,43 +125,25 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         if (!isExit() && !getDownload().isStopped() && cis != null) {
 
-                            int reads = 0, retry_timeout = 0;
+                            int reads = 0;
 
-                            do {
+                            while (!getDownload().isStopped() && chunk_reads < chunk_size && (reads = cis.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
+                                getDownload().getOutput_stream().write(buffer, 0, reads);
 
-                                try {
+                                chunk_reads += reads;
 
-                                    if ((reads = cis.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
+                                getDownload().getPartialProgress().add((long) reads);
 
-                                        getDownload().getOutput_stream().write(buffer, 0, reads);
+                                getDownload().getProgress_meter().secureNotify();
 
-                                        chunk_reads += reads;
+                                if (getDownload().isPaused() && !getDownload().isStopped()) {
 
-                                        getDownload().getPartialProgress().add((long) reads);
+                                    getDownload().pause_worker_mono();
 
-                                        getDownload().getProgress_meter().secureNotify();
+                                    secureWait();
 
-                                        if (getDownload().isPaused() && !getDownload().isStopped()) {
-
-                                            getDownload().pause_worker_mono();
-
-                                            secureWait();
-
-                                        }
-
-                                    }
-                                } catch (SocketTimeoutException timeout_exception) {
-
-                                    if (++retry_timeout > READ_TIMEOUT_RETRY) {
-
-                                        throw timeout_exception;
-
-                                    } else {
-                                        LOG.log(Level.SEVERE, "{0} TIMEOUT reading chunk {1}", new Object[]{Thread.currentThread().getName(), chunk_id});
-                                    }
                                 }
-
-                            } while (!getDownload().isStopped() && chunk_reads < chunk_size && reads != -1 && retry_timeout <= READ_TIMEOUT_RETRY);
+                            }
 
                             if (chunk_reads == chunk_size) {
 

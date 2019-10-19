@@ -904,10 +904,6 @@ public class MiscTools {
 
                 }
 
-                con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
-
-                con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
-
                 con.setUseCaches(false);
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
