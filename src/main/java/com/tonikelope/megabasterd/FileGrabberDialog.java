@@ -4,12 +4,21 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Color;
 import java.awt.Dialog;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -24,7 +33,7 @@ import javax.swing.tree.TreeNode;
  *
  * @author tonikelope
  */
-public class FileGrabberDialog extends javax.swing.JDialog implements FileDropHandlerNotifiable {
+public class FileGrabberDialog extends javax.swing.JDialog {
 
     private boolean _upload;
     private final ArrayList<File> _files;
@@ -85,7 +94,60 @@ public class FileGrabberDialog extends javax.swing.JDialog implements FileDropHa
 
         translateLabels(this);
 
-        jPanel1.setTransferHandler(new FileDropHandler(this));
+        jPanel1.setDropTarget(
+                new DropTarget() {
+
+            public boolean canImport(DataFlavor[] flavors) {
+                for (DataFlavor flavor : flavors) {
+                    if (flavor.isFlavorJavaFileListType()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public synchronized void drop(DropTargetDropEvent dtde) {
+                changeToNormal();
+                dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+
+                List<File> files;
+
+                try {
+
+                    if (canImport(dtde.getTransferable().getTransferDataFlavors())) {
+                        files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+
+                        THREAD_POOL.execute(() -> {
+                            _file_drop_notify(files);
+                        });
+                    }
+
+                } catch (UnsupportedFlavorException | IOException ex) {
+
+                }
+            }
+
+            @Override
+            public synchronized void dragEnter(DropTargetDragEvent dtde) {
+                changeToDrop();
+            }
+
+            @Override
+            public synchronized void dragExit(DropTargetEvent dtde) {
+                changeToNormal();
+            }
+
+            private void changeToDrop() {
+                jPanel1.setBorder(BorderFactory.createLineBorder(Color.green, 5));
+
+            }
+
+            private void changeToNormal() {
+                jPanel1.setBorder(null);
+            }
+        }
+        );
 
         _total_space = 0L;
         _base_path = null;
@@ -102,7 +164,7 @@ public class FileGrabberDialog extends javax.swing.JDialog implements FileDropHa
         THREAD_POOL.execute(() -> {
             if (_drag_drop_files != null) {
 
-                file_drop_notify(_drag_drop_files);
+                _file_drop_notify(_drag_drop_files);
             }
             if (_main_panel.getMega_accounts().size() > 0) {
                 swingInvoke(() -> {
@@ -845,8 +907,7 @@ public class FileGrabberDialog extends javax.swing.JDialog implements FileDropHa
     // End of variables declaration//GEN-END:variables
     private static final Logger LOG = Logger.getLogger(FileGrabberDialog.class.getName());
 
-    @Override
-    public void file_drop_notify(List<File> files) {
+    private void _file_drop_notify(List<File> files) {
 
         swingInvoke(() -> {
             add_files_button.setEnabled(false);

@@ -6,6 +6,13 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.dnd.DnDConstants;
+import java.awt.dnd.DropTarget;
+import java.awt.dnd.DropTargetDragEvent;
+import java.awt.dnd.DropTargetDropEvent;
+import java.awt.dnd.DropTargetEvent;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
@@ -24,6 +31,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
+import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBoxMenuItem;
@@ -43,7 +51,7 @@ import javax.swing.JTabbedPane;
  *
  * @author tonikelope
  */
-public final class MainPanelView extends javax.swing.JFrame implements FileDropHandlerNotifiable {
+public final class MainPanelView extends javax.swing.JFrame {
 
     private final MainPanel _main_panel;
 
@@ -336,8 +344,7 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
     }
 
-    @Override
-    public void file_drop_notify(List<File> files) {
+    private void _file_drop_notify(List<File> files) {
 
         final MainPanelView tthis = this;
 
@@ -404,7 +411,60 @@ public final class MainPanelView extends javax.swing.JFrame implements FileDropH
 
         jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
         jTabbedPane1.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
-        jTabbedPane1.setTransferHandler(new FileDropHandler(this));
+        jTabbedPane1.setDropTarget(new DropTarget() {
+
+            //Thanks to -> https://stackoverflow.com/users/6286694/abika
+            public boolean canImport(DataFlavor[] flavors) {
+                for (DataFlavor flavor : flavors) {
+                    if (flavor.isFlavorJavaFileListType()) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public synchronized void drop(DropTargetDropEvent dtde) {
+                changeToNormal();
+                dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+
+                List<File> files;
+
+                try {
+
+                    if (canImport(dtde.getTransferable().getTransferDataFlavors())) {
+                        files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+
+                        THREAD_POOL.execute(() -> {
+                            _file_drop_notify(files);
+                        });
+                    }
+
+                } catch (UnsupportedFlavorException | IOException ex) {
+
+                }
+            }
+
+            @Override
+            public synchronized void dragEnter(DropTargetDragEvent dtde) {
+                changeToDrop();
+            }
+
+            @Override
+            public synchronized void dragExit(DropTargetEvent dtde) {
+                changeToNormal();
+            }
+
+            private void changeToDrop() {
+                jTabbedPane1.setBorder(BorderFactory.createLineBorder(Color.green, 5));
+
+            }
+
+            private void changeToNormal() {
+                jTabbedPane1.setBorder(null);
+            }
+        }
+        );
 
         String auto_close = selectSettingValue("auto_close");
 

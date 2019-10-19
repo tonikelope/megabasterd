@@ -513,7 +513,7 @@ public class MiscTools {
 
         int pow = Math.min((int) ((bytes > 0L ? Math.log(bytes) : 0) / Math.log(1024)), units.length - 1);
 
-        Double bytes_double = (double) bytes / (1 << (10 * pow));
+        Double bytes_double = (double) bytes / (1L << (10 * pow));
 
         DecimalFormat df = new DecimalFormat("#.##");
 
