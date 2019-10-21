@@ -570,23 +570,25 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                         }
                     }
+
                     synchronized (getQueue_sort_lock()) {
-                        if (!isPreprocessing_transferences() && !isProvisioning_transferences()) {
-                            sortTransferenceWaitStartQueue();
-                            getTransference_waitstart_queue().forEach((up) -> {
-                                swingInvoke(() -> {
-                                    getScroll_panel().remove((Component) up.getView());
-                                    getScroll_panel().add((Component) up.getView());
-                                });
+
+                        sortTransferenceWaitStartQueue();
+                        getTransference_waitstart_queue().forEach((up) -> {
+                            swingInvoke(() -> {
+                                getScroll_panel().remove((Component) up.getView());
+                                getScroll_panel().add((Component) up.getView());
                             });
-                            getTransference_finished_queue().forEach((up) -> {
-                                swingInvoke(() -> {
-                                    getScroll_panel().remove((Component) up.getView());
-                                    getScroll_panel().add((Component) up.getView());
-                                });
+                        });
+                        getTransference_finished_queue().forEach((up) -> {
+                            swingInvoke(() -> {
+                                getScroll_panel().remove((Component) up.getView());
+                                getScroll_panel().add((Component) up.getView());
                             });
-                        }
+                        });
+
                     }
+
                     _frozen = false;
                     setProvisioning_transferences(false);
                     secureNotify();

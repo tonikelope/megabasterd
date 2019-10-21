@@ -3,7 +3,6 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Component;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -117,19 +116,6 @@ public class DownloadManager extends TransferenceManager {
                     getTransference_waitstart_queue().add(download);
 
                     getTransference_waitstart_queue().addAll(aux);
-
-                    getTransference_waitstart_queue().forEach((t1) -> {
-                        swingInvoke(() -> {
-                            getScroll_panel().remove((Component) t1.getView());
-                            getScroll_panel().add((Component) t1.getView());
-                        });
-                    });
-                    getTransference_finished_queue().forEach((t2) -> {
-                        swingInvoke(() -> {
-                            getScroll_panel().remove((Component) t2.getView());
-                            getScroll_panel().add((Component) t2.getView());
-                        });
-                    });
 
                 }
 

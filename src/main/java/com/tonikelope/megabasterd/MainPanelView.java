@@ -413,7 +413,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         jTabbedPane1.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
         jTabbedPane1.setDropTarget(new DropTarget() {
 
-            //Thanks to -> https://stackoverflow.com/users/6286694/abika
             public boolean canImport(DataFlavor[] flavors) {
                 for (DataFlavor flavor : flavors) {
                     if (flavor.isFlavorJavaFileListType()) {
