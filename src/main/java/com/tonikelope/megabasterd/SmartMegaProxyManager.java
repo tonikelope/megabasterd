@@ -39,19 +39,22 @@ public final class SmartMegaProxyManager {
 
     public synchronized String getFastestProxy() {
 
-        Set<String> keys = _proxy_list.keySet();
+        if (_proxy_list.size() > 0) {
 
-        Long current_time = System.currentTimeMillis();
+            Set<String> keys = _proxy_list.keySet();
 
-        for (String k : keys) {
+            Long current_time = System.currentTimeMillis();
 
-            if (_proxy_list.get(k) < current_time) {
+            for (String k : keys) {
 
-                return k;
+                if (_proxy_list.get(k) < current_time) {
+
+                    return k;
+                }
             }
         }
 
-        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!!", new Object[]{Thread.currentThread().getName()});
+        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing...)", new Object[]{Thread.currentThread().getName()});
 
         refreshProxyList();
 

@@ -113,7 +113,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             int http_error = 0, http_status = -1, conta_error = 0;
 
-            boolean chunk_error = false, slow_proxy = false, turbo_mode = false, timeout = false;
+            boolean chunk_error = false, slow_proxy = false, timeout = false;
 
             String worker_url = null;
 
@@ -127,9 +127,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 _current_smart_proxy = proxy_manager.getFastestProxy();
 
-                getDownload().enableTurboMode();
-
-                turbo_mode = true;
+                if (!getDownload().isTurbo()) {
+                    getDownload().enableTurboMode();
+                }
             }
 
             while (!_download.getMain_panel().isExit() && !_exit && !_download.isStopped()) {
@@ -171,10 +171,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         _current_smart_proxy = proxy_manager.getFastestProxy();
 
-                        if (!turbo_mode) {
+                        if (!getDownload().isTurbo()) {
                             getDownload().enableTurboMode();
-
-                            turbo_mode = true;
                         }
 
                     }
@@ -385,7 +383,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit && !_download.isStopped() && !timeout && (http_error != 509 || _current_smart_proxy != null) && http_error != 403 && http_error != 503) {
+                        if (!_exit && !_download.isStopped() && !timeout && _current_smart_proxy == null && http_error != 509 && http_error != 403 && http_error != 503) {
 
                             _error_wait = true;
 

@@ -189,6 +189,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     }
 
+    public boolean isTurbo() {
+        return _turbo;
+    }
+
     public String getCustom_chunks_dir() {
         return _custom_chunks_dir;
     }

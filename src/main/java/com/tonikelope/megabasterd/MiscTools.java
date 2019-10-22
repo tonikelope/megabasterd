@@ -833,7 +833,7 @@ public class MiscTools {
 
         boolean error = false, error509 = false, error403 = false;
 
-        SmartMegaProxyManager proxy_manager = null;
+        SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
         String current_proxy = null;
 
@@ -902,6 +902,11 @@ public class MiscTools {
                         }
                     }
 
+                }
+
+                if (current_proxy != null) {
+                    con.setConnectTimeout(Transference.HTTP_PROXY_CONNECT_TIMEOUT);
+                    con.setReadTimeout(Transference.HTTP_PROXY_READ_TIMEOUT);
                 }
 
                 con.setUseCaches(false);

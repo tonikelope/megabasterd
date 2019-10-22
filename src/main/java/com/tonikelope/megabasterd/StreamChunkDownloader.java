@@ -130,7 +130,6 @@ public class StreamChunkDownloader implements Runnable {
 
                     if (current_smart_proxy != null) {
                         con.setConnectTimeout(Transference.HTTP_PROXY_CONNECT_TIMEOUT);
-
                         con.setReadTimeout(Transference.HTTP_PROXY_READ_TIMEOUT);
                     }
 
