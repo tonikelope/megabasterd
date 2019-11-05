@@ -1000,6 +1000,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             });
         }
 
+        _exit = true;
+
         LOG.log(Level.INFO, "{0} Uploader {1} BYE BYE", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
     }
 

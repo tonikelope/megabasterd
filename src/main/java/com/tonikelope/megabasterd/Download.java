@@ -46,6 +46,7 @@ import javax.swing.JComponent;
 public class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
+    public static final int PROGRESS_WATCHDOG_TIMEOUT = 120;
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
@@ -98,6 +99,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile boolean _canceled;
     private volatile boolean _turbo;
     private volatile boolean _closed;
+    private final Object _progress_watchdog_lock;
 
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir) {
 
@@ -114,6 +116,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _closed = false;
         _pause = false;
         _exit = false;
+        _progress_watchdog_lock = new Object();
         _last_download_url = null;
         _provision_ok = true;
         _progress = 0L;
@@ -158,6 +161,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _finishing_download = false;
         _pause = false;
         _exit = false;
+        _progress_watchdog_lock = new Object();
         _last_download_url = null;
         _provision_ok = true;
         _progress = 0L;
@@ -631,6 +635,36 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                             }
                         });
 
+                        THREAD_POOL.execute(() -> {
+
+                            //PROGRESS WATCHDOG If a download (using SmartProxy) remains more than two minutes without advancing 1 byte, we restart it.
+                            LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
+
+                            long last_progress, progress = getProgress();
+
+                            do {
+                                last_progress = progress;
+
+                                synchronized (_progress_watchdog_lock) {
+                                    try {
+                                        _progress_watchdog_lock.wait(PROGRESS_WATCHDOG_TIMEOUT * 1000);
+                                        progress = getProgress();
+                                    } catch (InterruptedException ex) {
+                                        progress = -1;
+                                        Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+                                    }
+                                }
+
+                            } while (!isExit() && (!isTurbo() || isPaused() || progress > last_progress));
+
+                            if (!isExit() && progress <= last_progress) {
+                                stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
+                            }
+
+                            LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
+
+                        });
+
                         secureWait();
 
                         LOG.log(Level.INFO, "{0} Chunkdownloaders finished!", Thread.currentThread().getName());
@@ -882,6 +916,12 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     restart();
                 }
             });
+        }
+
+        _exit = true;
+
+        synchronized (_progress_watchdog_lock) {
+            _progress_watchdog_lock.notifyAll();
         }
 
         LOG.log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
