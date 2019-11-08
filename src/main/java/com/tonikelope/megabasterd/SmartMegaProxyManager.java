@@ -7,6 +7,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.logging.Level;
@@ -77,7 +79,32 @@ public final class SmartMegaProxyManager {
 
         try {
 
-            if (this._proxy_list_url != null && this._proxy_list_url.length() > 0) {
+            String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
+
+            ArrayList<String> custom_list = new ArrayList<>(Arrays.asList(custom_proxy_list.split("\\r?\\n")));
+
+            LinkedHashMap<String, Long> custom_clean_list = new LinkedHashMap<>();
+
+            if (!custom_list.isEmpty()) {
+
+                Long current_time = System.currentTimeMillis();
+
+                for (String proxy : custom_list) {
+
+                    if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
+                        custom_clean_list.put(proxy, current_time);
+                    }
+                }
+            }
+
+            if (!custom_clean_list.isEmpty()) {
+
+                _proxy_list.clear();
+
+                _proxy_list.putAll(custom_clean_list);
+            }
+
+            if (custom_clean_list.isEmpty() && _proxy_list_url != null && _proxy_list_url.length() > 0) {
 
                 URL url = new URL(this._proxy_list_url);
 
@@ -117,6 +144,13 @@ public final class SmartMegaProxyManager {
                     }
                 }
 
+                swingInvoke(() -> {
+                    _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
+                });
+
+                LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
+
+            } else if (!custom_clean_list.isEmpty()) {
                 swingInvoke(() -> {
                     _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
                 });

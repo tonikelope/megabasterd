@@ -46,7 +46,7 @@ import javax.swing.JComponent;
 public class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
-    public static final int PROGRESS_WATCHDOG_TIMEOUT = 120;
+    public static final int PROGRESS_WATCHDOG_TIMEOUT = 60;
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
@@ -637,7 +637,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         THREAD_POOL.execute(() -> {
 
-                            //PROGRESS WATCHDOG If a download (using SmartProxy) remains more than two minutes without advancing 1 byte, we restart it.
+                            //PROGRESS WATCHDOG If a download using SmartProxy remains more than 60 seconds without receiving data, we force fatal error in order to restart it.
                             LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
 
                             long last_progress, progress = getProgress();
@@ -659,6 +659,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             if (!isExit() && progress <= last_progress) {
                                 stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
+                                MainPanel.getProxy_manager().refreshProxyList(); //Force SmartProxy proxy list refresh
                             }
 
                             LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
