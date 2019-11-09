@@ -136,7 +136,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                 getDownload().getProgress_meter().secureNotify();
 
-                                if (getDownload().isPaused() && !getDownload().isStopped()) {
+                                if (getDownload().isPaused() && !getDownload().isStopped() && chunk_reads < chunk_size) {
 
                                     getDownload().pause_worker_mono();
 

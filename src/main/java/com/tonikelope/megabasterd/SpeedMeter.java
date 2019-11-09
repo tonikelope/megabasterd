@@ -18,7 +18,7 @@ import org.apache.commons.collections4.queue.CircularFifoQueue;
 public class SpeedMeter implements Runnable {
 
     public static final int SLEEP = 3000;
-    public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 10;
+    public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 20;
     private static final Logger LOG = Logger.getLogger(SpeedMeter.class.getName());
     private final JLabel _speed_label;
     private final JLabel _rem_label;
@@ -28,14 +28,14 @@ public class SpeedMeter implements Runnable {
     private long _speed_acumulator;
     private volatile long _max_avg_global_speed;
     private volatile long _avg_chunk_speed;
-    private final CircularFifoQueue _chunk_speed_queue;
+    private final CircularFifoQueue _pepillo_chunk_speed_queue;
 
     SpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
         _speed_label = sp_label;
         _rem_label = rem_label;
         _trans_manager = trans_manager;
         _transferences = new ConcurrentHashMap<>();
-        _chunk_speed_queue = new CircularFifoQueue(CHUNK_SPEED_QUEUE_MAX_SIZE);
+        _pepillo_chunk_speed_queue = new CircularFifoQueue(CHUNK_SPEED_QUEUE_MAX_SIZE);
         _speed_counter = 0L;
         _speed_acumulator = 0L;
         _max_avg_global_speed = 0L;
@@ -56,22 +56,22 @@ public class SpeedMeter implements Runnable {
 
     public void update_avg_chunk_speed(long speed) {
 
-        synchronized (_chunk_speed_queue) {
+        synchronized (_pepillo_chunk_speed_queue) {
 
-            this._chunk_speed_queue.add(speed);
+            this._pepillo_chunk_speed_queue.add(speed);
 
-            if (_chunk_speed_queue.size() == _chunk_speed_queue.maxSize()) {
+            if (_pepillo_chunk_speed_queue.size() == _pepillo_chunk_speed_queue.maxSize()) {
 
                 long acumulador = 0;
 
-                Iterator i = _chunk_speed_queue.iterator();
+                Iterator i = _pepillo_chunk_speed_queue.iterator();
 
                 while (i.hasNext()) {
 
                     acumulador += (long) i.next();
                 }
 
-                _avg_chunk_speed = Math.round(((double) acumulador) / _chunk_speed_queue.size());
+                _avg_chunk_speed = Math.round(((double) acumulador) / _pepillo_chunk_speed_queue.size());
             }
         }
     }

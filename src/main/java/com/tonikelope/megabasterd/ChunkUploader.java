@@ -188,7 +188,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 tot_bytes_up += reads;
 
-                                if (_upload.isPaused() && !_upload.isStopped()) {
+                                if (_upload.isPaused() && !_exit && !_upload.isStopped() && tot_bytes_up < chunk_size) {
 
                                     _upload.pause_worker();
 

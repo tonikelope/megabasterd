@@ -1,6 +1,7 @@
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
+import static com.tonikelope.megabasterd.MiscTools.formatBytes;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -22,7 +23,6 @@ import java.util.logging.Logger;
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     public static final double SLOW_PROXY_PERC = 0.3;
-    public static final int READ_TIMEOUT_RETRY = 3;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
     private final boolean FORCE_SMART_PROXY = false; //True for debugging SmartProxy
     private final int _id;
@@ -276,7 +276,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                             _download.getProgress_meter().secureNotify();
 
-                                            if (_download.isPaused() && !_download.isStopped()) {
+                                            if (_download.isPaused() && !_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size) {
 
                                                 _download.pause_worker();
 
@@ -328,9 +328,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             http_error = 0;
 
-                            /*
-                                //Proxy speed benchmark
-                            
+                            //Proxy speed benchmark
                             if (_current_smart_proxy != null && finish_chunk_time != -1) {
 
                                 //Update average chunk download speed using SmartProxy
@@ -341,7 +339,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                 long avg_chunk_speed = _download.getMain_panel().getGlobal_dl_speed().getAvg_chunk_speed();
 
                                 if (avg_chunk_speed != -1) {
-                                    
+
                                     if (chunk_speed < Math.round(avg_chunk_speed * SLOW_PROXY_PERC)) {
 
                                         LOG.log(Level.INFO, "{0} Worker [{1}] WARNING -> PROXY {2} CHUNK DOWNLOAD SPEED: {3}/s SEEMS TO BE SLOW (average is {4}/s) {4}", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy, formatBytes(chunk_speed), formatBytes(avg_chunk_speed), _download.getFile_name()});
@@ -349,8 +347,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                         slow_proxy = true;
                                     }
                                 }
-                            
-                            }*/
+
+                            }
+
                             if (!FORCE_SMART_PROXY) {
                                 _current_smart_proxy = null;
                             }
