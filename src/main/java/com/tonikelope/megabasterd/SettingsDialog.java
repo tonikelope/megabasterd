@@ -580,7 +580,9 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
 
-        custom_proxy_textarea.setText(custom_proxy_list);
+        if (custom_proxy_list != null) {
+            custom_proxy_textarea.setText(custom_proxy_list);
+        }
 
         _remember_master_pass = true;
 

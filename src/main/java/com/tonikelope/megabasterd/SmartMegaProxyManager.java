@@ -81,27 +81,31 @@ public final class SmartMegaProxyManager {
 
             String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
 
-            ArrayList<String> custom_list = new ArrayList<>(Arrays.asList(custom_proxy_list.split("\\r?\\n")));
+            LinkedHashMap<String, Long> custom_clean_list = new LinkedHashMap<>();;
 
-            LinkedHashMap<String, Long> custom_clean_list = new LinkedHashMap<>();
+            if (custom_proxy_list != null) {
 
-            if (!custom_list.isEmpty()) {
+                ArrayList<String> custom_list = new ArrayList<>(Arrays.asList(custom_proxy_list.split("\\r?\\n")));
 
-                Long current_time = System.currentTimeMillis();
+                if (!custom_list.isEmpty()) {
 
-                for (String proxy : custom_list) {
+                    Long current_time = System.currentTimeMillis();
 
-                    if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                        custom_clean_list.put(proxy, current_time);
+                    for (String proxy : custom_list) {
+
+                        if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
+                            custom_clean_list.put(proxy, current_time);
+                        }
                     }
                 }
-            }
 
-            if (!custom_clean_list.isEmpty()) {
+                if (!custom_clean_list.isEmpty()) {
 
-                _proxy_list.clear();
+                    _proxy_list.clear();
 
-                _proxy_list.putAll(custom_clean_list);
+                    _proxy_list.putAll(custom_clean_list);
+                }
+
             }
 
             if (custom_clean_list.isEmpty() && _proxy_list_url != null && _proxy_list_url.length() > 0) {
