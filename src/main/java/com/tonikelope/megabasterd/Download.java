@@ -46,7 +46,7 @@ import javax.swing.JComponent;
 public class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
-    public static final int PROGRESS_WATCHDOG_TIMEOUT = 60;
+    public static final int PROGRESS_WATCHDOG_TIMEOUT = 120;
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
@@ -637,7 +637,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         THREAD_POOL.execute(() -> {
 
-                            //PROGRESS WATCHDOG If a download using SmartProxy remains more than 60 seconds without receiving data, we force fatal error in order to restart it.
+                            //PROGRESS WATCHDOG If a download remains more than PROGRESS_WATCHDOG_TIMEOUT seconds without receiving data, we force fatal error in order to restart it.
                             LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
 
                             long last_progress, progress = getProgress();
@@ -655,11 +655,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                     }
                                 }
 
-                            } while (!isExit() && progress < getFile_size() && (!isTurbo() || isPaused() || progress > last_progress));
+                            } while (!isExit() && progress < getFile_size() && (isPaused() || progress > last_progress));
 
-                            if (!isExit() && progress < getFile_size() && progress <= last_progress) {
+                            if (!isExit() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
                                 stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
-                                MainPanel.getProxy_manager().refreshProxyList(); //Force SmartProxy proxy list refresh
+
+                                if (MainPanel.getProxy_manager() != null) {
+                                    MainPanel.getProxy_manager().refreshProxyList(); //Force SmartProxy proxy list refresh
+                                }
                             }
 
                             LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
@@ -831,15 +834,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 getView().printStatusNormal("Download CANCELED!");
             }
 
-        } catch (IOException ex) {
-
+        } catch (Exception ex) {
             _status_error = "I/O ERROR " + ex.getMessage();
 
             getView().printStatusError(_status_error);
 
-            LOG.log(Level.SEVERE, ex.getMessage());
-
-        } catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getMessage());
         }
 
