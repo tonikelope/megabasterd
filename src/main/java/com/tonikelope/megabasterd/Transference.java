@@ -38,6 +38,8 @@ public interface Transference {
 
     boolean isRestart();
 
+    boolean isCanceled();
+
     void unfreeze();
 
     void upWaitQueue();

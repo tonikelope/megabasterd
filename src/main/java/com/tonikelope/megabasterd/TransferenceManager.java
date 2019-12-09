@@ -247,7 +247,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void closeAllFinished() {
 
-        _transference_finished_queue.stream().filter((t) -> (!t.isStatusError())).map((t) -> {
+        _transference_finished_queue.stream().filter((t) -> (!t.isStatusError() && !t.isCanceled())).map((t) -> {
             _transference_finished_queue.remove(t);
             return t;
         }).forEachOrdered((t) -> {
@@ -487,7 +487,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     private boolean _isOKFinishedInQueue() {
 
-        return _transference_finished_queue.stream().anyMatch((t) -> (!t.isStatusError()));
+        return _transference_finished_queue.stream().anyMatch((t) -> (!t.isStatusError() && !t.isCanceled()));
     }
 
     @Override

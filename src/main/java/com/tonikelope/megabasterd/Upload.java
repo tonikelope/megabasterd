@@ -146,6 +146,10 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _temp_mac_data = null;
     }
 
+    public boolean isCanceled() {
+        return _canceled;
+    }
+
     public String getTemp_mac_data() {
         return _temp_mac_data;
     }
@@ -520,6 +524,12 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     public void close() {
 
         _closed = true;
+
+        try {
+            DBTools.deleteUpload(_file_name, _ma.getFull_email());
+        } catch (SQLException ex) {
+            LOG.log(Level.SEVERE, ex.getMessage());
+        }
 
         _main_panel.getUpload_manager().getTransference_remove_queue().add(this);
 
@@ -947,7 +957,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             getView().printStatusNormal("Upload CANCELED!");
         }
 
-        if (_status_error == null || _main_panel.isExit()) {
+        if ((_status_error == null && !_canceled) || _main_panel.isExit()) {
 
             try {
                 DBTools.deleteUpload(_file_name, _ma.getFull_email());

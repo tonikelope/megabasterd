@@ -193,6 +193,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     }
 
+    public boolean isCanceled() {
+        return _canceled;
+    }
+
     public boolean isTurbo() {
         return _turbo;
     }
@@ -492,6 +496,12 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     public void close() {
 
         _closed = true;
+
+        try {
+            deleteDownload(_url);
+        } catch (SQLException ex) {
+            LOG.log(SEVERE, null, ex);
+        }
 
         _main_panel.getDownload_manager().getTransference_remove_queue().add(this);
 
@@ -863,7 +873,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
         }
 
-        if (_status_error == null) {
+        if (_status_error == null && !_canceled) {
 
             try {
                 deleteDownload(_url);

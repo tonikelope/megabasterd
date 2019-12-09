@@ -386,7 +386,6 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     private void close_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_buttonActionPerformed
 
         _download.close();
-        close_button.setVisible(false);
     }//GEN-LAST:event_close_buttonActionPerformed
 
     private void copy_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_link_buttonActionPerformed
