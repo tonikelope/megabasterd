@@ -307,19 +307,10 @@ public class SettingsDialog extends javax.swing.JDialog {
             mega_account = DBTools.selectSettingValue("mega_account_down");
         }
 
-        if (use_mega_account) {
-
-            use_mega_label.setEnabled(true);
-            use_mega_account_down_checkbox.setSelected(true);
-            use_mega_account_down_combobox.setEnabled(true);
-            use_mega_account_down_combobox.setSelectedItem(mega_account);
-
-        } else {
-
-            use_mega_label.setEnabled(false);
-            use_mega_account_down_checkbox.setSelected(false);
-            use_mega_account_down_combobox.setEnabled(false);
-        }
+        use_mega_label.setEnabled(use_mega_account);
+        use_mega_account_down_checkbox.setSelected(use_mega_account);
+        use_mega_account_down_combobox.setEnabled(use_mega_account);
+        use_mega_account_down_combobox.setSelectedItem(mega_account);
 
         DefaultTableModel mega_model = (DefaultTableModel) mega_accounts_table.getModel();
 
@@ -481,24 +472,11 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
         }
 
-        if (use_mc_reverse) {
-
-            megacrypter_reverse_checkbox.setSelected(true);
-            megacrypter_reverse_port_spinner.setModel(new SpinnerNumberModel(Integer.parseInt(megacrypter_reverse_p), 1024, 65535, 1));
-            ((JSpinner.DefaultEditor) megacrypter_reverse_port_spinner.getEditor()).getTextField().setEditable(true);
-            megacrypter_reverse_port_spinner.setEnabled(true);
-            megacrypter_reverse_warning_label.setEnabled(true);
-
-        } else {
-
-            megacrypter_reverse_checkbox.setSelected(false);
-            megacrypter_reverse_port_spinner.setModel(new SpinnerNumberModel(Integer.parseInt(megacrypter_reverse_p), 1024, 65535, 1));
-            ((JSpinner.DefaultEditor) megacrypter_reverse_port_spinner.getEditor()).getTextField().setEditable(true);
-            megacrypter_reverse_port_label.setEnabled(false);
-            megacrypter_reverse_port_spinner.setEnabled(false);
-            megacrypter_reverse_warning_label.setEnabled(false);
-
-        }
+        megacrypter_reverse_checkbox.setSelected(use_mc_reverse);
+        megacrypter_reverse_port_spinner.setModel(new SpinnerNumberModel(Integer.parseInt(megacrypter_reverse_p), 1024, 65535, 1));
+        ((JSpinner.DefaultEditor) megacrypter_reverse_port_spinner.getEditor()).getTextField().setEditable(use_mc_reverse);
+        megacrypter_reverse_port_spinner.setEnabled(use_mc_reverse);
+        megacrypter_reverse_warning_label.setEnabled(use_mc_reverse);
 
         boolean use_smart_proxy = true;
 
@@ -509,17 +487,11 @@ public class SettingsDialog extends javax.swing.JDialog {
             use_smart_proxy = smart_proxy.equals("yes");
         }
 
-        if (use_smart_proxy) {
-
-            smart_proxy_checkbox.setSelected(true);
-            multi_slot_down_checkbox.setSelected(true);
-            rec_smart_proxy_label.setEnabled(true);
-
-        } else {
-
-            smart_proxy_checkbox.setSelected(false);
-            rec_smart_proxy_label.setEnabled(false);
-        }
+        smart_proxy_checkbox.setSelected(use_smart_proxy);
+        multi_slot_down_checkbox.setSelected(use_smart_proxy);
+        rec_smart_proxy_label.setEnabled(use_smart_proxy);
+        custom_proxy_list_label.setEnabled(use_smart_proxy);
+        custom_proxy_textarea.setEnabled(use_smart_proxy);
 
         boolean init_paused = false;
 
@@ -1255,7 +1227,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1263,7 +1235,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 91, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 111, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1583,7 +1555,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 478, Short.MAX_VALUE)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 518, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)

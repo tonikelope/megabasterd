@@ -48,7 +48,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="jTabbedPane1" pref="478" max="32767" attributes="0"/>
+              <Component id="jTabbedPane1" pref="518" max="32767" attributes="0"/>
               <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -804,7 +804,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="91" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="111" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -813,7 +813,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="91" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="111" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
