@@ -372,7 +372,7 @@ public class MegaAPI implements Serializable {
                         MainPanel.getProxy_manager().blockProxy(current_smart_proxy);
                     }
 
-                    current_smart_proxy = MainPanel.getProxy_manager().getFastestProxy();
+                    current_smart_proxy = MainPanel.getProxy_manager().getProxy();
 
                     if (current_smart_proxy != null) {
 

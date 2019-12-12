@@ -949,7 +949,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         _genFileList();
 
         swingInvoke(() -> {
-            dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance baby"));
+            dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
 
             if (_last_selected_index != -1 && _quota_ok) {
                 add_files_button.setEnabled(true);

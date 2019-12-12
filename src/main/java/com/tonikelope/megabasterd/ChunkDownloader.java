@@ -123,7 +123,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             if (FORCE_SMART_PROXY) {
 
-                _current_smart_proxy = proxy_manager.getFastestProxy();
+                _current_smart_proxy = proxy_manager.getProxy();
 
                 if (!getDownload().isTurbo()) {
                     getDownload().enableTurboMode();
@@ -161,13 +161,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         proxy_manager.blockProxy(_current_smart_proxy);
 
-                        _current_smart_proxy = proxy_manager.getFastestProxy();
+                        _current_smart_proxy = proxy_manager.getProxy();
 
                         Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy, _download.getFile_name()});
 
                     } else if (_current_smart_proxy == null) {
 
-                        _current_smart_proxy = proxy_manager.getFastestProxy();
+                        _current_smart_proxy = proxy_manager.getProxy();
 
                         if (!getDownload().isTurbo()) {
                             getDownload().enableTurboMode();

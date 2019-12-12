@@ -882,7 +882,7 @@ public class MiscTools {
 
                         }
 
-                        current_proxy = proxy_manager.getFastestProxy();
+                        current_proxy = proxy_manager.getProxy();
 
                         if (current_proxy != null) {
 

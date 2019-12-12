@@ -81,7 +81,7 @@ public class StreamChunkDownloader implements Runnable {
                             proxy_manager.blockProxy(current_smart_proxy);
                         }
 
-                        current_smart_proxy = proxy_manager.getFastestProxy();
+                        current_smart_proxy = proxy_manager.getProxy();
 
                         if (current_smart_proxy != null) {
 

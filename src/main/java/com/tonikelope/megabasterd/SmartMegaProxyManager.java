@@ -39,7 +39,7 @@ public final class SmartMegaProxyManager {
         return _proxy_list.size();
     }
 
-    public synchronized String getFastestProxy() {
+    public synchronized String getProxy() {
 
         if (_proxy_list.size() > 0) {
 
@@ -60,7 +60,7 @@ public final class SmartMegaProxyManager {
 
         refreshProxyList();
 
-        return getProxyCount() > 0 ? getFastestProxy() : null;
+        return getProxyCount() > 0 ? getProxy() : null;
     }
 
     public synchronized void blockProxy(String proxy) {
@@ -156,7 +156,7 @@ public final class SmartMegaProxyManager {
 
             } else if (!custom_clean_list.isEmpty()) {
                 swingInvoke(() -> {
-                    _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
+                    _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")*");
                 });
 
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
