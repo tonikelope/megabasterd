@@ -916,37 +916,50 @@ public class MegaAPI implements Serializable {
 
             String[] node_k = ((String) node.get("k")).split(":");
 
-            String dec_node_k = Bin2UrlBASE64(decryptKey(UrlBASE642Bin(node_k[1]), _urlBase64KeyDecode(folder_key)));
+            if (node_k.length == 2 && node_k[0] != "" && node_k[1] != "") {
 
-            HashMap at = _decAttr((String) node.get("a"), _urlBase64KeyDecode(dec_node_k));
+                try {
 
-            HashMap<String, Object> the_node = new HashMap<>();
+                    String dec_node_k = Bin2UrlBASE64(decryptKey(UrlBASE642Bin(node_k[1]), _urlBase64KeyDecode(folder_key)));
 
-            the_node.put("type", node.get("t"));
+                    HashMap at = _decAttr((String) node.get("a"), _urlBase64KeyDecode(dec_node_k));
 
-            the_node.put("parent", node.get("p"));
+                    HashMap<String, Object> the_node = new HashMap<>();
 
-            the_node.put("key", dec_node_k);
+                    the_node.put("type", node.get("t"));
 
-            if (node.get("s") != null) {
+                    the_node.put("parent", node.get("p"));
 
-                if (node.get("s") instanceof Integer) {
+                    the_node.put("key", dec_node_k);
 
-                    long size = ((Number) node.get("s")).longValue();
-                    the_node.put("size", size);
+                    if (node.get("s") != null) {
 
-                } else if (node.get("s") instanceof Long) {
+                        if (node.get("s") instanceof Integer) {
 
-                    long size = (Long) node.get("s");
-                    the_node.put("size", size);
+                            long size = ((Number) node.get("s")).longValue();
+                            the_node.put("size", size);
+
+                        } else if (node.get("s") instanceof Long) {
+
+                            long size = (Long) node.get("s");
+                            the_node.put("size", size);
+                        }
+                    }
+
+                    the_node.put("name", at.get("n"));
+
+                    the_node.put("h", node.get("h"));
+
+                    folder_nodes.put((String) node.get("h"), the_node);
+
+                } catch (Exception e) {
+                    System.out.println("WARNING: node key is not valid " + (String) node.get("k"));
                 }
+
+            } else {
+                System.out.println("WARNING: node key is not valid " + (String) node.get("k"));
             }
 
-            the_node.put("name", at.get("n"));
-
-            the_node.put("h", node.get("h"));
-
-            folder_nodes.put((String) node.get("h"), the_node);
         }
 
         return folder_nodes;
