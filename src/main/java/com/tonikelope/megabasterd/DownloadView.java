@@ -162,6 +162,8 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         slot_status_label = new javax.swing.JLabel();
         queue_up_button = new javax.swing.JButton();
         queue_down_button = new javax.swing.JButton();
+        queue_top_button = new javax.swing.JButton();
+        queue_bottom_button = new javax.swing.JButton();
 
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 3, true));
 
@@ -288,6 +290,24 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
+        queue_top_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        queue_top_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/arriba_1.png"))); // NOI18N
+        queue_top_button.setText("TOP");
+        queue_top_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                queue_top_buttonActionPerformed(evt);
+            }
+        });
+
+        queue_bottom_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        queue_bottom_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/abajo_1.png"))); // NOI18N
+        queue_bottom_button.setText("BOTTOM");
+        queue_bottom_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                queue_bottom_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -303,9 +323,13 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(slots_label))
                             .addGroup(layout.createSequentialGroup()
-                                .addComponent(queue_up_button, javax.swing.GroupLayout.PREFERRED_SIZE, 43, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(queue_top_button)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(queue_up_button, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                                 .addComponent(queue_down_button, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(queue_bottom_button)
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(slots_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -338,9 +362,11 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(queue_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)
-                    .addComponent(queue_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, 0)
+                    .addComponent(queue_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(queue_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(queue_top_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(queue_bottom_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(slots_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(slots_label)
@@ -447,6 +473,32 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             });
         });
     }//GEN-LAST:event_queue_down_buttonActionPerformed
+
+    private void queue_top_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queue_top_buttonActionPerformed
+        // TODO add your handling code here:
+
+        queue_top_button.setEnabled(false);
+
+        THREAD_POOL.execute(() -> {
+            _download.topWaitQueue();
+            swingInvoke(() -> {
+                queue_top_button.setEnabled(true);
+            });
+        });
+
+    }//GEN-LAST:event_queue_top_buttonActionPerformed
+
+    private void queue_bottom_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_queue_bottom_buttonActionPerformed
+        // TODO add your handling code here:
+        queue_bottom_button.setEnabled(false);
+
+        THREAD_POOL.execute(() -> {
+            _download.bottomWaitQueue();
+            swingInvoke(() -> {
+                queue_bottom_button.setEnabled(true);
+            });
+        });
+    }//GEN-LAST:event_queue_bottom_buttonActionPerformed
 
     @Override
     public void pause() {
@@ -596,7 +648,9 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     private javax.swing.JButton open_folder_button;
     private javax.swing.JButton pause_button;
     private javax.swing.JProgressBar progress_pbar;
+    private javax.swing.JButton queue_bottom_button;
     private javax.swing.JButton queue_down_button;
+    private javax.swing.JButton queue_top_button;
     private javax.swing.JButton queue_up_button;
     private javax.swing.JButton restart_button;
     private javax.swing.JLabel slot_status_label;

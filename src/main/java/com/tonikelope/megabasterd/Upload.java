@@ -1187,6 +1187,16 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     }
 
     @Override
+    public void bottomWaitQueue() {
+        _main_panel.getUpload_manager().bottomWaitQueue(this);
+    }
+
+    @Override
+    public void topWaitQueue() {
+        _main_panel.getUpload_manager().topWaitQueue(this);
+    }
+
+    @Override
     public int getSlotsCount() {
         return getChunkworkers().size();
     }

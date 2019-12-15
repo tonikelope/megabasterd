@@ -1666,6 +1666,16 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     @Override
+    public void bottomWaitQueue() {
+        _main_panel.getDownload_manager().bottomWaitQueue(this);
+    }
+
+    @Override
+    public void topWaitQueue() {
+        _main_panel.getDownload_manager().topWaitQueue(this);
+    }
+
+    @Override
     public boolean isRestart() {
         return _restart;
     }

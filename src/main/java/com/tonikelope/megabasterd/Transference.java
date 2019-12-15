@@ -46,6 +46,10 @@ public interface Transference {
 
     void downWaitQueue();
 
+    void bottomWaitQueue();
+
+    void topWaitQueue();
+
     void checkSlotsAndWorkers();
 
     ConcurrentLinkedQueue<Long> getPartialProgress();

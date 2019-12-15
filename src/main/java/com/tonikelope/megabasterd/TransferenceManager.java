@@ -285,6 +285,83 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         secureNotify();
     }
 
+    public void topWaitQueue(Transference t) {
+
+        synchronized (getWait_queue_lock()) {
+
+            ArrayList<Transference> wait_array = new ArrayList();
+
+            wait_array.add(t);
+
+            for (Transference t1 : getTransference_waitstart_queue()) {
+
+                if (t1 != t) {
+                    wait_array.add(t1);
+                }
+            }
+
+            getTransference_waitstart_queue().clear();
+
+            getTransference_waitstart_queue().addAll(wait_array);
+
+            getTransference_waitstart_queue().forEach((t1) -> {
+                swingInvoke(() -> {
+                    getScroll_panel().remove((Component) t1.getView());
+                    getScroll_panel().add((Component) t1.getView());
+                });
+            });
+            getTransference_finished_queue().forEach((t1) -> {
+                swingInvoke(() -> {
+                    getScroll_panel().remove((Component) t1.getView());
+                    getScroll_panel().add((Component) t1.getView());
+                });
+            });
+
+            _frozen = false;
+        }
+
+        secureNotify();
+    }
+
+    public void bottomWaitQueue(Transference t) {
+
+        synchronized (getWait_queue_lock()) {
+
+            ArrayList<Transference> wait_array = new ArrayList();
+
+            for (Transference t1 : getTransference_waitstart_queue()) {
+
+                if (t1 != t) {
+                    wait_array.add(t1);
+                }
+            }
+
+            wait_array.add(t);
+
+            getTransference_waitstart_queue().clear();
+
+            getTransference_waitstart_queue().addAll(wait_array);
+
+            getTransference_waitstart_queue().forEach((t1) -> {
+                swingInvoke(() -> {
+                    getScroll_panel().remove((Component) t1.getView());
+                    getScroll_panel().add((Component) t1.getView());
+                });
+            });
+            getTransference_finished_queue().forEach((t1) -> {
+                swingInvoke(() -> {
+                    getScroll_panel().remove((Component) t1.getView());
+                    getScroll_panel().add((Component) t1.getView());
+                });
+            });
+
+            _frozen = false;
+        }
+
+        secureNotify();
+
+    }
+
     public void upWaitQueue(Transference t) {
 
         synchronized (getWait_queue_lock()) {
