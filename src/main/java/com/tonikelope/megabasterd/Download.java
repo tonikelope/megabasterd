@@ -524,6 +524,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         swingInvoke(() -> {
             getView().getQueue_down_button().setVisible(false);
             getView().getQueue_up_button().setVisible(false);
+            getView().getQueue_top_button().setVisible(false);
+            getView().getQueue_bottom_button().setVisible(false);
             getView().getClose_button().setVisible(false);
             getView().getCopy_link_button().setVisible(true);
             getView().getOpen_folder_button().setVisible(true);

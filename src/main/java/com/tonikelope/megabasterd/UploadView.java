@@ -26,6 +26,14 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
         return cbc_label;
     }
 
+    public JButton getQueue_bottom_button() {
+        return queue_bottom_button;
+    }
+
+    public JButton getQueue_top_button() {
+        return queue_top_button;
+    }
+
     public JLabel getSlot_status_label() {
         return slot_status_label;
     }

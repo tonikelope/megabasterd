@@ -25,6 +25,14 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     private final Download _download;
 
+    public JButton getQueue_bottom_button() {
+        return queue_bottom_button;
+    }
+
+    public JButton getQueue_top_button() {
+        return queue_top_button;
+    }
+
     public JButton getQueue_down_button() {
         return queue_down_button;
     }
