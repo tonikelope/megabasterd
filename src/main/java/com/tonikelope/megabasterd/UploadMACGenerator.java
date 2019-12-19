@@ -191,6 +191,8 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                     mac = true;
                 }
 
+                _upload.setTemp_mac_data(String.valueOf(tot) + "#" + String.valueOf(chunk_id) + "#" + Bin2BASE64(i32a2bin(file_mac)));
+
                 if (mac) {
 
                     int[] meta_mac = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};
@@ -199,9 +201,6 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
                     LOG.log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
 
-                } else {
-
-                    _upload.setTemp_mac_data(String.valueOf(tot) + "#" + String.valueOf(chunk_id) + "#" + Bin2BASE64(i32a2bin(file_mac)));
                 }
             }
 
