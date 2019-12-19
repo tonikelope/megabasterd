@@ -667,9 +667,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                     }
                                 }
 
-                            } while (!isExit() && progress < getFile_size() && (isPaused() || progress > last_progress));
+                            } while (!isExit() && !_thread_pool.isShutdown() && progress < getFile_size() && (isPaused() || progress > last_progress));
 
-                            if (!isExit() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
+                            if (!isExit() && !_thread_pool.isShutdown() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
                                 stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
 
                                 if (MainPanel.getProxy_manager() != null) {

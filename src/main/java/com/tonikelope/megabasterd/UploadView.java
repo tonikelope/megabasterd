@@ -120,7 +120,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         status_label.setText("");
 
-        for (JComponent c : new JComponent[]{cbc_label, slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, file_name_label, close_button, restart_button, file_size_label}) {
+        for (JComponent c : new JComponent[]{queue_up_button, queue_down_button, queue_top_button, queue_bottom_button, cbc_label, slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, file_name_label, close_button, restart_button, file_size_label}) {
 
             c.setVisible(false);
         }

@@ -122,7 +122,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         status_label.setText("");
 
-        for (JComponent c : new JComponent[]{queue_up_button, queue_down_button, slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label, open_folder_button}) {
+        for (JComponent c : new JComponent[]{queue_top_button, queue_bottom_button, queue_up_button, queue_down_button, slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label, open_folder_button}) {
 
             c.setVisible(false);
         }
