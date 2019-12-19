@@ -1064,6 +1064,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             getView().getClose_button().setVisible(true);
             getView().getQueue_up_button().setVisible(true);
             getView().getQueue_down_button().setVisible(true);
+            getView().getQueue_top_button().setVisible(true);
+            getView().getQueue_bottom_button().setVisible(true);
         });
 
     }
