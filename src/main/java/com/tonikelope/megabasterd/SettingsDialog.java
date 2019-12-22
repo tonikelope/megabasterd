@@ -539,6 +539,8 @@ public class SettingsDialog extends javax.swing.JDialog {
         this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("English"));
 
         this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
+        
+        this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Traditional Chinese"));
 
         if (language == null) {
             language = MainPanel.DEFAULT_LANGUAGE;
@@ -548,6 +550,8 @@ public class SettingsDialog extends javax.swing.JDialog {
             this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("English"));
         } else if (language.equals("ES")) {
             this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
+        }else if (language.equals("TC")) {
+            this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Traditional Chinese"));
         }
 
         String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
@@ -1635,6 +1639,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                 language = "EN";
             } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Spanish"))) {
                 language = "ES";
+            }else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Traditional Chinese"))) {
+                 language = "TC";
             }
 
             settings.put("language", language);

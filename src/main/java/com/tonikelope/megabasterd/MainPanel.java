@@ -62,7 +62,7 @@ public final class MainPanel {
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = true;
     public static final double FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT = 0.7;
-    public static Font GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
+    public static Font GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttf");
     public static final float ZOOM_FACTOR = 1.0f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
@@ -598,16 +598,16 @@ public final class MainPanel {
         if (_font != null) {
             if (_font.equals("DEFAULT")) {
 
-                GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
+               GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttc");
 
             } else {
-
-                GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttc");
-
+      
+                GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
+                
             }
         } else {
 
-            GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
+            GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttf");
         }
 
         String def_slots = selectSettingValue("default_slots_down");
