@@ -44,6 +44,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Split content in different uploads", "Separar contenido en diferentes subidas");
         _addTranslation("Merge content in the same upload", "Juntar todo en la misma subida");
         _addTranslation("How do you want to proceed?", "¿Qué quieres hacer?");
+        _addTranslation("Put on TOP of waiting queue", "Poner en lo alto de la cola de espera");
         _addTranslation("TOP", "ENCIMA DE TODO");
         _addTranslation("BOTTOM", "DEBAJO DE TODO");
         _addTranslation("Freeze transferences before start", "Congelar transferencias antes de empezar");

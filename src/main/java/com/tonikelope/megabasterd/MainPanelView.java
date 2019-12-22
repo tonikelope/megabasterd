@@ -306,7 +306,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link);
+                                Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, dialog.getPriority_checkbox().isSelected());
 
                                 getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
 
@@ -938,7 +938,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
-                Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", dialog.getLinks_textarea().getText(), 0));
 
                 Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
 
@@ -967,7 +967,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", dialog.getLinks_textarea().getText(), 1));
 
                 dlc.stream().map((d) -> CryptTools.decryptDLC(d, _main_panel)).forEachOrdered((links) -> {
-                    links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^/\r\n]+/(#[^\r\n!]*?)?![^\r\n!]+![^\r\n]+", link, 0) != null)).forEachOrdered((link) -> {
+                    links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^\r\n](#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", link, 0) != null)).forEachOrdered((link) -> {
                         urls.add(link);
                     });
                 });
@@ -1023,7 +1023,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                             if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                                download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), true, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null);
+                                                download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), true, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
 
                                                 getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
@@ -1049,7 +1049,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                    download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null);
+                                    download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
 
                                     getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 

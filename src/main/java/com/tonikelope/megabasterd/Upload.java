@@ -74,10 +74,12 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private volatile boolean _closed;
     private volatile boolean _canceled;
     private volatile String _temp_mac_data;
+    private final boolean _priority;
 
-    public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link) {
+    public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean priority) {
 
         _notified = false;
+        _priority = priority;
         _frozen = main_panel.isInit_paused();
         _provision_ok = true;
         _status_error = null;
@@ -114,6 +116,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     public Upload(Upload upload) {
 
         _notified = false;
+        _priority = upload.isPriority();
         _provision_ok = true;
         _status_error = null;
         _auto_retry_on_error = true;
@@ -144,6 +147,10 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _progress_meter = new ProgressMeter(this);
         _file_meta_mac = null;
         _temp_mac_data = null;
+    }
+
+    public boolean isPriority() {
+        return _priority;
     }
 
     public boolean isCanceled() {
@@ -1213,10 +1220,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     @Override
     public void unfreeze() {
 
-        swingInvoke(() -> {
-
-            getView().printStatusNormal(getView().getStatus_label().getText().replaceFirst("^\\([^)]+\\) ", ""));
-        });
+        getView().printStatusNormal(getView().getStatus_label().getText().replaceFirst("^\\([^)]+\\) ", ""));
 
         _frozen = false;
     }

@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
@@ -123,6 +124,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
         dlc_button = new javax.swing.JButton();
         use_mega_account_down_label = new javax.swing.JLabel();
         use_mega_account_down_combobox = new javax.swing.JComboBox<>();
+        priority_checkbox = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("Link Grabber");
@@ -185,6 +187,10 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
             }
         });
 
+        priority_checkbox.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        priority_checkbox.setText("Put on TOP of waiting queue");
+        priority_checkbox.setDoubleBuffered(true);
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -193,7 +199,8 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 746, Short.MAX_VALUE)
+                        .addComponent(priority_checkbox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(dance_button))
                     .addComponent(links_scrollpane)
                     .addGroup(layout.createSequentialGroup()
@@ -231,7 +238,9 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                     .addComponent(use_mega_account_down_label)
                     .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(dance_button)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(dance_button)
+                    .addComponent(priority_checkbox))
                 .addContainerGap())
         );
 
@@ -428,6 +437,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
     private javax.swing.JLabel links_label;
     private javax.swing.JScrollPane links_scrollpane;
     private javax.swing.JTextArea links_textarea;
+    private javax.swing.JCheckBox priority_checkbox;
     private javax.swing.JComboBox<String> use_mega_account_down_combobox;
     private javax.swing.JLabel use_mega_account_down_label;
     // End of variables declaration//GEN-END:variables
@@ -441,5 +451,10 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
             links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
         });
     }
+
+    public JCheckBox getPriority_checkbox() {
+        return priority_checkbox;
+    }
+
     private static final Logger LOG = Logger.getLogger(LinkGrabberDialog.class.getName());
 }

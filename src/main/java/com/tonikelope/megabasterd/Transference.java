@@ -30,6 +30,8 @@ public interface Transference {
 
     void close();
 
+    boolean isPriority();
+
     boolean isPaused();
 
     boolean isStopped();

@@ -28,7 +28,8 @@
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="0" pref="746" max="32767" attributes="0"/>
+                      <Component id="priority_checkbox" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                       <Component id="dance_button" max="-2" attributes="0"/>
                   </Group>
                   <Component id="links_scrollpane" max="32767" attributes="0"/>
@@ -76,7 +77,10 @@
                   <Component id="use_mega_account_down_combobox" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace type="unrelated" max="-2" attributes="0"/>
-              <Component id="dance_button" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="dance_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="priority_checkbox" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -201,6 +205,15 @@
       <AuxValues>
         <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
       </AuxValues>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="priority_checkbox">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="14" style="1"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Put on TOP of waiting queue"/>
+        <Property name="doubleBuffered" type="boolean" value="true"/>
+      </Properties>
     </Component>
   </SubComponents>
 </Form>

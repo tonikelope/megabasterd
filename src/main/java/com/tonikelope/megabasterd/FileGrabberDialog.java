@@ -46,6 +46,10 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     private int _last_selected_index;
     private List<File> _drag_drop_files;
 
+    public JCheckBox getPriority_checkbox() {
+        return priority_checkbox;
+    }
+
     public JCheckBox getUpload_log_checkbox() {
         return upload_log_checkbox;
     }
@@ -227,6 +231,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         add_folder_button = new javax.swing.JButton();
         add_files_button = new javax.swing.JButton();
         upload_log_checkbox = new javax.swing.JCheckBox();
+        priority_checkbox = new javax.swing.JCheckBox();
         dance_button = new javax.swing.JButton();
         total_file_size_label = new javax.swing.JLabel();
         warning_label = new javax.swing.JLabel();
@@ -254,7 +259,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 305, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Upload info"));
@@ -310,10 +315,15 @@ public class FileGrabberDialog extends javax.swing.JDialog {
             }
         });
 
-        upload_log_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        upload_log_checkbox.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         upload_log_checkbox.setText("Enable log file");
         upload_log_checkbox.setDoubleBuffered(true);
         upload_log_checkbox.setEnabled(false);
+
+        priority_checkbox.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        priority_checkbox.setText("Put on TOP of waiting queue");
+        priority_checkbox.setDoubleBuffered(true);
+        priority_checkbox.setEnabled(false);
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -324,7 +334,8 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(upload_log_checkbox)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(priority_checkbox))
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(dir_name_label)
@@ -358,7 +369,9 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                     .addComponent(add_files_button)
                     .addComponent(add_folder_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(upload_log_checkbox)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(upload_log_checkbox)
+                    .addComponent(priority_checkbox))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -461,6 +474,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         dir_name_textfield.setEnabled(false);
         dir_name_label.setEnabled(false);
         upload_log_checkbox.setEnabled(false);
+        priority_checkbox.setEnabled(false);
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -518,6 +532,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                     skip_button.setEnabled(root_childs);
                     skip_rest_button.setEnabled(root_childs);
                     upload_log_checkbox.setEnabled(root_childs);
+                    priority_checkbox.setEnabled(root_childs);
                 });
             });
 
@@ -543,6 +558,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
             dir_name_textfield.setEnabled(root_childs);
             dir_name_label.setEnabled(root_childs);
             upload_log_checkbox.setEnabled(root_childs);
+            priority_checkbox.setEnabled(root_childs);
 
         }
     }//GEN-LAST:event_add_files_buttonActionPerformed
@@ -560,6 +576,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         dir_name_textfield.setEnabled(false);
         dir_name_label.setEnabled(false);
         upload_log_checkbox.setEnabled(false);
+        priority_checkbox.setEnabled(false);
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -609,6 +626,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                     skip_button.setEnabled(root_childs);
                     skip_rest_button.setEnabled(root_childs);
                     upload_log_checkbox.setEnabled(root_childs);
+                    priority_checkbox.setEnabled(root_childs);
                 });
             });
 
@@ -634,6 +652,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
             dir_name_textfield.setEnabled(root_childs);
             dir_name_label.setEnabled(root_childs);
             upload_log_checkbox.setEnabled(root_childs);
+            priority_checkbox.setEnabled(root_childs);
 
         }
 
@@ -705,7 +724,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
                                 used_space_label.setForeground(used_space_color);
 
-                                for (JComponent c : new JComponent[]{used_space_label, add_files_button, add_folder_button, account_combobox, account_label, upload_log_checkbox}) {
+                                for (JComponent c : new JComponent[]{used_space_label, add_files_button, add_folder_button, account_combobox, account_label, upload_log_checkbox, priority_checkbox}) {
 
                                     c.setEnabled(true);
                                 }
@@ -733,6 +752,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                                 add_files_button.setEnabled(false);
                                 add_folder_button.setEnabled(false);
                                 upload_log_checkbox.setEnabled(false);
+                                priority_checkbox.setEnabled(false);
                                 dir_name_textfield.setEnabled(false);
                                 dir_name_label.setEnabled(false);
                             });
@@ -756,6 +776,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                         add_files_button.setEnabled(false);
                         add_folder_button.setEnabled(false);
                         upload_log_checkbox.setEnabled(false);
+                        priority_checkbox.setEnabled(false);
                         dir_name_textfield.setEnabled(false);
                         dir_name_label.setEnabled(false);
                     });
@@ -898,6 +919,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     private javax.swing.JScrollPane file_tree_scrollpane;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JCheckBox priority_checkbox;
     private javax.swing.JButton skip_button;
     private javax.swing.JButton skip_rest_button;
     private javax.swing.JLabel total_file_size_label;
@@ -919,6 +941,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
             dir_name_textfield.setEnabled(false);
             dir_name_label.setEnabled(false);
             upload_log_checkbox.setEnabled(false);
+            priority_checkbox.setEnabled(false);
             total_file_size_label.setText("[0 B]");
         });
 
@@ -964,6 +987,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 dir_name_textfield.setEnabled(true);
                 dir_name_label.setEnabled(true);
                 upload_log_checkbox.setEnabled(true);
+                priority_checkbox.setEnabled(true);
             }
         });
     }

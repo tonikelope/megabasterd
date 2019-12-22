@@ -5,7 +5,6 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -103,25 +102,8 @@ public class DownloadManager extends TransferenceManager {
 
             increment_total_size(download.getFile_size());
 
-            if (download.isRestart()) {
+            getTransference_waitstart_aux_queue().add(download);
 
-                synchronized (getWait_queue_lock()) {
-
-                    ConcurrentLinkedQueue<Transference> aux = new ConcurrentLinkedQueue<>();
-
-                    aux.addAll(getTransference_waitstart_queue());
-
-                    getTransference_waitstart_queue().clear();
-
-                    getTransference_waitstart_queue().add(download);
-
-                    getTransference_waitstart_queue().addAll(aux);
-
-                }
-
-            } else {
-                getTransference_waitstart_queue().add(download);
-            }
         }
     }
 

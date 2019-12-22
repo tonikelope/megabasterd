@@ -179,81 +179,80 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
 
         final Dialog tthis = this;
 
-        swingInvoke(() -> {
-            try {
-                boolean error = false;
+        try {
+            boolean error = false;
 
-                String stream_link = null;
+            String stream_link = null;
 
-                String link = URLDecoder.decode(original_link_textfield.getText(), "UTF-8").trim();
+            String link = URLDecoder.decode(original_link_textfield.getText(), "UTF-8").trim();
 
-                if (link.length() > 0) {
+            if (link.length() > 0) {
 
-                    try {
+                try {
 
-                        if (findFirstRegex("://enc", link, 0) != null) {
+                    if (findFirstRegex("://enc", link, 0) != null) {
 
-                            link = CryptTools.decryptMegaDownloaderLink(link);
+                        link = CryptTools.decryptMegaDownloaderLink(link);
 
-                        } else if (findFirstRegex("://elc", link, 0) != null) {
+                    } else if (findFirstRegex("://elc", link, 0) != null) {
 
-                            HashSet links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
+                        HashSet links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
 
-                            if (links != null) {
+                        if (links != null) {
 
-                                link = (String) links.iterator().next();
-                            }
+                            link = (String) links.iterator().next();
                         }
-
-                    } catch (Exception ex) {
-
-                        error = true;
-
-                        LOG.log(Level.SEVERE, ex.getMessage());
                     }
 
-                    String data;
+                } catch (Exception ex) {
 
-                    if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
+                    error = true;
 
-                        String selected_account = (String) use_mega_account_down_combobox.getSelectedItem();
+                    LOG.log(Level.SEVERE, ex.getMessage());
+                }
 
-                        data = Bin2UrlBASE64(((selected_account != null ? selected_account : "") + "|" + link).getBytes("UTF-8"));
+                String data;
 
-                        stream_link = "http://localhost:1337/video/" + data;
+                if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
 
-                    } else {
+                    String selected_account = (String) use_mega_account_down_combobox.getSelectedItem();
 
-                        error = true;
-                    }
+                    data = Bin2UrlBASE64(((selected_account != null ? selected_account : "") + "|" + link).getBytes("UTF-8"));
+
+                    stream_link = "http://localhost:1337/video/" + data;
 
                 } else {
 
                     error = true;
                 }
 
-                if (error) {
+            } else {
 
-                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Please, paste a Mega/MegaCrypter/ELC link!"), "Error", JOptionPane.ERROR_MESSAGE);
-
-                    original_link_textfield.setText("");
-
-                    dance_button.setEnabled(true);
-
-                    original_link_textfield.setEnabled(true);
-
-                } else {
-
-                    _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
-                    copyTextToClipboard(stream_link);
-                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
-                    dispose();
-                    getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
-                }
-            } catch (UnsupportedEncodingException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                error = true;
             }
-        });
+
+            if (error) {
+
+                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Please, paste a Mega/MegaCrypter/ELC link!"), "Error", JOptionPane.ERROR_MESSAGE);
+
+                original_link_textfield.setText("");
+
+                dance_button.setEnabled(true);
+
+                original_link_textfield.setEnabled(true);
+
+            } else {
+
+                _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
+                copyTextToClipboard(stream_link);
+                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
+                dispose();
+                getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
+            }
+        } catch (UnsupportedEncodingException ex) {
+            LOG.log(Level.SEVERE, ex.getMessage());
+        }
+
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void use_mega_account_down_comboboxItemStateChanged(java.awt.event.ItemEvent evt) {//GEN-FIRST:event_use_mega_account_down_comboboxItemStateChanged

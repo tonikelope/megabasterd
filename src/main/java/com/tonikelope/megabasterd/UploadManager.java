@@ -3,7 +3,6 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 
@@ -30,9 +29,6 @@ public class UploadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference upload) {
-        swingInvoke(() -> {
-            getScroll_panel().add(((Upload) upload).getView());
-        });
 
         ((Upload) upload).provisionIt();
 
@@ -40,23 +36,7 @@ public class UploadManager extends TransferenceManager {
 
             increment_total_size(upload.getFile_size());
 
-            if (upload.isRestart()) {
-                synchronized (getWait_queue_lock()) {
-
-                    ConcurrentLinkedQueue<Transference> aux = new ConcurrentLinkedQueue<>();
-
-                    aux.addAll(getTransference_waitstart_queue());
-
-                    getTransference_waitstart_queue().clear();
-
-                    getTransference_waitstart_queue().add(upload);
-
-                    getTransference_waitstart_queue().addAll(aux);
-
-                }
-            } else {
-                getTransference_waitstart_queue().add(upload);
-            }
+            getTransference_waitstart_aux_queue().add(upload);
 
         } else {
 

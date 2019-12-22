@@ -25,6 +25,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private final ConcurrentLinkedQueue<Runnable> _transference_preprocess_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_provision_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_waitstart_queue;
+    private final ConcurrentLinkedQueue<Transference> _transference_waitstart_aux_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_remove_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_finished_queue;
     private final ConcurrentLinkedQueue<Transference> _transference_running_list;
@@ -77,6 +78,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _wait_queue_lock = new Object();
         _transference_preprocess_global_queue = new ConcurrentLinkedQueue<>();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
+        _transference_waitstart_aux_queue = new ConcurrentLinkedQueue<>();
         _transference_provision_queue = new ConcurrentLinkedQueue<>();
         _transference_remove_queue = new ConcurrentLinkedQueue<>();
         _transference_finished_queue = new ConcurrentLinkedQueue<>();
@@ -167,7 +169,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _starting_transferences = starting;
     }
 
-    public Object getQueue_sort_lock() {
+    public Object geWaitStartAuxQueue_sort_lock() {
         return _queue_sort_lock;
     }
 
@@ -469,17 +471,21 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         secureNotify();
     }
 
-    protected void sortTransferenceWaitStartQueue() {
+    public ConcurrentLinkedQueue<Transference> getTransference_waitstart_aux_queue() {
+        return _transference_waitstart_aux_queue;
+    }
+
+    protected void sortTransferenceWaitStartAuxQueue() {
 
         synchronized (_queue_sort_lock) {
 
-            ArrayList<Transference> trans_list = new ArrayList(getTransference_waitstart_queue());
+            ArrayList<Transference> trans_list = new ArrayList(getTransference_waitstart_aux_queue());
 
             trans_list.sort((Transference o1, Transference o2) -> o1.getFile_name().compareToIgnoreCase(o2.getFile_name()));
 
-            getTransference_waitstart_queue().clear();
+            getTransference_waitstart_aux_queue().clear();
 
-            getTransference_waitstart_queue().addAll(trans_list);
+            getTransference_waitstart_aux_queue().addAll(trans_list);
         }
     }
 
@@ -625,6 +631,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                     setPreprocessing_transferences(false);
 
+                    synchronized (getTransference_preprocess_queue()) {
+                        getTransference_preprocess_queue().notifyAll();
+                    }
+
                     secureNotify();
                 });
             }
@@ -646,21 +656,49 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                             provision(transference);
 
                         }
+
+                        if (isPreprocessing_transferences()) {
+
+                            synchronized (getTransference_preprocess_queue()) {
+                                try {
+                                    getTransference_preprocess_queue().wait(1000);
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                            }
+                        }
                     }
 
-                    synchronized (getQueue_sort_lock()) {
+                    synchronized (geWaitStartAuxQueue_sort_lock()) {
 
-                        sortTransferenceWaitStartQueue();
-                        getTransference_waitstart_queue().forEach((up) -> {
+                        sortTransferenceWaitStartAuxQueue();
+
+                        if (getTransference_waitstart_aux_queue().peek().isPriority()) {
+
+                            ArrayList<Transference> trans_list = new ArrayList(getTransference_waitstart_queue());
+
+                            trans_list.addAll(0, getTransference_waitstart_aux_queue());
+
+                            getTransference_waitstart_queue().clear();
+
+                            getTransference_waitstart_queue().addAll(trans_list);
+
+                        } else {
+                            getTransference_waitstart_queue().addAll(getTransference_waitstart_aux_queue());
+                        }
+
+                        getTransference_waitstart_aux_queue().clear();
+
+                        getTransference_waitstart_queue().forEach((t) -> {
                             swingInvoke(() -> {
-                                getScroll_panel().remove((Component) up.getView());
-                                getScroll_panel().add((Component) up.getView());
+                                getScroll_panel().remove((Component) t.getView());
+                                getScroll_panel().add((Component) t.getView());
                             });
                         });
-                        getTransference_finished_queue().forEach((up) -> {
+                        getTransference_finished_queue().forEach((t) -> {
                             swingInvoke(() -> {
-                                getScroll_panel().remove((Component) up.getView());
-                                getScroll_panel().add((Component) up.getView());
+                                getScroll_panel().remove((Component) t.getView());
+                                getScroll_panel().add((Component) t.getView());
                             });
                         });
 

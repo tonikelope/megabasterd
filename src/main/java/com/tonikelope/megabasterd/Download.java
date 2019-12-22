@@ -100,9 +100,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile boolean _turbo;
     private volatile boolean _closed;
     private final Object _progress_watchdog_lock;
+    private final boolean _priority;
 
-    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir) {
+    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir, boolean priority) {
 
+        _priority = priority;
         _paused_workers = 0;
         _ma = ma;
         _frozen = main_panel.isInit_paused();
@@ -149,6 +151,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     public Download(Download download) {
 
+        _priority = download.isPriority();
         _paused_workers = 0;
         _ma = download.getMa();
         _last_chunk_id_dispatched = 0L;
@@ -191,6 +194,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _custom_chunks_dir = download.getCustom_chunks_dir();
         _turbo = false;
 
+    }
+
+    public boolean isPriority() {
+        return _priority;
     }
 
     public boolean isCanceled() {
@@ -1651,10 +1658,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     @Override
     public void unfreeze() {
-        swingInvoke(() -> {
 
-            getView().printStatusNormal(getView().getStatus_label().getText().replaceFirst("^\\([^)]+\\) ", ""));
-        });
+        getView().printStatusNormal(getView().getStatus_label().getText().replaceFirst("^\\([^)]+\\) ", ""));
 
         _frozen = false;
     }
