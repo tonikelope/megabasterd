@@ -38,7 +38,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private int _max_running_trans;
     private final MainPanel _main_panel;
     private final Object _secure_notify_lock;
-    private final Object _queue_sort_lock;
+    private final Object _wait_aux_queue_sort_lock;
     private final Object _wait_queue_lock;
     private boolean _notified;
     private volatile boolean _removing_transferences;
@@ -74,7 +74,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _secure_notify_lock = new Object();
         _total_size_lock = new Object();
         _total_progress_lock = new Object();
-        _queue_sort_lock = new Object();
+        _wait_aux_queue_sort_lock = new Object();
         _wait_queue_lock = new Object();
         _transference_preprocess_global_queue = new ConcurrentLinkedQueue<>();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
@@ -170,7 +170,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     }
 
     public Object geWaitStartAuxQueue_sort_lock() {
-        return _queue_sort_lock;
+        return _wait_aux_queue_sort_lock;
     }
 
     public void setPreprocessing_transferences(boolean preprocessing) {
@@ -226,7 +226,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     }
 
     public ConcurrentLinkedQueue<Transference> getTransference_waitstart_queue() {
-        synchronized (_queue_sort_lock) {
+        synchronized (_wait_aux_queue_sort_lock) {
             return _transference_waitstart_queue;
         }
     }
@@ -477,7 +477,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     protected void sortTransferenceWaitStartAuxQueue() {
 
-        synchronized (_queue_sort_lock) {
+        synchronized (_wait_aux_queue_sort_lock) {
 
             ArrayList<Transference> trans_list = new ArrayList(getTransference_waitstart_aux_queue());
 
@@ -491,17 +491,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     protected void unfreezeTransferenceWaitStartQueue() {
 
-        synchronized (_queue_sort_lock) {
+        synchronized (_wait_aux_queue_sort_lock) {
 
-            ArrayList<Transference> trans_list = new ArrayList(getTransference_waitstart_queue());
-
-            trans_list.forEach((t) -> {
+            getTransference_waitstart_queue().forEach((t) -> {
                 t.unfreeze();
             });
-
-            getTransference_waitstart_queue().clear();
-
-            getTransference_waitstart_queue().addAll(trans_list);
 
             _frozen = false;
         }
@@ -648,7 +642,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 THREAD_POOL.execute(() -> {
                     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
-                    while (!getTransference_provision_queue().isEmpty()) {
+                    while (!getTransference_provision_queue().isEmpty() || isPreprocessing_transferences()) {
                         Transference transference = getTransference_provision_queue().poll();
 
                         if (transference != null) {
