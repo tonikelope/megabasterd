@@ -46,7 +46,7 @@ import javax.swing.JComponent;
 public class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
-    public static final int PROGRESS_WATCHDOG_TIMEOUT = 120;
+    public static final int PROGRESS_WATCHDOG_TIMEOUT = 180;
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
@@ -413,7 +413,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         if (!isExit()) {
             getMain_panel().getDownload_manager().setPaused_all(false);
-            Download.this.stopDownloader();
+            _canceled = true;
+            stopDownloader();
         }
     }
 
@@ -657,7 +658,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         THREAD_POOL.execute(() -> {
 
                             //PROGRESS WATCHDOG If a download remains more than PROGRESS_WATCHDOG_TIMEOUT seconds without receiving data, we force fatal error in order to restart it.
-                            LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
+                            LOG.log(Level.INFO, "{0} SMART PROXY PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
 
                             long last_progress, progress = getProgress();
 
@@ -674,17 +675,17 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                     }
                                 }
 
-                            } while (!isExit() && !_thread_pool.isShutdown() && progress < getFile_size() && (isPaused() || progress > last_progress));
+                            } while (!isExit() && !_thread_pool.isShutdown() && progress < getFile_size() && (!isTurbo() || isPaused() || progress > last_progress));
 
-                            if (!isExit() && !_thread_pool.isShutdown() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
-                                stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
+                            if (!isExit() && isTurbo() && !_thread_pool.isShutdown() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
+                                stopDownloader("SMART PROXY PROGRESS WATCHDOG TIMEOUT!");
 
                                 if (MainPanel.getProxy_manager() != null) {
                                     MainPanel.getProxy_manager().refreshProxyList(); //Force SmartProxy proxy list refresh
                                 }
                             }
 
-                            LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
+                            LOG.log(Level.INFO, "{0} SMART PROXY PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
 
                         });
 
@@ -729,6 +730,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         });
 
                         if (_progress == _file_size) {
+
                             if (_file.length() != _file_size) {
 
                                 throw new IOException("El tamaño del fichero es incorrecto!");
@@ -800,13 +802,17 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             getView().printStatusError(_status_error);
 
-                        } else {
-
-                            _canceled = true;
+                        } else if (_canceled) {
 
                             getView().hideAllExceptStatus();
 
                             getView().printStatusNormal("Download CANCELED!");
+
+                        } else {
+
+                            getView().hideAllExceptStatus();
+
+                            getView().printStatusNormal("UNKNOWN ERROR!");
                         }
 
                     } else if (_status_error != null) {
@@ -815,20 +821,18 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         getView().printStatusError(_status_error != null ? _status_error : "ERROR");
 
-                    } else {
-
-                        _canceled = true;
+                    } else if (_canceled) {
 
                         getView().hideAllExceptStatus();
 
                         getView().printStatusNormal("Download CANCELED!");
+
+                    } else {
+
+                        getView().hideAllExceptStatus();
+
+                        getView().printStatusNormal("UNKNOWN ERROR!");
                     }
-
-                } else if (_status_error != null) {
-
-                    getView().hideAllExceptStatus();
-
-                    getView().printStatusError(_status_error);
 
                 } else {
 
@@ -844,13 +848,17 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 getView().printStatusError(_status_error);
 
-            } else {
-
-                _canceled = true;
+            } else if (_canceled) {
 
                 getView().hideAllExceptStatus();
 
                 getView().printStatusNormal("Download CANCELED!");
+
+            } else {
+
+                getView().hideAllExceptStatus();
+
+                getView().printStatusNormal("UNKNOWN ERROR!");
             }
 
         } catch (Exception ex) {
@@ -1430,6 +1438,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8"))) : null);
                 }
 
+                _auto_retry_on_error = true;
+
             } catch (APIException ex) {
 
                 error = true;
@@ -1516,6 +1526,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 } else {
                     dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
+
+                _auto_retry_on_error = true;
 
             } catch (APIException ex) {
                 error = true;
@@ -1634,6 +1646,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             int old_percent_progress = (int) Math.floor(((double) old_progress / _file_size) * 100);
 
             int new_percent_progress = (int) Math.floor(((double) progress / _file_size) * 100);
+
+            if (new_percent_progress == 100 && progress != _file_size) {
+                new_percent_progress = 99;
+            }
 
             if (new_percent_progress > old_percent_progress) {
                 getView().updateProgressBar(_progress, _progress_bar_rate);

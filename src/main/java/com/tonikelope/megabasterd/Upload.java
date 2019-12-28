@@ -483,6 +483,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     public void stop() {
         if (!isExit()) {
             getMain_panel().getUpload_manager().setPaused_all(false);
+            _canceled = true;
             stopUploader();
         }
     }
@@ -935,13 +936,17 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     }
 
-                } else {
-
-                    _canceled = true;
+                } else if (_canceled) {
 
                     getView().hideAllExceptStatus();
 
                     getView().printStatusNormal("Upload CANCELED!");
+
+                } else {
+
+                    getView().hideAllExceptStatus();
+
+                    getView().printStatusNormal("UNKNOWN ERROR!");
                 }
 
             } else if (_status_error != null) {
@@ -950,25 +955,33 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 getView().printStatusError(_status_error);
 
-            } else {
-
-                _canceled = true;
+            } else if (_canceled) {
 
                 getView().hideAllExceptStatus();
 
                 getView().printStatusNormal("Upload CANCELED!");
+
+            } else {
+
+                getView().hideAllExceptStatus();
+
+                getView().printStatusNormal("UNKNOWN ERROR!");
             }
 
-        } else {
-
-            _canceled = true;
+        } else if (_canceled) {
 
             getView().hideAllExceptStatus();
 
             getView().printStatusNormal("Upload CANCELED!");
+
+        } else {
+
+            getView().hideAllExceptStatus();
+
+            getView().printStatusNormal("UNKNOWN ERROR!");
         }
 
-        if ((_status_error == null && !_canceled) || _main_panel.isExit()) {
+        if (_status_error == null && !_canceled) {
 
             try {
                 DBTools.deleteUpload(_file_name, _ma.getFull_email());
@@ -1158,6 +1171,10 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             int old_percent_progress = (int) Math.floor(((double) old_progress / _file_size) * 100);
 
             int new_percent_progress = (int) Math.floor(((double) progress / _file_size) * 100);
+
+            if (new_percent_progress == 100 && progress != _file_size) {
+                new_percent_progress = 99;
+            }
 
             if (new_percent_progress > old_percent_progress) {
 
