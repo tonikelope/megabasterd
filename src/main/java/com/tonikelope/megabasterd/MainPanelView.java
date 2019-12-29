@@ -212,6 +212,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             if (dialog.isUpload() && dialog.getFiles().size() > 0) {
 
+                getMain_panel().resumeUploads();
+
                 getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().addAll(dialog.getFiles());
 
                 getMain_panel().getUpload_manager().secureNotify();
@@ -931,6 +933,8 @@ public final class MainPanelView extends javax.swing.JFrame {
         jTabbedPane1.setSelectedIndex(0);
 
         if (dialog.isDownload()) {
+
+            getMain_panel().resumeDownloads();
 
             final MainPanelView tthis = this;
 

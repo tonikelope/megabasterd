@@ -5,11 +5,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.ArrayList;
 
 /**
  *
@@ -29,6 +29,8 @@ public class DBTools {
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS mega_accounts(email TEXT, password TEXT, password_aes TEXT, user_hash TEXT, PRIMARY KEY('email'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS elc_accounts(host TEXT, user TEXT, apikey TEXT, PRIMARY KEY('host'));");
             stat.executeUpdate("CREATE TABLE IF NOT EXISTS mega_sessions(email TEXT, ma BLOB, crypt INT, PRIMARY KEY('email'));");
+            stat.executeUpdate("CREATE TABLE IF NOT EXISTS downloads_queue(url TEXT, PRIMARY KEY('url'));");
+            stat.executeUpdate("CREATE TABLE IF NOT EXISTS uploads_queue(filename TEXT, PRIMARY KEY('filename'));");
         }
     }
 
@@ -37,6 +39,96 @@ public class DBTools {
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
 
             stat.execute("VACUUM");
+        }
+    }
+
+    public static synchronized void insertDownloadsQueue(ArrayList<String> queue) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO downloads_queue (url) VALUES (?)")) {
+
+            if (!queue.isEmpty()) {
+
+                for (String url : queue) {
+
+                    ps.setString(1, url);
+
+                    ps.addBatch();
+                }
+
+                ps.executeBatch();
+            }
+        }
+    }
+
+    public static synchronized ArrayList<String> selectDownloadsQueue() throws SQLException {
+
+        ArrayList<String> queue = new ArrayList<>();
+
+        ResultSet res;
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+
+            res = stat.executeQuery("SELECT * FROM downloads_queue ORDER BY rowid");
+
+            while (res.next()) {
+
+                queue.add(res.getString("url"));
+            }
+        }
+
+        return queue;
+    }
+
+    public static synchronized void truncateDownloadsQueue() throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+
+            stat.execute("DELETE FROM downloads_queue");
+        }
+    }
+
+    public static synchronized void insertUploadsQueue(ArrayList<String> queue) throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO uploads_queue (filename) VALUES (?)")) {
+
+            if (!queue.isEmpty()) {
+
+                for (String filename : queue) {
+
+                    ps.setString(1, filename);
+
+                    ps.addBatch();
+                }
+
+                ps.executeBatch();
+            }
+        }
+    }
+
+    public static synchronized ArrayList<String> selectUploadsQueue() throws SQLException {
+
+        ArrayList<String> queue = new ArrayList<>();
+
+        ResultSet res;
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+
+            res = stat.executeQuery("SELECT * FROM uploads_queue ORDER BY rowid");
+
+            while (res.next()) {
+
+                queue.add(res.getString("filename"));
+            }
+        }
+
+        return queue;
+    }
+
+    public static synchronized void truncateUploadsQueue() throws SQLException {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
+
+            stat.execute("DELETE FROM uploads_queue");
         }
     }
 
@@ -287,9 +379,9 @@ public class DBTools {
         }
     }
 
-    public static synchronized ArrayList<HashMap<String, Object>> selectDownloads() throws SQLException {
+    public static synchronized HashMap<String, HashMap<String, Object>> selectDownloads() throws SQLException {
 
-        ArrayList<HashMap<String, Object>> downloads = new ArrayList<>();
+        HashMap<String, HashMap<String, Object>> downloads = new HashMap<>();
 
         ResultSet res;
 
@@ -301,7 +393,6 @@ public class DBTools {
 
                 HashMap<String, Object> download = new HashMap<>();
 
-                download.put("url", res.getString("url"));
                 download.put("email", res.getString("email"));
                 download.put("path", res.getString("path"));
                 download.put("filename", res.getString("filename"));
@@ -311,16 +402,16 @@ public class DBTools {
                 download.put("filenoexpire", res.getString("filenoexpire"));
                 download.put("custom_chunks_dir", res.getString("custom_chunks_dir"));
 
-                downloads.add(download);
+                downloads.put(res.getString("url"), download);
             }
         }
 
         return downloads;
     }
 
-    public static synchronized ArrayList<HashMap<String, Object>> selectUploads() throws SQLException {
+    public static synchronized HashMap<String, HashMap<String, Object>> selectUploads() throws SQLException {
 
-        ArrayList<HashMap<String, Object>> uploads = new ArrayList<>();
+        HashMap<String, HashMap<String, Object>> uploads = new HashMap<>();
 
         ResultSet res;
 
@@ -332,7 +423,6 @@ public class DBTools {
 
                 HashMap<String, Object> upload = new HashMap<>();
 
-                upload.put("filename", res.getString("filename"));
                 upload.put("email", res.getString("email"));
                 upload.put("url", res.getString("url"));
                 upload.put("ul_key", res.getString("ul_key"));
@@ -342,7 +432,8 @@ public class DBTools {
                 upload.put("folder_link", res.getString("folder_link"));
                 upload.put("bytes_uploaded", res.getLong("bytes_uploaded"));
                 upload.put("meta_mac", res.getString("meta_mac"));
-                uploads.add(upload);
+
+                uploads.put(res.getString("filename"), upload);
             }
         }
 

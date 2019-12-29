@@ -52,6 +52,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final Object _total_size_lock;
     protected volatile long _total_progress;
     protected final Object _total_progress_lock;
+    private volatile Boolean _sort_wait_start_queue;
 
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
@@ -76,6 +77,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _total_progress_lock = new Object();
         _wait_aux_queue_sort_lock = new Object();
         _wait_queue_lock = new Object();
+        _sort_wait_start_queue = true;
         _transference_preprocess_global_queue = new ConcurrentLinkedQueue<>();
         _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
         _transference_waitstart_aux_queue = new ConcurrentLinkedQueue<>();
@@ -84,6 +86,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_finished_queue = new ConcurrentLinkedQueue<>();
         _transference_running_list = new ConcurrentLinkedQueue<>();
         _transference_preprocess_queue = new ConcurrentLinkedQueue<>();
+    }
+
+    public Boolean getSort_wait_start_queue() {
+        return _sort_wait_start_queue;
+    }
+
+    public void setSort_wait_start_queue(Boolean sort_wait_start_queue) {
+        this._sort_wait_start_queue = sort_wait_start_queue;
     }
 
     public boolean isFrozen() {
@@ -665,7 +675,9 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                     synchronized (geWaitStartAuxQueue_sort_lock()) {
 
-                        sortTransferenceWaitStartAuxQueue();
+                        if (getSort_wait_start_queue()) {
+                            sortTransferenceWaitStartAuxQueue();
+                        }
 
                         if (getTransference_waitstart_aux_queue().peek().isPriority()) {
 
@@ -699,6 +711,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     }
 
                     _frozen = false;
+                    setSort_wait_start_queue(true);
                     setProvisioning_transferences(false);
                     secureNotify();
                 });

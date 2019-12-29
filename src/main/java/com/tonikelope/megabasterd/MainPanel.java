@@ -31,6 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -53,7 +54,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "6.92";
+    public static final String VERSION = "6.93";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -78,6 +79,8 @@ public final class MainPanel {
     private static SmartMegaProxyManager _proxy_manager;
     private static String _language;
     private static String _new_version;
+    private static Boolean _resume_uploads;
+    private static Boolean _resume_downloads;
     private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
 
     public static void main(String args[]) {
@@ -213,6 +216,10 @@ public final class MainPanel {
         _use_smart_proxy = false;
 
         _proxy_manager = null;
+
+        _resume_uploads = false;
+
+        _resume_downloads = false;
 
         try {
 
@@ -369,6 +376,22 @@ public final class MainPanel {
 
         resumeUploads();
 
+    }
+
+    public static Boolean getResume_uploads() {
+        return _resume_uploads;
+    }
+
+    public static void setResume_uploads(Boolean resume_uploads) {
+        MainPanel._resume_uploads = resume_uploads;
+    }
+
+    public static Boolean getResume_downloads() {
+        return _resume_downloads;
+    }
+
+    public static void setResume_downloads(Boolean resume_downloads) {
+        MainPanel._resume_downloads = resume_downloads;
     }
 
     public boolean isUse_custom_chunks_dir() {
@@ -984,7 +1007,7 @@ public final class MainPanel {
 
             getView().setEnabled(false);
 
-            if (!_download_manager.getTransference_running_list().isEmpty() || !_upload_manager.getTransference_running_list().isEmpty()) {
+            if (!_download_manager.getTransference_running_list().isEmpty() || !_upload_manager.getTransference_running_list().isEmpty() || !_download_manager.getTransference_waitstart_queue().isEmpty() || !_upload_manager.getTransference_waitstart_queue().isEmpty()) {
 
                 THREAD_POOL.execute(() -> {
                     boolean wait;
@@ -1043,6 +1066,32 @@ public final class MainPanel {
                                 }
                             }
                         }
+
+                        ArrayList<String> downloads_queue = new ArrayList<>(), uploads_queue = new ArrayList<>();
+
+                        for (Transference t : _download_manager.getTransference_running_list()) {
+                            downloads_queue.add(((Download) t).getUrl());
+                        }
+
+                        for (Transference t : _download_manager.getTransference_waitstart_queue()) {
+                            downloads_queue.add(((Download) t).getUrl());
+                        }
+
+                        for (Transference t : _upload_manager.getTransference_running_list()) {
+                            uploads_queue.add(t.getFile_name());
+                        }
+
+                        for (Transference t : _upload_manager.getTransference_waitstart_queue()) {
+                            uploads_queue.add(t.getFile_name());
+                        }
+
+                        try {
+                            DBTools.insertDownloadsQueue(downloads_queue);
+                            DBTools.insertUploadsQueue(uploads_queue);
+                        } catch (SQLException ex) {
+                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
                         if (wait) {
 
                             try {
@@ -1110,56 +1159,93 @@ public final class MainPanel {
         return app_is_running;
     }
 
-    private void resumeDownloads() {
+    public void resumeDownloads() {
 
-        swingInvoke(() -> {
-            getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait..."));
-        });
+        if (!getResume_downloads()) {
 
-        final MainPanel tthis = this;
+            setResume_downloads(true);
 
-        THREAD_POOL.execute(() -> {
-            int conta_downloads = 0;
-            try {
-
-                ArrayList<HashMap<String, Object>> res = selectDownloads();
-
-                for (HashMap<String, Object> o : res) {
-
-                    try {
-
-                        String email = (String) o.get("email");
-
-                        MegaAPI ma = new MegaAPI();
-
-                        if (!tthis.isUse_mega_account_down() || (_mega_accounts.get(email) != null && (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null)) {
-
-                            Download download = new Download(tthis, ma, (String) o.get("url"), (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
-
-                            getDownload_manager().getTransference_provision_queue().add(download);
-
-                            conta_downloads++;
-                        }
-
-                    } catch (Exception ex) {
-                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
-                    }
-                }
-
-            } catch (SQLException ex) {
-
-                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
-            }
-            if (conta_downloads > 0) {
-                getDownload_manager().secureNotify();
-                swingInvoke(() -> {
-                    getView().getjTabbedPane1().setSelectedIndex(0);
-                });
-            }
             swingInvoke(() -> {
-                getView().getStatus_down_label().setText("");
+                getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait..."));
             });
-        });
+
+            final MainPanel tthis = this;
+
+            THREAD_POOL.execute(() -> {
+                int conta_downloads = 0;
+                try {
+
+                    ArrayList<String> downloads_queue = DBTools.selectDownloadsQueue();
+
+                    HashMap<String, HashMap<String, Object>> res = selectDownloads();
+
+                    for (String url : downloads_queue) {
+
+                        HashMap<String, Object> o = res.remove(url);
+
+                        if (o != null) {
+                            try {
+
+                                String email = (String) o.get("email");
+
+                                MegaAPI ma = new MegaAPI();
+
+                                if (!tthis.isUse_mega_account_down() || (_mega_accounts.get(email) != null && (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null)) {
+
+                                    Download download = new Download(tthis, ma, (String) url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
+
+                                    getDownload_manager().getTransference_provision_queue().add(download);
+
+                                    conta_downloads++;
+                                }
+
+                            } catch (Exception ex) {
+                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                            }
+                        }
+                    }
+
+                    DBTools.truncateDownloadsQueue();
+
+                    for (Map.Entry<String, HashMap<String, Object>> entry : res.entrySet()) {
+
+                        try {
+
+                            String email = (String) entry.getValue().get("email");
+
+                            MegaAPI ma = new MegaAPI();
+
+                            if (!tthis.isUse_mega_account_down() || (_mega_accounts.get(email) != null && (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null)) {
+
+                                Download download = new Download(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
+
+                                getDownload_manager().getTransference_provision_queue().add(download);
+
+                                conta_downloads++;
+                            }
+
+                        } catch (Exception ex) {
+                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        }
+                    }
+
+                } catch (SQLException ex) {
+
+                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                }
+                if (conta_downloads > 0) {
+                    _download_manager.setSort_wait_start_queue(false);
+                    getDownload_manager().secureNotify();
+                    swingInvoke(() -> {
+                        getView().getjTabbedPane1().setSelectedIndex(0);
+                    });
+                }
+                swingInvoke(() -> {
+                    getView().getStatus_down_label().setText("");
+                });
+            });
+
+        }
 
     }
 
@@ -1235,60 +1321,112 @@ public final class MainPanel {
 
     }
 
-    private void resumeUploads() {
+    public void resumeUploads() {
 
-        swingInvoke(() -> {
-            getView().getStatus_up_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous uploads, please wait..."));
-        });
+        if (!getResume_uploads()) {
 
-        final MainPanel tthis = this;
+            setResume_uploads(true);
 
-        THREAD_POOL.execute(() -> {
-            try {
-                int conta_uploads = 0;
-                ArrayList<HashMap<String, Object>> res = selectUploads();
-                for (HashMap<String, Object> o : res) {
+            swingInvoke(() -> {
+                getView().getStatus_up_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous uploads, please wait..."));
+            });
 
-                    try {
+            final MainPanel tthis = this;
 
-                        String email = (String) o.get("email");
+            THREAD_POOL.execute(() -> {
+                try {
+                    int conta_uploads = 0;
 
-                        if (_mega_accounts.get(email) != null) {
+                    ArrayList<String> uploads_queue = DBTools.selectUploadsQueue();
 
-                            MegaAPI ma;
+                    HashMap<String, HashMap<String, Object>> res = selectUploads();
 
-                            if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                    for (String filename : uploads_queue) {
 
-                                Upload upload = new Upload(tthis, ma, (String) o.get("filename"), (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), false);
+                        HashMap<String, Object> o = res.remove(filename);
 
-                                getUpload_manager().getTransference_provision_queue().add(upload);
+                        if (o != null) {
 
-                                conta_uploads++;
+                            try {
+
+                                String email = (String) o.get("email");
+
+                                if (_mega_accounts.get(email) != null) {
+
+                                    MegaAPI ma;
+
+                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+
+                                        Upload upload = new Upload(tthis, ma, (String) filename, (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), false);
+
+                                        getUpload_manager().getTransference_provision_queue().add(upload);
+
+                                        conta_uploads++;
+                                    } else {
+                                        break;
+                                    }
+
+                                } else {
+
+                                    deleteUpload((String) o.get("filename"), email);
+                                }
+
+                            } catch (Exception ex) {
+                                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                             }
-
-                        } else {
-
-                            deleteUpload((String) o.get("filename"), email);
                         }
 
-                    } catch (Exception ex) {
-                        Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                     }
-                }
-                if (conta_uploads > 0) {
-                    getUpload_manager().secureNotify();
-                    swingInvoke(() -> {
-                        getView().getjTabbedPane1().setSelectedIndex(1);
-                    });
-                }
-                swingInvoke(() -> {
-                    getView().getStatus_up_label().setText("");
-                });
-            } catch (SQLException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
-            }
-        });
 
+                    DBTools.truncateUploadsQueue();
+
+                    for (Map.Entry<String, HashMap<String, Object>> entry : res.entrySet()) {
+
+                        try {
+
+                            String email = (String) entry.getValue().get("email");
+
+                            if (_mega_accounts.get(email) != null) {
+
+                                MegaAPI ma;
+
+                                if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+
+                                    Upload upload = new Upload(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
+
+                                    getUpload_manager().getTransference_provision_queue().add(upload);
+
+                                    conta_uploads++;
+                                } else {
+                                    break;
+                                }
+
+                            } else {
+
+                                deleteUpload((String) entry.getValue().get("filename"), email);
+                            }
+
+                        } catch (Exception ex) {
+                            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                        }
+
+                    }
+
+                    if (conta_uploads > 0) {
+                        _upload_manager.setSort_wait_start_queue(false);
+                        getUpload_manager().secureNotify();
+                        swingInvoke(() -> {
+                            getView().getjTabbedPane1().setSelectedIndex(1);
+                        });
+                    }
+                    swingInvoke(() -> {
+                        getView().getStatus_up_label().setText("");
+                    });
+                } catch (SQLException ex) {
+                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                }
+            });
+        }
     }
 
 }
