@@ -1705,4 +1705,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         return _restart;
     }
 
+    @Override
+    public boolean isClosed() {
+        return _closed;
+    }
+
 }

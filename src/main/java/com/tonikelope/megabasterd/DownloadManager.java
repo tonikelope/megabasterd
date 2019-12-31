@@ -49,7 +49,9 @@ public class DownloadManager extends TransferenceManager {
 
                 increment_total_progress(-1 * d.getProgress());
 
-                delete_down.add(((Download) d).getUrl());
+                if (!d.isCanceled() || d.isClosed()) {
+                    delete_down.add(((Download) d).getUrl());
+                }
             }
         }
 

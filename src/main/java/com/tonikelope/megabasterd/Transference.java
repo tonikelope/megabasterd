@@ -42,6 +42,8 @@ public interface Transference {
 
     boolean isCanceled();
 
+    boolean isClosed();
+
     void unfreeze();
 
     void upWaitQueue();

@@ -1262,4 +1262,9 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _main_panel.getUpload_manager().downWaitQueue(this);
     }
 
+    @Override
+    public boolean isClosed() {
+        return _closed;
+    }
+
 }

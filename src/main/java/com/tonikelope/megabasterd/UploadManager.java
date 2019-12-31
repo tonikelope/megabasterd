@@ -71,7 +71,7 @@ public class UploadManager extends TransferenceManager {
 
             increment_total_progress(-1 * u.getProgress());
 
-            if (!u.isCanceled()) {
+            if (!u.isCanceled() || u.isClosed()) {
                 delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
             }
         }
