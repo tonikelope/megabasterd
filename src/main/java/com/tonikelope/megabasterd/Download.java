@@ -812,7 +812,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             getView().hideAllExceptStatus();
 
-                            getView().printStatusNormal("UNKNOWN ERROR!");
+                            getView().printStatusNormal("UNEXPECTED ERROR!");
                         }
 
                     } else if (_status_error != null) {
@@ -831,7 +831,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         getView().hideAllExceptStatus();
 
-                        getView().printStatusNormal("UNKNOWN ERROR!");
+                        getView().printStatusNormal("UNEXPECTED ERROR!");
                     }
 
                 } else {
@@ -858,7 +858,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 getView().hideAllExceptStatus();
 
-                getView().printStatusNormal("UNKNOWN ERROR!");
+                getView().printStatusNormal("UNEXPECTED ERROR!");
             }
 
         } catch (Exception ex) {
@@ -925,7 +925,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
         });
 
-        if (_status_error != null && _auto_retry_on_error) {
+        if (_status_error != null && !_canceled && _auto_retry_on_error) {
             THREAD_POOL.execute(() -> {
                 for (int i = 3; !_closed && i > 0; i--) {
                     final int j = i;
@@ -1438,8 +1438,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8"))) : null);
                 }
 
-                _auto_retry_on_error = true;
-
             } catch (APIException ex) {
 
                 error = true;
@@ -1496,6 +1494,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         if (!_exit && !error) {
 
+            _auto_retry_on_error = true;
+
             swingInvoke(() -> {
                 getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL DOWNLOAD"));
                 getView().getStop_button().setVisible(false);
@@ -1526,8 +1526,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 } else {
                     dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
-
-                _auto_retry_on_error = true;
 
             } catch (APIException ex) {
                 error = true;
@@ -1567,7 +1565,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         } while (!_exit && error);
 
-        if (!error) {
+        if (!_exit && !error) {
+
+            _auto_retry_on_error = true;
 
             swingInvoke(() -> {
                 getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL DOWNLOAD"));

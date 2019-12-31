@@ -169,7 +169,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 try {
 
-                    if (!_exit && !_upload.isStopped()) {
+                    if (!_exit) {
 
                         RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r");
 
@@ -179,7 +179,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                             LOG.log(Level.INFO, "{0} Uploading chunk {1} from worker {2} {3}...", new Object[]{Thread.currentThread().getName(), chunk_id, _id, _upload.getFile_name()});
 
-                            while (!_exit && !_upload.isStopped() && tot_bytes_up < chunk_size && (reads = cis.read(buffer)) != -1) {
+                            while (!_exit && tot_bytes_up < chunk_size && (reads = cis.read(buffer)) != -1) {
                                 out.write(buffer, 0, reads);
 
                                 _upload.getPartialProgress().add((long) reads);
@@ -198,7 +198,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                             }
                         }
 
-                        if (!_upload.isStopped() && !_exit) {
+                        if (!_exit) {
 
                             if ((http_status = con.getResponseCode()) != 200) {
 
@@ -208,6 +208,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 if (_upload.getProgress() == _upload.getFile_size()) {
                                     _upload.getView().printStatusNormal("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***");
+                                    _upload.getView().getPause_button().setEnabled(false);
                                 }
 
                                 String httpresponse;

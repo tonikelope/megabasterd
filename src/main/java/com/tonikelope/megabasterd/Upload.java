@@ -70,7 +70,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private final String _root_node;
     private final byte[] _share_key;
     private final String _folder_link;
-    private final boolean _restart;
+    private boolean _restart;
     private volatile boolean _closed;
     private volatile boolean _canceled;
     private volatile String _temp_mac_data;
@@ -81,7 +81,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _notified = false;
         _priority = priority;
         _frozen = main_panel.isInit_paused();
-        _provision_ok = true;
+        _provision_ok = false;
         _status_error = null;
         _auto_retry_on_error = true;
         _canceled = false;
@@ -117,10 +117,10 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         _notified = false;
         _priority = upload.isPriority();
-        _provision_ok = true;
+        _provision_ok = false;
         _status_error = null;
         _auto_retry_on_error = true;
-        _canceled = false;
+        _canceled = upload.isCanceled();
         _closed = false;
         _restart = true;
         _main_panel = upload.getMain_panel();
@@ -128,8 +128,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _file_name = upload.getFile_name();
         _parent_node = upload.getParent_node();
         _progress_lock = new Object();
-        _ul_key = null;
-        _ul_url = null;
+        _ul_key = upload.getUl_key();
+        _ul_url = upload.getUl_url();
         _root_node = upload.getRoot_node();
         _share_key = upload.getShare_key();
         _folder_link = upload.getFolder_link();
@@ -146,7 +146,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _view = new UploadView(this);
         _progress_meter = new ProgressMeter(this);
         _file_meta_mac = null;
-        _temp_mac_data = null;
+        _temp_mac_data = upload.getTemp_mac_data();
     }
 
     public boolean isPriority() {
@@ -685,7 +685,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         if (!_exit) {
 
-            if (_ul_url == null || _restart) {
+            if (_ul_url == null) {
 
                 int conta_error = 0;
 
@@ -727,11 +727,15 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                         DBTools.updateUploadUrl(_file_name, _ma.getFull_email(), _ul_url);
 
+                        _auto_retry_on_error = true;
+
                     } catch (SQLException ex) {
                         LOG.log(Level.SEVERE, ex.getMessage());
                     }
                 }
             }
+
+            _canceled = false;
 
             if (!_exit && _ul_url != null) {
 
@@ -946,7 +950,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     getView().hideAllExceptStatus();
 
-                    getView().printStatusNormal("UNKNOWN ERROR!");
+                    getView().printStatusNormal("UNEXPECTED ERROR!");
                 }
 
             } else if (_status_error != null) {
@@ -965,7 +969,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 getView().hideAllExceptStatus();
 
-                getView().printStatusNormal("UNKNOWN ERROR!");
+                getView().printStatusNormal("UNEXPECTED ERROR!");
             }
 
         } else if (_canceled) {
@@ -978,7 +982,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
             getView().hideAllExceptStatus();
 
-            getView().printStatusNormal("UNKNOWN ERROR!");
+            getView().printStatusNormal("UNEXPECTED ERROR!");
         }
 
         if (_status_error == null && !_canceled) {
@@ -987,6 +991,12 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                 DBTools.deleteUpload(_file_name, _ma.getFull_email());
             } catch (SQLException ex) {
                 LOG.log(Level.SEVERE, ex.getMessage());
+            }
+        } else {
+            try {
+                DBTools.updateUploadProgress(getFile_name(), getMa().getFull_email(), getProgress(), getTemp_mac_data() != null ? getTemp_mac_data() : null);
+            } catch (SQLException ex) {
+                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
 
@@ -1014,7 +1024,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             }
         });
 
-        if (_status_error != null && _auto_retry_on_error) {
+        if (_status_error != null && !_canceled && _auto_retry_on_error) {
             THREAD_POOL.execute(() -> {
                 for (int i = 3; !_closed && i > 0; i--) {
                     final int j = i;

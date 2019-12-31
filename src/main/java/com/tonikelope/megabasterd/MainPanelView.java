@@ -1258,7 +1258,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             LabelTranslatorSingleton.getInstance().translate("Yes")};
 
         int n = showOptionDialog(_main_panel.getView(),
-                LabelTranslatorSingleton.getInstance().translate("Remove all preprocessing, provisioning and waiting downloads?"),
+                LabelTranslatorSingleton.getInstance().translate("Remove all no running downloads?"),
                 LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
                 null,
                 options,
@@ -1310,7 +1310,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             LabelTranslatorSingleton.getInstance().translate("Yes")};
 
         int n = showOptionDialog(_main_panel.getView(),
-                LabelTranslatorSingleton.getInstance().translate("Remove all preprocessing, provisioning and waiting uploads?"),
+                LabelTranslatorSingleton.getInstance().translate("Remove all no running uploads?"),
                 LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
                 null,
                 options,

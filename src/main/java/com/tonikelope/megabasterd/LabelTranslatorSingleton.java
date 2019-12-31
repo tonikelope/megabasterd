@@ -135,8 +135,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("New streaming", "Nuevo streaming");
         _addTranslation("Split file", "Partir un archivo");
         _addTranslation("Merge file", "Juntar las partes de un archivo");
-        _addTranslation("Remove all no running downloads", "Cancelar las descargas en espera");
-        _addTranslation("Remove all no running uploads", "Cancelar las subidas en espera");
+        _addTranslation("Remove all no running downloads", "Cancelar las descargas no activas");
+        _addTranslation("Remove all no running uploads", "Cancelar las subidas no activas");
         _addTranslation("Edit", "Edición");
         _addTranslation("Settings", "Ajustes");
         _addTranslation("Help", "Ayuda");
@@ -184,6 +184,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Please, paste a Mega/MegaCrypter/ELC link!", "Por favor, escribe un enlace de Mega/MegaCrypter/ELC");
         _addTranslation("Yes", "Sí");
         _addTranslation("Cancel", "Cancelar");
+        _addTranslation("UNEXPECTED ERROR!", "¡ERROR INESPERADO!");
         _addTranslation("It seems MegaBasterd is streaming video. Do you want to exit?", "Parece que MegaBasterd está retransmitiendo vídeo. ¿Quieres continuar?");
         _addTranslation("It seems MegaBasterd is provisioning down/uploads.\n\nIf you exit now, unprovisioned down/uploads will be lost.\n\nDo you want to continue?", "Parece que MegaBasterd está provisionando transferencias.\n\nSi sales ahora, todas las transferencias no provisionadas se perderán.\n\n¿Quieres continuar?");
         _addTranslation("It seems MegaBasterd is just finishing uploading some files.\n\nIF YOU EXIT NOW, THOSE UPLOADS WILL FAIL.\n\nDo you want to continue?", "Parece que MegaBasterd está finalizando unas subidas.\n\nSI SALES AHORA, ESAS SUBIDAS FALLARÁN.\n\n¿Quieres continuar?");
@@ -191,9 +192,9 @@ public class LabelTranslatorSingleton {
         _addTranslation("Only SAVED settings and accounts will be exported. (If you are unsure, it is better to save your current settings and then export them).\n\nDo you want to continue?", "Sólamente los ajustes GUARDADOS se exportarán. (Si no estás seguro, es mejor que guardes antes tus ajustes y que después vuelvas aquí). ¿Quieres continuar?");
         _addTranslation("Master password will be reset and all your accounts will be removed. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?", "La contraseña maestra será reseteada y todas tus cuentas serán eliminadas. (ESTO NO SE PUEDE DESHACER).\n\n¿Quieres continuar?");
         _addTranslation("ALL YOUR SETTINGS, ACCOUNTS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?", "TODOS TUS AJUSTES, CUENTAS Y TRANSFERENCIAS SERÁN ELIMINADAS. (ESTO NO SE PUEDE DESHACER)\n\n¿Quieres continuar?");
-        _addTranslation("Remove all preprocessing, provisioning and waiting downloads?", "¿Eliminar todas las descargas que no están en ejecución?");
+        _addTranslation("Remove all no running downloads?", "¿Eliminar todas las descargas que no están en ejecución?");
         _addTranslation("Warning!", "¡Atención!");
-        _addTranslation("Remove all preprocessing, provisioning and waiting uploads?", "¿Eliminar todas las subidas que no están en ejecución?");
+        _addTranslation("Remove all no running uploads?", "¿Eliminar todas las subidas que no están en ejecución?");
         _addTranslation("Please, enter your master password", "Por favor, ingresa tu contraseña maestra");
         _addTranslation("WARNING: if you forget this password, you will have to insert all your accounts again.", "AVISO: si olvidas esta contraseña, tendrás que volver a insertar todas tus cuentas.");
         _addTranslation("New pass:", "Nueva contraseña:");

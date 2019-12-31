@@ -953,11 +953,11 @@ public class MegaAPI implements Serializable {
                     folder_nodes.put((String) node.get("h"), the_node);
 
                 } catch (Exception e) {
-                    System.out.println("WARNING: node key is not valid " + (String) node.get("k"));
+                    LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k"));
                 }
 
             } else {
-                System.out.println("WARNING: node key is not valid " + (String) node.get("k"));
+                LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k"));
             }
 
         }

@@ -545,7 +545,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             _main_panel.getView().repaint();
         });
-
     }
 
     private String _genStatus() {
@@ -556,7 +555,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         int rem = _transference_remove_queue.size();
 
-        int wait = _transference_waitstart_queue.size();
+        int wait = _transference_waitstart_queue.size() + _transference_waitstart_aux_queue.size();
 
         int run = _transference_running_list.size();
 
