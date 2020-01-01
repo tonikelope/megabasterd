@@ -218,6 +218,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 if (_current_smart_proxy != null) {
                     con.setConnectTimeout(Transference.HTTP_PROXY_CONNECT_TIMEOUT);
                     con.setReadTimeout(Transference.HTTP_PROXY_READ_TIMEOUT);
+                } else {
+                    con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
+                    con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
                 }
 
                 con.setUseCaches(false);

@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.Download.PROGRESS_WATCHDOG_TIMEOUT;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.File;
@@ -75,11 +76,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private volatile boolean _canceled;
     private volatile String _temp_mac_data;
     private final boolean _priority;
+    private final Object _progress_watchdog_lock;
 
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean priority) {
 
         _notified = false;
         _priority = priority;
+        _progress_watchdog_lock = new Object();
         _frozen = main_panel.isInit_paused();
         _provision_ok = false;
         _status_error = null;
@@ -117,6 +120,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         _notified = false;
         _priority = upload.isPriority();
+        _progress_watchdog_lock = new Object();
         _provision_ok = false;
         _status_error = null;
         _auto_retry_on_error = true;
@@ -802,6 +806,36 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                     getView().getProgress_pbar().setVisible(true);
                 });
 
+                THREAD_POOL.execute(() -> {
+
+                    //PROGRESS WATCHDOG If a upload remains more than PROGRESS_WATCHDOG_TIMEOUT seconds without receiving data, we force fatal error in order to restart it.
+                    LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
+
+                    long last_progress, progress = getProgress();
+
+                    do {
+                        last_progress = progress;
+
+                        synchronized (_progress_watchdog_lock) {
+                            try {
+                                _progress_watchdog_lock.wait(PROGRESS_WATCHDOG_TIMEOUT * 1000);
+                                progress = getProgress();
+                            } catch (InterruptedException ex) {
+                                progress = -1;
+                                Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+                            }
+                        }
+
+                    } while (!isExit() && !_thread_pool.isShutdown() && progress < getFile_size() && (isPaused() || progress > last_progress));
+
+                    if (!isExit() && !_thread_pool.isShutdown() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
+                        stopUploader("PROGRESS WATCHDOG TIMEOUT!");
+                    }
+
+                    LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
+
+                });
+
                 secureWait();
 
                 LOG.log(Level.INFO, "{0} Chunkuploaders finished! {1}", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
@@ -1045,6 +1079,10 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         }
 
         _exit = true;
+
+        synchronized (_progress_watchdog_lock) {
+            _progress_watchdog_lock.notifyAll();
+        }
 
         LOG.log(Level.INFO, "{0} Uploader {1} BYE BYE", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
     }
