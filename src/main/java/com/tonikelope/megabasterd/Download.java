@@ -83,7 +83,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private ChunkWriterManager _chunkmanager;
     private String _last_download_url;
     private boolean _provision_ok;
-    private boolean _finishing_download;
     private boolean _auto_retry_on_error;
     private int _paused_workers;
     private File _file;
@@ -113,7 +112,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _status_error = null;
         _retrying_request = false;
         _checking_cbc = false;
-        _finishing_download = false;
         _closed = false;
         _pause = false;
         _exit = false;
@@ -160,7 +158,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _auto_retry_on_error = true;
         _closed = false;
         _checking_cbc = false;
-        _finishing_download = false;
         _pause = false;
         _exit = false;
         _progress_watchdog_lock = new Object();
@@ -811,7 +808,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             getView().hideAllExceptStatus();
 
-                            getView().printStatusNormal("UNEXPECTED ERROR!");
+                            _status_error = "UNEXPECTED ERROR!";
+
+                            getView().printStatusError(_status_error);
                         }
 
                     } else if (_status_error != null) {
@@ -830,7 +829,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         getView().hideAllExceptStatus();
 
-                        getView().printStatusNormal("UNEXPECTED ERROR!");
+                        _status_error = "UNEXPECTED ERROR!";
+
+                        getView().printStatusError(_status_error);
                     }
 
                 } else {
@@ -857,7 +858,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 getView().hideAllExceptStatus();
 
-                getView().printStatusNormal("UNEXPECTED ERROR!");
+                _status_error = "UNEXPECTED ERROR!";
+
+                getView().printStatusError(_status_error);
             }
 
         } catch (Exception ex) {
@@ -1232,28 +1235,22 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         synchronized (_workers_lock) {
 
-            if (_chunkworkers.remove(chunkdownloader) && !_exit) {
+            if (_chunkworkers.remove(chunkdownloader) && !_exit && _use_slots) {
 
-                if (!chunkdownloader.isExit()) {
-
-                    _finishing_download = true;
-
-                    if (_use_slots) {
-
-                        swingInvoke(() -> {
-                            getView().getSlots_spinner().setEnabled(false);
-
-                            getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
-                        });
-
-                    }
-
-                } else if (!_finishing_download && _use_slots) {
+                if (chunkdownloader.isChunk_exception()) {
 
                     swingInvoke(() -> {
-                        getView().getSlots_spinner().setEnabled(true);
+                        getView().getSlots_spinner().setEnabled(false);
+
+                        getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
                     });
 
+                } else {
+
+                    swingInvoke(() -> {
+
+                        getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
+                    });
                 }
 
                 if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {

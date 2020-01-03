@@ -49,7 +49,6 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private final ExecutorService _thread_pool;
     private int[] _file_meta_mac;
-    private boolean _finishing_upload;
     private String _fid;
     private boolean _notified;
     private volatile String _completion_handler;
@@ -984,7 +983,9 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     getView().hideAllExceptStatus();
 
-                    getView().printStatusNormal("UNEXPECTED ERROR!");
+                    _status_error = "UNEXPECTED ERROR!";
+
+                    getView().printStatusError(_status_error);
                 }
 
             } else if (_status_error != null) {
@@ -1003,7 +1004,9 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 getView().hideAllExceptStatus();
 
-                getView().printStatusNormal("UNEXPECTED ERROR!");
+                _status_error = "UNEXPECTED ERROR!";
+
+                getView().printStatusError(_status_error);
             }
 
         } else if (_canceled) {
@@ -1016,7 +1019,9 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
             getView().hideAllExceptStatus();
 
-            getView().printStatusNormal("UNEXPECTED ERROR!");
+            _status_error = "UNEXPECTED ERROR!";
+
+            getView().printStatusError(_status_error);
         }
 
         if (_status_error == null && !_canceled) {
@@ -1122,9 +1127,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
             if (_chunkworkers.remove(chunkuploader) && !_exit) {
 
-                if (!chunkuploader.isExit()) {
-
-                    _finishing_upload = true;
+                if (chunkuploader.isChunk_exception()) {
 
                     swingInvoke(() -> {
                         getView().getSlots_spinner().setEnabled(false);
@@ -1132,12 +1135,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                         getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
                     });
 
-                } else if (!_finishing_upload) {
+                } else {
 
                     swingInvoke(() -> {
-                        getView().getSlots_spinner().setEnabled(true);
-                    });
 
+                        getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
+
+                    });
                 }
 
                 if (!_exit && _pause && _paused_workers == _chunkworkers.size()) {

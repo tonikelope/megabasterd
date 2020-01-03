@@ -31,14 +31,20 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private boolean _notified;
+    private volatile boolean _chunk_exception;
 
     public ChunkUploader(int id, Upload upload) {
         _notified = false;
         _secure_notify_lock = new Object();
         _id = id;
         _upload = upload;
+        _chunk_exception = false;
         _exit = false;
         _error_wait = false;
+    }
+
+    public boolean isChunk_exception() {
+        return _chunk_exception;
     }
 
     public void setExit(boolean exit) {
@@ -325,6 +331,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
             }
 
         } catch (ChunkInvalidException ex) {
+
+            _chunk_exception = true;
 
         } catch (OutOfMemoryError | Exception error) {
             _upload.stopUploader(error.getMessage());

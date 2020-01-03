@@ -29,6 +29,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
+    private volatile boolean _chunk_exception;
     private boolean _notified;
 
     private String _current_smart_proxy;
@@ -36,12 +37,17 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     public ChunkDownloader(int id, Download download) {
         _notified = false;
         _exit = false;
+        _chunk_exception = false;
         _secure_notify_lock = new Object();
         _id = id;
         _download = download;
         _current_smart_proxy = null;
         _error_wait = false;
 
+    }
+
+    public boolean isChunk_exception() {
+        return _chunk_exception;
     }
 
     public String getCurrent_smart_proxy() {
@@ -409,6 +415,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
             }
 
         } catch (ChunkInvalidException e) {
+
+            _chunk_exception = true;
 
         } catch (OutOfMemoryError | Exception error) {
 
