@@ -1129,26 +1129,26 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 if (chunkuploader.isChunk_exception()) {
 
-                    swingInvoke(() -> {
+                    swingInvokeAndWait(() -> {
                         getView().getSlots_spinner().setEnabled(false);
 
-                        getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
+                        getView().getSlots_spinner().setValue(Math.max((int) getView().getSlots_spinner().getValue() - 1, 0));
                     });
 
                 } else {
 
-                    swingInvoke(() -> {
+                    swingInvokeAndWait(() -> {
 
-                        getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
+                        getView().getSlots_spinner().setValue(Math.max((int) getView().getSlots_spinner().getValue() - 1, 0));
 
                     });
                 }
 
-                if (!_exit && _pause && _paused_workers == _chunkworkers.size()) {
+                if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
 
                     getView().printStatusNormal("Upload paused!");
 
-                    swingInvoke(() -> {
+                    swingInvokeAndWait(() -> {
                         getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME UPLOAD"));
                         getView().getPause_button().setEnabled(true);
                     });

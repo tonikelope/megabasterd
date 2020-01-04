@@ -97,6 +97,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile boolean _canceled;
     private volatile boolean _turbo;
     private volatile boolean _closed;
+    private volatile boolean _finalizing;
     private final Object _progress_watchdog_lock;
     private final boolean _priority;
 
@@ -112,6 +113,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _status_error = null;
         _retrying_request = false;
         _checking_cbc = false;
+        _finalizing = false;
         _closed = false;
         _pause = false;
         _exit = false;
@@ -154,6 +156,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _last_chunk_id_dispatched = 0L;
         _canceled = false;
         _status_error = null;
+        _finalizing = false;
         _retrying_request = false;
         _auto_retry_on_error = true;
         _closed = false;
@@ -235,33 +238,34 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 _turbo = true;
 
-                Download tthis = this;
+                if (!_finalizing) {
+                    Download tthis = this;
 
-                swingInvoke(() -> {
-                    getView().getSlots_label().setForeground(Color.BLUE);
+                    swingInvoke(() -> {
+                        getView().getSlots_label().setForeground(Color.BLUE);
 
-                    getView().getSlots_spinner().setEnabled(false);
-                });
+                        getView().getSlots_spinner().setEnabled(false);
+                    });
 
-                synchronized (_workers_lock) {
+                    synchronized (_workers_lock) {
 
-                    for (int t = getChunkworkers().size(); t <= Transference.MAX_WORKERS; t++) {
+                        for (int t = getChunkworkers().size(); t <= Transference.MAX_WORKERS; t++) {
 
-                        ChunkDownloader c = new ChunkDownloader(t, tthis);
+                            ChunkDownloader c = new ChunkDownloader(t, tthis);
 
-                        _chunkworkers.add(c);
+                            _chunkworkers.add(c);
 
-                        _thread_pool.execute(c);
+                            _thread_pool.execute(c);
+                        }
+
                     }
 
+                    swingInvoke(() -> {
+                        getView().getSlots_spinner().setValue(Transference.MAX_WORKERS);
+
+                        getView().getSlots_spinner().setEnabled(true);
+                    });
                 }
-
-                swingInvoke(() -> {
-                    getView().getSlots_spinner().setValue(Transference.MAX_WORKERS);
-
-                    getView().getSlots_spinner().setEnabled(true);
-                });
-
             }
 
         }
@@ -1235,38 +1239,43 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         synchronized (_workers_lock) {
 
-            if (_chunkworkers.remove(chunkdownloader) && !_exit && _use_slots) {
+            if (_chunkworkers.remove(chunkdownloader) && !_exit) {
 
-                if (chunkdownloader.isChunk_exception()) {
+                if (_use_slots) {
 
-                    swingInvoke(() -> {
-                        getView().getSlots_spinner().setEnabled(false);
+                    if (chunkdownloader.isChunk_exception()) {
 
-                        getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
-                    });
+                        _finalizing = true;
 
-                } else {
+                        swingInvokeAndWait(() -> {
+                            getView().getSlots_spinner().setEnabled(false);
 
-                    swingInvoke(() -> {
+                            getView().getSlots_spinner().setValue(Math.max((int) getView().getSlots_spinner().getValue() - 1, 0));
+                        });
 
-                        getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
-                    });
+                    } else {
+
+                        swingInvokeAndWait(() -> {
+
+                            getView().getSlots_spinner().setValue(Math.max((int) getView().getSlots_spinner().getValue() - 1, 0));
+                        });
+                    }
+
+                    getView().updateSlotsStatus();
+
+                    _turbo = false;
                 }
 
                 if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
 
                     getView().printStatusNormal("Download paused!");
 
-                    swingInvoke(() -> {
+                    swingInvokeAndWait(() -> {
                         getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
 
                         getView().getPause_button().setEnabled(true);
                     });
 
-                }
-
-                if (_use_slots) {
-                    getView().updateSlotsStatus();
                 }
             }
         }
