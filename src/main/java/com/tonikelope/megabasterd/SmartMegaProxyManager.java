@@ -68,6 +68,8 @@ public final class SmartMegaProxyManager {
         if (_proxy_list.containsKey(proxy)) {
 
             _proxy_list.put(proxy, System.currentTimeMillis() + PROXY_BLOCK_TIME * 1000);
+
+            LOG.log(Level.WARNING, "{0} Smart Proxy Manager: BLOCKING PROXY -> {1}", new Object[]{Thread.currentThread().getName(), proxy});
         }
     }
 
