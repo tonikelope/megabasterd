@@ -24,7 +24,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     public static final double SLOW_PROXY_PERC = 0.5;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
-    private final boolean FORCE_SMART_PROXY = false; //True for debugging SmartProxy
+    private final boolean FORCE_SMART_PROXY = true; //True for debugging SmartProxy
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
@@ -166,10 +166,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 if ((_current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                    if (!getDownload().isTurbo()) {
-                        getDownload().enableTurboMode();
-                    }
-
                     if (_current_smart_proxy != null && (slow_proxy || chunk_error)) {
 
                         if (http_error == 509) {
@@ -183,6 +179,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy, _download.getFile_name()});
 
                     } else if (_current_smart_proxy == null) {
+
+                        if (!getDownload().isTurbo()) {
+                            getDownload().enableTurboMode();
+                        }
 
                         _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
@@ -414,7 +414,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             _download.getView().updateSlotsStatus();
 
-                        } else if (http_error == 503 && _current_smart_proxy == null) {
+                        } else if (http_error == 503 && _current_smart_proxy == null && !_download.isTurbo()) {
                             setExit(true);
                         }
                     }

@@ -245,8 +245,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         getView().getSpeed_label().setForeground(new Color(255, 102, 0));
 
-                        getView().getSlots_spinner().setEnabled(false);
-
                     });
 
                     synchronized (_workers_lock) {
@@ -1240,20 +1238,16 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         swingInvokeAndWait(() -> {
                             getView().getSlots_spinner().setEnabled(false);
 
-                            getView().getSlots_spinner().setValue(Math.max((int) getView().getSlots_spinner().getValue() - 1, 0));
+                            getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
                         });
 
-                    } else {
-
+                    } else if (!_finalizing) {
                         swingInvokeAndWait(() -> {
-
-                            getView().getSlots_spinner().setValue(Math.max((int) getView().getSlots_spinner().getValue() - 1, 0));
+                            getView().getSlots_spinner().setEnabled(true);
                         });
                     }
 
                     getView().updateSlotsStatus();
-
-                    _turbo = false;
                 }
 
                 if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {

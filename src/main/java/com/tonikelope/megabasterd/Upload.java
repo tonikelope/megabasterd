@@ -76,6 +76,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private volatile String _temp_mac_data;
     private final boolean _priority;
     private final Object _progress_watchdog_lock;
+    private volatile boolean _finalizing;
 
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean priority) {
 
@@ -88,6 +89,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _auto_retry_on_error = true;
         _canceled = false;
         _closed = false;
+        _finalizing = false;
         _main_panel = main_panel;
         _ma = ma;
         _file_name = filename;
@@ -124,6 +126,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         _status_error = null;
         _auto_retry_on_error = true;
         _canceled = upload.isCanceled();
+        _finalizing = false;
         _closed = false;
         _restart = true;
         _main_panel = upload.getMain_panel();
@@ -1129,18 +1132,17 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 if (chunkuploader.isChunk_exception()) {
 
+                    _finalizing = true;
+
                     swingInvokeAndWait(() -> {
                         getView().getSlots_spinner().setEnabled(false);
 
-                        getView().getSlots_spinner().setValue(Math.max((int) getView().getSlots_spinner().getValue() - 1, 0));
+                        getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
                     });
 
-                } else {
-
+                } else if (!_finalizing) {
                     swingInvokeAndWait(() -> {
-
-                        getView().getSlots_spinner().setValue(Math.max((int) getView().getSlots_spinner().getValue() - 1, 0));
-
+                        getView().getSlots_spinner().setEnabled(true);
                     });
                 }
 
