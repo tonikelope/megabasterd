@@ -14,9 +14,9 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -360,7 +360,7 @@ public class MegaAPI implements Serializable {
 
         HttpsURLConnection con = null;
 
-        LinkedHashMap<String, Long> excluded_proxy_list = new LinkedHashMap<>();
+        ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
         SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
@@ -376,9 +376,7 @@ public class MegaAPI implements Serializable {
                             proxy_manager.blockProxy(current_smart_proxy);
                         }
 
-                        excluded_proxy_list.put(current_smart_proxy, System.currentTimeMillis() + SmartMegaProxyManager.BLOCK_TIME * 1000);
-
-                        SmartMegaProxyManager.purgeExcludedProxyList(excluded_proxy_list);
+                        excluded_proxy_list.add(current_smart_proxy);
 
                         current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 

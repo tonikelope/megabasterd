@@ -8,7 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.net.URL;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +53,7 @@ public class StreamChunkDownloader implements Runnable {
 
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
-            LinkedHashMap<String, Long> excluded_proxy_list = new LinkedHashMap<>();
+            ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
             while (!_exit && !_chunkmanager.isExit()) {
 
@@ -85,9 +85,7 @@ public class StreamChunkDownloader implements Runnable {
                                 proxy_manager.blockProxy(current_smart_proxy);
                             }
 
-                            excluded_proxy_list.put(current_smart_proxy, System.currentTimeMillis() + SmartMegaProxyManager.BLOCK_TIME * 1000);
-
-                            SmartMegaProxyManager.purgeExcludedProxyList(excluded_proxy_list);
+                            excluded_proxy_list.add(current_smart_proxy);
 
                             current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
@@ -195,6 +193,8 @@ public class StreamChunkDownloader implements Runnable {
                                         _chunkmanager.secureNotifyAll();
 
                                         current_smart_proxy = null;
+
+                                        excluded_proxy_list.clear();
                                     }
                                 }
                             }

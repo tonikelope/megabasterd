@@ -9,9 +9,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +21,7 @@ import java.util.logging.Logger;
 public final class SmartMegaProxyManager {
 
     public static String DEFAULT_SMART_PROXY_URL = "https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt";
-    public static final int BLOCK_TIME = 180;
+    public static final int PROXY_BLOCK_TIME = 180;
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
     private final LinkedHashMap<String, Long> _proxy_list;
@@ -36,28 +34,12 @@ public final class SmartMegaProxyManager {
         refreshProxyList();
     }
 
-    public static void purgeExcludedProxyList(LinkedHashMap<String, Long> excluded) {
-
-        Long current_time = System.currentTimeMillis();
-
-        Iterator<Map.Entry<String, Long>> iterator = excluded.entrySet().iterator();
-
-        while (iterator.hasNext()) {
-
-            Map.Entry<String, Long> entry = iterator.next();
-
-            if (entry.getValue() < current_time) {
-                iterator.remove();
-            }
-        }
-    }
-
     public synchronized int getProxyCount() {
 
         return _proxy_list.size();
     }
 
-    public synchronized String getProxy(LinkedHashMap<String, Long> excluded) {
+    public synchronized String getProxy(ArrayList<String> excluded) {
 
         if (_proxy_list.size() > 0) {
 
@@ -67,7 +49,7 @@ public final class SmartMegaProxyManager {
 
             for (String k : keys) {
 
-                if (_proxy_list.get(k) < current_time && (excluded == null || (excluded.containsKey(k) && excluded.get(k) < current_time))) {
+                if (_proxy_list.get(k) < current_time && (excluded == null || !excluded.contains(k))) {
 
                     return k;
                 }
@@ -85,7 +67,7 @@ public final class SmartMegaProxyManager {
 
         if (_proxy_list.containsKey(proxy)) {
 
-            _proxy_list.put(proxy, System.currentTimeMillis() + BLOCK_TIME * 1000);
+            _proxy_list.put(proxy, System.currentTimeMillis() + PROXY_BLOCK_TIME * 1000);
         }
     }
 

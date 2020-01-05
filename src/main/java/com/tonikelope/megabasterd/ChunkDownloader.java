@@ -12,7 +12,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.LinkedHashMap;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +32,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private volatile boolean _error_wait;
     private volatile boolean _chunk_exception;
     private boolean _notified;
-    private final LinkedHashMap<String, Long> _excluded_proxy_list;
+    private final ArrayList<String> _excluded_proxy_list;
 
     private String _current_smart_proxy;
 
@@ -44,7 +44,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _id = id;
         _download = download;
         _current_smart_proxy = null;
-        _excluded_proxy_list = new LinkedHashMap<>();
+        _excluded_proxy_list = new ArrayList<>();
         _error_wait = false;
 
     }
@@ -166,15 +166,17 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 if ((_current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
+                    if (!getDownload().isTurbo()) {
+                        getDownload().enableTurboMode();
+                    }
+
                     if (_current_smart_proxy != null && (slow_proxy || chunk_error)) {
 
                         if (http_error == 509) {
                             proxy_manager.blockProxy(_current_smart_proxy);
                         }
 
-                        _excluded_proxy_list.put(_current_smart_proxy, System.currentTimeMillis() + SmartMegaProxyManager.BLOCK_TIME * 1000);
-
-                        SmartMegaProxyManager.purgeExcludedProxyList(_excluded_proxy_list);
+                        _excluded_proxy_list.add(_current_smart_proxy);
 
                         _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
@@ -183,10 +185,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     } else if (_current_smart_proxy == null) {
 
                         _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
-
-                        if (!getDownload().isTurbo()) {
-                            getDownload().enableTurboMode();
-                        }
 
                     }
 
@@ -367,6 +365,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             if (!FORCE_SMART_PROXY) {
                                 _current_smart_proxy = null;
                             }
+
+                            _excluded_proxy_list.clear();
 
                             _download.getChunkmanager().secureNotify();
                         }

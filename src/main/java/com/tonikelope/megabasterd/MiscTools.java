@@ -49,7 +49,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -860,7 +859,7 @@ public class MiscTools {
 
         String current_smart_proxy = null;
 
-        LinkedHashMap<String, Long> excluded_proxy_list = new LinkedHashMap<>();
+        ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
         do {
 
@@ -878,9 +877,7 @@ public class MiscTools {
                                 proxy_manager.blockProxy(current_smart_proxy);
                             }
 
-                            excluded_proxy_list.put(current_smart_proxy, System.currentTimeMillis() + SmartMegaProxyManager.BLOCK_TIME * 1000);
-
-                            SmartMegaProxyManager.purgeExcludedProxyList(excluded_proxy_list);
+                            excluded_proxy_list.add(current_smart_proxy);
 
                             current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
