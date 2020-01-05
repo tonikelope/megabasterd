@@ -34,6 +34,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
@@ -68,6 +69,19 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         jProgressBar2.setStringPainted(true);
         jProgressBar2.setValue(0);
         jProgressBar2.setVisible(false);
+
+        split_size_text.addKeyListener(new java.awt.event.KeyAdapter() {
+
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                try {
+                    Integer.parseInt(split_size_text.getText());
+                } catch (Exception e) {
+                    split_size_text.setText(split_size_text.getText().substring(0, Math.max(0, split_size_text.getText().length() - 1)));
+                }
+            }
+        });
+
+        split_size_text.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
         pack();
     }
