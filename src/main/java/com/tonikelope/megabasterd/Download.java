@@ -119,7 +119,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _exit = false;
         _progress_watchdog_lock = new Object();
         _last_download_url = null;
-        _provision_ok = true;
+        _provision_ok = false;
         _progress = 0L;
         _notified = false;
         _main_panel = main_panel;
@@ -165,7 +165,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _exit = false;
         _progress_watchdog_lock = new Object();
         _last_download_url = null;
-        _provision_ok = true;
+        _provision_ok = false;
         _progress = 0L;
         _notified = false;
         _main_panel = download.getMain_panel();
@@ -976,7 +976,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _provision_ok = false;
 
         try {
-            if (_file_name == null) {
+            if (_file_name == null && !_restart) {
 
                 file_info = getMegaFileMetadata(_url, getMain_panel().getView(), retry);
 
@@ -1010,18 +1010,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 }
 
-            } else if (_restart) {
-
-                try {
-
-                    insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
-
-                    _provision_ok = true;
-
-                } catch (SQLException ex) {
-
-                    _status_error = "Error registering download: file is already downloading.";
-                }
             } else {
 
                 _provision_ok = true;
