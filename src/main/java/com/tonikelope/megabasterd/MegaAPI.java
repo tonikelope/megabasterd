@@ -16,6 +16,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.logging.Level;
@@ -359,20 +360,32 @@ public class MegaAPI implements Serializable {
 
         HttpsURLConnection con = null;
 
+        LinkedHashMap<String, Long> excluded_proxy_list = new LinkedHashMap<>();
+
+        SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
+
         do {
 
             try {
 
-                if (http_error == 509 && !MainPanel.isUse_proxy()) {
+                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                    if (current_smart_proxy != null) {
+                    if (current_smart_proxy != null && (http_error != 0 || mega_error != 0)) {
 
-                        Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_smart_proxy});
+                        if (http_error == 509) {
+                            proxy_manager.blockProxy(current_smart_proxy);
+                        }
 
-                        MainPanel.getProxy_manager().blockProxy(current_smart_proxy);
+                        excluded_proxy_list.put(current_smart_proxy, System.currentTimeMillis() + SmartMegaProxyManager.BLOCK_TIME * 1000);
+
+                        SmartMegaProxyManager.purgeExcludedProxyList(excluded_proxy_list);
+
+                        current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                    } else if (current_smart_proxy == null) {
+
+                        current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
                     }
-
-                    current_smart_proxy = MainPanel.getProxy_manager().getProxy();
 
                     if (current_smart_proxy != null) {
 

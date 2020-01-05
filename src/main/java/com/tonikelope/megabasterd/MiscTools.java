@@ -49,6 +49,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
@@ -849,15 +850,17 @@ public class MiscTools {
             return false;
         }
 
-        boolean url_ok = false;
-
         HttpURLConnection con = null;
 
-        boolean error = false, error509 = false, error403 = false;
+        boolean error = false;
+
+        int http_status = 0, http_error = 0;
 
         SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
-        String current_proxy = null;
+        String current_smart_proxy = null;
+
+        LinkedHashMap<String, Long> excluded_proxy_list = new LinkedHashMap<>();
 
         do {
 
@@ -867,26 +870,28 @@ public class MiscTools {
 
                 if (con == null || error) {
 
-                    if (error509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                        if (MainPanel.isUse_smart_proxy() && proxy_manager == null) {
+                        if (current_smart_proxy != null && error) {
 
-                            proxy_manager = MainPanel.getProxy_manager();
+                            if (http_error == 509) {
+                                proxy_manager.blockProxy(current_smart_proxy);
+                            }
 
+                            excluded_proxy_list.put(current_smart_proxy, System.currentTimeMillis() + SmartMegaProxyManager.BLOCK_TIME * 1000);
+
+                            SmartMegaProxyManager.purgeExcludedProxyList(excluded_proxy_list);
+
+                            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                        } else if (current_smart_proxy == null) {
+
+                            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
                         }
 
-                        if (error && !error403 && current_proxy != null) {
+                        if (current_smart_proxy != null) {
 
-                            proxy_manager.blockProxy(current_proxy);
-                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: excluding proxy -> {1}", new Object[]{Thread.currentThread().getName(), current_proxy});
-
-                        }
-
-                        current_proxy = proxy_manager.getProxy();
-
-                        if (current_proxy != null) {
-
-                            String[] proxy_info = current_proxy.split(":");
+                            String[] proxy_info = current_smart_proxy.split(":");
 
                             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
@@ -926,7 +931,7 @@ public class MiscTools {
 
                 }
 
-                if (current_proxy != null) {
+                if (current_smart_proxy != null) {
                     con.setConnectTimeout(Transference.HTTP_PROXY_CONNECT_TIMEOUT);
                     con.setReadTimeout(Transference.HTTP_PROXY_READ_TIMEOUT);
                 }
@@ -935,12 +940,10 @@ public class MiscTools {
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                int http_status = con.getResponseCode();
+                http_status = con.getResponseCode();
 
-                if (http_status != 403) {
-
-                    url_ok = true;
-
+                if (http_status != 200) {
+                    http_error = http_status;
                 }
 
             } catch (IOException ex) {
@@ -952,9 +955,9 @@ public class MiscTools {
                 }
             }
 
-        } while (error509);
+        } while (http_error == 509);
 
-        return url_ok;
+        return http_status != 403;
     }
 
     public static String getMyPublicIP() {

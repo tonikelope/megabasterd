@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -52,6 +53,8 @@ public class StreamChunkDownloader implements Runnable {
 
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
+            LinkedHashMap<String, Long> excluded_proxy_list = new LinkedHashMap<>();
+
             while (!_exit && !_chunkmanager.isExit()) {
 
                 while (!_exit && !_chunkmanager.isExit() && _chunkmanager.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
@@ -74,14 +77,27 @@ public class StreamChunkDownloader implements Runnable {
 
                     StreamChunk chunk_stream = new StreamChunk(offset, _chunkmanager.calculateChunkSize(offset), url);
 
-                    if (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                        if (current_smart_proxy != null) {
+                        if (current_smart_proxy != null && http_error != 0) {
 
-                            proxy_manager.blockProxy(current_smart_proxy);
+                            if (http_error == 509) {
+                                proxy_manager.blockProxy(current_smart_proxy);
+                            }
+
+                            excluded_proxy_list.put(current_smart_proxy, System.currentTimeMillis() + SmartMegaProxyManager.BLOCK_TIME * 1000);
+
+                            SmartMegaProxyManager.purgeExcludedProxyList(excluded_proxy_list);
+
+                            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_smart_proxy});
+
+                        } else if (current_smart_proxy == null) {
+
+                            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
                         }
-
-                        current_smart_proxy = proxy_manager.getProxy();
 
                         if (current_smart_proxy != null) {
 
@@ -177,6 +193,8 @@ public class StreamChunkDownloader implements Runnable {
                                         _chunkmanager.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
 
                                         _chunkmanager.secureNotifyAll();
+
+                                        current_smart_proxy = null;
                                     }
                                 }
                             }

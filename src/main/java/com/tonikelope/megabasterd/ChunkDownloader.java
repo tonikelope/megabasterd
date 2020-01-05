@@ -12,6 +12,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.LinkedHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -31,6 +32,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private volatile boolean _error_wait;
     private volatile boolean _chunk_exception;
     private boolean _notified;
+    private final LinkedHashMap<String, Long> _excluded_proxy_list;
 
     private String _current_smart_proxy;
 
@@ -42,6 +44,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _id = id;
         _download = download;
         _current_smart_proxy = null;
+        _excluded_proxy_list = new LinkedHashMap<>();
         _error_wait = false;
 
     }
@@ -129,7 +132,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             if (FORCE_SMART_PROXY) {
 
-                _current_smart_proxy = proxy_manager.getProxy();
+                _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
                 if (!getDownload().isTurbo()) {
                     getDownload().enableTurboMode();
@@ -165,15 +168,21 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (_current_smart_proxy != null && (slow_proxy || chunk_error)) {
 
-                        proxy_manager.blockProxy(_current_smart_proxy);
+                        if (http_error == 509) {
+                            proxy_manager.blockProxy(_current_smart_proxy);
+                        }
 
-                        _current_smart_proxy = proxy_manager.getProxy();
+                        _excluded_proxy_list.put(_current_smart_proxy, System.currentTimeMillis() + SmartMegaProxyManager.BLOCK_TIME * 1000);
+
+                        SmartMegaProxyManager.purgeExcludedProxyList(_excluded_proxy_list);
+
+                        _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
                         Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy, _download.getFile_name()});
 
                     } else if (_current_smart_proxy == null) {
 
-                        _current_smart_proxy = proxy_manager.getProxy();
+                        _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
                         if (!getDownload().isTurbo()) {
                             getDownload().enableTurboMode();
