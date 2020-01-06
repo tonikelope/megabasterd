@@ -31,7 +31,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -54,7 +54,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.5";
+    public static final String VERSION = "7.6";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -1176,15 +1176,15 @@ public final class MainPanel {
 
                     ArrayList<String> downloads_queue = DBTools.selectDownloadsQueue();
 
-                    System.out.println(downloads_queue);
-
                     HashMap<String, HashMap<String, Object>> res = selectDownloads();
-
-                    System.out.println(res);
 
                     tot_downloads = res.size();
 
-                    for (String url : downloads_queue) {
+                    Iterator downloads_queue_iterator = downloads_queue.iterator();
+
+                    while (downloads_queue_iterator.hasNext()) {
+
+                        String url = (String) downloads_queue_iterator.next();
 
                         HashMap<String, Object> o = res.remove(url);
 
@@ -1201,32 +1201,19 @@ public final class MainPanel {
                                 getDownload_manager().getTransference_provision_queue().add(download);
 
                                 conta_downloads++;
-                            }
 
+                                downloads_queue_iterator.remove();
+                            }
                         }
                     }
 
                     DBTools.truncateDownloadsQueue();
 
-                    for (Map.Entry<String, HashMap<String, Object>> entry : res.entrySet()) {
-
-                        String email = (String) entry.getValue().get("email");
-
-                        MegaAPI ma = new MegaAPI();
-
-                        if (!tthis.isUse_mega_account_down() || (_mega_accounts.get(email) != null && (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null)) {
-
-                            Download download = new Download(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
-
-                            getDownload_manager().getTransference_provision_queue().add(download);
-
-                            conta_downloads++;
-                        }
-
+                    if (!downloads_queue.isEmpty()) {
+                        DBTools.insertDownloadsQueue(downloads_queue);
                     }
 
                 } catch (SQLException ex) {
-
                     Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                 } catch (Exception ex2) {
                     Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex2);
@@ -1243,7 +1230,11 @@ public final class MainPanel {
                     swingInvoke(() -> {
                         getView().getjTabbedPane1().setSelectedIndex(0);
                     });
+
+                } else {
+                    setResume_downloads(true);
                 }
+
                 swingInvoke(() -> {
                     getView().getStatus_down_label().setText("");
                 });
@@ -1345,7 +1336,11 @@ public final class MainPanel {
 
                     tot_uploads = res.size();
 
-                    for (String filename : uploads_queue) {
+                    Iterator uploads_queue_iterator = uploads_queue.iterator();
+
+                    while (uploads_queue_iterator.hasNext()) {
+
+                        String filename = (String) uploads_queue_iterator.next();
 
                         HashMap<String, Object> o = res.remove(filename);
 
@@ -1364,47 +1359,27 @@ public final class MainPanel {
                                     getUpload_manager().getTransference_provision_queue().add(upload);
 
                                     conta_uploads++;
-                                } else {
-                                    throw new Exception("Mega Login Error!");
+
+                                    uploads_queue_iterator.remove();
+
                                 }
 
                             } else {
 
                                 deleteUpload((String) o.get("filename"), email);
+
                                 tot_uploads--;
+
+                                uploads_queue_iterator.remove();
                             }
 
                         }
-
                     }
 
                     DBTools.truncateUploadsQueue();
 
-                    for (Map.Entry<String, HashMap<String, Object>> entry : res.entrySet()) {
-
-                        String email = (String) entry.getValue().get("email");
-
-                        if (_mega_accounts.get(email) != null) {
-
-                            MegaAPI ma;
-
-                            if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
-
-                                Upload upload = new Upload(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
-
-                                getUpload_manager().getTransference_provision_queue().add(upload);
-
-                                conta_uploads++;
-                            } else {
-                                throw new Exception("Mega Login Error!");
-                            }
-
-                        } else {
-
-                            deleteUpload((String) entry.getValue().get("filename"), email);
-                            tot_uploads--;
-                        }
-
+                    if (!uploads_queue.isEmpty()) {
+                        DBTools.insertUploadsQueue(uploads_queue);
                     }
 
                 } catch (SQLException ex) {
@@ -1424,6 +1399,8 @@ public final class MainPanel {
                     swingInvoke(() -> {
                         getView().getjTabbedPane1().setSelectedIndex(1);
                     });
+                } else {
+                    setResume_uploads(true);
                 }
 
                 swingInvoke(() -> {

@@ -921,7 +921,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         swingInvoke(() -> {
             getView().getClose_button().setVisible(true);
 
-            if (_status_error != null || _canceled) {
+            if ((_status_error != null || _canceled) && isProvision_ok()) {
 
                 getView().getRestart_button().setVisible(true);
 
@@ -1001,8 +1001,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     } catch (SQLException ex) {
 
-                        LOG.log(SEVERE, null, ex);
-
                         _status_error = "Error registering download: file is already downloading.";
                     }
 
@@ -1045,7 +1043,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             getView().printStatusError(_status_error);
 
             swingInvoke(() -> {
-                getView().getRestart_button().setVisible(true);
+                getView().getClose_button().setVisible(true);
             });
 
         } else {
@@ -1066,14 +1064,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 getView().getFile_size_label().setText(formatBytes(_file_size));
             });
 
+            swingInvoke(() -> {
+                getView().getClose_button().setVisible(true);
+                getView().getQueue_up_button().setVisible(true);
+                getView().getQueue_down_button().setVisible(true);
+                getView().getQueue_top_button().setVisible(true);
+                getView().getQueue_bottom_button().setVisible(true);
+            });
+
         }
-        swingInvoke(() -> {
-            getView().getClose_button().setVisible(true);
-            getView().getQueue_up_button().setVisible(true);
-            getView().getQueue_down_button().setVisible(true);
-            getView().getQueue_top_button().setVisible(true);
-            getView().getQueue_bottom_button().setVisible(true);
-        });
 
     }
 

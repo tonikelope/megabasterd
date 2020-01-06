@@ -316,8 +316,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 getMain_panel().getUpload_manager().secureNotify();
 
-                            } else {
-                                break;
                             }
 
                         }
@@ -1051,14 +1049,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     }
                                 }
 
-                                if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+                                download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
 
-                                    download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
+                                getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 
-                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-
-                                    getMain_panel().getDownload_manager().secureNotify();
-                                }
+                                getMain_panel().getDownload_manager().secureNotify();
 
                             }
 

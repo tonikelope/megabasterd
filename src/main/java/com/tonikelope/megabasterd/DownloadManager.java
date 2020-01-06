@@ -106,6 +106,8 @@ public class DownloadManager extends TransferenceManager {
 
             getTransference_waitstart_aux_queue().add(download);
 
+        } else {
+            getTransference_finished_queue().add(download);
         }
     }
 
