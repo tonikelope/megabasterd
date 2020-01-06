@@ -1027,7 +1027,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                             if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                                download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), true, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
+                                                download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
 
                                                 getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
 

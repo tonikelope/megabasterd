@@ -974,7 +974,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _provision_ok = false;
 
         try {
-            if (_file_name == null && !_restart) {
+            if (_file_name == null) {
 
                 file_info = getMegaFileMetadata(_url, getMain_panel().getView(), retry);
 
@@ -1007,9 +1007,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     }
 
                 }
-
             } else {
-
                 _provision_ok = true;
             }
 

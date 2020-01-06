@@ -54,7 +54,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.4";
+    public static final String VERSION = "7.5";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -1176,7 +1176,11 @@ public final class MainPanel {
 
                     ArrayList<String> downloads_queue = DBTools.selectDownloadsQueue();
 
+                    System.out.println(downloads_queue);
+
                     HashMap<String, HashMap<String, Object>> res = selectDownloads();
+
+                    System.out.println(res);
 
                     tot_downloads = res.size();
 
