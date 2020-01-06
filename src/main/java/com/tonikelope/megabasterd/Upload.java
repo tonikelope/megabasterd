@@ -1130,7 +1130,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
             if (_chunkworkers.remove(chunkuploader) && !_exit) {
 
-                if (chunkuploader.isChunk_exception()) {
+                if (chunkuploader.isChunk_exception() || getMain_panel().isExit()) {
 
                     _finalizing = true;
 

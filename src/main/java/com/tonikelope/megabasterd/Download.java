@@ -1231,7 +1231,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 if (_use_slots) {
 
-                    if (chunkdownloader.isChunk_exception()) {
+                    if (chunkdownloader.isChunk_exception() || getMain_panel().isExit()) {
 
                         _finalizing = true;
 

@@ -24,7 +24,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     public static final double SLOW_PROXY_PERC = 0.5;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
-    private final boolean FORCE_SMART_PROXY = true; //True for debugging SmartProxy
+    private final boolean FORCE_SMART_PROXY = false; //True for debugging SmartProxy
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
