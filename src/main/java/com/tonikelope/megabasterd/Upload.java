@@ -1134,14 +1134,14 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     _finalizing = true;
 
-                    swingInvokeAndWait(() -> {
+                    swingInvoke(() -> {
                         getView().getSlots_spinner().setEnabled(false);
 
                         getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
                     });
 
                 } else if (!_finalizing) {
-                    swingInvokeAndWait(() -> {
+                    swingInvoke(() -> {
                         getView().getSlots_spinner().setEnabled(true);
                     });
                 }
@@ -1150,7 +1150,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     getView().printStatusNormal("Upload paused!");
 
-                    swingInvokeAndWait(() -> {
+                    swingInvoke(() -> {
                         getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME UPLOAD"));
                         getView().getPause_button().setEnabled(true);
                     });

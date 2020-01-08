@@ -976,6 +976,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         try {
             if (_file_name == null) {
 
+                //New single file links
                 file_info = getMegaFileMetadata(_url, getMain_panel().getView(), retry);
 
                 if (file_info != null) {
@@ -1001,12 +1002,26 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     } catch (SQLException ex) {
 
-                        _status_error = "Error registering download: file is already downloading.";
+                        _status_error = "Error registering download: " + ex.getMessage() + " file is already downloading?";
                     }
 
                 }
             } else {
-                _provision_ok = true;
+
+                //Resuming single file links and new/resuming folder links
+                try {
+
+                    deleteDownload(_url); //If resuming
+
+                    insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
+
+                    _provision_ok = true;
+
+                } catch (SQLException ex) {
+
+                    _status_error = "Error registering download: " + ex.getMessage();
+
+                }
             }
 
         } catch (APIException ex) {
@@ -1232,14 +1247,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         _finalizing = true;
 
-                        swingInvokeAndWait(() -> {
+                        swingInvoke(() -> {
                             getView().getSlots_spinner().setEnabled(false);
 
                             getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
                         });
 
                     } else if (!_finalizing) {
-                        swingInvokeAndWait(() -> {
+                        swingInvoke(() -> {
                             getView().getSlots_spinner().setEnabled(true);
                         });
                     }
@@ -1251,7 +1266,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     getView().printStatusNormal("Download paused!");
 
-                    swingInvokeAndWait(() -> {
+                    swingInvoke(() -> {
                         getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
 
                         getView().getPause_button().setEnabled(true);
