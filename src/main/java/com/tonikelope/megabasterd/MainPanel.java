@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.UUID;
@@ -54,7 +55,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.6";
+    public static final String VERSION = "7.7";
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -1192,9 +1193,13 @@ public final class MainPanel {
 
                             String email = (String) o.get("email");
 
+                            if (_mega_accounts.get(email) == null) {
+                                email = null;
+                            }
+
                             MegaAPI ma = new MegaAPI();
 
-                            if (!tthis.isUse_mega_account_down() || (_mega_accounts.get(email) != null && (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null)) {
+                            if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
                                 Download download = new Download(tthis, ma, (String) url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
 
@@ -1203,6 +1208,8 @@ public final class MainPanel {
                                 conta_downloads++;
 
                                 downloads_queue_iterator.remove();
+                            } else {
+                                tot_downloads--;
                             }
                         }
                     }
@@ -1211,6 +1218,34 @@ public final class MainPanel {
 
                     if (!downloads_queue.isEmpty()) {
                         DBTools.insertDownloadsQueue(downloads_queue);
+                    }
+
+                    if (!res.isEmpty()) {
+
+                        for (Map.Entry<String, HashMap<String, Object>> entry : res.entrySet()) {
+
+                            String email = (String) entry.getValue().get("email");
+
+                            if (_mega_accounts.get(email) == null) {
+                                email = null;
+                            }
+
+                            MegaAPI ma = new MegaAPI();
+
+                            if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+
+                                Download download = new Download(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
+
+                                getDownload_manager().getTransference_provision_queue().add(download);
+
+                                conta_downloads++;
+
+                            } else {
+
+                                tot_downloads--;
+                            }
+                        }
+
                     }
 
                 } catch (SQLException ex) {
@@ -1380,6 +1415,38 @@ public final class MainPanel {
 
                     if (!uploads_queue.isEmpty()) {
                         DBTools.insertUploadsQueue(uploads_queue);
+                    }
+
+                    if (!res.isEmpty()) {
+
+                        for (Map.Entry<String, HashMap<String, Object>> entry : res.entrySet()) {
+
+                            String email = (String) entry.getValue().get("email");
+
+                            if (_mega_accounts.get(email) != null) {
+
+                                MegaAPI ma;
+
+                                if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+
+                                    Upload upload = new Upload(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
+
+                                    getUpload_manager().getTransference_provision_queue().add(upload);
+
+                                    conta_uploads++;
+
+                                    uploads_queue_iterator.remove();
+
+                                }
+
+                            } else {
+
+                                deleteUpload((String) entry.getValue().get("filename"), email);
+
+                                tot_uploads--;
+                            }
+                        }
+
                     }
 
                 } catch (SQLException ex) {
