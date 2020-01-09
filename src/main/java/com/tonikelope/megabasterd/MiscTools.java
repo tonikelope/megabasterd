@@ -851,8 +851,6 @@ public class MiscTools {
 
         HttpURLConnection con = null;
 
-        boolean error = false;
-
         int http_status = 0, http_error = 0;
 
         SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
@@ -861,54 +859,42 @@ public class MiscTools {
 
         ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
+        if (MainPanel.FORCE_SMART_PROXY) {
+
+            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+        }
+
         do {
 
             try {
 
                 URL url = new URL(string_url + "/0-0");
 
-                if (con == null || error) {
+                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                    if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    if (current_smart_proxy != null && http_error != 0) {
 
-                        if (current_smart_proxy != null && error) {
-
-                            if (http_error == 509) {
-                                proxy_manager.blockProxy(current_smart_proxy);
-                            }
-
-                            excluded_proxy_list.add(current_smart_proxy);
-
-                            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-                        } else if (current_smart_proxy == null) {
-
-                            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                        if (http_error == 509) {
+                            proxy_manager.blockProxy(current_smart_proxy);
                         }
 
-                        if (current_smart_proxy != null) {
+                        excluded_proxy_list.add(current_smart_proxy);
 
-                            String[] proxy_info = current_smart_proxy.split(":");
+                        current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
-                            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+                    } else if (current_smart_proxy == null) {
 
-                            con = (HttpURLConnection) url.openConnection(proxy);
+                        current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                    }
 
-                        } else {
+                    if (current_smart_proxy != null) {
 
-                            if (MainPanel.isUse_proxy()) {
+                        String[] proxy_info = current_smart_proxy.split(":");
 
-                                con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
-                                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
-
-                                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
-                                }
-                            } else {
-
-                                con = (HttpURLConnection) url.openConnection();
-                            }
-                        }
+                        con = (HttpURLConnection) url.openConnection(proxy);
 
                     } else {
 
@@ -926,6 +912,20 @@ public class MiscTools {
                         }
                     }
 
+                } else {
+
+                    if (MainPanel.isUse_proxy()) {
+
+                        con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+
+                        if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+
+                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                        }
+                    } else {
+
+                        con = (HttpURLConnection) url.openConnection();
+                    }
                 }
 
                 if (current_smart_proxy != null) {
@@ -941,15 +941,18 @@ public class MiscTools {
 
                 if (http_status != 200) {
                     http_error = http_status;
+                } else {
+                    http_error = 0;
                 }
 
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             } finally {
 
                 if (con != null) {
                     con.disconnect();
                 }
+
             }
 
         } while (http_error == 509);

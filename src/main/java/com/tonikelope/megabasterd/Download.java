@@ -412,7 +412,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     public void stop() {
 
         if (!isExit()) {
-            getMain_panel().getDownload_manager().setPaused_all(false);
             _canceled = true;
             stopDownloader();
         }
@@ -425,8 +424,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             setPause(false);
 
-            getMain_panel().getDownload_manager().setPaused_all(false);
-
             setPaused_workers(0);
 
             synchronized (_workers_lock) {
@@ -437,6 +434,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
 
             getView().resume();
+
+            _main_panel.getDownload_manager().setPaused_all(false);
 
         } else {
 
@@ -1119,7 +1118,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     }
 
-    public String getDownloadUrlForWorker() throws IOException {
+    public String getDownloadUrlForWorker() {
 
         synchronized (_dl_url_lock) {
 
@@ -1156,7 +1155,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         error = true;
                     }
 
-                } catch (APIException ex) {
+                } catch (Exception ex) {
 
                     error = true;
 
@@ -1449,9 +1448,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
-                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
-
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
+
+                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
 
                 } else {
 
@@ -1535,9 +1534,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
-                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
-
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
+
+                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
 
                 } else {
 
@@ -1709,6 +1708,16 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     @Override
     public boolean isClosed() {
         return _closed;
+    }
+
+    @Override
+    public int getPausedWorkers() {
+        return _paused_workers;
+    }
+
+    @Override
+    public int getTotWorkers() {
+        return getChunkworkers().size();
     }
 
 }

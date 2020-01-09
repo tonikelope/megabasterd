@@ -1266,7 +1266,17 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void pause_all_down_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_all_down_buttonActionPerformed
 
-        _main_panel.getDownload_manager().pauseAll();
+        pause_all_down_button.setEnabled(false);
+
+        if (!_main_panel.getDownload_manager().isPaused_all()) {
+
+            _main_panel.getDownload_manager().pauseAll();
+
+        } else {
+
+            _main_panel.getDownload_manager().resumeAll();
+        }
+
     }//GEN-LAST:event_pause_all_down_buttonActionPerformed
 
     private void new_stream_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_stream_menuActionPerformed

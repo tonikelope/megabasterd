@@ -488,7 +488,6 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     @Override
     public void stop() {
         if (!isExit()) {
-            getMain_panel().getUpload_manager().setPaused_all(false);
             _canceled = true;
             stopUploader();
         }
@@ -501,8 +500,6 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
             setPause(false);
 
-            getMain_panel().getUpload_manager().setPaused_all(false);
-
             setPaused_workers(0);
 
             synchronized (_workers_lock) {
@@ -513,6 +510,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             }
 
             getView().resume();
+
+            _main_panel.getUpload_manager().setPaused_all(false);
 
         } else {
 
@@ -1311,4 +1310,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         return _closed;
     }
 
+    @Override
+    public int getPausedWorkers() {
+        return _paused_workers;
+    }
+
+    @Override
+    public int getTotWorkers() {
+        return getChunkworkers().size();
+    }
 }

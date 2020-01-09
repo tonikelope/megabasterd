@@ -55,6 +55,12 @@ public class StreamChunkDownloader implements Runnable {
 
             ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
+            if (MainPanel.FORCE_SMART_PROXY) {
+
+                current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+            }
+
             while (!_exit && !_chunkmanager.isExit()) {
 
                 while (!_exit && !_chunkmanager.isExit() && _chunkmanager.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {

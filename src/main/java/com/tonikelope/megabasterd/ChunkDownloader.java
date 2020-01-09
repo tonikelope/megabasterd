@@ -24,7 +24,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     public static final double SLOW_PROXY_PERC = 0.5;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
-    private final boolean FORCE_SMART_PROXY = false; //True for debugging SmartProxy
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
@@ -130,7 +129,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
-            if (FORCE_SMART_PROXY) {
+            if (MainPanel.FORCE_SMART_PROXY) {
 
                 _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
@@ -141,11 +140,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             while (!_download.getMain_panel().isExit() && !_exit && !_download.isStopped()) {
 
-                if (_download.isPaused() && !_download.isStopped()) {
+                if (_download.isPaused() && !_download.isStopped() && !_download.getChunkmanager().isExit()) {
 
                     _download.pause_worker();
 
+                    pause_init_time = System.currentTimeMillis();
+
                     secureWait();
+
+                    paused += System.currentTimeMillis() - pause_init_time;
 
                 }
 
@@ -362,17 +365,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             }
                              */
-                            if (!FORCE_SMART_PROXY) {
-                                _current_smart_proxy = null;
-                            }
-
                             _excluded_proxy_list.clear();
 
                             _download.getChunkmanager().secureNotify();
                         }
                     }
 
-                } catch (IOException ex) {
+                } catch (IOException | IllegalStateException ex) {
 
                     if (ex instanceof SocketTimeoutException) {
                         timeout = true;
@@ -417,6 +416,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         } else if (http_error == 503 && _current_smart_proxy == null && !_download.isTurbo()) {
                             setExit(true);
                         }
+
+                    } else if (!FORCE_SMART_PROXY) {
+                        _current_smart_proxy = null;
                     }
 
                     con.disconnect();

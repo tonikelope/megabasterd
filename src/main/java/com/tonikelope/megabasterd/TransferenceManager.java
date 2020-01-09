@@ -39,6 +39,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private final MainPanel _main_panel;
     private final Object _secure_notify_lock;
     private final Object _wait_queue_lock;
+    private final Object _pause_all_lock;
     private boolean _notified;
     private volatile boolean _removing_transferences;
     private volatile boolean _provisioning_transferences;
@@ -67,6 +68,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _max_running_trans = max_running_trans;
         _scroll_panel = scroll_panel;
         _status = status;
+        _pause_all_lock = new Object();
         _close_all_button = close_all_button;
         _pause_all_button = pause_all_button;
         _clean_all_menu = clean_all_menu;
@@ -96,6 +98,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         this._sort_wait_start_queue = sort_wait_start_queue;
     }
 
+    public void setPaused_all(boolean _paused_all) {
+        this._paused_all = _paused_all;
+    }
+
     public boolean isFrozen() {
         return _frozen;
     }
@@ -110,10 +116,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public Object getWait_queue_lock() {
         return _wait_queue_lock;
-    }
-
-    public void setPaused_all(boolean paused_all) {
-        _paused_all = paused_all;
     }
 
     public ConcurrentLinkedQueue<Object> getTransference_preprocess_global_queue() {
@@ -481,10 +483,78 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void pauseAll() {
 
-        _paused_all = !_paused_all;
+        _transference_running_list.forEach((transference) -> {
+
+            if (!transference.isPaused()) {
+                transference.pause();
+            }
+
+        });
+
+        secureNotify();
+
+        THREAD_POOL.execute(() -> {
+
+            boolean running;
+
+            do {
+
+                running = false;
+
+                for (Transference t : _transference_running_list) {
+                    if (t.getPausedWorkers() != t.getTotWorkers()) {
+                        running = true;
+                        break;
+                    }
+                }
+
+                if (running) {
+                    synchronized (_pause_all_lock) {
+
+                        try {
+                            _pause_all_lock.wait(1000);
+                        } catch (InterruptedException ex) {
+                            Logger.getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+
+                    }
+                }
+
+            } while (running);
+
+            _paused_all = true;
+
+            swingInvoke(() -> {
+
+                _pause_all_button.setText("RESUME ALL");
+                _pause_all_button.setEnabled(true);
+
+            });
+
+            secureNotify();
+
+        });
+
+    }
+
+    public void resumeAll() {
 
         _transference_running_list.forEach((transference) -> {
-            transference.pause();
+
+            if (transference.isPaused()) {
+                transference.pause();
+            }
+
+        });
+
+        _paused_all = false;
+
+        swingInvoke(() -> {
+
+            _pause_all_button.setText("PAUSE ALL");
+
+            _pause_all_button.setEnabled(true);
+
         });
 
         secureNotify();

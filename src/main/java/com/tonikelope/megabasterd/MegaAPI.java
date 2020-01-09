@@ -364,13 +364,19 @@ public class MegaAPI implements Serializable {
 
         SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
+        if (MainPanel.FORCE_SMART_PROXY) {
+
+            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+        }
+
         do {
 
             try {
 
                 if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
 
-                    if (current_smart_proxy != null && (http_error != 0 || mega_error != 0)) {
+                    if (current_smart_proxy != null && (http_error != 0 || empty_response)) {
 
                         if (http_error == 509) {
                             proxy_manager.blockProxy(current_smart_proxy);
@@ -419,19 +425,19 @@ public class MegaAPI implements Serializable {
 
                 mega_error = 0;
 
-                empty_response = true;
-
-                con.setRequestMethod("POST");
+                empty_response = false;
 
                 con.setRequestProperty("Content-type", "text/plain;charset=UTF-8");
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
+                con.setUseCaches(false);
+
+                con.setRequestMethod("POST");
+
                 con.setDoOutput(true);
 
                 con.getOutputStream().write(request.getBytes("UTF-8"));
-
-                con.getOutputStream().flush();
 
                 con.getOutputStream().close();
 
@@ -462,10 +468,17 @@ public class MegaAPI implements Serializable {
 
                         if (response.length() > 0) {
 
-                            empty_response = false;
-
                             mega_error = checkMEGAError(response);
 
+                            if (mega_error != 0 && !Arrays.asList(MEGA_ERROR_NO_EXCEPTION_CODES).contains(mega_error)) {
+
+                                throw new MegaAPIException(mega_error);
+
+                            }
+
+                        } else {
+
+                            empty_response = true;
                         }
                     }
 
@@ -483,12 +496,7 @@ public class MegaAPI implements Serializable {
 
             }
 
-            if (!empty_response && mega_error != 0 && http_error != 509) {
-
-                if (!Arrays.asList(MEGA_ERROR_NO_EXCEPTION_CODES).contains(mega_error)) {
-
-                    throw new MegaAPIException(mega_error);
-                }
+            if ((empty_response || mega_error != 0 || http_error != 0) && http_error != 509) {
 
                 LOG.log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(mega_error)});
 
@@ -498,12 +506,9 @@ public class MegaAPI implements Serializable {
                     LOG.log(Level.SEVERE, ex.getMessage());
                 }
 
-            } else if (!empty_response && mega_error == 0 && http_error == 0) {
-
-                conta_error = 0;
             }
 
-        } while (empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy()));
+        } while (empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()));
 
         _seqno++;
 
@@ -511,7 +516,7 @@ public class MegaAPI implements Serializable {
 
     }
 
-    public String getMegaFileDownloadUrl(String link) throws IOException, MegaAPIException {
+    public String getMegaFileDownloadUrl(String link) throws MegaAPIException, MalformedURLException, IOException {
 
         String file_id = findFirstRegex("#.*?!([^!]+)", link, 1);
 
