@@ -1306,7 +1306,16 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void pause_all_up_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_all_up_buttonActionPerformed
 
-        _main_panel.getUpload_manager().pauseAll();
+        pause_all_up_button.setEnabled(false);
+
+        if (!_main_panel.getUpload_manager().isPaused_all()) {
+
+            _main_panel.getUpload_manager().pauseAll();
+
+        } else {
+
+            _main_panel.getUpload_manager().resumeAll();
+        }
     }//GEN-LAST:event_pause_all_up_buttonActionPerformed
 
     private void clean_all_up_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clean_all_up_menuActionPerformed
