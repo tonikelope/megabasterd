@@ -153,53 +153,54 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public void updateKissStreamServerStatus(final String status) {
 
-        String old_status = getKiss_server_status().getText();
+        swingInvoke(() -> {
+            String old_status = getKiss_server_status().getText();
 
-        if (!old_status.equals(status + " ")) {
-            Dimension frame_size = this.getSize();
+            if (!old_status.equals(status + " ")) {
+                Dimension frame_size = this.getSize();
 
-            swingInvoke(() -> {
                 getKiss_server_status().setText(status + " ");
 
                 pack();
                 setSize(frame_size);
-            });
-        }
 
+            }
+        });
     }
 
     public void updateSmartProxyStatus(final String status) {
 
-        String old_status = getSmart_proxy_status().getText();
+        swingInvoke(() -> {
+            String old_status = getSmart_proxy_status().getText();
 
-        if (!old_status.equals(status + " ")) {
-            Dimension frame_size = this.getSize();
+            if (!old_status.equals(status + " ")) {
+                Dimension frame_size = this.getSize();
 
-            swingInvoke(() -> {
                 getSmart_proxy_status().setText(status + " ");
 
                 pack();
                 setSize(frame_size);
-            });
-        }
 
+            }
+        });
     }
 
     public void updateMCReverseStatus(final String status) {
 
-        String old_status = getMc_reverse_status().getText();
+        swingInvoke(() -> {
 
-        if (!old_status.equals(status + " ")) {
-            Dimension frame_size = this.getSize();
+            String old_status = getMc_reverse_status().getText();
 
-            swingInvoke(() -> {
+            if (!old_status.equals(status + " ")) {
+                Dimension frame_size = this.getSize();
+
                 getMc_reverse_status().setText(status + " ");
 
                 pack();
                 setSize(frame_size);
-            });
-        }
 
+            }
+        });
     }
 
     private void _new_upload_dialog(FileGrabberDialog dialog) {

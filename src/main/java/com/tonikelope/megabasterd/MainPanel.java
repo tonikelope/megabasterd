@@ -55,7 +55,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.9";
+    public static final String VERSION = "7.10";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -347,9 +347,9 @@ public final class MainPanel {
             });
 
         } else {
-            swingInvoke(() -> {
-                getView().updateSmartProxyStatus("SmartProxy: OFF");
-            });
+
+            getView().updateSmartProxyStatus("SmartProxy: OFF");
+
         }
 
         swingInvoke(() -> {

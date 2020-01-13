@@ -203,7 +203,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     } else {
 
-                        LOG.log(Level.INFO, "{0} Worker [{1}] SmartProxy getFastestProxy returned NULL! {2}", new Object[]{Thread.currentThread().getName(), _id, _download.getFile_name()});
+                        LOG.log(Level.INFO, "{0} Worker [{1}] SmartProxy getProxy returned NULL! {2}", new Object[]{Thread.currentThread().getName(), _id, _download.getFile_name()});
 
                         URL url = new URL(chunk_url);
 

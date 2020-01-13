@@ -1,6 +1,5 @@
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MiscTools.swingInvoke;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,7 +20,8 @@ import java.util.logging.Logger;
 public final class SmartMegaProxyManager {
 
     public static String DEFAULT_SMART_PROXY_URL = "https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt";
-    public static final int PROXY_BLOCK_TIME = 180;
+    public static final int PROXY_BLOCK_TIME = 300;
+    public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 15;
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
     private final LinkedHashMap<String, Long> _proxy_list;
@@ -56,7 +56,13 @@ public final class SmartMegaProxyManager {
             }
         }
 
-        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing...)", new Object[]{Thread.currentThread().getName()});
+        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing in " + String.valueOf(PROXY_AUTO_REFRESH_SLEEP_TIME) + " secs...)", new Object[]{Thread.currentThread().getName()});
+
+        try {
+            Thread.sleep(PROXY_AUTO_REFRESH_SLEEP_TIME * 1000);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
         refreshProxyList();
 
@@ -69,7 +75,7 @@ public final class SmartMegaProxyManager {
 
             _proxy_list.put(proxy, System.currentTimeMillis() + PROXY_BLOCK_TIME * 1000);
 
-            LOG.log(Level.WARNING, "{0} Smart Proxy Manager: BLOCKING PROXY -> {1}", new Object[]{Thread.currentThread().getName(), proxy});
+            LOG.log(Level.WARNING, "{0} Smart Proxy Manager: BLOCKING PROXY -> {1} ({2} secs)", new Object[]{Thread.currentThread().getName(), proxy, PROXY_BLOCK_TIME});
         }
     }
 
@@ -150,16 +156,13 @@ public final class SmartMegaProxyManager {
                     }
                 }
 
-                swingInvoke(() -> {
-                    _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
-                });
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
 
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
 
             } else if (!custom_clean_list.isEmpty()) {
-                swingInvoke(() -> {
-                    _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")*");
-                });
+
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")*");
 
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
             }
