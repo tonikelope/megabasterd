@@ -55,13 +55,14 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.10";
+    public static final String VERSION = "7.11";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
+    public static final int RUN_COMMAND_TIME = 600;
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = true;
     public static final double FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT = 0.7;
@@ -77,12 +78,15 @@ public final class MainPanel {
     private static String _proxy_user;
     private static String _proxy_pass;
     private static boolean _use_smart_proxy;
+    private static boolean _run_command;
+    private static String _run_command_path;
     private static String _font;
     private static SmartMegaProxyManager _proxy_manager;
     private static String _language;
     private static String _new_version;
     private static Boolean _resume_uploads;
     private static Boolean _resume_downloads;
+    private static long _last_run_command;
     private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
 
     public static void main(String args[]) {
@@ -114,6 +118,14 @@ public final class MainPanel {
         invokeLater(() -> {
             main_panel.getView().setVisible(true);
         });
+    }
+
+    public static boolean isRun_command() {
+        return _run_command;
+    }
+
+    public static String getRun_command_path() {
+        return _run_command_path;
     }
 
     public static Boolean getApp_image() {
@@ -196,6 +208,8 @@ public final class MainPanel {
         _new_version = null;
 
         _exit = false;
+
+        _last_run_command = -1;
 
         _restart = false;
 
@@ -779,6 +793,21 @@ public final class MainPanel {
             _proxy_pass = DBTools.selectSettingValue("proxy_pass");
         }
 
+        String run_command_string = DBTools.selectSettingValue("run_command");
+
+        if (run_command_string != null) {
+
+            _run_command = run_command_string.equals("yes");
+        }
+
+        String old_run_command_path = _run_command_path;
+
+        _run_command_path = DBTools.selectSettingValue("run_command_path");
+
+        if (_run_command && old_run_command_path != null && !old_run_command_path.equals(_run_command_path)) {
+            _last_run_command = -1;
+        }
+
         String use_megacrypter_reverse = selectSettingValue("megacrypter_reverse");
 
         if (use_megacrypter_reverse != null) {
@@ -806,6 +835,22 @@ public final class MainPanel {
 
         if (_language == null) {
             _language = DEFAULT_LANGUAGE;
+        }
+    }
+
+    public static synchronized void run_external_command() {
+
+        if (_run_command && (_last_run_command == -1 || _last_run_command + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
+
+            if (_run_command_path != null && !_run_command_path.equals("")) {
+                try {
+                    Runtime.getRuntime().exec(_run_command_path);
+                } catch (IOException ex) {
+                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                }
+
+                _last_run_command = System.currentTimeMillis();
+            }
         }
     }
 

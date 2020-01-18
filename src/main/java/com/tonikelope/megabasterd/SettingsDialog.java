@@ -493,6 +493,21 @@ public class SettingsDialog extends javax.swing.JDialog {
         custom_proxy_list_label.setEnabled(use_smart_proxy);
         custom_proxy_textarea.setEnabled(use_smart_proxy);
 
+        boolean run_command = false;
+
+        String run_command_string = DBTools.selectSettingValue("run_command");
+
+        if (run_command_string != null) {
+
+            run_command = run_command_string.equals("yes");
+        }
+
+        run_command_checkbox.setSelected(run_command);
+
+        run_command_textbox.setEnabled(run_command);
+
+        run_command_textbox.setText(DBTools.selectSettingValue("run_command_path"));
+
         boolean init_paused = false;
 
         String init_paused_string = DBTools.selectSettingValue("start_frozen");
@@ -673,6 +688,8 @@ public class SettingsDialog extends javax.swing.JDialog {
         jSeparator12 = new javax.swing.JSeparator();
         start_frozen_checkbox = new javax.swing.JCheckBox();
         jSeparator15 = new javax.swing.JSeparator();
+        run_command_checkbox = new javax.swing.JCheckBox();
+        run_command_textbox = new javax.swing.JTextField();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -1444,28 +1461,31 @@ public class SettingsDialog extends javax.swing.JDialog {
         start_frozen_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         start_frozen_checkbox.setText("Freeze transferences before start");
 
+        run_command_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        run_command_checkbox.setText("Execute this command when MEGA download limit is reached:");
+        run_command_checkbox.setDoubleBuffered(true);
+        run_command_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                run_command_checkboxActionPerformed(evt);
+            }
+        });
+
+        run_command_textbox.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        run_command_textbox.setDoubleBuffered(true);
+        run_command_textbox.setEnabled(false);
+
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
         advanced_panelLayout.setHorizontalGroup(
             advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator15, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSeparator12, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jSeparator1)
-                    .addComponent(proxy_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(advanced_panelLayout.createSequentialGroup()
-                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(rec_zoom_label, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(start_frozen_checkbox, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(custom_chunks_dir_checkbox, javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, advanced_panelLayout.createSequentialGroup()
-                                .addComponent(custom_chunks_dir_button)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(custom_chunks_dir_current_label)))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(run_command_textbox)
+                    .addComponent(jSeparator15)
+                    .addComponent(jSeparator12)
+                    .addComponent(jSeparator1, javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, advanced_panelLayout.createSequentialGroup()
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
                                 .addComponent(font_label)
@@ -1475,7 +1495,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                                 .addComponent(zoom_label)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 227, Short.MAX_VALUE))
+                                .addGap(0, 309, Short.MAX_VALUE))
                             .addGroup(advanced_panelLayout.createSequentialGroup()
                                 .addComponent(jLabel2)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1486,7 +1506,19 @@ public class SettingsDialog extends javax.swing.JDialog {
                                 .addComponent(import_settings_button)
                                 .addGap(18, 18, 18)
                                 .addComponent(export_settings_button))
-                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                    .addComponent(proxy_panel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, advanced_panelLayout.createSequentialGroup()
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(run_command_checkbox)
+                            .addComponent(start_frozen_checkbox)
+                            .addComponent(custom_chunks_dir_checkbox)
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addComponent(custom_chunks_dir_button)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(custom_chunks_dir_current_label))
+                            .addComponent(rec_zoom_label))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         advanced_panelLayout.setVerticalGroup(
@@ -1521,9 +1553,13 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addComponent(start_frozen_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator15, javax.swing.GroupLayout.PREFERRED_SIZE, 8, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(run_command_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(run_command_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(rec_zoom_label)
                 .addContainerGap())
         );
@@ -1542,7 +1578,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1071, Short.MAX_VALUE)
+                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1153, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(6, 6, 6)
@@ -1606,6 +1642,8 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("use_custom_chunks_dir", custom_chunks_dir_checkbox.isSelected() ? "yes" : "no");
             settings.put("custom_chunks_dir", _custom_chunks_dir);
             settings.put("custom_proxy_list", custom_proxy_textarea.getText());
+            settings.put("run_command", run_command_checkbox.isSelected() ? "yes" : "no");
+            settings.put("run_command_path", run_command_textbox.getText());
 
             String old_font = DBTools.selectSettingValue("font");
 
@@ -2749,6 +2787,13 @@ public class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_custom_chunks_dir_buttonActionPerformed
 
+    private void run_command_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_checkboxActionPerformed
+        // TODO add your handling code here:
+
+        run_command_textbox.setEnabled(run_command_checkbox.isSelected());
+
+    }//GEN-LAST:event_run_command_checkboxActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -2833,6 +2878,8 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel rec_zoom_label;
     private javax.swing.JButton remove_elc_account_button;
     private javax.swing.JButton remove_mega_account_button;
+    private javax.swing.JCheckBox run_command_checkbox;
+    private javax.swing.JTextField run_command_textbox;
     private javax.swing.JButton save_button;
     private javax.swing.JCheckBox smart_proxy_checkbox;
     private javax.swing.JCheckBox start_frozen_checkbox;
