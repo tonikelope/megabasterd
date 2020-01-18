@@ -69,6 +69,12 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     if (con == null || chunk_error) {
 
+                        if (http_error == 509 && MainPanel.isRun_command()) {
+
+                            MainPanel.run_external_command();
+
+                        }
+
                         URL url = new URL(worker_url + "/" + chunk_offset);
 
                         if (MainPanel.isUse_proxy()) {
