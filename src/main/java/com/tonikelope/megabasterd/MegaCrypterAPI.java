@@ -97,8 +97,8 @@ public class MegaCrypterAPI {
                 }
             }
 
-        } catch (Exception ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, ex.getMessage());
+        } catch (IOException ex) {
+            Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, ex.getMessage());
         } finally {
 
             if (con != null) {

@@ -484,7 +484,7 @@ public class MegaAPI implements Serializable {
 
                 }
 
-            } catch (Exception ex) {
+            } catch (IOException ex) {
 
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, ex.getMessage());
 
