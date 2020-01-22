@@ -690,6 +690,8 @@ public class SettingsDialog extends javax.swing.JDialog {
         jSeparator15 = new javax.swing.JSeparator();
         run_command_checkbox = new javax.swing.JCheckBox();
         run_command_textbox = new javax.swing.JTextField();
+        run_command_textbox.addMouseListener(new ContextMenuMouseListener());
+        run_command_test_button = new javax.swing.JButton();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -1474,6 +1476,14 @@ public class SettingsDialog extends javax.swing.JDialog {
         run_command_textbox.setDoubleBuffered(true);
         run_command_textbox.setEnabled(false);
 
+        run_command_test_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        run_command_test_button.setText("Test");
+        run_command_test_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                run_command_test_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
         advanced_panelLayout.setHorizontalGroup(
@@ -1509,15 +1519,18 @@ public class SettingsDialog extends javax.swing.JDialog {
                             .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addComponent(proxy_panel, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, advanced_panelLayout.createSequentialGroup()
-                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(run_command_checkbox)
-                            .addComponent(start_frozen_checkbox)
-                            .addComponent(custom_chunks_dir_checkbox)
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(start_frozen_checkbox, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(custom_chunks_dir_checkbox, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, advanced_panelLayout.createSequentialGroup()
                                 .addComponent(custom_chunks_dir_button)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(custom_chunks_dir_current_label))
-                            .addComponent(rec_zoom_label))
+                            .addComponent(rec_zoom_label, javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.LEADING, advanced_panelLayout.createSequentialGroup()
+                                .addComponent(run_command_checkbox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(run_command_test_button)))
                         .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
@@ -1554,7 +1567,9 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jSeparator15, javax.swing.GroupLayout.PREFERRED_SIZE, 8, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(run_command_checkbox)
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(run_command_checkbox)
+                    .addComponent(run_command_test_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(run_command_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -2794,6 +2809,20 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_run_command_checkboxActionPerformed
 
+    private void run_command_test_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_test_buttonActionPerformed
+        // TODO add your handling code here:
+
+        if (run_command_textbox.getText() != null && !"".equals(run_command_textbox.getText().trim())) {
+
+            try {
+                Runtime.getRuntime().exec(run_command_textbox.getText().trim());
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_run_command_test_buttonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -2879,6 +2908,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JButton remove_elc_account_button;
     private javax.swing.JButton remove_mega_account_button;
     private javax.swing.JCheckBox run_command_checkbox;
+    private javax.swing.JButton run_command_test_button;
     private javax.swing.JTextField run_command_textbox;
     private javax.swing.JButton save_button;
     private javax.swing.JCheckBox smart_proxy_checkbox;

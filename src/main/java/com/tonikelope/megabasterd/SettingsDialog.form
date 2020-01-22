@@ -1090,8 +1090,7 @@
                               </Group>
                               <Component id="proxy_panel" alignment="0" max="32767" attributes="0"/>
                               <Group type="102" alignment="0" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="run_command_checkbox" min="-2" max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="1" attributes="0">
                                       <Component id="start_frozen_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Component id="custom_chunks_dir_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                       <Group type="102" alignment="0" attributes="0">
@@ -1100,6 +1099,11 @@
                                           <Component id="custom_chunks_dir_current_label" min="-2" max="-2" attributes="0"/>
                                       </Group>
                                       <Component id="rec_zoom_label" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <Component id="run_command_checkbox" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="run_command_test_button" min="-2" max="-2" attributes="0"/>
+                                      </Group>
                                   </Group>
                                   <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
@@ -1145,7 +1149,10 @@
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="jSeparator15" min="-2" pref="8" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="run_command_checkbox" min="-2" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="run_command_checkbox" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="run_command_test_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="run_command_textbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
@@ -1550,6 +1557,20 @@
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                     <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
+                  <AuxValues>
+                    <AuxValue name="JavaCodeGenerator_CreateCodePost" type="java.lang.String" value="run_command_textbox.addMouseListener(new ContextMenuMouseListener());"/>
+                  </AuxValues>
+                </Component>
+                <Component class="javax.swing.JButton" name="run_command_test_button">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Dialog" size="18" style="1"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Test"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="run_command_test_buttonActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>
