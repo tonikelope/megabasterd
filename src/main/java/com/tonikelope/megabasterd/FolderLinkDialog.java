@@ -3,6 +3,7 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Dialog;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -439,10 +440,10 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                     for (Object p : object_path) {
 
-                        path += "/" + ((Map<String, Object>) p).get("name");
+                        path += File.separator + ((Map<String, Object>) p).get("name");
                     }
 
-                    path = path.replaceAll("^/+", "").trim();
+                    path = path.replaceAll("^/+", "").replaceAll("^\\+", "").trim();
 
                     String url = "https://mega.nz/#N!" + ((Map<String, Object>) node.getUserObject()).get("h") + "!" + ((Map<String, Object>) node.getUserObject()).get("key") + "###n=" + folder_id;
 

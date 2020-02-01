@@ -271,13 +271,17 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
 
-                            String[] dirs = file_path.split("/");
+                            LOG.log(Level.INFO, "{0} FILE_PATH -> {1}", new Object[]{Thread.currentThread().getName(), file_path});
+
+                            String[] dirs = file_path.split("\\" + File.separator);
 
                             MegaDirNode current_node = file_paths;
 
                             String file_parent = current_node.getNode_id();
 
                             for (String d : dirs) {
+
+                                LOG.log(Level.INFO, "{0} DIR -> {1}", new Object[]{Thread.currentThread().getName(), d});
 
                                 if (!d.isEmpty()) {
 

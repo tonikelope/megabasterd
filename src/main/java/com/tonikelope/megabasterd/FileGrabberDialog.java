@@ -885,10 +885,10 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
                 for (Object p : object_path) {
 
-                    path += "/" + p;
+                    path += File.separator + p;
                 }
 
-                path = path.replaceAll("^//", "/").trim().replaceAll(" \\[[0-9,.]+ [A-Z]+\\]$", "");
+                path = path.replaceAll("^/+", "/").replaceAll("^\\+", "\\").trim().replaceAll(" \\[[0-9,.]+ [A-Z]+\\]$", "");
 
                 File file = new File(path);
 

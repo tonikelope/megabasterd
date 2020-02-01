@@ -687,6 +687,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                 setPreprocessing_transferences(true);
 
+                if (isPaused_all()) {
+
+                    _paused_all = false;
+                }
+
                 THREAD_POOL.execute(() -> {
 
                     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
