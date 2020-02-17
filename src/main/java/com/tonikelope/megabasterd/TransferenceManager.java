@@ -570,7 +570,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             ArrayList<Transference> trans_list = new ArrayList(queue);
 
-            trans_list.sort((Transference o1, Transference o2) -> o1.getFile_name().compareToIgnoreCase(o2.getFile_name()));
+            trans_list.sort((Transference o1, Transference o2) -> MiscTools.naturalCompare(o1.getFile_name(), o2.getFile_name(), true));
 
             queue.clear();
 

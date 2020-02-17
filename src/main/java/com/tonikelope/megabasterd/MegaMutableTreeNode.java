@@ -18,7 +18,8 @@ public class MegaMutableTreeNode extends DefaultMutableTreeNode {
     protected Comparator nodeComparator = new Comparator() {
         @Override
         public int compare(Object o1, Object o2) {
-            return o1.toString().compareToIgnoreCase(o2.toString());
+
+            return MiscTools.naturalCompare(o1.toString(), o2.toString(), true);
         }
 
         @Override
