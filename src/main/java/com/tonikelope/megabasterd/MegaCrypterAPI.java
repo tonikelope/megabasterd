@@ -154,6 +154,8 @@ public class MegaCrypterAPI {
 
         objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
+        objectMapper.configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
+
         HashMap res_map = objectMapper.readValue(res, HashMap.class);
 
         String fname = cleanFilename((String) res_map.get("name"));

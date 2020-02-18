@@ -641,6 +641,8 @@ public class MegaAPI implements Serializable {
 
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
+            objectMapper.configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
+
             res_map = objectMapper.readValue(att, HashMap.class);
 
         } catch (Exception ex) {
