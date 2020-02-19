@@ -488,7 +488,6 @@ public class SettingsDialog extends javax.swing.JDialog {
         }
 
         smart_proxy_checkbox.setSelected(use_smart_proxy);
-        multi_slot_down_checkbox.setSelected(use_smart_proxy);
         rec_smart_proxy_label.setEnabled(use_smart_proxy);
         custom_proxy_list_label.setEnabled(use_smart_proxy);
         custom_proxy_textarea.setEnabled(use_smart_proxy);
