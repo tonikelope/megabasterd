@@ -832,7 +832,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         custom_proxy_textarea.addMouseListener(new ContextMenuMouseListener());
 
         custom_proxy_list_label.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        custom_proxy_list_label.setText("Use this proxy list (instead of the one included in MegaBasterd) Format is PROXY:PORT");
+        custom_proxy_list_label.setText("Use this proxy list (instead of the one included in MegaBasterd) Format is IP:PORT[@user:password_b64]");
 
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
@@ -883,7 +883,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, downloads_panelLayout.createSequentialGroup()
                                         .addGap(26, 26, 26)
                                         .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(rec_smart_proxy_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(rec_smart_proxy_label, javax.swing.GroupLayout.PREFERRED_SIZE, 542, javax.swing.GroupLayout.PREFERRED_SIZE)
                                             .addComponent(custom_proxy_list_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                             .addComponent(jScrollPane1))))
                                 .addGap(0, 0, Short.MAX_VALUE)))

@@ -2,6 +2,7 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import com.tonikelope.megabasterd.SmartMegaProxyManager.SmartProxyAuthenticator;
 import static com.tonikelope.megabasterd.Transference.*;
 import java.awt.AWTException;
 import java.awt.Color;
@@ -21,6 +22,7 @@ import java.io.File;
 import java.io.IOException;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.exit;
+import java.net.Authenticator;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -55,7 +57,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.17";
+    public static final String VERSION = "7.18";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -357,6 +359,8 @@ public final class MainPanel {
             MainPanel tthis = this;
 
             THREAD_POOL.execute(() -> {
+                Authenticator.setDefault(new SmartProxyAuthenticator());
+
                 _proxy_manager = new SmartMegaProxyManager(null, tthis);
             });
 

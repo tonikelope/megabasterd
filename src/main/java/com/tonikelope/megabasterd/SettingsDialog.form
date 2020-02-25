@@ -185,7 +185,7 @@
                                               <Group type="102" alignment="0" attributes="0">
                                                   <EmptySpace min="-2" pref="26" max="-2" attributes="0"/>
                                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                                      <Component id="rec_smart_proxy_label" max="32767" attributes="0"/>
+                                                      <Component id="rec_smart_proxy_label" min="-2" pref="542" max="-2" attributes="0"/>
                                                       <Component id="custom_proxy_list_label" alignment="0" max="32767" attributes="0"/>
                                                       <Component id="jScrollPane1" alignment="0" max="32767" attributes="0"/>
                                                   </Group>
@@ -556,7 +556,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="12" style="0"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Use this proxy list (instead of the one included in MegaBasterd) Format is PROXY:PORT"/>
+                    <Property name="text" type="java.lang.String" value="Use this proxy list (instead of the one included in MegaBasterd) Format is IP:PORT[@user:password_b64]"/>
                   </Properties>
                 </Component>
               </SubComponents>

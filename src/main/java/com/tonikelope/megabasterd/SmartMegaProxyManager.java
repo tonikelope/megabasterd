@@ -3,11 +3,16 @@ package com.tonikelope.megabasterd;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.net.Authenticator;
 import java.net.HttpURLConnection;
+import java.net.InetAddress;
 import java.net.MalformedURLException;
+import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Set;
 import java.util.logging.Level;
@@ -25,6 +30,7 @@ public final class SmartMegaProxyManager {
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
     private final LinkedHashMap<String, Long> _proxy_list;
+    private static final HashMap<String, String> PROXY_LIST_AUTH = new HashMap<>();
     private final MainPanel _main_panel;
 
     public SmartMegaProxyManager(String proxy_list_url, MainPanel main_panel) {
@@ -89,7 +95,9 @@ public final class SmartMegaProxyManager {
 
             String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
 
-            LinkedHashMap<String, Long> custom_clean_list = new LinkedHashMap<>();;
+            LinkedHashMap<String, Long> custom_clean_list = new LinkedHashMap<>();
+
+            HashMap<String, String> custom_clean_list_auth = new HashMap<>();
 
             if (custom_proxy_list != null) {
 
@@ -101,7 +109,17 @@ public final class SmartMegaProxyManager {
 
                     for (String proxy : custom_list) {
 
-                        if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
+                        System.out.println(proxy);
+
+                        if (proxy.trim().contains("@")) {
+
+                            String[] proxy_parts = proxy.trim().split("@");
+
+                            custom_clean_list_auth.put(proxy_parts[0], proxy_parts[1]);
+
+                            custom_clean_list.put(proxy_parts[0], current_time);
+
+                        } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
                             custom_clean_list.put(proxy, current_time);
                         }
                     }
@@ -112,6 +130,13 @@ public final class SmartMegaProxyManager {
                     _proxy_list.clear();
 
                     _proxy_list.putAll(custom_clean_list);
+                }
+
+                if (!custom_clean_list_auth.isEmpty()) {
+
+                    PROXY_LIST_AUTH.clear();
+
+                    PROXY_LIST_AUTH.putAll(custom_clean_list_auth);
                 }
 
             }
@@ -146,9 +171,23 @@ public final class SmartMegaProxyManager {
 
                     _proxy_list.clear();
 
+                    PROXY_LIST_AUTH.clear();
+
                     Long current_time = System.currentTimeMillis();
 
                     for (String proxy : proxy_list) {
+
+                        if (proxy.trim().contains("@")) {
+
+                            String[] proxy_parts = proxy.trim().split("@");
+
+                            PROXY_LIST_AUTH.put(proxy_parts[0], proxy_parts[1]);
+
+                            _proxy_list.put(proxy_parts[0], current_time);
+
+                        } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
+                            _proxy_list.put(proxy, current_time);
+                        }
 
                         if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
                             _proxy_list.put(proxy, current_time);
@@ -167,6 +206,8 @@ public final class SmartMegaProxyManager {
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
             }
 
+            System.out.println(PROXY_LIST_AUTH);
+
         } catch (MalformedURLException ex) {
             LOG.log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
@@ -176,6 +217,36 @@ public final class SmartMegaProxyManager {
                 con.disconnect();
             }
 
+        }
+    }
+
+    public static class SmartProxyAuthenticator extends Authenticator {
+
+        @Override
+        protected PasswordAuthentication getPasswordAuthentication() {
+
+            InetAddress ipaddr = getRequestingSite();
+            int port = getRequestingPort();
+
+            String auth_data;
+
+            if ((auth_data = PROXY_LIST_AUTH.get(ipaddr.getHostAddress() + ":" + String.valueOf(port))) != null) {
+
+                try {
+                    String[] auth_data_parts = auth_data.split(":");
+
+                    String user = auth_data_parts[0];
+
+                    String password = new String(MiscTools.BASE642Bin(auth_data_parts[1]), "UTF-8");
+
+                    return new PasswordAuthentication(user, password.toCharArray());
+
+                } catch (UnsupportedEncodingException ex) {
+                    Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+            return null;
         }
     }
 
