@@ -31,7 +31,7 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jTabbedPane1" pref="1153" max="32767" attributes="0"/>
+                  <Component id="jTabbedPane1" pref="1122" max="32767" attributes="0"/>
                   <Group type="102" alignment="1" attributes="0">
                       <Component id="status" max="32767" attributes="0"/>
                       <EmptySpace min="-2" pref="6" max="-2" attributes="0"/>
@@ -150,7 +150,7 @@
                               </Group>
                               <Group type="102" alignment="1" attributes="0">
                                   <Group type="103" groupAlignment="1" attributes="0">
-                                      <Component id="jSeparator10" alignment="0" pref="1683" max="32767" attributes="0"/>
+                                      <Component id="jSeparator10" alignment="0" max="32767" attributes="0"/>
                                       <Group type="102" alignment="0" attributes="0">
                                           <Group type="103" groupAlignment="1" attributes="0">
                                               <Component id="smart_proxy_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -191,7 +191,7 @@
                                                   </Group>
                                               </Group>
                                           </Group>
-                                          <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                                          <EmptySpace min="0" pref="76" max="32767" attributes="0"/>
                                       </Group>
                                   </Group>
                                   <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
@@ -263,11 +263,11 @@
                               <Component id="max_down_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="jSeparator8" min="-2" pref="2" max="-2" attributes="0"/>
+                          <Component id="jSeparator8" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="verify_file_down_checkbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="jSeparator9" min="-2" pref="2" max="-2" attributes="0"/>
+                          <Component id="jSeparator9" min="-2" max="-2" attributes="0"/>
                           <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                           <Component id="use_mega_account_down_checkbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -276,7 +276,7 @@
                               <Component id="use_mega_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                          <Component id="jSeparator10" min="-2" pref="8" max="-2" attributes="0"/>
+                          <Component id="jSeparator10" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="megacrypter_reverse_checkbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -1070,7 +1070,7 @@
                                           <Component id="zoom_label" min="-2" max="-2" attributes="0"/>
                                           <EmptySpace max="-2" attributes="0"/>
                                           <Component id="zoom_spinner" min="-2" pref="100" max="-2" attributes="0"/>
-                                          <EmptySpace min="0" pref="309" max="32767" attributes="0"/>
+                                          <EmptySpace min="0" pref="261" max="32767" attributes="0"/>
                                       </Group>
                                       <Group type="102" alignment="0" attributes="0">
                                           <Component id="jLabel2" min="-2" max="-2" attributes="0"/>
@@ -1143,7 +1143,7 @@
                               <Component id="custom_chunks_dir_current_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
-                          <Component id="jSeparator12" min="-2" pref="2" max="-2" attributes="0"/>
+                          <Component id="jSeparator12" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
                           <Component id="start_frozen_checkbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="unrelated" max="-2" attributes="0"/>
