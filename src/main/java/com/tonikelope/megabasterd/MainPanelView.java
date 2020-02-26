@@ -1210,8 +1210,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     MainPanel.getProxy_manager().refreshProxyList();
 
-                    updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(MainPanel.getProxy_manager().getProxyCount()) + ")");
-
                 } else {
 
                     updateSmartProxyStatus("SmartProxy: OFF");

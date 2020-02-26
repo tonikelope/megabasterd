@@ -858,11 +858,17 @@ public class MiscTools {
 
         String current_smart_proxy = null;
 
+        boolean smart_proxy_socks = false;
+
         ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
         if (MainPanel.FORCE_SMART_PROXY) {
 
-            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+            String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+            current_smart_proxy = smart_proxy[0];
+
+            smart_proxy_socks = smart_proxy[1].equals("socks");
 
         }
 
@@ -882,18 +888,26 @@ public class MiscTools {
 
                         excluded_proxy_list.add(current_smart_proxy);
 
-                        current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                        String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                        current_smart_proxy = smart_proxy[0];
+
+                        smart_proxy_socks = smart_proxy[1].equals("socks");
 
                     } else if (current_smart_proxy == null) {
 
-                        current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                        String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                        current_smart_proxy = smart_proxy[0];
+
+                        smart_proxy_socks = smart_proxy[1].equals("socks");
                     }
 
                     if (current_smart_proxy != null) {
 
                         String[] proxy_info = current_smart_proxy.split(":");
 
-                        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+                        Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
                         con = (HttpURLConnection) url.openConnection(proxy);
 
@@ -901,7 +915,7 @@ public class MiscTools {
 
                         if (MainPanel.isUse_proxy()) {
 
-                            con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                            con = (HttpURLConnection) url.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
                             if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
@@ -917,7 +931,7 @@ public class MiscTools {
 
                     if (MainPanel.isUse_proxy()) {
 
-                        con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                        con = (HttpURLConnection) url.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
                         if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 

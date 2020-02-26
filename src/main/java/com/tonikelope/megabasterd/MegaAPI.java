@@ -356,7 +356,7 @@ public class MegaAPI implements Serializable {
 
         int mega_error = 0, http_error = 0, conta_error = 0, http_status;
 
-        boolean empty_response = false;
+        boolean empty_response = false, smart_proxy_socks = false;
 
         HttpsURLConnection con = null;
 
@@ -366,7 +366,11 @@ public class MegaAPI implements Serializable {
 
         if (MainPanel.FORCE_SMART_PROXY) {
 
-            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+            String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+            current_smart_proxy = smart_proxy[0];
+
+            smart_proxy_socks = smart_proxy[1].equals("socks");
 
         }
 
@@ -384,18 +388,26 @@ public class MegaAPI implements Serializable {
 
                         excluded_proxy_list.add(current_smart_proxy);
 
-                        current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                        String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                        current_smart_proxy = smart_proxy[0];
+
+                        smart_proxy_socks = smart_proxy[1].equals("socks");
 
                     } else if (current_smart_proxy == null) {
 
-                        current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                        String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                        current_smart_proxy = smart_proxy[0];
+
+                        smart_proxy_socks = smart_proxy[1].equals("socks");
                     }
 
                     if (current_smart_proxy != null) {
 
                         String[] proxy_info = current_smart_proxy.split(":");
 
-                        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+                        Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
                         con = (HttpsURLConnection) url_api.openConnection(proxy);
 
@@ -408,7 +420,7 @@ public class MegaAPI implements Serializable {
 
                     if (MainPanel.isUse_proxy()) {
 
-                        con = (HttpsURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                        con = (HttpsURLConnection) url_api.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
                         if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 

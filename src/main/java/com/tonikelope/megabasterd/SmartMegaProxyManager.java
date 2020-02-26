@@ -29,7 +29,7 @@ public final class SmartMegaProxyManager {
     public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 15;
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
-    private final LinkedHashMap<String, Long> _proxy_list;
+    private final LinkedHashMap<String, Long[]> _proxy_list;
     private static final HashMap<String, String> PROXY_LIST_AUTH = new HashMap<>();
     private final MainPanel _main_panel;
 
@@ -45,7 +45,7 @@ public final class SmartMegaProxyManager {
         return _proxy_list.size();
     }
 
-    public synchronized String getProxy(ArrayList<String> excluded) {
+    public synchronized String[] getProxy(ArrayList<String> excluded) {
 
         if (_proxy_list.size() > 0) {
 
@@ -55,9 +55,9 @@ public final class SmartMegaProxyManager {
 
             for (String k : keys) {
 
-                if (_proxy_list.get(k) < current_time && (excluded == null || !excluded.contains(k))) {
+                if (_proxy_list.get(k)[0] < current_time && (excluded == null || !excluded.contains(k))) {
 
-                    return k;
+                    return new String[]{k, _proxy_list.get(k)[1] == -1L ? "http" : "socks"};
                 }
             }
         }
@@ -79,7 +79,11 @@ public final class SmartMegaProxyManager {
 
         if (_proxy_list.containsKey(proxy)) {
 
-            _proxy_list.put(proxy, System.currentTimeMillis() + PROXY_BLOCK_TIME * 1000);
+            Long[] proxy_data = _proxy_list.get(proxy);
+
+            proxy_data[0] = System.currentTimeMillis() + PROXY_BLOCK_TIME * 1000;
+
+            _proxy_list.put(proxy, proxy_data);
 
             LOG.log(Level.WARNING, "{0} Smart Proxy Manager: BLOCKING PROXY -> {1} ({2} secs)", new Object[]{Thread.currentThread().getName(), proxy, PROXY_BLOCK_TIME});
         }
@@ -95,7 +99,7 @@ public final class SmartMegaProxyManager {
 
             String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
 
-            LinkedHashMap<String, Long> custom_clean_list = new LinkedHashMap<>();
+            LinkedHashMap<String, Long[]> custom_clean_list = new LinkedHashMap<>();
 
             HashMap<String, String> custom_clean_list_auth = new HashMap<>();
 
@@ -109,7 +113,13 @@ public final class SmartMegaProxyManager {
 
                     for (String proxy : custom_list) {
 
-                        System.out.println(proxy);
+                        boolean socks = false;
+
+                        if (proxy.trim().startsWith("*")) {
+                            socks = true;
+
+                            proxy = proxy.trim().substring(1);
+                        }
 
                         if (proxy.trim().contains("@")) {
 
@@ -117,10 +127,15 @@ public final class SmartMegaProxyManager {
 
                             custom_clean_list_auth.put(proxy_parts[0], proxy_parts[1]);
 
-                            custom_clean_list.put(proxy_parts[0], current_time);
+                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+
+                            custom_clean_list.put(proxy_parts[0], proxy_data);
 
                         } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            custom_clean_list.put(proxy, current_time);
+
+                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+
+                            custom_clean_list.put(proxy, proxy_data);
                         }
                     }
                 }
@@ -177,21 +192,29 @@ public final class SmartMegaProxyManager {
 
                     for (String proxy : proxy_list) {
 
+                        boolean socks = false;
+
+                        if (proxy.trim().startsWith("*")) {
+                            socks = true;
+
+                            proxy = proxy.trim().substring(1);
+                        }
+
                         if (proxy.trim().contains("@")) {
 
                             String[] proxy_parts = proxy.trim().split("@");
 
                             PROXY_LIST_AUTH.put(proxy_parts[0], proxy_parts[1]);
 
-                            _proxy_list.put(proxy_parts[0], current_time);
+                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+
+                            _proxy_list.put(proxy_parts[0], proxy_data);
 
                         } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            _proxy_list.put(proxy, current_time);
+                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                            _proxy_list.put(proxy, proxy_data);
                         }
 
-                        if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            _proxy_list.put(proxy, current_time);
-                        }
                     }
                 }
 
@@ -206,7 +229,14 @@ public final class SmartMegaProxyManager {
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
             }
 
-            System.out.println(PROXY_LIST_AUTH);
+            Set<String> keys = _proxy_list.keySet();
+
+            for (String k : keys) {
+
+                Long[] pdata = _proxy_list.get(k);
+
+                System.out.println(k + " " + String.valueOf(pdata[0]) + " " + String.valueOf(pdata[1]));
+            }
 
         } catch (MalformedURLException ex) {
             LOG.log(Level.SEVERE, ex.getMessage());
@@ -235,7 +265,7 @@ public final class SmartMegaProxyManager {
                 try {
                     String[] auth_data_parts = auth_data.split(":");
 
-                    String user = auth_data_parts[0];
+                    String user = new String(MiscTools.BASE642Bin(auth_data_parts[0]), "UTF-8");
 
                     String password = new String(MiscTools.BASE642Bin(auth_data_parts[1]), "UTF-8");
 

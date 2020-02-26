@@ -49,6 +49,8 @@ public class StreamChunkDownloader implements Runnable {
 
             String current_smart_proxy = null;
 
+            boolean smart_proxy_socks = false;
+
             long offset = -1;
 
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
@@ -57,8 +59,11 @@ public class StreamChunkDownloader implements Runnable {
 
             if (MainPanel.FORCE_SMART_PROXY) {
 
-                current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
+                current_smart_proxy = smart_proxy[0];
+
+                smart_proxy_socks = smart_proxy[1].equals("socks");
             }
 
             while (!_exit && !_chunkmanager.isExit()) {
@@ -93,13 +98,21 @@ public class StreamChunkDownloader implements Runnable {
 
                             excluded_proxy_list.add(current_smart_proxy);
 
-                            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                            String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                            current_smart_proxy = smart_proxy[0];
+
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
 
                             Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_smart_proxy});
 
                         } else if (current_smart_proxy == null) {
 
-                            current_smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                            String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                            current_smart_proxy = smart_proxy[0];
+
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
 
                         }
 
@@ -107,7 +120,7 @@ public class StreamChunkDownloader implements Runnable {
 
                             String[] proxy_info = current_smart_proxy.split(":");
 
-                            Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+                            Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
                             URL chunk_url = new URL(chunk_stream.getUrl());
 
@@ -126,7 +139,7 @@ public class StreamChunkDownloader implements Runnable {
 
                         if (MainPanel.isUse_proxy()) {
 
-                            con = (HttpURLConnection) chunk_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                            con = (HttpURLConnection) chunk_url.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
                             if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
@@ -138,7 +151,7 @@ public class StreamChunkDownloader implements Runnable {
 
                                 String[] proxy_info = current_smart_proxy.split(":");
 
-                                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+                                Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
                                 con = (HttpURLConnection) chunk_url.openConnection(proxy);
 

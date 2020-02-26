@@ -119,7 +119,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             int http_error = 0, http_status = -1, conta_error = 0;
 
-            boolean chunk_error = false, slow_proxy = false, timeout = false;
+            boolean chunk_error = false, slow_proxy = false, timeout = false, smart_proxy_socks = false;
 
             String worker_url = null;
 
@@ -131,7 +131,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             if (MainPanel.FORCE_SMART_PROXY) {
 
-                _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
+                String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
+
+                _current_smart_proxy = smart_proxy[0];
+
+                smart_proxy_socks = smart_proxy[1].equals("socks");
 
                 if (!getDownload().isTurbo()) {
                     getDownload().enableTurboMode();
@@ -183,7 +187,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         _excluded_proxy_list.add(_current_smart_proxy);
 
-                        _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
+                        String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
+
+                        _current_smart_proxy = smart_proxy[0];
+
+                        smart_proxy_socks = smart_proxy[1].equals("socks");
 
                         Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2} {3}", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy, _download.getFile_name()});
 
@@ -193,7 +201,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             getDownload().enableTurboMode();
                         }
 
-                        _current_smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
+                        String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
+
+                        _current_smart_proxy = smart_proxy[0];
+
+                        smart_proxy_socks = smart_proxy[1].equals("socks");
 
                     }
 
@@ -201,7 +213,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         String[] proxy_info = _current_smart_proxy.split(":");
 
-                        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+                        Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
                         URL url = new URL(chunk_url);
 
@@ -224,7 +236,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         _current_smart_proxy = null;
 
-                        con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                        con = (HttpURLConnection) url.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
                         if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
