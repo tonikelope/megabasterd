@@ -229,15 +229,6 @@ public final class SmartMegaProxyManager {
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
             }
 
-            Set<String> keys = _proxy_list.keySet();
-
-            for (String k : keys) {
-
-                Long[] pdata = _proxy_list.get(k);
-
-                System.out.println(k + " " + String.valueOf(pdata[0]) + " " + String.valueOf(pdata[1]));
-            }
-
         } catch (MalformedURLException ex) {
             LOG.log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
