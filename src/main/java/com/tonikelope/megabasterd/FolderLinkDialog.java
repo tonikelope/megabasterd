@@ -34,7 +34,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private long _total_space;
 
-    private boolean _mega_error;
+    private int _mega_error;
 
     public List<HashMap> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
@@ -44,7 +44,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         return _download;
     }
 
-    public boolean isMega_error() {
+    public int isMega_error() {
         return _mega_error;
     }
 
@@ -64,7 +64,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
         translateLabels(this);
 
-        _mega_error = false;
+        _mega_error = 0;
         _total_space = 0L;
         _download = false;
         _download_links = new ArrayList<>();
@@ -79,13 +79,19 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         THREAD_POOL.execute(() -> {
             _loadMegaDirTree();
 
-            if (!_mega_error) {
+            if (_mega_error == 0) {
 
                 _genDownloadLiks();
 
                 dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
 
                 pack();
+
+            } else if (_mega_error == -18) {
+
+                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+
+                setVisible(false);
 
             } else {
                 JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
@@ -388,23 +394,37 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } while (current_node != root);
             }
 
-            final JTree ftree = file_tree;
+            if (root == null) {
+                LOG.log(SEVERE, null, "MEGA FOLDER ERROR (EMPTY?)");
 
-            final MegaMutableTreeNode roott = root;
+                _mega_error = 2;
 
-            swingInvoke(() -> {
-                ftree.setModel(new DefaultTreeModel(sortTree(roott)));
+            } else {
+                final JTree ftree = file_tree;
 
-                ftree.setRootVisible(roott != null ? roott.getChildCount() > 0 : false);
+                final MegaMutableTreeNode roott = root;
 
-                ftree.setEnabled(true);
-            });
+                swingInvoke(() -> {
+                    ftree.setModel(new DefaultTreeModel(sortTree(roott)));
+
+                    ftree.setRootVisible(roott != null ? roott.getChildCount() > 0 : false);
+
+                    ftree.setEnabled(true);
+                });
+
+            }
+
+        } catch (MegaAPIException mex) {
+
+            LOG.log(SEVERE, null, mex);
+
+            _mega_error = mex.getCode();
 
         } catch (Exception ex) {
 
             LOG.log(SEVERE, null, ex);
 
-            _mega_error = true;
+            _mega_error = 1;
         }
 
         swingInvoke(() -> {

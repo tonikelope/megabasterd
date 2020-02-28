@@ -265,6 +265,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("UPLOAD FAILED: too many errors", "LA SUBIDA FALLÓ: demasiados errores");
         _addTranslation("UPLOAD FAILED: FATAL ERROR", "LA SUBIDA FALLÓ: ERROR FATAL");
         _addTranslation("BAD NEWS :( File is DAMAGED!", "MALAS NOTICIAS :( El archivo está corrupto!");
+        _addTranslation("MEGA LINK TEMPORARILY UNAVAILABLE!", "¡ENLACE TEMPORALMENTE NO DISPONIBLE!");
+
         _addTranslation("File temporarily unavailable! (Retrying in ", "¡Archivo temporalmente no disponible! (Reintentando en ");
         _addTranslation(" secs...)", " segundos...)");
         _addTranslation(" (Retrying in ", " (Reintentando en ");
