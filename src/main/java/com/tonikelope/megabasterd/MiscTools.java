@@ -1153,6 +1153,15 @@ public class MiscTools {
         Thanks -> https://stackoverflow.com/a/26884326
      */
     public static int naturalCompare(String a, String b, boolean ignoreCase) {
+
+        if (a == null) {
+            a = "";
+        }
+
+        if (b == null) {
+            b = "";
+        }
+
         if (ignoreCase) {
             a = a.toLowerCase();
             b = b.toLowerCase();
