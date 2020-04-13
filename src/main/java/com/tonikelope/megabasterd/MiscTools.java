@@ -797,7 +797,9 @@ public class MiscTools {
 
                         try {
 
-                            String decoded = MiscTools.findFirstRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", new String(Base64.getDecoder().decode(chunk), "UTF-8"), 0);
+                            String clean_data = MiscTools.newMegaLinks2Legacy(new String(Base64.getDecoder().decode(chunk)));
+
+                            String decoded = MiscTools.findFirstRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0);
 
                             if (decoded != null) {
                                 links.add(decoded);
@@ -808,9 +810,11 @@ public class MiscTools {
                     }
                 }
 
-                links.addAll(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", URLDecoder.decode(data, "UTF-8"), 0));
+                String clean_data = MiscTools.newMegaLinks2Legacy(URLDecoder.decode(data, "UTF-8"));
 
-                links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0));
+                links.addAll(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0));
+
+                links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
 
                 res = links.stream().map((s) -> s + "\n").reduce(res, String::concat);
             } catch (UnsupportedEncodingException ex) {
@@ -828,9 +832,11 @@ public class MiscTools {
         if (data != null) {
 
             try {
-                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", URLDecoder.decode(data, "UTF-8"), 0);
+                String clean_data = MiscTools.newMegaLinks2Legacy(URLDecoder.decode(data, "UTF-8"));
 
-                links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", URLDecoder.decode(data, "UTF-8"), 0));
+                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0);
+
+                links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
 
                 if (links.size() > 0) {
 
@@ -1386,6 +1392,13 @@ public class MiscTools {
 
         return ma;
 
+    }
+
+    public static String newMegaLinks2Legacy(String data) {
+
+        String replace1 = data.replaceAll("https://mega\\.nz/folder/([^#]+)#(.+)", "https://mega.nz/#F!$1!$2");
+
+        return replace1.replaceAll("https://mega\\.nz/file/([^#]+)#(.+)", "https://mega.nz/#!$1!$2");
     }
 
     private MiscTools() {

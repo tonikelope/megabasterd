@@ -945,9 +945,12 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
-                Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                //Convert to legacy link format
+                String link_data = MiscTools.newMegaLinks2Legacy(dialog.getLinks_textarea().getText());
 
-                Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", link_data, 0));
+
+                Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", link_data, 0));
 
                 megadownloader.forEach((link) -> {
                     try {
@@ -959,7 +962,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     }
                 });
 
-                Set<String> elc = new HashSet(findAllRegex("mega://elc[^\r\n]+", dialog.getLinks_textarea().getText(), 0));
+                Set<String> elc = new HashSet(findAllRegex("mega://elc[^\r\n]+", link_data, 0));
 
                 elc.forEach((link) -> {
                     try {
@@ -971,7 +974,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     }
                 });
 
-                Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", dialog.getLinks_textarea().getText(), 1));
+                Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", link_data, 1));
 
                 dlc.stream().map((d) -> CryptTools.decryptDLC(d, _main_panel)).forEachOrdered((links) -> {
                     links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^\r\n](#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", link, 0) != null)).forEachOrdered((link) -> {
