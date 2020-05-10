@@ -19,7 +19,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.exit;
 import java.net.Authenticator;
@@ -57,7 +60,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.24";
+    public static final String VERSION = "7.25";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -97,6 +100,24 @@ public final class MainPanel {
 
         UIDefaults defaults = UIManager.getLookAndFeelDefaults();
         defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
+
+        PrintStream fileOut;
+
+        try {
+            fileOut = new PrintStream(new FileOutputStream("./megabasterd_DEBUG.log"));
+
+            System.setOut(fileOut);
+            System.setErr(fileOut);
+
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        System.out.println(System.getProperty("os.name"));
+
+        System.out.println(System.getProperty("java.vm.name"));
+
+        System.out.println(System.getProperty("java.version"));
 
         _app_image = false;
 
