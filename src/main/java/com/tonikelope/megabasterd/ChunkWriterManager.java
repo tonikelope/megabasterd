@@ -169,6 +169,10 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
                     while (chunk_file.exists() && chunk_file.canRead()) {
 
                         if (!download_finished && _download.getProgress() == _file_size) {
+
+                            _download.getMain_panel().getDownload_manager().getTransference_running_list().remove(_download);
+                            _download.getMain_panel().getDownload_manager().secureNotify();
+
                             _download.getView().printStatusNormal("Download finished. Joining file chunks, please wait...");
                             _download.getView().getPause_button().setVisible(false);
                             _download.getMain_panel().getGlobal_dl_speed().detachTransference(_download);
