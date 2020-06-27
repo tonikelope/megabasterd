@@ -24,8 +24,8 @@ import java.util.logging.Logger;
  */
 public final class SmartMegaProxyManager {
 
-    public static String DEFAULT_SMART_PROXY_URL = "https://raw.githubusercontent.com/tonikelope/megabasterd/proxy_list/proxy_list.txt";
-    public static final int PROXY_BLOCK_TIME = 300;
+    public static String DEFAULT_SMART_PROXY_URL = "";
+    public static final int PROXY_BLOCK_TIME = 120;
     public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 15;
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
@@ -156,7 +156,7 @@ public final class SmartMegaProxyManager {
 
             }
 
-            if (custom_clean_list.isEmpty() && _proxy_list_url != null && _proxy_list_url.length() > 0) {
+            if (custom_clean_list.isEmpty() && _proxy_list_url != null && !"".equals(_proxy_list_url)) {
 
                 URL url = new URL(this._proxy_list_url);
 
@@ -227,6 +227,9 @@ public final class SmartMegaProxyManager {
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")*");
 
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
+            } else {
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (0)");
+                LOG.log(Level.INFO, "{0} Smart Proxy Manager: NO PROXYS");
             }
 
         } catch (MalformedURLException ex) {
