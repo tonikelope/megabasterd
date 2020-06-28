@@ -489,6 +489,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         smart_proxy_checkbox.setSelected(use_smart_proxy);
         rec_smart_proxy_label.setEnabled(use_smart_proxy);
+        rec_smart_proxy_label1.setEnabled(use_smart_proxy);
         custom_proxy_list_label.setEnabled(use_smart_proxy);
         custom_proxy_textarea.setEnabled(use_smart_proxy);
 
@@ -2831,7 +2832,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private void smart_proxy_checkboxMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_smart_proxy_checkboxMouseClicked
         // TODO add your handling code here:
         if (this.smart_proxy_checkbox.isSelected()) {
-            JOptionPane.showMessageDialog(this, "Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use.\n\nUSE THIS OPTION AT YOUR OWN RISK.", "Pay attention to this", JOptionPane.WARNING_MESSAGE);
+            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use.\n\nUSE THIS OPTION AT YOUR OWN RISK."), LabelTranslatorSingleton.getInstance().translate("WARNING"), JOptionPane.WARNING_MESSAGE);
         }
 
     }//GEN-LAST:event_smart_proxy_checkboxMouseClicked

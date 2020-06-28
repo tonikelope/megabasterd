@@ -60,7 +60,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.27";
+    public static final String VERSION = "7.28";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -69,7 +69,7 @@ public final class MainPanel {
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
     public static final int RUN_COMMAND_TIME = 600;
     public static final String DEFAULT_LANGUAGE = "EN";
-    public static final boolean DEFAULT_SMART_PROXY = true;
+    public static final boolean DEFAULT_SMART_PROXY = false;
     public static final double FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT = 0.7;
     public static Font GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
     public static final float ZOOM_FACTOR = 1.0f;

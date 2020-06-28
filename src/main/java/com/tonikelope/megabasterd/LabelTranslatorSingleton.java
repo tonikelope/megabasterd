@@ -38,6 +38,8 @@ public class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _addTranslation("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.", "AVISO: El uso de proxies o VPN para saltar el límite diario de descarga de MEGA podría violar sus Términos de Uso. UTILIZA ESTA OPCIÓN BAJO TU RESPONSABILIDAD.");
+        _addTranslation("Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use.\n\nUSE THIS OPTION AT YOUR OWN RISK.", "El uso de proxies o VPN para saltar el límite diario de descarga de MEGA podría violar sus Términos de Uso.\n\nUTILIZA ESTA OPCIÓN BAJO TU RESPONSABILIDAD.");
         _addTranslation("Execute this command when MEGA download limit is reached:", "Ejecutar este comando cuando se alcance el límite de descarga de MEGA:");
         _addTranslation("Use this proxy list (instead of the one included in MegaBasterd) Format is [*]IP:PORT[@user_b64:password_b64]", "Usar esta lista de proxys (en vez de la incluida en MegaBasterd) El formato es [*]IP:PUERTO[@usuario_b64:password_b64]");
         _addTranslation("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***", "Esperando manejador de finalización ... ***NO CIERRES MEGABASTERD EN ESTE MOMENTO***");
