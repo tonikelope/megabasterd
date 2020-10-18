@@ -49,7 +49,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
-    public static final int CHUNK_SIZE_MULTI = 10;
+    public static final int CHUNK_SIZE_MULTI = 20;
     private static final Logger LOG = Logger.getLogger(Download.class.getName());
 
     private final MainPanel _main_panel;
@@ -241,7 +241,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 if (!_finalizing) {
                     Download tthis = this;
 
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
 
                         getView().getSpeed_label().setForeground(new Color(255, 102, 0));
 
@@ -260,7 +260,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     }
 
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getView().getSlots_spinner().setValue(Transference.MAX_WORKERS);
 
                         getView().getSlots_spinner().setEnabled(true);
@@ -528,7 +528,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     @Override
     public void run() {
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             getView().getQueue_down_button().setVisible(false);
             getView().getQueue_up_button().setVisible(false);
             getView().getQueue_top_button().setVisible(false);
@@ -622,7 +622,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                     _thread_pool.execute(c);
                                 }
 
-                                swingInvoke(() -> {
+                                MiscTools.GUIRun(() -> {
                                     for (JComponent c : new JComponent[]{getView().getSlots_label(), getView().getSlots_spinner(), getView().getSlot_status_label()}) {
 
                                         c.setVisible(true);
@@ -637,7 +637,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                 _thread_pool.execute(c);
 
-                                swingInvoke(() -> {
+                                MiscTools.GUIRun(() -> {
                                     for (JComponent c1 : new JComponent[]{getView().getSlots_label(), getView().getSlots_spinner(), getView().getSlot_status_label()}) {
                                         c1.setVisible(false);
                                     }
@@ -647,7 +647,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate("Downloading file from mega ") + (_ma.getFull_email() != null ? "(" + _ma.getFull_email() + ")" : "") + " ...");
 
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             for (JComponent c : new JComponent[]{getView().getPause_button(), getView().getProgress_pbar()}) {
 
                                 c.setVisible(true);
@@ -721,7 +721,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         _output_stream.close();
 
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             for (JComponent c : new JComponent[]{getView().getSpeed_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner(), getView().getKeep_temp_checkbox()}) {
 
                                 c.setVisible(false);
@@ -759,7 +759,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                 getView().printStatusNormal("Checking file integrity, please wait...");
 
-                                swingInvoke(() -> {
+                                MiscTools.GUIRun(() -> {
                                     getView().getStop_button().setVisible(true);
 
                                     getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL CHECK"));
@@ -785,7 +785,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                 }
 
-                                swingInvoke(() -> {
+                                MiscTools.GUIRun(() -> {
                                     getView().getStop_button().setVisible(false);
                                 });
 
@@ -909,7 +909,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         getMain_panel().getDownload_manager().getTransference_finished_queue().add(this);
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             getMain_panel().getDownload_manager().getScroll_panel().remove(getView());
 
             getMain_panel().getDownload_manager().getScroll_panel().add(getView());
@@ -917,7 +917,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         getMain_panel().getDownload_manager().secureNotify();
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             getView().getClose_button().setVisible(true);
 
             if ((_status_error != null || _canceled) && isProvision_ok()) {
@@ -934,7 +934,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             THREAD_POOL.execute(() -> {
                 for (int i = 3; !_closed && i > 0; i--) {
                     final int j = i;
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getView().getRestart_button().setText("Restart (" + String.valueOf(j) + " secs...)");
                     });
                     try {
@@ -963,7 +963,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         getView().printStatusNormal("Provisioning download, please wait...");
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             getView().getCopy_link_button().setVisible(true);
             getView().getOpen_folder_button().setVisible(true);
         });
@@ -1039,7 +1039,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
 
             if (_file_name != null) {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getView().getFile_name_label().setVisible(true);
 
                     getView().getFile_name_label().setText(truncateText(_download_path + "/" + _file_name, 100));
@@ -1056,7 +1056,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             getView().printStatusError(_status_error);
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 getView().getClose_button().setVisible(true);
             });
 
@@ -1066,7 +1066,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             getView().printStatusNormal(_frozen ? "(FROZEN) Waiting to start..." : "Waiting to start...");
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 getView().getFile_name_label().setVisible(true);
 
                 getView().getFile_name_label().setText(truncateText(_download_path + "/" + _file_name, 100));
@@ -1078,7 +1078,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 getView().getFile_size_label().setText(formatBytes(_file_size));
             });
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 getView().getClose_button().setVisible(true);
                 getView().getQueue_up_button().setVisible(true);
                 getView().getQueue_down_button().setVisible(true);
@@ -1098,7 +1098,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 getView().printStatusNormal("Download paused!");
 
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
                     getView().getPause_button().setEnabled(true);
                 });
@@ -1111,7 +1111,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         getView().printStatusNormal("Download paused!");
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
             getView().getPause_button().setEnabled(true);
         });
@@ -1204,7 +1204,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 if (!_chunkworkers.isEmpty()) {
 
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getView().getSlots_spinner().setEnabled(false);
                     });
 
@@ -1246,14 +1246,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         _finalizing = true;
 
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             getView().getSlots_spinner().setEnabled(false);
 
                             getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
                         });
 
                     } else if (!_finalizing) {
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             getView().getSlots_spinner().setEnabled(true);
                         });
                     }
@@ -1265,7 +1265,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     getView().printStatusNormal("Download paused!");
 
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
 
                         getView().getPause_button().setEnabled(true);
@@ -1461,7 +1461,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     _retrying_request = true;
 
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getMain_panel().getView().getNew_download_menu().setEnabled(true);
 
                         getView().getStop_button().setVisible(true);
@@ -1496,7 +1496,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             _auto_retry_on_error = true;
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL DOWNLOAD"));
                 getView().getStop_button().setVisible(false);
             });
@@ -1542,7 +1542,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     _retrying_request = true;
 
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getView().getStop_button().setVisible(true);
 
                         getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL RETRY"));
@@ -1569,7 +1569,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             _auto_retry_on_error = true;
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL DOWNLOAD"));
                 getView().getStop_button().setVisible(false);
             });

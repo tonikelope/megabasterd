@@ -35,17 +35,19 @@ public class WarningExitMessage extends javax.swing.JDialog {
      */
     public WarningExitMessage(java.awt.Frame parent, boolean modal, MainPanel main_panel, boolean restart) {
         super(parent, modal);
-        initComponents();
+        MiscTools.GUIRunAndWait(() -> {
+            initComponents();
 
-        updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
+            updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
 
-        translateLabels(this);
+            translateLabels(this);
 
-        _main_panel = main_panel;
+            _main_panel = main_panel;
 
-        _restart = restart;
+            _restart = restart;
 
-        pack();
+            pack();
+        });
     }
 
     /**

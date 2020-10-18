@@ -153,7 +153,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public void updateKissStreamServerStatus(final String status) {
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             String old_status = getKiss_server_status().getText();
 
             if (!old_status.equals(status + " ")) {
@@ -170,7 +170,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public void updateSmartProxyStatus(final String status) {
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             String old_status = getSmart_proxy_status().getText();
 
             if (!old_status.equals(status + " ")) {
@@ -187,7 +187,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public void updateMCReverseStatus(final String status) {
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
 
             String old_status = getMc_reverse_status().getText();
 
@@ -397,88 +397,91 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         _main_panel = main_panel;
 
-        initComponents();
+        MiscTools.GUIRunAndWait(() -> {
 
-        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
+            initComponents();
 
-        translateLabels(this);
+            updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
-        for (JComponent c : new JComponent[]{unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
+            translateLabels(this);
 
-            c.setVisible(false);
-        }
+            for (JComponent c : new JComponent[]{unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
 
-        clean_all_down_menu.setEnabled(false);
-        clean_all_up_menu.setEnabled(false);
+                c.setVisible(false);
+            }
 
-        jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
-        jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
+            clean_all_down_menu.setEnabled(false);
+            clean_all_up_menu.setEnabled(false);
 
-        jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
-        jTabbedPane1.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
-        jTabbedPane1.setDropTarget(new DropTarget() {
+            jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
+            jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
 
-            public boolean canImport(DataFlavor[] flavors) {
-                for (DataFlavor flavor : flavors) {
-                    if (flavor.isFlavorJavaFileListType()) {
-                        return true;
+            jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
+            jTabbedPane1.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
+            jTabbedPane1.setDropTarget(new DropTarget() {
+
+                public boolean canImport(DataFlavor[] flavors) {
+                    for (DataFlavor flavor : flavors) {
+                        if (flavor.isFlavorJavaFileListType()) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                @Override
+                public synchronized void drop(DropTargetDropEvent dtde) {
+                    changeToNormal();
+                    dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+
+                    List<File> files;
+
+                    try {
+
+                        if (canImport(dtde.getTransferable().getTransferDataFlavors())) {
+                            files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+
+                            THREAD_POOL.execute(() -> {
+                                _file_drop_notify(files);
+                            });
+                        }
+
+                    } catch (UnsupportedFlavorException | IOException ex) {
+
                     }
                 }
-                return false;
-            }
 
-            @Override
-            public synchronized void drop(DropTargetDropEvent dtde) {
-                changeToNormal();
-                dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+                @Override
+                public synchronized void dragEnter(DropTargetDragEvent dtde) {
+                    changeToDrop();
+                }
 
-                List<File> files;
+                @Override
+                public synchronized void dragExit(DropTargetEvent dtde) {
+                    changeToNormal();
+                }
 
-                try {
-
-                    if (canImport(dtde.getTransferable().getTransferDataFlavors())) {
-                        files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-
-                        THREAD_POOL.execute(() -> {
-                            _file_drop_notify(files);
-                        });
-                    }
-
-                } catch (UnsupportedFlavorException | IOException ex) {
+                private void changeToDrop() {
+                    jTabbedPane1.setBorder(BorderFactory.createLineBorder(Color.green, 5));
 
                 }
+
+                private void changeToNormal() {
+                    jTabbedPane1.setBorder(null);
+                }
+            }
+            );
+
+            String auto_close = selectSettingValue("auto_close");
+
+            if (auto_close != null) {
+                getAuto_close_menu().setSelected(auto_close.equals("yes"));
+            } else {
+                getAuto_close_menu().setSelected(false);
             }
 
-            @Override
-            public synchronized void dragEnter(DropTargetDragEvent dtde) {
-                changeToDrop();
-            }
-
-            @Override
-            public synchronized void dragExit(DropTargetEvent dtde) {
-                changeToNormal();
-            }
-
-            private void changeToDrop() {
-                jTabbedPane1.setBorder(BorderFactory.createLineBorder(Color.green, 5));
-
-            }
-
-            private void changeToNormal() {
-                jTabbedPane1.setBorder(null);
-            }
-        }
-        );
-
-        String auto_close = selectSettingValue("auto_close");
-
-        if (auto_close != null) {
-            getAuto_close_menu().setSelected(auto_close.equals("yes"));
-        } else {
-            getAuto_close_menu().setSelected(false);
-        }
-
-        pack();
+            pack();
+        });
 
     }
 
@@ -556,7 +559,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         memory_status.setDoubleBuffered(true);
 
         jTabbedPane1.setDoubleBuffered(true);
-        jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
 
         global_speed_down_label.setFont(new java.awt.Font("Dialog", 1, 54)); // NOI18N
         global_speed_down_label.setText("Speed");
@@ -618,7 +621,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
+                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(down_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -688,7 +691,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
+                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(up_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -700,7 +703,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_panel); // NOI18N
 
         unfreeze_transferences_button.setBackground(new java.awt.Color(255, 255, 255));
-        unfreeze_transferences_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        unfreeze_transferences_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         unfreeze_transferences_button.setForeground(new java.awt.Color(0, 153, 255));
         unfreeze_transferences_button.setText("UNFREEZE WAITING TRANSFERENCES");
         unfreeze_transferences_button.setDoubleBuffered(true);
@@ -861,9 +864,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jTabbedPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 343, Short.MAX_VALUE)
+                        .addGap(0, 283, Short.MAX_VALUE)
                         .addComponent(unfreeze_transferences_button)
-                        .addGap(0, 343, Short.MAX_VALUE))
+                        .addGap(0, 282, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -882,7 +885,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addComponent(unfreeze_transferences_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jTabbedPane1)
+                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 469, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(logo_label)

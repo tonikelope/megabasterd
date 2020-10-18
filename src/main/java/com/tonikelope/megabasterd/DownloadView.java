@@ -7,6 +7,7 @@ import java.awt.Desktop;
 import java.io.File;
 import static java.lang.Integer.MAX_VALUE;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -103,35 +104,40 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     public DownloadView(Download download) {
 
-        initComponents();
-
-        updateFonts(this, GUI_FONT, download.getMain_panel().getZoom_factor());
-
-        translateLabels(this);
+        DownloadView tthis = this;
 
         _download = download;
 
-        slots_spinner.setModel(new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
+        MiscTools.GUIRunAndWait(() -> {
 
-        ((JSpinner.DefaultEditor) slots_spinner.getEditor()).getTextField().setEditable(false);
+            initComponents();
 
-        speed_label.setForeground(new Color(0, 128, 255));
-        progress_pbar.setMinimum(0);
-        progress_pbar.setMaximum(MAX_VALUE);
-        progress_pbar.setStringPainted(true);
+            updateFonts(tthis, GUI_FONT, download.getMain_panel().getZoom_factor());
 
-        status_label.setText("");
+            translateLabels(tthis);
 
-        for (JComponent c : new JComponent[]{queue_top_button, queue_bottom_button, queue_up_button, queue_down_button, slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label, open_folder_button}) {
+            slots_spinner.setModel(new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
 
-            c.setVisible(false);
-        }
+            ((JSpinner.DefaultEditor) slots_spinner.getEditor()).getTextField().setEditable(false);
+
+            speed_label.setForeground(new Color(0, 128, 255));
+            progress_pbar.setMinimum(0);
+            progress_pbar.setMaximum(MAX_VALUE);
+            progress_pbar.setStringPainted(true);
+
+            status_label.setText("");
+
+            for (JComponent c : new JComponent[]{queue_top_button, queue_bottom_button, queue_up_button, queue_down_button, slots_spinner, slots_label, pause_button, stop_button, speed_label, progress_pbar, keep_temp_checkbox, file_name_label, close_button, copy_link_button, restart_button, file_size_label, open_folder_button}) {
+
+                c.setVisible(false);
+            }
+        });
 
     }
 
     public void hideAllExceptStatus() {
 
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             for (JComponent c : new JComponent[]{speed_label, slots_spinner, slots_label, slot_status_label, slot_status_label, pause_button, stop_button, progress_pbar, keep_temp_checkbox}) {
 
                 c.setVisible(false);
@@ -463,7 +469,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         THREAD_POOL.execute(() -> {
             _download.upWaitQueue();
-            swingInvokeAndWait(() -> {
+            MiscTools.GUIRunAndWait(() -> {
                 queue_up_button.setEnabled(true);
             });
         });
@@ -476,7 +482,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         THREAD_POOL.execute(() -> {
             _download.downWaitQueue();
-            swingInvokeAndWait(() -> {
+            MiscTools.GUIRunAndWait(() -> {
                 queue_down_button.setEnabled(true);
             });
         });
@@ -489,7 +495,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         THREAD_POOL.execute(() -> {
             _download.topWaitQueue();
-            swingInvokeAndWait(() -> {
+            MiscTools.GUIRunAndWait(() -> {
                 queue_top_button.setEnabled(true);
             });
         });
@@ -502,7 +508,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         THREAD_POOL.execute(() -> {
             _download.bottomWaitQueue();
-            swingInvokeAndWait(() -> {
+            MiscTools.GUIRunAndWait(() -> {
                 queue_bottom_button.setEnabled(true);
             });
         });
@@ -513,7 +519,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         printStatusNormal("Pausing download ...");
 
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
                 c.setEnabled(false);
@@ -531,7 +537,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         printStatusNormal("Downloading file from mega ...");
 
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
                 c.setEnabled(true);
@@ -553,7 +559,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         printStatusNormal(status);
 
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             for (JComponent c : new JComponent[]{pause_button, keep_temp_checkbox, stop_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
                 c.setEnabled(false);
@@ -565,7 +571,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     @Override
     public void updateSpeed(final String speed, final Boolean visible) {
 
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             if (speed != null) {
                 speed_label.setText(speed);
             }
@@ -579,14 +585,14 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     @Override
     public void updateProgressBar(final long progress, final double bar_rate) {
 
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             progress_pbar.setValue((int) Math.floor(bar_rate * progress));
         });
     }
 
     @Override
     public void updateProgressBar(final int value) {
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             progress_pbar.setValue(value);
         });
     }
@@ -594,7 +600,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     @Override
     public void printStatusError(final String message) {
 
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             status_label.setForeground(Color.red);
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
@@ -603,7 +609,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     @Override
     public void printStatusOK(final String message) {
 
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             status_label.setForeground(new Color(0, 170, 0));
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
@@ -612,7 +618,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     @Override
     public void printStatusNormal(final String message) {
 
-        swingInvokeAndWait(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             status_label.setForeground(new Color(102, 102, 102));
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
@@ -630,7 +636,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
             final String status = conta_error > 0 ? "(" + String.valueOf(conta_error) + ")" : "";
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 slot_status_label.setForeground(Color.RED);
                 slot_status_label.setText(status);
             });
@@ -639,12 +645,26 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public int getSlots() {
-        return (int) swingInvokeAndWaitForReturn((Callable) getSlots_spinner()::getValue);
+        try {
+            return (int) (MiscTools.futureRun((Callable) getSlots_spinner()::getValue).get());
+        } catch (InterruptedException ex) {
+            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ExecutionException ex) {
+            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return 0;
     }
 
     public boolean isKeepTempFileSelected() {
 
-        return (boolean) swingInvokeAndWaitForReturn((Callable) getKeep_temp_checkbox()::isSelected);
+        try {
+            return (boolean) (MiscTools.futureRun((Callable) getKeep_temp_checkbox()::isSelected).get());
+        } catch (InterruptedException ex) {
+            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (ExecutionException ex) {
+            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return false;
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

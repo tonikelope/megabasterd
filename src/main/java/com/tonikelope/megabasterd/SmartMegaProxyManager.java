@@ -25,8 +25,8 @@ import java.util.logging.Logger;
 public final class SmartMegaProxyManager {
 
     public static String DEFAULT_SMART_PROXY_URL = "";
-    public static final int PROXY_BLOCK_TIME = 120;
-    public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 15;
+    public static final int PROXY_BLOCK_TIME = 90;
+    public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 60;
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
     private final LinkedHashMap<String, Long[]> _proxy_list;

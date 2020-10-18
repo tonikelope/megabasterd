@@ -18,7 +18,6 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
-import static com.tonikelope.megabasterd.MiscTools.swingInvoke;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
 import static com.tonikelope.megabasterd.MiscTools.truncateText;
 import static com.tonikelope.megabasterd.MiscTools.updateFonts;
@@ -58,32 +57,34 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         super(parent, modal);
         _main_panel = parent.getMain_panel();
 
-        initComponents();
+        MiscTools.GUIRunAndWait(() -> {
+            initComponents();
 
-        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
+            updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
-        translateLabels(this);
+            translateLabels(this);
 
-        jProgressBar2.setMinimum(0);
-        jProgressBar2.setMaximum(MAX_VALUE);
-        jProgressBar2.setStringPainted(true);
-        jProgressBar2.setValue(0);
-        jProgressBar2.setVisible(false);
+            jProgressBar2.setMinimum(0);
+            jProgressBar2.setMaximum(MAX_VALUE);
+            jProgressBar2.setStringPainted(true);
+            jProgressBar2.setValue(0);
+            jProgressBar2.setVisible(false);
 
-        split_size_text.addKeyListener(new java.awt.event.KeyAdapter() {
+            split_size_text.addKeyListener(new java.awt.event.KeyAdapter() {
 
-            public void keyReleased(java.awt.event.KeyEvent evt) {
-                try {
-                    Integer.parseInt(split_size_text.getText());
-                } catch (Exception e) {
-                    split_size_text.setText(split_size_text.getText().substring(0, Math.max(0, split_size_text.getText().length() - 1)));
+                public void keyReleased(java.awt.event.KeyEvent evt) {
+                    try {
+                        Integer.parseInt(split_size_text.getText());
+                    } catch (Exception e) {
+                        split_size_text.setText(split_size_text.getText().substring(0, Math.max(0, split_size_text.getText().length() - 1)));
+                    }
                 }
-            }
+            });
+
+            split_size_text.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+
+            pack();
         });
-
-        split_size_text.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-
-        pack();
     }
 
     private boolean _splitFile() throws IOException {
@@ -101,8 +102,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         int position = 0;
         int conta_split = 1;
 
-        try (RandomAccessFile sourceFile = new RandomAccessFile(this._file.getAbsolutePath(), "r");
-                FileChannel sourceChannel = sourceFile.getChannel()) {
+        try (RandomAccessFile sourceFile = new RandomAccessFile(this._file.getAbsolutePath(), "r"); FileChannel sourceChannel = sourceFile.getChannel()) {
 
             for (; position < numSplits; position++, conta_split++) {
                 _writePartToFile(bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
@@ -119,15 +119,14 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private void _writePartToFile(long byteSize, long position, FileChannel sourceChannel, int conta_split, long num_splits) throws IOException {
 
         Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._file.getName() + ".part" + String.valueOf(conta_split) + "-" + String.valueOf(num_splits));
-        try (RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");
-                FileChannel toChannel = toFile.getChannel()) {
+        try (RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw"); FileChannel toChannel = toFile.getChannel()) {
             sourceChannel.position(position);
             toChannel.transferFrom(sourceChannel, 0, byteSize);
         }
 
         _progress += byteSize;
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _file.length()) * _progress));
         });
 
@@ -370,7 +369,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             THREAD_POOL.execute(() -> {
                 try {
                     if (_splitFile()) {
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully splitted!"));
 
                             if (Desktop.isDesktopSupported()) {
@@ -388,7 +387,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                     } else {
                         _file = null;
                         _output_dir = null;
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             file_name_label.setText("");
 
                             output_folder_label.setText("");

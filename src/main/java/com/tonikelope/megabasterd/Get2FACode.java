@@ -28,19 +28,23 @@ public class Get2FACode extends javax.swing.JDialog {
     public Get2FACode(java.awt.Frame parent, boolean modal, String email, MainPanel main_panel) {
         super(parent, modal);
 
-        initComponents();
+        MiscTools.GUIRunAndWait(() -> {
 
-        updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
+            initComponents();
 
-        translateLabels(this);
+            updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
 
-        _code_ok = false;
+            translateLabels(this);
 
-        this.email_label.setText(email);
+            _code_ok = false;
 
-        this.ok_button.setEnabled(false);
+            this.email_label.setText(email);
 
-        pack();
+            this.ok_button.setEnabled(false);
+
+            pack();
+
+        });
 
     }
 

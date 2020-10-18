@@ -23,7 +23,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
-import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -52,7 +51,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -413,78 +411,81 @@ public class MiscTools {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
+    public static void pausar(long pause) {
+        try {
+            Thread.sleep(pause);
+        } catch (InterruptedException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+    }
+
+    public static void GUIRun(Runnable r) {
+
+        boolean ok;
+
+        do {
+            ok = true;
+
+            try {
+                if (!SwingUtilities.isEventDispatchThread()) {
+                    SwingUtilities.invokeLater(r);
+                } else {
+                    r.run();
+                }
+            } catch (Exception ex) {
+                ok = false;
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                MiscTools.pausar(250);
+            }
+
+        } while (!ok);
+    }
+
+    public static void GUIRunAndWait(Runnable r) {
+
+        boolean ok;
+
+        do {
+            ok = true;
+            try {
+                if (!SwingUtilities.isEventDispatchThread()) {
+                    SwingUtilities.invokeAndWait(r);
+                } else {
+                    r.run();
+                }
+            } catch (Exception ex) {
+                ok = false;
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                MiscTools.pausar(250);
+            }
+        } while (!ok);
+    }
+
+    public static void threadRun(Runnable r) {
+
+        Thread hilo = new Thread(r);
+
+        hilo.start();
+
+    }
+
+    public static FutureTask futureRun(Callable c) {
+
+        FutureTask f = new FutureTask(c);
+
+        Thread hilo = new Thread(f);
+
+        hilo.start();
+
+        return f;
+    }
+
     public static long getWaitTimeExpBackOff(int retryCount) {
 
         long waitTime = ((long) Math.pow(EXP_BACKOFF_BASE, retryCount) * EXP_BACKOFF_SECS_RETRY);
 
         return Math.min(waitTime, EXP_BACKOFF_MAX_WAIT_TIME);
-    }
-
-    public static void swingInvoke(Runnable r) {
-
-        _swingInvokeIt(r, false);
-    }
-
-    public static void swingInvokeAndWait(Runnable r) {
-
-        _swingInvokeIt(r, true);
-    }
-
-    public static Object swingInvokeAndWaitForReturn(Callable c) {
-
-        return _swingInvokeItAndWaitForReturn(c);
-    }
-
-    private static void _swingInvokeIt(Runnable r, boolean wait) {
-
-        if (wait) {
-
-            if (SwingUtilities.isEventDispatchThread()) {
-
-                r.run();
-
-            } else {
-
-                try {
-                    /* OJO!!! El thread que lanza esto NO PUEDE poseer locks que necesite el EDT o se producirá un DEADLOCK */
-                    SwingUtilities.invokeAndWait(r);
-
-                } catch (InterruptedException | InvocationTargetException ex) {
-                    Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-                }
-            }
-
-        } else {
-
-            SwingUtilities.invokeLater(r);
-        }
-    }
-
-    private static Object _swingInvokeItAndWaitForReturn(Callable c) {
-        Object ret = null;
-
-        if (SwingUtilities.isEventDispatchThread()) {
-
-            try {
-                ret = c.call();
-            } catch (Exception ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-            }
-
-        } else {
-
-            FutureTask<Object> futureTask = new FutureTask<>(c);
-
-            SwingUtilities.invokeLater(futureTask);
-
-            try {
-                ret = futureTask.get();
-            } catch (InterruptedException | ExecutionException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-            }
-        }
-
-        return ret;
     }
 
     public static String bin2hex(byte[] b) {

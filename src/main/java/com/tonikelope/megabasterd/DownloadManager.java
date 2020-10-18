@@ -2,7 +2,6 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -29,7 +28,7 @@ public class DownloadManager extends TransferenceManager {
 
         for (final Transference d : downloads) {
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 getScroll_panel().remove(((Download) d).getView());
             });
 
@@ -66,7 +65,7 @@ public class DownloadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference download) {
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             getScroll_panel().add(((Download) download).getView());
         });
 

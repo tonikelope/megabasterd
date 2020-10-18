@@ -62,12 +62,6 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
         _main_panel = parent.getMain_panel();
 
-        initComponents();
-
-        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
-
-        translateLabels(this);
-
         _download = false;
 
         _download_path = Paths.get(download_path).toAbsolutePath().normalize().toString();
@@ -76,33 +70,42 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
         _clipboardspy = clipboardspy;
 
-        download_dir_label.setText(truncateText(_download_path, 80));
+        MiscTools.GUIRunAndWait(() -> {
 
-        if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
+            initComponents();
 
-            THREAD_POOL.execute(() -> {
-                swingInvoke(() -> {
-                    String mega_default_down = _main_panel.getMega_account_down();
+            updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
-                    use_mega_account_down_combobox.addItem(mega_default_down);
+            translateLabels(this);
 
-                    _main_panel.getMega_accounts().keySet().stream().filter((k) -> (!mega_default_down.equals(k))).forEachOrdered((k) -> {
-                        use_mega_account_down_combobox.addItem(k);
+            download_dir_label.setText(truncateText(_download_path, 80));
+
+            if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
+
+                THREAD_POOL.execute(() -> {
+                    MiscTools.GUIRun(() -> {
+                        String mega_default_down = _main_panel.getMega_account_down();
+
+                        use_mega_account_down_combobox.addItem(mega_default_down);
+
+                        _main_panel.getMega_accounts().keySet().stream().filter((k) -> (!mega_default_down.equals(k))).forEachOrdered((k) -> {
+                            use_mega_account_down_combobox.addItem(k);
+                        });
+
+                        use_mega_account_down_combobox.addItem("");
+                        use_mega_account_down_combobox.setSelectedIndex(0);
                     });
-
-                    use_mega_account_down_combobox.addItem("");
-                    use_mega_account_down_combobox.setSelectedIndex(0);
                 });
-            });
 
-        } else {
-            use_mega_account_down_combobox.setEnabled(false);
-            use_mega_account_down_combobox.setVisible(false);
-            use_mega_account_down_label.setEnabled(false);
-            use_mega_account_down_label.setVisible(false);
-        }
+            } else {
+                use_mega_account_down_combobox.setEnabled(false);
+                use_mega_account_down_combobox.setVisible(false);
+                use_mega_account_down_label.setEnabled(false);
+                use_mega_account_down_label.setVisible(false);
+            }
 
-        pack();
+            pack();
+        });
     }
 
     /**
@@ -334,7 +337,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                         }
                     }
                     if (!links.isEmpty()) {
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             links_textarea.setText("");
 
                             for (Iterator<String> i = links.iterator(); i.hasNext();) {
@@ -353,7 +356,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                 } catch (IOException ex) {
                     LOG.log(Level.SEVERE, ex.getMessage());
                 }
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
 
                     dlc_button.setEnabled(true);
@@ -411,11 +414,11 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                         use_account = false;
                     }
                     if (!use_account) {
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             use_mega_account_down_combobox.setSelectedIndex(_main_panel.getMega_accounts().size());
                         });
                     }
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getUse_mega_account_down_combobox().setEnabled(true);
 
                         getDance_button().setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
@@ -447,7 +450,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
     @Override
     public void notifyClipboardChange() {
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             String current_text = links_textarea.getText();
 
             links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));

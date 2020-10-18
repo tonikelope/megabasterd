@@ -58,49 +58,61 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
         super(parent, modal);
 
-        initComponents();
-
-        updateFonts(this, GUI_FONT, parent.getMain_panel().getZoom_factor());
-
-        translateLabels(this);
-
         _mega_error = 0;
         _total_space = 0L;
         _download = false;
         _download_links = new ArrayList<>();
         _link = link;
 
-        folder_link_label.setText(link);
+        MiscTools.GUIRunAndWait(() -> {
 
-        restore_button.setVisible(false);
+            initComponents();
 
-        final Dialog tthis = this;
+            updateFonts(this, GUI_FONT, parent.getMain_panel().getZoom_factor());
 
-        THREAD_POOL.execute(() -> {
-            _loadMegaDirTree();
+            translateLabels(this);
 
-            if (_mega_error == 0) {
+            folder_link_label.setText(link);
 
-                _genDownloadLiks();
+            restore_button.setVisible(false);
 
-                dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
+            final Dialog tthis = this;
 
-                pack();
+            THREAD_POOL.execute(() -> {
+                _loadMegaDirTree();
 
-            } else if (_mega_error == -18) {
+                if (_mega_error == 0) {
 
-                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+                    _genDownloadLiks();
 
-                setVisible(false);
+                    MiscTools.GUIRun(() -> {
 
-            } else {
-                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
 
-                setVisible(false);
-            }
+                        pack();
+                    });
+
+                } else if (_mega_error == -18) {
+
+                    MiscTools.GUIRun(() -> {
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+
+                        setVisible(false);
+                    });
+
+                } else {
+
+                    MiscTools.GUIRun(() -> {
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
+
+                        setVisible(false);
+                    });
+                }
+            });
+
+            pack();
+
         });
-
-        pack();
     }
 
     /**
@@ -307,7 +319,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         THREAD_POOL.execute(() -> {
             _loadMegaDirTree();
             _genDownloadLiks();
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 restore_button.setVisible(false);
                 restore_button.setText(LabelTranslatorSingleton.getInstance().translate("Restore folder data"));
                 boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
@@ -324,7 +336,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private void _loadMegaDirTree() {
 
         try {
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
             });
 
@@ -404,7 +416,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                 final MegaMutableTreeNode roott = root;
 
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     ftree.setModel(new DefaultTreeModel(sortTree(roott)));
 
                     ftree.setRootVisible(roott != null ? roott.getChildCount() > 0 : false);
@@ -427,7 +439,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             _mega_error = 1;
         }
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         });
 
@@ -435,7 +447,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private void _genDownloadLiks() {
 
-        swingInvoke(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
             String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);

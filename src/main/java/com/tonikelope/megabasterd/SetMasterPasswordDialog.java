@@ -52,12 +52,6 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         super(parent, modal);
 
-        initComponents();
-
-        updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
-
-        translateLabels(this);
-
         _pass_ok = false;
 
         _new_pass = null;
@@ -66,7 +60,16 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         _salt = salt;
 
-        pack();
+        MiscTools.GUIRunAndWait(() -> {
+
+            initComponents();
+
+            updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
+
+            translateLabels(this);
+
+            pack();
+        });
     }
 
     /**
@@ -219,7 +222,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         THREAD_POOL.execute(() -> {
             try {
                 if (Arrays.equals(new_pass_textfield.getPassword(), confirm_pass_textfield.getPassword())) {
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         status_label.setText(LabelTranslatorSingleton.getInstance().translate("Processing your password, please wait..."));
                     });
                     if (new_pass_textfield.getPassword().length > 0) {
@@ -229,11 +232,11 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                         _new_pass_hash = Bin2BASE64(HashBin("SHA-1", _new_pass));
                     }
                     _pass_ok = true;
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         tthis.setVisible(false);
                     });
                 } else {
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         status_label.setText("");

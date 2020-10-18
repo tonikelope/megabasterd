@@ -59,13 +59,6 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
      */
     public GetMasterPasswordDialog(java.awt.Frame parent, boolean modal, String current_pass_hash, String salt, MainPanel main_panel) {
         super(parent, modal);
-
-        initComponents();
-
-        updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
-
-        translateLabels(this);
-
         _current_pass_hash = current_pass_hash;
 
         _pass_ok = false;
@@ -73,8 +66,15 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
         _pass = null;
 
         _salt = salt;
+        MiscTools.GUIRunAndWait(() -> {
+            initComponents();
 
-        pack();
+            updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
+
+            translateLabels(this);
+
+            pack();
+        });
 
     }
 
@@ -208,7 +208,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
             try {
                 byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
                 String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     if (!pass_hash.equals(_current_pass_hash)) {
 
                         JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);

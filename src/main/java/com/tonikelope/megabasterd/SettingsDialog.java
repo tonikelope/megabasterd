@@ -80,66 +80,89 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         _main_panel = parent.getMain_panel();
 
-        initComponents();
+        _remember_master_pass = true;
 
-        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
+        _deleted_mega_accounts = new HashSet();
 
-        updateTitledBorderFont(((javax.swing.border.TitledBorder) proxy_panel.getBorder()), GUI_FONT, _main_panel.getZoom_factor());
+        _deleted_elc_accounts = new HashSet();
 
-        updateTitledBorderFont(((javax.swing.border.TitledBorder) proxy_auth_panel.getBorder()), GUI_FONT, _main_panel.getZoom_factor());
+        _settings_ok = false;
 
-        translateLabels(this);
+        MiscTools.GUIRunAndWait(() -> {
 
-        jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
+            initComponents();
 
-        jTabbedPane1.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
+            updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
-        jTabbedPane1.setTitleAt(2, LabelTranslatorSingleton.getInstance().translate("Accounts"));
+            updateTitledBorderFont(((javax.swing.border.TitledBorder) proxy_panel.getBorder()), GUI_FONT, _main_panel.getZoom_factor());
 
-        jTabbedPane1.setTitleAt(3, LabelTranslatorSingleton.getInstance().translate("Advanced"));
+            updateTitledBorderFont(((javax.swing.border.TitledBorder) proxy_auth_panel.getBorder()), GUI_FONT, _main_panel.getZoom_factor());
 
-        downloads_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
+            translateLabels(this);
 
-        downloads_scrollpane.getHorizontalScrollBar().setUnitIncrement(20);
+            panel_tabs.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
 
-        uploads_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
+            panel_tabs.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
 
-        uploads_scrollpane.getHorizontalScrollBar().setUnitIncrement(20);
+            panel_tabs.setTitleAt(2, LabelTranslatorSingleton.getInstance().translate("Accounts"));
 
-        advanced_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
+            panel_tabs.setTitleAt(3, LabelTranslatorSingleton.getInstance().translate("Advanced"));
 
-        advanced_scrollpane.getHorizontalScrollBar().setUnitIncrement(20);
+            downloads_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
 
-        String zoom_factor = DBTools.selectSettingValue("font_zoom");
+            downloads_scrollpane.getHorizontalScrollBar().setUnitIncrement(20);
 
-        int int_zoom_factor = Math.round(_main_panel.getZoom_factor() * 100);
+            uploads_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
 
-        if (zoom_factor != null) {
-            int_zoom_factor = Integer.parseInt(zoom_factor);
-        }
+            uploads_scrollpane.getHorizontalScrollBar().setUnitIncrement(20);
 
-        zoom_spinner.setModel(new SpinnerNumberModel(int_zoom_factor, 50, 250, 10));
-        ((JSpinner.DefaultEditor) zoom_spinner.getEditor()).getTextField().setEditable(false);
+            advanced_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
 
-        String use_custom_chunks_dir = DBTools.selectSettingValue("use_custom_chunks_dir");
+            advanced_scrollpane.getHorizontalScrollBar().setUnitIncrement(20);
 
-        if (use_custom_chunks_dir != null) {
+            String zoom_factor = DBTools.selectSettingValue("font_zoom");
 
-            if (use_custom_chunks_dir.equals("yes")) {
+            int int_zoom_factor = Math.round(_main_panel.getZoom_factor() * 100);
 
-                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+            if (zoom_factor != null) {
+                int_zoom_factor = Integer.parseInt(zoom_factor);
+            }
 
-                custom_chunks_dir_current_label.setText(_custom_chunks_dir != null ? truncateText(_custom_chunks_dir, 80) : "");
+            zoom_spinner.setModel(new SpinnerNumberModel(int_zoom_factor, 50, 250, 10));
+            ((JSpinner.DefaultEditor) zoom_spinner.getEditor()).getTextField().setEditable(false);
 
-                custom_chunks_dir_checkbox.setSelected(true);
+            String use_custom_chunks_dir = DBTools.selectSettingValue("use_custom_chunks_dir");
 
-                custom_chunks_dir_button.setEnabled(true);
+            if (use_custom_chunks_dir != null) {
+
+                if (use_custom_chunks_dir.equals("yes")) {
+
+                    _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+
+                    custom_chunks_dir_current_label.setText(_custom_chunks_dir != null ? truncateText(_custom_chunks_dir, 80) : "");
+
+                    custom_chunks_dir_checkbox.setSelected(true);
+
+                    custom_chunks_dir_button.setEnabled(true);
+
+                } else {
+
+                    _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+
+                    custom_chunks_dir_current_label.setText(_custom_chunks_dir != null ? truncateText(_custom_chunks_dir, 80) : "");
+
+                    custom_chunks_dir_checkbox.setSelected(false);
+
+                    custom_chunks_dir_button.setEnabled(false);
+
+                    custom_chunks_dir_current_label.setEnabled(false);
+                }
 
             } else {
 
-                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+                _custom_chunks_dir = null;
 
-                custom_chunks_dir_current_label.setText(_custom_chunks_dir != null ? truncateText(_custom_chunks_dir, 80) : "");
+                custom_chunks_dir_current_label.setText("");
 
                 custom_chunks_dir_checkbox.setSelected(false);
 
@@ -148,213 +171,258 @@ public class SettingsDialog extends javax.swing.JDialog {
                 custom_chunks_dir_current_label.setEnabled(false);
             }
 
-        } else {
+            String default_download_dir = DBTools.selectSettingValue("default_down_dir");
 
-            _custom_chunks_dir = null;
+            default_download_dir = Paths.get(default_download_dir == null ? System.getProperty("user.home") : default_download_dir).toAbsolutePath().normalize().toString();
 
-            custom_chunks_dir_current_label.setText("");
+            _download_path = default_download_dir;
 
-            custom_chunks_dir_checkbox.setSelected(false);
+            default_dir_label.setText(truncateText(_download_path, 80));
 
-            custom_chunks_dir_button.setEnabled(false);
+            String slots = DBTools.selectSettingValue("default_slots_down");
 
-            custom_chunks_dir_current_label.setEnabled(false);
-        }
+            int default_slots = Download.WORKERS_DEFAULT;
 
-        String default_download_dir = DBTools.selectSettingValue("default_down_dir");
+            if (slots != null) {
+                default_slots = Integer.parseInt(slots);
+            }
 
-        default_download_dir = Paths.get(default_download_dir == null ? System.getProperty("user.home") : default_download_dir).toAbsolutePath().normalize().toString();
+            default_slots_down_spinner.setModel(new SpinnerNumberModel(default_slots, Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
 
-        _download_path = default_download_dir;
+            ((JSpinner.DefaultEditor) default_slots_down_spinner.getEditor()).getTextField().setEditable(false);
 
-        default_dir_label.setText(truncateText(_download_path, 80));
+            slots = DBTools.selectSettingValue("default_slots_up");
 
-        String slots = DBTools.selectSettingValue("default_slots_down");
+            default_slots = Upload.WORKERS_DEFAULT;
 
-        int default_slots = Download.WORKERS_DEFAULT;
+            if (slots != null) {
+                default_slots = Integer.parseInt(slots);
+            }
 
-        if (slots != null) {
-            default_slots = Integer.parseInt(slots);
-        }
+            default_slots_up_spinner.setModel(new SpinnerNumberModel(default_slots, Upload.MIN_WORKERS, Upload.MAX_WORKERS, 1));
+            ((JSpinner.DefaultEditor) default_slots_up_spinner.getEditor()).getTextField().setEditable(false);
 
-        default_slots_down_spinner.setModel(new SpinnerNumberModel(default_slots, Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
+            String max_down = DBTools.selectSettingValue("max_downloads");
 
-        ((JSpinner.DefaultEditor) default_slots_down_spinner.getEditor()).getTextField().setEditable(false);
+            int max_dl = Download.SIM_TRANSFERENCES_DEFAULT;
 
-        slots = DBTools.selectSettingValue("default_slots_up");
+            if (max_down != null) {
+                max_dl = Integer.parseInt(max_down);
+            }
 
-        default_slots = Upload.WORKERS_DEFAULT;
+            max_downloads_spinner.setModel(new SpinnerNumberModel(max_dl, 1, Download.MAX_SIM_TRANSFERENCES, 1));
+            ((JSpinner.DefaultEditor) max_downloads_spinner.getEditor()).getTextField().setEditable(false);
 
-        if (slots != null) {
-            default_slots = Integer.parseInt(slots);
-        }
+            String max_up = DBTools.selectSettingValue("max_uploads");
 
-        default_slots_up_spinner.setModel(new SpinnerNumberModel(default_slots, Upload.MIN_WORKERS, Upload.MAX_WORKERS, 1));
-        ((JSpinner.DefaultEditor) default_slots_up_spinner.getEditor()).getTextField().setEditable(false);
+            int max_ul = Upload.SIM_TRANSFERENCES_DEFAULT;
 
-        String max_down = DBTools.selectSettingValue("max_downloads");
+            if (max_up != null) {
+                max_ul = Integer.parseInt(max_up);
+            }
 
-        int max_dl = Download.SIM_TRANSFERENCES_DEFAULT;
+            max_uploads_spinner.setModel(new SpinnerNumberModel(max_ul, 1, Upload.MAX_SIM_TRANSFERENCES, 1));
+            ((JSpinner.DefaultEditor) max_uploads_spinner.getEditor()).getTextField().setEditable(false);
 
-        if (max_down != null) {
-            max_dl = Integer.parseInt(max_down);
-        }
+            boolean limit_dl_speed = Download.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 
-        max_downloads_spinner.setModel(new SpinnerNumberModel(max_dl, 1, Download.MAX_SIM_TRANSFERENCES, 1));
-        ((JSpinner.DefaultEditor) max_downloads_spinner.getEditor()).getTextField().setEditable(false);
+            String limit_download_speed = DBTools.selectSettingValue("limit_download_speed");
 
-        String max_up = DBTools.selectSettingValue("max_uploads");
+            if (limit_download_speed != null) {
+                limit_dl_speed = limit_download_speed.equals("yes");
+            }
 
-        int max_ul = Upload.SIM_TRANSFERENCES_DEFAULT;
+            limit_download_speed_checkbox.setSelected(limit_dl_speed);
 
-        if (max_up != null) {
-            max_ul = Integer.parseInt(max_up);
-        }
+            max_down_speed_label.setEnabled(limit_dl_speed);
 
-        max_uploads_spinner.setModel(new SpinnerNumberModel(max_ul, 1, Upload.MAX_SIM_TRANSFERENCES, 1));
-        ((JSpinner.DefaultEditor) max_uploads_spinner.getEditor()).getTextField().setEditable(false);
+            max_down_speed_spinner.setEnabled(limit_dl_speed);
 
-        boolean limit_dl_speed = Download.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
+            String max_dl_speed = DBTools.selectSettingValue("max_download_speed");
 
-        String limit_download_speed = DBTools.selectSettingValue("limit_download_speed");
+            int max_download_speed = Download.MAX_TRANSFERENCE_SPEED_DEFAULT;
 
-        if (limit_download_speed != null) {
-            limit_dl_speed = limit_download_speed.equals("yes");
-        }
+            if (max_dl_speed != null) {
+                max_download_speed = Integer.parseInt(max_dl_speed);
+            }
 
-        limit_download_speed_checkbox.setSelected(limit_dl_speed);
+            max_down_speed_spinner.setModel(new SpinnerNumberModel(max_download_speed, 1, Integer.MAX_VALUE, 5));
 
-        max_down_speed_label.setEnabled(limit_dl_speed);
+            ((JSpinner.DefaultEditor) max_down_speed_spinner.getEditor()).getTextField().setEditable(true);
 
-        max_down_speed_spinner.setEnabled(limit_dl_speed);
+            boolean limit_ul_speed = Upload.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 
-        String max_dl_speed = DBTools.selectSettingValue("max_download_speed");
+            String limit_upload_speed = DBTools.selectSettingValue("limit_upload_speed");
 
-        int max_download_speed = Download.MAX_TRANSFERENCE_SPEED_DEFAULT;
+            if (limit_upload_speed != null) {
+                limit_ul_speed = limit_upload_speed.equals("yes");
+            }
 
-        if (max_dl_speed != null) {
-            max_download_speed = Integer.parseInt(max_dl_speed);
-        }
+            limit_upload_speed_checkbox.setSelected(limit_ul_speed);
 
-        max_down_speed_spinner.setModel(new SpinnerNumberModel(max_download_speed, 1, Integer.MAX_VALUE, 5));
+            max_up_speed_label.setEnabled(limit_ul_speed);
 
-        ((JSpinner.DefaultEditor) max_down_speed_spinner.getEditor()).getTextField().setEditable(true);
+            max_up_speed_spinner.setEnabled(limit_ul_speed);
 
-        boolean limit_ul_speed = Upload.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
+            String max_ul_speed = DBTools.selectSettingValue("max_upload_speed");
 
-        String limit_upload_speed = DBTools.selectSettingValue("limit_upload_speed");
+            int max_upload_speed = Upload.MAX_TRANSFERENCE_SPEED_DEFAULT;
 
-        if (limit_upload_speed != null) {
-            limit_ul_speed = limit_upload_speed.equals("yes");
-        }
+            if (max_ul_speed != null) {
+                max_upload_speed = Integer.parseInt(max_ul_speed);
+            }
 
-        limit_upload_speed_checkbox.setSelected(limit_ul_speed);
+            max_up_speed_spinner.setModel(new SpinnerNumberModel(max_upload_speed, 1, Integer.MAX_VALUE, 5));
 
-        max_up_speed_label.setEnabled(limit_ul_speed);
+            ((JSpinner.DefaultEditor) max_up_speed_spinner.getEditor()).getTextField().setEditable(true);
 
-        max_up_speed_spinner.setEnabled(limit_ul_speed);
+            boolean cbc_mac = Download.VERIFY_CBC_MAC_DEFAULT;
 
-        String max_ul_speed = DBTools.selectSettingValue("max_upload_speed");
+            String verify_file = DBTools.selectSettingValue("verify_down_file");
 
-        int max_upload_speed = Upload.MAX_TRANSFERENCE_SPEED_DEFAULT;
+            if (verify_file != null) {
+                cbc_mac = (verify_file.equals("yes"));
+            }
 
-        if (max_ul_speed != null) {
-            max_upload_speed = Integer.parseInt(max_ul_speed);
-        }
+            verify_file_down_checkbox.setSelected(cbc_mac);
 
-        max_up_speed_spinner.setModel(new SpinnerNumberModel(max_upload_speed, 1, Integer.MAX_VALUE, 5));
+            boolean use_slots = Download.USE_SLOTS_DEFAULT;
 
-        ((JSpinner.DefaultEditor) max_up_speed_spinner.getEditor()).getTextField().setEditable(true);
+            String use_slots_val = DBTools.selectSettingValue("use_slots_down");
 
-        boolean cbc_mac = Download.VERIFY_CBC_MAC_DEFAULT;
+            if (use_slots_val != null) {
+                use_slots = use_slots_val.equals("yes");
+            }
 
-        String verify_file = DBTools.selectSettingValue("verify_down_file");
+            multi_slot_down_checkbox.setSelected(use_slots);
 
-        if (verify_file != null) {
-            cbc_mac = (verify_file.equals("yes"));
-        }
+            default_slots_down_label.setEnabled(use_slots);
+            default_slots_down_spinner.setEnabled(use_slots);
+            rec_download_slots_label.setEnabled(use_slots);
 
-        verify_file_down_checkbox.setSelected(cbc_mac);
+            default_slots_up_label.setEnabled(use_slots);
+            default_slots_up_spinner.setEnabled(use_slots);
+            rec_upload_slots_label.setEnabled(use_slots);
 
-        boolean use_slots = Download.USE_SLOTS_DEFAULT;
+            boolean use_mega_account = Download.USE_MEGA_ACCOUNT_DOWN;
 
-        String use_slots_val = DBTools.selectSettingValue("use_slots_down");
+            String use_mega_acc = DBTools.selectSettingValue("use_mega_account_down");
 
-        if (use_slots_val != null) {
-            use_slots = use_slots_val.equals("yes");
-        }
+            String mega_account = null;
 
-        multi_slot_down_checkbox.setSelected(use_slots);
+            if (use_mega_acc != null) {
 
-        default_slots_down_label.setEnabled(use_slots);
-        default_slots_down_spinner.setEnabled(use_slots);
-        rec_download_slots_label.setEnabled(use_slots);
+                use_mega_account = use_mega_acc.equals("yes");
 
-        default_slots_up_label.setEnabled(use_slots);
-        default_slots_up_spinner.setEnabled(use_slots);
-        rec_upload_slots_label.setEnabled(use_slots);
+                mega_account = DBTools.selectSettingValue("mega_account_down");
+            }
 
-        boolean use_mega_account = Download.USE_MEGA_ACCOUNT_DOWN;
+            use_mega_label.setEnabled(use_mega_account);
+            use_mega_account_down_checkbox.setSelected(use_mega_account);
+            use_mega_account_down_combobox.setEnabled(use_mega_account);
+            use_mega_account_down_combobox.setSelectedItem(mega_account);
 
-        String use_mega_acc = DBTools.selectSettingValue("use_mega_account_down");
+            DefaultTableModel mega_model = (DefaultTableModel) mega_accounts_table.getModel();
 
-        String mega_account = null;
+            DefaultTableModel elc_model = (DefaultTableModel) elc_accounts_table.getModel();
 
-        if (use_mega_acc != null) {
+            encrypt_pass_checkbox.setSelected(_main_panel.getMaster_pass_hash() != null);
 
-            use_mega_account = use_mega_acc.equals("yes");
+            remove_mega_account_button.setEnabled(mega_model.getRowCount() > 0);
 
-            mega_account = DBTools.selectSettingValue("mega_account_down");
-        }
+            remove_elc_account_button.setEnabled(elc_model.getRowCount() > 0);
 
-        use_mega_label.setEnabled(use_mega_account);
-        use_mega_account_down_checkbox.setSelected(use_mega_account);
-        use_mega_account_down_combobox.setEnabled(use_mega_account);
-        use_mega_account_down_combobox.setSelectedItem(mega_account);
+            if (_main_panel.getMaster_pass_hash() != null) {
 
-        DefaultTableModel mega_model = (DefaultTableModel) mega_accounts_table.getModel();
+                if (_main_panel.getMaster_pass() == null) {
 
-        DefaultTableModel elc_model = (DefaultTableModel) elc_accounts_table.getModel();
+                    encrypt_pass_checkbox.setEnabled(false);
 
-        encrypt_pass_checkbox.setSelected(_main_panel.getMaster_pass_hash() != null);
+                    remove_mega_account_button.setEnabled(false);
 
-        remove_mega_account_button.setEnabled(mega_model.getRowCount() > 0);
+                    remove_elc_account_button.setEnabled(false);
 
-        remove_elc_account_button.setEnabled(elc_model.getRowCount() > 0);
+                    add_mega_account_button.setEnabled(false);
 
-        if (_main_panel.getMaster_pass_hash() != null) {
+                    add_elc_account_button.setEnabled(false);
 
-            if (_main_panel.getMaster_pass() == null) {
+                    unlock_accounts_button.setVisible(true);
 
-                encrypt_pass_checkbox.setEnabled(false);
+                    for (Object k : _main_panel.getMega_accounts().keySet()) {
 
-                remove_mega_account_button.setEnabled(false);
+                        String[] new_row_data = {(String) k, "**************************"};
 
-                remove_elc_account_button.setEnabled(false);
+                        mega_model.addRow(new_row_data);
+                    }
 
-                add_mega_account_button.setEnabled(false);
+                    for (Object k : _main_panel.getElc_accounts().keySet()) {
 
-                add_elc_account_button.setEnabled(false);
+                        String[] new_row_data = {(String) k, "**************************", "**************************"};
 
-                unlock_accounts_button.setVisible(true);
+                        elc_model.addRow(new_row_data);
+                    }
 
-                for (Object k : _main_panel.getMega_accounts().keySet()) {
+                    mega_accounts_table.setEnabled(false);
 
-                    String[] new_row_data = {(String) k, "**************************"};
+                    elc_accounts_table.setEnabled(false);
 
-                    mega_model.addRow(new_row_data);
+                } else {
+
+                    unlock_accounts_button.setVisible(false);
+
+                    for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+
+                        HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                        String pass = null;
+
+                        try {
+
+                            pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                            LOG.log(Level.SEVERE, ex.getMessage());
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, ex.getMessage());
+                        }
+
+                        String[] new_row_data = {(String) pair.getKey(), pass};
+
+                        mega_model.addRow(new_row_data);
+                    }
+
+                    for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+
+                        HashMap<String, Object> data = (HashMap) pair.getValue();
+
+                        String user = null, apikey = null;
+
+                        try {
+
+                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+
+                            apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                            LOG.log(Level.SEVERE, ex.getMessage());
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, ex.getMessage());
+                        }
+
+                        String[] new_row_data = {(String) pair.getKey(), user, apikey};
+
+                        elc_model.addRow(new_row_data);
+                    }
+
+                    mega_model = (DefaultTableModel) mega_accounts_table.getModel();
+
+                    elc_model = (DefaultTableModel) elc_accounts_table.getModel();
+
+                    remove_mega_account_button.setEnabled(mega_model.getRowCount() > 0);
+
+                    remove_elc_account_button.setEnabled(elc_model.getRowCount() > 0);
+
                 }
-
-                for (Object k : _main_panel.getElc_accounts().keySet()) {
-
-                    String[] new_row_data = {(String) k, "**************************", "**************************"};
-
-                    elc_model.addRow(new_row_data);
-                }
-
-                mega_accounts_table.setEnabled(false);
-
-                elc_accounts_table.setEnabled(false);
 
             } else {
 
@@ -364,19 +432,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     HashMap<String, Object> data = (HashMap) pair.getValue();
 
-                    String pass = null;
-
-                    try {
-
-                        pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
-
-                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    }
-
-                    String[] new_row_data = {(String) pair.getKey(), pass};
+                    String[] new_row_data = {(String) pair.getKey(), (String) data.get("password")};
 
                     mega_model.addRow(new_row_data);
                 }
@@ -385,201 +441,148 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     HashMap<String, Object> data = (HashMap) pair.getValue();
 
-                    String user = null, apikey = null;
-
-                    try {
-
-                        user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
-
-                        apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
-
-                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    }
-
-                    String[] new_row_data = {(String) pair.getKey(), user, apikey};
+                    String[] new_row_data = {(String) pair.getKey(), (String) data.get("user"), (String) data.get("apikey")};
 
                     elc_model.addRow(new_row_data);
                 }
 
-                mega_model = (DefaultTableModel) mega_accounts_table.getModel();
+                remove_mega_account_button.setEnabled((mega_model.getRowCount() > 0));
 
-                elc_model = (DefaultTableModel) elc_accounts_table.getModel();
-
-                remove_mega_account_button.setEnabled(mega_model.getRowCount() > 0);
-
-                remove_elc_account_button.setEnabled(elc_model.getRowCount() > 0);
+                remove_elc_account_button.setEnabled((elc_model.getRowCount() > 0));
 
             }
 
-        } else {
+            mega_accounts_table.setAutoCreateRowSorter(true);
+            DefaultRowSorter sorter_mega = ((DefaultRowSorter) mega_accounts_table.getRowSorter());
+            ArrayList list_mega = new ArrayList();
+            list_mega.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+            sorter_mega.setSortKeys(list_mega);
+            sorter_mega.sort();
 
-            unlock_accounts_button.setVisible(false);
+            elc_accounts_table.setAutoCreateRowSorter(true);
+            DefaultRowSorter sorter_elc = ((DefaultRowSorter) elc_accounts_table.getRowSorter());
+            ArrayList list_elc = new ArrayList();
+            list_elc.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+            sorter_elc.setSortKeys(list_elc);
+            sorter_elc.sort();
 
-            for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+            boolean use_mc_reverse = false;
 
-                HashMap<String, Object> data = (HashMap) pair.getValue();
+            String megacrypter_reverse = DBTools.selectSettingValue("megacrypter_reverse");
 
-                String[] new_row_data = {(String) pair.getKey(), (String) data.get("password")};
+            String megacrypter_reverse_p = String.valueOf(MainPanel.DEFAULT_MEGA_PROXY_PORT);
 
-                mega_model.addRow(new_row_data);
+            if (megacrypter_reverse != null) {
+
+                use_mc_reverse = megacrypter_reverse.equals("yes");
+
+                if (megacrypter_reverse_p != null) {
+
+                    megacrypter_reverse_p = DBTools.selectSettingValue("megacrypter_reverse_port");
+                }
             }
 
-            for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+            megacrypter_reverse_checkbox.setSelected(use_mc_reverse);
+            megacrypter_reverse_port_spinner.setModel(new SpinnerNumberModel(Integer.parseInt(megacrypter_reverse_p), 1024, 65535, 1));
+            ((JSpinner.DefaultEditor) megacrypter_reverse_port_spinner.getEditor()).getTextField().setEditable(use_mc_reverse);
+            megacrypter_reverse_port_spinner.setEnabled(use_mc_reverse);
+            megacrypter_reverse_warning_label.setEnabled(use_mc_reverse);
 
-                HashMap<String, Object> data = (HashMap) pair.getValue();
+            boolean use_smart_proxy = false;
 
-                String[] new_row_data = {(String) pair.getKey(), (String) data.get("user"), (String) data.get("apikey")};
+            String smart_proxy = DBTools.selectSettingValue("smart_proxy");
 
-                elc_model.addRow(new_row_data);
+            if (smart_proxy != null) {
+
+                use_smart_proxy = smart_proxy.equals("yes");
             }
 
-            remove_mega_account_button.setEnabled((mega_model.getRowCount() > 0));
+            smart_proxy_checkbox.setSelected(use_smart_proxy);
+            rec_smart_proxy_label.setEnabled(use_smart_proxy);
+            rec_smart_proxy_label1.setEnabled(use_smart_proxy);
+            custom_proxy_list_label.setEnabled(use_smart_proxy);
+            custom_proxy_textarea.setEnabled(use_smart_proxy);
 
-            remove_elc_account_button.setEnabled((elc_model.getRowCount() > 0));
+            boolean run_command = false;
 
-        }
+            String run_command_string = DBTools.selectSettingValue("run_command");
 
-        mega_accounts_table.setAutoCreateRowSorter(true);
-        DefaultRowSorter sorter_mega = ((DefaultRowSorter) mega_accounts_table.getRowSorter());
-        ArrayList list_mega = new ArrayList();
-        list_mega.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-        sorter_mega.setSortKeys(list_mega);
-        sorter_mega.sort();
+            if (run_command_string != null) {
 
-        elc_accounts_table.setAutoCreateRowSorter(true);
-        DefaultRowSorter sorter_elc = ((DefaultRowSorter) elc_accounts_table.getRowSorter());
-        ArrayList list_elc = new ArrayList();
-        list_elc.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
-        sorter_elc.setSortKeys(list_elc);
-        sorter_elc.sort();
-
-        boolean use_mc_reverse = false;
-
-        String megacrypter_reverse = DBTools.selectSettingValue("megacrypter_reverse");
-
-        String megacrypter_reverse_p = String.valueOf(MainPanel.DEFAULT_MEGA_PROXY_PORT);
-
-        if (megacrypter_reverse != null) {
-
-            use_mc_reverse = megacrypter_reverse.equals("yes");
-
-            if (megacrypter_reverse_p != null) {
-
-                megacrypter_reverse_p = DBTools.selectSettingValue("megacrypter_reverse_port");
+                run_command = run_command_string.equals("yes");
             }
-        }
 
-        megacrypter_reverse_checkbox.setSelected(use_mc_reverse);
-        megacrypter_reverse_port_spinner.setModel(new SpinnerNumberModel(Integer.parseInt(megacrypter_reverse_p), 1024, 65535, 1));
-        ((JSpinner.DefaultEditor) megacrypter_reverse_port_spinner.getEditor()).getTextField().setEditable(use_mc_reverse);
-        megacrypter_reverse_port_spinner.setEnabled(use_mc_reverse);
-        megacrypter_reverse_warning_label.setEnabled(use_mc_reverse);
+            run_command_checkbox.setSelected(run_command);
 
-        boolean use_smart_proxy = false;
+            run_command_textbox.setEnabled(run_command);
 
-        String smart_proxy = DBTools.selectSettingValue("smart_proxy");
+            run_command_textbox.setText(DBTools.selectSettingValue("run_command_path"));
 
-        if (smart_proxy != null) {
+            boolean init_paused = false;
 
-            use_smart_proxy = smart_proxy.equals("yes");
-        }
+            String init_paused_string = DBTools.selectSettingValue("start_frozen");
 
-        smart_proxy_checkbox.setSelected(use_smart_proxy);
-        rec_smart_proxy_label.setEnabled(use_smart_proxy);
-        rec_smart_proxy_label1.setEnabled(use_smart_proxy);
-        custom_proxy_list_label.setEnabled(use_smart_proxy);
-        custom_proxy_textarea.setEnabled(use_smart_proxy);
+            if (init_paused_string != null) {
 
-        boolean run_command = false;
+                init_paused = init_paused_string.equals("yes");
+            }
 
-        String run_command_string = DBTools.selectSettingValue("run_command");
+            start_frozen_checkbox.setSelected(init_paused);
 
-        if (run_command_string != null) {
+            boolean use_proxy = false;
 
-            run_command = run_command_string.equals("yes");
-        }
+            String use_proxy_val = DBTools.selectSettingValue("use_proxy");
 
-        run_command_checkbox.setSelected(run_command);
+            if (use_proxy_val != null) {
+                use_proxy = (use_proxy_val.equals("yes"));
+            }
 
-        run_command_textbox.setEnabled(run_command);
+            use_proxy_checkbox.setSelected(use_proxy);
 
-        run_command_textbox.setText(DBTools.selectSettingValue("run_command_path"));
+            proxy_host_textfield.setText(DBTools.selectSettingValue("proxy_host"));
 
-        boolean init_paused = false;
+            proxy_port_textfield.setText(DBTools.selectSettingValue("proxy_port"));
 
-        String init_paused_string = DBTools.selectSettingValue("start_frozen");
+            proxy_user_textfield.setText(DBTools.selectSettingValue("proxy_user"));
 
-        if (init_paused_string != null) {
+            proxy_pass_textfield.setText(DBTools.selectSettingValue("proxy_pass"));
 
-            init_paused = init_paused_string.equals("yes");
-        }
+            String font = DBTools.selectSettingValue("font");
 
-        start_frozen_checkbox.setSelected(init_paused);
+            this.font_combo.addItem(LabelTranslatorSingleton.getInstance().translate("DEFAULT"));
 
-        boolean use_proxy = false;
+            this.font_combo.addItem(LabelTranslatorSingleton.getInstance().translate("ALTERNATIVE"));
 
-        String use_proxy_val = DBTools.selectSettingValue("use_proxy");
+            if (font == null) {
+                this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("DEFAULT"));
+            } else {
+                this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate(font));
+            }
 
-        if (use_proxy_val != null) {
-            use_proxy = (use_proxy_val.equals("yes"));
-        }
+            String language = DBTools.selectSettingValue("language");
 
-        use_proxy_checkbox.setSelected(use_proxy);
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("English"));
 
-        proxy_host_textfield.setText(DBTools.selectSettingValue("proxy_host"));
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
 
-        proxy_port_textfield.setText(DBTools.selectSettingValue("proxy_port"));
+            if (language == null) {
+                language = MainPanel.DEFAULT_LANGUAGE;
+            }
 
-        proxy_user_textfield.setText(DBTools.selectSettingValue("proxy_user"));
+            if (language.equals("EN")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("English"));
+            } else if (language.equals("ES")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
+            }
 
-        proxy_pass_textfield.setText(DBTools.selectSettingValue("proxy_pass"));
+            String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
 
-        String font = DBTools.selectSettingValue("font");
+            if (custom_proxy_list != null) {
+                custom_proxy_textarea.setText(custom_proxy_list);
+            }
 
-        this.font_combo.addItem(LabelTranslatorSingleton.getInstance().translate("DEFAULT"));
-
-        this.font_combo.addItem(LabelTranslatorSingleton.getInstance().translate("ALTERNATIVE"));
-
-        if (font == null) {
-            this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("DEFAULT"));
-        } else {
-            this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate(font));
-        }
-
-        String language = DBTools.selectSettingValue("language");
-
-        this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("English"));
-
-        this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
-
-        if (language == null) {
-            language = MainPanel.DEFAULT_LANGUAGE;
-        }
-
-        if (language.equals("EN")) {
-            this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("English"));
-        } else if (language.equals("ES")) {
-            this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
-        }
-
-        String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
-
-        if (custom_proxy_list != null) {
-            custom_proxy_textarea.setText(custom_proxy_list);
-        }
-
-        _remember_master_pass = true;
-
-        _deleted_mega_accounts = new HashSet();
-
-        _deleted_elc_accounts = new HashSet();
-
-        _settings_ok = false;
-
-        pack();
+            pack();
+        });
 
     }
 
@@ -595,7 +598,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         jProgressBar1 = new javax.swing.JProgressBar();
         save_button = new javax.swing.JButton();
         cancel_button = new javax.swing.JButton();
-        jTabbedPane1 = new javax.swing.JTabbedPane();
+        panel_tabs = new javax.swing.JTabbedPane();
         downloads_scrollpane = new javax.swing.JScrollPane();
         downloads_panel = new javax.swing.JPanel();
         megacrypter_reverse_warning_label = new javax.swing.JLabel();
@@ -718,8 +721,8 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        jTabbedPane1.setDoubleBuffered(true);
-        jTabbedPane1.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        panel_tabs.setDoubleBuffered(true);
+        panel_tabs.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
 
         downloads_scrollpane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
@@ -981,7 +984,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         downloads_scrollpane.setViewportView(downloads_panel);
 
-        jTabbedPane1.addTab("Downloads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-download-from-ftp-30.png")), downloads_scrollpane); // NOI18N
+        panel_tabs.addTab("Downloads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-download-from-ftp-30.png")), downloads_scrollpane); // NOI18N
 
         uploads_scrollpane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
@@ -1070,7 +1073,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         uploads_scrollpane.setViewportView(uploads_panel);
 
-        jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_scrollpane); // NOI18N
+        panel_tabs.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_scrollpane); // NOI18N
 
         accounts_panel.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
@@ -1264,7 +1267,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
-        jTabbedPane1.addTab("Accounts", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-customer-30.png")), accounts_panel); // NOI18N
+        panel_tabs.addTab("Accounts", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-customer-30.png")), accounts_panel); // NOI18N
 
         advanced_scrollpane.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
 
@@ -1585,7 +1588,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         advanced_scrollpane.setViewportView(advanced_panel);
 
-        jTabbedPane1.addTab("Advanced", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-administrative-tools-30.png")), advanced_scrollpane); // NOI18N
+        panel_tabs.addTab("Advanced", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-administrative-tools-30.png")), advanced_scrollpane); // NOI18N
 
         status.setFont(new java.awt.Font("Dialog", 3, 14)); // NOI18N
         status.setForeground(new java.awt.Color(102, 102, 102));
@@ -1597,7 +1600,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 1071, Short.MAX_VALUE)
+                    .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 1071, Short.MAX_VALUE)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGap(6, 6, 6)
@@ -1610,7 +1613,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jTabbedPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 474, Short.MAX_VALUE)
+                .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 474, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1631,6 +1634,8 @@ public class SettingsDialog extends javax.swing.JDialog {
     private void save_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_save_buttonActionPerformed
 
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+
+        panel_tabs.setEnabled(false);
 
         try {
 
@@ -2056,7 +2061,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                         String email_error_s = "";
                         email_error_s = email_error.stream().map((s) -> s + "\n").reduce(email_error_s, String::concat);
                         final String final_email_error = email_error_s;
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             status.setText("");
 
                             JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n") + final_email_error, "Mega Account Check Error", JOptionPane.ERROR_MESSAGE);
@@ -2064,6 +2069,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                             save_button.setEnabled(true);
 
                             cancel_button.setEnabled(true);
+
+                            panel_tabs.setEnabled(true);
 
                             remove_mega_account_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
 
@@ -2087,7 +2094,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                         _main_panel.getMega_accounts().entrySet().stream().map((entry) -> entry.getKey()).filter((email) -> (!new_valid_mega_accounts.contains(email))).forEachOrdered((email) -> {
                             _deleted_mega_accounts.add(email);
                         });
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             status.setText("");
                             JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Settings successfully saved!"), LabelTranslatorSingleton.getInstance().translate("Settings saved"), JOptionPane.INFORMATION_MESSAGE);
                             _settings_ok = true;
@@ -2285,7 +2292,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         final Dialog tthis = this;
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt(), _main_panel);
 
             dialog.setLocationRelativeTo(tthis);
@@ -2462,7 +2469,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         final Dialog tthis = this;
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             SetMasterPasswordDialog dialog = new SetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_salt(), _main_panel);
 
             dialog.setLocationRelativeTo(tthis);
@@ -2884,7 +2891,6 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JSeparator jSeparator7;
     private javax.swing.JSeparator jSeparator8;
     private javax.swing.JSeparator jSeparator9;
-    private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JComboBox<String> language_combo;
     private javax.swing.JCheckBox limit_download_speed_checkbox;
     private javax.swing.JCheckBox limit_upload_speed_checkbox;
@@ -2904,6 +2910,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JSpinner megacrypter_reverse_port_spinner;
     private javax.swing.JLabel megacrypter_reverse_warning_label;
     private javax.swing.JCheckBox multi_slot_down_checkbox;
+    private javax.swing.JTabbedPane panel_tabs;
     private javax.swing.JPanel proxy_auth_panel;
     private javax.swing.JLabel proxy_host_label;
     private javax.swing.JTextField proxy_host_textfield;

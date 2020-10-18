@@ -1,7 +1,6 @@
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Component;
 import java.awt.TrayIcon;
 import java.util.ArrayList;
@@ -328,13 +327,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
             getTransference_waitstart_queue().addAll(wait_array);
 
             getTransference_waitstart_queue().forEach((t1) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getScroll_panel().remove((Component) t1.getView());
                     getScroll_panel().add((Component) t1.getView());
                 });
             });
             getTransference_finished_queue().forEach((t1) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getScroll_panel().remove((Component) t1.getView());
                     getScroll_panel().add((Component) t1.getView());
                 });
@@ -366,13 +365,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
             getTransference_waitstart_queue().addAll(wait_array);
 
             getTransference_waitstart_queue().forEach((t1) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getScroll_panel().remove((Component) t1.getView());
                     getScroll_panel().add((Component) t1.getView());
                 });
             });
             getTransference_finished_queue().forEach((t1) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getScroll_panel().remove((Component) t1.getView());
                     getScroll_panel().add((Component) t1.getView());
                 });
@@ -411,13 +410,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
             getTransference_waitstart_queue().addAll(wait_array);
 
             getTransference_waitstart_queue().forEach((t1) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getScroll_panel().remove((Component) t1.getView());
                     getScroll_panel().add((Component) t1.getView());
                 });
             });
             getTransference_finished_queue().forEach((t1) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getScroll_panel().remove((Component) t1.getView());
                     getScroll_panel().add((Component) t1.getView());
                 });
@@ -456,13 +455,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
             getTransference_waitstart_queue().addAll(wait_array);
 
             getTransference_waitstart_queue().forEach((t1) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getScroll_panel().remove((Component) t1.getView());
                     getScroll_panel().add((Component) t1.getView());
                 });
             });
             getTransference_finished_queue().forEach((t2) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getScroll_panel().remove((Component) t2.getView());
                     getScroll_panel().add((Component) t2.getView());
                 });
@@ -524,7 +523,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             _paused_all = true;
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
 
                 _pause_all_button.setText("RESUME ALL");
                 _pause_all_button.setEnabled(true);
@@ -549,7 +548,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         _paused_all = false;
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
 
             _pause_all_button.setText("PAUSE ALL");
 
@@ -594,7 +593,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     private void _updateView() {
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             if (_paused_all) {
                 _pause_all_button.setText("RESUME ALL");
             } else {
@@ -779,7 +778,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                         getTransference_waitstart_aux_queue().clear();
 
                         getTransference_waitstart_queue().forEach((t) -> {
-                            swingInvoke(() -> {
+                            MiscTools.GUIRun(() -> {
                                 getScroll_panel().remove((Component) t.getView());
                                 getScroll_panel().add((Component) t.getView());
                             });
@@ -788,7 +787,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                         sortTransferenceQueue(getTransference_finished_queue());
 
                         getTransference_finished_queue().forEach((t) -> {
-                            swingInvoke(() -> {
+                            MiscTools.GUIRun(() -> {
                                 getScroll_panel().remove((Component) t.getView());
                                 getScroll_panel().add((Component) t.getView());
                             });

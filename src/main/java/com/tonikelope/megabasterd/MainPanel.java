@@ -60,7 +60,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.28";
+    public static final String VERSION = "7.29";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -71,8 +71,8 @@ public final class MainPanel {
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = false;
     public static final double FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT = 0.7;
-    public static Font GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
-    public static final float ZOOM_FACTOR = 1.0f;
+    public static Font GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttc");
+    public static final float ZOOM_FACTOR = 0.8f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
@@ -104,7 +104,7 @@ public final class MainPanel {
         PrintStream fileOut;
 
         try {
-            fileOut = new PrintStream(new FileOutputStream(System.getProperty("user.home") + "/megabasterd_DEBUG.log"));
+            fileOut = new PrintStream(new FileOutputStream(System.getProperty("user.home") + "/.MEGABASTERD_DEBUG.log"));
 
             System.setOut(fileOut);
             System.setErr(fileOut);
@@ -365,7 +365,7 @@ public final class MainPanel {
         } else {
             _mega_proxy_server = null;
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 getView().updateMCReverseStatus("MC reverse mode: OFF");
             });
 
@@ -387,7 +387,7 @@ public final class MainPanel {
 
         }
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             getView().getGlobal_speed_down_label().setForeground(_limit_download_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
 
             getView().getGlobal_speed_up_label().setForeground(_limit_upload_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
@@ -398,7 +398,7 @@ public final class MainPanel {
             while (true) {
                 long used_memory = instance.totalMemory() - instance.freeMemory();
                 long max_memory = instance.maxMemory();
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     _view.getMemory_status().setText(MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
                 });
                 try {
@@ -658,16 +658,16 @@ public final class MainPanel {
         if (_font != null) {
             if (_font.equals("DEFAULT")) {
 
-                GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
+                GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttc");
 
             } else {
 
-                GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttc");
+                GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
 
             }
         } else {
 
-            GUI_FONT = createAndRegisterFont("/fonts/Kalam-Light.ttf");
+            GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttc");
         }
 
         String def_slots = selectSettingValue("default_slots_down");
@@ -1087,7 +1087,7 @@ public final class MainPanel {
                                 }
                                 if (!download.getChunkworkers().isEmpty()) {
                                     wait = true;
-                                    swingInvoke(() -> {
+                                    MiscTools.GUIRun(() -> {
                                         download.getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
                                         download.getView().getSlots_spinner().setEnabled(false);
                                         download.getView().getPause_button().setEnabled(false);
@@ -1111,7 +1111,7 @@ public final class MainPanel {
                                 }
                                 if (!upload.getChunkworkers().isEmpty()) {
                                     wait = true;
-                                    swingInvoke(() -> {
+                                    MiscTools.GUIRun(() -> {
                                         upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
                                         upload.getView().getSlots_spinner().setEnabled(false);
                                         upload.getView().getPause_button().setEnabled(false);
@@ -1207,7 +1207,7 @@ public final class MainPanel {
                     while (true) {
                         try {
                             socket.accept();
-                            swingInvoke(() -> {
+                            MiscTools.GUIRun(() -> {
                                 getView().setExtendedState(NORMAL);
 
                                 getView().setVisible(true);
@@ -1232,7 +1232,7 @@ public final class MainPanel {
 
         if (!getResume_downloads()) {
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait..."));
             });
 
@@ -1329,7 +1329,7 @@ public final class MainPanel {
 
                     _download_manager.setSort_wait_start_queue(false);
                     getDownload_manager().secureNotify();
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getView().getjTabbedPane1().setSelectedIndex(0);
                     });
 
@@ -1337,7 +1337,7 @@ public final class MainPanel {
                     setResume_downloads(true);
                 }
 
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getView().getStatus_down_label().setText("");
                 });
             });
@@ -1359,7 +1359,7 @@ public final class MainPanel {
             MenuItem messageItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("Restore window"));
 
             messageItem.addActionListener((ActionEvent e) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getView().setExtendedState(NORMAL);
 
                     getView().setVisible(true);
@@ -1390,7 +1390,7 @@ public final class MainPanel {
             menu.add(closeItem);
 
             ActionListener actionListener = (ActionEvent e) -> {
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     if (!getView().isVisible()) {
                         getView().setExtendedState(NORMAL);
                         getView().setVisible(true);
@@ -1422,7 +1422,7 @@ public final class MainPanel {
 
         if (!getResume_uploads()) {
 
-            swingInvoke(() -> {
+            MiscTools.GUIRun(() -> {
                 getView().getStatus_up_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous uploads, please wait..."));
             });
 
@@ -1530,14 +1530,14 @@ public final class MainPanel {
 
                     _upload_manager.setSort_wait_start_queue(false);
                     getUpload_manager().secureNotify();
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getView().getjTabbedPane1().setSelectedIndex(1);
                     });
                 } else {
                     setResume_uploads(true);
                 }
 
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     getView().getStatus_up_label().setText("");
                 });
             });

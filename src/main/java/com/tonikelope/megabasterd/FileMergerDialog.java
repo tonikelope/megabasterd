@@ -18,7 +18,6 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
-import static com.tonikelope.megabasterd.MiscTools.swingInvoke;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
 import static com.tonikelope.megabasterd.MiscTools.truncateText;
 import static com.tonikelope.megabasterd.MiscTools.updateFonts;
@@ -56,16 +55,19 @@ public class FileMergerDialog extends javax.swing.JDialog {
     public FileMergerDialog(MainPanelView parent, boolean modal) {
         super(parent, modal);
         _main_panel = parent.getMain_panel();
-        initComponents();
-        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
-        translateLabels(this);
-        jProgressBar2.setMinimum(0);
-        jProgressBar2.setMaximum(MAX_VALUE);
-        jProgressBar2.setStringPainted(true);
-        jProgressBar2.setValue(0);
-        jProgressBar2.setVisible(false);
 
-        pack();
+        MiscTools.GUIRunAndWait(() -> {
+            initComponents();
+            updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
+            translateLabels(this);
+            jProgressBar2.setMinimum(0);
+            jProgressBar2.setMaximum(MAX_VALUE);
+            jProgressBar2.setStringPainted(true);
+            jProgressBar2.setValue(0);
+            jProgressBar2.setVisible(false);
+
+            pack();
+        });
     }
 
     private boolean _mergeFile() throws IOException {
@@ -82,7 +84,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
                 _progress += rfile.length();
 
-                swingInvoke(() -> {
+                MiscTools.GUIRun(() -> {
                     jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _file_size) * _progress));
                 });
             }
@@ -359,7 +361,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                         if (delete_parts_checkbox.isSelected()) {
                             _deleteParts();
                         }
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
 
                             if (Desktop.isDesktopSupported()) {
@@ -376,7 +378,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                         });
                     } else {
                         _file_parts.clear();
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             file_name_label.setText("");
 
                             file_size_label.setText("");

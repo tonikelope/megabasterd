@@ -48,43 +48,46 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
 
         _main_panel = parent.getMain_panel();
 
-        initComponents();
-
-        updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
-
-        translateLabels(this);
-
         _clipboardspy = clipboardspy;
 
         _selected_item = null;
 
         _mainPanelView = parent;
 
-        if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
+        MiscTools.GUIRunAndWait(() -> {
 
-            THREAD_POOL.execute(() -> {
-                swingInvoke(() -> {
-                    String mega_default_down = _main_panel.getMega_account_down();
+            initComponents();
 
-                    use_mega_account_down_combobox.addItem(mega_default_down);
+            updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
-                    _main_panel.getMega_accounts().keySet().stream().filter((k) -> (!mega_default_down.equals(k))).forEachOrdered((k) -> {
-                        use_mega_account_down_combobox.addItem(k);
+            translateLabels(this);
+
+            if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
+
+                THREAD_POOL.execute(() -> {
+                    MiscTools.GUIRun(() -> {
+                        String mega_default_down = _main_panel.getMega_account_down();
+
+                        use_mega_account_down_combobox.addItem(mega_default_down);
+
+                        _main_panel.getMega_accounts().keySet().stream().filter((k) -> (!mega_default_down.equals(k))).forEachOrdered((k) -> {
+                            use_mega_account_down_combobox.addItem(k);
+                        });
+                        use_mega_account_down_combobox.addItem("");
+                        use_mega_account_down_combobox.setSelectedIndex(0);
                     });
-                    use_mega_account_down_combobox.addItem("");
-                    use_mega_account_down_combobox.setSelectedIndex(0);
                 });
-            });
 
-        } else {
+            } else {
 
-            use_mega_account_down_combobox.setEnabled(false);
-            use_mega_account_down_combobox.setVisible(false);
-            use_mega_account_down_label.setEnabled(false);
-            use_mega_account_down_label.setVisible(false);
-        }
+                use_mega_account_down_combobox.setEnabled(false);
+                use_mega_account_down_combobox.setVisible(false);
+                use_mega_account_down_label.setEnabled(false);
+                use_mega_account_down_label.setVisible(false);
+            }
 
-        pack();
+            pack();
+        });
     }
 
     /**
@@ -285,11 +288,11 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
                         use_account = false;
                     }
                     if (!use_account) {
-                        swingInvoke(() -> {
+                        MiscTools.GUIRun(() -> {
                             use_mega_account_down_combobox.setSelectedIndex(_main_panel.getMega_accounts().size());
                         });
                     }
-                    swingInvoke(() -> {
+                    MiscTools.GUIRun(() -> {
                         getUse_mega_account_down_combobox().setEnabled(true);
 
                         getDance_button().setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
@@ -307,7 +310,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
     @Override
     public void notifyClipboardChange() {
 
-        swingInvoke(() -> {
+        MiscTools.GUIRun(() -> {
             String link = extractFirstMegaLinkFromString(extractStringFromClipboardContents(_clipboardspy.getContents()));
 
             if (!link.contains("/#F!")) {
