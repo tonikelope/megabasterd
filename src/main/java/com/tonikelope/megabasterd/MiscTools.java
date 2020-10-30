@@ -785,6 +785,9 @@ public class MiscTools {
         String res = "";
 
         if (data != null) {
+            
+            if (data.startsWith("moz-extension") || data.startsWith("chrome-extension"))
+                data = extensionURL2NormalLink(data);
 
             try {
 
@@ -1400,6 +1403,15 @@ public class MiscTools {
         String replace1 = data.replaceAll("https://mega\\.nz/folder/([^#]+)#(.+)", "https://mega.nz/#F!$1!$2");
 
         return replace1.replaceAll("https://mega\\.nz/file/([^#]+)#(.+)", "https://mega.nz/#!$1!$2");
+    }
+
+    /* This method changes the MEGA extension URL to a ordinary MEGA URL,
+    so copying the extension URL from Firefox or Chrome also works as a normal URL */
+    public static String extensionURL2NormalLink(String data) {
+
+        String toReplace = data.substring(0, data.indexOf('#') + 1);
+
+        return data.replace(toReplace, "https://mega.nz");
     }
 
     private MiscTools() {
