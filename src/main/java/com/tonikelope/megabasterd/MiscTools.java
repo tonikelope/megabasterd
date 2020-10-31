@@ -738,12 +738,12 @@ public class MiscTools {
 
     public static String cleanFilename(String filename) {
 
-        return (System.getProperty("os.name").toLowerCase().contains("win") ? filename.replaceAll("[<>:\"/\\\\\\|\\?\\*\t]+", "") : filename).replaceAll("\\" + File.separator, "").replaceAll("[\\.]{1,}$", "").trim();
+        return (System.getProperty("os.name").toLowerCase().contains("win") ? filename.replaceAll("[<>:\"/\\\\\\|\\?\\*\t]+", "") : filename).replaceAll("\\" + File.separator, "").replaceAll("[\\.]{1,}$", "").replaceAll("[\\x00-\\x1F]", "").trim();
     }
 
     public static String cleanFilePath(String path) {
 
-        return !path.equals(".") ? ((System.getProperty("os.name").toLowerCase().contains("win") ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\" + File.separator, "\\" + File.separator).replaceAll("[\\.]{1,}$", "").trim()) : path;
+        return !path.equals(".") ? ((System.getProperty("os.name").toLowerCase().contains("win") ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\" + File.separator, "\\" + File.separator).replaceAll("[\\.]{1,}$", "").replaceAll("[\\x00-\\x1F]", "").trim()) : path;
     }
 
     public static byte[] genRandomByteArray(int length) {
@@ -785,9 +785,10 @@ public class MiscTools {
         String res = "";
 
         if (data != null) {
-            
-            if (data.startsWith("moz-extension") || data.startsWith("chrome-extension"))
+
+            if (data.startsWith("moz-extension") || data.startsWith("chrome-extension")) {
                 data = extensionURL2NormalLink(data);
+            }
 
             try {
 
