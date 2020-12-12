@@ -790,41 +790,41 @@ public class MiscTools {
                 data = extensionURL2NormalLink(data);
             }
 
+            ArrayList<String> links = new ArrayList<>();
+            String url_decoded;
             try {
-
-                ArrayList<String> links = new ArrayList<>();
-
-                ArrayList<String> base64_chunks = findAllRegex("[A-Za-z0-9+/_-]+=*", URLDecoder.decode(data, "UTF-8"), 0);
-
-                if (!base64_chunks.isEmpty()) {
-
-                    for (String chunk : base64_chunks) {
-
-                        try {
-
-                            String clean_data = MiscTools.newMegaLinks2Legacy(new String(Base64.getDecoder().decode(chunk)));
-
-                            String decoded = MiscTools.findFirstRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0);
-
-                            if (decoded != null) {
-                                links.add(decoded);
-                            }
-
-                        } catch (Exception e) {
-                        };
-                    }
-                }
-
-                String clean_data = MiscTools.newMegaLinks2Legacy(URLDecoder.decode(data, "UTF-8"));
-
-                links.addAll(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0));
-
-                links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
-
-                res = links.stream().map((s) -> s + "\n").reduce(res, String::concat);
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                url_decoded = URLDecoder.decode(data, "UTF-8");
+            } catch (Exception ex) {
+                url_decoded = data;
             }
+            ArrayList<String> base64_chunks = findAllRegex("[A-Za-z0-9+/_-]+=*", url_decoded, 0);
+            if (!base64_chunks.isEmpty()) {
+
+                for (String chunk : base64_chunks) {
+
+                    try {
+
+                        String clean_data = MiscTools.newMegaLinks2Legacy(new String(Base64.getDecoder().decode(chunk)));
+
+                        String decoded = MiscTools.findFirstRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0);
+
+                        if (decoded != null) {
+                            links.add(decoded);
+                        }
+
+                    } catch (Exception e) {
+                    };
+                }
+            }
+            try {
+                url_decoded = URLDecoder.decode(data, "UTF-8");
+            } catch (Exception ex) {
+                url_decoded = data;
+            }
+            String clean_data = MiscTools.newMegaLinks2Legacy(url_decoded);
+            links.addAll(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0));
+            links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
+            res = links.stream().map((s) -> s + "\n").reduce(res, String::concat);
         }
 
         return res.trim();

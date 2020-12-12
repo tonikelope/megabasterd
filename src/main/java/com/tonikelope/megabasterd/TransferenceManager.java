@@ -6,6 +6,8 @@ import java.awt.TrayIcon;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -18,6 +20,7 @@ import javax.swing.JPanel;
 abstract public class TransferenceManager implements Runnable, SecureSingleThreadNotifiable {
 
     public static final int MAX_WAIT_QUEUE = 1000;
+    public static final int MAX_PROVISION_WORKERS = 50;
     private static final Logger LOG = Logger.getLogger(TransferenceManager.class.getName());
 
     private final ConcurrentLinkedQueue<Object> _transference_preprocess_global_queue;
@@ -734,13 +737,30 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 THREAD_POOL.execute(() -> {
                     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
+                    ExecutorService executor = Executors.newFixedThreadPool(MAX_PROVISION_WORKERS);
+
+                    BoundedExecutor bounded_executor = new BoundedExecutor(executor, MAX_PROVISION_WORKERS);
+
                     while (!getTransference_provision_queue().isEmpty() || isPreprocessing_transferences()) {
                         Transference transference = getTransference_provision_queue().poll();
 
                         if (transference != null) {
 
-                            provision(transference);
+                            boolean error;
 
+                            do {
+                                error = false;
+
+                                try {
+                                    bounded_executor.submitTask(() -> {
+                                        provision(transference);
+                                    });
+                                } catch (InterruptedException ex) {
+                                    Logger.getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, null, ex);
+                                    error = true;
+                                    MiscTools.pausar(1000);
+                                }
+                            } while (error);
                         }
 
                         if (isPreprocessing_transferences()) {
@@ -753,6 +773,12 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                 }
                             }
                         }
+                    }
+
+                    executor.shutdown();
+
+                    while (!executor.isTerminated()) {
+                        MiscTools.pausar(1000);
                     }
 
                     synchronized (_transference_queue_sort_lock) {
@@ -803,7 +829,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             }
 
-            if (!_frozen && !_main_panel.isExit() && !_paused_all && !isRemoving_transferences() && !isStarting_transferences() && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
+            if (!_frozen && !_main_panel.isExit() && !_paused_all && !isRemoving_transferences() && !isStarting_transferences() && (!getTransference_waitstart_queue().isEmpty() || !getTransference_waitstart_aux_queue().isEmpty()) && getTransference_running_list().size() < _max_running_trans) {
 
                 setStarting_transferences(true);
 
@@ -811,20 +837,25 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
-                    while (!_frozen && !_main_panel.isExit() && !_paused_all && !getTransference_waitstart_queue().isEmpty() && getTransference_running_list().size() < _max_running_trans) {
+                    while (!_frozen && !_main_panel.isExit() && !_paused_all && (!getTransference_waitstart_queue().isEmpty() || !getTransference_waitstart_aux_queue().isEmpty()) && getTransference_running_list().size() < _max_running_trans) {
 
-                        Transference transference = getTransference_waitstart_queue().peek();
+                        synchronized (_transference_queue_sort_lock) {
+                            Transference transference = getTransference_waitstart_queue().peek();
 
-                        if (transference != null && !transference.isFrozen()) {
+                            if (transference == null) {
+                                transference = getTransference_waitstart_aux_queue().peek();
+                            }
 
-                            getTransference_waitstart_queue().poll();
+                            if (transference != null && !transference.isFrozen()) {
 
-                            start(transference);
+                                getTransference_waitstart_queue().remove(transference);
+                                getTransference_waitstart_aux_queue().remove(transference);
 
-                        } else {
+                                start(transference);
 
-                            _frozen = true;
-
+                            } else {
+                                _frozen = true;
+                            }
                         }
                     }
 
