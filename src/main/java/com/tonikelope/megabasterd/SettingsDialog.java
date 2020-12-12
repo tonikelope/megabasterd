@@ -1263,7 +1263,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1271,7 +1271,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 255, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1634,7 +1634,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 805, Short.MAX_VALUE)
+                .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 940, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1682,14 +1682,18 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("mega_account_down", use_mega_account_down_combobox.getSelectedItem());
             settings.put("megacrypter_reverse", megacrypter_reverse_checkbox.isSelected() ? "yes" : "no");
             settings.put("megacrypter_reverse_port", String.valueOf(megacrypter_reverse_port_spinner.getValue()));
-            settings.put("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
             settings.put("start_frozen", start_frozen_checkbox.isSelected() ? "yes" : "no");
             settings.put("use_custom_chunks_dir", custom_chunks_dir_checkbox.isSelected() ? "yes" : "no");
-            settings.put("debug_file", debug_file_checkbox.isSelected() ? "yes" : "no");
             settings.put("custom_chunks_dir", _custom_chunks_dir);
-            settings.put("custom_proxy_list", custom_proxy_textarea.getText());
             settings.put("run_command", run_command_checkbox.isSelected() ? "yes" : "no");
             settings.put("run_command_path", run_command_textbox.getText());
+
+            if (custom_proxy_textarea.getText().trim().length() == 0) {
+                smart_proxy_checkbox.setSelected(false);
+            }
+
+            settings.put("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
+            settings.put("custom_proxy_list", custom_proxy_textarea.getText());
 
             String old_font = DBTools.selectSettingValue("font");
 
@@ -1778,6 +1782,16 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             String proxy_pass = new String(proxy_pass_textfield.getPassword());
 
+            String old_debug_file = DBTools.selectSettingValue("debug_file");
+
+            if (old_debug_file == null) {
+
+                old_debug_file = "no";
+            }
+
+            String debug_file = debug_file_checkbox.isSelected() ? "yes" : "no";
+
+            settings.put("debug_file", debug_file);
             settings.put("use_proxy", use_proxy ? "yes" : "no");
             settings.put("proxy_host", proxy_host);
             settings.put("proxy_port", proxy_port);
@@ -1787,7 +1801,8 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             insertSettingsValues(settings);
 
-            if (!font.equals(old_font)
+            if (!debug_file.equals(old_debug_file)
+                    || !font.equals(old_font)
                     || !language.equals(old_language)
                     || !zoom.equals(old_zoom)
                     || use_proxy != old_use_proxy
