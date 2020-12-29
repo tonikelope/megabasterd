@@ -60,7 +60,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.31";
+    public static final String VERSION = "7.32";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -415,6 +415,11 @@ public final class MainPanel {
         resumeDownloads();
 
         resumeUploads();
+
+        if (MegaAPI.API_KEY == null) {
+            JOptionPane.showMessageDialog(this._view, LabelTranslatorSingleton.getInstance().translate("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE. YOU SHOULD GET A KEY -> https://mega.nz/sdk (and set it in MegaBasterd ADVANCED SETTINGS)"), "MEGA API KEY ERROR", JOptionPane.ERROR_MESSAGE);
+            openBrowserURL("https://mega.nz/sdk");
+        }
 
     }
 
@@ -867,6 +872,16 @@ public final class MainPanel {
             _debug_file = debug_file.equals("yes");
         } else {
             _debug_file = false;
+        }
+
+        String api_key = DBTools.selectSettingValue("mega_api_key");
+
+        if (api_key != null && !"".equals(api_key)) {
+
+            MegaAPI.API_KEY = api_key.trim();
+
+        } else {
+            MegaAPI.API_KEY = null;
         }
 
     }

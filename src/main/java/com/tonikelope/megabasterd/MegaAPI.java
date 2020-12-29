@@ -30,7 +30,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class MegaAPI implements Serializable {
 
     public static final String API_URL = "https://g.api.mega.co.nz";
-    public static final String API_KEY = null;
+    public static String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
     public static final Integer[] MEGA_ERROR_NO_EXCEPTION_CODES = {-1, -3};
     public static final int PBKDF2_ITERATIONS = 100000;
@@ -89,7 +89,6 @@ public class MegaAPI implements Serializable {
 
         Random randomno = new Random();
         _seqno = randomno.nextLong() & 0xffffffffL;
-
     }
 
     public int getAccount_version() {
