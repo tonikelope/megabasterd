@@ -29,7 +29,6 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
@@ -1117,7 +1116,7 @@ public class MiscTools {
                 return;
             }
             if (System.getProperty("os.name").toLowerCase().contains("nux")) {
-                Process p = Runtime.getRuntime().exec(new String[] { "xdg-open", url });
+                Process p = Runtime.getRuntime().exec(new String[]{"xdg-open", url});
                 p.waitFor();
                 p.destroy();
                 return;

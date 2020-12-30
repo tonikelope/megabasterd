@@ -1557,6 +1557,9 @@
                         <Property name="text" type="java.lang.String" value="MEGA API KEY:"/>
                         <Property name="doubleBuffered" type="boolean" value="true"/>
                       </Properties>
+                      <Events>
+                        <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="mega_api_key_labelMouseClicked"/>
+                      </Events>
                     </Component>
                     <Component class="javax.swing.JTextField" name="mega_api_key">
                       <Properties>

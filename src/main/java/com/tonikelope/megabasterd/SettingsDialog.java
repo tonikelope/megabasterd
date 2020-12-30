@@ -1488,6 +1488,11 @@ public class SettingsDialog extends javax.swing.JDialog {
         mega_api_key_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         mega_api_key_label.setText("MEGA API KEY:");
         mega_api_key_label.setDoubleBuffered(true);
+        mega_api_key_label.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                mega_api_key_labelMouseClicked(evt);
+            }
+        });
 
         mega_api_key.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         mega_api_key.setDoubleBuffered(true);
@@ -2898,6 +2903,11 @@ public class SettingsDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
         openBrowserURL("https://mega.nz/sdk");
     }//GEN-LAST:event_mega_api_key_warningMouseClicked
+
+    private void mega_api_key_labelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mega_api_key_labelMouseClicked
+        // TODO add your handling code here:
+        mega_api_key_warningMouseClicked(evt);
+    }//GEN-LAST:event_mega_api_key_labelMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
