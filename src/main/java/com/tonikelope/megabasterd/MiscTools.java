@@ -1110,8 +1110,20 @@ public class MiscTools {
     public static void openBrowserURL(final String url) {
 
         try {
-            Desktop.getDesktop().browse(new URI(url));
-        } catch (URISyntaxException | IOException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Trying to open URL in external browser: {0}", url);
+
+            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                Desktop.getDesktop().browse(new URI(url));
+                return;
+            }
+            if (System.getProperty("os.name").toLowerCase().contains("nux")) {
+                Process p = Runtime.getRuntime().exec(new String[] { "xdg-open", url });
+                p.waitFor();
+                p.destroy();
+                return;
+            }
+            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "Unable to open URL: Unsupported platform.", url);
+        } catch (Exception ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }
