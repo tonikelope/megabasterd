@@ -843,19 +843,16 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                         synchronized (_transference_queue_sort_lock) {
                             Transference transference = getTransference_waitstart_queue().peek();
 
-                            if (transference == null) {
-                                transference = getTransference_waitstart_aux_queue().peek();
-                            }
-
                             if (transference != null && !transference.isFrozen()) {
 
-                                getTransference_waitstart_queue().remove(transference);
-                                getTransference_waitstart_aux_queue().remove(transference);
+                                getTransference_waitstart_queue().poll();
 
                                 start(transference);
 
                             } else {
+
                                 _frozen = true;
+
                             }
                         }
                     }
