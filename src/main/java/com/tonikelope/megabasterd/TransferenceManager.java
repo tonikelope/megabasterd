@@ -754,6 +754,47 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                 try {
                                     bounded_executor.submitTask(() -> {
                                         provision(transference);
+
+                                        synchronized (_transference_queue_sort_lock) {
+
+                                            if (getSort_wait_start_queue()) {
+                                                sortTransferenceQueue(getTransference_waitstart_aux_queue());
+                                            }
+
+                                            if (getTransference_waitstart_aux_queue().peek() != null && getTransference_waitstart_aux_queue().peek().isPriority()) {
+
+                                                ArrayList<Transference> trans_list = new ArrayList(getTransference_waitstart_queue());
+
+                                                trans_list.addAll(0, getTransference_waitstart_aux_queue());
+
+                                                getTransference_waitstart_queue().clear();
+
+                                                getTransference_waitstart_queue().addAll(trans_list);
+
+                                            } else {
+                                                getTransference_waitstart_queue().addAll(getTransference_waitstart_aux_queue());
+                                            }
+
+                                            getTransference_waitstart_aux_queue().clear();
+
+                                            getTransference_waitstart_queue().forEach((t) -> {
+                                                MiscTools.GUIRun(() -> {
+                                                    getScroll_panel().remove((Component) t.getView());
+                                                    getScroll_panel().add((Component) t.getView());
+                                                });
+                                            });
+
+                                            sortTransferenceQueue(getTransference_finished_queue());
+
+                                            getTransference_finished_queue().forEach((t) -> {
+                                                MiscTools.GUIRun(() -> {
+                                                    getScroll_panel().remove((Component) t.getView());
+                                                    getScroll_panel().add((Component) t.getView());
+                                                });
+                                            });
+
+                                        }
+
                                     });
                                 } catch (InterruptedException ex) {
                                     Logger.getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, null, ex);
@@ -779,46 +820,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                     while (!executor.isTerminated()) {
                         MiscTools.pausar(1000);
-                    }
-
-                    synchronized (_transference_queue_sort_lock) {
-
-                        if (getSort_wait_start_queue()) {
-                            sortTransferenceQueue(getTransference_waitstart_aux_queue());
-                        }
-
-                        if (getTransference_waitstart_aux_queue().peek() != null && getTransference_waitstart_aux_queue().peek().isPriority()) {
-
-                            ArrayList<Transference> trans_list = new ArrayList(getTransference_waitstart_queue());
-
-                            trans_list.addAll(0, getTransference_waitstart_aux_queue());
-
-                            getTransference_waitstart_queue().clear();
-
-                            getTransference_waitstart_queue().addAll(trans_list);
-
-                        } else {
-                            getTransference_waitstart_queue().addAll(getTransference_waitstart_aux_queue());
-                        }
-
-                        getTransference_waitstart_aux_queue().clear();
-
-                        getTransference_waitstart_queue().forEach((t) -> {
-                            MiscTools.GUIRun(() -> {
-                                getScroll_panel().remove((Component) t.getView());
-                                getScroll_panel().add((Component) t.getView());
-                            });
-                        });
-
-                        sortTransferenceQueue(getTransference_finished_queue());
-
-                        getTransference_finished_queue().forEach((t) -> {
-                            MiscTools.GUIRun(() -> {
-                                getScroll_panel().remove((Component) t.getView());
-                                getScroll_panel().add((Component) t.getView());
-                            });
-                        });
-
                     }
 
                     _frozen = false;
