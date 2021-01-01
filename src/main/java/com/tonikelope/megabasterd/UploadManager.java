@@ -28,6 +28,9 @@ public class UploadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference upload) {
+        MiscTools.GUIRun(() -> {
+            getScroll_panel().add(((Upload) upload).getView());
+        });
 
         ((Upload) upload).provisionIt();
 

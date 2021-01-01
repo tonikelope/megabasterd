@@ -742,7 +742,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
             _canceled = false;
 
-            if (!_exit && _ul_url != null) {
+            if (!_exit && _ul_url != null && _ul_key != null) {
 
                 int[] file_iv = {_ul_key[4], _ul_key[5], 0, 0};
 

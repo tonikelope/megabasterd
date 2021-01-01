@@ -304,7 +304,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                 }
                             }
 
-                            while (getMain_panel().getUpload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
+                            while (getMain_panel().getUpload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || getMain_panel().getUpload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
 
                                 synchronized (getMain_panel().getUpload_manager().getWait_queue_lock()) {
                                     getMain_panel().getUpload_manager().getWait_queue_lock().wait(1000);
@@ -1021,7 +1021,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                         for (HashMap folder_link : folder_links) {
 
-                                            while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
+                                            while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || getMain_panel().getDownload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
 
                                                 if (!link_warning) {
                                                     link_warning = true;
@@ -1053,7 +1053,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             } else {
 
-                                while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
+                                while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || getMain_panel().getDownload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
 
                                     synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
                                         getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
