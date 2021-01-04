@@ -87,7 +87,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
             while (!_notified) {
 
                 try {
-                    _secure_notify_lock.wait();
+                    _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     LOG.log(SEVERE, null, ex);
                 }

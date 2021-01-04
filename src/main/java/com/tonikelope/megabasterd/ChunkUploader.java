@@ -72,7 +72,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
             while (!_notified) {
 
                 try {
-                    _secure_notify_lock.wait();
+                    _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
                     LOG.log(Level.SEVERE, ex.getMessage());
