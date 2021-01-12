@@ -159,62 +159,66 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
         if (_file_size > 0) {
             while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                boolean chunk_io_error;
+                synchronized (ChunkWriterManager.class) {
 
-                do {
+                    boolean chunk_io_error;
 
-                    chunk_io_error = false;
+                    do {
 
-                    try {
+                        chunk_io_error = false;
 
-                        File chunk_file = new File(getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+                        try {
 
-                        while (chunk_file.exists() && chunk_file.canRead() && chunk_file.length() > 0) {
+                            File chunk_file = new File(getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
 
-                            if (!download_finished && _download.getProgress() == _file_size) {
+                            while (chunk_file.exists() && chunk_file.canRead() && chunk_file.length() > 0) {
 
-                                _download.getMain_panel().getDownload_manager().getTransference_running_list().remove(_download);
-                                _download.getMain_panel().getDownload_manager().secureNotify();
+                                if (!download_finished && _download.getProgress() == _file_size) {
 
-                                _download.getView().printStatusNormal("Download finished. Joining file chunks, please wait...");
-                                _download.getView().getPause_button().setVisible(false);
-                                _download.getMain_panel().getGlobal_dl_speed().detachTransference(_download);
-                                _download.getView().getSpeed_label().setVisible(false);
-                                _download.getView().getSlots_label().setVisible(false);
-                                _download.getView().getSlot_status_label().setVisible(false);
-                                _download.getView().getSlots_spinner().setVisible(false);
-                                download_finished = true;
-                            }
+                                    _download.getMain_panel().getDownload_manager().getTransference_running_list().remove(_download);
+                                    _download.getMain_panel().getDownload_manager().secureNotify();
 
-                            byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-
-                            int reads;
-
-                            try (CipherInputStream cis = new CipherInputStream(new BufferedInputStream(new FileInputStream(chunk_file)), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
-                                while ((reads = cis.read(buffer)) != -1) {
-                                    _download.getOutput_stream().write(buffer, 0, reads);
+                                    _download.getView().printStatusNormal("Download finished. Joining file chunks, please wait...");
+                                    _download.getView().getPause_button().setVisible(false);
+                                    _download.getMain_panel().getGlobal_dl_speed().detachTransference(_download);
+                                    _download.getView().getSpeed_label().setVisible(false);
+                                    _download.getView().getSlots_label().setVisible(false);
+                                    _download.getView().getSlot_status_label().setVisible(false);
+                                    _download.getView().getSlots_spinner().setVisible(false);
+                                    download_finished = true;
                                 }
-                            } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                                LOG.log(Level.SEVERE, ex.getMessage());
+
+                                byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                                int reads;
+
+                                try (CipherInputStream cis = new CipherInputStream(new BufferedInputStream(new FileInputStream(chunk_file)), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
+                                    while ((reads = cis.read(buffer)) != -1) {
+                                        _download.getOutput_stream().write(buffer, 0, reads);
+                                    }
+                                } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
+                                    LOG.log(Level.SEVERE, ex.getMessage());
+                                }
+
+                                _bytes_written += chunk_file.length();
+
+                                _last_chunk_id_written++;
+
+                                LOG.log(Level.INFO, "{0} ChunkWriterManager has written to disk chunk [{1}] {2} {3} {4}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written, _download.calculateLastWrittenChunk(_bytes_written), _download.getFile_name()});
+
+                                chunk_file.delete();
+
+                                chunk_file = new File(getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+
                             }
-
-                            _bytes_written += chunk_file.length();
-
-                            _last_chunk_id_written++;
-
-                            LOG.log(Level.INFO, "{0} ChunkWriterManager has written to disk chunk [{1}] {2} {3} {4}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written, _download.calculateLastWrittenChunk(_bytes_written), _download.getFile_name()});
-
-                            chunk_file.delete();
-
-                            chunk_file = new File(getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
-
+                        } catch (IOException ex) {
+                            chunk_io_error = true;
+                            LOG.log(Level.WARNING, ex.getMessage());
+                            MiscTools.pausar(1000);
                         }
-                    } catch (IOException ex) {
-                        chunk_io_error = true;
-                        LOG.log(Level.WARNING, ex.getMessage());
-                        MiscTools.pausar(1000);
-                    }
-                } while (chunk_io_error);
+                    } while (chunk_io_error);
+
+                }
 
                 if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
@@ -223,6 +227,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
                     secureWait();
 
                 }
+
             }
 
             if (_bytes_written == _file_size) {
