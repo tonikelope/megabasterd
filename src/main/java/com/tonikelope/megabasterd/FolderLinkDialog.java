@@ -492,6 +492,27 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     _total_space += (long) download_link.get("filesize");
 
                     _download_links.add(download_link);
+                } else if (node.isLeaf() && node != root) {
+                    String path = "";
+
+                    Object[] object_path = node.getUserObjectPath();
+
+                    for (Object p : object_path) {
+
+                        path += File.separator + ((Map<String, Object>) p).get("name");
+                    }
+
+                    path = path.replaceAll("^/+", "").replaceAll("^\\+", "").trim();
+
+                    HashMap<String, Object> download_link = new HashMap<>();
+
+                    download_link.put("url", "*");
+
+                    download_link.put("filename", cleanFilePath(path));
+
+                    download_link.put("type", ((HashMap<String, Object>) node.getUserObject()).get("type"));
+
+                    _download_links.add(download_link);
                 }
             }
 

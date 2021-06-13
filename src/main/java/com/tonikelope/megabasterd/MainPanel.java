@@ -60,7 +60,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.40";
+    public static final String VERSION = "7.41";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -76,7 +76,7 @@ public final class MainPanel {
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
-    private static Boolean _app_image;
+    public static volatile String MEGABASTERD_HOME_DIR = System.getProperty("user.home");
     private static String _proxy_host;
     private static int _proxy_port;
     private static boolean _use_proxy;
@@ -101,11 +101,7 @@ public final class MainPanel {
         UIDefaults defaults = UIManager.getLookAndFeelDefaults();
         defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
 
-        _app_image = false;
-
         if (args.length > 0) {
-
-            _app_image = args[0].equals("appimage");
 
             if (args.length > 1) {
                 try {
@@ -116,6 +112,12 @@ public final class MainPanel {
                 }
             }
 
+        }
+
+        File f = new File(getCurrentJarParentPath() + "/.megabasterd_portable");
+
+        if (f.exists()) {
+            MEGABASTERD_HOME_DIR = f.getParentFile().getAbsolutePath();
         }
 
         final MainPanel main_panel = new MainPanel();
@@ -131,10 +133,6 @@ public final class MainPanel {
 
     public static String getRun_command_path() {
         return _run_command_path;
-    }
-
-    public static Boolean getApp_image() {
-        return _app_image;
     }
 
     public static String getFont() {
@@ -257,7 +255,7 @@ public final class MainPanel {
             PrintStream fileOut;
 
             try {
-                fileOut = new PrintStream(new FileOutputStream(System.getProperty("user.home") + "/.MEGABASTERD_DEBUG.log"));
+                fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/.MEGABASTERD_DEBUG.log"));
 
                 System.setOut(fileOut);
                 System.setErr(fileOut);
@@ -970,7 +968,7 @@ public final class MainPanel {
 
             if (delete_db) {
 
-                File db_file = new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE);
+                File db_file = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE);
 
                 db_file.delete();
 
@@ -995,11 +993,11 @@ public final class MainPanel {
 
         try {
 
-            if (!new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").exists()) {
+            if (!new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").exists()) {
 
-                new File(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").createNewFile();
+                new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").createNewFile();
 
-                File directory = new File(System.getProperty("user.home"));
+                File directory = new File(MainPanel.MEGABASTERD_HOME_DIR);
 
                 String version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", VERSION, 1);
 
@@ -1011,7 +1009,7 @@ public final class MainPanel {
 
                 String old_version = "0.0";
 
-                File old_backups_dir = new File(System.getProperty("user.home") + "/.megabasterd_old_backups");
+                File old_backups_dir = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd_old_backups");
 
                 if (!old_backups_dir.exists()) {
                     old_backups_dir.mkdir();
@@ -1059,7 +1057,7 @@ public final class MainPanel {
                             options[0]);
 
                     if (n == 1) {
-                        Files.copy(Paths.get(System.getProperty("user.home") + "/.megabasterd_old_backups/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(System.getProperty("user.home") + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd_old_backups/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
 
                         JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
 

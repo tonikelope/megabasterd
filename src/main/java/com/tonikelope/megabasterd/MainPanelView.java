@@ -251,7 +251,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         if (dialog.getUpload_log_checkbox().isSelected()) {
 
-                            File upload_log = new File(System.getProperty("user.home") + "/megabasterd_upload_" + parent_node + ".log");
+                            File upload_log = new File(MainPanel.MEGABASTERD_HOME_DIR + "/megabasterd_upload_" + parent_node + ".log");
                             upload_log.createNewFile();
 
                             FileWriter fr;
@@ -1036,11 +1036,38 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                             if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                                download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
+                                                if (!((String) folder_link.get("url")).equals("*")) {
 
-                                                getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+                                                    download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
 
-                                                getMain_panel().getDownload_manager().secureNotify();
+                                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
+
+                                                    getMain_panel().getDownload_manager().secureNotify();
+
+                                                } else {
+                                                    //Directorio vacío
+                                                    String filename = dl_path + "/" + (String) folder_link.get("filename");
+
+                                                    File file = new File(filename);
+
+                                                    if (file.getParent() != null) {
+                                                        File path = new File(file.getParent());
+
+                                                        path.mkdirs();
+                                                    }
+
+                                                    if (((int) folder_link.get("type")) == 1) {
+
+                                                        file.mkdir();
+
+                                                    } else {
+                                                        try {
+                                                            file.createNewFile();
+                                                        } catch (IOException ex) {
+                                                            Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                                                        }
+                                                    }
+                                                }
                                             } else {
                                                 break;
                                             }

@@ -29,6 +29,7 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
@@ -37,6 +38,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.security.CodeSource;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DecimalFormat;
@@ -1145,27 +1147,39 @@ public class MiscTools {
         }
     }
 
+    public static String getCurrentJarParentPath() {
+        try {
+            CodeSource codeSource = MainPanel.class.getProtectionDomain().getCodeSource();
+
+            File jarFile = new File(codeSource.getLocation().toURI().getPath());
+
+            return jarFile.getParentFile().getAbsolutePath();
+
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
+    }
+
     public static void restartApplication() {
 
-        if (!MainPanel.getApp_image()) {
+        StringBuilder cmd = new StringBuilder();
 
-            StringBuilder cmd = new StringBuilder();
+        cmd.append(System.getProperty("java.home")).append(File.separator).append("bin").append(File.separator).append("java ");
 
-            cmd.append(System.getProperty("java.home")).append(File.separator).append("bin").append(File.separator).append("java ");
+        ManagementFactory.getRuntimeMXBean().getInputArguments().forEach((jvmArg) -> {
+            cmd.append(jvmArg).append(" ");
+        });
 
-            ManagementFactory.getRuntimeMXBean().getInputArguments().forEach((jvmArg) -> {
-                cmd.append(jvmArg).append(" ");
-            });
+        cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
 
-            cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
+        cmd.append(MainPanel.class.getName()).append(" native 1");
 
-            cmd.append(MainPanel.class.getName()).append(" native 1");
-
-            try {
-                Runtime.getRuntime().exec(cmd.toString());
-            } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-            }
+        try {
+            Runtime.getRuntime().exec(cmd.toString());
+        } catch (IOException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
 
         System.exit(2);
