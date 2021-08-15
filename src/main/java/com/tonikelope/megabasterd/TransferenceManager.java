@@ -523,7 +523,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             MiscTools.GUIRun(() -> {
 
-                _pause_all_button.setText("RESUME ALL");
+                _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("RESUME ALL"));
                 _pause_all_button.setEnabled(true);
 
             });
@@ -548,7 +548,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         MiscTools.GUIRun(() -> {
 
-            _pause_all_button.setText("PAUSE ALL");
+            _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE ALL"));
 
             _pause_all_button.setEnabled(true);
 
@@ -593,9 +593,9 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         MiscTools.GUIRun(() -> {
             if (_paused_all) {
-                _pause_all_button.setText("RESUME ALL");
+                _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("RESUME ALL"));
             } else {
-                _pause_all_button.setText("PAUSE ALL");
+                _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE ALL"));
             }
 
             _pause_all_button.setVisible(!getTransference_running_list().isEmpty());

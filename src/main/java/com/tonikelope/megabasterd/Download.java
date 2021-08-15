@@ -849,7 +849,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     getView().hideAllExceptStatus();
 
                     _status_error = "FILE WITH SAME NAME AND SIZE ALREADY EXISTS";
-                    
+
                     _auto_retry_on_error = false;
 
                     getView().printStatusError(_status_error);

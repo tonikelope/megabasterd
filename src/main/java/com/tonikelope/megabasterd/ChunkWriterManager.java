@@ -174,19 +174,17 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
                     download_finished = true;
                 }
 
-                synchronized (ChunkWriterManager.class) {
+                boolean chunk_io_error;
 
-                    boolean chunk_io_error;
-
-                    do {
-
+                do {
+                    synchronized (ChunkWriterManager.class) {
                         chunk_io_error = false;
 
                         try {
 
                             File chunk_file = new File(getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
 
-                            while (chunk_file.exists() && chunk_file.canRead() && chunk_file.length() > 0) {
+                            while (chunk_file.exists() && chunk_file.canRead() && chunk_file.canWrite() && chunk_file.length() > 0) {
 
                                 if (!download_finished && _download.getProgress() == _file_size) {
 
@@ -231,9 +229,8 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
                             LOG.log(Level.WARNING, ex.getMessage());
                             MiscTools.pausar(1000);
                         }
-                    } while (chunk_io_error);
-
-                }
+                    }
+                } while (chunk_io_error);
 
                 if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
