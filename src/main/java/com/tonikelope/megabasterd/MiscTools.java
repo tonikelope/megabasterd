@@ -423,51 +423,27 @@ public class MiscTools {
 
     public static void GUIRun(Runnable r) {
 
-        boolean ok;
+        if (!SwingUtilities.isEventDispatchThread()) {
+            SwingUtilities.invokeLater(r);
+        } else {
+            r.run();
+        }
 
-        do {
-            ok = true;
-
-            try {
-                if (!SwingUtilities.isEventDispatchThread()) {
-                    SwingUtilities.invokeLater(r);
-                } else {
-                    r.run();
-                }
-            } catch (Exception ex) {
-                ok = false;
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-                MiscTools.pausar(250);
-            }
-
-        } while (!ok);
     }
 
     public static void GUIRunAndWait(Runnable r) {
 
-        boolean ok;
-
-        do {
-            ok = true;
-            try {
-                if (!SwingUtilities.isEventDispatchThread()) {
-                    SwingUtilities.invokeAndWait(r);
-                } else {
-                    r.run();
-                }
-            } catch (Exception ex) {
-                ok = false;
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-                MiscTools.pausar(250);
+        try {
+            if (!SwingUtilities.isEventDispatchThread()) {
+                SwingUtilities.invokeAndWait(r);
+            } else {
+                r.run();
             }
-        } while (!ok);
-    }
+        } catch (Exception ex) {
 
-    public static void threadRun(Runnable r) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
 
-        Thread hilo = new Thread(r);
-
-        hilo.start();
+        }
 
     }
 

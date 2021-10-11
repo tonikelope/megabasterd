@@ -329,6 +329,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         LOG.log(SEVERE, null, ex);
                     }
+
                 };
 
                 getMain_panel().getUpload_manager().getTransference_preprocess_queue().add(run);

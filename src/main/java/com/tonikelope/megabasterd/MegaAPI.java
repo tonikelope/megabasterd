@@ -22,6 +22,7 @@ import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLException;
 
 /**
  *
@@ -495,6 +496,12 @@ public class MegaAPI implements Serializable {
 
                 }
 
+            } catch (SSLException ssl_ex) {
+
+                empty_response = true;
+
+                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, ssl_ex.getMessage());
+
             } catch (IOException ex) {
 
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, ex.getMessage());
@@ -925,7 +932,7 @@ public class MegaAPI implements Serializable {
 
     public HashMap<String, Object> getFolderNodes(String folder_id, String folder_key) throws Exception {
 
-        HashMap<String, Object> folder_nodes;
+        HashMap<String, Object> folder_nodes = null;
 
         String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\"}]";
 
@@ -933,62 +940,69 @@ public class MegaAPI implements Serializable {
 
         String res = _rawRequest(request, url_api);
 
-        ObjectMapper objectMapper = new ObjectMapper();
+        if (res != null) {
 
-        HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
+            ObjectMapper objectMapper = new ObjectMapper();
 
-        folder_nodes = new HashMap<>();
+            HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
 
-        for (Object o : (Iterable<? extends Object>) res_map[0].get("f")) {
+            folder_nodes = new HashMap<>();
 
-            HashMap<String, Object> node = (HashMap<String, Object>) o;
+            for (Object o : (Iterable<? extends Object>) res_map[0].get("f")) {
 
-            String[] node_k = ((String) node.get("k")).split(":");
+                HashMap<String, Object> node = (HashMap<String, Object>) o;
 
-            if (node_k.length == 2 && node_k[0] != "" && node_k[1] != "") {
+                String[] node_k = ((String) node.get("k")).split(":");
 
-                try {
+                if (node_k.length == 2 && node_k[0] != "" && node_k[1] != "") {
 
-                    String dec_node_k = Bin2UrlBASE64(decryptKey(UrlBASE642Bin(node_k[1]), _urlBase64KeyDecode(folder_key)));
+                    try {
 
-                    HashMap at = _decAttr((String) node.get("a"), _urlBase64KeyDecode(dec_node_k));
+                        String dec_node_k = Bin2UrlBASE64(decryptKey(UrlBASE642Bin(node_k[1]), _urlBase64KeyDecode(folder_key)));
 
-                    HashMap<String, Object> the_node = new HashMap<>();
+                        HashMap at = _decAttr((String) node.get("a"), _urlBase64KeyDecode(dec_node_k));
 
-                    the_node.put("type", node.get("t"));
+                        HashMap<String, Object> the_node = new HashMap<>();
 
-                    the_node.put("parent", node.get("p"));
+                        the_node.put("type", node.get("t"));
 
-                    the_node.put("key", dec_node_k);
+                        the_node.put("parent", node.get("p"));
 
-                    if (node.get("s") != null) {
+                        the_node.put("key", dec_node_k);
 
-                        if (node.get("s") instanceof Integer) {
+                        if (node.get("s") != null) {
 
-                            long size = ((Number) node.get("s")).longValue();
-                            the_node.put("size", size);
+                            if (node.get("s") instanceof Integer) {
 
-                        } else if (node.get("s") instanceof Long) {
+                                long size = ((Number) node.get("s")).longValue();
+                                the_node.put("size", size);
 
-                            long size = (Long) node.get("s");
-                            the_node.put("size", size);
+                            } else if (node.get("s") instanceof Long) {
+
+                                long size = (Long) node.get("s");
+                                the_node.put("size", size);
+                            }
                         }
+
+                        the_node.put("name", at.get("n"));
+
+                        the_node.put("h", node.get("h"));
+
+                        folder_nodes.put((String) node.get("h"), the_node);
+
+                    } catch (Exception e) {
+                        LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k"));
                     }
 
-                    the_node.put("name", at.get("n"));
-
-                    the_node.put("h", node.get("h"));
-
-                    folder_nodes.put((String) node.get("h"), the_node);
-
-                } catch (Exception e) {
+                } else {
                     LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k"));
                 }
 
-            } else {
-                LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k"));
             }
 
+        } else {
+
+            throw new Exception();
         }
 
         return folder_nodes;
