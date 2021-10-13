@@ -504,10 +504,12 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         _closed = true;
 
-        try {
-            deleteDownload(_url);
-        } catch (SQLException ex) {
-            LOG.log(SEVERE, null, ex);
+        if (_provision_ok) {
+            try {
+                deleteDownload(_url);
+            } catch (SQLException ex) {
+                LOG.log(SEVERE, null, ex);
+            }
         }
 
         _main_panel.getDownload_manager().getTransference_remove_queue().add(this);

@@ -540,12 +540,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         _closed = true;
 
-        try {
-            DBTools.deleteUpload(_file_name, _ma.getFull_email());
-        } catch (SQLException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+        if (_provision_ok) {
+            try {
+                DBTools.deleteUpload(_file_name, _ma.getFull_email());
+            } catch (SQLException ex) {
+                LOG.log(Level.SEVERE, ex.getMessage());
+            }
         }
-
         _main_panel.getUpload_manager().getTransference_remove_queue().add(this);
 
         _main_panel.getUpload_manager().secureNotify();

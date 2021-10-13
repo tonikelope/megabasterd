@@ -557,6 +557,18 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         secureNotify();
     }
 
+    protected boolean hasFrozenTransferences() {
+
+        for (Transference t : getTransference_waitstart_queue()) {
+
+            if (t.isFrozen()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public ConcurrentLinkedQueue<Transference> getTransference_waitstart_aux_queue() {
         return _transference_waitstart_aux_queue;
     }
@@ -596,9 +608,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("RESUME ALL"));
             } else {
                 _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE ALL"));
+                _pause_all_button.setVisible(!getTransference_running_list().isEmpty());
             }
-
-            _pause_all_button.setVisible(!getTransference_running_list().isEmpty());
 
             _clean_all_menu.getComponent().setEnabled(!_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty() || !getTransference_waitstart_queue().isEmpty());
 
@@ -615,7 +626,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             _status.setText(_genStatus());
 
-            _main_panel.getView().getUnfreeze_transferences_button().setVisible(_main_panel.getDownload_manager().isFrozen() || _main_panel.getUpload_manager().isFrozen());
+            _main_panel.getView().getUnfreeze_transferences_button().setVisible(_main_panel.getDownload_manager().hasFrozenTransferences() || _main_panel.getUpload_manager().hasFrozenTransferences());
 
             _main_panel.getView().revalidate();
 

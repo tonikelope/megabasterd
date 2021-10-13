@@ -1402,9 +1402,16 @@ public class MiscTools {
 
     public static String newMegaLinks2Legacy(String data) {
 
-        String replace1 = data.replaceAll("https://mega\\.nz/folder/([^#]+)#(.+)", "https://mega.nz/#F!$1!$2");
+        data = MiscTools.addHTTPSToMegaLinks(data);
 
-        return replace1.replaceAll("https://mega\\.nz/file/([^#]+)#(.+)", "https://mega.nz/#!$1!$2");
+        String replace1 = data.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/folder/([^#]+)#(.+)", "https://mega.nz/#F!$1!$2");
+
+        return replace1.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/file/([^#]+)#(.+)", "https://mega.nz/#!$1!$2");
+    }
+
+    public static String addHTTPSToMegaLinks(String data) {
+
+        return data.replaceAll("(?<!http://|https://)mega(?:\\.co)?\\.nz", "https://mega.nz");
     }
 
     /* This method changes the MEGA extension URL to a ordinary MEGA URL,
