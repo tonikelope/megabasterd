@@ -18,7 +18,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
@@ -991,11 +993,11 @@ public class MegaAPI implements Serializable {
                         folder_nodes.put((String) node.get("h"), the_node);
 
                     } catch (Exception e) {
-                        LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k"));
+                        LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
                     }
 
                 } else {
-                    LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k"));
+                    LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
                 }
 
             }
@@ -1006,6 +1008,105 @@ public class MegaAPI implements Serializable {
         }
 
         return folder_nodes;
+    }
+
+    public ArrayList<String> getNlinks(Set<String> links) {
+
+        HashMap<String, ArrayList<String>> map = new HashMap<>();
+
+        ArrayList<String> nlinks = new ArrayList<>();
+
+        for (String link : links) {
+
+            String folder_id = findFirstRegex("#F\\*[^!]+!([^!]+)", link, 1);
+
+            String folder_key = findFirstRegex("#F\\*[^!]+![^!]+!([^!]+)", link, 1);
+
+            String file_id = findFirstRegex("#F\\*([^!]+)", link, 1);
+
+            if (!map.containsKey(folder_id + ":" + folder_key)) {
+
+                ArrayList<String> lista = new ArrayList<>();
+
+                lista.add(file_id);
+
+                map.put(folder_id + ":" + folder_key, lista);
+
+            } else {
+
+                map.get(folder_id + ":" + folder_key).add(file_id);
+
+            }
+        }
+
+        for (Map.Entry<String, ArrayList<String>> entry : map.entrySet()) {
+
+            String[] folder_parts = entry.getKey().split(":");
+
+            try {
+                nlinks.addAll(getNLinksFromFolder(folder_parts[0], folder_parts[1], entry.getValue()));
+            } catch (Exception ex) {
+                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+
+        return nlinks;
+
+    }
+
+    public ArrayList<String> getNLinksFromFolder(String folder_id, String folder_key, ArrayList<String> file_ids) throws Exception {
+
+        ArrayList<String> nlinks = new ArrayList<>();
+
+        String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\"}]";
+
+        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
+
+        String res = _rawRequest(request, url_api);
+
+        if (res != null) {
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
+
+            for (Object o : (Iterable<? extends Object>) res_map[0].get("f")) {
+
+                HashMap<String, Object> node = (HashMap<String, Object>) o;
+
+                String[] node_k = ((String) node.get("k")).split(":");
+
+                if (node_k.length == 2 && node_k[0] != "" && node_k[1] != "") {
+
+                    try {
+
+                        String dec_node_k = Bin2UrlBASE64(decryptKey(UrlBASE642Bin(node_k[1]), _urlBase64KeyDecode(folder_key)));
+
+                        if (file_ids.contains((String) node.get("h"))) {
+
+                            //Este es el que queremos
+                            nlinks.add("https://mega.nz/#N!" + ((String) node.get("h")) + "!" + dec_node_k + "###n=" + folder_id);
+
+                        }
+
+                    } catch (Exception e) {
+                        LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                    }
+
+                } else {
+                    LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                }
+
+            }
+
+        } else {
+
+            throw new Exception();
+        }
+
+        return nlinks;
+
     }
 
     private byte[] _urlBase64KeyDecode(String key) {

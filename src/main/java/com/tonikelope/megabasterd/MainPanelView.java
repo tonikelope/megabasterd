@@ -952,7 +952,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 //Convert to legacy link format
                 String link_data = MiscTools.newMegaLinks2Legacy(dialog.getLinks_textarea().getText());
 
-                Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", link_data, 0));
+                Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
 
                 Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", link_data, 0));
 
@@ -981,16 +981,30 @@ public final class MainPanelView extends javax.swing.JFrame {
                 Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", link_data, 1));
 
                 dlc.stream().map((d) -> CryptTools.decryptDLC(d, _main_panel)).forEachOrdered((links) -> {
-                    links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^\r\n](#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", link, 0) != null)).forEachOrdered((link) -> {
+                    links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^\r\n](#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link, 0) != null)).forEachOrdered((link) -> {
                         urls.add(link);
                     });
                 });
 
                 if (!urls.isEmpty()) {
 
+                    Set<String> folder_file_links = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+#F\\*[^\r\n!]*?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
+
+                    if (!folder_file_links.isEmpty()) {
+                        ArrayList<String> nlinks = ma.getNlinks(folder_file_links);
+
+                        urls.removeAll(folder_file_links);
+
+                        urls.addAll(nlinks);
+                    }
+
                     getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(urls);
 
                     getMain_panel().getDownload_manager().secureNotify();
+
+                    MiscTools.GUIRun(() -> {
+                        new_download_menu.setEnabled(true);
+                    });
 
                     boolean link_warning;
 
@@ -1113,8 +1127,6 @@ public final class MainPanelView extends javax.swing.JFrame {
             getMain_panel().getDownload_manager().getTransference_preprocess_queue().add(run);
 
             getMain_panel().getDownload_manager().secureNotify();
-
-            new_download_menu.setEnabled(true);
 
         } else {
 

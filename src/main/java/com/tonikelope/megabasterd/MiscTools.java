@@ -783,7 +783,7 @@ public class MiscTools {
 
                         String clean_data = MiscTools.newMegaLinks2Legacy(new String(Base64.getDecoder().decode(chunk)));
 
-                        String decoded = MiscTools.findFirstRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0);
+                        String decoded = MiscTools.findFirstRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
 
                         if (decoded != null) {
                             links.add(decoded);
@@ -799,7 +799,7 @@ public class MiscTools {
                 url_decoded = data;
             }
             String clean_data = MiscTools.newMegaLinks2Legacy(url_decoded);
-            links.addAll(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0));
+            links.addAll(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0));
             links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
             res = links.stream().map((s) -> s + "\n").reduce(res, String::concat);
         }
@@ -816,7 +816,7 @@ public class MiscTools {
             try {
                 String clean_data = MiscTools.newMegaLinks2Legacy(URLDecoder.decode(data, "UTF-8"));
 
-                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n]+", clean_data, 0);
+                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
 
                 links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
 
@@ -1403,6 +1403,8 @@ public class MiscTools {
     public static String newMegaLinks2Legacy(String data) {
 
         data = MiscTools.addBackSlashToLinks(MiscTools.addHTTPSToMegaLinks(data));
+
+        data = data.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/folder/([^#]+)#([^\r\n/]+)/file/([^\r\n/]+)", "https://mega.nz/#F*$3!$1!$2");
 
         return data.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/folder/([^#]+)#([^\r\n]+)", "https://mega.nz/#F!$1!$2").replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/file/([^#]+)#([^\r\n]+)", "https://mega.nz/#!$1!$2");
     }
