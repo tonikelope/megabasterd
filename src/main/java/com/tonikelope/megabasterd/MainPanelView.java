@@ -52,208 +52,208 @@ import javax.swing.JTabbedPane;
  * @author tonikelope
  */
 public final class MainPanelView extends javax.swing.JFrame {
-
+    
     private final MainPanel _main_panel;
-
+    
     public JLabel getKiss_server_status() {
         return kiss_server_status;
     }
-
+    
     public JMenuItem getClean_all_down_menu() {
         return clean_all_down_menu;
     }
-
+    
     public JMenuItem getClean_all_up_menu() {
         return clean_all_up_menu;
     }
-
+    
     public JButton getClose_all_finished_down_button() {
         return close_all_finished_down_button;
     }
-
+    
     public JButton getClose_all_finished_up_button() {
         return close_all_finished_up_button;
     }
-
+    
     public JLabel getMemory_status() {
         return memory_status;
     }
-
+    
     public JLabel getGlobal_speed_down_label() {
         return global_speed_down_label;
     }
-
+    
     public JLabel getDown_remtime_label() {
         return down_remtime_label;
     }
-
+    
     public JLabel getUp_remtime_label() {
         return up_remtime_label;
     }
-
+    
     public JLabel getGlobal_speed_up_label() {
         return global_speed_up_label;
     }
-
+    
     public JPanel getjPanel_scroll_down() {
         return jPanel_scroll_down;
     }
-
+    
     public JPanel getjPanel_scroll_up() {
         return jPanel_scroll_up;
     }
-
+    
     public JMenuItem getNew_download_menu() {
         return new_download_menu;
     }
-
+    
     public JMenuItem getNew_upload_menu() {
         return new_upload_menu;
     }
-
+    
     public JButton getPause_all_down_button() {
         return pause_all_down_button;
     }
-
+    
     public JButton getPause_all_up_button() {
         return pause_all_up_button;
     }
-
+    
     public JLabel getStatus_down_label() {
         return status_down_label;
     }
-
+    
     public JLabel getStatus_up_label() {
         return status_up_label;
     }
-
+    
     public JButton getUnfreeze_transferences_button() {
         return unfreeze_transferences_button;
     }
-
+    
     public MainPanel getMain_panel() {
         return _main_panel;
     }
-
+    
     public JTabbedPane getjTabbedPane1() {
         return jTabbedPane1;
     }
-
+    
     public JLabel getSmart_proxy_status() {
         return smart_proxy_status;
     }
-
+    
     public JLabel getMc_reverse_status() {
         return mc_reverse_status;
     }
-
+    
     public JCheckBoxMenuItem getAuto_close_menu() {
         return auto_close_menu;
     }
-
+    
     public void updateKissStreamServerStatus(final String status) {
-
+        
         MiscTools.GUIRun(() -> {
             String old_status = getKiss_server_status().getText();
-
+            
             if (!old_status.equals(status + " ")) {
                 Dimension frame_size = this.getSize();
-
+                
                 getKiss_server_status().setText(status + " ");
-
+                
                 pack();
                 setSize(frame_size);
-
+                
             }
         });
     }
-
+    
     public void updateSmartProxyStatus(final String status) {
-
+        
         MiscTools.GUIRun(() -> {
             String old_status = getSmart_proxy_status().getText();
-
+            
             if (!old_status.equals(status + " ")) {
                 Dimension frame_size = this.getSize();
-
+                
                 getSmart_proxy_status().setText(status + " ");
-
+                
                 pack();
                 setSize(frame_size);
-
+                
             }
         });
     }
-
+    
     public void updateMCReverseStatus(final String status) {
-
+        
         MiscTools.GUIRun(() -> {
-
+            
             String old_status = getMc_reverse_status().getText();
-
+            
             if (!old_status.equals(status + " ")) {
                 Dimension frame_size = this.getSize();
-
+                
                 getMc_reverse_status().setText(status + " ");
-
+                
                 pack();
                 setSize(frame_size);
-
+                
             }
         });
     }
-
+    
     private void _new_upload_dialog(FileGrabberDialog dialog) {
-
+        
         try {
-
+            
             dialog.setLocationRelativeTo(this);
-
+            
             dialog.setVisible(true);
-
+            
             if (dialog.isUpload() && dialog.getFiles().size() > 0) {
-
+                
                 getMain_panel().resumeUploads();
-
+                
                 getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().addAll(dialog.getFiles());
-
+                
                 getMain_panel().getUpload_manager().secureNotify();
-
+                
                 final String mega_account = (String) dialog.getAccount_combobox().getSelectedItem();
-
+                
                 final String base_path = dialog.getBase_path();
-
+                
                 final String dir_name = dialog.getDir_name_textfield().getText();
-
+                
                 jTabbedPane1.setSelectedIndex(1);
-
+                
                 Runnable run = () -> {
-
+                    
                     Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
+                    
                     MegaAPI ma = getMain_panel().getMega_active_accounts().get(mega_account);
-
+                    
                     try {
-
+                        
                         byte[] parent_key = ma.genFolderKey();
-
+                        
                         byte[] share_key = ma.genShareKey();
-
+                        
                         HashMap<String, Object> res = ma.createDir(dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10), ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
-
+                        
                         String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
-
+                        
                         LOG.log(Level.INFO, "{0} Dir {1} created", new Object[]{Thread.currentThread().getName(), parent_node});
-
+                        
                         ma.shareFolder(parent_node, parent_key, share_key);
-
+                        
                         String folder_link = ma.getPublicFolderLink(parent_node, share_key);
-
+                        
                         if (dialog.getUpload_log_checkbox().isSelected()) {
-
+                            
                             File upload_log = new File(MainPanel.MEGABASTERD_HOME_DIR + "/megabasterd_upload_" + parent_node + ".log");
                             upload_log.createNewFile();
-
+                            
                             FileWriter fr;
                             try {
                                 fr = new FileWriter(upload_log, true);
@@ -264,118 +264,118 @@ public final class MainPanelView extends javax.swing.JFrame {
                                 Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
                             }
                         }
-
+                        
                         MegaDirNode file_paths = new MegaDirNode(parent_node);
-
+                        
                         for (File f : dialog.getFiles()) {
-
+                            
                             String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
-
+                            
                             LOG.log(Level.INFO, "{0} FILE_PATH -> {1}", new Object[]{Thread.currentThread().getName(), file_path});
-
+                            
                             String[] dirs = file_path.split("\\" + File.separator);
-
+                            
                             MegaDirNode current_node = file_paths;
-
+                            
                             String file_parent = current_node.getNode_id();
-
+                            
                             for (String d : dirs) {
-
+                                
                                 LOG.log(Level.INFO, "{0} DIR -> {1}", new Object[]{Thread.currentThread().getName(), d});
-
+                                
                                 if (!d.isEmpty()) {
-
+                                    
                                     if (current_node.getChildren().get(d) != null) {
-
+                                        
                                         current_node = current_node.getChildren().get(d);
-
+                                        
                                         file_parent = current_node.getNode_id();
-
+                                        
                                     } else {
-
+                                        
                                         res = ma.createDirInsideAnotherSharedDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
-
+                                        
                                         file_parent = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
-
+                                        
                                         current_node.getChildren().put(d, new MegaDirNode(file_parent));
-
+                                        
                                         current_node = current_node.getChildren().get(d);
                                     }
                                 }
                             }
-
+                            
                             while (getMain_panel().getUpload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || getMain_panel().getUpload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
-
+                                
                                 synchronized (getMain_panel().getUpload_manager().getWait_queue_lock()) {
                                     getMain_panel().getUpload_manager().getWait_queue_lock().wait(1000);
                                 }
                             }
-
+                            
                             if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
-
+                                
                                 Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, dialog.getPriority_checkbox().isSelected());
-
+                                
                                 getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
-
+                                
                                 getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
-
+                                
                                 getMain_panel().getUpload_manager().secureNotify();
-
+                                
                             }
-
+                            
                         }
-
+                        
                     } catch (Exception ex) {
-
+                        
                         LOG.log(SEVERE, null, ex);
                     }
-
+                    
                 };
-
+                
                 getMain_panel().getUpload_manager().getTransference_preprocess_queue().add(run);
-
+                
                 getMain_panel().getUpload_manager().secureNotify();
-
+                
             }
-
+            
         } catch (Exception ex) {
         }
-
+        
         if (!dialog.isRemember_master_pass()) {
-
+            
             _main_panel.setMaster_pass(null);
         }
-
+        
         dialog.dispose();
-
+        
     }
-
+    
     private void _file_drop_notify(List<File> files) {
-
+        
         final MainPanelView tthis = this;
-
+        
         THREAD_POOL.execute(() -> {
             int n;
-
+            
             if (files.size() > 1) {
-
+                
                 Object[] options = {LabelTranslatorSingleton.getInstance().translate("Split content in different uploads"), LabelTranslatorSingleton.getInstance().translate("Merge content in the same upload")};
-
+                
                 n = showOptionDialog(_main_panel.getView(),
                         LabelTranslatorSingleton.getInstance().translate("How do you want to proceed?"),
                         LabelTranslatorSingleton.getInstance().translate("File Grabber"), DEFAULT_OPTION, INFORMATION_MESSAGE,
                         null,
                         options,
                         null);
-
+                
             } else {
-
+                
                 n = 1;
-
+                
             }
-
+            
             if (n == 0) {
-
+                
                 files.stream().map((file) -> {
                     List<File> aux = new ArrayList<>();
                     aux.add(file);
@@ -383,44 +383,44 @@ public final class MainPanelView extends javax.swing.JFrame {
                 }).map((aux) -> new FileGrabberDialog(tthis, true, aux)).forEachOrdered((dialog) -> {
                     _new_upload_dialog(dialog);
                 });
-
+                
             } else if (n == 1) {
-
+                
                 final FileGrabberDialog dialog = new FileGrabberDialog(tthis, true, files);
-
+                
                 _new_upload_dialog(dialog);
-
+                
             }
         });
     }
-
+    
     public MainPanelView(MainPanel main_panel) {
-
+        
         _main_panel = main_panel;
-
+        
         MiscTools.GUIRunAndWait(() -> {
-
+            
             initComponents();
-
+            
             updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
-
+            
             translateLabels(this);
-
+            
             for (JComponent c : new JComponent[]{unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
-
+                
                 c.setVisible(false);
             }
-
+            
             clean_all_down_menu.setEnabled(false);
             clean_all_up_menu.setEnabled(false);
-
+            
             jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
             jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
-
+            
             jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
             jTabbedPane1.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
             jTabbedPane1.setDropTarget(new DropTarget() {
-
+                
                 public boolean canImport(DataFlavor[] flavors) {
                     for (DataFlavor flavor : flavors) {
                         if (flavor.isFlavorJavaFileListType()) {
@@ -429,61 +429,61 @@ public final class MainPanelView extends javax.swing.JFrame {
                     }
                     return false;
                 }
-
+                
                 @Override
                 public synchronized void drop(DropTargetDropEvent dtde) {
                     changeToNormal();
                     dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-
+                    
                     List<File> files;
-
+                    
                     try {
-
+                        
                         if (canImport(dtde.getTransferable().getTransferDataFlavors())) {
                             files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-
+                            
                             THREAD_POOL.execute(() -> {
                                 _file_drop_notify(files);
                             });
                         }
-
+                        
                     } catch (UnsupportedFlavorException | IOException ex) {
-
+                        
                     }
                 }
-
+                
                 @Override
                 public synchronized void dragEnter(DropTargetDragEvent dtde) {
                     changeToDrop();
                 }
-
+                
                 @Override
                 public synchronized void dragExit(DropTargetEvent dtde) {
                     changeToNormal();
                 }
-
+                
                 private void changeToDrop() {
                     jTabbedPane1.setBorder(BorderFactory.createLineBorder(Color.green, 5));
-
+                    
                 }
-
+                
                 private void changeToNormal() {
                     jTabbedPane1.setBorder(null);
                 }
             }
             );
-
+            
             String auto_close = selectSettingValue("auto_close");
-
+            
             if (auto_close != null) {
                 getAuto_close_menu().setSelected(auto_close.equals("yes"));
             } else {
                 getAuto_close_menu().setSelected(false);
             }
-
+            
             pack();
         });
-
+        
     }
 
     /**
@@ -541,8 +541,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         setTitle("MegaBasterd " + VERSION);
         setIconImage(new ImageIcon(getClass().getResource(ICON_FILE)).getImage());
-        setPreferredSize(new java.awt.Dimension(1024, 600));
-        setSize(new java.awt.Dimension(1024, 600));
+        setPreferredSize(new java.awt.Dimension(1024, 650));
+        setSize(new java.awt.Dimension(1024, 650));
 
         logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/mbasterd_logo_nuevo-picsay.png"))); // NOI18N
         logo_label.setDoubleBuffered(true);
@@ -603,7 +603,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         jButton1.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-copy-to-clipboard-30.png"))); // NOI18N
-        jButton1.setText("COPY ALL LINKS");
+        jButton1.setText("COPY ALL");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -624,8 +624,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_down_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1)
-                .addGap(6, 6, 6))
+                .addComponent(jButton1))
             .addComponent(jScrollPane_down)
             .addComponent(down_remtime_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
@@ -920,178 +919,178 @@ public final class MainPanelView extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void new_download_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_download_menuActionPerformed
-
+        
         new_download_menu.setEnabled(false);
-
+        
         final LinkGrabberDialog dialog = new LinkGrabberDialog(this, true, _main_panel.getDefault_download_path(), _main_panel.getClipboardspy());
-
+        
         _main_panel.getClipboardspy().attachObserver(dialog);
-
+        
         dialog.setLocationRelativeTo(this);
-
+        
         dialog.setVisible(true);
-
+        
         _main_panel.getClipboardspy().detachObserver(dialog);
-
+        
         final String dl_path = dialog.getDownload_path();
-
+        
         final MegaAPI ma;
-
+        
         if (getMain_panel().isUse_mega_account_down()) {
             final String mega_account = (String) dialog.getUse_mega_account_down_combobox().getSelectedItem();
-
+            
             if ("".equals(mega_account)) {
-
+                
                 ma = new MegaAPI();
-
+                
             } else {
-
+                
                 ma = getMain_panel().getMega_active_accounts().get(mega_account);
             }
-
+            
         } else {
-
+            
             ma = new MegaAPI();
         }
-
+        
         jTabbedPane1.setSelectedIndex(0);
-
+        
         if (dialog.isDownload()) {
-
+            
             getMain_panel().resumeDownloads();
-
+            
             final MainPanelView tthis = this;
-
+            
             Runnable run = () -> {
-
+                
                 Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
                 //Convert to legacy link format
                 String link_data = MiscTools.newMegaLinks2Legacy(dialog.getLinks_textarea().getText());
-
+                
                 Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
-
+                
                 Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", link_data, 0));
-
+                
                 megadownloader.forEach((link) -> {
                     try {
-
+                        
                         urls.add(decryptMegaDownloaderLink(link));
-
+                        
                     } catch (Exception ex) {
                         LOG.log(SEVERE, null, ex);
                     }
                 });
-
+                
                 Set<String> elc = new HashSet(findAllRegex("mega://elc[^\r\n]+", link_data, 0));
-
+                
                 elc.forEach((link) -> {
                     try {
-
+                        
                         urls.addAll(CryptTools.decryptELC(link, getMain_panel()));
-
+                        
                     } catch (Exception ex) {
                         LOG.log(SEVERE, null, ex);
                     }
                 });
-
+                
                 Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", link_data, 1));
-
+                
                 dlc.stream().map((d) -> CryptTools.decryptDLC(d, _main_panel)).forEachOrdered((links) -> {
                     links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^\r\n](#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link, 0) != null)).forEachOrdered((link) -> {
                         urls.add(link);
                     });
                 });
-
+                
                 if (!urls.isEmpty()) {
-
+                    
                     Set<String> folder_file_links = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+#F\\*[^\r\n!]*?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
-
+                    
                     if (!folder_file_links.isEmpty()) {
                         ArrayList<String> nlinks = ma.getNlinks(folder_file_links);
-
+                        
                         urls.removeAll(folder_file_links);
-
+                        
                         urls.addAll(nlinks);
                     }
-
+                    
                     getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(urls);
-
+                    
                     getMain_panel().getDownload_manager().secureNotify();
-
+                    
                     MiscTools.GUIRun(() -> {
                         new_download_menu.setEnabled(true);
                     });
-
+                    
                     boolean link_warning;
-
+                    
                     for (String url : urls) {
-
+                        
                         try {
-
+                            
                             link_warning = false;
-
+                            
                             url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
-
+                            
                             Download download;
-
+                            
                             if (findFirstRegex("#F!", url, 0) != null) {
-
+                                
                                 FolderLinkDialog fdialog = new FolderLinkDialog(_main_panel.getView(), true, url);
-
+                                
                                 if (fdialog.isMega_error() == 0) {
-
+                                    
                                     fdialog.setLocationRelativeTo(_main_panel.getView());
-
+                                    
                                     fdialog.setVisible(true);
-
+                                    
                                     if (fdialog.isDownload()) {
-
+                                        
                                         List<HashMap> folder_links = fdialog.getDownload_links();
-
+                                        
                                         fdialog.dispose();
-
+                                        
                                         for (HashMap folder_link : folder_links) {
-
+                                            
                                             while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || getMain_panel().getDownload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
-
+                                                
                                                 if (!link_warning) {
                                                     link_warning = true;
-
+                                                    
                                                     JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd"), "Warning", JOptionPane.WARNING_MESSAGE);
                                                 }
-
+                                                
                                                 synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
                                                     getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
                                                 }
                                             }
-
+                                            
                                             if (!getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
-
+                                                
                                                 if (!((String) folder_link.get("url")).equals("*")) {
-
+                                                    
                                                     download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
-
+                                                    
                                                     getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-
+                                                    
                                                     getMain_panel().getDownload_manager().secureNotify();
-
+                                                    
                                                 } else {
                                                     //Directorio vacío
                                                     String filename = dl_path + "/" + (String) folder_link.get("filename");
-
+                                                    
                                                     File file = new File(filename);
-
+                                                    
                                                     if (file.getParent() != null) {
                                                         File path = new File(file.getParent());
-
+                                                        
                                                         path.mkdirs();
                                                     }
-
+                                                    
                                                     if (((int) folder_link.get("type")) == 1) {
-
+                                                        
                                                         file.mkdir();
-
+                                                        
                                                     } else {
                                                         try {
                                                             file.createNewFile();
@@ -1105,65 +1104,65 @@ public final class MainPanelView extends javax.swing.JFrame {
                                             }
                                         }
                                     }
-
+                                    
                                 }
-
+                                
                                 fdialog.dispose();
-
+                                
                             } else {
-
+                                
                                 while (getMain_panel().getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || getMain_panel().getDownload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
-
+                                    
                                     synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {
                                         getMain_panel().getDownload_manager().getWait_queue_lock().wait(1000);
                                     }
                                 }
-
+                                
                                 download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
-
+                                
                                 getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-
+                                
                                 getMain_panel().getDownload_manager().secureNotify();
-
+                                
                             }
-
+                            
                             getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().remove(url);
-
+                            
                             getMain_panel().getDownload_manager().secureNotify();
-
+                            
                         } catch (UnsupportedEncodingException ex) {
                             LOG.log(Level.SEVERE, ex.getMessage());
                         } catch (InterruptedException ex) {
                             Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
                         }
-
+                        
                     }
                 }
             };
-
+            
             getMain_panel().getDownload_manager().getTransference_preprocess_queue().add(run);
-
+            
             getMain_panel().getDownload_manager().secureNotify();
-
+            
         } else {
-
+            
             new_download_menu.setEnabled(true);
         }
-
+        
         dialog.dispose();
-
+        
     }//GEN-LAST:event_new_download_menuActionPerformed
-
+    
     private void settings_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_settings_menuActionPerformed
-
+        
         SettingsDialog dialog = new SettingsDialog(this, true);
-
+        
         dialog.setLocationRelativeTo(this);
-
+        
         dialog.setVisible(true);
-
+        
         if (dialog.isSettings_ok()) {
-
+            
             dialog.getDeleted_mega_accounts().stream().map((email) -> {
                 try {
                     deleteMegaAccount(email);
@@ -1187,239 +1186,239 @@ public final class MainPanelView extends javax.swing.JFrame {
             }).forEachOrdered((host) -> {
                 _main_panel.getElc_accounts().remove(host);
             });
-
+            
             if (_main_panel.isRestart()) {
-
+                
                 _main_panel.byebye(true);
             } else {
                 _main_panel.loadUserSettings();
-
+                
                 if (_main_panel.isLimit_download_speed()) {
-
+                    
                     _main_panel.getStream_supervisor().setMaxBytesPerSecInput(_main_panel.getMax_dl_speed() * 1024);
-
+                    
                     global_speed_down_label.setForeground(new Color(255, 0, 0));
-
+                    
                 } else {
-
+                    
                     _main_panel.getStream_supervisor().setMaxBytesPerSecInput(0);
-
+                    
                     global_speed_down_label.setForeground(new Color(0, 128, 255));
-
+                    
                 }
-
+                
                 if (_main_panel.isLimit_upload_speed()) {
-
+                    
                     _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(_main_panel.getMax_up_speed() * 1024);
-
+                    
                     global_speed_up_label.setForeground(new Color(255, 0, 0));
-
+                    
                 } else {
-
+                    
                     _main_panel.getStream_supervisor().setMaxBytesPerSecOutput(0);
-
+                    
                     global_speed_up_label.setForeground(new Color(0, 128, 255));
-
+                    
                 }
-
+                
                 _main_panel.getDownload_manager().setMax_running_trans(_main_panel.getMax_dl());
-
+                
                 _main_panel.getUpload_manager().setMax_running_trans(_main_panel.getMax_ul());
-
+                
                 _main_panel.getDownload_manager().secureNotify();
-
+                
                 _main_panel.getUpload_manager().secureNotify();
-
+                
                 if (_main_panel.isMegacrypter_reverse()) {
-
+                    
                     if (_main_panel.getMega_proxy_server() == null) {
-
+                        
                         _main_panel.setMega_proxy_server(new MegaProxyServer(_main_panel, UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
-
+                        
                         THREAD_POOL.execute(_main_panel.getMega_proxy_server());
-
+                        
                     } else if (_main_panel.getMega_proxy_server().getPort() != _main_panel.getMegacrypter_reverse_port()) {
-
+                        
                         try {
-
+                            
                             _main_panel.getMega_proxy_server().stopServer();
                             _main_panel.setMega_proxy_server(new MegaProxyServer(_main_panel, UUID.randomUUID().toString(), _main_panel.getMegacrypter_reverse_port()));
                             THREAD_POOL.execute(_main_panel.getMega_proxy_server());
-
+                            
                         } catch (IOException ex) {
                             LOG.log(Level.SEVERE, ex.getMessage());
                         }
                     }
-
+                    
                 } else {
-
+                    
                     if (_main_panel.getMega_proxy_server() != null) {
-
+                        
                         try {
                             _main_panel.getMega_proxy_server().stopServer();
                         } catch (IOException ex) {
                             LOG.log(Level.SEVERE, ex.getMessage());
                         }
                     }
-
+                    
                     _main_panel.setMega_proxy_server(null);
                 }
-
+                
                 if (MainPanel.isUse_smart_proxy()) {
-
+                    
                     if (MainPanel.getProxy_manager() == null) {
                         MainPanel.setProxy_manager(new SmartMegaProxyManager(null, _main_panel));
                     }
-
+                    
                     MainPanel.getProxy_manager().refreshProxyList();
-
+                    
                 } else {
-
+                    
                     updateSmartProxyStatus("SmartProxy: OFF");
                 }
             }
-
+            
             if (!dialog.isRemember_master_pass()) {
-
+                
                 _main_panel.setMaster_pass(null);
             }
-
+            
             dialog.dispose();
-
+            
         }
     }//GEN-LAST:event_settings_menuActionPerformed
-
+    
     private void hide_tray_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_hide_tray_menuActionPerformed
-
+        
         dispatchEvent(new WindowEvent(this, WINDOW_CLOSING));
     }//GEN-LAST:event_hide_tray_menuActionPerformed
-
+    
     private void about_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_about_menuActionPerformed
-
+        
         AboutDialog dialog = new AboutDialog(this, true);
-
+        
         dialog.setLocationRelativeTo(this);
-
+        
         dialog.setVisible(true);
     }//GEN-LAST:event_about_menuActionPerformed
-
+    
     private void exit_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exit_menuActionPerformed
-
+        
         _main_panel.byebye(false);
     }//GEN-LAST:event_exit_menuActionPerformed
-
+    
     private void close_all_finished_down_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_all_finished_down_buttonActionPerformed
-
+        
         _main_panel.getDownload_manager().closeAllFinished();
     }//GEN-LAST:event_close_all_finished_down_buttonActionPerformed
-
+    
     private void clean_all_down_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clean_all_down_menuActionPerformed
-
+        
         Object[] options = {"No",
             LabelTranslatorSingleton.getInstance().translate("Yes")};
-
+        
         int n = showOptionDialog(_main_panel.getView(),
                 LabelTranslatorSingleton.getInstance().translate("Remove all no running downloads?"),
                 LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
                 null,
                 options,
                 options[0]);
-
+        
         if (n == 1) {
             _main_panel.getDownload_manager().closeAllPreProWaiting();
         }
     }//GEN-LAST:event_clean_all_down_menuActionPerformed
-
+    
     private void pause_all_down_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_all_down_buttonActionPerformed
-
+        
         pause_all_down_button.setEnabled(false);
-
+        
         if (!_main_panel.getDownload_manager().isPaused_all()) {
-
+            
             _main_panel.getDownload_manager().pauseAll();
-
+            
         } else {
-
+            
             _main_panel.getDownload_manager().resumeAll();
         }
-
+        
     }//GEN-LAST:event_pause_all_down_buttonActionPerformed
-
+    
     private void new_stream_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_stream_menuActionPerformed
-
+        
         StreamerDialog dialog = new StreamerDialog(this, true, _main_panel.getClipboardspy());
-
+        
         _main_panel.getClipboardspy().attachObserver(dialog);
-
+        
         dialog.setLocationRelativeTo(this);
-
+        
         dialog.setVisible(true);
-
+        
         _main_panel.getClipboardspy().detachObserver(dialog);
     }//GEN-LAST:event_new_stream_menuActionPerformed
-
+    
     private void new_upload_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_upload_menuActionPerformed
-
+        
         final FileGrabberDialog dialog = new FileGrabberDialog(this, true, null);
-
+        
         _new_upload_dialog(dialog);
     }//GEN-LAST:event_new_upload_menuActionPerformed
-
+    
     private void close_all_finished_up_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_all_finished_up_buttonActionPerformed
-
+        
         _main_panel.getUpload_manager().closeAllFinished();
     }//GEN-LAST:event_close_all_finished_up_buttonActionPerformed
-
+    
     private void pause_all_up_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_all_up_buttonActionPerformed
-
+        
         pause_all_up_button.setEnabled(false);
-
+        
         if (!_main_panel.getUpload_manager().isPaused_all()) {
-
+            
             _main_panel.getUpload_manager().pauseAll();
-
+            
         } else {
-
+            
             _main_panel.getUpload_manager().resumeAll();
         }
     }//GEN-LAST:event_pause_all_up_buttonActionPerformed
-
+    
     private void clean_all_up_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_clean_all_up_menuActionPerformed
-
+        
         Object[] options = {"No",
             LabelTranslatorSingleton.getInstance().translate("Yes")};
-
+        
         int n = showOptionDialog(_main_panel.getView(),
                 LabelTranslatorSingleton.getInstance().translate("Remove all no running uploads?"),
                 LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, QUESTION_MESSAGE,
                 null,
                 options,
                 options[0]);
-
+        
         if (n == 1) {
             _main_panel.getUpload_manager().closeAllPreProWaiting();
         }
     }//GEN-LAST:event_clean_all_up_menuActionPerformed
-
+    
     private void split_file_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_split_file_menuActionPerformed
         // TODO add your handling code here:
         FileSplitterDialog dialog = new FileSplitterDialog(this, true);
-
+        
         dialog.setLocationRelativeTo(this);
-
+        
         dialog.setVisible(true);
     }//GEN-LAST:event_split_file_menuActionPerformed
-
+    
     private void merge_file_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_merge_file_menuActionPerformed
         // TODO add your handling code here:
 
         FileMergerDialog dialog = new FileMergerDialog(this, true);
-
+        
         dialog.setLocationRelativeTo(this);
-
+        
         dialog.setVisible(true);
     }//GEN-LAST:event_merge_file_menuActionPerformed
-
+    
     private void auto_close_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_auto_close_menuActionPerformed
         try {
             DBTools.insertSettingValue("auto_close", getAuto_close_menu().isSelected() ? "yes" : "no");
@@ -1427,23 +1426,23 @@ public final class MainPanelView extends javax.swing.JFrame {
             Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
     }//GEN-LAST:event_auto_close_menuActionPerformed
-
+    
     private void unfreeze_transferences_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_unfreeze_transferences_buttonActionPerformed
         // TODO add your handling code here:
 
         unfreeze_transferences_button.setVisible(false);
-
+        
         THREAD_POOL.execute(_main_panel.getDownload_manager()::unfreezeTransferenceWaitStartQueue);
-
+        
         THREAD_POOL.execute(_main_panel.getUpload_manager()::unfreezeTransferenceWaitStartQueue);
     }//GEN-LAST:event_unfreeze_transferences_buttonActionPerformed
-
+    
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
 
         _main_panel.getDownload_manager().copyAllLinksToClipboard();
-
-        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("¡TODO COPIADO!"));
+        
+        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("ALL COPIED!"));
     }//GEN-LAST:event_jButton1ActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -1492,5 +1491,5 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JPanel uploads_panel;
     // End of variables declaration//GEN-END:variables
     private static final Logger LOG = Logger.getLogger(MainPanelView.class.getName());
-
+    
 }
