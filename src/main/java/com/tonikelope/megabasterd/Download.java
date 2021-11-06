@@ -101,6 +101,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private final Object _progress_watchdog_lock;
     private final boolean _priority;
 
+    public String getStatus_error() {
+        return _status_error;
+    }
+
     public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir, boolean priority) {
 
         _priority = priority;

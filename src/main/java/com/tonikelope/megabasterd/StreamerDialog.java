@@ -8,6 +8,8 @@ import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JButton;
@@ -182,79 +184,98 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
 
         final Dialog tthis = this;
 
-        try {
-            boolean error = false;
+        THREAD_POOL.execute(() -> {
+            try {
+                boolean error = false;
 
-            String stream_link = null;
+                String stream_link = null;
 
-            String link = URLDecoder.decode(original_link_textfield.getText(), "UTF-8").trim();
+                String link = URLDecoder.decode(original_link_textfield.getText(), "UTF-8").trim();
 
-            if (link.length() > 0) {
+                if (link.length() > 0) {
 
-                try {
+                    try {
 
-                    if (findFirstRegex("://enc", link, 0) != null) {
+                        if (findFirstRegex("://enc", link, 0) != null) {
 
-                        link = CryptTools.decryptMegaDownloaderLink(link);
+                            link = CryptTools.decryptMegaDownloaderLink(link);
 
-                    } else if (findFirstRegex("://elc", link, 0) != null) {
+                        } else if (findFirstRegex("://elc", link, 0) != null) {
 
-                        HashSet links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
+                            HashSet links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
 
-                        if (links != null) {
+                            if (links != null) {
 
-                            link = (String) links.iterator().next();
+                                link = (String) links.iterator().next();
+                            }
                         }
+
+                    } catch (Exception ex) {
+
+                        error = true;
+
+                        LOG.log(Level.SEVERE, ex.getMessage());
                     }
 
-                } catch (Exception ex) {
+                    String data;
 
-                    error = true;
+                    if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("://mega(\\.co)?\\.nz/#F*", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
 
-                    LOG.log(Level.SEVERE, ex.getMessage());
-                }
+                        if (link.contains("#F*")) {
 
-                String data;
+                            MegaAPI ma = new MegaAPI();
 
-                if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
+                            Set<String> links = new HashSet<>();
 
-                    String selected_account = (String) use_mega_account_down_combobox.getSelectedItem();
+                            links.add(link);
 
-                    data = Bin2UrlBASE64(((selected_account != null ? selected_account : "") + "|" + link).getBytes("UTF-8"));
+                            List nlinks = ma.getNlinks(links);
 
-                    stream_link = "http://localhost:1337/video/" + data;
+                            link = (String) nlinks.get(0);
+                        }
+
+                        String selected_account = (String) use_mega_account_down_combobox.getSelectedItem();
+
+                        data = Bin2UrlBASE64(((selected_account != null ? selected_account : "") + "|" + link).getBytes("UTF-8"));
+
+                        stream_link = "http://localhost:1337/video/" + data;
+
+                    } else {
+
+                        error = true;
+                    }
 
                 } else {
 
                     error = true;
                 }
 
-            } else {
+                if (error) {
 
-                error = true;
+                    MiscTools.GUIRun(() -> {
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Please, paste a Mega/MegaCrypter/ELC link!"), "Error", JOptionPane.ERROR_MESSAGE);
+
+                        original_link_textfield.setText("");
+
+                        dance_button.setEnabled(true);
+
+                        original_link_textfield.setEnabled(true);
+                    });
+
+                } else {
+
+                    _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
+                    copyTextToClipboard(stream_link);
+                    MiscTools.GUIRun(() -> {
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
+                        dispose();
+                        getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
+                    });
+                }
+            } catch (UnsupportedEncodingException ex) {
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
-
-            if (error) {
-
-                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Please, paste a Mega/MegaCrypter/ELC link!"), "Error", JOptionPane.ERROR_MESSAGE);
-
-                original_link_textfield.setText("");
-
-                dance_button.setEnabled(true);
-
-                original_link_textfield.setEnabled(true);
-
-            } else {
-
-                _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
-                copyTextToClipboard(stream_link);
-                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
-                dispose();
-                getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
-            }
-        } catch (UnsupportedEncodingException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
-        }
+        });
 
     }//GEN-LAST:event_dance_buttonActionPerformed
 

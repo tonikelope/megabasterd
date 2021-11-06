@@ -23,14 +23,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public static final int MAX_PROVISION_WORKERS = 25;
     private static final Logger LOG = Logger.getLogger(TransferenceManager.class.getName());
 
-    private final ConcurrentLinkedQueue<Object> _transference_preprocess_global_queue;
-    private final ConcurrentLinkedQueue<Runnable> _transference_preprocess_queue;
-    private final ConcurrentLinkedQueue<Transference> _transference_provision_queue;
-    private final ConcurrentLinkedQueue<Transference> _transference_waitstart_queue;
-    private final ConcurrentLinkedQueue<Transference> _transference_waitstart_aux_queue;
-    private final ConcurrentLinkedQueue<Transference> _transference_remove_queue;
-    private final ConcurrentLinkedQueue<Transference> _transference_finished_queue;
-    private final ConcurrentLinkedQueue<Transference> _transference_running_list;
+    protected final ConcurrentLinkedQueue<Object> _transference_preprocess_global_queue;
+    protected final ConcurrentLinkedQueue<Runnable> _transference_preprocess_queue;
+    protected final ConcurrentLinkedQueue<Transference> _transference_provision_queue;
+    protected final ConcurrentLinkedQueue<Transference> _transference_waitstart_queue;
+    protected final ConcurrentLinkedQueue<Transference> _transference_waitstart_aux_queue;
+    protected final ConcurrentLinkedQueue<Transference> _transference_remove_queue;
+    protected final ConcurrentLinkedQueue<Transference> _transference_finished_queue;
+    protected final ConcurrentLinkedQueue<Transference> _transference_running_list;
 
     private final javax.swing.JPanel _scroll_panel;
     private final javax.swing.JLabel _status;

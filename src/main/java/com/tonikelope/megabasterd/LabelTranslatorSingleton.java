@@ -38,6 +38,7 @@ public class LabelTranslatorSingleton {
 
     private void Spanish() {
 
+        _addTranslation("¡TODO COPIADO!", "ALL COPIED!");
         _addTranslation("FILE WITH SAME NAME AND SIZE ALREADY EXISTS", "YA EXISTE UN FICHERO CON EL MISMO NOMBRE Y TAMAÑO");
         _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE. YOU SHOULD GET A KEY -> https://mega.nz/sdk", "AVISO: USAR LA API DE MEGA SIN UNA API KEY PUEDE VIOLAR SUS TÉRMINOS DE USO. DEBES CONSEGUIR UNA API KEY -> https://mega.nz/sdk");
         _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE.\n\nYOU SHOULD GET A KEY -> https://mega.nz/sdk (and set it in MegaBasterd ADVANCED SETTINGS).\n\nCREATE API KEY NOW?", "AVISO: USAR LA API DE MEGA SIN UNA API KEY PUEDE VIOLAR SUS TÉRMINOS DE USO.\n\nDEBES CONSEGUIR UNA API KEY -> https://mega.nz/sdk (e introducirla en AJUSTES AVANZADOS de MegaBasterd).\n\n¿CREAR AHORA UNA API KEY?");

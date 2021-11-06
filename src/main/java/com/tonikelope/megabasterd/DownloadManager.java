@@ -22,6 +22,74 @@ public class DownloadManager extends TransferenceManager {
     }
 
     @Override
+    public void closeAllFinished() {
+
+        _transference_finished_queue.stream().filter((t) -> ((!t.isStatusError() || ((Download) t).getStatus_error().equals("FILE WITH SAME NAME AND SIZE ALREADY EXISTS")) && !t.isCanceled())).map((t) -> {
+            _transference_finished_queue.remove(t);
+            return t;
+        }).forEachOrdered((t) -> {
+            _transference_remove_queue.add(t);
+        });
+
+        secureNotify();
+    }
+
+    public void copyAllLinksToClipboard() {
+
+        ArrayList<String> links = new ArrayList<>();
+
+        String out = "***PROVISIONING DOWNLOADS***\r\n\r\n";
+
+        for (Transference t : _transference_provision_queue) {
+
+            links.add(((Download) t).getUrl());
+        }
+
+        out += String.join("\r\n", links);
+
+        links.clear();
+
+        out += "\r\n\r\n***WAITING DOWNLOADS***\r\n\r\n";
+
+        for (Transference t : _transference_waitstart_aux_queue) {
+
+            links.add(((Download) t).getUrl());
+        }
+
+        for (Transference t : _transference_waitstart_queue) {
+
+            links.add(((Download) t).getUrl());
+        }
+
+        out += String.join("\r\n", links);
+
+        links.clear();
+
+        out += "\r\n\r\n***RUNNING DOWNLOADS***\r\n\r\n";
+
+        for (Transference t : _transference_running_list) {
+
+            links.add(((Download) t).getUrl());
+        }
+
+        out += String.join("\r\n", links);
+
+        links.clear();
+
+        out += "\r\n\r\n***FINISHED DOWNLOADS***\r\n\r\n";
+
+        for (Transference t : _transference_finished_queue) {
+
+            links.add(((Download) t).getUrl());
+        }
+
+        out += String.join("\r\n", links);
+
+        MiscTools.copyTextToClipboard(out);
+
+    }
+
+    @Override
     public void remove(Transference[] downloads) {
 
         ArrayList<String> delete_down = new ArrayList<>();
