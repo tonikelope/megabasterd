@@ -96,10 +96,7 @@ public final class MainPanel {
 
     public static void main(String args[]) {
 
-        setNimbusLookAndFeel();
-
-        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
-        defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
+        FlatLightLaf.setup();
 
         if (args.length > 0) {
 
