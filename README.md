@@ -7,6 +7,8 @@
 
 <p align="center"><i>Note: MegaBasterd uses <a href="https://java.com" target="_blank">Java</a></i></p>
 
+<p align="center"><a href="https://github.com/tonikelope/megabasterd/issues/385"><b>Why the f*ck has MegaBasterd stopped downloading?</b></a></p>
+
 <p align="center"><a href="https://youtu.be/5TkBXT7osQI">Watch demo</a></p>
 
 <p align="center"><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/src/main/resources/images/ethereum_toni.png"></p>
