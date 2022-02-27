@@ -100,6 +100,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile boolean _finalizing;
     private final Object _progress_watchdog_lock;
     private final boolean _priority;
+    private volatile boolean global_cancel = false;
+
+    public void setGlobal_cancel(boolean global_cancel) {
+        this.global_cancel = global_cancel;
+    }
 
     public String getStatus_error() {
         return _status_error;
@@ -204,7 +209,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     public boolean isCanceled() {
-        return _canceled;
+        return (_canceled && !global_cancel);
     }
 
     public boolean isTurbo() {
@@ -911,7 +916,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
         }
 
-        if (_status_error == null && !_canceled) {
+        if ((_status_error == null && !_canceled) || global_cancel || !_auto_retry_on_error) {
 
             try {
                 deleteDownload(_url);
@@ -936,11 +941,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         MiscTools.GUIRun(() -> {
             getView().getClose_button().setVisible(true);
 
-            if ((_status_error != null || _canceled) && isProvision_ok()) {
+            if ((_status_error != null || _canceled) && isProvision_ok() && !global_cancel) {
 
                 getView().getRestart_button().setVisible(true);
 
-            } else {
+            } else if (!global_cancel) {
 
                 getView().getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
             }
@@ -967,6 +972,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         }
 
         _exit = true;
+
+        if (_status_error != null && !_canceled && getMain_panel().getDownload_manager().no_transferences() && getMain_panel().getUpload_manager().no_transferences() && (!getMain_panel().getDownload_manager().getTransference_finished_queue().isEmpty() || !getMain_panel().getUpload_manager().getTransference_finished_queue().isEmpty()) && getMain_panel().getView().getAuto_close_menu().isSelected()) {
+            System.exit(0);
+        }
 
         synchronized (_progress_watchdog_lock) {
             _progress_watchdog_lock.notifyAll();

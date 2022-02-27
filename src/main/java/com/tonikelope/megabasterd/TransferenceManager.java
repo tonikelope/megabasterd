@@ -267,7 +267,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void closeAllFinished() {
 
-        _transference_finished_queue.stream().filter((t) -> (!t.isStatusError() && !t.isCanceled())).map((t) -> {
+        _transference_finished_queue.stream().filter((t) -> !t.isCanceled()).map((t) -> {
             _transference_finished_queue.remove(t);
             return t;
         }).forEachOrdered((t) -> {
@@ -297,6 +297,33 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_remove_queue.addAll(new ArrayList(getTransference_waitstart_queue()));
 
         getTransference_waitstart_queue().clear();
+
+        synchronized (getWait_queue_lock()) {
+            getWait_queue_lock().notifyAll();
+        }
+
+        secureNotify();
+    }
+
+    public void cancelAllTransferences() {
+        _transference_preprocess_queue.clear();
+
+        _transference_preprocess_global_queue.clear();
+
+        _transference_provision_queue.clear();
+
+        _transference_remove_queue.addAll(new ArrayList(getTransference_waitstart_queue()));
+
+        getTransference_waitstart_queue().clear();
+
+        for (Transference t : this.getTransference_running_list()) {
+
+            if (t instanceof Download) {
+                ((Download) t).setGlobal_cancel(true);
+            }
+
+            t.stop();
+        }
 
         synchronized (getWait_queue_lock()) {
             getWait_queue_lock().notifyAll();
@@ -613,7 +640,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             _clean_all_menu.getComponent().setEnabled(!_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty() || !getTransference_waitstart_queue().isEmpty());
 
-            if (!_transference_finished_queue.isEmpty() && _isOKFinishedInQueue()) {
+            if (!_transference_finished_queue.isEmpty()) {
 
                 _close_all_button.setText(LabelTranslatorSingleton.getInstance().translate("Clear finished"));
 

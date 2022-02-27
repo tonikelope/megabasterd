@@ -1088,6 +1088,10 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         _exit = true;
 
+        if (_status_error != null && !_canceled && getMain_panel().getDownload_manager().no_transferences() && getMain_panel().getUpload_manager().no_transferences() && (!getMain_panel().getDownload_manager().getTransference_finished_queue().isEmpty() || !getMain_panel().getUpload_manager().getTransference_finished_queue().isEmpty()) && getMain_panel().getView().getAuto_close_menu().isSelected()) {
+            System.exit(0);
+        }
+
         synchronized (_progress_watchdog_lock) {
             _progress_watchdog_lock.notifyAll();
         }

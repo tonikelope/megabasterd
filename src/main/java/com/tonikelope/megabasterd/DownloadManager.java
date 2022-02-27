@@ -24,7 +24,7 @@ public class DownloadManager extends TransferenceManager {
     @Override
     public void closeAllFinished() {
 
-        _transference_finished_queue.stream().filter((t) -> ((!t.isStatusError() || ((Download) t).getStatus_error().equals("FILE WITH SAME NAME AND SIZE ALREADY EXISTS")) && !t.isCanceled())).map((t) -> {
+        _transference_finished_queue.stream().filter((t) -> (!t.isCanceled())).map((t) -> {
             _transference_finished_queue.remove(t);
             return t;
         }).forEachOrdered((t) -> {
