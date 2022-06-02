@@ -499,6 +499,24 @@ public class MiscTools {
         return df.format(bytes_double) + ' ' + units[pow];
     }
 
+    public static MegaMutableTreeNode calculateTreeFolderSizes(MegaMutableTreeNode node) {
+
+        int n = node.getChildCount();
+
+        for (int i = 0; i < n; i++) {
+
+            if (node.getChildAt(i).isLeaf()) {
+                node.setMega_node_size(node.getMega_node_size() + ((MegaMutableTreeNode) node.getChildAt(i)).getMega_node_size());
+            } else {
+                calculateTreeFolderSizes((MegaMutableTreeNode) node.getChildAt(i));
+                node.setMega_node_size(node.getMega_node_size() + ((MegaMutableTreeNode) node.getChildAt(i)).getMega_node_size());
+            }
+        }
+
+        return node;
+
+    }
+
     public static DefaultMutableTreeNode sortTree(DefaultMutableTreeNode root) {
 
         Enumeration e = root.depthFirstEnumeration();

@@ -24,11 +24,12 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="link_detected_label" max="32767" attributes="0"/>
-                  <Component id="file_tree_scrollpane" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="1" attributes="0">
+                  <Component id="node_bar" max="32767" attributes="0"/>
+                  <Component id="link_detected_label" alignment="0" max="32767" attributes="0"/>
+                  <Component id="file_tree_scrollpane" alignment="0" max="32767" attributes="0"/>
                   <Component id="total_space_label" alignment="0" max="32767" attributes="0"/>
                   <Component id="warning_label" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
@@ -52,25 +53,24 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" attributes="0">
-                  <Group type="102" attributes="0">
-                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="skip_rest_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="skip_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="dance_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
+              <Component id="link_detected_label" min="-2" max="-2" attributes="0"/>
+              <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="3" attributes="0">
+                  <Component id="folder_link_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="restore_button" alignment="3" min="-2" max="-2" attributes="0"/>
+              </Group>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="file_tree_scrollpane" pref="295" max="32767" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="node_bar" min="-2" pref="14" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Group type="103" alignment="1" groupAlignment="3" attributes="0">
+                      <Component id="skip_rest_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="skip_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="dance_button" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <Group type="102" attributes="0">
-                      <Component id="link_detected_label" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="3" attributes="0">
-                          <Component id="folder_link_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                          <Component id="restore_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                      </Group>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="file_tree_scrollpane" pref="315" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
+                  <Group type="102" alignment="1" attributes="0">
                       <Component id="total_space_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="warning_label" min="-2" max="-2" attributes="0"/>
@@ -213,6 +213,8 @@
         <Property name="doubleBuffered" type="boolean" value="true"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
+    </Component>
+    <Component class="javax.swing.JProgressBar" name="node_bar">
     </Component>
   </SubComponents>
 </Form>

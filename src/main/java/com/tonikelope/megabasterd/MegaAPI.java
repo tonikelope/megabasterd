@@ -25,6 +25,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
+import javax.swing.JProgressBar;
 
 /**
  *
@@ -932,7 +933,7 @@ public class MegaAPI implements Serializable {
         return ch;
     }
 
-    public HashMap<String, Object> getFolderNodes(String folder_id, String folder_key) throws Exception {
+    public HashMap<String, Object> getFolderNodes(String folder_id, String folder_key, JProgressBar bar) throws Exception {
 
         HashMap<String, Object> folder_nodes = null;
 
@@ -950,7 +951,26 @@ public class MegaAPI implements Serializable {
 
             folder_nodes = new HashMap<>();
 
+            int s = ((List) res_map[0].get("f")).size();
+
+            MiscTools.GUIRun(() -> {
+                bar.setIndeterminate(false);
+                bar.setMaximum(s);
+                bar.setValue(0);
+            });
+
+            int conta_nodo = 0;
+
             for (Object o : (Iterable<? extends Object>) res_map[0].get("f")) {
+
+                conta_nodo++;
+
+                int c = conta_nodo;
+
+                MiscTools.GUIRun(() -> {
+
+                    bar.setValue(c);
+                });
 
                 HashMap<String, Object> node = (HashMap<String, Object>) o;
 
@@ -984,6 +1004,8 @@ public class MegaAPI implements Serializable {
                                 long size = (Long) node.get("s");
                                 the_node.put("size", size);
                             }
+                        } else {
+                            the_node.put("size", 0L);
                         }
 
                         the_node.put("name", at.get("n"));
