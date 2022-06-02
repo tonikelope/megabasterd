@@ -576,6 +576,12 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
 
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Italian"));
+
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Turkish"));
+
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Chinese"));
+
             if (language == null) {
                 language = MainPanel.DEFAULT_LANGUAGE;
             }
@@ -584,6 +590,12 @@ public class SettingsDialog extends javax.swing.JDialog {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("English"));
             } else if (language.equals("ES")) {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
+            } else if (language.equals("IT")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Italian"));
+            } else if (language.equals("TU")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Turkish"));
+            } else if (language.equals("CH")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Chinese"));
             }
 
             String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
@@ -1743,6 +1755,14 @@ public class SettingsDialog extends javax.swing.JDialog {
                 language = "EN";
             } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Spanish"))) {
                 language = "ES";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Italian"))) {
+                language = "IT";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Turkish"))) {
+                language = "TU";
+                font = "DEFAULT";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Chinese"))) {
+                language = "CH";
+                font = "ALTERNATIVE";
             }
 
             settings.put("language", language);
