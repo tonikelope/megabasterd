@@ -267,6 +267,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private void skip_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_buttonActionPerformed
 
         if (deleteSelectedTreeItems(file_tree)) {
+            file_tree.setEnabled(false);
             node_bar.setVisible(true);
             skip_rest_button.setEnabled(false);
             skip_button.setEnabled(false);
@@ -275,6 +276,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 _genDownloadLiks();
                 MiscTools.GUIRun(() -> {
                     restore_button.setVisible(true);
+
+                    file_tree.setEnabled(true);
 
                     boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
@@ -300,6 +303,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
 
         if (deleteAllExceptSelectedTreeItems(file_tree)) {
+            file_tree.setEnabled(false);
             node_bar.setVisible(true);
             skip_rest_button.setEnabled(false);
             skip_button.setEnabled(false);
@@ -307,6 +311,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 _genDownloadLiks();
                 MiscTools.GUIRun(() -> {
                     restore_button.setVisible(true);
+
+                    file_tree.setEnabled(true);
 
                     boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
@@ -335,6 +341,10 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
         node_bar.setIndeterminate(true);
 
+        skip_button.setEnabled(false);
+
+        skip_rest_button.setEnabled(false);
+
         THREAD_POOL.execute(() -> {
             _loadMegaDirTree();
             _genDownloadLiks();
@@ -347,6 +357,10 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                     c.setEnabled(root_childs);
                 }
+
+                skip_button.setEnabled(root_childs);
+
+                skip_rest_button.setEnabled(root_childs);
             });
         });
 
