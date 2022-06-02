@@ -2,6 +2,7 @@
 <p align="center"><a href="https://github.com/tonikelope/megabasterd/releases/latest" target="_blank"><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/src/main/resources/images/mbasterd_logo_git.png"></a></p>
 <h2 align="center"><a href="https://github.com/tonikelope/megabasterd/releases/latest" target="_blank"><b>Download latest build</b></a></h2>
 <p align="center"><a href="https://github.com/tonikelope/megabasterd/releases/latest" target="_blank"><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/src/main/resources/images/linux-mac-windows.png"></a></p>
+<p align="center"><a href="https://github.com/tonikelope/megabasterd/issues/397"><b>Would you like to help by translating MegaBasterd into your favorite language?</b></a></p>
 
 ![Screnshot](/src/main/resources/images/mbasterd_screen.png)
 
