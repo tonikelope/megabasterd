@@ -1148,6 +1148,10 @@ public final class MainPanelView extends javax.swing.JFrame {
                         }
 
                     }
+                } else {
+                    MiscTools.GUIRun(() -> {
+                        new_download_menu.setEnabled(true);
+                    });
                 }
             };
 
