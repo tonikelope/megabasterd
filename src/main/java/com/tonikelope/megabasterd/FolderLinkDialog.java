@@ -15,8 +15,6 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
-import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 
@@ -35,6 +33,10 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private long _total_space;
 
     private int _mega_error;
+
+    private volatile boolean working = false;
+
+    private volatile boolean exit = false;
 
     public List<HashMap> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
@@ -137,8 +139,13 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         total_space_label = new javax.swing.JLabel();
         node_bar = new javax.swing.JProgressBar();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("FolderLink");
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         file_tree.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
@@ -272,12 +279,15 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             skip_rest_button.setEnabled(false);
             skip_button.setEnabled(false);
             THREAD_POOL.execute(() -> {
-
+                MiscTools.resetTreeFolderSizes(((MegaMutableTreeNode) file_tree.getModel().getRoot()));
+                MiscTools.calculateTreeFolderSizes(((MegaMutableTreeNode) file_tree.getModel().getRoot()));
                 _genDownloadLiks();
                 MiscTools.GUIRun(() -> {
                     restore_button.setVisible(true);
 
                     file_tree.setEnabled(true);
+
+                    file_tree.setModel(new DefaultTreeModel((TreeNode) file_tree.getModel().getRoot()));
 
                     boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
@@ -297,7 +307,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
         _download = true;
 
-        setVisible(false);
+        dispose();
     }//GEN-LAST:event_dance_buttonActionPerformed
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
@@ -308,11 +318,16 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             skip_rest_button.setEnabled(false);
             skip_button.setEnabled(false);
             THREAD_POOL.execute(() -> {
+                MiscTools.resetTreeFolderSizes(((MegaMutableTreeNode) file_tree.getModel().getRoot()));
+                MiscTools.calculateTreeFolderSizes(((MegaMutableTreeNode) file_tree.getModel().getRoot()));
+
                 _genDownloadLiks();
                 MiscTools.GUIRun(() -> {
                     restore_button.setVisible(true);
 
                     file_tree.setEnabled(true);
+
+                    file_tree.setModel(new DefaultTreeModel((TreeNode) file_tree.getModel().getRoot()));
 
                     boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
@@ -366,12 +381,23 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_restore_buttonActionPerformed
 
-    private void _loadMegaDirTree() {
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+
+        if (working && JOptionPane.showConfirmDialog(this, "EXIT?") == 0) {
+            dispose();
+            exit = true;
+        } else if (!working) {
+            dispose();
+            exit = true;
+        }
+    }//GEN-LAST:event_formWindowClosing
+
+    private int _loadMegaDirTree() {
 
         try {
-            MiscTools.GUIRun(() -> {
-                setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-            });
+
+            working = true;
 
             HashMap<String, Object> folder_nodes;
 
@@ -396,6 +422,10 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             int conta_nodo = 0;
 
             for (Object o : folder_nodes.values()) {
+
+                if (exit) {
+                    return 1;
+                }
 
                 conta_nodo++;
 
@@ -502,96 +532,100 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             _mega_error = 1;
         }
 
-        MiscTools.GUIRun(() -> {
-            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        });
+        working = false;
+
+        return 0;
 
     }
 
     private void _genDownloadLiks() {
 
         MiscTools.GUIRun(() -> {
-            setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-        });
+            working = true;
 
-        String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
+            String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
 
-        _download_links.clear();
+            _download_links.clear();
 
-        MegaMutableTreeNode root = (MegaMutableTreeNode) file_tree.getModel().getRoot();
+            MegaMutableTreeNode root = (MegaMutableTreeNode) file_tree.getModel().getRoot();
 
-        Enumeration files_tree = root.depthFirstEnumeration();
+            Enumeration files_tree = root.depthFirstEnumeration();
 
-        _total_space = 0L;
+            THREAD_POOL.execute(() -> {
 
-        while (files_tree.hasMoreElements()) {
+                _total_space = 0L;
 
-            MegaMutableTreeNode node = (MegaMutableTreeNode) files_tree.nextElement();
+                while (files_tree.hasMoreElements()) {
 
-            if (node.isLeaf() && node != root && ((HashMap<String, Object>) node.getUserObject()).get("size") != null) {
+                    MegaMutableTreeNode node = (MegaMutableTreeNode) files_tree.nextElement();
 
-                String path = "";
+                    if (node.isLeaf() && node != root && ((HashMap<String, Object>) node.getUserObject()).get("size") != null) {
 
-                Object[] object_path = node.getUserObjectPath();
+                        String path = "";
 
-                for (Object p : object_path) {
+                        Object[] object_path = node.getUserObjectPath();
 
-                    path += File.separator + ((Map<String, Object>) p).get("name");
+                        for (Object p : object_path) {
+
+                            path += File.separator + ((Map<String, Object>) p).get("name");
+                        }
+
+                        path = path.replaceAll("^/+", "").replaceAll("^\\+", "").trim();
+
+                        String url = "https://mega.nz/#N!" + ((Map<String, Object>) node.getUserObject()).get("h") + "!" + ((Map<String, Object>) node.getUserObject()).get("key") + "###n=" + folder_id;
+
+                        HashMap<String, Object> download_link = new HashMap<>();
+
+                        download_link.put("url", url);
+
+                        download_link.put("filename", cleanFilePath(path));
+
+                        download_link.put("filekey", ((Map<String, Object>) node.getUserObject()).get("key"));
+
+                        download_link.put("filesize", ((Map<String, Object>) node.getUserObject()).get("size"));
+
+                        _total_space += (long) download_link.get("filesize");
+
+                        _download_links.add(download_link);
+                    } else if (node.isLeaf() && node != root) {
+                        String path = "";
+
+                        Object[] object_path = node.getUserObjectPath();
+
+                        for (Object p : object_path) {
+
+                            path += File.separator + ((Map<String, Object>) p).get("name");
+                        }
+
+                        path = path.replaceAll("^/+", "").replaceAll("^\\+", "").trim();
+
+                        HashMap<String, Object> download_link = new HashMap<>();
+
+                        download_link.put("url", "*");
+
+                        download_link.put("filename", cleanFilePath(path));
+
+                        download_link.put("type", ((HashMap<String, Object>) node.getUserObject()).get("type"));
+
+                        _download_links.add(download_link);
+                    }
                 }
 
-                path = path.replaceAll("^/+", "").replaceAll("^\\+", "").trim();
+                MiscTools.GUIRun(() -> {
 
-                String url = "https://mega.nz/#N!" + ((Map<String, Object>) node.getUserObject()).get("h") + "!" + ((Map<String, Object>) node.getUserObject()).get("key") + "###n=" + folder_id;
+                    total_space_label.setText("[" + formatBytes(_total_space) + "]");
 
-                HashMap<String, Object> download_link = new HashMap<>();
+                    for (JComponent c : new JComponent[]{dance_button, warning_label, skip_button, skip_rest_button, total_space_label}) {
 
-                download_link.put("url", url);
+                        c.setEnabled(root.getChildCount() > 0);
+                    }
 
-                download_link.put("filename", cleanFilePath(path));
+                    node_bar.setVisible(false);
 
-                download_link.put("filekey", ((Map<String, Object>) node.getUserObject()).get("key"));
+                    working = false;
+                });
 
-                download_link.put("filesize", ((Map<String, Object>) node.getUserObject()).get("size"));
-
-                _total_space += (long) download_link.get("filesize");
-
-                _download_links.add(download_link);
-            } else if (node.isLeaf() && node != root) {
-                String path = "";
-
-                Object[] object_path = node.getUserObjectPath();
-
-                for (Object p : object_path) {
-
-                    path += File.separator + ((Map<String, Object>) p).get("name");
-                }
-
-                path = path.replaceAll("^/+", "").replaceAll("^\\+", "").trim();
-
-                HashMap<String, Object> download_link = new HashMap<>();
-
-                download_link.put("url", "*");
-
-                download_link.put("filename", cleanFilePath(path));
-
-                download_link.put("type", ((HashMap<String, Object>) node.getUserObject()).get("type"));
-
-                _download_links.add(download_link);
-            }
-        }
-
-        MiscTools.GUIRun(() -> {
-
-            total_space_label.setText("[" + formatBytes(_total_space) + "]");
-
-            for (JComponent c : new JComponent[]{dance_button, warning_label, skip_button, skip_rest_button, total_space_label}) {
-
-                c.setEnabled(root.getChildCount() > 0);
-            }
-
-            node_bar.setVisible(false);
-
-            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+            });
         });
     }
 

@@ -3,7 +3,6 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.logging.Logger;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.MutableTreeNode;
 
@@ -12,8 +11,6 @@ import javax.swing.tree.MutableTreeNode;
  * @author tonikelope
  */
 public class MegaMutableTreeNode extends DefaultMutableTreeNode {
-
-    private static final Logger LOG = Logger.getLogger(MegaMutableTreeNode.class.getName());
 
     protected long mega_node_size = 0L;
 

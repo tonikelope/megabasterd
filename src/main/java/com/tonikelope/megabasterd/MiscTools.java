@@ -517,6 +517,26 @@ public class MiscTools {
 
     }
 
+    public static MegaMutableTreeNode resetTreeFolderSizes(MegaMutableTreeNode node) {
+
+        if (!node.isLeaf()) {
+
+            node.setMega_node_size(0);
+
+            int n = node.getChildCount();
+
+            for (int i = 0; i < n; i++) {
+
+                if (!node.getChildAt(i).isLeaf()) {
+                    resetTreeFolderSizes((MegaMutableTreeNode) node.getChildAt(i));
+                }
+            }
+        }
+
+        return node;
+
+    }
+
     public static DefaultMutableTreeNode sortTree(DefaultMutableTreeNode root) {
 
         Enumeration e = root.depthFirstEnumeration();
@@ -733,12 +753,12 @@ public class MiscTools {
 
     public static String cleanFilename(String filename) {
 
-        return (System.getProperty("os.name").toLowerCase().contains("win") ? filename.replaceAll("[<>:\"/\\\\\\|\\?\\*\t]+", "") : filename).replaceAll("\\" + File.separator, "").replaceAll("[\\.]{1,}$", "").replaceAll("[\\x00-\\x1F]", "").trim();
+        return (System.getProperty("os.name").toLowerCase().contains("win") ? filename.replaceAll("[<>:\"/\\\\\\|\\?\\*\t]+", "") : filename).replaceAll("\\" + File.separator, "").replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim();
     }
 
     public static String cleanFilePath(String path) {
 
-        return !path.equals(".") ? ((System.getProperty("os.name").toLowerCase().contains("win") ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\" + File.separator, "\\" + File.separator).replaceAll("[\\.]{1,}$", "").replaceAll("[\\x00-\\x1F]", "").trim()) : path;
+        return !path.equals(".") ? ((System.getProperty("os.name").toLowerCase().contains("win") ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\" + File.separator, "\\" + File.separator).replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim()) : path;
     }
 
     public static byte[] genRandomByteArray(int length) {
