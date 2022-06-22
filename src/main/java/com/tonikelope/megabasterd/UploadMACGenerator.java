@@ -113,7 +113,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
             Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", _upload.getByte_file_key(), i32a2bin(mac_iv));
 
-            try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(_upload.getFile_name()))) {
+            try ( BufferedInputStream is = new BufferedInputStream(new FileInputStream(_upload.getFile_name()))) {
 
                 if (tot > 0) {
                     is.skip(tot);

@@ -205,7 +205,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
                                 int reads;
 
-                                try (CipherInputStream cis = new CipherInputStream(new BufferedInputStream(new FileInputStream(chunk_file)), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
+                                try ( CipherInputStream cis = new CipherInputStream(new BufferedInputStream(new FileInputStream(chunk_file)), genDecrypter("AES", "AES/CTR/NoPadding", _byte_file_key, forwardMEGALinkKeyIV(_byte_iv, _bytes_written)))) {
                                     while ((reads = cis.read(buffer)) != -1) {
                                         _download.getOutput_stream().write(buffer, 0, reads);
                                     }

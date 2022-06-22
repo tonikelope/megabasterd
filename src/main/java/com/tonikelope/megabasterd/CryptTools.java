@@ -300,7 +300,7 @@ public class CryptTools {
 
                 if (compression) {
 
-                    try (InputStream is = new GZIPInputStream(new ByteArrayInputStream(elc_byte)); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                    try ( InputStream is = new GZIPInputStream(new ByteArrayInputStream(elc_byte));  ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -428,7 +428,7 @@ public class CryptTools {
 
                 con.getOutputStream().close();
 
-                try (InputStream is = con.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+                try ( InputStream is = con.getInputStream();  ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 
                     byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -549,7 +549,7 @@ public class CryptTools {
 
             String enc_dlc_key;
 
-            try (InputStream is = con.getInputStream(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            try ( InputStream is = con.getInputStream();  ByteArrayOutputStream out = new ByteArrayOutputStream()) {
                 byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
                 int reads;
                 while ((reads = is.read(buffer)) != -1) {

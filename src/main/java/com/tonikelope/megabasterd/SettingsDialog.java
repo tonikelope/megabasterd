@@ -2013,7 +2013,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                         ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
-                                        try (ObjectOutputStream os = new ObjectOutputStream(bs)) {
+                                        try ( ObjectOutputStream os = new ObjectOutputStream(bs)) {
                                             os.writeObject(ma);
                                         }
 
@@ -2098,7 +2098,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                             ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
-                                            try (ObjectOutputStream os = new ObjectOutputStream(bs)) {
+                                            try ( ObjectOutputStream os = new ObjectOutputStream(bs)) {
                                                 os.writeObject(ma);
                                             }
 
@@ -2704,7 +2704,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     file.createNewFile();
 
-                    try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(file)); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+                    try ( BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(file));  ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 
                         HashMap<String, Object> settings = new HashMap<>();
 
@@ -2755,7 +2755,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 try {
 
-                    try (InputStream fis = new BufferedInputStream(new FileInputStream(file)); ObjectInputStream ois = new ObjectInputStream(fis)) {
+                    try ( InputStream fis = new BufferedInputStream(new FileInputStream(file));  ObjectInputStream ois = new ObjectInputStream(fis)) {
 
                         HashMap<String, Object> settings = (HashMap<String, Object>) ois.readObject();
 

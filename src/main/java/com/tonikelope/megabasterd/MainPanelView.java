@@ -720,7 +720,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_panel); // NOI18N
 
-        unfreeze_transferences_button.setBackground(new java.awt.Color(255, 255, 255));
         unfreeze_transferences_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         unfreeze_transferences_button.setForeground(new java.awt.Color(0, 153, 255));
         unfreeze_transferences_button.setText("UNFREEZE WAITING TRANSFERENCES");

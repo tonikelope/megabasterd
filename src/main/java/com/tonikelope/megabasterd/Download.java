@@ -602,7 +602,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                 getView().printStatusNormal("Truncating temp file...");
 
-                                try (FileChannel out_truncate = new FileOutputStream(temp_filename, true).getChannel()) {
+                                try ( FileChannel out_truncate = new FileOutputStream(temp_filename, true).getChannel()) {
                                     out_truncate.truncate(max_size);
                                 }
                             }
@@ -1336,7 +1336,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", byte_file_key, i32a2bin(cbc_iv));
 
-        try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(filename))) {
+        try ( BufferedInputStream is = new BufferedInputStream(new FileInputStream(filename))) {
 
             long chunk_id = 1L;
             long tot = 0L;

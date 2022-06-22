@@ -293,7 +293,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 tmp_chunk_file = new File(_download.getChunkmanager().getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + chunk_id + ".tmp");
 
-                                try (InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor()); OutputStream tmp_chunk_file_os = new BufferedOutputStream(new FileOutputStream(tmp_chunk_file))) {
+                                try ( InputStream is = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor());  OutputStream tmp_chunk_file_os = new BufferedOutputStream(new FileOutputStream(tmp_chunk_file))) {
 
                                     init_chunk_time = System.currentTimeMillis();
 

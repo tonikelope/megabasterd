@@ -72,7 +72,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
     private boolean _mergeFile() throws IOException {
 
-        try (RandomAccessFile targetFile = new RandomAccessFile(this.file_name_label.getText(), "rw")) {
+        try ( RandomAccessFile targetFile = new RandomAccessFile(this.file_name_label.getText(), "rw")) {
 
             FileChannel targetChannel = targetFile.getChannel();
 

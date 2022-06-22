@@ -192,7 +192,7 @@ public class StreamChunkDownloader implements Runnable {
 
                             } else {
 
-                                try (InputStream is = con.getInputStream()) {
+                                try ( InputStream is = con.getInputStream()) {
 
                                     int chunk_writes = 0;
 

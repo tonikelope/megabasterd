@@ -72,7 +72,7 @@ public class MegaCrypterAPI {
 
             } else {
 
-                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                try ( InputStream is = con.getInputStream();  ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                     byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
