@@ -64,9 +64,9 @@ public class LabelTranslatorSingleton {
         _addTranslation("Split content in different uploads", "Dividi il contenuto in diversi upload");
         _addTranslation("Merge content in the same upload", "Unisci contenuti nello stesso upload");
         _addTranslation("How do you want to proceed?", "Come vuoi procedere?");
-        _addTranslation("Put on TOP of waiting queue", "Metti in CIMA alla coda di attesa");
+        _addTranslation("Put on TOP of waiting queue", "Sposta in alto nella coda di attesa");
         _addTranslation("TOP", "ALTO");
-        _addTranslation("BOTTOM", "BASSSO");
+        _addTranslation("BOTTOM", "BASSO");
         _addTranslation("Freeze transferences before start", "Blocca i trasferimenti prima dell'avvio");
         _addTranslation("UNFREEZE WAITING TRANSFERENCES", "SBLOCCA TRASFERIMENTI IN ATTESA");
         _addTranslation("(FROZEN) Waiting to start...", "(BLOCCATO) In attesa dell'avvio...");
@@ -91,8 +91,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("Checking, please wait...", "Verifica...");
         _addTranslation("You have the latest version ;)", "La versione installata è aggiornata :)");
         _addTranslation("Copy MegaBasterd download URL", "Copia URL download MegaBasterd");
-        _addTranslation("Made with love (and with no warranty) by tonikelope.", "Realizzato con amore (e senza garanzia) da tonikelope.");
-        _addTranslation("Yet another unofficial (and ugly) cross-platform MEGA downloader/uploader/streaming suite.", "Ancora un'altra suite non ufficiale di download/upload/streaming per MEGA multi piattaforma.");
+        _addTranslation("Made with love (and with no warranty) by tonikelope.", "Realizzato con amore (e senza garanzie) da tonikelope.");
+        _addTranslation("Yet another unofficial (and ugly) cross-platform MEGA downloader/uploader/streaming suite.", "Ancora un'altra suite multi piattaforma non ufficiale di download/upload/streaming per MEGA.");
         _addTranslation("MEGA URL was copied to clipboard!", "URL MEGA URL copiata negli Appunti!");
         _addTranslation("MegaBasterd NEW VERSION is available! -> ", "Disponibile NUOVA VERSIONE MegaBasterd! ->");
         _addTranslation("Selecting folder...", "Seelziona cartella...");
@@ -101,7 +101,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Remove selected", "Rimuovi selezionati");
         _addTranslation("SPLIT FILE", "DIVIDI FILE");
         _addTranslation("Encrypt on disk sensitive information", "Crittografa su disco le informazioni sensibili");
-        _addTranslation("Allow using MEGA accounts for download/streaming", "Consenti l'uso dell'account MEGA per download/streaming");
+        _addTranslation("Allow using MEGA accounts for download/streaming", "Consenti uso account MEGA per download/streaming");
         _addTranslation("Please wait...", "Attendi...");
         _addTranslation("CANCEL RETRY", "Annulla ritentativo");
         _addTranslation("SPLITTING FILE...", "Divisione file...");
@@ -113,7 +113,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("RESET MEGABASTERD", "Ripristina MegaBasterd");
         _addTranslation("RESET ACCOUNTS", "Ripristina account");
         _addTranslation("Verify file integrity (when download is finished)", "Verifica integrità file (a download completato)");
-        _addTranslation("Let's dance, baby", "Balliamo, piccola");
+        _addTranslation("Let's dance, baby", "Conferma download");
         _addTranslation("Unlock accounts", "Sblocca account");
         _addTranslation("Use MegaCrypter reverse mode", "Usa modalità inversa MegaCrypter");
         _addTranslation("Select (any) file part", "Seleziona (qualsiasi) parte di file");
@@ -121,8 +121,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("Adding files, please wait...", "Aggiunta file");
         _addTranslation("Restart", "Riavvia");
         _addTranslation("Use SmartProxy", "Usa SmartProxy");
-        _addTranslation("PAUSE DOWNLOAD", "Puasa download");
-        _addTranslation("Change it", "Modificalo");
+        _addTranslation("PAUSE DOWNLOAD", "Pausa download");
+        _addTranslation("Change it", "Modifica cartella");
         _addTranslation("EXPORT SETTINGS", "ESPORTA IMPOSTAZIONI");
         _addTranslation("Change output folder", "Modifica cambia cartella destinazione");
         _addTranslation("Add account", "Aggiungi account");
@@ -211,7 +211,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("All your current settings and accounts will be deleted after import. (It is recommended to export your current settings before importing). \n\nDo you want to continue?", "Tutte le impostazioni e gli account attuali verranno eliminati dopo l'importazione (ti consigliamo di esportare le impostazioni attuali prima di importare quelle nuove).\n\nVuoi continuare?");
         _addTranslation("Only SAVED settings and accounts will be exported. (If you are unsure, it is better to save your current settings and then export them).\n\nDo you want to continue?", "Verranno esportate solo le impostazioni e gli account SALVATI (se non sei sicuro, è meglio salvare le impostazioni attauli e quindi esportarle).\n\nVuoi continuare?");
         _addTranslation("Master password will be reset and all your accounts will be removed. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?", "La password principale verrà reimpostata e tutti i tuoi account verranno rimossi  (L'OPERAZIONE NON PUÒ ESSERE ANNULLATA).\n\nVuoi continuare?");
-        _addTranslation("ALL YOUR SETTINGS, ACCOUNTS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?", "Tutte e informazioni, gli acoount e i trasferimenti verranno rimossi (l'operazione non può essere annullata).\n\nVuoi continuare?");
+        _addTranslation("ALL YOUR SETTINGS, ACCOUNTS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?", "Tutte e informazioni, gli account e i trasferimenti verranno rimossi (l'operazione non può essere annullata).\n\nVuoi continuare?");
         _addTranslation("Remove all no running downloads?", "Vuoi rimuovere tutti i download non in esecuzione?");
         _addTranslation("Warning!", "Attenzione!");
         _addTranslation("Remove all no running uploads?", "Vuoi rimuovere tutti gli upload non in esecuzione?");
@@ -249,7 +249,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Download CANCELED!", "Download annullato");
         _addTranslation("Upload CANCELED!", "Upload annullato");
         _addTranslation("Uploading file to mega (", "Upload file su Mega");
-        _addTranslation("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:", "Per ottenere un collegamento streaming Inserisci qui il collegamento MEGA/MegaCrypter/ELC:");
+        _addTranslation("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:", "Per ottenere un collegamento streaming inserisci qui il collegamento MEGA/MegaCrypter/ELC:");
         _addTranslation("Use this account for streaming:", "Per lo streaming usa questo account:");
         _addTranslation("Use this account for download:", "Per il download usa questo account:");
         _addTranslation("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content.", "Il collegamento in streaming è stato copiato negli Appunti!\nRicordati di mantenere  MegaBasterd in esecuzione in background durante la riproduzione dei contenuti.");
@@ -315,12 +315,15 @@ public class LabelTranslatorSingleton {
         _addTranslation("Run:", "In download:");
         _addTranslation("Finish:", "Completati:");
         _addTranslation("Rem:", "Rem:");
+        _addTranslation("Link Grabber", "Cattura collegamenti");
+        _addTranslation("Select DLC Container", "Selezione contenitore DLC");
+        _addTranslation("No MEGA accounts available (Go to Settings > Accounts)", "Nessun account MEGA disponibile (vai in Impostazioni -> Account");
         _addTranslation("English", "Inglese");
         _addTranslation("Spanish", "Spagnolo");
         _addTranslation("Italian", "Italiano");
         _addTranslation("Turkish", "Turco");
         _addTranslation("Chinese", "Cinese");
-
+        _addTranslation("German", "Tedesco");
     }
 
     private void Chinese() {
