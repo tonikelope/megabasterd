@@ -50,13 +50,13 @@ public class LabelTranslatorSingleton {
     }
 
     private void Italian() {
-        _addTranslation("COPY ALL", "COPIA TUTTO");
-        _addTranslation("ALL COPIED!", "TUTTI COPIATI!");
-        _addTranslation("FILE WITH SAME NAME AND SIZE ALREADY EXISTS", "ESISTE GIA' UN FILE CON LO STESSO NOME E DIMENSIONE");
-        _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE. YOU SHOULD GET A KEY -> https://mega.nz/sdk", "ATTENZIONE: L'USO DI API MEGA SENZA CHIAVE API PUÒ VIOLARE IL TERMINE D'USO DI MEGA.\nDOVRESTI CHIEDERE UNA CHIAVE - > https://mega.nz/sdk");
-        _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE.\n\nYOU SHOULD GET A KEY -> https://mega.nz/sdk (and set it in MegaBasterd ADVANCED SETTINGS).\n\nCREATE API KEY NOW?", "Attenzione: l'usi di API Mega senza chiave API può violare il termine d'uso di Mega.\n\nDovresti chiedere una chiave - > https://mega.nz/sdk (e impostarla in MegaBasterd - Impostazioni avanzate).\n\nVuoi creare ora una chiave API?");
-        _addTranslation("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.", "ATTENZIONE: l'uso di proxy o VPN per aggirare la limitazione del download giornaliero di MEGA potrebbe violare i suoi Termini di uso.\n\nUsa questa opzione  a tuo rischio.");
-        _addTranslation("Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use.\n\nUSE THIS OPTION AT YOUR OWN RISK.", "L'uso di proxy o VPN per aggirare la limitazione del download giornaliero di MEGA potrebbe violare i suoi Termini di uso.\n\nNSA QUESTA OPZIONE A TUO RISCHIO.");
+        _addTranslation("COPY ALL", "Copia tutto");
+        _addTranslation("ALL COPIED!", "Copia completata!");
+        _addTranslation("FILE WITH SAME NAME AND SIZE ALREADY EXISTS", "Esiste già un file con lo stesso nome e dimensione");
+        _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE. YOU SHOULD GET A KEY -> https://mega.nz/sdk", "Attenzione: l'uso di API MEGA senza chiave API potrebbe violare i termini d'uso di MEGA.\nRicheidi una chiave API - > https://mega.nz/sdk");
+        _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE.\n\nYOU SHOULD GET A KEY -> https://mega.nz/sdk (and set it in MegaBasterd ADVANCED SETTINGS).\n\nCREATE API KEY NOW?", "Attenzione: l'usi di API Mega senza chiave API potrebbe violare i termini d'uso di Mega.\n\nRichiedi una chiave API - > https://mega.nz/sdk (e impostarla in MegaBasterd - Impostazioni avanzate).\n\nVuoi creare ora una chiave API?");
+        _addTranslation("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.", "Attenzione: l'uso di proxy o VPN per aggirare la limitazione del download giornaliero di MEGA potrebbe violare i termini d'uso di MEGA.\n\nUsa questa opzione a tuo rischio.");
+        _addTranslation("Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use.\n\nUSE THIS OPTION AT YOUR OWN RISK.", "L'uso di proxy o VPN per aggirare la limitazione del download giornaliero di MEGA potrebbe violare i termini d'uso di MEGA.\n\nUsa questa opzione a tuo rischio.");
         _addTranslation("Execute this command when MEGA download limit is reached:", "Esegui questo comando quando viene raggiunto il limite download MEGA:");
         _addTranslation("Use this proxy list (instead of the one included in MegaBasterd) Format is [*]IP:PORT[@user_b64:password_b64]", "Usa questo elenco proxy (invece di quello incluso in MegaBasterd).\nIl formato è [*]IP:PORTA[@user_b64:password_b64]");
         _addTranslation("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***", "In attesa completamento gestore... *** Non uscire da MegaBasterd!!! ***");
@@ -174,7 +174,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Default account:", "Account predefinito:");
         _addTranslation("TCP Port:", "Porta TCP");
         _addTranslation("Note: you MUST \"OPEN\" this port in your router/firewall.", "Nota: è NECESSARIO \"APRIRE\" questa porta nel router/firewall.");
-        _addTranslation("Note: enable it in order to mitigate bandwidth limit. (Multi slot required).", "Nota: abilitarlo per mitigare il limite di larghezza di banda (richiesto multi slot).");
+        _addTranslation("Note: enable it in order to mitigate bandwidth limit. (Multi slot required).", "Nota: abilita questa opzione per mitigare il limite di larghezza di banda (richiesto multi slot).");
         _addTranslation("Max parallel downloads:", "N. download contemporanei:");
         _addTranslation("Max parallel uploads:", "N. upload contemporanei:");
         _addTranslation("Note: slots consume RAM, so use them moderately.", "Nota: gli slot consumano RAM, usali moderatamente.");
@@ -229,7 +229,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Loading files, please wait...", "Caricamento file...");
         _addTranslation("Checking account quota, please wait...", "Verifica quota account...");
         _addTranslation("ERROR checking account quota!", "ERRORE durante il controllo quota account!");
-        _addTranslation("If you DO NOT want to transfer some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).", "Se non vuoi trasferire qualche cartella o file puoi rimuoverlo (per selezionare più elementi contemporaneamente usa CTRL + MOUSE SX).");
+        _addTranslation("If you DO NOT want to transfer some folder or file you can REMOVE it (to select several items at the same time use CTRL + LMOUSE).", "Se non vuoi trasferire qualche cartella o file puoi rimuoverlo (per selezionare più elementi contemporaneamente usa CTRL + mouse sx).");
         _addTranslation("Upload name:", "Nome upload:");
         _addTranslation("Account:", "Account:");
         _addTranslation("Folder link detected!", "Rilevato collegamento cartella!");
@@ -319,6 +319,11 @@ public class LabelTranslatorSingleton {
         _addTranslation("Select DLC container", "Selezione contenitore DLC");
         _addTranslation("No MEGA accounts available (Go to Settings > Accounts)", "Nessun account MEGA disponibile (vai in Impostazioni -> Account");
         _addTranslation("MEGA API KEY", "Chiave API MEGA");
+        _addTranslation("Email", "Email");
+        _addTranslation("Host", "Host");
+        _addTranslation("User", "Utente");
+        _addTranslation("Password", "Password");
+        _addTranslation("API-KEY", "Chiave API");
         _addTranslation("English", "Inglese");
         _addTranslation("Spanish", "Spagnolo");
         _addTranslation("Italian", "Italiano");
