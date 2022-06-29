@@ -65,8 +65,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("Merge content in the same upload", "Unisci contenuti nello stesso upload");
         _addTranslation("How do you want to proceed?", "Come vuoi procedere?");
         _addTranslation("Put on TOP of waiting queue", "Sposta in alto nella coda di attesa");
-        _addTranslation("TOP", "ALTO");
-        _addTranslation("BOTTOM", "BASSO");
+        _addTranslation("TOP", "Sposta in alto");
+        _addTranslation("BOTTOM", "Sposta in basso");
         _addTranslation("Freeze transferences before start", "Blocca i trasferimenti prima dell'avvio");
         _addTranslation("UNFREEZE WAITING TRANSFERENCES", "Sblocca trasferimenti in attesa");
         _addTranslation("(FROZEN) Waiting to start...", "(Bloccato) in attesa dell'avvio...");
@@ -166,7 +166,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Restoring data, please wait...", "Ripristino dati...");
         _addTranslation("File", "File");
         _addTranslation("Hide to tray", "Nascondi in barra sistema");
-        _addTranslation("Clear finished", "Rimuovi da elenco file completati");
+        _addTranslation("Clear finished", "Rimuovi file completati da elenco");
         _addTranslation("Exit", "Esci");
         _addTranslation("Default slots per file:", "Slot predefiniti per file:");
         _addTranslation("Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it. (Slots consume RAM, so use them moderately).", "Nota: se vuoi scaricare senza usare un account PREMIUM MEGA è necessario abilitarlo (gli slot consumano RAM, usali moderatamente).");
