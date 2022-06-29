@@ -191,11 +191,11 @@ public class LabelTranslatorSingleton {
         _addTranslation("Settings successfully exported!", "Esportazioni impostazioni completata!");
         _addTranslation("Settings successfully reset!", "Ripristino impostazioni completato");
         _addTranslation("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n", "Si sono verificati errori con alcuni account (email e/o password errati).\nControllali:\n\n");
-        _addTranslation("Settings saved", "Impostazioni salvate:");
-        _addTranslation("Settings imported", "Impostazioni importate:");
-        _addTranslation("Settings exported", "Impostazioni esportate");
+        _addTranslation("Settings saved", "Salvataggio impostazioni");
+        _addTranslation("Settings imported", "Importazione impostazioni");
+        _addTranslation("Settings exported", "Esportazione impostazioni");
         _addTranslation("Settings reset", "Ripristino impostazioni");
-        _addTranslation("MegaBasterd will restart", "MegaBasterd si riavvierà");
+        _addTranslation("MegaBasterd will restart", "MegaBasterd verrà riavviato per applicare le nuove impostazioni");
         _addTranslation("Restart required", "Riavvio richiesto");
         _addTranslation("File is not readable!", "Il file non è leggibile");
         _addTranslation("Folder is not readable!", "La cartella non è leggibile");
@@ -209,7 +209,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("It seems MegaBasterd is provisioning down/uploads.\n\nIf you exit now, unprovisioned down/uploads will be lost.\n\nDo you want to continue?", "Sembra che MegaBasterd stia effettuando il provisioning/upload.\n\nSe esci ora, l'unprovisioned/upload andranno persi.\n\nVuoi continuare?");
         _addTranslation("It seems MegaBasterd is just finishing uploading some files.\n\nIF YOU EXIT NOW, THOSE UPLOADS WILL FAIL.\n\nDo you want to continue?", "Sembra che MegaBasterd stia finendo di caricare alcuni file.\n\nSe esci ora quegli upload falliranno.\n\nVuoi continuare?");
         _addTranslation("All your current settings and accounts will be deleted after import. (It is recommended to export your current settings before importing). \n\nDo you want to continue?", "Dopo l'importazione tutte le impostazioni e gli account attuali verranno eliminati (ti consigliamo di esportare le impostazioni attuali prima di importare quelle nuove).\n\nVuoi continuare?");
-        _addTranslation("Only SAVED settings and accounts will be exported. (If you are unsure, it is better to save your current settings and then export them).\n\nDo you want to continue?", "Verranno esportate solo le impostazioni e gli account SALVATI (se non sei sicuro, è meglio salvare le impostazioni attauli e quindi esportarle).\n\nVuoi continuare?");
+        _addTranslation("Only SAVED settings and accounts will be exported. (If you are unsure, it is better to save your current settings and then export them).\n\nDo you want to continue?", "Verranno esportate solo le impostazioni e gli account SALVATI (se non sei sicuro, è meglio salvare le impostazioni attuali e quindi esportarle).\n\nVuoi continuare?");
         _addTranslation("Master password will be reset and all your accounts will be removed. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?", "La password principale verrà reimpostata e tutti i tuoi account verranno rimossi (l'operazione non può essere annullata).\n\nVuoi continuare?");
         _addTranslation("ALL YOUR SETTINGS, ACCOUNTS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?", "Tutte e informazioni, gli account e i trasferimenti verranno rimossi (l'operazione non può essere annullata).\n\nVuoi continuare?");
         _addTranslation("Remove all no running downloads?", "Vuoi rimuovere tutti i download non in esecuzione?");
