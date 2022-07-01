@@ -335,13 +335,13 @@ public class LabelTranslatorSingleton {
     private void Chinese() {
         _addTranslation("COPY ALL", "全部复制");
         _addTranslation("ALL COPIED!", "全部复制!");
-        _addTranslation("FILE WITH SAME NAME AND SIZE ALREADY EXISTS", "已存在相同名称大小的文件"");
+        _addTranslation("FILE WITH SAME NAME AND SIZE ALREADY EXISTS", "已存在相同名称大小的文件");
         _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE. YOU SHOULD GET A KEY -> https://mega.nz/sdk", "警告: 在没有 API 密钥的情况下使用 MEGA API 可能会违反其使用条款. API 密钥获取地址 -> https://mega.nz/sdk");
         _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE.\n\nYOU SHOULD GET A KEY -> https://mega.nz/sdk (and set it in MegaBasterd ADVANCED SETTINGS).\n\nCREATE API KEY NOW?", "警告: 在没有 API 密钥的情况下使用 MEGA API 可能会违反其使用条款. API 密钥获取地址 -> https://mega.nz/sdk");
         _addTranslation("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.", "警告: 在没有 API 密钥的情况下使用 MEGA API 可能会违反其使用条款.\n\nAPI 密钥获取地址 -> https://mega.nz/sdk (并在 MegaBasterd 高级设置中进行设置).\n\n立即创建 API 密钥?");
         _addTranslation("Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use.\n\nUSE THIS OPTION AT YOUR OWN RISK.", "警告: 使用代理或 VPN 绕过 MEGA 的每日下载限制可能违反其使用条款. 使用此选项需您自担风险.");
-        _addTranslation("Execute this command when MEGA download limit is reached:", "达到 MEGA 下载限制时执行此命令:", );
-        _addTranslation("Use this proxy list (instead of the one included in MegaBasterd) Format is [*]IP:PORT[@user_b64:password_b64]", 使用此代理列表 (而不是 MegaBasterd 中包含的那个) 格式为 [*]IP:PORT[@user_b64:password_b64]");
+        _addTranslation("Execute this command when MEGA download limit is reached:", "达到 MEGA 下载限制时执行此命令:");
+        _addTranslation("Use this proxy list (instead of the one included in MegaBasterd) Format is [*]IP:PORT[@user_b64:password_b64]", "使用此代理列表 (而不是 MegaBasterd 中包含的那个) 格式为 [*]IP:PORT[@user_b64:password_b64]");
         _addTranslation("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***", "等待完成处理程序 ... ***不要退出 MEGABASTERD***");
         _addTranslation("Finishing calculating CBC-MAC code (this could take a while) ... ***DO NOT EXIT MEGABASTERD NOW***", "完成计算CBC-MAC码 (可能需要一段时间) ... ***不要退出 MEGABASTERD***");
         _addTranslation("Split content in different uploads", "拆分上传内容");
@@ -353,7 +353,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Freeze transferences before start", "开始前暂停传输");
         _addTranslation("UNFREEZE WAITING TRANSFERENCES", "取消暂停传输");
         _addTranslation("(FROZEN) Waiting to start...", "(暂停) 等待开始...");
-        _addTranslation("(FROZEN) Waiting to start (", "(暂停) 等待开始);
+        _addTranslation("(FROZEN) Waiting to start (", "(暂停) 等待开始");
         _addTranslation("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd", "这个文件夹里有很多文件.\n并非所有链接都将立即提供以避免使 MegaBasterd 饱和");
         _addTranslation("You've tried to login too many times. Wait an hour.", "您尝试登录太多次. 等一个小时.");
         _addTranslation("MEGA LINK ERROR!", "MEGA 链接错误!");
@@ -456,7 +456,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Max speed (KB/s):", "最大速度 (KB/s):");
         _addTranslation("Default account:", "默认帐户:");
         _addTranslation("TCP Port:", "TCP 端口:");
-        _addTranslation("Note: you MUST \"OPEN\" this port in your router/firewall.", "Nota: es OBLIGATORIO \"ABRIR\" este puerto en tu router/firewall.", "注意: 你必须 \"打开\" 路由器中的此端口/firewall.", "注意: 这是强制性的 \"打开\" 路由器上的这个端口/firewall.");
+        _addTranslation("Note: you MUST \"OPEN\" this port in your router/firewall.", "注意: 你必须 \"打开\" 路由器中的此端口/firewall.");
         _addTranslation("Note: enable it in order to mitigate bandwidth limit. (Multi slot required).", "注意: 启用它以减轻带宽限制. (需要多线程).");
         _addTranslation("Max parallel downloads:", "最大下载并行:");
         _addTranslation("Max parallel uploads:", "最大上传并行:");
@@ -468,8 +468,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("Note: restart might be required.", "注意: 可能需要重新启动.");
         _addTranslation("Font ZOOM (%):", "字体 缩放 (%):");
         _addTranslation("Note: MegaBasterd will use this proxy for ALL connections.", "注意: MegaBasterd 将使用此代理进行所有连接.");
-        _addTranslation("Port:", ""端口:"");
-        _addTranslation("Settings successfully saved!", "设置保存成功!);
+        _addTranslation("Port:", "端口:");
+        _addTranslation("Settings successfully saved!", "设置保存成功!");
         _addTranslation("Settings successfully imported!", "导入设置成功!");
         _addTranslation("Settings successfully exported!", "导出设置成功!");
         _addTranslation("Settings successfully reset!", "重置设置成功!");
@@ -590,10 +590,10 @@ public class LabelTranslatorSingleton {
         _addTranslation("Quota used: ", "配额使用: ");
         _addTranslation("Streaming server: ON (port ", "流媒体服务器: ON (端口 ");
         _addTranslation("MC reverse mode: ON (port ", "MC 反向模式: ON (端口 ");
-        _addTranslation("Streaming server: OFF (port ", "流媒体服务器: OFF (端口 ");
-        _addTranslation("MC reverse mode: OFF (port ", "MC 反向模式：OFF ");
-        _addTranslation("SmartProxy: ON (port ", "智能代理：ON (端口 ");
-        _addTranslation("SmartProxy: OFF (port ", "智能代理：OFF ");
+        _addTranslation("Streaming server: OFF (port ", "流媒体服务器: OFF (端口");
+        _addTranslation("MC reverse mode: OFF (port ", "MC 反向模式：OFF");
+        _addTranslation("SmartProxy: ON (port ", "智能代理：ON (端口");
+        _addTranslation("SmartProxy: OFF (port ", "智能代理：OFF");
         _addTranslation("Joining file chunks, please wait...", "加入文件块, 请稍等...");
         _addTranslation("Close MegaBasterd when all transfers finish", "所有传输完成后关闭 MegaBasterd");
         _addTranslation("Use custom temporary directory for chunks storage", "使用自定义临时目录进行存储");
