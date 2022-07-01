@@ -582,6 +582,8 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Chinese"));
 
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("German"));
+
             if (language == null) {
                 language = MainPanel.DEFAULT_LANGUAGE;
             }
@@ -596,6 +598,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Turkish"));
             } else if (language.equals("CH")) {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Chinese"));
+            } else if (language.equals("DE")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("German"));
             }
 
             String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
@@ -1762,6 +1766,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                 language = "ES";
             } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Italian"))) {
                 language = "IT";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("German"))) {
+                language = "DE";
             } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Turkish"))) {
                 language = "TU";
                 font = "DEFAULT";
