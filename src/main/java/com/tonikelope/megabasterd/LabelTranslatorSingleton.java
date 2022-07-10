@@ -45,6 +45,10 @@ public class LabelTranslatorSingleton {
             case "TU":
                 Turkish();
                 break;
+
+            case "DE":
+                German();
+                break;
         }
 
     }
@@ -319,6 +323,10 @@ public class LabelTranslatorSingleton {
         _addTranslation("Select DLC container", "Selezione contenitore DLC");
         _addTranslation("No MEGA accounts available (Go to Settings > Accounts)", "Nessun account MEGA disponibile (vai in Impostazioni -> Account");
         _addTranslation("MEGA API KEY", "Chiave API MEGA");
+        _addTranslation("MEGA API KEY ERROR", "Errore chiave API Mega");
+        _addTranslation("An older version of MegaBasterd has been detected (", "È stata rilevata una versione precedente di MegaBasterd (");
+        _addTranslation(").\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS.", ").\nVuoi importare tutte le impostazioni attuali e i trasferimenti dalla versione precedente?\nAttezione: possono esistere incompatibilità tra versioni.");
+        _addTranslation("All your transferences have finished", "Tutti i trasferimenti sono stati completati");
         _addTranslation("Email", "Email");
         _addTranslation("Host", "Host");
         _addTranslation("User", "Utente");
