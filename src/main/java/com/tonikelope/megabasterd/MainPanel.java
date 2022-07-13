@@ -1011,7 +1011,7 @@ public final class MainPanel {
                         LabelTranslatorSingleton.getInstance().translate("Yes")};
 
                     int n = showOptionDialog(getView(),
-                            LabelTranslatorSingleton.getInstance().translate("An older version (" + old_version + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
+                            LabelTranslatorSingleton.getInstance().translate("An older version of MegaBasterd has been detected (" + old_version + ").\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
                             LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE,
                             null,
                             options,
@@ -1342,7 +1342,7 @@ public final class MainPanel {
 
             menu.setFont(new_font.deriveFont(Font.BOLD, Math.round(14 * ZOOM_FACTOR)));
 
-            MenuItem messageItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("Restore window"));
+            MenuItem messageItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("Restore MegaBasterd window"));
 
             messageItem.addActionListener((ActionEvent e) -> {
                 MiscTools.GUIRun(() -> {
@@ -1358,7 +1358,7 @@ public final class MainPanel {
 
             menu.add(messageItem);
 
-            MenuItem closeItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("EXIT"));
+            MenuItem closeItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("Exit from MegaBasterd"));
 
             closeItem.addActionListener((ActionEvent e) -> {
                 if (!getView().isVisible()) {

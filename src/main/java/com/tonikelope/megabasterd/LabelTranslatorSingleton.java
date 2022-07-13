@@ -299,12 +299,16 @@ public class LabelTranslatorSingleton {
         _addTranslation("Link was copied to clipboard!", "Il collegamento è stato copiato negli Appunti!");
         _addTranslation("Checking if there are previous downloads, please wait...", "Verifica se ci sono download precedenti...");
         _addTranslation("Checking if there are previous uploads, please wait...", "Verifica se ci sono upload precedenti...");
-        _addTranslation("Restore window", "Ripristina finestra");
+        _addTranslation("Restore window", "Ripristina finestra MegaBasterd");
         _addTranslation("EXIT", "Esci");
         _addTranslation("File successfully downloaded!", "Download file completato!");
         _addTranslation("Quota used: ", "Quota usata: ");
         _addTranslation("Streaming server: ON (port ", "Server streaming: ON (porta ");
         _addTranslation("MC reverse mode: ON (port ", "Modo inverso MC: ON (porta ");
+        _addTranslation("Streaming server: OFF (port ", "");
+        _addTranslation("MC reverse mode: OFF (port ", "Mod MC inverso:(porta ");
+        _addTranslation("SmartProxy: ON (port ", "SmaprtProxy: ON (porta ");
+        _addTranslation("SmartProxy: OFF (port ", "");
         _addTranslation("Joining file chunks, please wait...", "Unione segmenti file...");
         _addTranslation("Close MegaBasterd when all transfers finish", "Chiudi MegaBasterd a trasferimenti completati");
         _addTranslation("Use custom temporary directory for chunks storage", "Per salvare i segmenti usa cartella temporanea personalizzata");
@@ -312,7 +316,6 @@ public class LabelTranslatorSingleton {
         _addTranslation("Save debug info to file", "Salva info debug nel file");
         _addTranslation("Use this proxy list Format is [*]IP:PORT[@user_b64:password_b64]", "Il formato per l'elenco proxy è []IP:PORT[@user_b64:password_b64)");
         _addTranslation("Slots", "Slot");
-        _addTranslation("MC reverse mode: OFF", "Modo MC inverso: OFF");
         _addTranslation("Pre:", "In preparazione:");
         _addTranslation("Pro:", "Pro:");
         _addTranslation("Wait:", "In attesa:");
@@ -322,7 +325,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Link Grabber", "Cattura collegamenti");
         _addTranslation("Select DLC container", "Selezione contenitore DLC");
         _addTranslation("No MEGA accounts available (Go to Settings > Accounts)", "Nessun account MEGA disponibile (vai in Impostazioni -> Account");
-        _addTranslation("MEGA API KEY", "Chiave API MEGA");
+        _addTranslation("MEGA API KEY:", "Chiave API MEGA:");
         _addTranslation("MEGA API KEY ERROR", "Errore chiave API Mega");
         _addTranslation("An older version of MegaBasterd has been detected (", "È stata rilevata una versione precedente di MegaBasterd (");
         _addTranslation(").\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS.", ").\nVuoi importare tutte le impostazioni attuali e i trasferimenti dalla versione precedente?\nAttezione: possono esistere incompatibilità tra versioni.");
@@ -332,6 +335,13 @@ public class LabelTranslatorSingleton {
         _addTranslation("User", "Utente");
         _addTranslation("Password", "Password");
         _addTranslation("API-KEY", "Chiave API");
+        _addTranslation("Test", "Test");
+        _addTranslation("OK", "OK");
+        _addTranslation("No", "No");
+        _addTranslation("MC reverse mode: OFF", "Modo MC inverso: OFF");
+        _addTranslation("Restore MegaBasterd window", "Ripristina finestra MegaBasterd");
+        _addTranslation("Exit from MegaBasterd", "Esci da MegaBasterd");
+        _addTranslation("Used space: 0.00GB", "Spazio usato: 0.00GB");
         _addTranslation("English", "Inglese");
         _addTranslation("Spanish", "Spagnolo");
         _addTranslation("Italian", "Italiano");
@@ -517,12 +527,6 @@ public class LabelTranslatorSingleton {
         _addTranslation("Accounts", "账户");
         _addTranslation("Advanced", "高级");
         _addTranslation("Language:", "语言:");
-        _addTranslation("English", "");
-        _addTranslation("Spanish", "");
-        _addTranslation("Italian", "");
-        _addTranslation("Chinese", "");
-        _addTranslation("Turkish", "");
-        _addTranslation("German", "");
         _addTranslation("Loading files, please wait...", "正在加载文件, 请稍候...");
         _addTranslation("Checking account quota, please wait...", "正在查看账户配额, 请稍候...");
         _addTranslation("ERROR checking account quota!", "检查帐户配额时出错!");
@@ -614,10 +618,15 @@ public class LabelTranslatorSingleton {
         _addTranslation("Wait:", "等待:");
         _addTranslation("Run:", "下载中:");
         _addTranslation("Finish:", "完成:");
+        _addTranslation("Rem:", "");
         _addTranslation("Link Grabber", "请输入下载链接");
         _addTranslation("Select DLC container", "选择 DLC 容器");
         _addTranslation("No MEGA accounts available (Go to Settings > Accounts)", "没有可用的 MEGA 帐户 (前往设置 > 账户)");
         _addTranslation("MEGA API KEY)", "");
+        _addTranslation("MEGA API KEY ERROR", "");
+        _addTranslation("An older version of MegaBasterd has been detected (", "");
+        _addTranslation(").\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS.", "");
+        _addTranslation("All your transferences have finished", "");
         _addTranslation("Email", "");
         _addTranslation("Host", "域名/IP");
         _addTranslation("User", "用户名");
@@ -627,7 +636,15 @@ public class LabelTranslatorSingleton {
         _addTranslation("Rem:", "Rem:");
         _addTranslation("OK", "确定");
         _addTranslation("No", "否");
-    }
+        _addTranslation("MC reverse mode: OFF", "");
+        _addTranslation("Restore MegaBasterd window", "");
+        _addTranslation("Exit from MegaBasterd", "");
+        _addTranslation("English", "English");
+        _addTranslation("Spanish", "Spanish");
+        _addTranslation("Italian", "Italian");
+        _addTranslation("Turkish", "Turkish");
+        _addTranslation("Chinese", "Chinese");
+        _addTranslation("German", "German");	}
 	
     private void Turkish() {
         _addTranslation("COPY ALL", "HEPSİNİ KOPYALA");
@@ -650,7 +667,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Freeze transferences before start", "Başlamadan önce aktarımları dondurun");
         _addTranslation("UNFREEZE WAITING TRANSFERENCES", "BEKLEYEN TRANSFERLERİ BIRAKIN");
         _addTranslation("(FROZEN) Waiting to start...", "(DONDURULMUŞ) Başlamak için bekleniyor...");
-        _addTranslation("(FROZEN) Waiting to start (", "(DONDURULMUŞ) Başlamak için bekleniyor...");
+        _addTranslation("(FROZEN) Waiting to start"), "(DONDURULMUŞ) Başlamak için bekleniyor...");
         _addTranslation("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd", "Bu klasörde çok sayıda dosya var.\nMegaBasterd için tüm bağlantılar aynı anda sağlanmayacak");
         _addTranslation("You've tried to login too many times. Wait an hour.", "Çok fazla giriş yapmayı denediniz. bir saat bekleyin.");
         _addTranslation("MEGA LINK ERROR!", "MEGA BAĞLANTI HATASI!");
@@ -669,7 +686,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Checking your MEGA accounts, please wait...", "MEGA hesaplarınız kontrol ediliyor, lütfen bekleyin...");
         _addTranslation("Check for updates", "Güncellemeleri kontrol et");
         _addTranslation("Checking, please wait...", "Kontrol ediliyor, lütfen bekleyin...");
-        _addTranslation("You have the latest version ;)", "En son sürüme sahipsiniz ;)");
+        _addTranslation("You have the latest version", "En son sürüme sahipsiniz");
         _addTranslation("Copy MegaBasterd download URL", "MegaBasterd indirme URL'sini kopyalayın");
         _addTranslation("Made with love (and with no warranty) by tonikelope.", "Tonikelope tarafından sevgiyle (ve garantisiz) yapılmıştır.");
         _addTranslation("Yet another unofficial (and ugly) cross-platform MEGA downloader/uploader/streaming suite.", "Yine bir başka resmi olmayan çapraz platform.");
@@ -881,6 +898,10 @@ public class LabelTranslatorSingleton {
         _addTranslation("Quota used: ", "Kullanılan kota: ");
         _addTranslation("Streaming server: ON (port ", "Akış sunucusu: AÇIK (bağlantı noktası ");
         _addTranslation("MC reverse mode: ON (port ", "MC ters modu: AÇIK (bağlantı noktası ");
+        _addTranslation("Streaming server: OFF (port ", "Akış sunucusu: KAPALI (bağlantı noktası ");
+        _addTranslation("MC reverse mode: OFF (port ", "MC ters modu: KAPALI (bağlantı noktası ");
+        _addTranslation("SmartProxy: ON (port ", "SmartProxy: AÇIK (bağlantı noktası");
+        _addTranslation("SmartProxy: OFF (port ", "SmartProxy: KAPALI (bağlantı noktası ");
         _addTranslation("Joining file chunks, please wait...", "Dosya parçaları birleştiriliyor, lütfen bekleyin...");
         _addTranslation("Close MegaBasterd when all transfers finish", "Tüm transferler bittiğinde MegaBasterd'ı kapatın");
         _addTranslation("Use custom temporary directory for chunks storage", "Birleştirmeler için özel geçici depolama dizini kullanın");
@@ -888,18 +909,38 @@ public class LabelTranslatorSingleton {
         _addTranslation("Save debug info to file", "Hata ayıklama bilgilerini dosyaya kaydet");
         _addTranslation("Use this proxy list Format is [*]IP:PORT[@user_b64:password_b64]", "Bu proxy biçim listesini kullan: [*]IP:PORT[@user_b64:password_b64]");
         _addTranslation("Slots", "Slot");
-        _addTranslation("MC reverse mode: OFF", "Ters MC modu: KAPALI");
         _addTranslation("Pre:", "Hazırlık aşamasında:");
         _addTranslation("Pro:", "Pro:");
         _addTranslation("Wait:", "Bekleme aşamasında:");
         _addTranslation("Run:", "indirme aşamasında:");
         _addTranslation("Finish:", "Tamamlandı:");
         _addTranslation("Rem:", "Rem:");
+        _addTranslation("Link Grabber", "Bağlantı Yakalayıcı");
+        _addTranslation("Select DLC container", "DLC birimini seçin");
+        _addTranslation("No MEGA accounts available (Go to Settings > Accounts)", "MEGA hesabı yok (Ayarlar > Hesaplar'a gidin");
+        _addTranslation("MEGA API KEY", "MEGA API ANAHTARI");
+        _addTranslation("MEGA API KEY ERROR", "MEGA API ANAHTARI HATASI");
+        _addTranslation("An older version of MegaBasterd has been detected)", "MegaBasterd'ın daha eski bir sürümü tespit edildi");
+        _addTranslation(").\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS.", "\nÖnceki sürümden tüm mevcut ayarları ve aktarımları içe aktarmak istiyor musunuz?\nUYARI: VERSİYONLAR ARASINDA UYUMSUZLUKLAR OLABİLİR");
+        _addTranslation("All your transferences have finished", "Tüm transferlerin tamamlandı");
+        _addTranslation("Email", "Mail");
+        _addTranslation("Host", "Sunucu");
+        _addTranslation("User", "Kullanıcı");
+        _addTranslation("Password", "Şifre");
+        _addTranslation("API-KEY", "API-ANAHTARI");
+        _addTranslation("Test", "Test");
+        _addTranslation("Rem:", "Rem");
+        _addTranslation("OK", "TAMAM");
+        _addTranslation("No", "Hayır");
+        _addTranslation("MC reverse mode: OFF", "Ters MC modu: KAPALI");
+        _addTranslation("Restore MegaBasterd window", "MegaBasterd penceresini geri yükle");
+        _addTranslation("Exit from MegaBasterd", "MegaBasterd'den çıkış yap");
         _addTranslation("English", "İngilizce");
         _addTranslation("Spanish", "İspanyolca");
         _addTranslation("Italian", "İtalyan");
         _addTranslation("Turkish", "Türkçe");
         _addTranslation("Chinese", "Çince");
+        _addTranslation("German", "Almanca");
     }
 
     private void Spanish() {
@@ -1154,20 +1195,48 @@ public class LabelTranslatorSingleton {
         _addTranslation("Quota used: ", "Espacio usado: ");
         _addTranslation("Streaming server: ON (port ", "Servidor de streaming: ON (puerto ");
         _addTranslation("MC reverse mode: ON (port ", "MC reverse mode: ON (puerto ");
+        _addTranslation("Streaming server: OFF (port ", "");
+        _addTranslation("MC reverse mode: OFF (port ", "");
+        _addTranslation("SmartProxy: ON (port ", "");
+        _addTranslation("SmartProxy: OFF (port ", "");
         _addTranslation("Joining file chunks, please wait...", "Juntando chunks, por favor espera...");
         _addTranslation("Close MegaBasterd when all transfers finish", "Cerrar MegaBasterd cuando todas las transferencias terminen");
         _addTranslation("Use custom temporary directory for chunks storage", "Usar un directorio temporal personalizado para almacenar los chunks");
+        _addTranslation("CANCEL ALL DOWNLOADS", "");
+        _addTranslation("Save debug info to file", "");
+        _addTranslation("Use this proxy list Format is [*]IP:PORT[@user_b64:password_b64]", "");
+        _addTranslation("Slots", "");
         _addTranslation("Pre:", "Pre:");
         _addTranslation("Pro:", "Cargando:");
         _addTranslation("Wait:", "Espera:");
         _addTranslation("Run:", "Transf:");
         _addTranslation("Finish:", "Fin:");
         _addTranslation("Rem:", "Pend:");
+        _addTranslation("Link Grabber", "");
+        _addTranslation("Select DLC container", "");
+        _addTranslation("No MEGA accounts available (Go to Settings > Accounts)", "");
+        _addTranslation("MEGA API KEY:", "MEGA API KEY:");
+        _addTranslation("MEGA API KEY ERROR", "MEGA API KEY ERROR");
+        _addTranslation("An older version of MegaBasterd has been detected (", "An older version of MegaBasterd has been detected (");
+        _addTranslation(").\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS.", ").\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS.");
+        _addTranslation("All your transferences have finished", "All your transferences have finished");
+        _addTranslation("Email", "Email");
+        _addTranslation("Host", "");
+        _addTranslation("User", "");
+        _addTranslation("Password", "");
+        _addTranslation("API-KEY", "API-KEY");
+        _addTranslation("Test", "");
+        _addTranslation("OK", "");
+        _addTranslation("No", "");
+        _addTranslation("MC reverse mode: OFF", "MC reverse mode: OFF");
+        _addTranslation("Restore MegaBasterd window", "Restore MegaBasterd window");
+        _addTranslation("Exit from MegaBasterd", "Exit from MegaBasterd");
         _addTranslation("English", "Inglés");
         _addTranslation("Spanish", "Español");
         _addTranslation("Italian", "Italiano");
         _addTranslation("Turkish", "Turco");
         _addTranslation("Chinese", "Chino");
+        _addTranslation("German", "Alemán");
     }
 
      private void German() {
@@ -1347,8 +1416,6 @@ public class LabelTranslatorSingleton {
         _addTranslation("Accounts", "Konten");
         _addTranslation("Advanced", "Erweitert");
         _addTranslation("Language:", "Sprache");
-        _addTranslation("English", "Englisch");
-        _addTranslation("Spanish", "Spanisch");
         _addTranslation("Loading files, please wait...", "Dateien werden geladen, bitte warten...");
         _addTranslation("Checking account quota, please wait...", "Kontokontingent prüfen, bitte warten...");
         _addTranslation("ERROR checking account quota!", "FEHLER beim überprüfen ihres Kontokontigenten!");
@@ -1424,10 +1491,48 @@ public class LabelTranslatorSingleton {
         _addTranslation("Quota used: ", "Genutztes Kontingent: ");
         _addTranslation("Streaming server: ON (port ", "Streaming-Server: EIN (Port");
         _addTranslation("MC reverse mode: ON (port ", "MC-Umkehrmodus: EIN (Port");
+        _addTranslation("Streaming server: OFF (port ", "");
+        _addTranslation("MC reverse mode: OFF (port ", "");
+        _addTranslation("SmartProxy: ON (port ", "");
+        _addTranslation("SmartProxy: OFF (port ", "");
         _addTranslation("Joining file chunks, please wait...", "Dateiblöcke werden zusammengefügt, bitte warten...");
         _addTranslation("Close MegaBasterd when all transfers finish", "Schließen Sie MegaBasterd, wenn alle Übertragungen abgeschlossen sind");
         _addTranslation("Use custom temporary directory for chunks storage", "Verwenden Sie ein benutzerdefiniertes temporäres Verzeichnis für die Chunks-Speicherung");
-    }
+        _addTranslation("CANCEL ALL DOWNLOADS", "");
+        _addTranslation("Save debug info to file", "");
+        _addTranslation("Use this proxy list Format is [*]IP:PORT[@user_b64:password_b64]", "");
+        _addTranslation("Slots", "");
+        _addTranslation("Pre:", "");
+        _addTranslation("Pro:", "");
+        _addTranslation("Wait:", "");
+        _addTranslation("Run:", "");
+        _addTranslation("Finish:", "");
+        _addTranslation("Rem:", "");
+        _addTranslation("Link Grabber", "");
+        _addTranslation("Select DLC container", "");
+        _addTranslation("No MEGA accounts available (Go to Settings > Accounts)", "");
+        _addTranslation("MEGA API KEY", "");
+        _addTranslation("MEGA API KEY ERROR", "");
+        _addTranslation("An older version of MegaBasterd has been detected (", "");
+        _addTranslation(").\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS.", "");
+        _addTranslation("All your transferences have finished", "");
+        _addTranslation("Email", "");
+        _addTranslation("Host", "");
+        _addTranslation("User", "");
+        _addTranslation("Password", "");
+        _addTranslation("API-KEY", "");
+        _addTranslation("Test", "");
+        _addTranslation("Rem:", "");
+        _addTranslation("OK", "");
+        _addTranslation("No", "");
+        _addTranslation("MC reverse mode: OFF", "");
+        _addTranslation("English", "Englisch");
+        _addTranslation("Spanish", "Spanisch");
+        _addTranslation("Italian", "");
+        _addTranslation("Turkish", "");
+        _addTranslation("Chinese", "");
+        _addTranslation("German", "");
+	}
 
    private void _addTranslation(String key, String val) {
 
