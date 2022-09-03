@@ -74,7 +74,7 @@ public final class MainPanel {
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
     public static final ExecutorService THREAD_POOL = newCachedThreadPool();
-    public static volatile String MEGABASTERD_HOME_DIR = System.getProperty("user.home");
+    public static volatile String MEGABASTERD_HOME_DIR = System.getProperty("user.home") + "/.megabasterd";
     public static volatile String MEGABASTERD_DOWNLOAD_DIR = System.getProperty("user.home") + "/Downloads";
     private static String _proxy_host;
     private static int _proxy_port;
