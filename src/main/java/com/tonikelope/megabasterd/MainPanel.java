@@ -18,6 +18,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -680,7 +682,25 @@ public final class MainPanel {
         _default_download_path = selectSettingValue("default_down_dir");
 
         if (_default_download_path == null) {
-            _default_download_path = ".";
+            _default_download_path = Paths.get(".").toAbsolutePath().normalize().toString();
+            // On most Linux distributions, we can find the path of the default 'Downloads' directory with:
+            // $ xdg-user-dir DOWNLOAD
+            if (System.getProperty("os.name").toLowerCase().contains("nux")) {
+                try {
+                    Process p = Runtime.getRuntime().exec(new String[] { "xdg-user-dir", "DOWNLOAD" });
+                    BufferedReader in = new BufferedReader(new InputStreamReader(p.getInputStream()));
+                    // We only read a single line from the command output and then exit.
+                    String path = in.readLine();
+                    p.destroy();
+
+                    if (new File(path).isDirectory()) {
+                        _default_download_path = path;
+                    }
+                } catch (Exception ex) {
+                    Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING, "Unable to get default Downloads folder: {0}", ex.getMessage());
+                }
+            }
+            Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "Downloads folder not set, using this one as default: {0}", _default_download_path);
         }
 
         String limit_dl_speed = selectSettingValue("limit_download_speed");
