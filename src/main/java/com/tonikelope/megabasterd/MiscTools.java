@@ -50,6 +50,7 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -92,8 +93,8 @@ public class MiscTools {
         } else if (!a.isLeaf() && b.isLeaf()) {
             return -1;
         } else {
-            String sa = a.getUserObject().toString();
-            String sb = b.getUserObject().toString();
+            String sa = (String) ((Map) a.getUserObject()).get("name");
+            String sb = (String) ((Map) b.getUserObject()).get("name");
 
             return MiscTools.naturalCompare(sa, sb, true);
         }

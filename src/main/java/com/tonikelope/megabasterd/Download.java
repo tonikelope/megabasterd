@@ -17,6 +17,7 @@ import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Long.valueOf;
 import static java.lang.Thread.sleep;
 import java.nio.channels.FileChannel;
+import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
@@ -553,6 +554,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         try {
 
+            FileStore fs = Files.getFileStore(Paths.get(_download_path));
+
+            if (fs.getUsableSpace() < _file_size) {
+                _status_error = "NO DISK SPACE AVAILABLE!";
+                _exit = true;
+            }
+
             if (!_exit) {
 
                 String filename = _download_path + "/" + _file_name;
@@ -699,7 +707,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                 stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
 
                                 if (MainPanel.getProxy_manager() != null) {
-                                    MainPanel.getProxy_manager().refreshProxyList(); //Force SmartProxy proxy list refresh
+                                    String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
+
+                                    String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
+                                    MainPanel.getProxy_manager().refreshProxyList(url_list); //Force SmartProxy proxy list refresh
                                 }
                             }
 
@@ -969,6 +980,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     restart();
                 }
             });
+        } else {
+            getMain_panel().getDownload_manager().setAll_finished(false);
         }
 
         _exit = true;
@@ -1085,7 +1098,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 MiscTools.GUIRun(() -> {
                     getView().getFile_name_label().setVisible(true);
 
-                    getView().getFile_name_label().setText(truncateText(_download_path + "/" + _file_name, 100));
+                    getView().getFile_name_label().setText(truncateText(new File(_download_path + "/" + _file_name).getName(), 150));
 
                     getView().getFile_name_label().setToolTipText(_download_path + "/" + _file_name);
 
@@ -1112,7 +1125,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             MiscTools.GUIRun(() -> {
                 getView().getFile_name_label().setVisible(true);
 
-                getView().getFile_name_label().setText(truncateText(_download_path + "/" + _file_name, 100));
+                getView().getFile_name_label().setText(truncateText(new File(_download_path + "/" + _file_name).getName(), 150));
 
                 getView().getFile_name_label().setToolTipText(_download_path + "/" + _file_name);
 

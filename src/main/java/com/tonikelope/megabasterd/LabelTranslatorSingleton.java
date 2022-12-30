@@ -99,7 +99,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("MERGE FILE", "UNISCI FILE");
         _addTranslation("Delete parts after merge", "Elimina parti dopo l'unione");
         _addTranslation("Remove selected", "Rimuovi selezionati");
-        _addTranslation("SPLIT FILE", "DIVIDI FILE");
+        _addTranslation("SPLIT FILE/s", "DIVIDI FILE");
         _addTranslation("Encrypt on disk sensitive information", "Crittografa su disco le informazioni sensibili");
         _addTranslation("Allow using MEGA accounts for download/streaming", "Consenti l'uso dell'account MEGA per download/streaming");
         _addTranslation("Please wait...", "Attendi...");
@@ -126,7 +126,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("EXPORT SETTINGS", "ESPORTA IMPOSTAZIONI");
         _addTranslation("Change output folder", "Modifica cambia cartella destinazione");
         _addTranslation("Add account", "Aggiungi account");
-        _addTranslation("Select file", "Seleziona file");
+        _addTranslation("Select file/s", "Seleziona file");
         _addTranslation("Opening file...", "Apertura file..");
         _addTranslation("CANCEL DOWNLOAD", "Annulla download");
         _addTranslation("REMOVE ALL EXCEPT THIS", "Rimuovi tutto eccetto questo");
@@ -373,7 +373,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("MERGE FILE", "合并 文件");
         _addTranslation("Delete parts after merge", "合并后删除部分");
         _addTranslation("Remove selected", "删除选中");
-        _addTranslation("SPLIT FILE", "分割文件");
+        _addTranslation("SPLIT FILE/s", "分割文件");
         _addTranslation("Encrypt on disk sensitive information", "加密磁盘敏感信息");
         _addTranslation("Allow using MEGA accounts for download/streaming", "允许使用 MEGA 帐户进行下载/流媒体");
         _addTranslation("Please wait...", "请稍等...");
@@ -400,7 +400,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("EXPORT SETTINGS", "导出设置");
         _addTranslation("Change output folder", "更改输出文件夹");
         _addTranslation("Add account", "新增帐户");
-        _addTranslation("Select file", "选择文件");
+        _addTranslation("Select file/s", "选择文件");
         _addTranslation("Opening file...", "打开文件...");
         _addTranslation("CANCEL DOWNLOAD", "取消下载");
         _addTranslation("REMOVE ALL EXCEPT THIS", "删除除此之外的所有内容");
@@ -646,7 +646,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("MERGE FILE", "DOSYA BİRLEŞTİRME");
         _addTranslation("Delete parts after merge", "Birleştirmeden sonra parçaları sil");
         _addTranslation("Remove selected", "Seçilenleri kaldır");
-        _addTranslation("SPLIT FILE", "BÖLÜNMÜŞ DOSYA");
+        _addTranslation("SPLIT FILE/s", "BÖLÜNMÜŞ DOSYA");
         _addTranslation("Encrypt on disk sensitive information", "Disk üzerindeki hassas bilgileri şifreleyin");
         _addTranslation("Allow using MEGA accounts for download/streaming", "MEGA hesaplarının kullanılmasına izin ver");
         _addTranslation("Please wait...", "Lütfen bekleyin...");
@@ -673,7 +673,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("EXPORT SETTINGS", "AYARLARI AKTAR");
         _addTranslation("Change output folder", "KAYDETME KLASÖRÜNÜ DEĞİŞTİR");
         _addTranslation("Add account", "Hesap ekle");
-        _addTranslation("Select file", "Dosya seçin");
+        _addTranslation("Select file/s", "Dosya seçin");
         _addTranslation("Opening file...", "Dosya açılıyor...");
         _addTranslation("CANCEL DOWNLOAD", "İNDİRMEYİ İPTAL ET");
         _addTranslation("REMOVE ALL EXCEPT THIS", "BUNUN DIŞINDA TÜMÜNÜ KALDIRIN");
@@ -870,7 +870,7 @@ public class LabelTranslatorSingleton {
     }
 
     private void Spanish() {
-
+        _addTranslation("SURE?", "SEGURO?");
         _addTranslation("COPY ALL", "COPIAR TODO");
         _addTranslation("ALL COPIED!", "¡TODO COPIADO!");
         _addTranslation("FILE WITH SAME NAME AND SIZE ALREADY EXISTS", "YA EXISTE UN FICHERO CON EL MISMO NOMBRE Y TAMAÑO");
@@ -920,7 +920,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("MERGE FILE", "JUNTAR ARCHIVO");
         _addTranslation("Delete parts after merge", "Eliminar partes después de juntar");
         _addTranslation("Remove selected", "Quitar seleccionado");
-        _addTranslation("SPLIT FILE", "PARTIR ARCHIVO");
+        _addTranslation("SPLIT FILE/s", "PARTIR ARCHIVO/s");
         _addTranslation("Encrypt on disk sensitive information", "Cifrar en disco datos sensibles");
         _addTranslation("Allow using MEGA accounts for download/streaming", "Permitir utilizar cuentas de MEGA para descargar/streaming");
         _addTranslation("Please wait...", "Por favor espera...");
@@ -947,7 +947,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("EXPORT SETTINGS", "EXPORTAR AJUSTES");
         _addTranslation("Change output folder", "Cambiar carpeta destino");
         _addTranslation("Add account", "Añadir cuenta");
-        _addTranslation("Select file", "Seleccionar archivo");
+        _addTranslation("Select file/s", "Seleccionar archivo/s");
         _addTranslation("Opening file...", "Abriendo archivo...");
         _addTranslation("CANCEL DOWNLOAD", "CANCELAR DESCARGA");
         _addTranslation("REMOVE ALL EXCEPT THIS", "QUITAR TODO EXCEPTO ESTO");

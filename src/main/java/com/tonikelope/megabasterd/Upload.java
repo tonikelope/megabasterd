@@ -429,9 +429,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                 MiscTools.GUIRun(() -> {
                     getView().getFile_name_label().setVisible(true);
 
-                    getView().getFile_name_label().setText(_file_name);
-
-                    getView().getFile_name_label().setText(truncateText(_file_name, 100));
+                    getView().getFile_name_label().setText(truncateText(new File(_file_name).getName(), 150));
 
                     getView().getFile_name_label().setToolTipText(_file_name);
 
@@ -456,9 +454,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             MiscTools.GUIRun(() -> {
                 getView().getFile_name_label().setVisible(true);
 
-                getView().getFile_name_label().setText(_file_name);
-
-                getView().getFile_name_label().setText(truncateText(_file_name, 100));
+                getView().getFile_name_label().setText(truncateText(new File(_file_name).getName(), 150));
 
                 getView().getFile_name_label().setToolTipText(_file_name);
 
@@ -1084,6 +1080,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                     restart();
                 }
             });
+        } else {
+            getMain_panel().getUpload_manager().setAll_finished(false);
         }
 
         _exit = true;

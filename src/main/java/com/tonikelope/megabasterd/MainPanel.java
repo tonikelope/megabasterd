@@ -58,7 +58,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.55";
+    public static final String VERSION = "7.56";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -340,7 +340,11 @@ public final class MainPanel {
             THREAD_POOL.execute(() -> {
                 Authenticator.setDefault(new SmartProxyAuthenticator());
 
-                _proxy_manager = new SmartMegaProxyManager(null, tthis);
+                String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
+
+                String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
+
+                _proxy_manager = new SmartMegaProxyManager(url_list, tthis);
             });
 
         } else {

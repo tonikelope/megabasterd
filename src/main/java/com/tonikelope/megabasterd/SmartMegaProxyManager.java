@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public final class SmartMegaProxyManager {
 
-    public static String DEFAULT_SMART_PROXY_URL = "";
+    public static String DEFAULT_SMART_PROXY_URL = null;
     public static final int PROXY_BLOCK_TIME = 90;
     public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 60;
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
@@ -89,6 +89,16 @@ public final class SmartMegaProxyManager {
         }
     }
 
+    public synchronized void refreshProxyList(String url_list) {
+        if (url_list != null) {
+            _proxy_list_url = url_list;
+        } else {
+            _proxy_list_url = null;
+        }
+
+        refreshProxyList();
+    }
+
     public synchronized void refreshProxyList() {
 
         String data;
@@ -97,7 +107,7 @@ public final class SmartMegaProxyManager {
 
         try {
 
-            String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
+            String custom_proxy_list = (_proxy_list_url == null ? DBTools.selectSettingValue("custom_proxy_list") : null);
 
             LinkedHashMap<String, Long[]> custom_clean_list = new LinkedHashMap<>();
 

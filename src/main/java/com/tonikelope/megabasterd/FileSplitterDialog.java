@@ -36,8 +36,8 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
-import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
+import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
+import static javax.swing.JOptionPane.showOptionDialog;
 
 /**
  *
@@ -46,9 +46,12 @@ import static javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE;
 public class FileSplitterDialog extends javax.swing.JDialog {
 
     private final MainPanel _main_panel;
-    private File _file = null;
+    private File[] _files = null;
     private File _output_dir = null;
-    private long _progress = 0L;
+    private volatile long _progress = 0L;
+    private volatile Path _current_part = null;
+    private volatile int _current_file = 0;
+    private volatile boolean _exit = false;
 
     /**
      * Creates new form FileSplitterDialog
@@ -87,7 +90,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         });
     }
 
-    private boolean _splitFile() throws IOException {
+    private boolean _splitFile(int i) throws IOException {
 
         int mBperSplit = Integer.parseInt(this.split_size_text.getText());
 
@@ -95,41 +98,74 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             throw new IllegalArgumentException("mBperSplit must be more than zero");
         }
 
-        final long sourceSize = Files.size(Paths.get(this._file.getAbsolutePath()));
+        final long sourceSize = Files.size(Paths.get(this._files[i].getAbsolutePath()));
         final long bytesPerSplit = 1024L * 1024L * mBperSplit;
         final long numSplits = sourceSize / bytesPerSplit;
         final long remainingBytes = sourceSize % bytesPerSplit;
         int position = 0;
         int conta_split = 1;
 
-        try ( RandomAccessFile sourceFile = new RandomAccessFile(this._file.getAbsolutePath(), "r");  FileChannel sourceChannel = sourceFile.getChannel()) {
+        try ( RandomAccessFile sourceFile = new RandomAccessFile(this._files[i].getAbsolutePath(), "r");  FileChannel sourceChannel = sourceFile.getChannel()) {
 
-            for (; position < numSplits; position++, conta_split++) {
-                _writePartToFile(bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
+            for (; position < numSplits && !_exit; position++, conta_split++) {
+                _writePartToFile(i, bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
             }
 
-            if (remainingBytes > 0) {
-                _writePartToFile(remainingBytes, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
+            if (remainingBytes > 0 && !_exit) {
+                _writePartToFile(i, remainingBytes, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
             }
         }
 
         return true;
     }
 
-    private void _writePartToFile(long byteSize, long position, FileChannel sourceChannel, int conta_split, long num_splits) throws IOException {
+    private void monitorProgress(int f, long part_size) {
 
-        Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._file.getName() + ".part" + String.valueOf(conta_split) + "-" + String.valueOf(num_splits));
-        try ( RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");  FileChannel toChannel = toFile.getChannel()) {
-            sourceChannel.position(position);
-            toChannel.transferFrom(sourceChannel, 0, byteSize);
+        THREAD_POOL.execute(() -> {
+
+            long p = 0;
+
+            Path file = _current_part;
+
+            while (!_exit && f == _current_file && file == _current_part && p < part_size) {
+                try {
+                    if (Files.exists(_current_part)) {
+
+                        p = Files.size(file);
+
+                        long fp = _progress + p;
+
+                        MiscTools.GUIRunAndWait(() -> {
+                            if (jProgressBar2.getValue() < jProgressBar2.getMaximum()) {
+                                jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _files[f].length()) * fp));
+                            }
+                        });
+                    }
+                    MiscTools.pausar(2000);
+                } catch (IOException ex) {
+                    Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        });
+
+    }
+
+    private void _writePartToFile(int f, long byteSize, long position, FileChannel sourceChannel, int conta_split, long num_splits) throws IOException {
+
+        Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._files[f].getName() + ".part" + String.valueOf(conta_split) + "-" + String.valueOf(num_splits));
+
+        _current_part = fileName;
+
+        monitorProgress(f, byteSize);
+        if (!_exit) {
+            try ( RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");  FileChannel toChannel = toFile.getChannel()) {
+                sourceChannel.position(position);
+                toChannel.transferFrom(sourceChannel, 0, byteSize);
+            }
         }
 
         _progress += byteSize;
-
-        MiscTools.GUIRun(() -> {
-            jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _file.length()) * _progress));
-        });
-
     }
 
     /**
@@ -151,13 +187,18 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         jProgressBar2 = new javax.swing.JProgressBar();
         split_button = new javax.swing.JButton();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("File Splitter");
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         file_button.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         file_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-add-file-30.png"))); // NOI18N
-        file_button.setText("Select file");
+        file_button.setText("Select file/s");
         file_button.setDoubleBuffered(true);
         file_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -202,7 +243,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         split_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         split_button.setForeground(new java.awt.Color(255, 255, 255));
         split_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cut-30.png"))); // NOI18N
-        split_button.setText("SPLIT FILE");
+        split_button.setText("SPLIT FILE/s");
         split_button.setDoubleBuffered(true);
         split_button.setEnabled(false);
         split_button.addActionListener(new java.awt.event.ActionListener() {
@@ -267,6 +308,8 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         JFileChooser filechooser = new javax.swing.JFileChooser();
 
+        filechooser.setMultiSelectionEnabled(true);
+
         updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setDialogTitle("Select file");
@@ -275,13 +318,13 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION && filechooser.getSelectedFile().canRead()) {
 
-            this._file = filechooser.getSelectedFile();
-            this.file_name_label.setText(truncateText(this._file.getAbsolutePath(), 100));
-            this.file_name_label.setToolTipText(this._file.getAbsolutePath());
-            this.file_size_label.setText(MiscTools.formatBytes(this._file.length()));
-            this.output_folder_label.setText(truncateText(this._file.getParentFile().getAbsolutePath(), 100));
-            this.output_folder_label.setToolTipText(this._file.getParentFile().getAbsolutePath());
-            this._output_dir = new File(this._file.getParentFile().getAbsolutePath());
+            this._files = filechooser.getSelectedFiles();
+            this.file_name_label.setText(truncateText(this._files[0].getAbsolutePath(), 100));
+            this.file_name_label.setToolTipText(this._files[0].getAbsolutePath());
+            this.file_size_label.setText(MiscTools.formatBytes(this._files[0].length()));
+            this.output_folder_label.setText(truncateText(this._files[0].getParentFile().getAbsolutePath(), 100));
+            this.output_folder_label.setToolTipText(this._files[0].getParentFile().getAbsolutePath());
+            this._output_dir = new File(this._files[0].getParentFile().getAbsolutePath());
             this.jProgressBar2.setMinimum(0);
             this.jProgressBar2.setMaximum(MAX_VALUE);
             this.jProgressBar2.setStringPainted(true);
@@ -348,8 +391,6 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         if (this._output_dir != null && !"".equals(this.split_size_text.getText())) {
 
-            this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
-
             this.split_button.setText(LabelTranslatorSingleton.getInstance().translate("SPLITTING FILE..."));
 
             this.file_button.setEnabled(false);
@@ -368,56 +409,85 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
             THREAD_POOL.execute(() -> {
                 try {
-                    if (_splitFile()) {
+                    for (int i = 0; i < this._files.length && !_exit; i++) {
+
+                        _current_file = i;
+
+                        int j = i;
+
                         MiscTools.GUIRun(() -> {
-                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully splitted!"));
+                            this.jProgressBar2.setMinimum(0);
+                            this.jProgressBar2.setMaximum(MAX_VALUE);
+                            this.jProgressBar2.setStringPainted(true);
+                            this.jProgressBar2.setValue(0);
+                            this.file_name_label.setText(truncateText(this._files[j].getAbsolutePath(), 100));
+                            this.file_name_label.setToolTipText(this._files[j].getAbsolutePath());
+                            this.file_size_label.setText(MiscTools.formatBytes(this._files[j].length()));
 
-                            if (Desktop.isDesktopSupported()) {
-                                try {
-                                    Desktop.getDesktop().open(_output_dir);
-                                } catch (IOException ex) {
+                        });
 
-                                }
+                        if (_splitFile(i)) {
+
+                            MiscTools.GUIRun(() -> {
+                                _main_panel.getView().getSplit_file_menu().setEnabled(true);
+                            });
+
+                            if (i == this._files.length - 1 && !_exit) {
+
+                                MiscTools.GUIRun(() -> {
+
+                                    jProgressBar2.setValue(jProgressBar2.getMaximum());
+
+                                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File/s successfully splitted!"));
+
+                                    if (Desktop.isDesktopSupported()) {
+                                        try {
+                                            Desktop.getDesktop().open(_output_dir);
+                                        } catch (IOException ex) {
+
+                                        }
+                                    }
+
+                                    _exit = true;
+
+                                    dispose();
+                                });
                             }
 
-                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                        } else {
+                            _files = null;
+                            _output_dir = null;
+                            MiscTools.GUIRun(() -> {
+                                file_name_label.setText("");
 
-                            setVisible(false);
-                        });
-                    } else {
-                        _file = null;
-                        _output_dir = null;
-                        MiscTools.GUIRun(() -> {
-                            file_name_label.setText("");
+                                output_folder_label.setText("");
 
-                            output_folder_label.setText("");
+                                split_size_text.setText("");
 
-                            split_size_text.setText("");
+                                file_size_label.setText("");
 
-                            file_size_label.setText("");
+                                _progress = 0L;
 
-                            _progress = 0L;
+                                jProgressBar2.setMinimum(0);
+                                jProgressBar2.setMaximum(MAX_VALUE);
+                                jProgressBar2.setStringPainted(true);
+                                jProgressBar2.setValue(0);
+                                jProgressBar2.setVisible(false);
 
-                            jProgressBar2.setMinimum(0);
-                            jProgressBar2.setMaximum(MAX_VALUE);
-                            jProgressBar2.setStringPainted(true);
-                            jProgressBar2.setValue(0);
-                            jProgressBar2.setVisible(false);
+                                split_button.setText(LabelTranslatorSingleton.getInstance().translate("SPLIT FILE"));
 
-                            split_button.setText(LabelTranslatorSingleton.getInstance().translate("SPLIT FILE"));
+                                file_button.setEnabled(true);
 
-                            file_button.setEnabled(true);
+                                output_button.setEnabled(true);
 
-                            output_button.setEnabled(true);
+                                split_button.setEnabled(true);
 
-                            split_button.setEnabled(true);
+                                split_size_text.setEnabled(true);
 
-                            split_size_text.setEnabled(true);
+                                pack();
+                            });
+                        }
 
-                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-                            pack();
-                        });
                     }
                 } catch (IOException ex) {
                     Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
@@ -426,6 +496,33 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         }
     }//GEN-LAST:event_split_buttonActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        Object[] options = {"No",
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
+
+        int n = 1;
+
+        if (!this.file_button.isEnabled()) {
+            n = showOptionDialog(this,
+                    LabelTranslatorSingleton.getInstance().translate("SURE?"),
+                    LabelTranslatorSingleton.getInstance().translate("EXIT"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+                    null,
+                    options,
+                    options[0]);
+        }
+
+        if (n == 1) {
+            _exit = true;
+
+            if (!this.file_button.isEnabled()) {
+                _main_panel.getView().getSplit_file_menu().setEnabled(false);
+            }
+
+            dispose();
+        }
+    }//GEN-LAST:event_formWindowClosing
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton file_button;

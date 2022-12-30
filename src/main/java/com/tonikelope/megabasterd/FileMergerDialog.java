@@ -28,12 +28,17 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import static java.lang.Integer.MAX_VALUE;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
+import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
+import static javax.swing.JOptionPane.showOptionDialog;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 /**
@@ -44,10 +49,11 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
     private final MainPanel _main_panel;
     private File _output_dir = null;
-    private long _progress = 0L;
+    private volatile long _progress = 0L;
     private final ArrayList<String> _file_parts = new ArrayList<>();
     private String _file_name = null;
     private long _file_size = 0L;
+    private volatile boolean _exit = false;
 
     /**
      * Creates new form FileSplitterDialog
@@ -70,13 +76,53 @@ public class FileMergerDialog extends javax.swing.JDialog {
         });
     }
 
+    private void monitorProgress(Path file) {
+
+        THREAD_POOL.execute(() -> {
+
+            long p = 0;
+
+            while (!_exit && p < _file_size) {
+
+                try {
+
+                    if (Files.exists(file)) {
+
+                        p = Files.size(file);
+
+                        long fp = p;
+
+                        MiscTools.GUIRunAndWait(() -> {
+                            if (jProgressBar2.getValue() < jProgressBar2.getMaximum()) {
+                                jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _file_size) * fp));
+                            }
+                        });
+                    }
+
+                    MiscTools.pausar(2000);
+
+                } catch (IOException ex) {
+                    Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+
+        });
+
+    }
+
     private boolean _mergeFile() throws IOException {
 
         try ( RandomAccessFile targetFile = new RandomAccessFile(this.file_name_label.getText(), "rw")) {
 
             FileChannel targetChannel = targetFile.getChannel();
 
+            monitorProgress(Paths.get(this.file_name_label.getText()));
+
             for (String file_path : this._file_parts) {
+
+                if (_exit) {
+                    break;
+                }
 
                 RandomAccessFile rfile = new RandomAccessFile(file_path, "r");
 
@@ -118,9 +164,14 @@ public class FileMergerDialog extends javax.swing.JDialog {
         merge_button = new javax.swing.JButton();
         delete_parts_checkbox = new javax.swing.JCheckBox();
 
-        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setDefaultCloseOperation(javax.swing.WindowConstants.DO_NOTHING_ON_CLOSE);
         setTitle("File Merger");
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+        });
 
         file_button.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         file_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-add-file-30.png"))); // NOI18N
@@ -361,21 +412,29 @@ public class FileMergerDialog extends javax.swing.JDialog {
                         if (delete_parts_checkbox.isSelected()) {
                             _deleteParts();
                         }
+
                         MiscTools.GUIRun(() -> {
-                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
-
-                            if (Desktop.isDesktopSupported()) {
-                                try {
-                                    Desktop.getDesktop().open(new File(file_name_label.getText()).getParentFile());
-                                } catch (IOException ex) {
-
-                                }
-                            }
-
-                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-
-                            setVisible(false);
+                            _main_panel.getView().getMerge_file_menu().setEnabled(true);
                         });
+
+                        if (!_exit) {
+                            MiscTools.GUIRun(() -> {
+                                jProgressBar2.setValue(jProgressBar2.getMaximum());
+
+                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
+
+                                if (Desktop.isDesktopSupported()) {
+                                    try {
+                                        Desktop.getDesktop().open(new File(file_name_label.getText()).getParentFile());
+                                    } catch (IOException ex) {
+
+                                    }
+                                }
+
+                                _exit = true;
+                                dispose();
+                            });
+                        }
                     } else {
                         _file_parts.clear();
                         MiscTools.GUIRun(() -> {
@@ -421,6 +480,33 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         }
     }//GEN-LAST:event_merge_buttonActionPerformed
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        Object[] options = {"No",
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
+
+        int n = 1;
+
+        if (!this.file_button.isEnabled()) {
+            n = showOptionDialog(this,
+                    LabelTranslatorSingleton.getInstance().translate("SURE?"),
+                    LabelTranslatorSingleton.getInstance().translate("EXIT"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+                    null,
+                    options,
+                    options[0]);
+        }
+
+        if (n == 1) {
+            _exit = true;
+
+            if (!this.file_button.isEnabled()) {
+                _main_panel.getView().getMerge_file_menu().setEnabled(false);
+            }
+
+            dispose();
+        }
+    }//GEN-LAST:event_formWindowClosing
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JCheckBox delete_parts_checkbox;

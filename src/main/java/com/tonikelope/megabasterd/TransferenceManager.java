@@ -56,6 +56,15 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final Object _total_progress_lock;
     protected final Object _transference_queue_sort_lock;
     private volatile Boolean _sort_wait_start_queue;
+    protected volatile boolean _all_finished = false;
+
+    public boolean isAll_finished() {
+        return _all_finished;
+    }
+
+    public void setAll_finished(boolean all_finished) {
+        this._all_finished = all_finished;
+    }
 
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
@@ -675,9 +684,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         int finish = _transference_finished_queue.size();
 
-        if (!_tray_icon_finish && finish > 0 && pre + prov + wait + run == 0 && !_main_panel.getView().isVisible()) {
+        if (!_all_finished && !_tray_icon_finish && finish > 0 && pre + prov + wait + run == 0 && !_main_panel.getView().isVisible()) {
 
             _tray_icon_finish = true;
+
+            _all_finished = true;
 
             _main_panel.getTrayicon().displayMessage("MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
         }

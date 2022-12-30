@@ -877,7 +877,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         custom_proxy_textarea.addMouseListener(new ContextMenuMouseListener());
 
         custom_proxy_list_label.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        custom_proxy_list_label.setText("Use this proxy list Format is [*]IP:PORT[@user_b64:password_b64]");
+        custom_proxy_list_label.setText("Use this proxy list Format is [*]IP:PORT[@user_b64:password_b64] OR #PROXY_LIST_URL");
 
         rec_smart_proxy_label1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         rec_smart_proxy_label1.setText("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.");

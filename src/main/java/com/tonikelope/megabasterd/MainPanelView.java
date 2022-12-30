@@ -7,7 +7,6 @@ import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
 import java.awt.dnd.DropTargetDragEvent;
@@ -54,6 +53,14 @@ import javax.swing.JTabbedPane;
 public final class MainPanelView extends javax.swing.JFrame {
 
     private final MainPanel _main_panel;
+
+    public JMenuItem getMerge_file_menu() {
+        return merge_file_menu;
+    }
+
+    public JMenuItem getSplit_file_menu() {
+        return split_file_menu;
+    }
 
     public JLabel getKiss_server_status() {
         return kiss_server_status;
@@ -447,7 +454,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                             });
                         }
 
-                    } catch (UnsupportedFlavorException | IOException ex) {
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(main_panel.getView(), LabelTranslatorSingleton.getInstance().translate("ERROR DOING DRAG AND DROP WITH THIS FILE (use button method)"), "Error", JOptionPane.ERROR_MESSAGE);
 
                     }
                 }
@@ -1281,10 +1289,18 @@ public final class MainPanelView extends javax.swing.JFrame {
                 if (MainPanel.isUse_smart_proxy()) {
 
                     if (MainPanel.getProxy_manager() == null) {
-                        MainPanel.setProxy_manager(new SmartMegaProxyManager(null, _main_panel));
-                    }
 
-                    MainPanel.getProxy_manager().refreshProxyList();
+                        String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
+
+                        String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
+
+                        MainPanel.setProxy_manager(new SmartMegaProxyManager(url_list, _main_panel));
+                    } else {
+                        String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
+
+                        String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
+                        MainPanel.getProxy_manager().refreshProxyList(url_list);
+                    }
 
                 } else {
 
