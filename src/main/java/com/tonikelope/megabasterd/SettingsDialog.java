@@ -1987,6 +1987,8 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 cancel_button.setEnabled(false);
 
+                import_mega_button.setEnabled(false);
+
                 remove_mega_account_button.setEnabled(false);
 
                 remove_elc_account_button.setEnabled(false);
@@ -2192,6 +2194,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                             cancel_button.setEnabled(true);
 
                             panel_tabs.setEnabled(true);
+
+                            import_mega_button.setEnabled(true);
 
                             remove_mega_account_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
 
@@ -2976,7 +2980,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         if (!unlock_accounts_button.isVisible() || !unlock_accounts_button.isEnabled()) {
 
-            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("EMAIL1\nPASS1\nEMAIL2\nPASS2\nEMAIL3\nPASS3\n"), "TXT FILE FORMAT", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("EMAIL1\nPASS1\nEMAIL2\nPASS2"), "TXT FILE FORMAT", JOptionPane.INFORMATION_MESSAGE);
 
             javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -3002,7 +3006,6 @@ public class SettingsDialog extends javax.swing.JDialog {
                     DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
 
                     for (int i = 0; i < result.size() - 1; i += 2) {
-                        System.out.println(result.get(i) + " " + result.get(i + 1));
 
                         model.addRow(new Object[]{result.get(i), result.get(i + 1)});
                     }
