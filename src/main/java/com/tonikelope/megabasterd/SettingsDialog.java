@@ -2980,7 +2980,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         if (!unlock_accounts_button.isVisible() || !unlock_accounts_button.isEnabled()) {
 
-            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("EMAIL1\nPASS1\nEMAIL2\nPASS2"), "TXT FILE FORMAT", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("EMAIL1#PASS1\nEMAIL2#PASS2"), "TXT FILE FORMAT", JOptionPane.INFORMATION_MESSAGE);
 
             javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -3005,9 +3005,11 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
 
-                    for (int i = 0; i < result.size() - 1; i += 2) {
+                    for (String line : result) {
 
-                        model.addRow(new Object[]{result.get(i), result.get(i + 1)});
+                        String email = MiscTools.findFirstRegex("^[^#]+", line, 0).trim();
+                        String pass = MiscTools.findFirstRegex("^[^#]+#(.+)$", line, 1);
+                        model.addRow(new Object[]{email, pass});
                     }
 
                     mega_accounts_table.setModel(model);
