@@ -93,10 +93,16 @@ public class MiscTools {
         } else if (!a.isLeaf() && b.isLeaf()) {
             return -1;
         } else {
-            String sa = (String) ((Map) a.getUserObject()).get("name");
-            String sb = (String) ((Map) b.getUserObject()).get("name");
 
-            return MiscTools.naturalCompare(sa, sb, true);
+            Object ca = a.getUserObject();
+
+            Object cb = b.getUserObject();
+
+            if (ca instanceof String) {
+                return MiscTools.naturalCompare((String) ca, (String) cb, true);
+            } else {
+                return MiscTools.naturalCompare((String) ((Map) ca).get("name"), (String) ((Map) cb).get("name"), true);
+            }
         }
     };
     private static final Logger LOG = Logger.getLogger(MiscTools.class.getName());

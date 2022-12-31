@@ -596,7 +596,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION && filechooser.getSelectedFile().canRead()) {
 
             THREAD_POOL.execute(() -> {
-                MiscTools.GUIRun(() -> {
+                MiscTools.GUIRunAndWait(() -> {
                     total_file_size_label.setText("[0 B]");
 
                     _base_path = filechooser.getSelectedFile().getAbsolutePath();
@@ -607,14 +607,20 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
                     dir_name_label.setEnabled(true);
                 });
+
                 DefaultMutableTreeNode root = new DefaultMutableTreeNode(filechooser.getSelectedFile().getAbsolutePath());
+
                 _genFileTree(filechooser.getSelectedFile().getAbsolutePath(), root, null);
+
                 DefaultTreeModel tree_model = new DefaultTreeModel(sortTree(root));
-                MiscTools.GUIRun(() -> {
+
+                MiscTools.GUIRunAndWait(() -> {
                     file_tree.setModel(tree_model);
                 });
+
                 _genFileList();
-                MiscTools.GUIRun(() -> {
+
+                MiscTools.GUIRunAndWait(() -> {
                     add_files_button.setEnabled(true);
 
                     add_folder_button.setEnabled(true);
