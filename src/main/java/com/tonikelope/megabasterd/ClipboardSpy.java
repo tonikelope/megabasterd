@@ -49,7 +49,15 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
 
         _enabled = enabled;
 
-        if (_enabled) {
+        boolean monitor_clipboard = true;
+
+        String monitor_clipboard_string = DBTools.selectSettingValue("clipboardspy");
+
+        if (monitor_clipboard_string != null) {
+            monitor_clipboard = monitor_clipboard_string.equals("yes");
+        }
+
+        if (_enabled && monitor_clipboard) {
 
             _contents = getClipboardContents();
 

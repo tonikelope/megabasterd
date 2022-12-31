@@ -50,6 +50,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
+    public static final boolean DEFAULT_CLIPBOARD_LINK_MONITOR = true;
     public static final int CHUNK_SIZE_MULTI = 20;
     private static final Logger LOG = Logger.getLogger(Download.class.getName());
 
