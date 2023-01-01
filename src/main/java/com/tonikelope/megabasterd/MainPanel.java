@@ -100,6 +100,7 @@ public final class MainPanel {
     private static Boolean _resume_downloads;
     private static long _last_run_command;
     private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
+    private static volatile boolean CHECK_RUNNING = true;
 
     public static void main(String args[]) {
 
@@ -113,7 +114,12 @@ public final class MainPanel {
             if (args.length > 1) {
                 try {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "{0} Waiting {1} seconds before start...", new Object[]{Thread.currentThread().getName(), args[1]});
-                    Thread.sleep(Long.parseLong(args[1]) * 1000);
+                    
+                    if(Long.parseLong(args[1])>=0){
+                        Thread.sleep(Long.parseLong(args[1]) * 1000);
+                    }else {
+                        CHECK_RUNNING = false;
+                    }
                 } catch (InterruptedException ex) {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
@@ -286,7 +292,7 @@ public final class MainPanel {
 
         _view = new MainPanelView(this);
 
-        if (checkAppIsRunning()) {
+        if (CHECK_RUNNING && checkAppIsRunning()) {
 
             System.exit(0);
         }
