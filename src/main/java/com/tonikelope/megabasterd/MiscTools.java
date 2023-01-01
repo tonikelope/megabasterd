@@ -1,3 +1,12 @@
+/*
+ __  __                  _               _               _ 
+|  \/  | ___  __ _  __ _| |__   __ _ ___| |_ ___ _ __ __| |
+| |\/| |/ _ \/ _` |/ _` | '_ \ / _` / __| __/ _ \ '__/ _` |
+| |  | |  __/ (_| | (_| | |_) | (_| \__ \ ||  __/ | | (_| |
+|_|  |_|\___|\__, |\__,_|_.__/ \__,_|___/\__\___|_|  \__,_|
+             |___/                                         
+© Perpetrated by tonikelope since 2016
+ */
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.VERSION;
@@ -41,12 +50,15 @@ import java.nio.file.Path;
 import java.security.CodeSource;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.DateFormat;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -106,6 +118,22 @@ public class MiscTools {
         }
     };
     private static final Logger LOG = Logger.getLogger(MiscTools.class.getName());
+
+    public static String getFechaHoraActual() {
+
+        String format = "dd-MM-yyyy HH:mm:ss";
+
+        return getFechaHoraActual(format);
+    }
+
+    public static String getFechaHoraActual(String format) {
+
+        Date currentDate = new Date(System.currentTimeMillis());
+
+        DateFormat df = new SimpleDateFormat(format);
+
+        return df.format(currentDate);
+    }
 
     public static void deleteDirectoryRecursion(Path path) throws IOException {
         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {

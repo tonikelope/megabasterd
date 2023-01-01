@@ -1,3 +1,12 @@
+/*
+ __  __                  _               _               _ 
+|  \/  | ___  __ _  __ _| |__   __ _ ___| |_ ___ _ __ __| |
+| |\/| |/ _ \/ _` |/ _` | '_ \ / _` / __| __/ _ \ '__/ _` |
+| |  | |  __/ (_| | (_| | |_) | (_| \__ \ ||  __/ | | (_| |
+|_|  |_|\___|\__, |\__,_|_.__/ \__,_|___/\__\___|_|  \__,_|
+             |___/                                         
+© Perpetrated by tonikelope since 2016
+ */
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.DBTools.*;
@@ -58,7 +67,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.58";
+    public static final String VERSION = "7.59";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;

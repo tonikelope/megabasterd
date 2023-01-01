@@ -1,7 +1,11 @@
 /*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ __  __                  _               _               _ 
+|  \/  | ___  __ _  __ _| |__   __ _ ___| |_ ___ _ __ __| |
+| |\/| |/ _ \/ _` |/ _` | '_ \ / _` / __| __/ _ \ '__/ _` |
+| |  | |  __/ (_| | (_| | |_) | (_| \__ \ ||  __/ | | (_| |
+|_|  |_|\___|\__, |\__,_|_.__/ \__,_|___/\__\___|_|  \__,_|
+             |___/                                         
+© Perpetrated by tonikelope since 2016
  */
 package com.tonikelope.megabasterd;
 
@@ -870,6 +874,12 @@ public class LabelTranslatorSingleton {
     }
 
     private void Spanish() {
+        _addTranslation("CANCEL ALL DOWNLOADS?", "¿CANCELAR TODAS LAS DESCARGAS?");
+        _addTranslation("CANCEL ALL DOWNLOADS", "CANCELAR TODAS LAS DESCARGAS");
+        _addTranslation("MEGA ACCOUNTS ARE LOCKED", "LA LISTA DE CUENTAS DE MEGA ESTÁ BLOQUEADA");
+        _addTranslation("IMPORT ACCOUNTS (FILE)", "IMPORTAR CUENTAS (FICHERO)");
+        _addTranslation("Save debug info to file", "Generar fichero de depuración");
+        _addTranslation("Monitor clipboard looking for new links", "Vigilar portapapeles en busca de enlaces nuevos");
         _addTranslation("SURE?", "SEGURO?");
         _addTranslation("COPY ALL", "COPIAR TODO");
         _addTranslation("ALL COPIED!", "¡TODO COPIADO!");

@@ -1,3 +1,12 @@
+/*
+ __  __                  _               _               _ 
+|  \/  | ___  __ _  __ _| |__   __ _ ___| |_ ___ _ __ __| |
+| |\/| |/ _ \/ _` |/ _` | '_ \ / _` / __| __/ _ \ '__/ _` |
+| |  | |  __/ (_| | (_| | |_) | (_| \__ \ ||  __/ | | (_| |
+|_|  |_|\___|\__, |\__,_|_.__/ \__,_|___/\__\___|_|  \__,_|
+             |___/                                         
+© Perpetrated by tonikelope since 2016
+ */
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
@@ -947,7 +956,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                     FileWriter fr;
                                     try {
                                         fr = new FileWriter(upload_log, true);
-                                        fr.write(_file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
+                                        fr.write("[" + MiscTools.getFechaHoraActual() + "] " + _file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
                                         fr.close();
                                     } catch (IOException ex) {
                                         Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());

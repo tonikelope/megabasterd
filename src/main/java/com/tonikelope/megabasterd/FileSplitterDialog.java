@@ -1,18 +1,11 @@
 /*
- * Copyright (C) 2018 tonikelope
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ __  __                  _               _               _ 
+|  \/  | ___  __ _  __ _| |__   __ _ ___| |_ ___ _ __ __| |
+| |\/| |/ _ \/ _` |/ _` | '_ \ / _` / __| __/ _ \ '__/ _` |
+| |  | |  __/ (_| | (_| | |_) | (_| \__ \ ||  __/ | | (_| |
+|_|  |_|\___|\__, |\__,_|_.__/ \__,_|___/\__\___|_|  \__,_|
+             |___/                                         
+© Perpetrated by tonikelope since 2016
  */
 package com.tonikelope.megabasterd;
 
@@ -92,6 +85,8 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
     private boolean _splitFile(int i) throws IOException {
 
+        this._progress = 0L;
+
         int mBperSplit = Integer.parseInt(this.split_size_text.getText());
 
         if (mBperSplit <= 0) {
@@ -104,6 +99,18 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         final long remainingBytes = sourceSize % bytesPerSplit;
         int position = 0;
         int conta_split = 1;
+
+        MiscTools.GUIRunAndWait(() -> {
+            jProgressBar2.setMinimum(0);
+            jProgressBar2.setMaximum(MAX_VALUE);
+            jProgressBar2.setStringPainted(true);
+            jProgressBar2.setValue(0);
+            file_name_label.setText(truncateText(_files[i].getName(), 150));
+            file_name_label.setToolTipText(_files[i].getAbsolutePath());
+            file_size_label.setText(MiscTools.formatBytes(_files[i].length()));
+            pack();
+
+        });
 
         try ( RandomAccessFile sourceFile = new RandomAccessFile(this._files[i].getAbsolutePath(), "r");  FileChannel sourceChannel = sourceFile.getChannel()) {
 
@@ -157,7 +164,10 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         _current_part = fileName;
 
+        _current_file = f;
+
         monitorProgress(f, byteSize);
+
         if (!_exit) {
             try ( RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");  FileChannel toChannel = toFile.getChannel()) {
                 sourceChannel.position(position);
@@ -312,24 +322,23 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
-        filechooser.setDialogTitle("Select file");
+        filechooser.setDialogTitle("Select file/s");
 
         filechooser.setAcceptAllFileFilterUsed(false);
 
         if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION && filechooser.getSelectedFile().canRead()) {
 
             this._files = filechooser.getSelectedFiles();
-            this.file_name_label.setText(truncateText(this._files[0].getAbsolutePath(), 100));
+            this.file_name_label.setText(truncateText(this._files[0].getName(), 150));
             this.file_name_label.setToolTipText(this._files[0].getAbsolutePath());
             this.file_size_label.setText(MiscTools.formatBytes(this._files[0].length()));
-            this.output_folder_label.setText(truncateText(this._files[0].getParentFile().getAbsolutePath(), 100));
+            this.output_folder_label.setText(truncateText(this._files[0].getParentFile().getAbsolutePath(), 150));
             this.output_folder_label.setToolTipText(this._files[0].getParentFile().getAbsolutePath());
             this._output_dir = new File(this._files[0].getParentFile().getAbsolutePath());
             this.jProgressBar2.setMinimum(0);
             this.jProgressBar2.setMaximum(MAX_VALUE);
             this.jProgressBar2.setStringPainted(true);
             this.jProgressBar2.setValue(0);
-            this._progress = 0L;
 
             this.output_button.setEnabled(true);
             this.split_size_label.setEnabled(true);
@@ -337,7 +346,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             this.split_button.setEnabled(true);
         }
 
-        this.file_button.setText(LabelTranslatorSingleton.getInstance().translate("Select file"));
+        this.file_button.setText(LabelTranslatorSingleton.getInstance().translate("Select file/s"));
 
         this.file_button.setEnabled(true);
 
@@ -411,32 +420,11 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                 try {
                     for (int i = 0; i < this._files.length && !_exit; i++) {
 
-                        _current_file = i;
-
-                        int j = i;
-
-                        MiscTools.GUIRun(() -> {
-                            this.jProgressBar2.setMinimum(0);
-                            this.jProgressBar2.setMaximum(MAX_VALUE);
-                            this.jProgressBar2.setStringPainted(true);
-                            this.jProgressBar2.setValue(0);
-                            this.file_name_label.setText(truncateText(this._files[j].getAbsolutePath(), 100));
-                            this.file_name_label.setToolTipText(this._files[j].getAbsolutePath());
-                            this.file_size_label.setText(MiscTools.formatBytes(this._files[j].length()));
-
-                        });
-
                         if (_splitFile(i)) {
-
-                            MiscTools.GUIRun(() -> {
-                                _main_panel.getView().getSplit_file_menu().setEnabled(true);
-                            });
 
                             if (i == this._files.length - 1 && !_exit) {
 
                                 MiscTools.GUIRun(() -> {
-
-                                    jProgressBar2.setValue(jProgressBar2.getMaximum());
 
                                     JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File/s successfully splitted!"));
 
@@ -465,8 +453,6 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                                 split_size_text.setText("");
 
                                 file_size_label.setText("");
-
-                                _progress = 0L;
 
                                 jProgressBar2.setMinimum(0);
                                 jProgressBar2.setMaximum(MAX_VALUE);
@@ -516,9 +502,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         if (n == 1) {
             _exit = true;
 
-            if (!this.file_button.isEnabled()) {
-                _main_panel.getView().getSplit_file_menu().setEnabled(false);
-            }
+            _main_panel.getView().getSplit_file_menu().setEnabled(this.file_button.isEnabled());
 
             dispose();
         }

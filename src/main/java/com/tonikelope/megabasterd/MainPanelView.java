@@ -1,3 +1,12 @@
+/*
+ __  __                  _               _               _ 
+|  \/  | ___  __ _  __ _| |__   __ _ ___| |_ ___ _ __ __| |
+| |\/| |/ _ \/ _` |/ _` | '_ \ / _` / __| __/ _ \ '__/ _` |
+| |  | |  __/ (_| | (_| | |_) | (_| \__ \ ||  __/ | | (_| |
+|_|  |_|\___|\__, |\__,_|_.__/ \__,_|___/\__\___|_|  \__,_|
+             |___/                                         
+© Perpetrated by tonikelope since 2016
+ */
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.CryptTools.*;
@@ -265,6 +274,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                             try {
                                 fr = new FileWriter(upload_log, true);
                                 fr.write("***** MegaBasterd UPLOAD LOG FILE *****\n\n");
+                                fr.write(MiscTools.getFechaHoraActual() + "\n\n");
+                                fr.write(ma.getEmail() + "\n\n");
                                 fr.write(dir_name + "   " + folder_link + "\n\n");
                                 fr.close();
                             } catch (IOException ex) {

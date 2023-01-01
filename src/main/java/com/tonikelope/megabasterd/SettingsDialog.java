@@ -1,3 +1,12 @@
+/*
+ __  __                  _               _               _ 
+|  \/  | ___  __ _  __ _| |__   __ _ ___| |_ ___ _ __ __| |
+| |\/| |/ _ \/ _` |/ _` | '_ \ / _` / __| __/ _ \ '__/ _` |
+| |  | |  __/ (_| | (_| | |_) | (_| \__ \ ||  __/ | | (_| |
+|_|  |_|\___|\__, |\__,_|_.__/ \__,_|___/\__\___|_|  \__,_|
+             |___/                                         
+© Perpetrated by tonikelope since 2016
+ */
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.DBTools.*;
@@ -3020,7 +3029,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             }
         } else {
-            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("MEGA ACCOUNTS ARE LOCKED"), "Mega Accounts Locked", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("MEGA ACCOUNTS ARE LOCKED"), "ERROR", JOptionPane.ERROR_MESSAGE);
 
         }
     }//GEN-LAST:event_import_mega_buttonActionPerformed
