@@ -496,7 +496,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     @Override
     public void checkSlotsAndWorkers() {
 
-        if (!isExit()) {
+        if (!isExit() && !this._finalizing) {
 
             synchronized (_workers_lock) {
 

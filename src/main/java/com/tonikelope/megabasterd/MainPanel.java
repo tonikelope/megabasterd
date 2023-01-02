@@ -67,7 +67,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.59";
+    public static final String VERSION = "7.60";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -114,10 +114,10 @@ public final class MainPanel {
             if (args.length > 1) {
                 try {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "{0} Waiting {1} seconds before start...", new Object[]{Thread.currentThread().getName(), args[1]});
-                    
-                    if(Long.parseLong(args[1])>=0){
+
+                    if (Long.parseLong(args[1]) >= 0) {
                         Thread.sleep(Long.parseLong(args[1]) * 1000);
-                    }else {
+                    } else {
                         CHECK_RUNNING = false;
                     }
                 } catch (InterruptedException ex) {

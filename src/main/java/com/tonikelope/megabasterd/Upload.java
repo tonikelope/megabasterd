@@ -570,7 +570,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     @Override
     public void checkSlotsAndWorkers() {
 
-        if (!isExit()) {
+        if (!isExit() && !this._finalizing) {
 
             synchronized (_workers_lock) {
 

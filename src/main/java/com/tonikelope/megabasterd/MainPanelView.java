@@ -289,56 +289,71 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
 
-                            LOG.log(Level.INFO, "{0} FILE_PATH -> {1}", new Object[]{Thread.currentThread().getName(), file_path});
+                            try {
 
-                            String[] dirs = file_path.split("\\" + File.separator);
+                                LOG.log(Level.INFO, "{0} FILE_PATH -> {1}", new Object[]{Thread.currentThread().getName(), file_path});
 
-                            MegaDirNode current_node = file_paths;
+                                String[] dirs = file_path.split("\\" + File.separator);
 
-                            String file_parent = current_node.getNode_id();
+                                MegaDirNode current_node = file_paths;
 
-                            for (String d : dirs) {
+                                String file_parent = current_node.getNode_id();
 
-                                LOG.log(Level.INFO, "{0} DIR -> {1}", new Object[]{Thread.currentThread().getName(), d});
+                                for (String d : dirs) {
 
-                                if (!d.isEmpty()) {
+                                    LOG.log(Level.INFO, "{0} DIR -> {1}", new Object[]{Thread.currentThread().getName(), d});
 
-                                    if (current_node.getChildren().get(d) != null) {
+                                    if (!d.isEmpty()) {
 
-                                        current_node = current_node.getChildren().get(d);
+                                        if (current_node.getChildren().get(d) != null) {
 
-                                        file_parent = current_node.getNode_id();
+                                            current_node = current_node.getChildren().get(d);
 
-                                    } else {
+                                            file_parent = current_node.getNode_id();
 
-                                        res = ma.createDirInsideAnotherSharedDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
+                                        } else {
 
-                                        file_parent = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
+                                            res = ma.createDirInsideAnotherSharedDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
 
-                                        current_node.getChildren().put(d, new MegaDirNode(file_parent));
+                                            file_parent = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
-                                        current_node = current_node.getChildren().get(d);
+                                            current_node.getChildren().put(d, new MegaDirNode(file_parent));
+
+                                            current_node = current_node.getChildren().get(d);
+                                        }
                                     }
                                 }
-                            }
 
-                            while (getMain_panel().getUpload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || getMain_panel().getUpload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
+                                while (getMain_panel().getUpload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || getMain_panel().getUpload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
 
-                                synchronized (getMain_panel().getUpload_manager().getWait_queue_lock()) {
-                                    getMain_panel().getUpload_manager().getWait_queue_lock().wait(1000);
+                                    synchronized (getMain_panel().getUpload_manager().getWait_queue_lock()) {
+                                        getMain_panel().getUpload_manager().getWait_queue_lock().wait(1000);
+                                    }
                                 }
-                            }
 
-                            if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+                                if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
 
-                                Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, dialog.getPriority_checkbox().isSelected());
+                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, dialog.getPriority_checkbox().isSelected());
 
-                                getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+                                    getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
+                                    getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
 
-                                getMain_panel().getUpload_manager().secureNotify();
+                                    getMain_panel().getUpload_manager().secureNotify();
 
+                                }
+
+                            } catch (Exception ex) {
+
+                                if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+
+                                    getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
+
+                                    getMain_panel().getUpload_manager().secureNotify();
+
+                                }
+
+                                LOG.log(SEVERE, null, ex);
                             }
 
                         }
