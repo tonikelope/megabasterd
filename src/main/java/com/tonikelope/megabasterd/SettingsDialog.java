@@ -2025,6 +2025,14 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                         String pass = (String) model.getValueAt(i, 1);
 
+                        int j = i;
+
+                        MiscTools.GUIRun(() -> {
+
+                            status.setText(LabelTranslatorSingleton.getInstance().translate("Checking your MEGA accounts, please wait... ") + email + " (" + String.valueOf(j + 1) + "/" + String.valueOf(model_row_count) + ")");
+
+                        });
+
                         if (!email.isEmpty() && !pass.isEmpty()) {
 
                             new_valid_mega_accounts.add(email);

@@ -538,7 +538,7 @@ public class MegaAPI implements Serializable {
 
             }
 
-        } while (empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()));
+        } while (http_error == 500 || empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()));
 
         _seqno++;
 
