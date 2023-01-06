@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MainPanel.VERSION;
 import java.awt.Component;
 import java.awt.Container;
@@ -1200,24 +1201,25 @@ public class MiscTools {
     }
 
     public static void openBrowserURL(final String url) {
+        THREAD_POOL.execute(() -> {
+            try {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Trying to open URL in external browser: {0}", url);
 
-        try {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Trying to open URL in external browser: {0}", url);
-
-            if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
-                Desktop.getDesktop().browse(new URI(url));
-                return;
+                if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
+                    Desktop.getDesktop().browse(new URI(url));
+                    return;
+                }
+                if (System.getProperty("os.name").toLowerCase().contains("nux")) {
+                    Process p = Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+                    p.waitFor();
+                    p.destroy();
+                    return;
+                }
+                Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "Unable to open URL: Unsupported platform.", url);
+            } catch (Exception ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
-            if (System.getProperty("os.name").toLowerCase().contains("nux")) {
-                Process p = Runtime.getRuntime().exec(new String[]{"xdg-open", url});
-                p.waitFor();
-                p.destroy();
-                return;
-            }
-            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "Unable to open URL: Unsupported platform.", url);
-        } catch (Exception ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-        }
+        });
     }
 
     public static byte[] recReverseArray(byte[] arr, int start, int end) {

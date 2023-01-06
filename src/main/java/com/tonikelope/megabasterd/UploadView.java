@@ -97,6 +97,10 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
         return folder_link_button;
     }
 
+    public JButton getOpen_browser_button() {
+        return open_browser_button;
+    }
+
     public JLabel getStatus_label() {
         return status_label;
     }
@@ -168,6 +172,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
         cbc_label = new javax.swing.JLabel();
         queue_top_button = new javax.swing.JButton();
         queue_bottom_button = new javax.swing.JButton();
+        open_browser_button = new javax.swing.JButton();
 
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 3, true));
 
@@ -311,6 +316,17 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
             }
         });
 
+        open_browser_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        open_browser_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-export-30.png"))); // NOI18N
+        open_browser_button.setText("Open folder in browser");
+        open_browser_button.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        open_browser_button.setDoubleBuffered(true);
+        open_browser_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                open_browser_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -321,9 +337,11 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
                     .addComponent(progress_pbar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(file_size_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGap(6, 6, 6)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(open_browser_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(folder_link_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(file_link_button))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(file_name_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -383,10 +401,11 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(folder_link_button)
                     .addComponent(file_link_button)
-                    .addComponent(file_size_label))
+                    .addComponent(file_size_label)
+                    .addComponent(open_browser_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progress_pbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(speed_label)
                     .addComponent(pause_button))
@@ -521,6 +540,11 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
             });
         });
     }//GEN-LAST:event_queue_bottom_buttonActionPerformed
+
+    private void open_browser_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_open_browser_buttonActionPerformed
+        // TODO add your handling code here:
+        MiscTools.openBrowserURL(_upload.getFolder_link());
+    }//GEN-LAST:event_open_browser_buttonActionPerformed
 
     public void updateCBC(String status) {
 
@@ -674,6 +698,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
     private javax.swing.JLabel file_name_label;
     private javax.swing.JLabel file_size_label;
     private javax.swing.JButton folder_link_button;
+    private javax.swing.JButton open_browser_button;
     private javax.swing.JButton pause_button;
     private javax.swing.JProgressBar progress_pbar;
     private javax.swing.JButton queue_bottom_button;

@@ -971,6 +971,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Use multi slot download mode", "Utilizar descarga multi slot");
         _addTranslation("Selecting file...", "Seleccionando archivo...");
         _addTranslation("Copy folder link", "Copiar enlace de carpeta");
+        _addTranslation("Open folder in browser", "Abrir carpeta en navegador");
         _addTranslation("Limit download speed", "Limitar velocidad de descarga");
         _addTranslation("REMOVE THIS", "QUITAR ESTO");
         _addTranslation("Copy file link", "Copiar enlace de archivo");
