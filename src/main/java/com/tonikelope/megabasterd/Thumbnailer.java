@@ -122,7 +122,7 @@ public class Thumbnailer {
 
             return file.getAbsolutePath();
 
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(Thumbnailer.class.getName()).log(Level.SEVERE, null, ex);
         }
 
