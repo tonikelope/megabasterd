@@ -17,12 +17,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -634,6 +637,19 @@ public class MegaAPI implements Serializable {
         return file_data;
     }
 
+    private byte[] _encThumbAttr(byte[] attr_byte, byte[] key) {
+
+        try {
+
+            return aes_cbc_encrypt_pkcs7(attr_byte, key, AES_ZERO_IV);
+
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, ex.getMessage());
+        }
+
+        return null;
+    }
+
     private byte[] _encAttr(String attr, byte[] key) {
 
         byte[] ret = null;
@@ -712,6 +728,115 @@ public class MegaAPI implements Serializable {
         }
 
         return ul_url;
+    }
+
+    public String uploadThumbnails(Upload upload, String node_handle, String filename0, String filename1) throws MegaAPIException {
+
+        String[] ul_url = new String[2];
+
+        String[] hash = new String[2];
+
+        try {
+
+            File[] files = new File[2];
+
+            files[0] = new File(filename0);
+
+            byte[][] file_bytes = new byte[2][];
+
+            file_bytes[0] = _encThumbAttr(Files.readAllBytes(files[0].toPath()), upload.getByte_file_key());
+
+            files[1] = new File(filename1);
+
+            file_bytes[1] = _encThumbAttr(Files.readAllBytes(files[1].toPath()), upload.getByte_file_key());
+
+            String request = "[{\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[0].length) + ", \"ssl\":1}, {\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[1].length) + ", \"ssl\":1}]";
+
+            System.out.println(request);
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+
+            String res = _rawRequest(request, url_api);
+
+            System.out.println(res);
+
+            ObjectMapper objectMapper = new ObjectMapper();
+
+            HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
+
+            ul_url[0] = (String) res_map[0].get("p");
+
+            ul_url[1] = (String) res_map[1].get("p");
+
+            int h = 0;
+
+            for (String u : ul_url) {
+
+                URL url = new URL(u);
+
+                HttpURLConnection con;
+
+                con = (HttpURLConnection) url.openConnection();
+
+                con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
+
+                con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
+
+                con.setRequestMethod("POST");
+
+                con.setDoOutput(true);
+
+                con.setUseCaches(false);
+
+                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
+
+                byte[] buffer = new byte[8192];
+
+                int reads;
+
+                try ( OutputStream out = new ThrottledOutputStream(con.getOutputStream(), upload.getMain_panel().getStream_supervisor())) {
+
+                    out.write(file_bytes[h]);
+                }
+
+                try ( InputStream is = con.getInputStream();  ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                    while ((reads = is.read(buffer)) != -1) {
+                        byte_res.write(buffer, 0, reads);
+                    }
+
+                    hash[h] = MiscTools.Bin2UrlBASE64(byte_res.toByteArray());
+
+                    System.out.println(hash[h]);
+                }
+
+                h++;
+            }
+
+            request = "[{\"a\":\"pfa\", \"fa\":\"0*" + hash[0] + "/1*" + hash[1] + "\", \"n\":\"" + node_handle + "\"}]";
+
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+
+            res = _rawRequest(request, url_api);
+
+            System.out.println(request);
+
+            objectMapper = new ObjectMapper();
+
+            String[] resp = objectMapper.readValue(res, String[].class);
+
+            System.out.println((String) resp[0]);
+
+            return (String) resp[0];
+
+        } catch (MegaAPIException mae) {
+
+            throw mae;
+
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, ex.getMessage());
+        }
+
+        return "";
     }
 
     public HashMap<String, Object> finishUploadFile(String fbasename, int[] ul_key, int[] fkey, int[] meta_mac, String completion_handle, String mega_parent, byte[] master_key, String root_node, byte[] share_key) throws MegaAPIException {

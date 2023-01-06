@@ -891,6 +891,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("Execute this command when MEGA download limit is reached:", "Ejecutar este comando cuando se alcance el límite de descarga de MEGA:");
         _addTranslation("Use this proxy list (instead of the one included in MegaBasterd) Format is [*]IP:PORT[@user_b64:password_b64]", "Usar esta lista de proxys (en vez de la incluida en MegaBasterd) El formato es [*]IP:PUERTO[@usuario_b64:password_b64]");
         _addTranslation("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***", "Esperando manejador de finalización ... ***NO CIERRES MEGABASTERD EN ESTE MOMENTO***");
+        _addTranslation("Creating and uploading thumbnails ... ***DO NOT EXIT MEGABASTERD NOW***", "Creando y subiendo thumbnails ... ***NO CIERRES MEGABASTERD EN ESTE MOMENTO***");
         _addTranslation("Finishing calculating CBC-MAC code (this could take a while) ... ***DO NOT EXIT MEGABASTERD NOW***", "Terminando de calcular código CBC-MAC (esto podría llevar tiempo) ... ***NO CIERRES MEGABASTERD EN ESTE MOMENTO***");
         _addTranslation("Split content in different uploads", "Separar contenido en diferentes subidas");
         _addTranslation("Merge content in the same upload", "Juntar todo en la misma subida");

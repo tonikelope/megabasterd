@@ -3,8 +3,22 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tonikelope</groupId>
     <artifactId>MegaBasterd</artifactId>
-    <version>7.61</version>
+    <version>7.62</version>
     <packaging>jar</packaging>
+    <repositories>
+        <repository>
+            <id>olivier-ayache-xuggler</id> 
+            <url>https://dl.cloudsmith.io/public/olivier-ayache/xuggler/maven/</url>
+            <releases>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+            </snapshots>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.xerial</groupId>
@@ -38,6 +52,11 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.12.6.1</version>
+        </dependency>
+        <dependency>
+            <groupId>xuggle</groupId>
+            <artifactId>xuggle-xuggler-server-all</artifactId>
+            <version>5.7.0-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <properties>

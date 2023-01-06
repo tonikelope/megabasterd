@@ -2049,7 +2049,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                     boolean error_2FA = false;
 
-                                    if (ma.check2FA(email)) {
+                                    if (!_main_panel.getMega_active_accounts().containsKey(email) && ma.check2FA(email)) {
 
                                         Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
 
@@ -2065,37 +2065,40 @@ public class SettingsDialog extends javax.swing.JDialog {
                                     }
 
                                     if (!error_2FA) {
-                                        ma.login(email, pass, pincode);
+                                        if (!_main_panel.getMega_active_accounts().containsKey(email)) {
+                                            ma.login(email, pass, pincode);
 
-                                        ByteArrayOutputStream bs = new ByteArrayOutputStream();
+                                            ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
-                                        try ( ObjectOutputStream os = new ObjectOutputStream(bs)) {
-                                            os.writeObject(ma);
+                                            try ( ObjectOutputStream os = new ObjectOutputStream(bs)) {
+                                                os.writeObject(ma);
+                                            }
+
+                                            if (_main_panel.getMaster_pass() != null) {
+
+                                                DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
+
+                                            } else {
+
+                                                DBTools.insertMegaSession(email, bs.toByteArray(), false);
+                                            }
+
+                                            _main_panel.getMega_active_accounts().put(email, ma);
+
+                                            String password = pass, password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
+
+                                            if (_main_panel.getMaster_pass_hash() != null) {
+
+                                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes("UTF-8"), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                            }
+
+                                            DBTools.insertMegaAccount(email, password, password_aes, user_hash);
                                         }
 
-                                        if (_main_panel.getMaster_pass() != null) {
-
-                                            DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
-
-                                        } else {
-
-                                            DBTools.insertMegaSession(email, bs.toByteArray(), false);
-                                        }
-
-                                        _main_panel.getMega_active_accounts().put(email, ma);
-
-                                        String password = pass, password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
-
-                                        if (_main_panel.getMaster_pass_hash() != null) {
-
-                                            password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes("UTF-8"), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                            password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-                                        }
-
-                                        DBTools.insertMegaAccount(email, password, password_aes, user_hash);
                                     } else {
                                         email_error.add(email);
                                     }
@@ -2133,7 +2136,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                         boolean error_2FA = false;
 
-                                        if (ma.check2FA(email)) {
+                                        if (!_main_panel.getMega_active_accounts().containsKey(email) && ma.check2FA(email)) {
 
                                             Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
 
@@ -2149,40 +2152,41 @@ public class SettingsDialog extends javax.swing.JDialog {
                                         }
 
                                         if (!error_2FA) {
+                                            if (!_main_panel.getMega_active_accounts().containsKey(email)) {
+                                                ma.login(email, pass, pincode);
 
-                                            ma.login(email, pass, pincode);
+                                                ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
-                                            ByteArrayOutputStream bs = new ByteArrayOutputStream();
+                                                try ( ObjectOutputStream os = new ObjectOutputStream(bs)) {
+                                                    os.writeObject(ma);
+                                                }
 
-                                            try ( ObjectOutputStream os = new ObjectOutputStream(bs)) {
-                                                os.writeObject(ma);
+                                                if (_main_panel.getMaster_pass() != null) {
+
+                                                    DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
+
+                                                } else {
+
+                                                    DBTools.insertMegaSession(email, bs.toByteArray(), false);
+                                                }
+
+                                                _main_panel.getMega_active_accounts().put(email, ma);
+
+                                                password = pass;
+
+                                                String password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
+
+                                                if (_main_panel.getMaster_pass() != null) {
+
+                                                    password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes("UTF-8"), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+
+                                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                                                }
+
+                                                DBTools.insertMegaAccount(email, password, password_aes, user_hash);
                                             }
-
-                                            if (_main_panel.getMaster_pass() != null) {
-
-                                                DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
-
-                                            } else {
-
-                                                DBTools.insertMegaSession(email, bs.toByteArray(), false);
-                                            }
-
-                                            _main_panel.getMega_active_accounts().put(email, ma);
-
-                                            password = pass;
-
-                                            String password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
-
-                                            if (_main_panel.getMaster_pass() != null) {
-
-                                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(pass.getBytes("UTF-8"), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-
-                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
-                                            }
-
-                                            DBTools.insertMegaAccount(email, password, password_aes, user_hash);
                                         } else {
                                             email_error.add(email);
                                         }

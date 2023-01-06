@@ -16,6 +16,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import static java.lang.Integer.MAX_VALUE;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -929,40 +931,79 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                         } while (upload_res == null && !_exit);
 
                         if (upload_res != null && !_exit) {
-                            List files = (List) upload_res.get("f");
-
-                            _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
-
                             try {
+                                List files = (List) upload_res.get("f");
 
-                                _file_link = _ma.getPublicFileLink(_fid, i32a2bin(node_key));
+                                _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
 
-                                MiscTools.GUIRun(() -> {
-                                    getView().getFile_link_button().setEnabled(true);
-                                });
+                                if (MiscTools.isVideoFile(Paths.get(_file_name))) {
 
-                            } catch (Exception ex) {
-                                LOG.log(Level.SEVERE, ex.getMessage());
-                            }
+                                    getView().printStatusNormal("Creating and uploading thumbnails ... ***DO NOT EXIT MEGABASTERD NOW***");
 
-                            getView().printStatusOK(LabelTranslatorSingleton.getInstance().translate("File successfully uploaded! (") + _ma.getFull_email() + ")");
+                                    Thumbnailer thumbnailer = new Thumbnailer();
 
-                            synchronized (this.getMain_panel().getUpload_manager().getLog_file_lock()) {
+                                    String thumb_file = thumbnailer.createVideoThumbnail(_file_name);
 
-                                File upload_log = new File(MainPanel.MEGABASTERD_HOME_DIR + "/megabasterd_upload_" + _root_node + ".log");
+                                    if (thumb_file != null) {
 
-                                if (upload_log.exists()) {
+                                        _ma.uploadThumbnails(this, _fid, thumb_file, thumb_file);
 
-                                    FileWriter fr;
-                                    try {
-                                        fr = new FileWriter(upload_log, true);
-                                        fr.write("[" + MiscTools.getFechaHoraActual() + "] " + _file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
-                                        fr.close();
-                                    } catch (IOException ex) {
-                                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                        Files.deleteIfExists(Paths.get(thumb_file));
+                                    }
+
+                                } else if (MiscTools.isImageFile(Paths.get(_file_name))) {
+
+                                    getView().printStatusNormal("Creating and uploading thumbnails ... ***DO NOT EXIT MEGABASTERD NOW***");
+
+                                    Thumbnailer thumbnailer = new Thumbnailer();
+
+                                    String thumb_file = thumbnailer.createImageThumbnail(_file_name);
+
+                                    if (thumb_file != null) {
+
+                                        _ma.uploadThumbnails(this, _fid, thumb_file, thumb_file);
+
+                                        Files.deleteIfExists(Paths.get(thumb_file));
                                     }
 
                                 }
+
+                                try {
+
+                                    _file_link = _ma.getPublicFileLink(_fid, i32a2bin(node_key));
+
+                                    MiscTools.GUIRun(() -> {
+                                        getView().getFile_link_button().setEnabled(true);
+                                    });
+
+                                } catch (Exception ex) {
+                                    LOG.log(Level.SEVERE, ex.getMessage());
+                                }
+
+                                getView().printStatusOK(LabelTranslatorSingleton.getInstance().translate("File successfully uploaded! (") + _ma.getFull_email() + ")");
+
+                                synchronized (this.getMain_panel().getUpload_manager().getLog_file_lock()) {
+
+                                    File upload_log = new File(MainPanel.MEGABASTERD_HOME_DIR + "/megabasterd_upload_" + _root_node + ".log");
+
+                                    if (upload_log.exists()) {
+
+                                        FileWriter fr;
+                                        try {
+                                            fr = new FileWriter(upload_log, true);
+                                            fr.write("[" + MiscTools.getFechaHoraActual() + "] " + _file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
+                                            fr.close();
+                                        } catch (IOException ex) {
+                                            Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                        }
+
+                                    }
+                                }
+
+                            } catch (MegaAPIException ex) {
+                                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (IOException ex) {
+                                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
                             }
 
                         } else if (_status_error != null) {
