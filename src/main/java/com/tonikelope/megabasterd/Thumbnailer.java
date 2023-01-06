@@ -30,7 +30,7 @@ public class Thumbnailer {
      */
     public static final double SECONDS_BETWEEN_FRAMES = 10;
 
-    public static final float SECONDS_BETWEEN_FRAMES_PERC = 0.02f; //0f for disable
+    public static final float SECONDS_BETWEEN_FRAMES_PERC = 0.03f; //0f para usar SECONDS_BETWEEN_FRAMES directamente
 
     /**
      * The number of nano-seconds between frames.

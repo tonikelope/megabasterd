@@ -45,7 +45,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
     private final Object _progress_lock;
-    private String _status_error;
+    private volatile String _status_error;
+    private volatile String _thumbnail_file = "";
     private volatile boolean _exit;
     private volatile boolean _frozen;
     private int _slots;
@@ -459,6 +460,24 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             });
 
         } else {
+
+            _thread_pool.execute(() -> {
+
+                if (MiscTools.isVideoFile(Paths.get(_file_name))) {
+
+                    Thumbnailer thumbnailer = new Thumbnailer();
+
+                    _thumbnail_file = thumbnailer.createVideoThumbnail(_file_name);
+
+                } else if (MiscTools.isImageFile(Paths.get(_file_name))) {
+
+                    Thumbnailer thumbnailer = new Thumbnailer();
+
+                    _thumbnail_file = thumbnailer.createImageThumbnail(_file_name);
+
+                }
+
+            });
 
             getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate(_frozen ? "(FROZEN) Waiting to start (" : "Waiting to start (") + _ma.getFull_email() + ") ...");
 
@@ -940,34 +959,34 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                     getView().printStatusNormal("Creating thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
-                                    Thumbnailer thumbnailer = new Thumbnailer();
+                                    if (_thumbnail_file != null) {
 
-                                    String thumb_file = thumbnailer.createVideoThumbnail(_file_name);
-
-                                    if (thumb_file != null) {
+                                        while ("".equals(_thumbnail_file)) {
+                                            MiscTools.pausar(1000);
+                                        }
 
                                         getView().printStatusNormal("Uploading thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
-                                        _ma.uploadThumbnails(this, _fid, thumb_file, thumb_file);
+                                        _ma.uploadThumbnails(this, _fid, _thumbnail_file, _thumbnail_file);
 
-                                        Files.deleteIfExists(Paths.get(thumb_file));
+                                        Files.deleteIfExists(Paths.get(_thumbnail_file));
                                     }
 
                                 } else if (MiscTools.isImageFile(Paths.get(_file_name))) {
 
                                     getView().printStatusNormal("Creating thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
-                                    Thumbnailer thumbnailer = new Thumbnailer();
+                                    if (_thumbnail_file != null) {
 
-                                    String thumb_file = thumbnailer.createImageThumbnail(_file_name);
-
-                                    if (thumb_file != null) {
+                                        while ("".equals(_thumbnail_file)) {
+                                            MiscTools.pausar(1000);
+                                        }
 
                                         getView().printStatusNormal("Uploading thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
-                                        _ma.uploadThumbnails(this, _fid, thumb_file, thumb_file);
+                                        _ma.uploadThumbnails(this, _fid, _thumbnail_file, _thumbnail_file);
 
-                                        Files.deleteIfExists(Paths.get(thumb_file));
+                                        Files.deleteIfExists(Paths.get(_thumbnail_file));
                                     }
 
                                 }
