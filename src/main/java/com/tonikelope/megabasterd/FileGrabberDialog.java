@@ -108,6 +108,10 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         MiscTools.GUIRunAndWait(() -> {
             initComponents();
 
+            String upload_log_string = DBTools.selectSettingValue("upload_log");
+
+            upload_log_checkbox.setSelected("yes".equals(upload_log_string));
+
             updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
             updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel1.getBorder()), GUI_FONT, _main_panel.getZoom_factor());

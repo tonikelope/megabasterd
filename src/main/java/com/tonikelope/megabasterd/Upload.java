@@ -40,6 +40,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
     public static final int WORKERS_DEFAULT = 6;
     public static final int CHUNK_SIZE_MULTI = 1; //Otra cosa da errores al reanudar una subida (investigar)
+    public static final boolean DEFAULT_THUMBNAILS = true;
+    public static final boolean UPLOAD_LOG = false;
     private static final Logger LOG = Logger.getLogger(Upload.class.getName());
     private final MainPanel _main_panel;
     private volatile UploadView _view;
@@ -461,24 +463,6 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         } else {
 
-            _thread_pool.execute(() -> {
-
-                if (MiscTools.isVideoFile(Paths.get(_file_name))) {
-
-                    Thumbnailer thumbnailer = new Thumbnailer();
-
-                    _thumbnail_file = thumbnailer.createVideoThumbnail(_file_name);
-
-                } else if (MiscTools.isImageFile(Paths.get(_file_name))) {
-
-                    Thumbnailer thumbnailer = new Thumbnailer();
-
-                    _thumbnail_file = thumbnailer.createImageThumbnail(_file_name);
-
-                }
-
-            });
-
             getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate(_frozen ? "(FROZEN) Waiting to start (" : "Waiting to start (") + _ma.getFull_email() + ") ...");
 
             MiscTools.GUIRun(() -> {
@@ -716,6 +700,21 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         getView().printStatusNormal("Starting upload, please wait...");
 
         if (!_exit) {
+
+            _thread_pool.execute(() -> {
+
+                String thumbnails_string = DBTools.selectSettingValue("thumbnails");
+
+                if ("yes".equals(thumbnails_string)) {
+
+                    Thumbnailer thumbnailer = new Thumbnailer();
+
+                    _thumbnail_file = thumbnailer.createThumbnail(_file_name);
+                } else {
+                    _thumbnail_file = null;
+                }
+
+            });
 
             if (_ul_url == null) {
 
@@ -955,39 +954,25 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
 
-                                if (MiscTools.isVideoFile(Paths.get(_file_name))) {
+                                while ("".equals(_thumbnail_file)) {
+                                    MiscTools.pausar(1000);
+                                }
+
+                                if (_thumbnail_file != null) {
 
                                     getView().printStatusNormal("Creating thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
-                                    if (_thumbnail_file != null) {
+                                    if (!Files.isReadable(Paths.get(_thumbnail_file))) {
+                                        Thumbnailer thumbnailer = new Thumbnailer();
 
-                                        while ("".equals(_thumbnail_file)) {
-                                            MiscTools.pausar(1000);
-                                        }
-
-                                        getView().printStatusNormal("Uploading thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
-
-                                        _ma.uploadThumbnails(this, _fid, _thumbnail_file, _thumbnail_file);
-
-                                        Files.deleteIfExists(Paths.get(_thumbnail_file));
+                                        _thumbnail_file = thumbnailer.createThumbnail(_file_name);
                                     }
 
-                                } else if (MiscTools.isImageFile(Paths.get(_file_name))) {
+                                    getView().printStatusNormal("Uploading thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
-                                    getView().printStatusNormal("Creating thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
+                                    _ma.uploadThumbnails(this, _fid, _thumbnail_file, _thumbnail_file);
 
-                                    if (_thumbnail_file != null) {
-
-                                        while ("".equals(_thumbnail_file)) {
-                                            MiscTools.pausar(1000);
-                                        }
-
-                                        getView().printStatusNormal("Uploading thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
-
-                                        _ma.uploadThumbnails(this, _fid, _thumbnail_file, _thumbnail_file);
-
-                                        Files.deleteIfExists(Paths.get(_thumbnail_file));
-                                    }
+                                    Files.deleteIfExists(Paths.get(_thumbnail_file));
 
                                 }
 

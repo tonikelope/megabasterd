@@ -567,23 +567,30 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="rec_upload_slots_label" alignment="0" pref="1185" max="32767" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
-                                  <Component id="max_up_speed_label" min="-2" max="-2" attributes="0"/>
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Component id="max_up_speed_spinner" min="-2" max="-2" attributes="0"/>
-                              </Group>
-                              <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Component id="default_slots_up_label" max="32767" attributes="0"/>
-                                      <Component id="max_uploads_label" max="32767" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace max="-2" attributes="0"/>
+                              <Group type="102" attributes="0">
                                   <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="default_slots_up_spinner" min="-2" max="-2" attributes="0"/>
-                                      <Component id="max_uploads_spinner" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                                          <Component id="max_up_speed_label" min="-2" max="-2" attributes="0"/>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Component id="max_up_speed_spinner" min="-2" max="-2" attributes="0"/>
+                                      </Group>
+                                      <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
+                                      <Group type="102" alignment="0" attributes="0">
+                                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                              <Component id="default_slots_up_label" max="32767" attributes="0"/>
+                                              <Component id="max_uploads_label" max="32767" attributes="0"/>
+                                          </Group>
+                                          <EmptySpace max="-2" attributes="0"/>
+                                          <Group type="103" groupAlignment="0" attributes="0">
+                                              <Component id="default_slots_up_spinner" min="-2" max="-2" attributes="0"/>
+                                              <Component id="max_uploads_spinner" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          </Group>
+                                      </Group>
+                                      <Component id="thumbnail_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                                      <Component id="upload_log_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
                                   </Group>
+                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
@@ -612,6 +619,10 @@
                               <Component id="max_up_speed_label" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="max_up_speed_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="thumbnail_checkbox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="upload_log_checkbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -687,6 +698,24 @@
                       <Font name="Dialog" size="14" style="0"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Note: slots consume RAM, so use them moderately."/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="thumbnail_checkbox">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Dialog" size="18" style="1"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Create and upload image/video thumbnails"/>
+                    <Property name="doubleBuffered" type="boolean" value="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="upload_log_checkbox">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Dialog" size="18" style="1"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Create upload logs"/>
+                    <Property name="doubleBuffered" type="boolean" value="true"/>
                   </Properties>
                 </Component>
               </SubComponents>

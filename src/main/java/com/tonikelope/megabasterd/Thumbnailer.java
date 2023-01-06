@@ -14,6 +14,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -25,17 +26,12 @@ public class Thumbnailer {
 
     public static final int IMAGE_THUMB_SIZE = 250;
 
-    /**
-     * The number of seconds between frames.
-     */
-    public static final double SECONDS_BETWEEN_FRAMES = 10;
-
-    public static final float SECONDS_BETWEEN_FRAMES_PERC = 0.03f; //0f para usar SECONDS_BETWEEN_FRAMES directamente
+    public static final float SECONDS_BETWEEN_FRAMES_PERC = 0.03f; //Take frame video at 3% position
 
     /**
      * The number of nano-seconds between frames.
      */
-    private long nano_seconds_between_frames = (long) (Global.DEFAULT_PTS_PER_SECOND * SECONDS_BETWEEN_FRAMES);
+    private long nano_seconds_between_frames;
 
     /**
      * Time of last frame write.
@@ -93,7 +89,22 @@ public class Thumbnailer {
         return null;
     }
 
-    public String createImageThumbnail(String filename) {
+    public String createThumbnail(String filename) {
+
+        if (MiscTools.isVideoFile(Paths.get(filename))) {
+
+            return createVideoThumbnail(filename);
+
+        } else if (MiscTools.isImageFile(Paths.get(filename))) {
+
+            return createImageThumbnail(filename);
+
+        }
+
+        return null;
+    }
+
+    private String createImageThumbnail(String filename) {
 
         try {
 
@@ -139,7 +150,7 @@ public class Thumbnailer {
      * @param args must contain one string which represents a filename
      */
     @SuppressWarnings("deprecation")
-    public String createVideoThumbnail(String filename) {
+    private String createVideoThumbnail(String filename) {
 
         // make sure that we can actually convert video pixel formats
         if (!IVideoResampler.isSupported(
@@ -157,9 +168,7 @@ public class Thumbnailer {
             throw new IllegalArgumentException("could not open file: " + filename);
         }
 
-        if (SECONDS_BETWEEN_FRAMES_PERC > 0) {
-            nano_seconds_between_frames = (long) (Global.DEFAULT_PTS_PER_SECOND * Math.round((float) SECONDS_BETWEEN_FRAMES_PERC * container.getDuration() / 1000000));
-        }
+        nano_seconds_between_frames = (long) (Global.DEFAULT_PTS_PER_SECOND * Math.round((float) SECONDS_BETWEEN_FRAMES_PERC * container.getDuration() / 1000000));
 
         // query how many streams the call to open found
         int numStreams = container.getNumStreams();

@@ -194,6 +194,26 @@ public class SettingsDialog extends javax.swing.JDialog {
                 monitor_clipboard = monitor_clipboard_string.equals("yes");
             }
 
+            boolean thumbnails = Upload.DEFAULT_THUMBNAILS;
+
+            String thumbnails_string = DBTools.selectSettingValue("thumbnails");
+
+            if (thumbnails_string != null) {
+                thumbnails = thumbnails_string.equals("yes");
+            }
+
+            thumbnail_checkbox.setSelected(thumbnails);
+
+            boolean upload_log = Upload.UPLOAD_LOG;
+
+            String upload_log_string = DBTools.selectSettingValue("upload_log");
+
+            if (upload_log_string != null) {
+                upload_log = upload_log_string.equals("yes");
+            }
+
+            upload_log_checkbox.setSelected(upload_log);
+
             clipboardspy_checkbox.setSelected(monitor_clipboard);
 
             String default_download_dir = DBTools.selectSettingValue("default_down_dir");
@@ -703,6 +723,8 @@ public class SettingsDialog extends javax.swing.JDialog {
         max_up_speed_spinner = new javax.swing.JSpinner();
         limit_upload_speed_checkbox = new javax.swing.JCheckBox();
         rec_upload_slots_label = new javax.swing.JLabel();
+        thumbnail_checkbox = new javax.swing.JCheckBox();
+        upload_log_checkbox = new javax.swing.JCheckBox();
         accounts_panel = new javax.swing.JPanel();
         mega_accounts_scrollpane = new javax.swing.JScrollPane();
         mega_accounts_table = new javax.swing.JTable();
@@ -1066,6 +1088,14 @@ public class SettingsDialog extends javax.swing.JDialog {
         rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         rec_upload_slots_label.setText("Note: slots consume RAM, so use them moderately.");
 
+        thumbnail_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        thumbnail_checkbox.setText("Create and upload image/video thumbnails");
+        thumbnail_checkbox.setDoubleBuffered(true);
+
+        upload_log_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        upload_log_checkbox.setText("Create upload logs");
+        upload_log_checkbox.setDoubleBuffered(true);
+
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
         uploads_panelLayout.setHorizontalGroup(
@@ -1075,19 +1105,24 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(rec_upload_slots_label, javax.swing.GroupLayout.DEFAULT_SIZE, 1185, Short.MAX_VALUE)
                     .addGroup(uploads_panelLayout.createSequentialGroup()
-                        .addGap(20, 20, 20)
-                        .addComponent(max_up_speed_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(limit_upload_speed_checkbox)
-                    .addGroup(uploads_panelLayout.createSequentialGroup()
-                        .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(default_slots_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(max_uploads_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addGroup(uploads_panelLayout.createSequentialGroup()
+                                .addGap(20, 20, 20)
+                                .addComponent(max_up_speed_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(limit_upload_speed_checkbox)
+                            .addGroup(uploads_panelLayout.createSequentialGroup()
+                                .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(default_slots_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(max_uploads_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(thumbnail_checkbox)
+                            .addComponent(upload_log_checkbox))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         uploads_panelLayout.setVerticalGroup(
@@ -1109,6 +1144,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(max_up_speed_label)
                     .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(thumbnail_checkbox)
+                .addGap(18, 18, 18)
+                .addComponent(upload_log_checkbox)
                 .addContainerGap())
         );
 
@@ -1770,6 +1809,8 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("run_command_path", run_command_textbox.getText());
             settings.put("mega_api_key", mega_api_key.getText().trim());
             settings.put("clipboardspy", clipboardspy_checkbox.isSelected() ? "yes" : "no");
+            settings.put("thumbnails", thumbnail_checkbox.isSelected() ? "yes" : "no");
+            settings.put("upload_log", upload_log_checkbox.isSelected() ? "yes" : "no");
 
             if (custom_proxy_textarea.getText().trim().length() == 0) {
                 smart_proxy_checkbox.setSelected(false);
@@ -3133,7 +3174,9 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox smart_proxy_checkbox;
     private javax.swing.JCheckBox start_frozen_checkbox;
     private javax.swing.JLabel status;
+    private javax.swing.JCheckBox thumbnail_checkbox;
     private javax.swing.JButton unlock_accounts_button;
+    private javax.swing.JCheckBox upload_log_checkbox;
     private javax.swing.JPanel uploads_panel;
     private javax.swing.JScrollPane uploads_scrollpane;
     private javax.swing.JCheckBox use_mega_account_down_checkbox;
