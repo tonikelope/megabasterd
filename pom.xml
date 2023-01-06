@@ -21,6 +21,11 @@
     </repositories>
     <dependencies>
         <dependency>
+            <groupId>org.sejda.webp-imageio</groupId>
+            <artifactId>webp-imageio-sejda</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+        <dependency>
             <groupId>org.xerial</groupId>
             <artifactId>sqlite-jdbc</artifactId>
             <version>3.25.2</version>
