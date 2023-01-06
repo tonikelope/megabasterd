@@ -938,13 +938,15 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 if (MiscTools.isVideoFile(Paths.get(_file_name))) {
 
-                                    getView().printStatusNormal("Creating and uploading thumbnails ... ***DO NOT EXIT MEGABASTERD NOW***");
+                                    getView().printStatusNormal("Creating thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
                                     Thumbnailer thumbnailer = new Thumbnailer();
 
                                     String thumb_file = thumbnailer.createVideoThumbnail(_file_name);
 
                                     if (thumb_file != null) {
+
+                                        getView().printStatusNormal("Uploading thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
                                         _ma.uploadThumbnails(this, _fid, thumb_file, thumb_file);
 
@@ -953,13 +955,15 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 } else if (MiscTools.isImageFile(Paths.get(_file_name))) {
 
-                                    getView().printStatusNormal("Creating and uploading thumbnails ... ***DO NOT EXIT MEGABASTERD NOW***");
+                                    getView().printStatusNormal("Creating thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
                                     Thumbnailer thumbnailer = new Thumbnailer();
 
                                     String thumb_file = thumbnailer.createImageThumbnail(_file_name);
 
                                     if (thumb_file != null) {
+
+                                        getView().printStatusNormal("Uploading thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
                                         _ma.uploadThumbnails(this, _fid, thumb_file, thumb_file);
 

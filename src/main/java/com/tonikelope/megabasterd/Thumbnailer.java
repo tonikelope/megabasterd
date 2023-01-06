@@ -14,7 +14,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -31,11 +30,12 @@ public class Thumbnailer {
      */
     public static final double SECONDS_BETWEEN_FRAMES = 10;
 
+    public static final float SECONDS_BETWEEN_FRAMES_PERC = 0.02f; //0f for disable
+
     /**
      * The number of nano-seconds between frames.
      */
-    public static final long NANO_SECONDS_BETWEEN_FRAMES
-            = (long) (Global.DEFAULT_PTS_PER_SECOND * SECONDS_BETWEEN_FRAMES);
+    private long nano_seconds_between_frames = (long) (Global.DEFAULT_PTS_PER_SECOND * SECONDS_BETWEEN_FRAMES);
 
     /**
      * Time of last frame write.
@@ -57,11 +57,11 @@ public class Thumbnailer {
             // first frame
 
             if (mLastPtsWrite == Global.NO_PTS) {
-                mLastPtsWrite = picture.getPts() - NANO_SECONDS_BETWEEN_FRAMES;
+                mLastPtsWrite = picture.getPts() - nano_seconds_between_frames;
             }
 
             // if it's time to write the next frame
-            if (picture.getPts() - mLastPtsWrite >= NANO_SECONDS_BETWEEN_FRAMES) {
+            if (picture.getPts() - mLastPtsWrite >= nano_seconds_between_frames) {
                 // Make a temorary file name
 
                 if (conta_frames == 1) {
@@ -82,7 +82,7 @@ public class Thumbnailer {
                 conta_frames++;
 
                 // update last write time
-                mLastPtsWrite += NANO_SECONDS_BETWEEN_FRAMES;
+                mLastPtsWrite += nano_seconds_between_frames;
 
                 return null;
             }
@@ -94,6 +94,7 @@ public class Thumbnailer {
     }
 
     public String createImageThumbnail(String filename) {
+
         try {
 
             BufferedImage imagen_original = ImageIO.read(new File(filename));
@@ -154,6 +155,10 @@ public class Thumbnailer {
         // open up the container
         if (container.open(filename, IContainer.Type.READ, null) < 0) {
             throw new IllegalArgumentException("could not open file: " + filename);
+        }
+
+        if (SECONDS_BETWEEN_FRAMES_PERC > 0) {
+            nano_seconds_between_frames = (long) (Global.DEFAULT_PTS_PER_SECOND * Math.round((float) SECONDS_BETWEEN_FRAMES_PERC * container.getDuration() / 1000000));
         }
 
         // query how many streams the call to open found
