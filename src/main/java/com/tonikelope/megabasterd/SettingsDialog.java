@@ -2599,7 +2599,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                             password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(password_aes), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(user_hash), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_pkcs7(BASE642Bin(user_hash.replace('-', '+').replace('_', '/')), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
                         }
 
                         data.put("password", password);
