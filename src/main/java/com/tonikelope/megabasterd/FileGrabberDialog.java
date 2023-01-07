@@ -21,6 +21,7 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -189,11 +190,20 @@ public class FileGrabberDialog extends javax.swing.JDialog {
             }
 
             if (_main_panel.getMega_accounts().size() > 0) {
+
+                ArrayList<String> cuentas = new ArrayList<>();
+
+                _main_panel.getMega_accounts().keySet().forEach((o) -> {
+                    cuentas.add(o);
+                });
+
+                Collections.sort(cuentas);
+
                 MiscTools.GUIRunAndWait(() -> {
                     if (!_main_panel.getMega_active_accounts().isEmpty()) {
                         _inserting_mega_accounts = true;
 
-                        _main_panel.getMega_accounts().keySet().forEach((o) -> {
+                        cuentas.forEach((o) -> {
                             account_combobox.addItem(o);
                         });
 
@@ -210,7 +220,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
                     } else {
 
-                        _main_panel.getMega_accounts().keySet().forEach((o) -> {
+                        cuentas.forEach((o) -> {
                             account_combobox.addItem(o);
                         });
                     }

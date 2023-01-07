@@ -72,6 +72,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private final Set<String> _deleted_elc_accounts;
     private final MainPanel _main_panel;
     private boolean _remember_master_pass;
+    private volatile boolean _exit = false;
 
     public boolean isSettings_ok() {
         return _settings_ok;
@@ -1768,7 +1769,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_buttonActionPerformed
-
+        _exit = false;
         setVisible(false);
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
@@ -2035,7 +2036,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 save_button.setEnabled(false);
 
-                cancel_button.setEnabled(false);
+                cancel_button.setEnabled(true);
 
                 import_mega_button.setEnabled(false);
 
@@ -2060,7 +2061,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 THREAD_POOL.execute(() -> {
                     ArrayList<String> email_error = new ArrayList<>();
                     ArrayList<String> new_valid_mega_accounts = new ArrayList<>();
-                    for (int i = 0; i < model_row_count; i++) {
+                    for (int i = 0; i < model_row_count && !_exit; i++) {
 
                         String email = (String) model.getValueAt(i, 0);
 
@@ -2242,52 +2243,54 @@ public class SettingsDialog extends javax.swing.JDialog {
                             }
                         }
                     }
-                    if (email_error.size() > 0) {
-                        String email_error_s = "";
-                        email_error_s = email_error.stream().map((s) -> s + "\n").reduce(email_error_s, String::concat);
-                        final String final_email_error = email_error_s;
-                        MiscTools.GUIRun(() -> {
-                            status.setText("");
+                    if (!_exit) {
+                        if (email_error.size() > 0) {
+                            String email_error_s = "";
+                            email_error_s = email_error.stream().map((s) -> s + "\n").reduce(email_error_s, String::concat);
+                            final String final_email_error = email_error_s;
+                            MiscTools.GUIRun(() -> {
+                                status.setText("");
 
-                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n") + final_email_error, "Mega Account Check Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n") + final_email_error, "Mega Account Check Error", JOptionPane.ERROR_MESSAGE);
 
-                            save_button.setEnabled(true);
+                                save_button.setEnabled(true);
 
-                            cancel_button.setEnabled(true);
+                                cancel_button.setEnabled(true);
 
-                            panel_tabs.setEnabled(true);
+                                panel_tabs.setEnabled(true);
 
-                            import_mega_button.setEnabled(true);
+                                import_mega_button.setEnabled(true);
 
-                            remove_mega_account_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
+                                remove_mega_account_button.setEnabled(mega_accounts_table.getModel().getRowCount() > 0);
 
-                            remove_elc_account_button.setEnabled(elc_accounts_table.getModel().getRowCount() > 0);
+                                remove_elc_account_button.setEnabled(elc_accounts_table.getModel().getRowCount() > 0);
 
-                            add_mega_account_button.setEnabled(true);
+                                add_mega_account_button.setEnabled(true);
 
-                            add_elc_account_button.setEnabled(true);
+                                add_elc_account_button.setEnabled(true);
 
-                            mega_accounts_table.setEnabled(true);
+                                mega_accounts_table.setEnabled(true);
 
-                            elc_accounts_table.setEnabled(true);
+                                elc_accounts_table.setEnabled(true);
 
-                            delete_all_accounts_button.setEnabled(true);
+                                delete_all_accounts_button.setEnabled(true);
 
-                            encrypt_pass_checkbox.setEnabled(true);
+                                encrypt_pass_checkbox.setEnabled(true);
 
-                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                        });
-                    } else {
-                        _main_panel.getMega_accounts().entrySet().stream().map((entry) -> entry.getKey()).filter((email) -> (!new_valid_mega_accounts.contains(email))).forEachOrdered((email) -> {
-                            _deleted_mega_accounts.add(email);
-                        });
-                        MiscTools.GUIRun(() -> {
-                            status.setText("");
-                            JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Settings successfully saved!"), LabelTranslatorSingleton.getInstance().translate("Settings saved"), JOptionPane.INFORMATION_MESSAGE);
-                            _settings_ok = true;
-                            setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-                            setVisible(false);
-                        });
+                                setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                            });
+                        } else {
+                            _main_panel.getMega_accounts().entrySet().stream().map((entry) -> entry.getKey()).filter((email) -> (!new_valid_mega_accounts.contains(email))).forEachOrdered((email) -> {
+                                _deleted_mega_accounts.add(email);
+                            });
+                            MiscTools.GUIRun(() -> {
+                                status.setText("");
+                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Settings successfully saved!"), LabelTranslatorSingleton.getInstance().translate("Settings saved"), JOptionPane.INFORMATION_MESSAGE);
+                                _settings_ok = true;
+                                setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+                                setVisible(false);
+                            });
+                        }
                     }
                 });
 
