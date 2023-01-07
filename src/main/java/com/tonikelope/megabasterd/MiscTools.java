@@ -51,6 +51,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -130,10 +131,13 @@ public class MiscTools {
         return getFechaHoraActual(format);
     }
 
-    public static boolean isVideoFile(Path path) {
+    public static boolean isVideoFile(String filename) {
 
         try {
-            return Files.probeContentType(path).startsWith("video/");
+
+            String part_file = MiscTools.findFirstRegex("\\.part[0-9]+-[0-9]+$", filename, 0);
+
+            return part_file == null && Files.probeContentType(Paths.get(filename)).startsWith("video/");
         } catch (IOException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -141,10 +145,13 @@ public class MiscTools {
         return false;
     }
 
-    public static boolean isImageFile(Path path) {
+    public static boolean isImageFile(String filename) {
 
         try {
-            return Files.probeContentType(path).startsWith("image/");
+
+            String part_file = MiscTools.findFirstRegex("\\.part[0-9]+-[0-9]+$", filename, 0);
+
+            return part_file == null && Files.probeContentType(Paths.get(filename)).startsWith("image/");
         } catch (IOException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }

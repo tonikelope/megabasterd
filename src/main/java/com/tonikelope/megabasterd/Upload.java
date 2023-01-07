@@ -954,7 +954,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
 
-                                while ("".equals(_thumbnail_file)) {
+                                while (_thumbnail_file != null && "".equals(_thumbnail_file)) {
                                     MiscTools.pausar(1000);
                                 }
 

@@ -14,7 +14,6 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -90,15 +89,17 @@ public class Thumbnailer {
     }
 
     public String createThumbnail(String filename) {
+        try {
+            if (MiscTools.isVideoFile(filename)) {
 
-        if (MiscTools.isVideoFile(Paths.get(filename))) {
+                return createVideoThumbnail(filename);
 
-            return createVideoThumbnail(filename);
+            } else if (MiscTools.isImageFile(filename)) {
 
-        } else if (MiscTools.isImageFile(Paths.get(filename))) {
+                return createImageThumbnail(filename);
 
-            return createImageThumbnail(filename);
-
+            }
+        } catch (Exception ex) {
         }
 
         return null;

@@ -1769,8 +1769,30 @@ public class SettingsDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_buttonActionPerformed
-        _exit = true;
-        setVisible(false);
+
+        if (!this.save_button.isEnabled()) {
+
+            Object[] options = {"No",
+                LabelTranslatorSingleton.getInstance().translate("Yes")};
+
+            int n = 1;
+            n = showOptionDialog(this,
+                    LabelTranslatorSingleton.getInstance().translate("SURE?"),
+                    LabelTranslatorSingleton.getInstance().translate("EXIT"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+                    null,
+                    options,
+                    options[0]);
+
+            if (n == 1) {
+                _exit = true;
+                dispose();
+            }
+
+        } else {
+            _exit = true;
+            dispose();
+        }
+
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
     private void save_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_save_buttonActionPerformed
