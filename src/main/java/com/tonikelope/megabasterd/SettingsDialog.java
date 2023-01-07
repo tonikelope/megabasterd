@@ -1769,7 +1769,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     }// </editor-fold>//GEN-END:initComponents
 
     private void cancel_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_buttonActionPerformed
-        _exit = false;
+        _exit = true;
         setVisible(false);
     }//GEN-LAST:event_cancel_buttonActionPerformed
 
