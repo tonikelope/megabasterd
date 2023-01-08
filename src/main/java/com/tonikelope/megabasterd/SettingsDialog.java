@@ -627,6 +627,12 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Chinese"));
 
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Vietnamese"));
+
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("German"));
+
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Hungarian"));
+
             if (language == null) {
                 language = MainPanel.DEFAULT_LANGUAGE;
             }
@@ -641,6 +647,12 @@ public class SettingsDialog extends javax.swing.JDialog {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Turkish"));
             } else if (language.equals("CH")) {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Chinese"));
+            } else if (language.equals("VI")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Vietnamese"));
+            } else if (language.equals("GE")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("German"));
+            } else if (language.equals("HU")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Hungarian"));
             }
 
             String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
@@ -1856,8 +1868,6 @@ public class SettingsDialog extends javax.swing.JDialog {
                 font = "ALTERNATIVE";
             }
 
-            settings.put("font", font);
-
             String old_language = DBTools.selectSettingValue("language");
 
             if (old_language == null) {
@@ -1872,13 +1882,21 @@ public class SettingsDialog extends javax.swing.JDialog {
                 language = "ES";
             } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Italian"))) {
                 language = "IT";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("German"))) {
+                language = "GE";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Hungarian"))) {
+                language = "HU";
             } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Turkish"))) {
                 language = "TU";
                 font = "DEFAULT";
             } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Chinese"))) {
                 language = "CH";
                 font = "ALTERNATIVE";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Vietnamese"))) {
+                language = "VI";
             }
+
+            settings.put("font", font);
 
             settings.put("language", language);
 

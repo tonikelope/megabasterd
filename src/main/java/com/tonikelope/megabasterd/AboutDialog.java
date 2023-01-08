@@ -68,6 +68,13 @@ public class AboutDialog extends javax.swing.JDialog {
         check_version_button = new javax.swing.JButton();
         dot_com_label = new javax.swing.JLabel();
         java_version = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel1 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("About");
@@ -142,14 +149,14 @@ public class AboutDialog extends javax.swing.JDialog {
         author_webpage_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         author_webpage_label.setDoubleBuffered(true);
         author_webpage_label.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseReleased(java.awt.event.MouseEvent evt) {
-                author_webpage_labelMouseReleased(evt);
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                author_webpage_labelMouseEntered(evt);
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 author_webpage_labelMouseExited(evt);
             }
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                author_webpage_labelMouseEntered(evt);
+            public void mouseReleased(java.awt.event.MouseEvent evt) {
+                author_webpage_labelMouseReleased(evt);
             }
         });
 
@@ -164,7 +171,7 @@ public class AboutDialog extends javax.swing.JDialog {
 
         check_version_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
         check_version_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-restart-30.png"))); // NOI18N
-        check_version_button.setText("Check for updates");
+        check_version_button.setText("Check version");
         check_version_button.setDoubleBuffered(true);
         check_version_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -185,6 +192,64 @@ public class AboutDialog extends javax.swing.JDialog {
         java_version.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         java_version.setText(System.getProperty("java.vm.name")+" "+System.getProperty("java.version"));
 
+        jLabel5.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/turkey.png"))); // NOI18N
+        jLabel5.setText("FabrieI");
+
+        jLabel2.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/germany.png"))); // NOI18N
+        jLabel2.setText("NieckLikesCode");
+
+        jLabel3.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/hungary.png"))); // NOI18N
+        jLabel3.setText("Roschach96 ");
+
+        jLabel1.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/china.png"))); // NOI18N
+        jLabel1.setText("linkea131");
+        jLabel1.setDoubleBuffered(true);
+
+        jLabel4.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/italy.png"))); // NOI18N
+        jLabel4.setText("bovirus ");
+
+        jLabel6.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/vietnam.png"))); // NOI18N
+        jLabel6.setText("rattybox");
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel1)
+                .addGap(18, 18, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addGap(18, 18, Short.MAX_VALUE)
+                .addComponent(jLabel3)
+                .addGap(18, 18, Short.MAX_VALUE)
+                .addComponent(jLabel4)
+                .addGap(18, 18, Short.MAX_VALUE)
+                .addComponent(jLabel5)
+                .addGap(18, 18, Short.MAX_VALUE)
+                .addComponent(jLabel6)
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel1)
+                    .addComponent(jLabel2)
+                    .addComponent(jLabel3)
+                    .addComponent(jLabel4)
+                    .addComponent(jLabel5)
+                    .addComponent(jLabel6))
+                .addContainerGap())
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -192,6 +257,7 @@ public class AboutDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(subtitle_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(title_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -228,7 +294,7 @@ public class AboutDialog extends javax.swing.JDialog {
                             .addComponent(check_version_button))))
                 .addGap(18, 18, 18)
                 .addComponent(subtitle_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(made_in_spain_label)
                     .addComponent(dot_com_label)
@@ -240,7 +306,9 @@ public class AboutDialog extends javax.swing.JDialog {
                         .addComponent(author_webpage_label)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(java_version)
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         pack();
@@ -353,6 +421,13 @@ public class AboutDialog extends javax.swing.JDialog {
     private javax.swing.JLabel author_webpage_label;
     private javax.swing.JButton check_version_button;
     private javax.swing.JLabel dot_com_label;
+    private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel java_version;
     private javax.swing.JLabel made_in_spain_label;
     private javax.swing.JLabel mb_label;
