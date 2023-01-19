@@ -1929,6 +1929,10 @@ public class LabelTranslatorSingleton {
     }
 
     private void Spanish() {
+        _addTranslation("FILE INTEGRITY IS OK", "LA INTEGRIDAD DEL ARCHIVO ES CORRECTA");
+        _addTranslation("FILE INTEGRITY CHECK FAILED", "FALLÓ LA VERIFICACIÓN DE INTEGRIDAD DEL ARCHIVO");
+        _addTranslation("CHECKING FILE INTEGRITY, please wait...", "COMPROBANDO INTEGRIDAD DEL ARCHIVO, por favor espera...");
+        _addTranslation("GENERATING SHA1, please wait...", "GENERANDO SHA1, por favor espera...");
         _addTranslation("COPY ALL", "COPIAR TODO");
         _addTranslation("ALL COPIED!", "¡TODO COPIADO!");
         _addTranslation("FILE WITH SAME NAME AND SIZE ALREADY EXISTS", "YA EXISTE UN FICHERO CON EL MISMO NOMBRE Y TAMAÑO");

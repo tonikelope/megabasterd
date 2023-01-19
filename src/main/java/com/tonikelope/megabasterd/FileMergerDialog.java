@@ -132,17 +132,17 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         if (Files.exists(Paths.get(_file_name_full + ".sha1"))) {
 
-            String sha1 = Files.readString(Paths.get(_file_name_full + ".sha1")).trim();
+            String sha1 = Files.readString(Paths.get(_file_name_full + ".sha1")).toLowerCase().trim();
 
             MiscTools.GUIRunAndWait(() -> {
-                merge_button.setText("CHECKING FILE INTEGRITY, please wait...");
+                merge_button.setText(LabelTranslatorSingleton.getInstance().translate("CHECKING FILE INTEGRITY, please wait..."));
             });
 
             if (sha1.equals(MiscTools.computeFileSHA1(new File(_file_name_full)))) {
-                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("FILE INTEGRITY OK"));
+                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("FILE INTEGRITY IS OK"));
                 return true;
             } else {
-                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("FILE SEEMS TO BE CORRUPTED"), "VERIFICATION ERROR", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("FILE INTEGRITY CHECK FAILED"), "ERROR", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
@@ -152,9 +152,15 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
     private void _deleteParts() {
 
-        this._file_parts.stream().map((file_path) -> new File(file_path)).forEachOrdered((file) -> {
-            file.delete();
-        });
+        try {
+            this._file_parts.stream().map((file_path) -> new File(file_path)).forEachOrdered((file) -> {
+                file.delete();
+            });
+
+            Files.deleteIfExists(Paths.get(_file_name_full + ".sha1"));
+        } catch (IOException ex) {
+            Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**

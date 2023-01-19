@@ -55,7 +55,6 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
@@ -141,7 +140,7 @@ public class MiscTools {
                     digest.update(buffer, 0, n);
                 }
             }
-            return new HexBinaryAdapter().marshal(digest.digest());
+            return new HexBinaryAdapter().marshal(digest.digest()).toLowerCase().trim();
         } catch (NoSuchAlgorithmException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
