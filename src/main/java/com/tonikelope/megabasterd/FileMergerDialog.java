@@ -47,6 +47,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
     private String _file_name = null;
     private long _file_size = 0L;
     private volatile boolean _exit = false;
+    private volatile String _file_name_full;
 
     /**
      * Creates new form FileSplitterDialog
@@ -105,11 +106,11 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
     private boolean _mergeFile() throws IOException {
 
-        try ( RandomAccessFile targetFile = new RandomAccessFile(this.file_name_label.getText(), "rw")) {
+        try ( RandomAccessFile targetFile = new RandomAccessFile(_file_name_full, "rw")) {
 
             FileChannel targetChannel = targetFile.getChannel();
 
-            monitorProgress(Paths.get(this.file_name_label.getText()));
+            monitorProgress(Paths.get(_file_name));
 
             for (String file_path : this._file_parts) {
 
@@ -126,6 +127,23 @@ public class FileMergerDialog extends javax.swing.JDialog {
                 MiscTools.GUIRun(() -> {
                     jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _file_size) * _progress));
                 });
+            }
+        }
+
+        if (Files.exists(Paths.get(_file_name_full + ".sha1"))) {
+
+            String sha1 = Files.readString(Paths.get(_file_name_full + ".sha1")).trim();
+
+            MiscTools.GUIRunAndWait(() -> {
+                merge_button.setText("CHECKING FILE INTEGRITY, please wait...");
+            });
+
+            if (sha1.equals(MiscTools.computeFileSHA1(new File(_file_name_full)))) {
+                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("FILE INTEGRITY OK"));
+                return true;
+            } else {
+                JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("FILE SEEMS TO BE CORRUPTED"), "VERIFICATION ERROR", JOptionPane.ERROR_MESSAGE);
+                return false;
             }
         }
 
@@ -281,6 +299,8 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
             this._file_name = MiscTools.findFirstRegex("^(.+)\\.part[0-9]+\\-[0-9]+$", filechooser.getSelectedFile().getName(), 1);
 
+            this._file_name_full = MiscTools.findFirstRegex("^(.+)\\.part[0-9]+\\-[0-9]+$", filechooser.getSelectedFile().getAbsolutePath(), 1);
+
             if (this._file_name != null) {
 
                 this.file_name_label.setText(truncateText(this._file_name, 150));
@@ -414,9 +434,9 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
                                 if (Desktop.isDesktopSupported()) {
                                     try {
-                                        Desktop.getDesktop().open(new File(file_name_label.getText()).getParentFile());
-                                    } catch (IOException ex) {
-
+                                        Desktop.getDesktop().open(_output_dir);
+                                    } catch (Exception ex) {
+                                        Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
                                     }
                                 }
 
@@ -462,7 +482,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                             pack();
                         });
                     }
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
             });

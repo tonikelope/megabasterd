@@ -27,9 +27,11 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.image.BufferedImage;
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
@@ -53,6 +55,7 @@ import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.CodeSource;
+import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
@@ -92,6 +95,7 @@ import javax.swing.tree.MutableTreeNode;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
 
 /**
  *
@@ -123,6 +127,27 @@ public class MiscTools {
         }
     };
     private static final Logger LOG = Logger.getLogger(MiscTools.class.getName());
+
+    public static String computeFileSHA1(File file) throws IOException {
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-1");
+            BufferedInputStream fis = new BufferedInputStream(new FileInputStream(file));
+            int n = 0;
+            byte[] buffer = new byte[8192];
+            while (n != -1) {
+                n = fis.read(buffer);
+                if (n > 0) {
+                    digest.update(buffer, 0, n);
+                }
+            }
+            return new HexBinaryAdapter().marshal(digest.digest());
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
+    }
 
     public static String getFechaHoraActual() {
 

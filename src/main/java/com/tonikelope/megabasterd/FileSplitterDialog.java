@@ -41,6 +41,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private final MainPanel _main_panel;
     private File[] _files = null;
     private File _output_dir = null;
+    private volatile String _sha1=null;
     private volatile long _progress = 0L;
     private volatile Path _current_part = null;
     private volatile int _current_file = 0;
@@ -84,6 +85,17 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     }
 
     private boolean _splitFile(int i) throws IOException {
+        
+        _sha1 = "";
+            
+            THREAD_POOL.execute(() -> {
+            
+            try {
+                _sha1 = MiscTools.computeFileSHA1(new File(_files[i].getAbsolutePath()));
+            } catch (IOException ex) {
+                Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            });
 
         this._progress = 0L;
 
@@ -121,6 +133,20 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             if (remainingBytes > 0 && !_exit) {
                 _writePartToFile(i, remainingBytes, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
             }
+        }
+        
+        while("".equals(_sha1)){
+            MiscTools.GUIRunAndWait(() -> {
+            
+                split_button.setText("GENERATING SHA1, please wait...");
+
+            });
+            
+            MiscTools.pausar(1000);
+        }
+        
+        if(_sha1!=null){
+            Files.writeString(Paths.get(this._files[i].getAbsolutePath()+".sha1"), _sha1);
         }
 
         return true;
@@ -413,6 +439,8 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             this.jProgressBar2.setVisible(true);
 
             pack();
+            
+            
 
             Dialog tthis = this;
 
@@ -431,8 +459,8 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                                     if (Desktop.isDesktopSupported()) {
                                         try {
                                             Desktop.getDesktop().open(_output_dir);
-                                        } catch (IOException ex) {
-
+                                        } catch (Exception ex) {
+                                             Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
                                         }
                                     }
 
@@ -475,7 +503,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                         }
 
                     }
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
             });
