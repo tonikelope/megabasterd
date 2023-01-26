@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tonikelope</groupId>
     <artifactId>MegaBasterd</artifactId>
-    <version>7.72</version>
+    <version>7.73</version>
     <packaging>jar</packaging>
     <repositories>
         <repository>
@@ -20,6 +20,11 @@
         </repository>
     </repositories>
     <dependencies>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.11.0</version>
+        </dependency>
         <dependency>
             <groupId>org.sejda.webp-imageio</groupId>
             <artifactId>webp-imageio-sejda</artifactId>

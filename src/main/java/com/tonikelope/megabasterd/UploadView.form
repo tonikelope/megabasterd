@@ -106,11 +106,13 @@
                   <Component id="slot_status_label" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="folder_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="file_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="file_size_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="open_browser_button" alignment="0" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="open_browser_button" alignment="0" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="folder_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="file_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="file_size_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="progress_pbar" min="-2" max="-2" attributes="0"/>
@@ -387,9 +389,6 @@
           <Image iconType="3" name="/images/icons8-export-30.png"/>
         </Property>
         <Property name="text" type="java.lang.String" value="Open folder in browser"/>
-        <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
-          <Color id="Cursor de Mano"/>
-        </Property>
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
       <Events>

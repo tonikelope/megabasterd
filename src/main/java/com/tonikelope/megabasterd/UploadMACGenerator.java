@@ -11,10 +11,10 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.BadPaddingException;
@@ -33,6 +33,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
     private final Object _secure_notify_lock;
     private boolean _notified;
     private volatile boolean _exit;
+    public final ConcurrentHashMap<Long, ByteArrayOutputStream> CHUNK_QUEUE = new ConcurrentHashMap<>();
 
     public UploadMACGenerator(Upload upload) {
         _secure_notify_lock = new Object();
@@ -122,36 +123,40 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
             Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", _upload.getByte_file_key(), i32a2bin(mac_iv));
 
-            try ( BufferedInputStream is = new BufferedInputStream(new FileInputStream(_upload.getFile_name()))) {
+            int[] chunk_mac = new int[4];
+            byte[] byte_block = new byte[16];
+            byte[] chunk_bytes;
 
-                if (tot > 0) {
-                    is.skip(tot);
-                }
+            try {
+                while (!_exit && !_upload.isStopped() && !_upload.getMain_panel().isExit()) {
 
-                int[] chunk_mac = new int[4];
-                byte[] byte_block = new byte[16];
+                    int reads;
 
-                try {
-                    while (!_exit && !_upload.isStopped() && !_upload.getMain_panel().isExit()) {
+                    long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, 1);
 
-                        int reads;
+                    long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, _upload.getFile_size(), chunk_offset, 1);
 
-                        long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, 1);
+                    ChunkWriterManager.checkChunkID(chunk_id, _upload.getFile_size(), chunk_offset);
 
-                        long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, _upload.getFile_size(), chunk_offset, 1);
+                    while (!CHUNK_QUEUE.containsKey(chunk_offset)) {
+                        MiscTools.pausar(1000);
+                    }
 
-                        ChunkWriterManager.checkChunkID(chunk_id, _upload.getFile_size(), chunk_offset);
+                    try {
 
-                        try {
+                        chunk_mac[0] = file_iv[0];
+                        chunk_mac[1] = file_iv[1];
+                        chunk_mac[2] = file_iv[0];
+                        chunk_mac[3] = file_iv[1];
 
-                            chunk_mac[0] = file_iv[0];
-                            chunk_mac[1] = file_iv[1];
-                            chunk_mac[2] = file_iv[0];
-                            chunk_mac[3] = file_iv[1];
+                        long conta_chunk = 0L;
 
-                            long conta_chunk = 0L;
+                        try ( ByteArrayOutputStream baos = CHUNK_QUEUE.remove(chunk_offset)) {
+                            chunk_bytes = baos.toByteArray();
+                        }
 
-                            while (conta_chunk < chunk_size && (reads = is.read(byte_block)) != -1) {
+                        try ( ByteArrayInputStream bais = new ByteArrayInputStream(chunk_bytes)) {
+                            while (conta_chunk < chunk_size && (reads = bais.read(byte_block)) != -1) {
 
                                 if (reads < byte_block.length) {
                                     for (int i = reads; i < byte_block.length; i++) {
@@ -172,45 +177,46 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                                 tot += reads;
 
                             }
-
-                            for (int i = 0; i < file_mac.length; i++) {
-                                file_mac[i] ^= chunk_mac[i];
-                            }
-
-                            file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
-
-                        } catch (IOException | IllegalBlockSizeException | BadPaddingException ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
                         }
 
-                        chunk_id++;
-
-                        int new_cbc_per = (int) ((((double) tot) / _upload.getFile_size()) * 100);
-
-                        if (new_cbc_per != cbc_per) {
-                            _upload.getView().updateCBC("CBC-MAC " + String.valueOf(new_cbc_per) + "%");
-                            cbc_per = new_cbc_per;
+                        for (int i = 0; i < file_mac.length; i++) {
+                            file_mac[i] ^= chunk_mac[i];
                         }
+
+                        file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
+
+                    } catch (IllegalBlockSizeException | BadPaddingException ex) {
+                        LOG.log(Level.SEVERE, ex.getMessage());
                     }
 
-                    mac = (tot == _upload.getFile_size());
+                    chunk_id++;
 
-                } catch (ChunkInvalidException e) {
+                    int new_cbc_per = (int) ((((double) tot) / _upload.getFile_size()) * 100);
 
-                    mac = true;
-                }
-
-                _upload.setTemp_mac_data(String.valueOf(tot) + "#" + String.valueOf(chunk_id) + "#" + Bin2BASE64(i32a2bin(file_mac)));
-
-                if (mac) {
-
-                    int[] meta_mac = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};
-
-                    _upload.setFile_meta_mac(meta_mac);
-
-                    LOG.log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
+                    if (new_cbc_per != cbc_per) {
+                        _upload.getView().updateCBC("CBC-MAC " + String.valueOf(new_cbc_per) + "%");
+                        cbc_per = new_cbc_per;
+                    }
 
                 }
+
+                mac = (tot == _upload.getFile_size());
+
+            } catch (ChunkInvalidException e) {
+
+                mac = true;
+            }
+
+            _upload.setTemp_mac_data(String.valueOf(tot) + "#" + String.valueOf(chunk_id) + "#" + Bin2BASE64(i32a2bin(file_mac)));
+
+            if (mac) {
+
+                int[] meta_mac = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};
+
+                _upload.setFile_meta_mac(meta_mac);
+
+                LOG.log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
+
             }
 
             while (!_exit && !_upload.isStopped() && !_upload.getChunkworkers().isEmpty()) {

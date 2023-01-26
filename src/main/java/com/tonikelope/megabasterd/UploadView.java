@@ -319,7 +319,6 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
         open_browser_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         open_browser_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-export-30.png"))); // NOI18N
         open_browser_button.setText("Open folder in browser");
-        open_browser_button.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         open_browser_button.setDoubleBuffered(true);
         open_browser_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -398,11 +397,12 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
                     .addComponent(file_name_label)
                     .addComponent(slot_status_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(folder_link_button)
-                    .addComponent(file_link_button)
-                    .addComponent(file_size_label)
-                    .addComponent(open_browser_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(open_browser_button)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(folder_link_button)
+                        .addComponent(file_link_button)
+                        .addComponent(file_size_label)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(progress_pbar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

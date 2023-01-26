@@ -25,6 +25,8 @@ import java.nio.channels.Channels;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
+import org.apache.commons.io.input.QueueInputStream;
+import org.apache.commons.io.output.QueueOutputStream;
 
 /**
  *
@@ -117,6 +119,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
+        byte[] buffer_enc = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
         boolean fatal_error = false;
 
         int conta_error = 0;
@@ -141,9 +145,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 chunk_id = _upload.nextChunkId();
 
-                long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, Upload.CHUNK_SIZE_MULTI);
+                long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, 1);
 
-                long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, _upload.getFile_size(), chunk_offset, Upload.CHUNK_SIZE_MULTI);
+                long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, _upload.getFile_size(), chunk_offset, 1);
 
                 ChunkWriterManager.checkChunkID(chunk_id, _upload.getFile_size(), chunk_offset);
 
@@ -194,12 +198,25 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         f.seek(chunk_offset);
 
-                        try ( CipherInputStream cis = new CipherInputStream(new BufferedInputStream(Channels.newInputStream(f.getChannel())), genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset)));  OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
+                        ByteArrayOutputStream chunk_mac = new ByteArrayOutputStream();
+
+                        try ( QueueInputStream qis = new QueueInputStream();  QueueOutputStream qos = qis.newQueueOutputStream();  BufferedInputStream bis = new BufferedInputStream(Channels.newInputStream(f.getChannel()));  CipherInputStream cis = new CipherInputStream(qis, genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset)));  OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
 
                             LOG.log(Level.INFO, "{0} Uploading chunk {1} from worker {2} {3}...", new Object[]{Thread.currentThread().getName(), chunk_id, _id, _upload.getFile_name()});
 
-                            while (!_exit && tot_bytes_up < chunk_size && (reads = cis.read(buffer)) != -1) {
-                                out.write(buffer, 0, reads);
+                            while (!_exit && tot_bytes_up < chunk_size && (reads = bis.read(buffer)) != -1) {
+
+                                chunk_mac.write(buffer, 0, reads);
+
+                                for (int i = 0; i < reads; i++) {
+                                    qos.write(buffer[i]);
+                                }
+
+                                for (int i = 0; i < reads; i++) {
+                                    buffer_enc[i] = (byte) cis.read();
+                                }
+
+                                out.write(buffer_enc, 0, reads);
 
                                 _upload.getPartialProgress().add((long) reads);
 
@@ -215,6 +232,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 }
                             }
+
+                            _upload.getMac_generator().CHUNK_QUEUE.put(chunk_offset, chunk_mac);
                         }
 
                         if (!_exit) {

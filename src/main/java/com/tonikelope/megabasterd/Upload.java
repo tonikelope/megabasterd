@@ -39,7 +39,6 @@ import javax.swing.JComponent;
 public class Upload implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final int WORKERS_DEFAULT = 6;
-    public static final int CHUNK_SIZE_MULTI = 1; //Otra cosa da errores al reanudar una subida (investigar)
     public static final boolean DEFAULT_THUMBNAILS = true;
     public static final boolean UPLOAD_LOG = false;
     private static final Logger LOG = Logger.getLogger(Upload.class.getName());
@@ -62,7 +61,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private long _last_chunk_id_dispatched;
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private final ExecutorService _thread_pool;
-    private int[] _file_meta_mac;
+    private volatile int[] _file_meta_mac;
     private String _fid;
     private boolean _notified;
     private volatile String _completion_handler;
@@ -1305,7 +1304,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     public long calculateLastUploadedChunk(long bytes_read) {
 
         if (bytes_read > 3584 * 1024) {
-            return 7 + (long) Math.floor((float) (bytes_read - 3584 * 1024) / (1024 * 1024 * Upload.CHUNK_SIZE_MULTI));
+            return 7 + (long) Math.floor((float) (bytes_read - 3584 * 1024) / (1024 * 1024 * 1));
         } else {
             long i = 0, tot = 0;
 

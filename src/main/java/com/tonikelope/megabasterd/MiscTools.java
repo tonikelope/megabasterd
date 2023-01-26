@@ -30,6 +30,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -48,6 +49,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -239,54 +241,29 @@ public class MiscTools {
     public static int[] bin2i32a(byte[] bin) {
         int l = (int) (4 * Math.ceil((double) bin.length / 4));
 
-        byte[] new_bin = Arrays.copyOfRange(bin, 0, l);
+        IntBuffer intBuf = ByteBuffer.wrap(bin, 0, l).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 
-        bin = new_bin;
+        int[] array = new int[intBuf.remaining()];
 
-        ByteBuffer bin_buffer = ByteBuffer.wrap(bin);
-        IntBuffer int_buffer = bin_buffer.asIntBuffer();
+        intBuf.get(array);
 
-        if (int_buffer.hasArray()) {
-            return int_buffer.array();
-        } else {
-            ArrayList<Integer> list = new ArrayList<>();
-
-            while (int_buffer.hasRemaining()) {
-                list.add(int_buffer.get());
-            }
-
-            int[] aux = new int[list.size()];
-
-            for (int i = 0; i < aux.length; i++) {
-                aux[i] = list.get(i);
-            }
-
-            return aux;
-        }
+        return array;
     }
 
-    public static byte[] i32a2bin(int[] i32a) {
-        ByteBuffer bin_buffer = ByteBuffer.allocate(i32a.length * 4);
-        IntBuffer int_buffer = bin_buffer.asIntBuffer();
-        int_buffer.put(i32a);
+    public static byte[] i32a2bin(int[] values) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        if (bin_buffer.hasArray()) {
-            return bin_buffer.array();
-        } else {
-            ArrayList<Byte> list = new ArrayList<>();
+        DataOutputStream dos = new DataOutputStream(baos);
 
-            while (int_buffer.hasRemaining()) {
-                list.add(bin_buffer.get());
+        for (int i = 0; i < values.length; ++i) {
+            try {
+                dos.writeInt(values[i]);
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
-
-            byte[] aux = new byte[list.size()];
-
-            for (int i = 0; i < aux.length; i++) {
-                aux[i] = list.get(i);
-            }
-
-            return aux;
         }
+
+        return baos.toByteArray();
     }
 
     public static BigInteger mpi2big(byte[] s) {
