@@ -619,19 +619,21 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("English"));
 
-            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
-
-            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Italian"));
-
-            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Turkish"));
-
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Chinese"));
-
-            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Vietnamese"));
 
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("German"));
 
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Hungarian"));
+
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Italian"));
+
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Korean"));
+
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
+
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Turkish"));
+
+            this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Vietnamese"));
 
             if (language == null) {
                 language = MainPanel.DEFAULT_LANGUAGE;
@@ -639,20 +641,22 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             if (language.equals("EN")) {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("English"));
-            } else if (language.equals("ES")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
-            } else if (language.equals("IT")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Italian"));
-            } else if (language.equals("TU")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Turkish"));
             } else if (language.equals("CH")) {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Chinese"));
-            } else if (language.equals("VI")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Vietnamese"));
             } else if (language.equals("GE")) {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("German"));
             } else if (language.equals("HU")) {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Hungarian"));
+            } else if (language.equals("IT")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Italian"));
+            } else if (language.equals("KR")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Korean"));
+            } else if (language.equals("ES")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
+            } else if (language.equals("TU")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Turkish"));
+            } else if (language.equals("VI")) {
+                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Vietnamese"));
             }
 
             String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
@@ -1878,22 +1882,31 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             if (language.equals(LabelTranslatorSingleton.getInstance().translate("English"))) {
                 language = "EN";
-            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Spanish"))) {
-                language = "ES";
-            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Italian"))) {
-                language = "IT";
-            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("German"))) {
-                language = "GE";
-            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Hungarian"))) {
-                language = "HU";
-            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Turkish"))) {
-                language = "TU";
                 font = "DEFAULT";
             } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Chinese"))) {
                 language = "CH";
                 font = "ALTERNATIVE";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("German"))) {
+                language = "GE";
+                font = "DEFAULT";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Hungarian"))) {
+                language = "HU";
+                font = "DEFAULT";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Italian"))) {
+                language = "IT";
+                font = "DEFAULT";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Korean"))) {
+                language = "KR";
+                font = "ALTERNATIVE";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Spanish"))) {
+                language = "ES";
+                font = "DEFAULT";
+            } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Turkish"))) {
+                language = "TU";
+                font = "DEFAULT";
             } else if (language.equals(LabelTranslatorSingleton.getInstance().translate("Vietnamese"))) {
                 language = "VI";
+                font = "DEFAULT";
             }
 
             settings.put("font", font);
