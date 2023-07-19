@@ -366,6 +366,8 @@ public class MegaAPI implements Serializable {
     }
 
     private String _rawRequest(String request, URL url_api) throws MegaAPIException {
+        
+        System.out.println(request);
 
         String response = null, current_smart_proxy = null;
 
@@ -1039,7 +1041,8 @@ public class MegaAPI implements Serializable {
 
             String ha = cryptoHandleauth(node);
 
-            String request = "[{\"a\":\"s2\",\"n\":\"" + node + "\",\"s\":[{\"u\":\"EXP\",\"r\":0}],\"i\":\"" + _req_id + "\",\"ok\":\"" + ok + "\",\"ha\":\"" + ha + "\",\"cr\":[[\"" + node + "\"],[\"" + node + "\"],[0,0,\"" + enc_nk + "\"]]}]";
+            //OJO
+            String request = "[{\"a\":\"s2\",\"n\":\"" + node + "\",\"s\":[{\"u\":\"EXP\",\"r\":0}],\"i\":\"" + _req_id + "\",\"ok\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"ha\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"cr\":[[\"" + node + "\"],[\"" + node + "\"],[0,0,\"" + enc_nk + "\"]]}]";
 
             URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
