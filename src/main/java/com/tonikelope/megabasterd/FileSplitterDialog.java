@@ -124,7 +124,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         });
 
-        try ( RandomAccessFile sourceFile = new RandomAccessFile(this._files[i].getAbsolutePath(), "r");  FileChannel sourceChannel = sourceFile.getChannel()) {
+        try (RandomAccessFile sourceFile = new RandomAccessFile(this._files[i].getAbsolutePath(), "r"); FileChannel sourceChannel = sourceFile.getChannel()) {
 
             for (; position < numSplits && !_exit; position++, conta_split++) {
                 _writePartToFile(i, bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
@@ -195,7 +195,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         monitorProgress(f, byteSize);
 
         if (!_exit) {
-            try ( RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw");  FileChannel toChannel = toFile.getChannel()) {
+            try (RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw"); FileChannel toChannel = toFile.getChannel()) {
                 sourceChannel.position(position);
                 toChannel.transferFrom(sourceChannel, 0, byteSize);
             }

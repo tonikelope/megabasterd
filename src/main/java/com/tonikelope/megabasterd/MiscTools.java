@@ -196,7 +196,7 @@ public class MiscTools {
 
     public static void deleteDirectoryRecursion(Path path) throws IOException {
         if (Files.isDirectory(path, LinkOption.NOFOLLOW_LINKS)) {
-            try ( DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
+            try (DirectoryStream<Path> entries = Files.newDirectoryStream(path)) {
                 for (Path entry : entries) {
                     deleteDirectoryRecursion(entry);
                 }
@@ -1111,7 +1111,7 @@ public class MiscTools {
 
             con.setUseCaches(false);
 
-            try ( InputStream is = con.getInputStream();  ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+            try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                 byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -1165,7 +1165,7 @@ public class MiscTools {
 
             con.setUseCaches(false);
 
-            try ( InputStream is = con.getInputStream();  ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+            try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                 byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -1435,7 +1435,7 @@ public class MiscTools {
 
                             ByteArrayInputStream bs = new ByteArrayInputStream(CryptTools.aes_cbc_decrypt_pkcs7((byte[]) old_session_data.get("ma"), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
 
-                            try ( ObjectInputStream is = new ObjectInputStream(bs)) {
+                            try (ObjectInputStream is = new ObjectInputStream(bs)) {
 
                                 old_ma = (MegaAPI) is.readObject();
 
@@ -1447,7 +1447,7 @@ public class MiscTools {
 
                             ByteArrayInputStream bs = new ByteArrayInputStream((byte[]) old_session_data.get("ma"));
 
-                            try ( ObjectInputStream is = new ObjectInputStream(bs)) {
+                            try (ObjectInputStream is = new ObjectInputStream(bs)) {
                                 old_ma = (MegaAPI) is.readObject();
                             } catch (Exception ex) {
                                 unserialization_error = true;
@@ -1488,7 +1488,7 @@ public class MiscTools {
 
                         ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
-                        try ( ObjectOutputStream os = new ObjectOutputStream(bs)) {
+                        try (ObjectOutputStream os = new ObjectOutputStream(bs)) {
                             os.writeObject(ma);
                         }
 

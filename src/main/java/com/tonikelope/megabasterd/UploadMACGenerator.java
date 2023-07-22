@@ -151,11 +151,11 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
                         long conta_chunk = 0L;
 
-                        try ( ByteArrayOutputStream baos = CHUNK_QUEUE.remove(chunk_offset)) {
+                        try (ByteArrayOutputStream baos = CHUNK_QUEUE.remove(chunk_offset)) {
                             chunk_bytes = baos.toByteArray();
                         }
 
-                        try ( ByteArrayInputStream bais = new ByteArrayInputStream(chunk_bytes)) {
+                        try (ByteArrayInputStream bais = new ByteArrayInputStream(chunk_bytes)) {
                             while (conta_chunk < chunk_size && (reads = bais.read(byte_block)) != -1) {
 
                                 if (reads < byte_block.length) {

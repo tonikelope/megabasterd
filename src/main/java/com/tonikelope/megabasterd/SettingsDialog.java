@@ -1599,28 +1599,22 @@ public class SettingsDialog extends javax.swing.JDialog {
         debug_file_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         debug_file_checkbox.setText("Save debug info to file");
 
+        mega_api_key_panel.setOpaque(false);
+
         mega_api_key_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         mega_api_key_label.setText("MEGA API KEY:");
         mega_api_key_label.setDoubleBuffered(true);
-        mega_api_key_label.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                mega_api_key_labelMouseClicked(evt);
-            }
-        });
 
         mega_api_key.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         mega_api_key.setDoubleBuffered(true);
+        mega_api_key.setEnabled(false);
 
         mega_api_key_warning.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        mega_api_key_warning.setForeground(new java.awt.Color(0, 0, 255));
         mega_api_key_warning.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        mega_api_key_warning.setText("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE. YOU SHOULD GET A KEY -> https://mega.nz/sdk");
+        mega_api_key_warning.setText("MEGA API KEY IS NO LONGER REQUIRED (DISABLED)");
         mega_api_key_warning.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         mega_api_key_warning.setDoubleBuffered(true);
-        mega_api_key_warning.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                mega_api_key_warningMouseClicked(evt);
-            }
-        });
 
         javax.swing.GroupLayout mega_api_key_panelLayout = new javax.swing.GroupLayout(mega_api_key_panel);
         mega_api_key_panel.setLayout(mega_api_key_panelLayout);
@@ -1684,10 +1678,12 @@ public class SettingsDialog extends javax.swing.JDialog {
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(start_frozen_checkbox)
                             .addComponent(debug_file_checkbox)
-                            .addComponent(custom_chunks_dir_checkbox)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(custom_chunks_dir_button)
+                                .addComponent(custom_chunks_dir_checkbox)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(custom_chunks_dir_button))
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addGap(165, 165, 165)
                                 .addComponent(custom_chunks_dir_current_label))
                             .addComponent(rec_zoom_label)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
@@ -1716,11 +1712,11 @@ public class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton1))
                 .addGap(18, 18, 18)
-                .addComponent(custom_chunks_dir_checkbox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(custom_chunks_dir_button)
-                    .addComponent(custom_chunks_dir_current_label))
+                    .addComponent(custom_chunks_dir_checkbox)
+                    .addComponent(custom_chunks_dir_button))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(custom_chunks_dir_current_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(mega_api_key_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -2152,7 +2148,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                             ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
-                                            try ( ObjectOutputStream os = new ObjectOutputStream(bs)) {
+                                            try (ObjectOutputStream os = new ObjectOutputStream(bs)) {
                                                 os.writeObject(ma);
                                             }
 
@@ -2239,7 +2235,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                                 ByteArrayOutputStream bs = new ByteArrayOutputStream();
 
-                                                try ( ObjectOutputStream os = new ObjectOutputStream(bs)) {
+                                                try (ObjectOutputStream os = new ObjectOutputStream(bs)) {
                                                     os.writeObject(ma);
                                                 }
 
@@ -2850,7 +2846,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     file.createNewFile();
 
-                    try ( BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(file));  ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+                    try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(file)); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 
                         HashMap<String, Object> settings = new HashMap<>();
 
@@ -2901,7 +2897,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 try {
 
-                    try ( InputStream fis = new BufferedInputStream(new FileInputStream(file));  ObjectInputStream ois = new ObjectInputStream(fis)) {
+                    try (InputStream fis = new BufferedInputStream(new FileInputStream(file)); ObjectInputStream ois = new ObjectInputStream(fis)) {
 
                         HashMap<String, Object> settings = (HashMap<String, Object>) ois.readObject();
 
@@ -3069,16 +3065,6 @@ public class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_port_spinner.setEnabled(megacrypter_reverse_checkbox.isSelected());
         megacrypter_reverse_warning_label.setEnabled(megacrypter_reverse_checkbox.isSelected());
     }//GEN-LAST:event_megacrypter_reverse_checkboxStateChanged
-
-    private void mega_api_key_warningMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mega_api_key_warningMouseClicked
-        // TODO add your handling code here:
-        openBrowserURL("https://mega.nz/sdk");
-    }//GEN-LAST:event_mega_api_key_warningMouseClicked
-
-    private void mega_api_key_labelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_mega_api_key_labelMouseClicked
-        // TODO add your handling code here:
-        mega_api_key_warningMouseClicked(evt);
-    }//GEN-LAST:event_mega_api_key_labelMouseClicked
 
     private void import_mega_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_mega_buttonActionPerformed
         // TODO add your handling code here:

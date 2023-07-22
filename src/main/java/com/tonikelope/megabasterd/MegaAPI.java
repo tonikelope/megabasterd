@@ -366,7 +366,7 @@ public class MegaAPI implements Serializable {
     }
 
     private String _rawRequest(String request, URL url_api) throws MegaAPIException {
-        
+
         System.out.println(request);
 
         String response = null, current_smart_proxy = null;
@@ -482,7 +482,7 @@ public class MegaAPI implements Serializable {
 
                 } else {
 
-                    try ( InputStream is = con.getInputStream();  ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -795,12 +795,12 @@ public class MegaAPI implements Serializable {
 
                 int reads;
 
-                try ( OutputStream out = new ThrottledOutputStream(con.getOutputStream(), upload.getMain_panel().getStream_supervisor())) {
+                try (OutputStream out = new ThrottledOutputStream(con.getOutputStream(), upload.getMain_panel().getStream_supervisor())) {
 
                     out.write(file_bytes[h]);
                 }
 
-                try ( InputStream is = con.getInputStream();  ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                     while ((reads = is.read(buffer)) != -1) {
                         byte_res.write(buffer, 0, reads);

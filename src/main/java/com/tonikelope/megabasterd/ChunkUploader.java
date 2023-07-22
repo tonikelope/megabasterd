@@ -200,7 +200,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         ByteArrayOutputStream chunk_mac = new ByteArrayOutputStream();
 
-                        try ( QueueInputStream qis = new QueueInputStream();  QueueOutputStream qos = qis.newQueueOutputStream();  BufferedInputStream bis = new BufferedInputStream(Channels.newInputStream(f.getChannel()));  CipherInputStream cis = new CipherInputStream(qis, genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset)));  OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
+                        try (QueueInputStream qis = new QueueInputStream(); QueueOutputStream qos = qis.newQueueOutputStream(); BufferedInputStream bis = new BufferedInputStream(Channels.newInputStream(f.getChannel())); CipherInputStream cis = new CipherInputStream(qis, genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset))); OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
 
                             LOG.log(Level.INFO, "{0} Uploading chunk {1} from worker {2} {3}...", new Object[]{Thread.currentThread().getName(), chunk_id, _id, _upload.getFile_name()});
 
@@ -251,7 +251,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 String httpresponse;
 
-                                try ( InputStream is = con.getInputStream();  ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                                     while ((reads = is.read(buffer)) != -1) {
                                         byte_res.write(buffer, 0, reads);
