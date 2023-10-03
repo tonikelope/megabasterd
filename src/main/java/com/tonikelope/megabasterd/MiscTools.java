@@ -171,6 +171,13 @@ public class MiscTools {
         return false;
     }
 
+    public static String pickRandomProxy(String[] list) {
+        Random r = new Random()
+
+        return list[r.nextInt(list.length)]
+    }
+ 
+ 
     public static boolean isImageFile(String filename) {
 
         try {
@@ -978,7 +985,7 @@ public class MiscTools {
 
             String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
-            current_smart_proxy = smart_proxy[0];
+            current_smart_proxy = pickRandomProxy(smart_proxy);
 
             smart_proxy_socks = smart_proxy[1].equals("socks");
 
@@ -1002,7 +1009,7 @@ public class MiscTools {
 
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
-                        current_smart_proxy = smart_proxy[0];
+                        current_smart_proxy = pickRandomProxy(smart_proxy);
 
                         smart_proxy_socks = smart_proxy[1].equals("socks");
 
@@ -1010,7 +1017,7 @@ public class MiscTools {
 
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
-                        current_smart_proxy = smart_proxy[0];
+                        current_smart_proxy = pickRandomProxy(smart_proxy);
 
                         smart_proxy_socks = smart_proxy[1].equals("socks");
                     }
