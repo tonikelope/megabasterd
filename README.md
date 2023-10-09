@@ -1,6 +1,6 @@
 <h1>MegaBasterd</h1>
 
-<h2><b>WARNING: Uploads are currently unreliable (you could lose the uploaded data). USE AT YOUR OWN RISK (<a href="https://github.com/tonikelope/megabasterd/issues/564">More info</a>)</h2>
+<h3>WARNING: Uploads are currently unreliable (you could lose the uploaded data). USE AT YOUR OWN RISK (<a href="https://github.com/tonikelope/megabasterd/issues/564">More info</a>)</h3>
 
 [![Maintenance](https://img.shields.io/badge/Maintained%3F-yes-green.svg)](https://GitHub.com/Naereen/StrapDown.js/graphs/commit-activity) [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
