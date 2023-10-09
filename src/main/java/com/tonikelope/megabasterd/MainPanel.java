@@ -67,7 +67,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.76";
+    public static final String VERSION = "7.77";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -1120,7 +1120,7 @@ public final class MainPanel {
                                         upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
                                         upload.getView().getSlots_spinner().setEnabled(false);
                                         upload.getView().getPause_button().setEnabled(false);
-                                        upload.getView().getFolder_link_button().setEnabled(false);
+
                                         upload.getView().getFile_link_button().setEnabled(false);
                                         upload.getView().getFile_size_label().setEnabled(false);
                                         upload.getView().getFile_name_label().setEnabled(false);

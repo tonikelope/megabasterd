@@ -261,9 +261,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         LOG.log(Level.INFO, "{0} Dir {1} created", new Object[]{Thread.currentThread().getName(), parent_node});
 
-                        ma.shareFolder(parent_node, parent_key, share_key);
-
-                        String folder_link = ma.getPublicFolderLink(parent_node, share_key);
+                        //ma.shareFolder(parent_node, parent_key, share_key); //DE MOMENTO NO HAY OTRA
+                        //String folder_link = ma.getPublicFolderLink(parent_node, share_key);
+                        String folder_link = null; //No hay otra
 
                         if (dialog.getUpload_log_checkbox().isSelected()) {
 

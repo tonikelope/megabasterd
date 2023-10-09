@@ -12,7 +12,6 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
@@ -661,22 +660,6 @@ public class SettingsDialog extends javax.swing.JDialog {
                 custom_proxy_textarea.setText(custom_proxy_list);
             }
 
-            String mega_api_key_sql = DBTools.selectSettingValue("mega_api_key");
-
-            if (mega_api_key_sql != null && !"".equals(mega_api_key_sql)) {
-                mega_api_key.setText(mega_api_key_sql);
-                mega_api_key_panel.setBackground(new Color(153, 255, 153));
-                mega_api_key_warning.setVisible(false);
-                mega_api_key_label.setVisible(modal);
-                MegaAPI.API_KEY = mega_api_key_sql.trim();
-            } else {
-                mega_api_key_panel.setBackground(Color.red);
-                mega_api_key_warning.setForeground(Color.white);
-                mega_api_key_label.setForeground(Color.WHITE);
-                mega_api_key_warning.setVisible(true);
-                MegaAPI.API_KEY = null;
-            }
-
             setPreferredSize(parent.getSize());
 
             pack();
@@ -787,11 +770,6 @@ public class SettingsDialog extends javax.swing.JDialog {
         run_command_textbox.addMouseListener(new ContextMenuMouseListener());
         run_command_test_button = new javax.swing.JButton();
         debug_file_checkbox = new javax.swing.JCheckBox();
-        mega_api_key_panel = new javax.swing.JPanel();
-        mega_api_key_label = new javax.swing.JLabel();
-        mega_api_key = new javax.swing.JTextField();
-        mega_api_key.addMouseListener(new ContextMenuMouseListener());
-        mega_api_key_warning = new javax.swing.JLabel();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -1599,49 +1577,6 @@ public class SettingsDialog extends javax.swing.JDialog {
         debug_file_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         debug_file_checkbox.setText("Save debug info to file");
 
-        mega_api_key_panel.setOpaque(false);
-
-        mega_api_key_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        mega_api_key_label.setText("MEGA API KEY:");
-        mega_api_key_label.setDoubleBuffered(true);
-
-        mega_api_key.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        mega_api_key.setDoubleBuffered(true);
-        mega_api_key.setEnabled(false);
-
-        mega_api_key_warning.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        mega_api_key_warning.setForeground(new java.awt.Color(0, 0, 255));
-        mega_api_key_warning.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        mega_api_key_warning.setText("MEGA API KEY IS NO LONGER REQUIRED (DISABLED)");
-        mega_api_key_warning.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        mega_api_key_warning.setDoubleBuffered(true);
-
-        javax.swing.GroupLayout mega_api_key_panelLayout = new javax.swing.GroupLayout(mega_api_key_panel);
-        mega_api_key_panel.setLayout(mega_api_key_panelLayout);
-        mega_api_key_panelLayout.setHorizontalGroup(
-            mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mega_api_key_panelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(mega_api_key_warning, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(mega_api_key_panelLayout.createSequentialGroup()
-                        .addComponent(mega_api_key_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(mega_api_key)))
-                .addContainerGap())
-        );
-        mega_api_key_panelLayout.setVerticalGroup(
-            mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mega_api_key_panelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(mega_api_key_label)
-                    .addComponent(mega_api_key, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(mega_api_key_warning)
-                .addContainerGap())
-        );
-
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
         advanced_panelLayout.setHorizontalGroup(
@@ -1649,7 +1584,6 @@ public class SettingsDialog extends javax.swing.JDialog {
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(mega_api_key_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(advanced_panelLayout.createSequentialGroup()
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
@@ -1718,8 +1652,6 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(custom_chunks_dir_current_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(mega_api_key_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
                 .addComponent(start_frozen_checkbox)
                 .addGap(18, 18, 18)
                 .addComponent(debug_file_checkbox)
@@ -1838,7 +1770,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("custom_chunks_dir", _custom_chunks_dir);
             settings.put("run_command", run_command_checkbox.isSelected() ? "yes" : "no");
             settings.put("run_command_path", run_command_textbox.getText());
-            settings.put("mega_api_key", mega_api_key.getText().trim());
+
             settings.put("clipboardspy", clipboardspy_checkbox.isSelected() ? "yes" : "no");
             settings.put("thumbnails", thumbnail_checkbox.isSelected() ? "yes" : "no");
             settings.put("upload_log", upload_log_checkbox.isSelected() ? "yes" : "no");
@@ -3168,10 +3100,6 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel mega_accounts_label;
     private javax.swing.JScrollPane mega_accounts_scrollpane;
     private javax.swing.JTable mega_accounts_table;
-    private javax.swing.JTextField mega_api_key;
-    private javax.swing.JLabel mega_api_key_label;
-    private javax.swing.JPanel mega_api_key_panel;
-    private javax.swing.JLabel mega_api_key_warning;
     private javax.swing.JCheckBox megacrypter_reverse_checkbox;
     private javax.swing.JLabel megacrypter_reverse_port_label;
     private javax.swing.JSpinner megacrypter_reverse_port_spinner;
