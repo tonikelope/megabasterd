@@ -31,7 +31,6 @@ import java.util.logging.Logger;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final double SLOW_PROXY_PERC = 0.5;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
     private final int _id;
     private final Download _download;
@@ -184,6 +183,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     MainPanel.run_external_command();
 
+                } else if (http_error != 509 && MainPanel.isRun_command() && MainPanel.LAST_TIMESTAMP_EXTERNAL_COMMAND != -1) {
+                    MainPanel.LAST_TIMESTAMP_EXTERNAL_COMMAND = -1;
                 }
 
                 if ((_current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {

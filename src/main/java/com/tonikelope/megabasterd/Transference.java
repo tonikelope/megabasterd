@@ -18,14 +18,14 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public interface Transference {
 
     int MIN_WORKERS = 1;
-    int MAX_WORKERS = 20;
+    int MAX_WORKERS = 30;
     int HTTP_PROXY_CONNECT_TIMEOUT = 20000;
     int HTTP_PROXY_READ_TIMEOUT = 20000;
     int HTTP_CONNECT_TIMEOUT = 60000;
     int HTTP_READ_TIMEOUT = 60000;
     int MAX_SIM_TRANSFERENCES = 50;
     int SIM_TRANSFERENCES_DEFAULT = 4;
-    int PROGRESS_WATCHDOG_TIMEOUT = 600;
+    int PROGRESS_WATCHDOG_TIMEOUT = 300;
     boolean LIMIT_TRANSFERENCE_SPEED_DEFAULT = false;
     int MAX_TRANSFERENCE_SPEED_DEFAULT = 5;
     int MAX_WAIT_WORKERS_SHUTDOWN = 15;
