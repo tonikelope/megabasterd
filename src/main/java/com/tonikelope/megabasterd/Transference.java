@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 public interface Transference {
 
     int MIN_WORKERS = 1;
-    int MAX_WORKERS = 30;
+    int MAX_WORKERS = 20;
     int HTTP_PROXY_CONNECT_TIMEOUT = 20000;
     int HTTP_PROXY_READ_TIMEOUT = 20000;
     int HTTP_CONNECT_TIMEOUT = 60000;

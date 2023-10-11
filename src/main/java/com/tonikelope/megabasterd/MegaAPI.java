@@ -1031,6 +1031,7 @@ public class MegaAPI implements Serializable {
         return genRandomByteArray(16);
     }
 
+    //OJO A ESTO, HAY QUE ACTUALIZAR ESTO CON EL ANILLO DE CLAVES Y LA ACTUALIZACIÓN DE SEGURIDAD DE MEGA de 2023 (PENDIENTE)
     public String shareFolder(String node, byte[] node_key, byte[] share_key) {
 
         try {
