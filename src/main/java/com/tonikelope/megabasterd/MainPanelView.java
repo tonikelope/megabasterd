@@ -1460,7 +1460,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     
     private void split_file_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_split_file_menuActionPerformed
         // TODO add your handling code here:
-        FileSplitterDialog dialog = new FileSplitterDialog(this, true);
+        FileSplitterDialog dialog = new FileSplitterDialog(this, false);
         
         dialog.setLocationRelativeTo(this);
         
@@ -1470,7 +1470,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private void merge_file_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_merge_file_menuActionPerformed
         // TODO add your handling code here:
 
-        FileMergerDialog dialog = new FileMergerDialog(this, true);
+        FileMergerDialog dialog = new FileMergerDialog(this, false);
         
         dialog.setLocationRelativeTo(this);
         
