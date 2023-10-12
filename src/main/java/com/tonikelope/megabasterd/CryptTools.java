@@ -572,13 +572,16 @@ public class CryptTools {
 
             String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt_nopadding(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key)), "UTF-8").trim();
 
-            String dec_dlc_data_file = findFirstRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), "UTF-8"), 1);
+            ArrayList<String> files = findAllRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), "UTF-8"), 1);
 
-            ArrayList<String> urls = findAllRegex("< *url *>(.+?)< */ *url *>", dec_dlc_data_file, 1);
+            for (String f : files) {
 
-            for (String s : urls) {
+                ArrayList<String> urls = findAllRegex("< *url *>(.+?)< */ *url *>", f, 1);
 
-                links.add(new String(BASE642Bin(s), "UTF-8"));
+                for (String s : urls) {
+
+                    links.add(new String(BASE642Bin(s), "UTF-8"));
+                }
             }
 
         } catch (Exception ex) {

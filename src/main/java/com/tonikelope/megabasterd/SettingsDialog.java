@@ -3098,9 +3098,9 @@ public class SettingsDialog extends javax.swing.JDialog {
         this.upload_public_folder_checkbox.setBackground(this.upload_public_folder_checkbox.isSelected() ? java.awt.Color.RED : null);
 
         this.public_folder_panel.setVisible(this.upload_public_folder_checkbox.isSelected());
-        
+
         revalidate();
-        
+
         repaint();
 
     }//GEN-LAST:event_upload_public_folder_checkboxActionPerformed
