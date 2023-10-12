@@ -1122,7 +1122,7 @@ public final class MainPanel {
                                         upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
                                         upload.getView().getSlots_spinner().setEnabled(false);
                                         upload.getView().getPause_button().setEnabled(false);
-
+                                        upload.getView().getFolder_link_button().setEnabled(false);
                                         upload.getView().getFile_link_button().setEnabled(false);
                                         upload.getView().getFile_size_label().setEnabled(false);
                                         upload.getView().getFile_name_label().setEnabled(false);

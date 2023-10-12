@@ -1512,10 +1512,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 error_code = ex.getCode();
 
-                if (error_code == -11) {
-                    _status_error = "ERROR: MEGA LINK BLOCKED/DELETED!";
-                }
-
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);

@@ -31,7 +31,11 @@
                   <Component id="progress_pbar" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="file_size_label" max="32767" attributes="0"/>
-                      <EmptySpace max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="open_browser_button" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="folder_link_button" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="file_link_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
@@ -64,7 +68,7 @@
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
                           <Group type="102" attributes="0">
-                              <Component id="status_label" max="32767" attributes="0"/>
+                              <Component id="status_label" pref="446" max="32767" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
                               <Component id="cbc_label" min="-2" max="-2" attributes="0"/>
                           </Group>
@@ -102,9 +106,13 @@
                   <Component id="slot_status_label" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="file_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
-                  <Component id="file_size_label" alignment="3" min="-2" max="-2" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="open_browser_button" alignment="0" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="folder_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="file_link_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="file_size_label" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="progress_pbar" min="-2" max="-2" attributes="0"/>
@@ -277,6 +285,20 @@
         <Property name="doubleBuffered" type="boolean" value="true"/>
       </Properties>
     </Component>
+    <Component class="javax.swing.JButton" name="folder_link_button">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="16" style="1"/>
+        </Property>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/images/icons8-copy-to-clipboard-30.png"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Copy folder link"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="folder_link_buttonActionPerformed"/>
+      </Events>
+    </Component>
     <Component class="javax.swing.JButton" name="file_link_button">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
@@ -356,6 +378,21 @@
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="queue_bottom_buttonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="open_browser_button">
+      <Properties>
+        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+          <Font name="Dialog" size="16" style="1"/>
+        </Property>
+        <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+          <Image iconType="3" name="/images/icons8-export-30.png"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="Open folder in browser"/>
+        <Property name="doubleBuffered" type="boolean" value="true"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="open_browser_buttonActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

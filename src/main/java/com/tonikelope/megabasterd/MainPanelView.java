@@ -286,7 +286,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                 fr.write("***** MegaBasterd UPLOAD LOG FILE *****\n\n");
                                 fr.write(MiscTools.getFechaHoraActual() + "\n\n");
                                 fr.write(ma.getEmail() + "\n\n");
-                                fr.write(dir_name + "\n\n");
+                                fr.write(dir_name + "   " + folder_link + "\n\n");
                                 fr.close();
                             } catch (IOException ex) {
                                 Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
@@ -463,8 +463,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         MiscTools.GUIRunAndWait(() -> {
 
             initComponents();
-
-            unfreeze_transferences_button.setBackground(Color.WHITE);
 
             updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
