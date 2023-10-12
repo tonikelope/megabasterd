@@ -18,13 +18,12 @@ import java.awt.Color;
 import static java.awt.EventQueue.invokeLater;
 import java.awt.Font;
 import static java.awt.Frame.NORMAL;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
 import static java.awt.SystemTray.getSystemTray;
 import static java.awt.Toolkit.getDefaultToolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
@@ -53,11 +52,14 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
@@ -67,14 +69,14 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.76";
+    public static final String VERSION = "7.81";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
-    public static final int RUN_COMMAND_TIME = 600;
+    public static final int RUN_COMMAND_TIME = 120;
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = false;
     public static final double FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT = 0.7;
@@ -98,7 +100,7 @@ public final class MainPanel {
     private static String _new_version;
     private static Boolean _resume_uploads;
     private static Boolean _resume_downloads;
-    private static long _last_run_command;
+    public static volatile long LAST_EXTERNAL_COMMAND_TIMESTAMP;
     private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
     private static volatile boolean CHECK_RUNNING = true;
 
@@ -225,7 +227,7 @@ public final class MainPanel {
 
         _exit = false;
 
-        _last_run_command = -1;
+        LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
 
         _restart = false;
 
@@ -812,7 +814,7 @@ public final class MainPanel {
         _run_command_path = DBTools.selectSettingValue("run_command_path");
 
         if (_run_command && old_run_command_path != null && !old_run_command_path.equals(_run_command_path)) {
-            _last_run_command = -1;
+            LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
         }
 
         String use_megacrypter_reverse = selectSettingValue("megacrypter_reverse");
@@ -866,7 +868,7 @@ public final class MainPanel {
 
     public static synchronized void run_external_command() {
 
-        if (_run_command && (_last_run_command == -1 || _last_run_command + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
+        if (_run_command && (LAST_EXTERNAL_COMMAND_TIMESTAMP == -1 || LAST_EXTERNAL_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
 
             if (_run_command_path != null && !_run_command_path.equals("")) {
                 try {
@@ -875,7 +877,7 @@ public final class MainPanel {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
 
-                _last_run_command = System.currentTimeMillis();
+                LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
             }
         }
     }
@@ -1355,29 +1357,29 @@ public final class MainPanel {
 
         if (java.awt.SystemTray.isSupported()) {
 
-            PopupMenu menu = new PopupMenu();
+            JPopupMenu menu = new JPopupMenu();
 
             Font new_font = GUI_FONT;
 
             menu.setFont(new_font.deriveFont(Font.BOLD, Math.round(14 * ZOOM_FACTOR)));
 
-            MenuItem messageItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("Restore window"));
+            JMenuItem messageItem = new JMenuItem(LabelTranslatorSingleton.getInstance().translate("Restore window"));
 
             messageItem.addActionListener((ActionEvent e) -> {
-                MiscTools.GUIRun(() -> {
-                    getView().setExtendedState(NORMAL);
 
-                    getView().setVisible(true);
+                getView().setExtendedState(NORMAL);
 
-                    getView().revalidate();
+                getView().setVisible(true);
 
-                    getView().repaint();
-                });
+                getView().revalidate();
+
+                getView().repaint();
+
             });
 
             menu.add(messageItem);
 
-            MenuItem closeItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("EXIT"));
+            JMenuItem closeItem = new JMenuItem(LabelTranslatorSingleton.getInstance().translate("EXIT"));
 
             closeItem.addActionListener((ActionEvent e) -> {
                 if (!getView().isVisible()) {
@@ -1394,28 +1396,34 @@ public final class MainPanel {
 
             menu.add(closeItem);
 
-            ActionListener actionListener = (ActionEvent e) -> {
-                MiscTools.GUIRun(() -> {
-                    if (!getView().isVisible()) {
-                        getView().setExtendedState(NORMAL);
-                        getView().setVisible(true);
-                        getView().revalidate();
-                        getView().repaint();
-
-                    } else {
-
-                        getView().dispatchEvent(new WindowEvent(getView(), WINDOW_CLOSING));
-                    }
-                });
-            };
-
-            _trayicon = new TrayIcon(getDefaultToolkit().getImage(getClass().getResource(ICON_FILE)), "MegaBasterd", menu);
+            _trayicon = new TrayIcon(getDefaultToolkit().getImage(getClass().getResource(ICON_FILE)), "MegaBasterd", null);
 
             _trayicon.setToolTip("MegaBasterd " + VERSION);
 
             _trayicon.setImageAutoSize(true);
 
-            _trayicon.addActionListener(actionListener);
+            _trayicon.addMouseListener(new MouseAdapter() {
+                public void mouseReleased(MouseEvent e) {
+
+                    if (SwingUtilities.isRightMouseButton(e)) {
+                        menu.setLocation(e.getX(), e.getY());
+                        menu.setInvoker(menu);
+                        menu.setVisible(true);
+                    } else {
+                        if (!getView().isVisible()) {
+                            getView().setExtendedState(NORMAL);
+                            getView().setVisible(true);
+                            getView().revalidate();
+                            getView().repaint();
+
+                        } else {
+
+                            getView().dispatchEvent(new WindowEvent(getView(), WINDOW_CLOSING));
+                        }
+                    }
+
+                }
+            });
 
             getSystemTray().add(_trayicon);
 

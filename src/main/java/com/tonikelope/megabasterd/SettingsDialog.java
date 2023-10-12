@@ -12,7 +12,6 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
@@ -214,6 +213,20 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
 
             upload_log_checkbox.setSelected(upload_log);
+
+            boolean upload_public_folder = Upload.UPLOAD_PUBLIC_FOLDER;
+
+            String upload_public_folder_string = DBTools.selectSettingValue("upload_public_folder");
+
+            if (upload_public_folder_string != null) {
+                upload_public_folder = upload_public_folder_string.equals("yes");
+            }
+
+            upload_public_folder_checkbox.setSelected(upload_public_folder);
+
+            upload_public_folder_checkbox.setBackground(upload_public_folder_checkbox.isSelected() ? java.awt.Color.RED : null);
+
+            this.public_folder_panel.setVisible(this.upload_public_folder_checkbox.isSelected());
 
             clipboardspy_checkbox.setSelected(monitor_clipboard);
 
@@ -661,22 +674,6 @@ public class SettingsDialog extends javax.swing.JDialog {
                 custom_proxy_textarea.setText(custom_proxy_list);
             }
 
-            String mega_api_key_sql = DBTools.selectSettingValue("mega_api_key");
-
-            if (mega_api_key_sql != null && !"".equals(mega_api_key_sql)) {
-                mega_api_key.setText(mega_api_key_sql);
-                mega_api_key_panel.setBackground(new Color(153, 255, 153));
-                mega_api_key_warning.setVisible(false);
-                mega_api_key_label.setVisible(modal);
-                MegaAPI.API_KEY = mega_api_key_sql.trim();
-            } else {
-                mega_api_key_panel.setBackground(Color.red);
-                mega_api_key_warning.setForeground(Color.white);
-                mega_api_key_label.setForeground(Color.WHITE);
-                mega_api_key_warning.setVisible(true);
-                MegaAPI.API_KEY = null;
-            }
-
             setPreferredSize(parent.getSize());
 
             pack();
@@ -738,6 +735,9 @@ public class SettingsDialog extends javax.swing.JDialog {
         rec_upload_slots_label = new javax.swing.JLabel();
         thumbnail_checkbox = new javax.swing.JCheckBox();
         upload_log_checkbox = new javax.swing.JCheckBox();
+        upload_public_folder_checkbox = new javax.swing.JCheckBox();
+        public_folder_panel = new javax.swing.JScrollPane();
+        public_folder_warning = new javax.swing.JTextArea();
         accounts_panel = new javax.swing.JPanel();
         mega_accounts_scrollpane = new javax.swing.JScrollPane();
         mega_accounts_table = new javax.swing.JTable();
@@ -787,11 +787,6 @@ public class SettingsDialog extends javax.swing.JDialog {
         run_command_textbox.addMouseListener(new ContextMenuMouseListener());
         run_command_test_button = new javax.swing.JButton();
         debug_file_checkbox = new javax.swing.JCheckBox();
-        mega_api_key_panel = new javax.swing.JPanel();
-        mega_api_key_label = new javax.swing.JLabel();
-        mega_api_key = new javax.swing.JTextField();
-        mega_api_key.addMouseListener(new ContextMenuMouseListener());
-        mega_api_key_warning = new javax.swing.JLabel();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -1109,6 +1104,26 @@ public class SettingsDialog extends javax.swing.JDialog {
         upload_log_checkbox.setText("Create upload logs");
         upload_log_checkbox.setDoubleBuffered(true);
 
+        upload_public_folder_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        upload_public_folder_checkbox.setText("CREATE UPLOAD FOLDER PUBLIC LINK");
+        upload_public_folder_checkbox.setDoubleBuffered(true);
+        upload_public_folder_checkbox.setOpaque(true);
+        upload_public_folder_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                upload_public_folder_checkboxActionPerformed(evt);
+            }
+        });
+
+        public_folder_warning.setEditable(false);
+        public_folder_warning.setBackground(new java.awt.Color(255, 255, 51));
+        public_folder_warning.setColumns(20);
+        public_folder_warning.setFont(new java.awt.Font("Noto Sans", 1, 18)); // NOI18N
+        public_folder_warning.setLineWrap(true);
+        public_folder_warning.setRows(5);
+        public_folder_warning.setText("THIS OPTION IS NOT RECOMMENDED. Using this will cause MegaBasterd uploaded folder to appear in your account as NOT DECRYPTABLE. \n\nAt the time of writing there is a method to FIX IT:\n\n1) Move \"MEGABASTERD\" FOLDER (first \"child\" folder of the upload folder) to the ROOT (cloud) folder of your account. \n\n2) Then go to account settings and RELOAD ACCOUNT. \n\nI don't know how long this method will last. USE THIS OPTION AT YOUR OWN RISK.");
+        public_folder_warning.setWrapStyleWord(true);
+        public_folder_panel.setViewportView(public_folder_warning);
+
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
         uploads_panelLayout.setHorizontalGroup(
@@ -1116,27 +1131,26 @@ public class SettingsDialog extends javax.swing.JDialog {
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rec_upload_slots_label, javax.swing.GroupLayout.DEFAULT_SIZE, 1185, Short.MAX_VALUE)
                     .addGroup(uploads_panelLayout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addComponent(max_up_speed_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(limit_upload_speed_checkbox)
+                    .addGroup(uploads_panelLayout.createSequentialGroup()
+                        .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(default_slots_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(max_uploads_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(uploads_panelLayout.createSequentialGroup()
-                                .addGap(20, 20, 20)
-                                .addComponent(max_up_speed_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(limit_upload_speed_checkbox)
-                            .addGroup(uploads_panelLayout.createSequentialGroup()
-                                .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(default_slots_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(max_uploads_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(thumbnail_checkbox)
-                            .addComponent(upload_log_checkbox))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(thumbnail_checkbox)
+                    .addComponent(upload_log_checkbox)
+                    .addComponent(upload_public_folder_checkbox)
+                    .addComponent(rec_upload_slots_label, javax.swing.GroupLayout.PREFERRED_SIZE, 1003, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(public_folder_panel, javax.swing.GroupLayout.PREFERRED_SIZE, 1086, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(29, Short.MAX_VALUE))
         );
         uploads_panelLayout.setVerticalGroup(
             uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1161,6 +1175,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addComponent(thumbnail_checkbox)
                 .addGap(18, 18, 18)
                 .addComponent(upload_log_checkbox)
+                .addGap(18, 18, 18)
+                .addComponent(upload_public_folder_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(public_folder_panel, javax.swing.GroupLayout.PREFERRED_SIZE, 265, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -1339,7 +1357,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                             .addComponent(mega_accounts_label)
                             .addComponent(elc_accounts_label))
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1072, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1109, Short.MAX_VALUE))
                 .addContainerGap())
         );
         accounts_panelLayout.setVerticalGroup(
@@ -1355,7 +1373,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1364,7 +1382,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 205, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1599,49 +1617,6 @@ public class SettingsDialog extends javax.swing.JDialog {
         debug_file_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         debug_file_checkbox.setText("Save debug info to file");
 
-        mega_api_key_panel.setOpaque(false);
-
-        mega_api_key_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        mega_api_key_label.setText("MEGA API KEY:");
-        mega_api_key_label.setDoubleBuffered(true);
-
-        mega_api_key.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        mega_api_key.setDoubleBuffered(true);
-        mega_api_key.setEnabled(false);
-
-        mega_api_key_warning.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        mega_api_key_warning.setForeground(new java.awt.Color(0, 0, 255));
-        mega_api_key_warning.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        mega_api_key_warning.setText("MEGA API KEY IS NO LONGER REQUIRED (DISABLED)");
-        mega_api_key_warning.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        mega_api_key_warning.setDoubleBuffered(true);
-
-        javax.swing.GroupLayout mega_api_key_panelLayout = new javax.swing.GroupLayout(mega_api_key_panel);
-        mega_api_key_panel.setLayout(mega_api_key_panelLayout);
-        mega_api_key_panelLayout.setHorizontalGroup(
-            mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mega_api_key_panelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(mega_api_key_warning, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(mega_api_key_panelLayout.createSequentialGroup()
-                        .addComponent(mega_api_key_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(mega_api_key)))
-                .addContainerGap())
-        );
-        mega_api_key_panelLayout.setVerticalGroup(
-            mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mega_api_key_panelLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(mega_api_key_label)
-                    .addComponent(mega_api_key, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(mega_api_key_warning)
-                .addContainerGap())
-        );
-
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
         advanced_panelLayout.setHorizontalGroup(
@@ -1649,7 +1624,6 @@ public class SettingsDialog extends javax.swing.JDialog {
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(mega_api_key_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(advanced_panelLayout.createSequentialGroup()
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
@@ -1715,10 +1689,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(custom_chunks_dir_checkbox)
                     .addComponent(custom_chunks_dir_button))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(0, 0, 0)
                 .addComponent(custom_chunks_dir_current_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(mega_api_key_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(start_frozen_checkbox)
                 .addGap(18, 18, 18)
@@ -1752,7 +1724,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(panel_tabs, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(status, javax.swing.GroupLayout.DEFAULT_SIZE, 809, Short.MAX_VALUE)
+                        .addComponent(status, javax.swing.GroupLayout.DEFAULT_SIZE, 846, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(save_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
@@ -1763,7 +1735,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
+                .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 702, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1838,10 +1810,10 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("custom_chunks_dir", _custom_chunks_dir);
             settings.put("run_command", run_command_checkbox.isSelected() ? "yes" : "no");
             settings.put("run_command_path", run_command_textbox.getText());
-            settings.put("mega_api_key", mega_api_key.getText().trim());
             settings.put("clipboardspy", clipboardspy_checkbox.isSelected() ? "yes" : "no");
             settings.put("thumbnails", thumbnail_checkbox.isSelected() ? "yes" : "no");
             settings.put("upload_log", upload_log_checkbox.isSelected() ? "yes" : "no");
+            settings.put("upload_public_folder", upload_public_folder_checkbox.isSelected() ? "yes" : "no");
 
             if (custom_proxy_textarea.getText().trim().length() == 0) {
                 smart_proxy_checkbox.setSelected(false);
@@ -3116,6 +3088,19 @@ public class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_import_mega_buttonActionPerformed
 
+    private void upload_public_folder_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_upload_public_folder_checkboxActionPerformed
+        // TODO add your handling code here:
+        if (this.upload_public_folder_checkbox.isSelected()) {
+            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Using this option may irreversibly corrupt your uploads.\n\nUSE IT AT YOUR OWN RISK"), LabelTranslatorSingleton.getInstance().translate("WARNING"), JOptionPane.WARNING_MESSAGE);
+
+        }
+
+        this.upload_public_folder_checkbox.setBackground(this.upload_public_folder_checkbox.isSelected() ? java.awt.Color.RED : null);
+
+        this.public_folder_panel.setVisible(this.upload_public_folder_checkbox.isSelected());
+
+    }//GEN-LAST:event_upload_public_folder_checkboxActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -3168,10 +3153,6 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel mega_accounts_label;
     private javax.swing.JScrollPane mega_accounts_scrollpane;
     private javax.swing.JTable mega_accounts_table;
-    private javax.swing.JTextField mega_api_key;
-    private javax.swing.JLabel mega_api_key_label;
-    private javax.swing.JPanel mega_api_key_panel;
-    private javax.swing.JLabel mega_api_key_warning;
     private javax.swing.JCheckBox megacrypter_reverse_checkbox;
     private javax.swing.JLabel megacrypter_reverse_port_label;
     private javax.swing.JSpinner megacrypter_reverse_port_spinner;
@@ -3189,6 +3170,8 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel proxy_user_label;
     private javax.swing.JTextField proxy_user_textfield;
     private javax.swing.JLabel proxy_warning_label;
+    private javax.swing.JScrollPane public_folder_panel;
+    private javax.swing.JTextArea public_folder_warning;
     private javax.swing.JLabel rec_download_slots_label;
     private javax.swing.JLabel rec_smart_proxy_label;
     private javax.swing.JLabel rec_smart_proxy_label1;
@@ -3206,6 +3189,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox thumbnail_checkbox;
     private javax.swing.JButton unlock_accounts_button;
     private javax.swing.JCheckBox upload_log_checkbox;
+    private javax.swing.JCheckBox upload_public_folder_checkbox;
     private javax.swing.JPanel uploads_panel;
     private javax.swing.JScrollPane uploads_scrollpane;
     private javax.swing.JCheckBox use_mega_account_down_checkbox;

@@ -261,9 +261,19 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         LOG.log(Level.INFO, "{0} Dir {1} created", new Object[]{Thread.currentThread().getName(), parent_node});
 
-                        ma.shareFolder(parent_node, parent_key, share_key);
+                        String upload_folder_string = DBTools.selectSettingValue("upload_public_folder");
 
-                        String folder_link = ma.getPublicFolderLink(parent_node, share_key);
+                        boolean folder_share = "yes".equals(upload_folder_string);
+
+                        String folder_link = null;
+
+                        if (folder_share) {
+
+                            ma.shareFolder(parent_node, parent_key, share_key);
+
+                            folder_link = ma.getPublicFolderLink(parent_node, share_key);
+
+                        }
 
                         if (dialog.getUpload_log_checkbox().isSelected()) {
 
@@ -283,7 +293,22 @@ public final class MainPanelView extends javax.swing.JFrame {
                             }
                         }
 
+                        if (folder_share) {
+                            res = ma.createDirInsideAnotherSharedDir("MEGABASTERD", parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
+                        } else {
+                            res = ma.createDir("MEGABASTERD", parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()));
+
+                        }
+
+                        String file_paths_2_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
+
                         MegaDirNode file_paths = new MegaDirNode(parent_node);
+
+                        MegaDirNode file_paths_2 = new MegaDirNode(file_paths_2_node);
+
+                        file_paths.getChildren().put("MEGABASTERD", file_paths_2);
+
+                        file_paths = file_paths_2;
 
                         for (File f : dialog.getFiles()) {
 
@@ -313,8 +338,12 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                         } else {
 
-                                            res = ma.createDirInsideAnotherSharedDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
+                                            if (folder_share) {
+                                                res = ma.createDirInsideAnotherSharedDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
+                                            } else {
+                                                res = ma.createDir(d, current_node.getNode_id(), ma.genFolderKey(), i32a2bin(ma.getMaster_key()));
 
+                                            }
                                             file_parent = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
                                             current_node.getChildren().put(d, new MegaDirNode(file_parent));
@@ -754,6 +783,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_panel); // NOI18N
 
+        unfreeze_transferences_button.setBackground(new java.awt.Color(255, 255, 204));
         unfreeze_transferences_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
         unfreeze_transferences_button.setForeground(new java.awt.Color(0, 153, 255));
         unfreeze_transferences_button.setText("UNFREEZE WAITING TRANSFERENCES");
@@ -1458,7 +1488,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void split_file_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_split_file_menuActionPerformed
         // TODO add your handling code here:
-        FileSplitterDialog dialog = new FileSplitterDialog(this, true);
+        FileSplitterDialog dialog = new FileSplitterDialog(this, false);
 
         dialog.setLocationRelativeTo(this);
 
@@ -1468,7 +1498,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private void merge_file_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_merge_file_menuActionPerformed
         // TODO add your handling code here:
 
-        FileMergerDialog dialog = new FileMergerDialog(this, true);
+        FileMergerDialog dialog = new FileMergerDialog(this, false);
 
         dialog.setLocationRelativeTo(this);
 
