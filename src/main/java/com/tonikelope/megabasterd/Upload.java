@@ -40,7 +40,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean DEFAULT_THUMBNAILS = true;
-    public static final boolean UPLOAD_LOG = false;
+    public static final boolean UPLOAD_LOG = true;
+    public static final boolean UPLOAD_PUBLIC_FOLDER = false;
     private static final Logger LOG = Logger.getLogger(Upload.class.getName());
     private final MainPanel _main_panel;
     private volatile UploadView _view;

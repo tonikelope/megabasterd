@@ -33,7 +33,7 @@
               <Group type="103" groupAlignment="0" attributes="0">
                   <Component id="panel_tabs" pref="0" max="32767" attributes="0"/>
                   <Group type="102" attributes="0">
-                      <Component id="status" pref="809" max="32767" attributes="0"/>
+                      <Component id="status" pref="846" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="save_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
@@ -48,7 +48,7 @@
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="1" attributes="0">
               <EmptySpace min="-2" max="-2" attributes="0"/>
-              <Component id="panel_tabs" pref="600" max="32767" attributes="0"/>
+              <Component id="panel_tabs" pref="702" max="32767" attributes="0"/>
               <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -566,34 +566,31 @@
                       <Group type="102" attributes="0">
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Component id="rec_upload_slots_label" alignment="0" pref="1185" max="32767" attributes="0"/>
-                              <Group type="102" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
-                                          <Component id="max_up_speed_label" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="max_up_speed_spinner" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                              <Component id="default_slots_up_label" max="32767" attributes="0"/>
-                                              <Component id="max_uploads_label" max="32767" attributes="0"/>
-                                          </Group>
-                                          <EmptySpace max="-2" attributes="0"/>
-                                          <Group type="103" groupAlignment="0" attributes="0">
-                                              <Component id="default_slots_up_spinner" min="-2" max="-2" attributes="0"/>
-                                              <Component id="max_uploads_spinner" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          </Group>
-                                      </Group>
-                                      <Component id="thumbnail_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="upload_log_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <EmptySpace min="-2" pref="20" max="-2" attributes="0"/>
+                                  <Component id="max_up_speed_label" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="max_up_speed_spinner" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <Component id="limit_upload_speed_checkbox" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                      <Component id="default_slots_up_label" max="32767" attributes="0"/>
+                                      <Component id="max_uploads_label" max="32767" attributes="0"/>
+                                  </Group>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Group type="103" groupAlignment="0" attributes="0">
+                                      <Component id="default_slots_up_spinner" min="-2" max="-2" attributes="0"/>
+                                      <Component id="max_uploads_spinner" alignment="0" min="-2" max="-2" attributes="0"/>
+                                  </Group>
+                              </Group>
+                              <Component id="thumbnail_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="upload_log_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="upload_public_folder_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="rec_upload_slots_label" alignment="0" min="-2" pref="1003" max="-2" attributes="0"/>
+                              <Component id="public_folder_panel" alignment="0" min="-2" pref="1086" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace pref="29" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -623,6 +620,10 @@
                           <Component id="thumbnail_checkbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="upload_log_checkbox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="upload_public_folder_checkbox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="public_folder_panel" min="-2" pref="265" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
@@ -718,6 +719,44 @@
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                   </Properties>
                 </Component>
+                <Component class="javax.swing.JCheckBox" name="upload_public_folder_checkbox">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Dialog" size="18" style="1"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="CREATE UPLOAD FOLDER PUBLIC LINK"/>
+                    <Property name="doubleBuffered" type="boolean" value="true"/>
+                    <Property name="opaque" type="boolean" value="true"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="upload_public_folder_checkboxActionPerformed"/>
+                  </Events>
+                </Component>
+                <Container class="javax.swing.JScrollPane" name="public_folder_panel">
+                  <AuxValues>
+                    <AuxValue name="autoScrollPane" type="java.lang.Boolean" value="true"/>
+                  </AuxValues>
+
+                  <Layout class="org.netbeans.modules.form.compat2.layouts.support.JScrollPaneSupportLayout"/>
+                  <SubComponents>
+                    <Component class="javax.swing.JTextArea" name="public_folder_warning">
+                      <Properties>
+                        <Property name="editable" type="boolean" value="false"/>
+                        <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                          <Color blue="33" green="ff" red="ff" type="rgb"/>
+                        </Property>
+                        <Property name="columns" type="int" value="20"/>
+                        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                          <Font name="Noto Sans" size="18" style="1"/>
+                        </Property>
+                        <Property name="lineWrap" type="boolean" value="true"/>
+                        <Property name="rows" type="int" value="5"/>
+                        <Property name="text" type="java.lang.String" value="THIS OPTION IS NOT RECOMMENDED. Using this will cause MegaBasterd uploaded folder to appear in your account as NOT DECRYPTABLE. &#xa;&#xa;At the time of writing there is a method to FIX IT:&#xa;&#xa;1) Move &quot;MEGABASTERD&quot; FOLDER (first &quot;child&quot; folder of the upload folder) to the ROOT (cloud) folder of your account. &#xa;&#xa;2) Then go to account settings and RELOAD ACCOUNT. &#xa;&#xa;I don&apos;t know how long this method will last. USE THIS OPTION AT YOUR OWN RISK."/>
+                        <Property name="wrapStyleWord" type="boolean" value="true"/>
+                      </Properties>
+                    </Component>
+                  </SubComponents>
+                </Container>
               </SubComponents>
             </Container>
           </SubComponents>
@@ -777,7 +816,7 @@
                               </Group>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
-                          <Component id="jLabel1" alignment="0" pref="1072" max="32767" attributes="0"/>
+                          <Component id="jLabel1" alignment="0" pref="1109" max="32767" attributes="0"/>
                       </Group>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -797,7 +836,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jLabel1" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="mega_accounts_scrollpane" pref="154" max="32767" attributes="0"/>
+                      <Component id="mega_accounts_scrollpane" pref="205" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_mega_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -807,7 +846,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="elc_accounts_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
-                      <Component id="elc_accounts_scrollpane" pref="154" max="32767" attributes="0"/>
+                      <Component id="elc_accounts_scrollpane" pref="205" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="remove_elc_account_button" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -1147,9 +1186,9 @@
                               <Component id="custom_chunks_dir_checkbox" alignment="3" min="-2" max="-2" attributes="0"/>
                               <Component id="custom_chunks_dir_button" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
-                          <EmptySpace max="-2" attributes="0"/>
+                          <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                           <Component id="custom_chunks_dir_current_label" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="start_frozen_checkbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="debug_file_checkbox" min="-2" max="-2" attributes="0"/>

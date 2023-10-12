@@ -79,6 +79,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -443,6 +448,26 @@ public class MiscTools {
                 }
             }
         }
+    }
+
+    public static Sequencer midiLoopPlay(String midi) {
+        try {
+            Sequencer sequencer = MidiSystem.getSequencer(); // Get the default Sequencer
+            if (sequencer == null) {
+                System.err.println("Sequencer device not supported");
+                return null;
+            }
+            sequencer.open(); // Open device
+            // Create sequence, the File must contain MIDI file data.
+            Sequence sequence = MidiSystem.getSequence(MiscTools.class.getResource(midi));
+            sequencer.setSequence(sequence); // load it into sequencer
+            sequencer.setLoopCount(Sequencer.LOOP_CONTINUOUSLY);
+            sequencer.start();  // start the playback
+            return sequencer;
+        } catch (MidiUnavailableException | InvalidMidiDataException | IOException ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
     public static void updateTitledBorderFont(final TitledBorder border, final Font font, final float zoom_factor) {

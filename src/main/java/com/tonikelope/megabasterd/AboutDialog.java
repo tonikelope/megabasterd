@@ -14,6 +14,7 @@ import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Color;
 import java.awt.Dialog;
 import java.util.logging.Logger;
+import javax.sound.midi.Sequencer;
 import javax.swing.JOptionPane;
 
 /**
@@ -29,6 +30,7 @@ public class AboutDialog extends javax.swing.JDialog {
     public static final String SPAIN_URL = "https://en.wikipedia.org/wiki/Spain";
     public static final String MEGABASTERD_GITHUB_URL = "https://tonikelope.github.io/megabasterd/";
     public static final String KIM_URL = "http://www.kim.com/";
+    private static volatile Sequencer _midi = null;
 
     public AboutDialog(MainPanelView parent, boolean modal) {
 
@@ -80,6 +82,14 @@ public class AboutDialog extends javax.swing.JDialog {
         setTitle("About");
         setIconImage(null);
         setResizable(false);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowClosing(java.awt.event.WindowEvent evt) {
+                formWindowClosing(evt);
+            }
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         title_label.setFont(new java.awt.Font("Dialog", 1, 48)); // NOI18N
         title_label.setText("MegaBasterd " + VERSION + " ");
@@ -416,6 +426,26 @@ public class AboutDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
         subtitle_label.setForeground(new Color(102, 102, 102));
     }//GEN-LAST:event_subtitle_labelMouseExited
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        // TODO add your handling code here:
+        THREAD_POOL.execute(() -> {
+
+            if (_midi == null) {
+                _midi = MiscTools.midiLoopPlay("/midis/a-team.mid");
+            } else {
+                _midi.start();
+            }
+        });
+    }//GEN-LAST:event_formWindowOpened
+
+    private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
+        // TODO add your handling code here:
+        THREAD_POOL.execute(() -> {
+            _midi.stop();
+        });
+        dispose();
+    }//GEN-LAST:event_formWindowClosing
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel author_webpage_label;

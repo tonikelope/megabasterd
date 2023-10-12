@@ -133,6 +133,11 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
                 c.setVisible(false);
             }
 
+            if (upload.getFolder_link() == null) {
+                folder_link_button.setVisible(false);
+                open_browser_button.setVisible(false);
+            }
+
         });
     }
 

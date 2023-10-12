@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.80";
+    public static final String VERSION = "7.81";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -100,7 +100,7 @@ public final class MainPanel {
     private static String _new_version;
     private static Boolean _resume_uploads;
     private static Boolean _resume_downloads;
-    public static volatile long LAST_TIMESTAMP_EXTERNAL_COMMAND;
+    public static volatile long LAST_EXTERNAL_COMMAND_TIMESTAMP;
     private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
     private static volatile boolean CHECK_RUNNING = true;
 
@@ -227,7 +227,7 @@ public final class MainPanel {
 
         _exit = false;
 
-        LAST_TIMESTAMP_EXTERNAL_COMMAND = -1;
+        LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
 
         _restart = false;
 
@@ -814,7 +814,7 @@ public final class MainPanel {
         _run_command_path = DBTools.selectSettingValue("run_command_path");
 
         if (_run_command && old_run_command_path != null && !old_run_command_path.equals(_run_command_path)) {
-            LAST_TIMESTAMP_EXTERNAL_COMMAND = -1;
+            LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
         }
 
         String use_megacrypter_reverse = selectSettingValue("megacrypter_reverse");
@@ -868,7 +868,7 @@ public final class MainPanel {
 
     public static synchronized void run_external_command() {
 
-        if (_run_command && (LAST_TIMESTAMP_EXTERNAL_COMMAND == -1 || LAST_TIMESTAMP_EXTERNAL_COMMAND + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
+        if (_run_command && (LAST_EXTERNAL_COMMAND_TIMESTAMP == -1 || LAST_EXTERNAL_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
 
             if (_run_command_path != null && !_run_command_path.equals("")) {
                 try {
@@ -877,7 +877,7 @@ public final class MainPanel {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
 
-                LAST_TIMESTAMP_EXTERNAL_COMMAND = System.currentTimeMillis();
+                LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
             }
         }
     }
