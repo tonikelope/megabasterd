@@ -155,6 +155,18 @@ public class MiscTools {
         return null;
     }
 
+    public static void containerSetEnabled(Container panel, boolean enabled) {
+
+        for (Component cp : panel.getComponents()) {
+
+            if (cp instanceof Container) {
+                containerSetEnabled((Container) cp, enabled);
+            }
+
+            cp.setEnabled(enabled);
+        }
+    }
+
     public static String getFechaHoraActual() {
 
         String format = "dd-MM-yyyy HH:mm:ss";

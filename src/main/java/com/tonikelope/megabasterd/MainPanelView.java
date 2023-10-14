@@ -477,6 +477,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                 c.setVisible(false);
             }
 
+            force_chunk_reset_button.setVisible(MainPanel.isUse_smart_proxy());
+
             clean_all_down_menu.setEnabled(false);
             clean_all_up_menu.setEnabled(false);
 
@@ -1359,6 +1361,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     _main_panel.setMega_proxy_server(null);
                 }
+
+                force_chunk_reset_button.setVisible(MainPanel.isUse_smart_proxy());
 
                 if (MainPanel.isUse_smart_proxy()) {
 
