@@ -399,11 +399,7 @@ public class MegaAPI implements Serializable {
 
                     if (current_smart_proxy != null && (http_error != 0 || empty_response)) {
 
-                        if (http_error == 509) {
-                            proxy_manager.blockProxy(current_smart_proxy);
-                        }
-
-                        excluded_proxy_list.add(current_smart_proxy);
+                        proxy_manager.blockProxy(current_smart_proxy, "HTTP " + String.valueOf(http_error));
 
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 

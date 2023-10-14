@@ -384,7 +384,9 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="global_speed_down_label" pref="839" max="32767" attributes="0"/>
+                      <Component id="global_speed_down_label" pref="484" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="force_chunk_reset_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="pause_all_down_button" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -419,6 +421,7 @@
                       <Group type="103" groupAlignment="3" attributes="0">
                           <Component id="global_speed_down_label" alignment="3" min="-2" max="-2" attributes="0"/>
                           <Component id="pause_all_down_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                          <Component id="force_chunk_reset_button" alignment="3" min="-2" max="-2" attributes="0"/>
                       </Group>
                   </Group>
               </Group>
@@ -518,6 +521,23 @@
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
+              </Events>
+            </Component>
+            <Component class="javax.swing.JButton" name="force_chunk_reset_button">
+              <Properties>
+                <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="99" green="0" red="ff" type="rgb"/>
+                </Property>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Dialog" size="18" style="1"/>
+                </Property>
+                <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+                  <Color blue="ff" green="ff" red="ff" type="rgb"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="FORCE ALL CURRENT CHUNK RESET"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="force_chunk_reset_buttonActionPerformed"/>
               </Events>
             </Component>
           </SubComponents>

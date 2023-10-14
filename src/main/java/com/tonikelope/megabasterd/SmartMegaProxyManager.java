@@ -21,8 +21,10 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -34,19 +36,52 @@ import java.util.logging.Logger;
 public final class SmartMegaProxyManager {
 
     public static String DEFAULT_SMART_PROXY_URL = null;
-    public static final int PROXY_BLOCK_TIME = 90;
-    public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 60;
+    public static final int PROXY_BLOCK_TIME = 300;
+    public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 30;
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
     private final LinkedHashMap<String, Long[]> _proxy_list;
     private static final HashMap<String, String> PROXY_LIST_AUTH = new HashMap<>();
     private final MainPanel _main_panel;
+    private volatile int _ban_time;
+    private volatile int _proxy_timeout;
+
+    public int getBan_time() {
+        return _ban_time;
+    }
+
+    public int getProxy_timeout() {
+        return _proxy_timeout;
+    }
 
     public SmartMegaProxyManager(String proxy_list_url, MainPanel main_panel) {
         _proxy_list_url = (proxy_list_url != null && !"".equals(proxy_list_url)) ? proxy_list_url : DEFAULT_SMART_PROXY_URL;
         _proxy_list = new LinkedHashMap<>();
         _main_panel = main_panel;
+
+        refreshSmartProxySettings();
+
         refreshProxyList();
+    }
+
+    public synchronized void refreshSmartProxySettings() {
+        String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
+
+        if (smartproxy_ban_time != null) {
+            _ban_time = Integer.parseInt(smartproxy_ban_time);
+        } else {
+            _ban_time = PROXY_BLOCK_TIME;
+        }
+
+        String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
+
+        if (smartproxy_timeout != null) {
+            _proxy_timeout = Integer.parseInt(smartproxy_timeout) * 1000;
+        } else {
+            _proxy_timeout = Transference.HTTP_PROXY_CONNECT_TIMEOUT;
+        }
+
+        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + " TIMEOUT: " + String.valueOf(_proxy_timeout / 1000));
     }
 
     public synchronized int getProxyCount() {
@@ -60,9 +95,13 @@ public final class SmartMegaProxyManager {
 
             Set<String> keys = _proxy_list.keySet();
 
+            List<String> keysList = new ArrayList<>(keys);
+
+            Collections.shuffle(keysList);
+
             Long current_time = System.currentTimeMillis();
 
-            for (String k : keys) {
+            for (String k : keysList) {
 
                 if (_proxy_list.get(k)[0] < current_time && (excluded == null || !excluded.contains(k))) {
 
@@ -84,17 +123,27 @@ public final class SmartMegaProxyManager {
         return getProxyCount() > 0 ? getProxy(excluded) : null;
     }
 
-    public synchronized void blockProxy(String proxy) {
+    public synchronized void blockProxy(String proxy, String cause) {
 
         if (_proxy_list.containsKey(proxy)) {
 
-            Long[] proxy_data = _proxy_list.get(proxy);
+            if (this._ban_time == 0) {
 
-            proxy_data[0] = System.currentTimeMillis() + PROXY_BLOCK_TIME * 1000;
+                _proxy_list.remove(proxy);
 
-            _proxy_list.put(proxy, proxy_data);
+                LOG.log(Level.WARNING, "{0} Smart Proxy Manager: DELETING PROXY -> {1} ({2})", new Object[]{Thread.currentThread().getName(), proxy, cause});
 
-            LOG.log(Level.WARNING, "{0} Smart Proxy Manager: BLOCKING PROXY -> {1} ({2} secs)", new Object[]{Thread.currentThread().getName(), proxy, PROXY_BLOCK_TIME});
+            } else {
+
+                Long[] proxy_data = _proxy_list.get(proxy);
+
+                proxy_data[0] = System.currentTimeMillis() + this._ban_time * 1000;
+
+                _proxy_list.put(proxy, proxy_data);
+
+                LOG.log(Level.WARNING, "{0} Smart Proxy Manager: BLOCKING PROXY -> {1} ({2} secs) ({3})", new Object[]{Thread.currentThread().getName(), proxy, this._ban_time, cause});
+
+            }
         }
     }
 

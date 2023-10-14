@@ -101,19 +101,13 @@ public class StreamChunkDownloader implements Runnable {
 
                         if (current_smart_proxy != null && http_error != 0) {
 
-                            if (http_error == 509) {
-                                proxy_manager.blockProxy(current_smart_proxy);
-                            }
-
-                            excluded_proxy_list.add(current_smart_proxy);
+                            proxy_manager.blockProxy(current_smart_proxy, "HTTP " + String.valueOf(http_error));
 
                             String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
                             current_smart_proxy = smart_proxy[0];
 
                             smart_proxy_socks = smart_proxy[1].equals("socks");
-
-                            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "{0}: worker {1} excluding proxy -> {2}", new Object[]{Thread.currentThread().getName(), _id, current_smart_proxy});
 
                         } else if (current_smart_proxy == null) {
 

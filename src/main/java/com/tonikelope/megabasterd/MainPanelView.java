@@ -143,6 +143,10 @@ public final class MainPanelView extends javax.swing.JFrame {
         return status_up_label;
     }
 
+    public JButton getForce_chunk_reset_button() {
+        return force_chunk_reset_button;
+    }
+
     public JButton getUnfreeze_transferences_button() {
         return unfreeze_transferences_button;
     }
@@ -573,6 +577,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         pause_all_down_button = new javax.swing.JButton();
         down_remtime_label = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
+        force_chunk_reset_button = new javax.swing.JButton();
         uploads_panel = new javax.swing.JPanel();
         global_speed_up_label = new javax.swing.JLabel();
         status_up_label = new javax.swing.JLabel();
@@ -674,12 +679,24 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
 
+        force_chunk_reset_button.setBackground(new java.awt.Color(255, 0, 153));
+        force_chunk_reset_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        force_chunk_reset_button.setForeground(new java.awt.Color(255, 255, 255));
+        force_chunk_reset_button.setText("FORCE ALL CURRENT CHUNK RESET");
+        force_chunk_reset_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                force_chunk_reset_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
         downloads_panelLayout.setHorizontalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
-                .addComponent(global_speed_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 839, Short.MAX_VALUE)
+                .addComponent(global_speed_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(force_chunk_reset_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pause_all_down_button))
             .addGroup(downloads_panelLayout.createSequentialGroup()
@@ -708,7 +725,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(global_speed_down_label)
-                    .addComponent(pause_all_down_button)))
+                    .addComponent(pause_all_down_button)
+                    .addComponent(force_chunk_reset_button)))
         );
 
         jTabbedPane1.addTab("Downloads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-download-from-ftp-30.png")), downloads_panel); // NOI18N
@@ -1358,6 +1376,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                         MainPanel.getProxy_manager().refreshProxyList(url_list);
                     }
 
+                    MainPanel.getProxy_manager().refreshSmartProxySettings();
+
                 } else {
 
                     updateSmartProxyStatus("SmartProxy: OFF");
@@ -1549,6 +1569,15 @@ public final class MainPanelView extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
+    private void force_chunk_reset_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_force_chunk_reset_buttonActionPerformed
+        // TODO add your handling code here:
+
+        force_chunk_reset_button.setEnabled(false);
+
+        _main_panel.getDownload_manager().forceResetAllChunks();
+
+    }//GEN-LAST:event_force_chunk_reset_buttonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem about_menu;
     private javax.swing.JCheckBoxMenuItem auto_close_menu;
@@ -1561,6 +1590,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JMenu edit_menu;
     private javax.swing.JMenuItem exit_menu;
     private javax.swing.JMenu file_menu;
+    private javax.swing.JButton force_chunk_reset_button;
     private javax.swing.JLabel global_speed_down_label;
     private javax.swing.JLabel global_speed_up_label;
     private javax.swing.JMenu help_menu;
