@@ -45,6 +45,7 @@ public final class SmartMegaProxyManager {
     private final MainPanel _main_panel;
     private volatile int _ban_time;
     private volatile int _proxy_timeout;
+    private volatile boolean _force_smart_proxy;
 
     public int getBan_time() {
         return _ban_time;
@@ -52,6 +53,10 @@ public final class SmartMegaProxyManager {
 
     public int getProxy_timeout() {
         return _proxy_timeout;
+    }
+
+    public boolean isForce_smart_proxy() {
+        return _force_smart_proxy;
     }
 
     public SmartMegaProxyManager(String proxy_list_url, MainPanel main_panel) {
@@ -78,10 +83,19 @@ public final class SmartMegaProxyManager {
         if (smartproxy_timeout != null) {
             _proxy_timeout = Integer.parseInt(smartproxy_timeout) * 1000;
         } else {
-            _proxy_timeout = Transference.HTTP_PROXY_CONNECT_TIMEOUT;
+            _proxy_timeout = Transference.HTTP_PROXY_TIMEOUT;
         }
 
-        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + " TIMEOUT: " + String.valueOf(_proxy_timeout / 1000));
+        String force_smart_proxy_string = DBTools.selectSettingValue("force_smart_proxy");
+
+        if (force_smart_proxy_string != null) {
+
+            _force_smart_proxy = force_smart_proxy_string.equals("yes");
+        } else {
+            _force_smart_proxy = MainPanel.FORCE_SMART_PROXY;
+        }
+
+        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + " TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + " FORCE: " + String.valueOf(_force_smart_proxy));
     }
 
     public synchronized int getProxyCount() {
@@ -131,7 +145,7 @@ public final class SmartMegaProxyManager {
 
                 _proxy_list.remove(proxy);
 
-                LOG.log(Level.WARNING, "{0} Smart Proxy Manager: DELETING PROXY -> {1} ({2})", new Object[]{Thread.currentThread().getName(), proxy, cause});
+                LOG.log(Level.WARNING, "[Smart Proxy] REMOVING PROXY {0} ({1})", new Object[]{proxy, cause});
 
             } else {
 
@@ -141,7 +155,7 @@ public final class SmartMegaProxyManager {
 
                 _proxy_list.put(proxy, proxy_data);
 
-                LOG.log(Level.WARNING, "{0} Smart Proxy Manager: BLOCKING PROXY -> {1} ({2} secs) ({3})", new Object[]{Thread.currentThread().getName(), proxy, this._ban_time, cause});
+                LOG.log(Level.WARNING, "[Smart Proxy] BLOCKING PROXY {0} ({1} secs) ({2})", new Object[]{proxy, _ban_time, cause});
 
             }
         }

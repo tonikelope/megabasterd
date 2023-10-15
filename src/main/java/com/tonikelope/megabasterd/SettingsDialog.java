@@ -338,7 +338,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
 
-            int smartproxy_timeout_int = (int) ((float) Transference.HTTP_PROXY_CONNECT_TIMEOUT / 1000);
+            int smartproxy_timeout_int = (int) ((float) Transference.HTTP_PROXY_TIMEOUT / 1000);
 
             if (smartproxy_timeout != null) {
                 smartproxy_timeout_int = Integer.parseInt(smartproxy_timeout);
@@ -585,6 +585,17 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             MiscTools.containerSetEnabled(smart_proxy_settings, use_smart_proxy);
 
+            boolean force_smart_proxy = MainPanel.FORCE_SMART_PROXY;
+
+            String force_smart_proxy_string = DBTools.selectSettingValue("force_smart_proxy");
+
+            if (force_smart_proxy_string != null) {
+
+                force_smart_proxy = force_smart_proxy_string.equals("yes");
+            }
+
+            force_smart_proxy_checkbox.setSelected(force_smart_proxy);
+
             boolean run_command = false;
 
             String run_command_string = DBTools.selectSettingValue("run_command");
@@ -754,6 +765,8 @@ public class SettingsDialog extends javax.swing.JDialog {
         rec_smart_proxy_label2 = new javax.swing.JLabel();
         rec_smart_proxy_label = new javax.swing.JLabel();
         proxy_timeout_spinner = new javax.swing.JSpinner();
+        force_smart_proxy_checkbox = new javax.swing.JCheckBox();
+        jLabel7 = new javax.swing.JLabel();
         uploads_scrollpane = new javax.swing.JScrollPane();
         uploads_panel = new javax.swing.JPanel();
         default_slots_up_label = new javax.swing.JLabel();
@@ -799,16 +812,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         proxy_user_textfield = new javax.swing.JTextField();
         proxy_pass_label = new javax.swing.JLabel();
         proxy_pass_textfield = new javax.swing.JPasswordField();
-        import_settings_button = new javax.swing.JButton();
-        export_settings_button = new javax.swing.JButton();
-        zoom_label = new javax.swing.JLabel();
-        zoom_spinner = new javax.swing.JSpinner();
         rec_zoom_label = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
-        language_combo = new javax.swing.JComboBox<>();
-        font_label = new javax.swing.JLabel();
-        font_combo = new javax.swing.JComboBox<>();
         custom_chunks_dir_button = new javax.swing.JButton();
         custom_chunks_dir_current_label = new javax.swing.JLabel();
         custom_chunks_dir_checkbox = new javax.swing.JCheckBox();
@@ -818,6 +822,18 @@ public class SettingsDialog extends javax.swing.JDialog {
         run_command_textbox.addMouseListener(new ContextMenuMouseListener());
         run_command_test_button = new javax.swing.JButton();
         debug_file_checkbox = new javax.swing.JCheckBox();
+        jPanel1 = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
+        import_settings_button = new javax.swing.JButton();
+        export_settings_button = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        font_label = new javax.swing.JLabel();
+        language_combo = new javax.swing.JComboBox<>();
+        font_combo = new javax.swing.JComboBox<>();
+        zoom_label = new javax.swing.JLabel();
+        zoom_spinner = new javax.swing.JSpinner();
+        debug_file_path = new javax.swing.JLabel();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -999,31 +1015,43 @@ public class SettingsDialog extends javax.swing.JDialog {
         proxy_timeout_spinner.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
         proxy_timeout_spinner.setModel(new javax.swing.SpinnerNumberModel(10, 1, null, 1));
 
+        force_smart_proxy_checkbox.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
+        force_smart_proxy_checkbox.setText("FORCE SMART PROXY");
+
+        jLabel7.setFont(new java.awt.Font("Noto Sans", 2, 16)); // NOI18N
+        jLabel7.setText("Forces the use of smart proxy even if we still have direct bandwidth available (useful to test proxies).");
+
         javax.swing.GroupLayout smart_proxy_settingsLayout = new javax.swing.GroupLayout(smart_proxy_settings);
         smart_proxy_settings.setLayout(smart_proxy_settingsLayout);
         smart_proxy_settingsLayout.setHorizontalGroup(
             smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                        .addComponent(rec_smart_proxy_label1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(custom_proxy_list_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1151, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(rec_smart_proxy_label)
-                        .addComponent(rec_smart_proxy_label2))
                     .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                        .addContainerGap()
                         .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel3)
-                            .addComponent(jLabel5))
+                            .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(rec_smart_proxy_label1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(custom_proxy_list_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1151, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(rec_smart_proxy_label)
+                                .addComponent(rec_smart_proxy_label2))
+                            .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel3)
+                                    .addComponent(jLabel5))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(bad_proxy_time_spinner)
+                                    .addComponent(proxy_timeout_spinner))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel6)))))
+                    .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                        .addComponent(force_smart_proxy_checkbox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(bad_proxy_time_spinner)
-                            .addComponent(proxy_timeout_spinner))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel4)
-                            .addComponent(jLabel6))))
+                        .addComponent(jLabel7)))
                 .addContainerGap())
         );
         smart_proxy_settingsLayout.setVerticalGroup(
@@ -1045,6 +1073,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(jLabel5)
                     .addComponent(proxy_timeout_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(force_smart_proxy_checkbox)
+                    .addComponent(jLabel7))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(custom_proxy_list_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1412,7 +1444,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         jLabel1.setText("Note: you can use a (optional) alias for your email addresses -> bob@supermail.com#bob_mail (don't forget to save after entering your accounts).");
         jLabel1.setDoubleBuffered(true);
 
@@ -1524,7 +1556,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        proxy_warning_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        proxy_warning_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         proxy_warning_label.setText("Note: MegaBasterd will use this proxy for ALL connections.");
         proxy_warning_label.setEnabled(false);
 
@@ -1618,56 +1650,9 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
-        import_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        import_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-import-30.png"))); // NOI18N
-        import_settings_button.setText("IMPORT SETTINGS");
-        import_settings_button.setDoubleBuffered(true);
-        import_settings_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                import_settings_buttonActionPerformed(evt);
-            }
-        });
-
-        export_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        export_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-export-30.png"))); // NOI18N
-        export_settings_button.setText("EXPORT SETTINGS");
-        export_settings_button.setDoubleBuffered(true);
-        export_settings_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                export_settings_buttonActionPerformed(evt);
-            }
-        });
-
-        zoom_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        zoom_label.setText("Font ZOOM (%):");
-        zoom_label.setDoubleBuffered(true);
-
-        zoom_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        zoom_spinner.setDoubleBuffered(true);
-
         rec_zoom_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
         rec_zoom_label.setText("Note: restart might be required.");
         rec_zoom_label.setDoubleBuffered(true);
-
-        jButton1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(255, 0, 0));
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
-        jButton1.setText("RESET MEGABASTERD");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
-        jLabel2.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        jLabel2.setText("Language:");
-
-        language_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-
-        font_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        font_label.setText("Font:");
-
-        font_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
         custom_chunks_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         custom_chunks_dir_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-folder-30.png"))); // NOI18N
@@ -1713,7 +1698,122 @@ public class SettingsDialog extends javax.swing.JDialog {
         });
 
         debug_file_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        debug_file_checkbox.setText("Save debug info to file");
+        debug_file_checkbox.setText("Save debug info to file -> ");
+
+        jButton1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 0, 0));
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
+        jButton1.setText("RESET MEGABASTERD");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
+
+        import_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        import_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-import-30.png"))); // NOI18N
+        import_settings_button.setText("IMPORT SETTINGS");
+        import_settings_button.setDoubleBuffered(true);
+        import_settings_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                import_settings_buttonActionPerformed(evt);
+            }
+        });
+
+        export_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        export_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-export-30.png"))); // NOI18N
+        export_settings_button.setText("EXPORT SETTINGS");
+        export_settings_button.setDoubleBuffered(true);
+        export_settings_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                export_settings_buttonActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(import_settings_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(export_settings_button, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(import_settings_button)
+                    .addComponent(export_settings_button))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton1)
+                .addContainerGap())
+        );
+
+        jLabel2.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel2.setText("Language:");
+
+        font_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        font_label.setText("Font:");
+
+        language_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+
+        font_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+
+        zoom_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        zoom_label.setText("Font ZOOM (%):");
+        zoom_label.setDoubleBuffered(true);
+
+        zoom_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        zoom_spinner.setDoubleBuffered(true);
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(zoom_label)
+                            .addComponent(font_label))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(font_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addComponent(jLabel2)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(font_label)
+                    .addComponent(font_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(zoom_label)
+                    .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap())
+        );
+
+        debug_file_path.setFont(new java.awt.Font("Noto Sans", 0, 18)); // NOI18N
+        debug_file_path.setText(MainPanel.MEGABASTERD_HOME_DIR + "/.MEGABASTERD_DEBUG.log");
 
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
@@ -1724,64 +1824,38 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(proxy_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addComponent(run_command_test_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(run_command_textbox))
+                    .addGroup(advanced_panelLayout.createSequentialGroup()
                         .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(zoom_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(start_frozen_checkbox)
-                            .addComponent(debug_file_checkbox)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(custom_chunks_dir_checkbox)
+                                .addComponent(debug_file_checkbox)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(custom_chunks_dir_button))
+                                .addComponent(debug_file_path))
                             .addGroup(advanced_panelLayout.createSequentialGroup()
                                 .addGap(165, 165, 165)
                                 .addComponent(custom_chunks_dir_current_label))
                             .addComponent(rec_zoom_label)
+                            .addComponent(run_command_checkbox)
                             .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(run_command_checkbox)
+                                .addComponent(custom_chunks_dir_checkbox)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(run_command_test_button))
+                                .addComponent(custom_chunks_dir_button))
                             .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, advanced_panelLayout.createSequentialGroup()
-                                    .addComponent(jLabel2)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(language_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addGroup(javax.swing.GroupLayout.Alignment.LEADING, advanced_panelLayout.createSequentialGroup()
-                                    .addComponent(import_settings_button)
-                                    .addGap(18, 18, 18)
-                                    .addComponent(export_settings_button))
-                                .addGroup(advanced_panelLayout.createSequentialGroup()
-                                    .addComponent(font_label)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(font_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 484, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(0, 644, Short.MAX_VALUE))
-                    .addComponent(run_command_textbox))
+                                .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGap(0, 409, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         advanced_panelLayout.setVerticalGroup(
             advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(import_settings_button)
-                    .addComponent(export_settings_button))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(jButton1)
-                .addGap(18, 18, 18)
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(font_label)
-                    .addComponent(font_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(zoom_label)
-                    .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(custom_chunks_dir_checkbox)
@@ -1791,13 +1865,15 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addComponent(start_frozen_checkbox)
                 .addGap(18, 18, 18)
-                .addComponent(debug_file_checkbox)
-                .addGap(18, 18, 18)
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(run_command_checkbox)
-                    .addComponent(run_command_test_button))
+                    .addComponent(debug_file_checkbox)
+                    .addComponent(debug_file_path))
+                .addGap(18, 18, 18)
+                .addComponent(run_command_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(run_command_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(run_command_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(run_command_test_button))
                 .addGap(18, 18, 18)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -1825,7 +1901,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                         .addComponent(save_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cancel_button))
-                    .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 1030, Short.MAX_VALUE))
+                    .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 935, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -1910,6 +1986,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("clipboardspy", clipboardspy_checkbox.isSelected() ? "yes" : "no");
             settings.put("thumbnails", thumbnail_checkbox.isSelected() ? "yes" : "no");
             settings.put("upload_log", upload_log_checkbox.isSelected() ? "yes" : "no");
+            settings.put("force_smart_proxy", force_smart_proxy_checkbox.isSelected() ? "yes" : "no");
             settings.put("upload_public_folder", upload_public_folder_checkbox.isSelected() ? "yes" : "no");
             settings.put("smartproxy_ban_time", String.valueOf(bad_proxy_time_spinner.getValue()));
             settings.put("smartproxy_timeout", String.valueOf(proxy_timeout_spinner.getValue()));
@@ -3208,6 +3285,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel custom_proxy_list_label;
     private javax.swing.JTextArea custom_proxy_textarea;
     private javax.swing.JCheckBox debug_file_checkbox;
+    private javax.swing.JLabel debug_file_path;
     private javax.swing.JLabel default_dir_label;
     private javax.swing.JLabel default_slots_down_label;
     private javax.swing.JSpinner default_slots_down_spinner;
@@ -3224,6 +3302,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JButton export_settings_button;
     private javax.swing.JComboBox<String> font_combo;
     private javax.swing.JLabel font_label;
+    private javax.swing.JCheckBox force_smart_proxy_checkbox;
     private javax.swing.JButton import_mega_button;
     private javax.swing.JButton import_settings_button;
     private javax.swing.JButton jButton1;
@@ -3233,6 +3312,9 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JComboBox<String> language_combo;

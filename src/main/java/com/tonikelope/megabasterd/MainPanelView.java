@@ -684,7 +684,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         force_chunk_reset_button.setBackground(new java.awt.Color(255, 0, 153));
         force_chunk_reset_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         force_chunk_reset_button.setForeground(new java.awt.Color(255, 255, 255));
-        force_chunk_reset_button.setText("FORCE ALL CURRENT CHUNK RESET");
+        force_chunk_reset_button.setText("FORCE ALL CURRENT CHUNKS RESET");
         force_chunk_reset_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 force_chunk_reset_buttonActionPerformed(evt);
@@ -696,7 +696,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         downloads_panelLayout.setHorizontalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
-                .addComponent(global_speed_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 484, Short.MAX_VALUE)
+                .addComponent(global_speed_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 474, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(force_chunk_reset_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)

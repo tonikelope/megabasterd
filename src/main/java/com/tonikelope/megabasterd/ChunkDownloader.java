@@ -143,7 +143,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
-            if (MainPanel.FORCE_SMART_PROXY) {
+            if (proxy_manager.isForce_smart_proxy()) {
 
                 String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
@@ -195,7 +195,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (_current_smart_proxy != null && chunk_error) {
 
-                        proxy_manager.blockProxy(_current_smart_proxy, "HTTP " + String.valueOf(http_error));
+                        proxy_manager.blockProxy(_current_smart_proxy, timeout ? "TIMEOUT!" : "HTTP " + String.valueOf(http_error));
 
                         String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
@@ -259,7 +259,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 if (_current_smart_proxy != null) {
                     con.setConnectTimeout(MainPanel.getProxy_manager().getProxy_timeout());
-                    con.setReadTimeout(Transference.HTTP_PROXY_READ_TIMEOUT);
+                    con.setReadTimeout(MainPanel.getProxy_manager().getProxy_timeout() * 2);
                 } else {
                     con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
                     con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);

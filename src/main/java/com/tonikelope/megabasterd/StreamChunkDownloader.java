@@ -66,7 +66,7 @@ public class StreamChunkDownloader implements Runnable {
 
             ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
-            if (MainPanel.FORCE_SMART_PROXY) {
+            if (proxy_manager.isForce_smart_proxy()) {
 
                 String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
@@ -165,8 +165,8 @@ public class StreamChunkDownloader implements Runnable {
                     }
 
                     if (current_smart_proxy != null) {
-                        con.setConnectTimeout(Transference.HTTP_PROXY_CONNECT_TIMEOUT);
-                        con.setReadTimeout(Transference.HTTP_PROXY_READ_TIMEOUT);
+                        con.setConnectTimeout(MainPanel.getProxy_manager().getProxy_timeout());
+                        con.setReadTimeout(MainPanel.getProxy_manager().getProxy_timeout() * 2);
                     }
 
                     con.setUseCaches(false);
