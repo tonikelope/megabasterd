@@ -716,9 +716,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                             if (!isExit() && !_thread_pool.isShutdown() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
                                 stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
 
-                                if (MainPanel.getProxy_manager() != null) {
+                                if (MainPanel.isUse_smart_proxy()) {
                                     String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
-
                                     String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
                                     MainPanel.getProxy_manager().refreshProxyList(url_list); //Force SmartProxy proxy list refresh
                                 }

@@ -143,7 +143,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
-            if (proxy_manager.isForce_smart_proxy()) {
+            if (MainPanel.isUse_smart_proxy() && proxy_manager.isForce_smart_proxy()) {
 
                 String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 

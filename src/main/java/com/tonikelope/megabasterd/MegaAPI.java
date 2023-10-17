@@ -381,7 +381,7 @@ public class MegaAPI implements Serializable {
 
         SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
-        if (proxy_manager.isForce_smart_proxy()) {
+        if (MainPanel.isUse_smart_proxy() && proxy_manager.isForce_smart_proxy()) {
 
             String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 

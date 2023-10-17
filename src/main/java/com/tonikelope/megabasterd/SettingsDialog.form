@@ -261,6 +261,7 @@
                       <Font name="Dialog" size="14" style="0"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Note: you MUST &quot;OPEN&quot; this port in your router/firewall."/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="rec_download_slots_label">
@@ -269,6 +270,7 @@
                       <Font name="Dialog" size="16" style="2"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it. (Slots consume RAM, so use them moderately)."/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="megacrypter_reverse_checkbox">
@@ -319,6 +321,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="18" style="0"/>
                     </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="verify_file_down_checkbox">
@@ -357,6 +360,7 @@
                     <Property name="model" type="javax.swing.ComboBoxModel" editor="org.netbeans.modules.form.editors2.ComboBoxModelEditor">
                       <StringArray count="0"/>
                     </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                   <AuxValues>
                     <AuxValue name="JavaCodeGenerator_TypeParameters" type="java.lang.String" value="&lt;String&gt;"/>
@@ -383,6 +387,7 @@
                       <Font name="Dialog" size="18" style="0"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Max speed (KB/s):"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="megacrypter_reverse_port_label">
@@ -391,6 +396,7 @@
                       <Font name="Dialog" size="18" style="0"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="TCP Port:"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="default_dir_label">
@@ -412,6 +418,7 @@
                     </Property>
                     <Property name="text" type="java.lang.String" value="Default slots per file:"/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="use_mega_label">
@@ -420,6 +427,7 @@
                       <Font name="Dialog" size="18" style="0"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Default account:"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="multi_slot_down_checkbox">
@@ -440,6 +448,7 @@
                       <Font name="Dialog" size="18" style="0"/>
                     </Property>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                     <Property name="value" type="java.lang.Object" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
                       <Connection code="2" type="code"/>
                     </Property>
@@ -450,6 +459,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="18" style="0"/>
                     </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JLabel" name="down_dir_label">
@@ -829,6 +839,7 @@
                       <Font name="Dialog" size="18" style="0"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Max speed (KB/s):"/>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JSpinner" name="max_up_speed_spinner">
@@ -836,6 +847,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="18" style="0"/>
                     </Property>
+                    <Property name="enabled" type="boolean" value="false"/>
                   </Properties>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="limit_upload_speed_checkbox">
@@ -1838,7 +1850,7 @@
                       <Font name="Noto Sans" size="18" style="0"/>
                     </Property>
                     <Property name="text" type="java.lang.String" editor="org.netbeans.modules.form.RADConnectionPropertyEditor">
-                      <Connection code="MainPanel.MEGABASTERD_HOME_DIR + &quot;/.MEGABASTERD_DEBUG.log&quot;" type="code"/>
+                      <Connection code="MainPanel.MEGABASTERD_HOME_DIR + &quot;/MEGABASTERD_DEBUG.log&quot;" type="code"/>
                     </Property>
                   </Properties>
                 </Component>

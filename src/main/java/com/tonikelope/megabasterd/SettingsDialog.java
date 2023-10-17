@@ -708,6 +708,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                 custom_proxy_textarea.setText(custom_proxy_list);
             }
 
+            revalidate();
+
+            repaint();
+
             setPreferredSize(parent.getSize());
 
             pack();
@@ -866,9 +870,11 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         megacrypter_reverse_warning_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         megacrypter_reverse_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
+        megacrypter_reverse_warning_label.setEnabled(false);
 
         rec_download_slots_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
         rec_download_slots_label.setText("Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it. (Slots consume RAM, so use them moderately).");
+        rec_download_slots_label.setEnabled(false);
 
         megacrypter_reverse_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         megacrypter_reverse_checkbox.setText("Use MegaCrypter reverse mode");
@@ -904,6 +910,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         });
 
         max_down_speed_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        max_down_speed_spinner.setEnabled(false);
 
         verify_file_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         verify_file_down_checkbox.setText("Verify file integrity (when download is finished)");
@@ -921,6 +928,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         max_downloads_spinner.setDoubleBuffered(true);
 
         use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        use_mega_account_down_combobox.setEnabled(false);
 
         change_download_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         change_download_dir_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-folder-30.png"))); // NOI18N
@@ -934,9 +942,11 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         max_down_speed_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         max_down_speed_label.setText("Max speed (KB/s):");
+        max_down_speed_label.setEnabled(false);
 
         megacrypter_reverse_port_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         megacrypter_reverse_port_label.setText("TCP Port:");
+        megacrypter_reverse_port_label.setEnabled(false);
 
         default_dir_label.setBackground(new java.awt.Color(153, 255, 153));
         default_dir_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
@@ -946,9 +956,11 @@ public class SettingsDialog extends javax.swing.JDialog {
         default_slots_down_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         default_slots_down_label.setText("Default slots per file:");
         default_slots_down_label.setDoubleBuffered(true);
+        default_slots_down_label.setEnabled(false);
 
         use_mega_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         use_mega_label.setText("Default account:");
+        use_mega_label.setEnabled(false);
 
         multi_slot_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         multi_slot_down_checkbox.setText("Use multi slot download mode");
@@ -961,9 +973,11 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         default_slots_down_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         default_slots_down_spinner.setDoubleBuffered(true);
+        default_slots_down_spinner.setEnabled(false);
         default_slots_down_spinner.setValue(2);
 
         megacrypter_reverse_port_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        megacrypter_reverse_port_spinner.setEnabled(false);
 
         down_dir_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         down_dir_label.setText("Download folder:");
@@ -1212,8 +1226,10 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         max_up_speed_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         max_up_speed_label.setText("Max speed (KB/s):");
+        max_up_speed_label.setEnabled(false);
 
         max_up_speed_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        max_up_speed_spinner.setEnabled(false);
 
         limit_upload_speed_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         limit_upload_speed_checkbox.setText("Limit upload speed");
@@ -1813,7 +1829,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         );
 
         debug_file_path.setFont(new java.awt.Font("Noto Sans", 0, 18)); // NOI18N
-        debug_file_path.setText(MainPanel.MEGABASTERD_HOME_DIR + "/.MEGABASTERD_DEBUG.log");
+        debug_file_path.setText(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log");
 
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
@@ -3200,6 +3216,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_port_label.setEnabled(megacrypter_reverse_checkbox.isSelected());
         megacrypter_reverse_port_spinner.setEnabled(megacrypter_reverse_checkbox.isSelected());
         megacrypter_reverse_warning_label.setEnabled(megacrypter_reverse_checkbox.isSelected());
+
     }//GEN-LAST:event_megacrypter_reverse_checkboxStateChanged
 
     private void import_mega_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_mega_buttonActionPerformed

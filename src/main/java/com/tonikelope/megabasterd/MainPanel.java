@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.85";
+    public static final String VERSION = "7.86";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -270,7 +270,7 @@ public final class MainPanel {
             PrintStream fileOut;
 
             try {
-                fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/.MEGABASTERD_DEBUG.log"));
+                fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log"));
 
                 System.setOut(fileOut);
                 System.setErr(fileOut);
