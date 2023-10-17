@@ -42,7 +42,7 @@ public class DownloadManager extends TransferenceManager {
                 ArrayList<ChunkDownloader> chunkworkers = ((Download) transference).getChunkworkers();
 
                 chunkworkers.forEach((worker) -> {
-                    worker.setReset_current_chunk(true);
+                    worker.RESET_CURRENT_CHUNK();
                 });
 
             });
