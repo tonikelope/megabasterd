@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -171,159 +172,166 @@ public final class SmartMegaProxyManager {
         refreshProxyList();
     }
 
-    public synchronized void refreshProxyList() {
+    public void refreshProxyList() {
 
-        String data;
+        THREAD_POOL.execute(() -> {
 
-        HttpURLConnection con = null;
+            synchronized (this) {
 
-        try {
+                String data;
 
-            String custom_proxy_list = (_proxy_list_url == null ? DBTools.selectSettingValue("custom_proxy_list") : null);
+                HttpURLConnection con = null;
 
-            LinkedHashMap<String, Long[]> custom_clean_list = new LinkedHashMap<>();
+                try {
 
-            HashMap<String, String> custom_clean_list_auth = new HashMap<>();
+                    String custom_proxy_list = (_proxy_list_url == null ? DBTools.selectSettingValue("custom_proxy_list") : null);
 
-            if (custom_proxy_list != null) {
+                    LinkedHashMap<String, Long[]> custom_clean_list = new LinkedHashMap<>();
 
-                ArrayList<String> custom_list = new ArrayList<>(Arrays.asList(custom_proxy_list.split("\\r?\\n")));
+                    HashMap<String, String> custom_clean_list_auth = new HashMap<>();
 
-                if (!custom_list.isEmpty()) {
+                    if (custom_proxy_list != null) {
 
-                    Long current_time = System.currentTimeMillis();
+                        ArrayList<String> custom_list = new ArrayList<>(Arrays.asList(custom_proxy_list.split("\\r?\\n")));
 
-                    for (String proxy : custom_list) {
+                        if (!custom_list.isEmpty()) {
 
-                        boolean socks = false;
+                            Long current_time = System.currentTimeMillis();
 
-                        if (proxy.trim().startsWith("*")) {
-                            socks = true;
+                            for (String proxy : custom_list) {
 
-                            proxy = proxy.trim().substring(1);
+                                boolean socks = false;
+
+                                if (proxy.trim().startsWith("*")) {
+                                    socks = true;
+
+                                    proxy = proxy.trim().substring(1);
+                                }
+
+                                if (proxy.trim().contains("@")) {
+
+                                    String[] proxy_parts = proxy.trim().split("@");
+
+                                    custom_clean_list_auth.put(proxy_parts[0], proxy_parts[1]);
+
+                                    Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+
+                                    custom_clean_list.put(proxy_parts[0], proxy_data);
+
+                                } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
+
+                                    Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+
+                                    custom_clean_list.put(proxy, proxy_data);
+                                }
+                            }
                         }
 
-                        if (proxy.trim().contains("@")) {
+                        if (!custom_clean_list.isEmpty()) {
 
-                            String[] proxy_parts = proxy.trim().split("@");
+                            _proxy_list.clear();
 
-                            custom_clean_list_auth.put(proxy_parts[0], proxy_parts[1]);
-
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
-
-                            custom_clean_list.put(proxy_parts[0], proxy_data);
-
-                        } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
-
-                            custom_clean_list.put(proxy, proxy_data);
-                        }
-                    }
-                }
-
-                if (!custom_clean_list.isEmpty()) {
-
-                    _proxy_list.clear();
-
-                    _proxy_list.putAll(custom_clean_list);
-                }
-
-                if (!custom_clean_list_auth.isEmpty()) {
-
-                    PROXY_LIST_AUTH.clear();
-
-                    PROXY_LIST_AUTH.putAll(custom_clean_list_auth);
-                }
-
-            }
-
-            if (custom_clean_list.isEmpty() && _proxy_list_url != null && !"".equals(_proxy_list_url)) {
-
-                URL url = new URL(this._proxy_list_url);
-
-                con = (HttpURLConnection) url.openConnection();
-
-                con.setUseCaches(false);
-
-                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
-
-                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-
-                    int reads;
-
-                    while ((reads = is.read(buffer)) != -1) {
-
-                        byte_res.write(buffer, 0, reads);
-                    }
-
-                    data = new String(byte_res.toByteArray(), "UTF-8");
-                }
-
-                String[] proxy_list = data.split("\n");
-
-                if (proxy_list.length > 0) {
-
-                    _proxy_list.clear();
-
-                    PROXY_LIST_AUTH.clear();
-
-                    Long current_time = System.currentTimeMillis();
-
-                    for (String proxy : proxy_list) {
-
-                        boolean socks = false;
-
-                        if (proxy.trim().startsWith("*")) {
-                            socks = true;
-
-                            proxy = proxy.trim().substring(1);
+                            _proxy_list.putAll(custom_clean_list);
                         }
 
-                        if (proxy.trim().contains("@")) {
+                        if (!custom_clean_list_auth.isEmpty()) {
 
-                            String[] proxy_parts = proxy.trim().split("@");
+                            PROXY_LIST_AUTH.clear();
 
-                            PROXY_LIST_AUTH.put(proxy_parts[0], proxy_parts[1]);
-
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
-
-                            _proxy_list.put(proxy_parts[0], proxy_data);
-
-                        } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
-                            _proxy_list.put(proxy, proxy_data);
+                            PROXY_LIST_AUTH.putAll(custom_clean_list_auth);
                         }
 
                     }
+
+                    if (custom_clean_list.isEmpty() && _proxy_list_url != null && !"".equals(_proxy_list_url)) {
+
+                        URL url = new URL(this._proxy_list_url);
+
+                        con = (HttpURLConnection) url.openConnection();
+
+                        con.setUseCaches(false);
+
+                        con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
+
+                        try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                            byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                            int reads;
+
+                            while ((reads = is.read(buffer)) != -1) {
+
+                                byte_res.write(buffer, 0, reads);
+                            }
+
+                            data = new String(byte_res.toByteArray(), "UTF-8");
+                        }
+
+                        String[] proxy_list = data.split("\n");
+
+                        if (proxy_list.length > 0) {
+
+                            _proxy_list.clear();
+
+                            PROXY_LIST_AUTH.clear();
+
+                            Long current_time = System.currentTimeMillis();
+
+                            for (String proxy : proxy_list) {
+
+                                boolean socks = false;
+
+                                if (proxy.trim().startsWith("*")) {
+                                    socks = true;
+
+                                    proxy = proxy.trim().substring(1);
+                                }
+
+                                if (proxy.trim().contains("@")) {
+
+                                    String[] proxy_parts = proxy.trim().split("@");
+
+                                    PROXY_LIST_AUTH.put(proxy_parts[0], proxy_parts[1]);
+
+                                    Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+
+                                    _proxy_list.put(proxy_parts[0], proxy_data);
+
+                                } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
+                                    Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                                    _proxy_list.put(proxy, proxy_data);
+                                }
+
+                            }
+                        }
+
+                        _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
+
+                        LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
+
+                    } else if (!custom_clean_list.isEmpty()) {
+
+                        _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
+
+                        LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
+                    } else {
+                        _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (0 proxies!)" + (this.isForce_smart_proxy() ? " F!" : ""));
+                        LOG.log(Level.INFO, "{0} Smart Proxy Manager: NO PROXYS");
+                    }
+
+                } catch (MalformedURLException ex) {
+                    LOG.log(Level.SEVERE, ex.getMessage());
+                } catch (IOException ex) {
+                    LOG.log(Level.SEVERE, ex.getMessage());
+                } finally {
+                    if (con != null) {
+                        con.disconnect();
+                    }
+
                 }
-
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
-
-                LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
-
-            } else if (!custom_clean_list.isEmpty()) {
-
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")*");
-
-                LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
-            } else {
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (0)");
-                LOG.log(Level.INFO, "{0} Smart Proxy Manager: NO PROXYS");
             }
+        });
 
-        } catch (MalformedURLException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
-        } catch (IOException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
-        } finally {
-            if (con != null) {
-                con.disconnect();
-            }
-
-        }
     }
 
     public static class SmartProxyAuthenticator extends Authenticator {

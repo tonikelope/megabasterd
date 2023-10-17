@@ -1003,31 +1003,31 @@ public class MiscTools {
 
         int http_status = 0, http_error = 0;
 
-        SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
-
         String current_smart_proxy = null;
 
         boolean smart_proxy_socks = false;
 
         ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
-        if (MainPanel.isUse_smart_proxy() && proxy_manager.isForce_smart_proxy()) {
-
-            String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-            current_smart_proxy = smart_proxy[0];
-
-            smart_proxy_socks = smart_proxy[1].equals("socks");
-
-        }
-
         do {
+
+            SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
+
+            if (MainPanel.isUse_smart_proxy() && proxy_manager != null && proxy_manager.isForce_smart_proxy()) {
+
+                String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                current_smart_proxy = smart_proxy[0];
+
+                smart_proxy_socks = smart_proxy[1].equals("socks");
+
+            }
 
             try {
 
                 URL url = new URL(string_url + "/0-0");
 
-                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && proxy_manager != null && !MainPanel.isUse_proxy()) {
 
                     if (current_smart_proxy != null && http_error != 0) {
 
@@ -1088,9 +1088,9 @@ public class MiscTools {
                     }
                 }
 
-                if (current_smart_proxy != null) {
-                    con.setConnectTimeout(MainPanel.getProxy_manager().getProxy_timeout());
-                    con.setReadTimeout(MainPanel.getProxy_manager().getProxy_timeout() * 2);
+                if (current_smart_proxy != null && proxy_manager != null) {
+                    con.setConnectTimeout(proxy_manager.getProxy_timeout());
+                    con.setReadTimeout(proxy_manager.getProxy_timeout() * 2);
                 }
 
                 con.setUseCaches(false);

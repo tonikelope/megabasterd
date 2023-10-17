@@ -163,7 +163,7 @@ public class MegaAPI implements Serializable {
 
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-        String res = _rawRequest(request, url_api);
+        String res = RAW_REQUEST(request, url_api);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -199,7 +199,7 @@ public class MegaAPI implements Serializable {
 
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-        String res = _rawRequest(request, url_api);
+        String res = RAW_REQUEST(request, url_api);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -217,7 +217,7 @@ public class MegaAPI implements Serializable {
 
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-        String res = _rawRequest(request, url_api);
+        String res = RAW_REQUEST(request, url_api);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -287,7 +287,7 @@ public class MegaAPI implements Serializable {
 
             url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-            String res = _rawRequest(request, url_api);
+            String res = RAW_REQUEST(request, url_api);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -331,7 +331,7 @@ public class MegaAPI implements Serializable {
 
             url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-            String res = _rawRequest(request, url_api);
+            String res = RAW_REQUEST(request, url_api);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -365,7 +365,7 @@ public class MegaAPI implements Serializable {
 
     }
 
-    private String _rawRequest(String request, URL url_api) throws MegaAPIException {
+    private String RAW_REQUEST(String request, URL url_api) throws MegaAPIException {
 
         System.out.println(request);
 
@@ -379,23 +379,13 @@ public class MegaAPI implements Serializable {
 
         ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
-        SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
-
-        if (MainPanel.isUse_smart_proxy() && proxy_manager.isForce_smart_proxy()) {
-
-            String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-            current_smart_proxy = smart_proxy[0];
-
-            smart_proxy_socks = smart_proxy[1].equals("socks");
-
-        }
-
         do {
+
+            SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
             try {
 
-                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && proxy_manager != null && !MainPanel.isUse_proxy()) {
 
                     if (current_smart_proxy != null && (http_error != 0 || empty_response)) {
 
@@ -568,7 +558,7 @@ public class MegaAPI implements Serializable {
             url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
         }
 
-        String data = _rawRequest(request, url_api);
+        String data = RAW_REQUEST(request, url_api);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -607,7 +597,7 @@ public class MegaAPI implements Serializable {
             url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
         }
 
-        String data = _rawRequest(request, url_api);
+        String data = RAW_REQUEST(request, url_api);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
@@ -709,7 +699,7 @@ public class MegaAPI implements Serializable {
 
             URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-            String res = _rawRequest(request, url_api);
+            String res = RAW_REQUEST(request, url_api);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -753,7 +743,7 @@ public class MegaAPI implements Serializable {
             System.out.println(request);
             URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-            String res = _rawRequest(request, url_api);
+            String res = RAW_REQUEST(request, url_api);
 
             System.out.println(res);
 
@@ -814,7 +804,7 @@ public class MegaAPI implements Serializable {
 
             url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-            res = _rawRequest(request, url_api);
+            res = RAW_REQUEST(request, url_api);
 
             System.out.println(request);
 
@@ -849,7 +839,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"p\", \"t\":\"" + mega_parent + "\", \"n\":[{\"h\":\"" + completion_handle + "\", \"t\":0, \"a\":\"" + Bin2UrlBASE64(enc_att) + "\", \"k\":\"" + Bin2UrlBASE64(encryptKey(i32a2bin(fkey), master_key)) + "\"}], \"i\":\"" + _req_id + "\", \"cr\" : [ [\"" + root_node + "\"] , [\"" + completion_handle + "\"] , [0,0, \"" + Bin2UrlBASE64(encryptKey(i32a2bin(fkey), share_key)) + "\"]]}]";
 
-            String res = _rawRequest(request, url_api);
+            String res = RAW_REQUEST(request, url_api);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -906,7 +896,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"p\", \"t\":\"" + parent_node + "\", \"n\":[{\"h\":\"xxxxxxxx\",\"t\":1,\"a\":\"" + Bin2UrlBASE64(enc_att) + "\",\"k\":\"" + Bin2UrlBASE64(enc_node_key) + "\"}],\"i\":\"" + _req_id + "\"}]";
 
-            String res = _rawRequest(request, url_api);
+            String res = RAW_REQUEST(request, url_api);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -936,7 +926,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"p\", \"t\":\"" + parent_node + "\", \"n\":[{\"h\":\"xxxxxxxx\",\"t\":1,\"a\":\"" + Bin2UrlBASE64(enc_att) + "\",\"k\":\"" + Bin2UrlBASE64(enc_node_key) + "\"}],\"i\":\"" + _req_id + "\", \"cr\" : [ [\"" + root_node + "\"] , [\"xxxxxxxx\"] , [0,0, \"" + Bin2UrlBASE64(enc_node_key_s) + "\"]]}]";
 
-            String res = _rawRequest(request, url_api);
+            String res = RAW_REQUEST(request, url_api);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -964,7 +954,7 @@ public class MegaAPI implements Serializable {
 
             URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-            String res = _rawRequest(request, url_api);
+            String res = RAW_REQUEST(request, url_api);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -995,7 +985,7 @@ public class MegaAPI implements Serializable {
 
             URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-            String res = _rawRequest(request, url_api);
+            String res = RAW_REQUEST(request, url_api);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -1042,7 +1032,7 @@ public class MegaAPI implements Serializable {
 
             URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
 
-            return _rawRequest(request, url_api);
+            return RAW_REQUEST(request, url_api);
 
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, ex.getMessage());
@@ -1074,7 +1064,7 @@ public class MegaAPI implements Serializable {
 
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
 
-        String res = _rawRequest(request, url_api);
+        String res = RAW_REQUEST(request, url_api);
 
         if (res != null) {
 
@@ -1218,7 +1208,7 @@ public class MegaAPI implements Serializable {
 
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
 
-        String res = _rawRequest(request, url_api);
+        String res = RAW_REQUEST(request, url_api);
 
         if (res != null) {
 

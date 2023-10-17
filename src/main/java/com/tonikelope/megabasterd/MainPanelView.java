@@ -472,12 +472,10 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             translateLabels(this);
 
-            for (JComponent c : new JComponent[]{unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
+            for (JComponent c : new JComponent[]{force_chunk_reset_button, unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
 
                 c.setVisible(false);
             }
-
-            force_chunk_reset_button.setVisible(MainPanel.isUse_smart_proxy());
 
             clean_all_down_menu.setEnabled(false);
             clean_all_up_menu.setEnabled(false);
@@ -674,7 +672,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         jButton1.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-copy-to-clipboard-30.png"))); // NOI18N
-        jButton1.setText("COPY ALL");
+        jButton1.setText("COPY ALL DOWNLOAD LINKS");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -685,6 +683,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         force_chunk_reset_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         force_chunk_reset_button.setForeground(new java.awt.Color(255, 255, 255));
         force_chunk_reset_button.setText("FORCE ALL CURRENT CHUNKS RESET");
+        force_chunk_reset_button.setDoubleBuffered(true);
         force_chunk_reset_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 force_chunk_reset_buttonActionPerformed(evt);
@@ -1375,7 +1374,6 @@ public final class MainPanelView extends javax.swing.JFrame {
                         MainPanel.setProxy_manager(new SmartMegaProxyManager(url_list, _main_panel));
                     } else {
                         String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
-
                         String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
                         MainPanel.getProxy_manager().refreshProxyList(url_list);
                     }
@@ -1550,9 +1548,9 @@ public final class MainPanelView extends javax.swing.JFrame {
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         // TODO add your handling code here:
 
-        _main_panel.getDownload_manager().copyAllLinksToClipboard();
+        int total = _main_panel.getDownload_manager().copyAllLinksToClipboard();
 
-        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("ALL COPIED!"));
+        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate(total > 0 ? "ALL DOWNLOAD LINKS COPIED!" : "NO DOWNLOAD LINKS TO COPY"));
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed

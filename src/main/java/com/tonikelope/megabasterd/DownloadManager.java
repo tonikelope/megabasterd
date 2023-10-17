@@ -37,21 +37,23 @@ public class DownloadManager extends TransferenceManager {
 
             ConcurrentLinkedQueue<Transference> transference_running_list = getMain_panel().getDownload_manager().getTransference_running_list();
 
-            transference_running_list.forEach((transference) -> {
+            if (!transference_running_list.isEmpty()) {
+                transference_running_list.forEach((transference) -> {
 
-                ArrayList<ChunkDownloader> chunkworkers = ((Download) transference).getChunkworkers();
+                    ArrayList<ChunkDownloader> chunkworkers = ((Download) transference).getChunkworkers();
 
-                chunkworkers.forEach((worker) -> {
-                    worker.RESET_CURRENT_CHUNK();
+                    chunkworkers.forEach((worker) -> {
+                        worker.RESET_CURRENT_CHUNK();
+                    });
+
                 });
 
-            });
+                MiscTools.GUIRun(() -> {
+                    getMain_panel().getView().getForce_chunk_reset_button().setEnabled(true);
+                });
 
-            MiscTools.GUIRun(() -> {
-                getMain_panel().getView().getForce_chunk_reset_button().setEnabled(true);
-            });
-
-            JOptionPane.showMessageDialog(getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("DONE"));
+                JOptionPane.showMessageDialog(getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("CURRENT DOWNLOAD CHUNKS RESET!"));
+            }
 
         });
     }
@@ -69,7 +71,9 @@ public class DownloadManager extends TransferenceManager {
         secureNotify();
     }
 
-    public void copyAllLinksToClipboard() {
+    public int copyAllLinksToClipboard() {
+
+        int total = 0;
 
         ArrayList<String> links = new ArrayList<>();
 
@@ -81,6 +85,8 @@ public class DownloadManager extends TransferenceManager {
         }
 
         out += String.join("\r\n", links);
+
+        total += links.size();
 
         links.clear();
 
@@ -98,6 +104,8 @@ public class DownloadManager extends TransferenceManager {
 
         out += String.join("\r\n", links);
 
+        total += links.size();
+
         links.clear();
 
         out += "\r\n\r\n***RUNNING DOWNLOADS***\r\n\r\n";
@@ -108,6 +116,8 @@ public class DownloadManager extends TransferenceManager {
         }
 
         out += String.join("\r\n", links);
+
+        total += links.size();
 
         links.clear();
 
@@ -120,7 +130,11 @@ public class DownloadManager extends TransferenceManager {
 
         out += String.join("\r\n", links);
 
+        total += links.size();
+
         MiscTools.copyTextToClipboard(out);
+
+        return total;
 
     }
 

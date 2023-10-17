@@ -649,6 +649,12 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private void _updateView() {
 
         MiscTools.GUIRun(() -> {
+
+            if (this instanceof DownloadManager) {
+
+                this._main_panel.getView().getForce_chunk_reset_button().setVisible(MainPanel.isUse_smart_proxy() && !getTransference_running_list().isEmpty());
+            }
+
             if (_paused_all) {
                 _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("RESUME ALL"));
             } else {

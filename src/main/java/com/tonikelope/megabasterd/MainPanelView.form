@@ -517,7 +517,7 @@
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/images/icons8-copy-to-clipboard-30.png"/>
                 </Property>
-                <Property name="text" type="java.lang.String" value="COPY ALL"/>
+                <Property name="text" type="java.lang.String" value="COPY ALL DOWNLOAD LINKS"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jButton1ActionPerformed"/>
@@ -535,6 +535,7 @@
                   <Color blue="ff" green="ff" red="ff" type="rgb"/>
                 </Property>
                 <Property name="text" type="java.lang.String" value="FORCE ALL CURRENT CHUNKS RESET"/>
+                <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
               <Events>
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="force_chunk_reset_buttonActionPerformed"/>
