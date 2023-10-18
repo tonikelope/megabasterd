@@ -152,8 +152,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             String worker_url = null;
 
-            long pause_init_time, paused = 0L;
-
             byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
@@ -164,12 +162,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     _download.pause_worker();
 
-                    pause_init_time = System.currentTimeMillis();
-
                     secureWait();
-
-                    paused += System.currentTimeMillis() - pause_init_time;
-
                 }
 
                 if (http_error == 509 && _509_timestamp == -1) {
@@ -197,7 +190,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     MainPanel.LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
                 }
 
-                if (MainPanel.isUse_smart_proxy() && ((proxy_manager != null && proxy_manager.isForce_smart_proxy()) || _current_smart_proxy != null || http_error == 509 || (_509_timestamp != -1 && _509_timestamp + SMART_PROXY_RECHECK_509_TIME * 1000 < System.currentTimeMillis())) && !MainPanel.isUse_proxy()) {
+                if (MainPanel.isUse_smart_proxy() && ((proxy_manager != null && proxy_manager.isForce_smart_proxy()) || _current_smart_proxy != null || http_error == 509 || (_509_timestamp != -1 && _509_timestamp + SMART_PROXY_RECHECK_509_TIME * 1000 > System.currentTimeMillis())) && !MainPanel.isUse_proxy()) {
 
                     if (_current_smart_proxy != null && chunk_error) {
 
@@ -309,8 +302,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 try (OutputStream tmp_chunk_file_os = new BufferedOutputStream(new FileOutputStream(tmp_chunk_file))) {
 
-                                    paused = 0L;
-
                                     int reads = 0;
 
                                     if (!_exit && !_download.isStopped() && !_download.getChunkmanager().isExit()) {
@@ -328,11 +319,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                                 _download.pause_worker();
 
-                                                pause_init_time = System.currentTimeMillis();
-
                                                 secureWait();
-
-                                                paused += System.currentTimeMillis() - pause_init_time;
 
                                             }
                                         }
@@ -374,7 +361,12 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             http_error = 0;
 
                             if (_current_smart_proxy != null && _509_timestamp != -1) {
+
                                 _509_timestamp = -1;
+
+                                if (_download.isTurbo()) {
+                                    _download.disableTurboMode();
+                                }
                             }
 
                             _excluded_proxy_list.clear();

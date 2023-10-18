@@ -250,6 +250,19 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         }
     }
 
+    public void disableTurboMode() {
+        synchronized (_turbo_proxy_lock) {
+            if (_turbo) {
+                _turbo = false;
+                MiscTools.GUIRun(() -> {
+
+                    getView().getSpeed_label().setForeground(Color.BLACK);
+
+                });
+            }
+        }
+    }
+
     public void enableTurboMode() {
 
         synchronized (_turbo_proxy_lock) {
