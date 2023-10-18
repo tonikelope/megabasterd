@@ -26,6 +26,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
 
 /**
  *
@@ -46,6 +47,10 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private volatile boolean working = false;
 
     private volatile boolean exit = false;
+
+    private volatile MegaMutableTreeNode _subfolder_node = null;
+
+    private volatile boolean _subfolder_finish = false;
 
     public List<HashMap> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
@@ -326,12 +331,16 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             node_bar.setVisible(true);
             skip_rest_button.setEnabled(false);
             skip_button.setEnabled(false);
+
             THREAD_POOL.execute(() -> {
+
                 MiscTools.resetTreeFolderSizes(((MegaMutableTreeNode) file_tree.getModel().getRoot()));
+
                 MiscTools.calculateTreeFolderSizes(((MegaMutableTreeNode) file_tree.getModel().getRoot()));
 
                 _genDownloadLiks();
-                MiscTools.GUIRun(() -> {
+
+                MiscTools.GUIRunAndWait(() -> {
                     restore_button.setVisible(true);
 
                     file_tree.setEnabled(true);
@@ -345,6 +354,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     skip_button.setEnabled(root_childs);
 
                     skip_rest_button.setEnabled(root_childs);
+
                 });
             });
 
@@ -413,6 +423,17 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             MegaAPI ma = new MegaAPI();
 
             String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
+
+            String subfolder_id = null;
+
+            if (folder_id.contains("@")) {
+
+                String[] fids = folder_id.split("@");
+
+                folder_id = fids[0];
+
+                subfolder_id = fids[1];
+            }
 
             String folder_key = findFirstRegex("#F![^!]+!(.+)", _link, 1);
 
@@ -515,7 +536,9 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                 final MegaMutableTreeNode roott = root;
 
-                MiscTools.GUIRun(() -> {
+                final String ssubfolder_id = subfolder_id;
+
+                MiscTools.GUIRunAndWait(() -> {
 
                     node_bar.setIndeterminate(true);
 
@@ -525,6 +548,12 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                     ftree.setEnabled(true);
                 });
+
+                if (ssubfolder_id != null) {
+
+                    _subfolder_node = MiscTools.findMegaTreeNodeByID(roott, ssubfolder_id);
+
+                }
 
             }
 
@@ -620,7 +649,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     }
                 }
 
-                MiscTools.GUIRun(() -> {
+                MiscTools.GUIRunAndWait(() -> {
 
                     total_space_label.setText("[" + formatBytes(_total_space) + "]");
 
@@ -634,6 +663,28 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     working = false;
                 });
 
+                if (_subfolder_node != null && !_subfolder_finish) {
+
+                    MiscTools.GUIRunAndWait(() -> {
+
+                        file_tree.setSelectionPath(new TreePath(_subfolder_node.getPath()));
+
+                    });
+
+                    _subfolder_finish = true;
+
+                    MiscTools.GUIRun(() -> {
+                        skip_rest_button.setEnabled(true);
+                        skip_rest_button.doClick();
+                    });
+
+                } else if (_subfolder_node != null && _subfolder_finish) {
+                    MiscTools.GUIRunAndWait(() -> {
+
+                        file_tree.setSelectionPath(new TreePath(_subfolder_node.getPath()));
+
+                    });
+                }
             });
         });
     }

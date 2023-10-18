@@ -161,7 +161,7 @@ public class MegaAPI implements Serializable {
             request = "[{\"a\":\"us\",\"user\":\"" + _email + "\",\"uh\":\"" + _user_hash + "\"}]";
         }
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
+        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=");
 
         String res = RAW_REQUEST(request, url_api);
 
@@ -197,7 +197,7 @@ public class MegaAPI implements Serializable {
 
         String request = "[{\"a\":\"us0\",\"user\":\"" + _email + "\"}]";
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
+        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=");
 
         String res = RAW_REQUEST(request, url_api);
 
@@ -215,7 +215,7 @@ public class MegaAPI implements Serializable {
 
         String request = "[{\"a\":\"mfag\",\"e\":\"" + email + "\"}]";
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : ""));
+        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=");
 
         String res = RAW_REQUEST(request, url_api);
 
@@ -285,7 +285,7 @@ public class MegaAPI implements Serializable {
 
             URL url_api;
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -329,7 +329,7 @@ public class MegaAPI implements Serializable {
 
         try {
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -550,12 +550,12 @@ public class MegaAPI implements Serializable {
 
             request = "[{\"a\":\"g\", \"g\":\"1\", \"n\":\"" + file_id + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : "") + "&n=" + folder_id);
 
         } else {
 
             request = "[{\"a\":\"g\", \"g\":\"1\", \"p\":\"" + file_id + "\"}]";
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
         }
 
         String data = RAW_REQUEST(request, url_api);
@@ -588,13 +588,13 @@ public class MegaAPI implements Serializable {
 
             request = "[{\"a\":\"g\", \"g\":\"1\", \"n\":\"" + file_id + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : "") + "&n=" + folder_id);
 
         } else {
 
             request = "[{\"a\":\"g\", \"p\":\"" + file_id + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
         }
 
         String data = RAW_REQUEST(request, url_api);
@@ -697,7 +697,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"u\", \"s\":" + String.valueOf(f.length()) + "}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -741,7 +741,7 @@ public class MegaAPI implements Serializable {
             String request = "[{\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[0].length) + ", \"ssl\":1}, {\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[1].length) + ", \"ssl\":1}]";
 
             System.out.println(request);
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -802,7 +802,7 @@ public class MegaAPI implements Serializable {
 
             request = "[{\"a\":\"pfa\", \"fa\":\"0*" + hash[0] + "/1*" + hash[1] + "\", \"n\":\"" + node_handle + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             res = RAW_REQUEST(request, url_api);
 
@@ -835,7 +835,7 @@ public class MegaAPI implements Serializable {
 
             byte[] enc_att = _encAttr("{\"n\":\"" + fbasename + "\"}", i32a2bin(Arrays.copyOfRange(ul_key, 0, 4)));
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String request = "[{\"a\":\"p\", \"t\":\"" + mega_parent + "\", \"n\":[{\"h\":\"" + completion_handle + "\", \"t\":0, \"a\":\"" + Bin2UrlBASE64(enc_att) + "\", \"k\":\"" + Bin2UrlBASE64(encryptKey(i32a2bin(fkey), master_key)) + "\"}], \"i\":\"" + _req_id + "\", \"cr\" : [ [\"" + root_node + "\"] , [\"" + completion_handle + "\"] , [0,0, \"" + Bin2UrlBASE64(encryptKey(i32a2bin(fkey), share_key)) + "\"]]}]";
 
@@ -892,7 +892,7 @@ public class MegaAPI implements Serializable {
 
             byte[] enc_node_key = encryptKey(node_key, master_key);
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String request = "[{\"a\":\"p\", \"t\":\"" + parent_node + "\", \"n\":[{\"h\":\"xxxxxxxx\",\"t\":1,\"a\":\"" + Bin2UrlBASE64(enc_att) + "\",\"k\":\"" + Bin2UrlBASE64(enc_node_key) + "\"}],\"i\":\"" + _req_id + "\"}]";
 
@@ -922,7 +922,7 @@ public class MegaAPI implements Serializable {
 
             byte[] enc_node_key_s = encryptKey(node_key, share_key);
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String request = "[{\"a\":\"p\", \"t\":\"" + parent_node + "\", \"n\":[{\"h\":\"xxxxxxxx\",\"t\":1,\"a\":\"" + Bin2UrlBASE64(enc_att) + "\",\"k\":\"" + Bin2UrlBASE64(enc_node_key) + "\"}],\"i\":\"" + _req_id + "\", \"cr\" : [ [\"" + root_node + "\"] , [\"xxxxxxxx\"] , [0,0, \"" + Bin2UrlBASE64(enc_node_key_s) + "\"]]}]";
 
@@ -952,7 +952,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"l\", \"n\":\"" + node + "\"}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -983,7 +983,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"l\", \"n\":\"" + node + "\", \"i\":\"" + _req_id + "\"}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -1030,7 +1030,7 @@ public class MegaAPI implements Serializable {
             //OJO
             String request = "[{\"a\":\"s2\",\"n\":\"" + node + "\",\"s\":[{\"u\":\"EXP\",\"r\":0}],\"i\":\"" + _req_id + "\",\"ok\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"ha\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"cr\":[[\"" + node + "\"],[\"" + node + "\"],[0,0,\"" + enc_nk + "\"]]}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + (API_KEY != null ? "&ak=" + API_KEY : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             return RAW_REQUEST(request, url_api);
 
@@ -1062,7 +1062,7 @@ public class MegaAPI implements Serializable {
 
         String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\"}]";
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
+        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + "&n=" + folder_id);
 
         String res = RAW_REQUEST(request, url_api);
 
@@ -1076,12 +1076,13 @@ public class MegaAPI implements Serializable {
 
             int s = ((List) res_map[0].get("f")).size();
 
-            MiscTools.GUIRun(() -> {
-                bar.setIndeterminate(false);
-                bar.setMaximum(s);
-                bar.setValue(0);
-            });
-
+            if (bar != null) {
+                MiscTools.GUIRun(() -> {
+                    bar.setIndeterminate(false);
+                    bar.setMaximum(s);
+                    bar.setValue(0);
+                });
+            }
             int conta_nodo = 0;
 
             for (Object o : (Iterable<? extends Object>) res_map[0].get("f")) {
@@ -1090,10 +1091,12 @@ public class MegaAPI implements Serializable {
 
                 int c = conta_nodo;
 
-                MiscTools.GUIRun(() -> {
+                if (bar != null) {
+                    MiscTools.GUIRun(() -> {
 
-                    bar.setValue(c);
-                });
+                        bar.setValue(c);
+                    });
+                }
 
                 HashMap<String, Object> node = (HashMap<String, Object>) o;
 
@@ -1155,7 +1158,7 @@ public class MegaAPI implements Serializable {
         return folder_nodes;
     }
 
-    public ArrayList<String> getNlinks(Set<String> links) {
+    public ArrayList<String> GENERATE_N_LINKS(Set<String> links) {
 
         HashMap<String, ArrayList<String>> map = new HashMap<>();
 
@@ -1206,7 +1209,7 @@ public class MegaAPI implements Serializable {
 
         String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\"}]";
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (API_KEY != null ? "&ak=" + API_KEY : "") + "&n=" + folder_id);
+        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + "&n=" + folder_id);
 
         String res = RAW_REQUEST(request, url_api);
 

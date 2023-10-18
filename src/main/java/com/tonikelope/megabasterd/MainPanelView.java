@@ -14,7 +14,6 @@ import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -177,12 +176,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             String old_status = getKiss_server_status().getText();
 
             if (!old_status.equals(status + " ")) {
-                Dimension frame_size = this.getSize();
 
                 getKiss_server_status().setText(status + " ");
-
-                pack();
-                setSize(frame_size);
 
             }
         });
@@ -194,12 +189,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             String old_status = getSmart_proxy_status().getText();
 
             if (!old_status.equals(status + " ")) {
-                Dimension frame_size = this.getSize();
 
                 getSmart_proxy_status().setText(status + " ");
-
-                pack();
-                setSize(frame_size);
 
             }
         });
@@ -212,13 +203,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             String old_status = getMc_reverse_status().getText();
 
             if (!old_status.equals(status + " ")) {
-                Dimension frame_size = this.getSize();
 
                 getMc_reverse_status().setText(status + " ");
-
-                pack();
-                setSize(frame_size);
-
             }
         });
     }
@@ -1100,7 +1086,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     Set<String> folder_file_links = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+#F\\*[^\r\n!]*?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
 
                     if (!folder_file_links.isEmpty()) {
-                        ArrayList<String> nlinks = ma.getNlinks(folder_file_links);
+                        ArrayList<String> nlinks = ma.GENERATE_N_LINKS(folder_file_links);
 
                         urls.removeAll(folder_file_links);
 

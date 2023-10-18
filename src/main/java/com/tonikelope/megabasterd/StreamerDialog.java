@@ -238,7 +238,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
 
                             links.add(link);
 
-                            List nlinks = ma.getNlinks(links);
+                            List nlinks = ma.GENERATE_N_LINKS(links);
 
                             link = (String) nlinks.get(0);
                         }

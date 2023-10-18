@@ -39,6 +39,7 @@ public final class SmartMegaProxyManager {
     public static String DEFAULT_SMART_PROXY_URL = null;
     public static final int PROXY_BLOCK_TIME = 300;
     public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 30;
+
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
     private final LinkedHashMap<String, Long[]> _proxy_list;
@@ -68,6 +69,24 @@ public final class SmartMegaProxyManager {
         refreshSmartProxySettings();
 
         refreshProxyList();
+    }
+
+    private synchronized int countBlockedProxies() {
+
+        int i = 0;
+
+        Long current_time = System.currentTimeMillis();
+
+        for (String k : _proxy_list.keySet()) {
+
+            if (_proxy_list.get(k)[0] > current_time) {
+
+                i++;
+            }
+        }
+
+        return i;
+
     }
 
     public synchronized void refreshSmartProxySettings() {
@@ -159,6 +178,9 @@ public final class SmartMegaProxyManager {
                 LOG.log(Level.WARNING, "[Smart Proxy] BLOCKING PROXY {0} ({1} secs) ({2})", new Object[]{proxy, _ban_time, cause});
 
             }
+
+            _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount() - countBlockedProxies()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
+
         }
     }
 

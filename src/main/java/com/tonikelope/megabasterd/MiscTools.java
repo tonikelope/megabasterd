@@ -660,6 +660,24 @@ public class MiscTools {
 
     }
 
+    public static MegaMutableTreeNode findMegaTreeNodeByID(MegaMutableTreeNode root, String node_id) {
+
+        Enumeration e = root.depthFirstEnumeration();
+
+        while (e.hasMoreElements()) {
+
+            MegaMutableTreeNode node = (MegaMutableTreeNode) e.nextElement();
+
+            HashMap<String, Object> mega_node = (HashMap<String, Object>) node.getUserObject();
+
+            if (mega_node.get("h").equals(node_id)) {
+                return node;
+            }
+        }
+
+        return null;
+    }
+
     public static DefaultMutableTreeNode sortTree(DefaultMutableTreeNode root) {
 
         Enumeration e = root.depthFirstEnumeration();
@@ -1563,6 +1581,8 @@ public class MiscTools {
         data = MiscTools.addBackSlashToLinks(MiscTools.addHTTPSToMegaLinks(data));
 
         data = data.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/folder/([^#]+)#([^\r\n/]+)/file/([^\r\n/]+)", "https://mega.nz/#F*$3!$1!$2");
+
+        data = data.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/folder/([^#]+)#([^\r\n/]+)/folder/([^\r\n/]+)", "https://mega.nz/#F!$1@$3!$2");
 
         return data.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/folder/([^#]+)#([^\r\n]+)", "https://mega.nz/#F!$1!$2").replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/file/([^#]+)#([^\r\n]+)", "https://mega.nz/#!$1!$2");
     }
