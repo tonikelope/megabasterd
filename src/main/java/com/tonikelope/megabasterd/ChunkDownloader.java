@@ -165,7 +165,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     secureWait();
                 }
 
-                if (http_error == 509 && _509_timestamp == -1) {
+                if (http_error == 509 && (_509_timestamp == -1 || _509_timestamp + SMART_PROXY_RECHECK_509_TIME * 1000 < System.currentTimeMillis())) {
                     _509_timestamp = System.currentTimeMillis();
                 }
 
