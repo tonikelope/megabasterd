@@ -30,7 +30,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
 
     private final Clipboard _sysClip;
 
-    private boolean _notified;
+    private volatile boolean _notified;
 
     private final ConcurrentLinkedQueue<ClipboardChangeObserver> _observers;
 

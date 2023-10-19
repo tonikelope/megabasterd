@@ -75,7 +75,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
     private final byte[] _byte_iv;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
-    private boolean _notified;
+    private volatile boolean _notified;
     private final String _chunks_dir;
 
     public ChunkWriterManager(Download downloader) throws Exception {
@@ -240,13 +240,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
                     LOG.log(Level.INFO, "{0} ChunkWriterManager waiting for chunk [{1}] {2}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _download.getFile_name()});
 
-                    try {
-                        synchronized (_secure_notify_lock) {
-                            _secure_notify_lock.wait(1000);
-                        }
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(ChunkWriterManager.class.getName()).log(Level.SEVERE, null, ex);
-                    }
+                    secureWait();
 
                 }
 

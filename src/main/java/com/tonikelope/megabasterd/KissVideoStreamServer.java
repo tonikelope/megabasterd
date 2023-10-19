@@ -50,7 +50,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
     private final ConcurrentHashMap<String, HashMap<String, Object>> _link_cache;
     private final ConcurrentLinkedQueue<Thread> _working_threads;
     private final ContentType _ctype;
-    private boolean _notified;
+    private volatile boolean _notified;
     private final Object _secure_notify_lock;
 
     public KissVideoStreamServer(MainPanel panel) {

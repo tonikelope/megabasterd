@@ -41,7 +41,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
-    private boolean _notified;
+    private volatile boolean _notified;
     private volatile boolean _chunk_exception;
 
     public ChunkUploader(int id, Upload upload) {

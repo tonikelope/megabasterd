@@ -39,7 +39,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
     private volatile boolean _chunk_exception;
-    private boolean _notified;
+    private volatile boolean _notified;
     private final ArrayList<String> _excluded_proxy_list;
     private volatile boolean _reset_current_chunk;
     private volatile InputStream _chunk_inputstream = null;

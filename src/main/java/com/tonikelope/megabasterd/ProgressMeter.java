@@ -24,7 +24,7 @@ public class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
     private final Transference _transference;
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
-    private boolean _notified;
+    private volatile boolean _notified;
     private long _progress;
 
     ProgressMeter(Transference transference) {

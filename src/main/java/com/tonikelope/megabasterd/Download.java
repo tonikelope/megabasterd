@@ -72,7 +72,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private final Object _chunkid_lock;
     private final Object _dl_url_lock;
     private final Object _turbo_proxy_lock;
-    private boolean _notified;
+    private volatile boolean _notified;
     private final String _url;
     private final String _download_path;
     private final String _custom_chunks_dir;
@@ -1526,7 +1526,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
-                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
+                    stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 
                 } else {
 

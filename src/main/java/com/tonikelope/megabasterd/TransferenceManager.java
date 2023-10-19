@@ -51,7 +51,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private final Object _secure_notify_lock;
     private final Object _wait_queue_lock;
     private final Object _pause_all_lock;
-    private boolean _notified;
+    private volatile boolean _notified;
     private volatile boolean _removing_transferences;
     private volatile boolean _provisioning_transferences;
     private volatile boolean _starting_transferences;

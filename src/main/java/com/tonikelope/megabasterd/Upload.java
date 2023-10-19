@@ -64,7 +64,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private final ExecutorService _thread_pool;
     private volatile int[] _file_meta_mac;
     private String _fid;
-    private boolean _notified;
+    private volatile boolean _notified;
     private volatile String _completion_handler;
     private int _paused_workers;
     private Double _progress_bar_rate;
