@@ -26,7 +26,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
 
 /**
  *
@@ -49,8 +48,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private volatile boolean exit = false;
 
     private volatile MegaMutableTreeNode _subfolder_node = null;
-
-    private volatile boolean _subfolder_finish = false;
 
     public List<HashMap> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
@@ -326,7 +323,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
 
-        if (deleteAllExceptSelectedTreeItems(file_tree)) {
+        if (deleteAllExceptSelectedTreeItems(file_tree, _subfolder_node)) {
             file_tree.setEnabled(false);
             node_bar.setVisible(true);
             skip_rest_button.setEnabled(false);
@@ -482,11 +479,13 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                 String parent_id = (String) current_hashmap_node.get("parent");
 
-                root = null;
+                String current_id = (String) current_hashmap_node.get("h");
+
+                boolean ignore_node = false;
 
                 do {
 
-                    if (folder_nodes.get(parent_id) != null) {
+                    if ((subfolder_id == null && folder_nodes.get(parent_id) != null) || (subfolder_id != null && !subfolder_id.equals(current_id) && folder_nodes.get(parent_id) != null)) {
 
                         HashMap<String, Object> parent_hashmap_node = (HashMap) folder_nodes.get(parent_id);
 
@@ -509,12 +508,20 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                         current_node = parent_node;
 
-                    } else {
+                    } else if (subfolder_id != null && subfolder_id.equals(current_id)) {
+
+                        root = current_node;
+
+                    } else if (subfolder_id != null && folder_nodes.get(parent_id) == null) {
+
+                        ignore_node = true;
+
+                    } else if (subfolder_id == null && folder_nodes.get(parent_id) == null) {
 
                         root = current_node;
                     }
 
-                } while (current_node != root);
+                } while (current_node != root && !ignore_node);
             }
 
             MiscTools.GUIRun(() -> {
@@ -522,9 +529,11 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 node_bar.setIndeterminate(true);
             });
 
-            MiscTools.sortTree(root);
+            if (root != null) {
+                MiscTools.sortTree(root);
 
-            MiscTools.calculateTreeFolderSizes(root);
+                MiscTools.calculateTreeFolderSizes(root);
+            }
 
             if (root == null) {
                 LOG.log(SEVERE, null, "MEGA FOLDER ERROR (EMPTY?)");
@@ -536,8 +545,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                 final MegaMutableTreeNode roott = root;
 
-                final String ssubfolder_id = subfolder_id;
-
                 MiscTools.GUIRunAndWait(() -> {
 
                     node_bar.setIndeterminate(true);
@@ -548,12 +555,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                     ftree.setEnabled(true);
                 });
-
-                if (ssubfolder_id != null) {
-
-                    _subfolder_node = MiscTools.findMegaTreeNodeByID(roott, ssubfolder_id);
-
-                }
 
             }
 
@@ -581,8 +582,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         MiscTools.GUIRun(() -> {
             working = true;
 
-            String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
-
             _download_links.clear();
 
             MegaMutableTreeNode root = (MegaMutableTreeNode) file_tree.getModel().getRoot();
@@ -591,6 +590,15 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             THREAD_POOL.execute(() -> {
 
+                String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
+
+                if (folder_id.contains("@")) {
+
+                    String[] fids = folder_id.split("@");
+
+                    folder_id = fids[0];
+                }
+
                 _total_space = 0L;
 
                 while (files_tree.hasMoreElements()) {
@@ -598,6 +606,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     MegaMutableTreeNode node = (MegaMutableTreeNode) files_tree.nextElement();
 
                     if (node.isLeaf() && node != root && ((HashMap<String, Object>) node.getUserObject()).get("size") != null) {
+
+                        System.out.println(((HashMap<String, Object>) node.getUserObject()).get("name"));
 
                         String path = "";
 
@@ -609,6 +619,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                         }
 
                         path = path.replaceAll("^/+", "").replaceAll("^\\+", "").trim();
+
+                        System.out.println(path);
 
                         String url = "https://mega.nz/#N!" + ((Map<String, Object>) node.getUserObject()).get("h") + "!" + ((Map<String, Object>) node.getUserObject()).get("key") + "###n=" + folder_id;
 
@@ -663,28 +675,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     working = false;
                 });
 
-                if (_subfolder_node != null && !_subfolder_finish) {
-
-                    MiscTools.GUIRunAndWait(() -> {
-
-                        file_tree.setSelectionPath(new TreePath(_subfolder_node.getPath()));
-
-                    });
-
-                    _subfolder_finish = true;
-
-                    MiscTools.GUIRun(() -> {
-                        skip_rest_button.setEnabled(true);
-                        skip_rest_button.doClick();
-                    });
-
-                } else if (_subfolder_node != null && _subfolder_finish) {
-                    MiscTools.GUIRunAndWait(() -> {
-
-                        file_tree.setSelectionPath(new TreePath(_subfolder_node.getPath()));
-
-                    });
-                }
             });
         });
     }

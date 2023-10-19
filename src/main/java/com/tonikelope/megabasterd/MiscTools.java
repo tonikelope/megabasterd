@@ -491,12 +491,20 @@ public class MiscTools {
         border.setTitleFont(new_title_font);
     }
 
-    public static String HashString(String algo, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest md = MessageDigest.getInstance(algo);
+    public static String HashString(String algo, String data) {
+        try {
+            MessageDigest md = MessageDigest.getInstance(algo);
 
-        byte[] thedigest = md.digest(data.getBytes("UTF-8"));
+            byte[] thedigest = md.digest(data.getBytes("UTF-8"));
 
-        return bin2hex(thedigest);
+            return bin2hex(thedigest);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
     }
 
     public static String HashString(String algo, byte[] data) throws NoSuchAlgorithmException {
@@ -787,7 +795,19 @@ public class MiscTools {
         return false;
     }
 
-    public static boolean deleteAllExceptSelectedTreeItems(JTree tree) {
+    public static boolean isDirEmpty(Path path) {
+        if (Files.isDirectory(path)) {
+            try (DirectoryStream<Path> directory = Files.newDirectoryStream(path)) {
+                return !directory.iterator().hasNext();
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return false;
+    }
+
+    public static boolean deleteAllExceptSelectedTreeItems(JTree tree, DefaultMutableTreeNode custom_root) {
 
         TreePath[] paths = tree.getSelectionPaths();
 
@@ -864,6 +884,10 @@ public class MiscTools {
 
                     return false;
                 }
+            }
+
+            if (custom_root != null) {
+                new_root = custom_root;
             }
 
             tree.setModel(new DefaultTreeModel(sortTree((DefaultMutableTreeNode) new_root)));

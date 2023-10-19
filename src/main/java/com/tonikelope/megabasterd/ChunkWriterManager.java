@@ -191,7 +191,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
                         try {
 
-                            File chunk_file = new File(getChunks_dir() + "/" + new File(_download.getFile_name()).getName() + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+                            File chunk_file = new File(getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
 
                             while (chunk_file.exists() && chunk_file.canRead() && chunk_file.canWrite() && chunk_file.length() > 0) {
 
@@ -251,7 +251,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
             }
 
-            if (_bytes_written == _file_size) {
+            if (_bytes_written == _file_size && MiscTools.isDirEmpty(Paths.get(getChunks_dir()))) {
                 delete_chunks_temp_dir();
             }
         }
