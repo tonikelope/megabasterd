@@ -455,8 +455,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 conta_nodo++;
 
                 int c = conta_nodo;
-                MiscTools.GUIRun(() -> {
 
+                MiscTools.GUIRun(() -> {
                     node_bar.setValue(c);
                 });
 
@@ -539,6 +539,9 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 _mega_error = 2;
 
             } else {
+
+                root.setParent(null);
+
                 final JTree ftree = file_tree;
 
                 final MegaMutableTreeNode roott = root;
