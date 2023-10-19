@@ -47,8 +47,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private volatile boolean exit = false;
 
-    private volatile MegaMutableTreeNode _subfolder_node = null;
-
     public List<HashMap> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
     }
@@ -323,7 +321,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
 
-        if (deleteAllExceptSelectedTreeItems(file_tree, _subfolder_node)) {
+        if (deleteAllExceptSelectedTreeItems(file_tree)) {
             file_tree.setEnabled(false);
             node_bar.setVisible(true);
             skip_rest_button.setEnabled(false);

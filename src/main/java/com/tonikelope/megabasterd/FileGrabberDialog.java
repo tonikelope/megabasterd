@@ -822,7 +822,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
 
-        if (deleteAllExceptSelectedTreeItems(file_tree, null)) {
+        if (deleteAllExceptSelectedTreeItems(file_tree)) {
 
             _genFileList();
 

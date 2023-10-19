@@ -39,6 +39,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -807,7 +808,7 @@ public class MiscTools {
         return false;
     }
 
-    public static boolean deleteAllExceptSelectedTreeItems(JTree tree, DefaultMutableTreeNode custom_root) {
+    public static boolean deleteAllExceptSelectedTreeItems(JTree tree) {
 
         TreePath[] paths = tree.getSelectionPaths();
 
@@ -823,12 +824,14 @@ public class MiscTools {
 
             try {
 
-                new_root = node_class.newInstance();
+                new_root = node_class.getDeclaredConstructor().newInstance();
 
-                ((MutableTreeNode) new_root).setUserObject(((DefaultMutableTreeNode) tree_model.getRoot()).getUserObject());
+                ((DefaultMutableTreeNode) new_root).setUserObject(((DefaultMutableTreeNode) tree_model.getRoot()).getUserObject());
 
             } catch (InstantiationException | IllegalAccessException ex) {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             for (TreePath path : paths) {
@@ -838,13 +841,13 @@ public class MiscTools {
 
                     for (Object path_element : path.getPath()) {
 
-                        if ((MutableTreeNode) path_element != (MutableTreeNode) tree_model.getRoot()) {
+                        if ((DefaultMutableTreeNode) path_element != (DefaultMutableTreeNode) tree_model.getRoot()) {
 
                             if (hashmap_old.get(path_element) == null) {
 
                                 Object node = null;
 
-                                if ((MutableTreeNode) path_element == (MutableTreeNode) path.getLastPathComponent()) {
+                                if ((DefaultMutableTreeNode) path_element == (DefaultMutableTreeNode) path.getLastPathComponent()) {
 
                                     node = path_element;
 
@@ -854,7 +857,7 @@ public class MiscTools {
 
                                         node = node_class.newInstance();
 
-                                        ((MutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
+                                        ((DefaultMutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
 
                                     } catch (InstantiationException | IllegalAccessException ex) {
                                         Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
@@ -863,11 +866,11 @@ public class MiscTools {
 
                                 if (parent != null) {
 
-                                    ((DefaultMutableTreeNode) parent).add((MutableTreeNode) node);
+                                    ((DefaultMutableTreeNode) parent).add((DefaultMutableTreeNode) node);
 
                                     if (!((TreeNode) path_element).isLeaf()) {
 
-                                        hashmap_old.put((MutableTreeNode) path_element, (MutableTreeNode) node);
+                                        hashmap_old.put((DefaultMutableTreeNode) path_element, (DefaultMutableTreeNode) node);
 
                                         parent = node;
                                     }
@@ -884,10 +887,6 @@ public class MiscTools {
 
                     return false;
                 }
-            }
-
-            if (custom_root != null) {
-                new_root = custom_root;
             }
 
             tree.setModel(new DefaultTreeModel(sortTree((DefaultMutableTreeNode) new_root)));
