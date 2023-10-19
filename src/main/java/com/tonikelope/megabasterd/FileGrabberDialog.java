@@ -269,8 +269,9 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("File Grabber");
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder("Files"));
+        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Files", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Noto Sans", 0, 18))); // NOI18N
 
+        file_tree.setBorder(null);
         file_tree.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         file_tree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
@@ -287,7 +288,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 176, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 171, Short.MAX_VALUE)
         );
 
         jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Upload info"));
@@ -343,12 +344,12 @@ public class FileGrabberDialog extends javax.swing.JDialog {
             }
         });
 
-        upload_log_checkbox.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        upload_log_checkbox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         upload_log_checkbox.setText("Enable log file");
         upload_log_checkbox.setDoubleBuffered(true);
         upload_log_checkbox.setEnabled(false);
 
-        priority_checkbox.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        priority_checkbox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         priority_checkbox.setText("Put on TOP of waiting queue");
         priority_checkbox.setDoubleBuffered(true);
         priority_checkbox.setEnabled(false);

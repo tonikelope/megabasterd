@@ -73,7 +73,9 @@
       <Properties>
         <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
           <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Files"/>
+            <TitledBorder title="Files">
+              <Font PropertyName="font" name="Noto Sans" size="18" style="0"/>
+            </TitledBorder>
           </Border>
         </Property>
       </Properties>
@@ -86,7 +88,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="file_tree_scrollpane" alignment="0" pref="176" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" alignment="0" pref="171" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -100,6 +102,9 @@
           <SubComponents>
             <Component class="javax.swing.JTree" name="file_tree">
               <Properties>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="null"/>
+                </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="0"/>
                 </Property>
@@ -283,7 +288,7 @@
         <Component class="javax.swing.JCheckBox" name="upload_log_checkbox">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="14" style="1"/>
+              <Font name="Dialog" size="16" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Enable log file"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -293,7 +298,7 @@
         <Component class="javax.swing.JCheckBox" name="priority_checkbox">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="14" style="1"/>
+              <Font name="Dialog" size="16" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Put on TOP of waiting queue"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
