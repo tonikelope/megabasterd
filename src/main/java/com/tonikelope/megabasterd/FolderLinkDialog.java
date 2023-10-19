@@ -607,8 +607,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                     if (node.isLeaf() && node != root && ((HashMap<String, Object>) node.getUserObject()).get("size") != null) {
 
-                        System.out.println(((HashMap<String, Object>) node.getUserObject()).get("name"));
-
                         String path = "";
 
                         Object[] object_path = node.getUserObjectPath();
@@ -619,8 +617,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                         }
 
                         path = path.replaceAll("^/+", "").replaceAll("^\\+", "").trim();
-
-                        System.out.println(path);
 
                         String url = "https://mega.nz/#N!" + ((Map<String, Object>) node.getUserObject()).get("h") + "!" + ((Map<String, Object>) node.getUserObject()).get("key") + "###n=" + folder_id;
 

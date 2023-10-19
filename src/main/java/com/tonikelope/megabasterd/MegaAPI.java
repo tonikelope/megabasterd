@@ -35,6 +35,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.GZIPInputStream;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
 import javax.swing.JProgressBar;
@@ -367,8 +368,6 @@ public class MegaAPI implements Serializable {
 
     private String RAW_REQUEST(String request, URL url_api) throws MegaAPIException {
 
-        System.out.println(request);
-
         String response = null, current_smart_proxy = null;
 
         int mega_error = 0, http_error = 0, conta_error = 0, http_status;
@@ -444,6 +443,8 @@ public class MegaAPI implements Serializable {
 
                 con.setRequestProperty("Content-type", "text/plain;charset=UTF-8");
 
+                con.setRequestProperty("Accept-Encoding", "gzip");
+
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 con.setUseCaches(false);
@@ -468,7 +469,7 @@ public class MegaAPI implements Serializable {
 
                 } else {
 
-                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                    try (InputStream is = "gzip".equals(con.getContentEncoding()) ? new GZIPInputStream(con.getInputStream()) : con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
 
                         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
 
@@ -740,12 +741,9 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[0].length) + ", \"ssl\":1}, {\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[1].length) + ", \"ssl\":1}]";
 
-            System.out.println(request);
             URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
-
-            System.out.println(res);
 
             ObjectMapper objectMapper = new ObjectMapper();
 
@@ -794,7 +792,6 @@ public class MegaAPI implements Serializable {
 
                     hash[h] = MiscTools.Bin2UrlBASE64(byte_res.toByteArray());
 
-                    System.out.println(hash[h]);
                 }
 
                 h++;
@@ -806,13 +803,9 @@ public class MegaAPI implements Serializable {
 
             res = RAW_REQUEST(request, url_api);
 
-            System.out.println(request);
-
             objectMapper = new ObjectMapper();
 
             String[] resp = objectMapper.readValue(res, String[].class);
-
-            System.out.println((String) resp[0]);
 
             return (String) resp[0];
 
@@ -1060,7 +1053,7 @@ public class MegaAPI implements Serializable {
 
         HashMap<String, Object> folder_nodes = null;
 
-        String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\"}]";
+        String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\", \"ca\":\"1\"}]";
 
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&v=3&lang=es&domain=meganz&ec=" + "&n=" + folder_id);
 
