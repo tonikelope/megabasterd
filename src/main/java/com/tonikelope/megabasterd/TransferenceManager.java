@@ -727,8 +727,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                 THREAD_POOL.execute(() -> {
 
-                    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
                     if (!getTransference_remove_queue().isEmpty()) {
 
                         ArrayList<Transference> transferences = new ArrayList(getTransference_remove_queue());
@@ -754,8 +752,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 }
 
                 THREAD_POOL.execute(() -> {
-
-                    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
                     while (!getTransference_preprocess_queue().isEmpty()) {
                         Runnable run = getTransference_preprocess_queue().poll();
@@ -794,7 +790,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 _tray_icon_finish = false;
 
                 THREAD_POOL.execute(() -> {
-                    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
                     ExecutorService executor = Executors.newFixedThreadPool(MAX_PROVISION_WORKERS);
 
@@ -897,8 +892,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 setStarting_transferences(true);
 
                 THREAD_POOL.execute(() -> {
-
-                    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
                     while (!_frozen && !_main_panel.isExit() && !_paused_all && (!getTransference_waitstart_queue().isEmpty() || !getTransference_waitstart_aux_queue().isEmpty()) && getTransference_running_list().size() < _max_running_trans) {
 

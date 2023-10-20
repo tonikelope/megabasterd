@@ -85,8 +85,6 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
     @Override
     public void run() {
 
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
         LOG.log(Level.INFO, "{0} MAC GENERATOR {1} Hello!", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
 
         try {

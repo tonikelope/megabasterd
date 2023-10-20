@@ -83,6 +83,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             translateLabels(this);
 
+            file_tree.setRootVisible(false);
+
             node_bar.setIndeterminate(true);
 
             folder_link_label.setText(link);
@@ -108,7 +110,15 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else if (_mega_error == -18) {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+
+                        setVisible(false);
+                    });
+
+                } else if (_mega_error == -16) {
+
+                    MiscTools.GUIRun(() -> {
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER BLOCKED/DELETED"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -116,7 +126,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -221,8 +231,9 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             }
         });
 
-        total_space_label.setFont(new java.awt.Font("Dialog", 1, 28)); // NOI18N
-        total_space_label.setText("[0 B]");
+        total_space_label.setFont(new java.awt.Font("Dialog", 1, 32)); // NOI18N
+        total_space_label.setForeground(new java.awt.Color(0, 51, 255));
+        total_space_label.setText("[---]");
         total_space_label.setDoubleBuffered(true);
         total_space_label.setEnabled(false);
 
@@ -260,7 +271,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     .addComponent(folder_link_label)
                     .addComponent(restore_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
+                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(node_bar, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -588,6 +599,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             MegaMutableTreeNode root = (MegaMutableTreeNode) file_tree.getModel().getRoot();
 
             Enumeration files_tree = root.depthFirstEnumeration();
+
+            total_space_label.setText("[---]");
 
             THREAD_POOL.execute(() -> {
 

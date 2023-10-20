@@ -256,7 +256,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 _turbo = false;
                 MiscTools.GUIRun(() -> {
 
-                    getView().getSpeed_label().setForeground(Color.BLACK);
+                    getView().getSpeed_label().setForeground(new Color(0, 128, 255));
 
                 });
             }
@@ -1353,8 +1353,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         int old_thread_priority = Thread.currentThread().getPriority();
 
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
         int[] int_key = bin2i32a(UrlBASE642Bin(_file_key));
         int[] iv = new int[]{int_key[4], int_key[5]};
         int[] meta_mac = new int[]{int_key[6], int_key[7]};
@@ -1429,8 +1427,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
 
             int[] cbc = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};
-
-            Thread.currentThread().setPriority(old_thread_priority);
 
             return (cbc[0] == meta_mac[0] && cbc[1] == meta_mac[1]);
         }
@@ -1519,7 +1515,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 error_code = ex.getCode();
 
                 if (error_code == -16) {
-                    _status_error = "ERROR: MEGA LINK BLOCKED/DELETED";
+                    _status_error = "ERROR: MEGA FILE BLOCKED/DELETED";
                 }
 
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
@@ -1608,11 +1604,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 error_code = ex.getCode();
 
+                if (error_code == -16) {
+                    _status_error = "ERROR: MEGA FILE BLOCKED/DELETED";
+                }
+
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
-                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
+                    stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 
                 } else {
 

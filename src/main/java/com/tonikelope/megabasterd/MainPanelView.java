@@ -235,8 +235,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 Runnable run = () -> {
 
-                    Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
                     MegaAPI ma = getMain_panel().getMega_active_accounts().get(mega_account);
 
                     try {
@@ -1041,8 +1039,6 @@ public final class MainPanelView extends javax.swing.JFrame {
             final MainPanelView tthis = this;
 
             Runnable run = () -> {
-
-                Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
                 //Convert to legacy link format
                 String link_data = MiscTools.newMegaLinks2Legacy(dialog.getLinks_textarea().getText());

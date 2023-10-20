@@ -63,7 +63,7 @@
                   <Component id="restore_button" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="file_tree_scrollpane" pref="295" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" pref="289" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="node_bar" min="-2" pref="14" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
@@ -210,9 +210,12 @@
     <Component class="javax.swing.JLabel" name="total_space_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="28" style="1"/>
+          <Font name="Dialog" size="32" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="[0 B]"/>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="ff" green="33" red="0" type="rgb"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="[---]"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
