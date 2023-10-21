@@ -17,12 +17,14 @@ import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
@@ -38,6 +40,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -54,7 +57,6 @@ import javax.swing.JSpinner;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SpinnerNumberModel;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
@@ -2900,13 +2902,29 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     private void run_command_test_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_test_buttonActionPerformed
         // TODO add your handling code here:
+        Logger logger = Logger.getLogger(MiscTools.class.getName());
 
         if (run_command_textbox.getText() != null && !"".equals(run_command_textbox.getText().trim())) {
-
             try {
-                Runtime.getRuntime().exec(run_command_textbox.getText().trim());
-            } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                StringTokenizer st = new StringTokenizer(run_command_textbox.getText().trim());
+                String[] cmdarray = new String[st.countTokens()];
+                for (int i = 0; st.hasMoreTokens(); i++)
+                    cmdarray[i] = st.nextToken();
+
+                ProcessBuilder pb = new ProcessBuilder(cmdarray)
+                        .redirectErrorStream(true);
+                Process pr = pb.start();
+
+                BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                String line;
+                while ((line = in.readLine()) != null) {
+                    logger.log(Level.INFO, "[Command output] " + line);
+                }
+                pr.waitFor();
+                in.close();
+                pr.destroy();
+            } catch (IOException | InterruptedException ex) {
+                logger.log(Level.SEVERE, ex.getMessage());
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }

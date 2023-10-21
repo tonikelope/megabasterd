@@ -26,9 +26,11 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import static java.lang.Integer.parseInt;
@@ -46,6 +48,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
@@ -868,10 +871,27 @@ public final class MainPanel {
         if (_run_command && (LAST_EXTERNAL_COMMAND_TIMESTAMP == -1 || LAST_EXTERNAL_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
 
             if (_run_command_path != null && !_run_command_path.equals("")) {
+                Logger logger = Logger.getLogger(MainPanel.class.getName());
                 try {
-                    Runtime.getRuntime().exec(_run_command_path);
-                } catch (IOException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    StringTokenizer st = new StringTokenizer(_run_command_path);
+                    String[] cmdarray = new String[st.countTokens()];
+                    for (int i = 0; st.hasMoreTokens(); i++)
+                        cmdarray[i] = st.nextToken();
+
+                    ProcessBuilder pb = new ProcessBuilder(cmdarray)
+                            .redirectErrorStream(true);
+                    Process pr = pb.start();
+
+                    BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
+                    String line;
+                    while ((line = in.readLine()) != null) {
+                        logger.log(Level.INFO, "[Command output] " + line);
+                    }
+                    pr.waitFor();
+                    in.close();
+                    pr.destroy();
+                } catch (IOException | InterruptedException ex) {
+                    logger.log(Level.SEVERE, ex.getMessage());
                 }
 
                 LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
