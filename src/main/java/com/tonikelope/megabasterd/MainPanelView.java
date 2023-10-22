@@ -1022,8 +1022,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             Runnable run = () -> {
 
-                //Convert to legacy link format
-                String link_data = MiscTools.newMegaLinks2Legacy(dialog.getLinks_textarea().getText());
+                String link_data = MiscTools.extractMegaLinksFromString(dialog.getLinks_textarea().getText());
 
                 Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
 

@@ -232,7 +232,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         });
 
         total_space_label.setFont(new java.awt.Font("Dialog", 1, 32)); // NOI18N
-        total_space_label.setForeground(new java.awt.Color(0, 51, 255));
+        total_space_label.setForeground(new java.awt.Color(0, 0, 255));
         total_space_label.setText("[---]");
         total_space_label.setDoubleBuffered(true);
         total_space_label.setEnabled(false);
