@@ -70,7 +70,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.0";
+    public static final String VERSION = "8.1";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -345,10 +345,6 @@ public final class MainPanel {
         } else {
             _mega_proxy_server = null;
 
-            MiscTools.GUIRun(() -> {
-                getView().updateMCReverseStatus("MC reverse mode: OFF");
-            });
-
         }
 
         if (_use_smart_proxy) {
@@ -383,7 +379,7 @@ public final class MainPanel {
                 long used_memory = instance.totalMemory() - instance.freeMemory();
                 long max_memory = instance.maxMemory();
                 MiscTools.GUIRun(() -> {
-                    _view.getMemory_status().setText(MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
+                    _view.getMemory_status().setText("JVM-RAM used: " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
                 });
                 try {
                     Thread.sleep(2000);

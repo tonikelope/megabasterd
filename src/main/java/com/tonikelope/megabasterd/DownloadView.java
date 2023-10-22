@@ -314,8 +314,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         });
 
         queue_top_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        queue_top_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/arriba_1.png"))); // NOI18N
-        queue_top_button.setText("TOP");
+        queue_top_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/arrow_up.png"))); // NOI18N
         queue_top_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 queue_top_buttonActionPerformed(evt);
@@ -323,8 +322,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         });
 
         queue_bottom_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        queue_bottom_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/abajo_1.png"))); // NOI18N
-        queue_bottom_button.setText("BOTTOM");
+        queue_bottom_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/arrow_down.png"))); // NOI18N
         queue_bottom_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 queue_bottom_buttonActionPerformed(evt);
@@ -347,11 +345,11 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
                                 .addComponent(slots_label))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(queue_top_button)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(queue_up_button, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(queue_down_button, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(queue_up_button)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(queue_down_button)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(queue_bottom_button)
                                 .addGap(0, 0, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -385,10 +383,10 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(queue_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(queue_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(queue_top_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(queue_bottom_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(queue_down_button)
+                    .addComponent(queue_up_button)
+                    .addComponent(queue_top_button)
+                    .addComponent(queue_bottom_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(slots_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE)

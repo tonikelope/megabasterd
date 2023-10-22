@@ -162,12 +162,12 @@ public final class MainPanelView extends javax.swing.JFrame {
         return smart_proxy_status;
     }
 
-    public JLabel getMc_reverse_status() {
-        return mc_reverse_status;
-    }
-
     public JCheckBoxMenuItem getAuto_close_menu() {
         return auto_close_menu;
+    }
+
+    public JMenuItem getCancel_all_downloads_menu() {
+        return cancel_all_downloads_menu;
     }
 
     public void updateKissStreamServerStatus(final String status) {
@@ -192,19 +192,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 getSmart_proxy_status().setText(status + " ");
 
-            }
-        });
-    }
-
-    public void updateMCReverseStatus(final String status) {
-
-        MiscTools.GUIRun(() -> {
-
-            String old_status = getMc_reverse_status().getText();
-
-            if (!old_status.equals(status + " ")) {
-
-                getMc_reverse_status().setText(status + " ");
             }
         });
     }
@@ -463,6 +450,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             clean_all_down_menu.setEnabled(false);
             clean_all_up_menu.setEnabled(false);
+            cancel_all_downloads_menu.setEnabled(false);
 
             jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
             jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
@@ -548,7 +536,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         logo_label = new javax.swing.JLabel();
         kiss_server_status = new javax.swing.JLabel();
-        mc_reverse_status = new javax.swing.JLabel();
         smart_proxy_status = new javax.swing.JLabel();
         memory_status = new javax.swing.JLabel();
         jTabbedPane1 = new javax.swing.JTabbedPane();
@@ -582,7 +569,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         jSeparator4 = new javax.swing.JPopupMenu.Separator();
         clean_all_down_menu = new javax.swing.JMenuItem();
         clean_all_up_menu = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        cancel_all_downloads_menu = new javax.swing.JMenuItem();
         jSeparator2 = new javax.swing.JPopupMenu.Separator();
         hide_tray_menu = new javax.swing.JMenuItem();
         auto_close_menu = new javax.swing.JCheckBoxMenuItem();
@@ -603,9 +590,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         kiss_server_status.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         kiss_server_status.setForeground(new java.awt.Color(102, 102, 102));
         kiss_server_status.setDoubleBuffered(true);
-
-        mc_reverse_status.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        mc_reverse_status.setForeground(new java.awt.Color(102, 102, 102));
 
         smart_proxy_status.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         smart_proxy_status.setForeground(new java.awt.Color(102, 102, 102));
@@ -873,18 +857,19 @@ public final class MainPanelView extends javax.swing.JFrame {
         });
         file_menu.add(clean_all_up_menu);
 
-        jMenuItem1.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        jMenuItem1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-minus-30.png"))); // NOI18N
-        jMenuItem1.setText("CANCEL ALL DOWNLOADS");
-        jMenuItem1.addActionListener(new java.awt.event.ActionListener() {
+        cancel_all_downloads_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        cancel_all_downloads_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-minus-30.png"))); // NOI18N
+        cancel_all_downloads_menu.setText("CANCEL ALL DOWNLOADS");
+        cancel_all_downloads_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jMenuItem1ActionPerformed(evt);
+                cancel_all_downloads_menuActionPerformed(evt);
             }
         });
-        file_menu.add(jMenuItem1);
+        file_menu.add(cancel_all_downloads_menu);
         file_menu.add(jSeparator2);
 
         hide_tray_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        hide_tray_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/pica_roja_menu.png"))); // NOI18N
         hide_tray_menu.setText("Hide to tray");
         hide_tray_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -963,13 +948,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(kiss_server_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(mc_reverse_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(memory_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(smart_proxy_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(memory_status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(logo_label)))
                 .addContainerGap())
         );
@@ -985,7 +968,6 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(logo_label)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(mc_reverse_status)
                             .addComponent(smart_proxy_status)
                             .addComponent(memory_status))
                         .addComponent(kiss_server_status)))
@@ -1535,7 +1517,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate(total > 0 ? "ALL DOWNLOAD LINKS COPIED!" : "NO DOWNLOAD LINKS TO COPY"));
     }//GEN-LAST:event_jButton1ActionPerformed
 
-    private void jMenuItem1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem1ActionPerformed
+    private void cancel_all_downloads_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancel_all_downloads_menuActionPerformed
         // TODO add your handling code here:
         Object[] options = {"No",
             LabelTranslatorSingleton.getInstance().translate("Yes")};
@@ -1551,7 +1533,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             _main_panel.getDownload_manager().closeAllPreProWaiting();
             _main_panel.getDownload_manager().cancelAllTransferences();
         }
-    }//GEN-LAST:event_jMenuItem1ActionPerformed
+    }//GEN-LAST:event_cancel_all_downloads_menuActionPerformed
 
     private void force_chunk_reset_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_force_chunk_reset_buttonActionPerformed
         // TODO add your handling code here:
@@ -1565,6 +1547,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem about_menu;
     private javax.swing.JCheckBoxMenuItem auto_close_menu;
+    private javax.swing.JMenuItem cancel_all_downloads_menu;
     private javax.swing.JMenuItem clean_all_down_menu;
     private javax.swing.JMenuItem clean_all_up_menu;
     private javax.swing.JButton close_all_finished_down_button;
@@ -1580,7 +1563,6 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JMenu help_menu;
     private javax.swing.JMenuItem hide_tray_menu;
     private javax.swing.JButton jButton1;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JPanel jPanel_scroll_down;
     private javax.swing.JPanel jPanel_scroll_up;
     private javax.swing.JScrollPane jScrollPane_down;
@@ -1592,7 +1574,6 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JLabel kiss_server_status;
     private javax.swing.JLabel logo_label;
     private javax.swing.JMenuBar main_menubar;
-    private javax.swing.JLabel mc_reverse_status;
     private javax.swing.JLabel memory_status;
     private javax.swing.JMenuItem merge_file_menu;
     private javax.swing.JMenuItem new_download_menu;

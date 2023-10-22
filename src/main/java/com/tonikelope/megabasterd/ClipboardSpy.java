@@ -76,7 +76,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
 
             LOG.log(Level.INFO, "{0} Monitoring clipboard ON...", Thread.currentThread().getName());
 
-        } else {
+        } else if (monitor_clipboard) {
             LOG.log(Level.INFO, "{0} Monitoring clipboard OFF...", Thread.currentThread().getName());
         }
     }
