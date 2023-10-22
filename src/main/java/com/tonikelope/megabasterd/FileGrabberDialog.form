@@ -153,8 +153,12 @@
                                   <Component id="add_folder_button" max="32767" attributes="0"/>
                               </Group>
                               <Component id="dir_name_textfield" max="32767" attributes="0"/>
-                              <Component id="account_combobox" max="32767" attributes="0"/>
                               <Component id="used_space_label" alignment="0" max="32767" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="account_combobox" max="32767" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="copy_email_button" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                       </Group>
                   </Group>
@@ -174,6 +178,7 @@
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="account_label" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="account_combobox" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="copy_email_button" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="used_space_label" min="-2" max="-2" attributes="0"/>
@@ -304,6 +309,21 @@
             <Property name="doubleBuffered" type="boolean" value="true"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="copy_email_button">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Dialog" size="18" style="1"/>
+            </Property>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/images/icons8-copy-to-clipboard-30.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Copy email"/>
+            <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="copy_email_buttonActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

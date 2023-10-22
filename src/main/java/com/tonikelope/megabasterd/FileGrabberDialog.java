@@ -260,6 +260,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         add_files_button = new javax.swing.JButton();
         upload_log_checkbox = new javax.swing.JCheckBox();
         priority_checkbox = new javax.swing.JCheckBox();
+        copy_email_button = new javax.swing.JButton();
         dance_button = new javax.swing.JButton();
         total_file_size_label = new javax.swing.JLabel();
         warning_label = new javax.swing.JLabel();
@@ -354,6 +355,16 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         priority_checkbox.setDoubleBuffered(true);
         priority_checkbox.setEnabled(false);
 
+        copy_email_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        copy_email_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-copy-to-clipboard-30.png"))); // NOI18N
+        copy_email_button.setText("Copy email");
+        copy_email_button.setEnabled(false);
+        copy_email_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copy_email_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
@@ -376,8 +387,11 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addComponent(add_folder_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                             .addComponent(dir_name_textfield)
-                            .addComponent(account_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(used_space_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                            .addComponent(used_space_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(account_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(copy_email_button)))))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -390,7 +404,8 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(account_label)
-                    .addComponent(account_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(account_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(copy_email_button))
                 .addGap(18, 18, 18)
                 .addComponent(used_space_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -718,6 +733,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
             used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("Checking account quota, please wait..."));
 
             account_combobox.setEnabled(false);
+            copy_email_button.setEnabled(false);
             account_label.setEnabled(false);
             dance_button.setEnabled(false);
             add_files_button.setEnabled(false);
@@ -760,7 +776,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
                                 used_space_label.setForeground(used_space_color);
 
-                                for (JComponent c : new JComponent[]{used_space_label, add_files_button, add_folder_button, account_combobox, account_label, upload_log_checkbox, priority_checkbox}) {
+                                for (JComponent c : new JComponent[]{copy_email_button, used_space_label, add_files_button, add_folder_button, account_combobox, account_label, upload_log_checkbox, priority_checkbox}) {
 
                                     c.setEnabled(true);
                                 }
@@ -775,6 +791,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                                 account_combobox.setEnabled(true);
                                 account_label.setEnabled(true);
                                 account_combobox.setSelectedIndex(-1);
+                                copy_email_button.setEnabled(true);
                                 used_space_label.setForeground(Color.red);
                                 used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
                                 used_space_label.setEnabled(true);
@@ -799,6 +816,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                         account_combobox.setEnabled(true);
                         account_label.setEnabled(true);
                         account_combobox.setSelectedIndex(-1);
+                        copy_email_button.setEnabled(true);
                         used_space_label.setForeground(Color.red);
                         used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
                         used_space_label.setEnabled(true);
@@ -860,6 +878,21 @@ public class FileGrabberDialog extends javax.swing.JDialog {
             }
         }
     }//GEN-LAST:event_skip_buttonActionPerformed
+
+    private void copy_email_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_email_buttonActionPerformed
+        // TODO add your handling code here:
+        if (account_combobox.getSelectedIndex() >= 0) {
+            copy_email_button.setEnabled(false);
+
+            copy_email_button.setText(LabelTranslatorSingleton.getInstance().translate("Please wait..."));
+
+            copyTextToClipboard((String) account_combobox.getSelectedItem());
+
+            copy_email_button.setText(LabelTranslatorSingleton.getInstance().translate("Copy email"));
+
+            copy_email_button.setEnabled(true);
+        }
+    }//GEN-LAST:event_copy_email_buttonActionPerformed
 
     private void _genFileTree(String directoryName, DefaultMutableTreeNode root, File[] files) {
 
@@ -954,6 +987,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     private javax.swing.JLabel account_label;
     private javax.swing.JButton add_files_button;
     private javax.swing.JButton add_folder_button;
+    private javax.swing.JButton copy_email_button;
     private javax.swing.JButton dance_button;
     private javax.swing.JLabel dir_name_label;
     private javax.swing.JTextField dir_name_textfield;
