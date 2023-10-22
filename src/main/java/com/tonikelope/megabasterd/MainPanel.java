@@ -26,11 +26,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import static java.lang.Integer.parseInt;
@@ -98,6 +96,7 @@ public final class MainPanel {
     private static boolean _use_smart_proxy;
     private static boolean _run_command;
     private static String _run_command_path;
+    private static boolean _run_command_log;
     private static String _font;
     private static SmartMegaProxyManager _proxy_manager;
     private static String _language;
@@ -270,6 +269,7 @@ public final class MainPanel {
         loadUserSettings();
 
         if (_debug_file) {
+            _run_command_log = true;
 
             PrintStream fileOut;
 
@@ -871,27 +871,28 @@ public final class MainPanel {
         if (_run_command && (LAST_EXTERNAL_COMMAND_TIMESTAMP == -1 || LAST_EXTERNAL_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
 
             if (_run_command_path != null && !_run_command_path.equals("")) {
-                Logger logger = Logger.getLogger(MainPanel.class.getName());
                 try {
                     StringTokenizer st = new StringTokenizer(_run_command_path);
                     String[] cmdarray = new String[st.countTokens()];
                     for (int i = 0; st.hasMoreTokens(); i++)
                         cmdarray[i] = st.nextToken();
 
-                    ProcessBuilder pb = new ProcessBuilder(cmdarray)
-                            .redirectErrorStream(true);
+                    ProcessBuilder pb;
+
+                    if (_run_command_log) {
+                        File externalCmdLog = new File(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_EXTERNAL_CMD.log");
+                        pb = new ProcessBuilder(cmdarray)
+                                .redirectOutput(ProcessBuilder.Redirect.appendTo(externalCmdLog))
+                                .redirectError(ProcessBuilder.Redirect.appendTo(externalCmdLog));
+                    } else {
+                        pb = new ProcessBuilder(cmdarray);
+                    }
                     Process pr = pb.start();
 
-                    BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-                    String line;
-                    while ((line = in.readLine()) != null) {
-                        logger.log(Level.INFO, "[Command output] " + line);
-                    }
                     pr.waitFor();
-                    in.close();
                     pr.destroy();
                 } catch (IOException | InterruptedException ex) {
-                    logger.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
 
                 LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();

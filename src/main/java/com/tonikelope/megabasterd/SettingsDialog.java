@@ -17,14 +17,12 @@ import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
@@ -2902,8 +2900,6 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     private void run_command_test_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_test_buttonActionPerformed
         // TODO add your handling code here:
-        Logger logger = Logger.getLogger(MiscTools.class.getName());
-
         if (run_command_textbox.getText() != null && !"".equals(run_command_textbox.getText().trim())) {
             try {
                 StringTokenizer st = new StringTokenizer(run_command_textbox.getText().trim());
@@ -2911,20 +2907,21 @@ public class SettingsDialog extends javax.swing.JDialog {
                 for (int i = 0; st.hasMoreTokens(); i++)
                     cmdarray[i] = st.nextToken();
 
-                ProcessBuilder pb = new ProcessBuilder(cmdarray)
-                        .redirectErrorStream(true);
+                ProcessBuilder pb;
+                if (debug_file_checkbox != null && debug_file_checkbox.isSelected()) {
+                    File externalCmdLog = new File(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_EXTERNAL_CMD.log");
+                    pb = new ProcessBuilder(cmdarray)
+                            .redirectOutput(ProcessBuilder.Redirect.appendTo(externalCmdLog))
+                            .redirectError(ProcessBuilder.Redirect.appendTo(externalCmdLog));
+                } else {
+                    pb = new ProcessBuilder(cmdarray);
+                }
                 Process pr = pb.start();
 
-                BufferedReader in = new BufferedReader(new InputStreamReader(pr.getInputStream()));
-                String line;
-                while ((line = in.readLine()) != null) {
-                    logger.log(Level.INFO, "[Command output] " + line);
-                }
                 pr.waitFor();
-                in.close();
                 pr.destroy();
             } catch (IOException | InterruptedException ex) {
-                logger.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.SEVERE, ex.getMessage());
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
