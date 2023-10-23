@@ -665,6 +665,15 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
     }
 
+    public void printStatusWarning(final String message) {
+
+        MiscTools.GUIRunAndWait(() -> {
+            status_label.setForeground(new Color(255, 0, 255));
+            status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
+        });
+
+    }
+
     @Override
     public void updateSlotsStatus() {
 

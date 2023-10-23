@@ -50,10 +50,6 @@ public final class SmartMegaProxyManager {
     private volatile int _proxy_timeout;
     private volatile boolean _force_smart_proxy;
 
-    public int getBan_time() {
-        return _ban_time;
-    }
-
     public int getProxy_timeout() {
         return _proxy_timeout;
     }
@@ -82,7 +78,7 @@ public final class SmartMegaProxyManager {
 
         for (String k : _proxy_list.keySet()) {
 
-            if (_proxy_list.get(k)[0] > current_time) {
+            if (_proxy_list.get(k)[0] != -1 && _proxy_list.get(k)[0] > current_time - _ban_time * 1000) {
 
                 i++;
             }
@@ -140,7 +136,7 @@ public final class SmartMegaProxyManager {
 
             for (String k : keysList) {
 
-                if (_proxy_list.get(k)[0] < current_time && (excluded == null || !excluded.contains(k))) {
+                if ((_proxy_list.get(k)[0] == -1 || _proxy_list.get(k)[0] < current_time - _ban_time * 1000) && (excluded == null || !excluded.contains(k))) {
 
                     return new String[]{k, _proxy_list.get(k)[1] == -1L ? "http" : "socks"};
                 }
@@ -174,7 +170,7 @@ public final class SmartMegaProxyManager {
 
                 Long[] proxy_data = _proxy_list.get(proxy);
 
-                proxy_data[0] = System.currentTimeMillis() + this._ban_time * 1000;
+                proxy_data[0] = System.currentTimeMillis();
 
                 _proxy_list.put(proxy, proxy_data);
 
@@ -219,8 +215,6 @@ public final class SmartMegaProxyManager {
 
                 if (!custom_list.isEmpty()) {
 
-                    Long current_time = System.currentTimeMillis();
-
                     for (String proxy : custom_list) {
 
                         boolean socks = false;
@@ -237,13 +231,13 @@ public final class SmartMegaProxyManager {
 
                             custom_clean_list_auth.put(proxy_parts[0], proxy_parts[1]);
 
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
 
                             custom_clean_list.put(proxy_parts[0], proxy_data);
 
                         } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
 
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
 
                             custom_clean_list.put(proxy, proxy_data);
                         }
@@ -298,8 +292,6 @@ public final class SmartMegaProxyManager {
 
                     PROXY_LIST_AUTH.clear();
 
-                    Long current_time = System.currentTimeMillis();
-
                     for (String proxy : proxy_list) {
 
                         boolean socks = false;
@@ -316,12 +308,12 @@ public final class SmartMegaProxyManager {
 
                             PROXY_LIST_AUTH.put(proxy_parts[0], proxy_parts[1]);
 
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
 
                             _proxy_list.put(proxy_parts[0], proxy_data);
 
                         } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
                             _proxy_list.put(proxy, proxy_data);
                         }
 

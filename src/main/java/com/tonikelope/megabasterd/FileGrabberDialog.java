@@ -115,10 +115,6 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
             updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 
-            updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel1.getBorder()), GUI_FONT, _main_panel.getZoom_factor());
-
-            updateTitledBorderFont(((javax.swing.border.TitledBorder) jPanel2.getBorder()), GUI_FONT, _main_panel.getZoom_factor());
-
             translateLabels(this);
 
             jPanel1.setDropTarget(
@@ -270,8 +266,6 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("File Grabber");
 
-        jPanel1.setBorder(javax.swing.BorderFactory.createTitledBorder(null, "Files", javax.swing.border.TitledBorder.DEFAULT_JUSTIFICATION, javax.swing.border.TitledBorder.DEFAULT_POSITION, new java.awt.Font("Noto Sans", 0, 18))); // NOI18N
-
         file_tree.setBorder(null);
         file_tree.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
@@ -289,10 +283,8 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 165, Short.MAX_VALUE)
+            .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 236, Short.MAX_VALUE)
         );
-
-        jPanel2.setBorder(javax.swing.BorderFactory.createTitledBorder("Upload info"));
 
         dir_name_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         dir_name_label.setText("Upload name:");
@@ -370,7 +362,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
+                .addGap(0, 0, 0)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
                         .addComponent(upload_log_checkbox)
@@ -392,7 +384,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                                 .addComponent(account_combobox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(copy_email_button)))))
-                .addContainerGap())
+                .addGap(0, 0, 0))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -401,11 +393,11 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(dir_name_label)
                     .addComponent(dir_name_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(account_label)
-                    .addComponent(account_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(copy_email_button))
+                    .addComponent(account_combobox)
+                    .addComponent(copy_email_button, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addComponent(used_space_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -416,7 +408,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(upload_log_checkbox)
                     .addComponent(priority_checkbox))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
@@ -433,7 +425,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
         total_file_size_label.setFont(new java.awt.Font("Dialog", 1, 32)); // NOI18N
         total_file_size_label.setForeground(new java.awt.Color(0, 0, 255));
-        total_file_size_label.setText("[0 B]");
+        total_file_size_label.setText("[---]");
         total_file_size_label.setDoubleBuffered(true);
         total_file_size_label.setEnabled(false);
 

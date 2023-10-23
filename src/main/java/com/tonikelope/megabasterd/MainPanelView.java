@@ -291,7 +291,11 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             try {
 
-                                LOG.log(Level.INFO, "{0} FILE_PATH -> {1}", new Object[]{Thread.currentThread().getName(), file_path});
+                                if (!file_path.isEmpty()) {
+
+                                    LOG.log(Level.INFO, "{0} FILE_PATH -> {1}", new Object[]{Thread.currentThread().getName(), file_path});
+
+                                }
 
                                 String[] dirs = file_path.split("\\" + File.separator);
 
@@ -301,9 +305,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 for (String d : dirs) {
 
-                                    LOG.log(Level.INFO, "{0} DIR -> {1}", new Object[]{Thread.currentThread().getName(), d});
-
                                     if (!d.isEmpty()) {
+
+                                        LOG.log(Level.INFO, "{0} DIR -> {1}", new Object[]{Thread.currentThread().getName(), d});
 
                                         if (current_node.getChildren().get(d) != null) {
 

@@ -70,15 +70,6 @@
   </Layout>
   <SubComponents>
     <Container class="javax.swing.JPanel" name="jPanel1">
-      <Properties>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Files">
-              <Font PropertyName="font" name="Noto Sans" size="18" style="0"/>
-            </TitledBorder>
-          </Border>
-        </Property>
-      </Properties>
 
       <Layout>
         <DimensionLayout dim="0">
@@ -88,7 +79,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="file_tree_scrollpane" alignment="0" pref="165" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" alignment="0" pref="236" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -121,19 +112,12 @@
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="jPanel2">
-      <Properties>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Upload info"/>
-          </Border>
-        </Property>
-      </Properties>
 
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Component id="upload_log_checkbox" min="-2" max="-2" attributes="0"/>
@@ -162,7 +146,7 @@
                           </Group>
                       </Group>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -174,11 +158,11 @@
                       <Component id="dir_name_label" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="dir_name_textfield" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="account_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="account_combobox" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="copy_email_button" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="account_combobox" max="32767" attributes="0"/>
+                      <Component id="copy_email_button" alignment="3" min="-2" pref="38" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="used_space_label" min="-2" max="-2" attributes="0"/>
@@ -192,7 +176,7 @@
                       <Component id="upload_log_checkbox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="priority_checkbox" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -354,7 +338,7 @@
         <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
           <Color blue="ff" green="0" red="0" type="rgb"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="[0 B]"/>
+        <Property name="text" type="java.lang.String" value="[---]"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
