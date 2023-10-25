@@ -156,6 +156,17 @@ public class MiscTools {
         return null;
     }
 
+    public static void purgeFolderCache() {
+        File directory = new File(System.getProperty("java.io.tmpdir"));
+
+        for (File f : directory.listFiles()) {
+            if (f.isFile() && f.getName().startsWith("megabasterd_folder_cache_")) {
+                f.delete();
+                Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "REMOVING FOLDER CACHE FILE {0}", f.getAbsolutePath());
+            }
+        }
+    }
+
     public static void containerSetEnabled(Container panel, boolean enabled) {
 
         for (Component cp : panel.getComponents()) {

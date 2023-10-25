@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1049,15 +1050,62 @@ public class MegaAPI implements Serializable {
         return ch;
     }
 
-    public HashMap<String, Object> getFolderNodes(String folder_id, String folder_key, JProgressBar bar) throws Exception {
+    public boolean existsCachedFolderNodes(String folder_id) {
+        return Files.exists(Path.of(System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id));
+    }
+
+    private String getCachedFolderNodes(String folder_id) {
+
+        String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
+
+        if (Files.exists(Path.of(file_path))) {
+
+            LOG.log(Level.INFO, "MEGA FOLDER {0} USING CACHED JSON FILE TREE", new Object[]{folder_id});
+
+            try {
+                return Files.readString(Path.of(file_path));
+            } catch (IOException ex) {
+                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return null;
+    }
+
+    private void writeCachedFolderNodes(String folder_id, String res) {
+        String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
+
+        try {
+            Files.writeString(Path.of(file_path), res);
+        } catch (IOException ex) {
+            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public HashMap<String, Object> getFolderNodes(String folder_id, String folder_key, JProgressBar bar, boolean cache) throws Exception {
 
         HashMap<String, Object> folder_nodes = null;
 
-        String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\", \"ca\":\"1\"}]";
+        String res = null;
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&n=" + folder_id);
+        if (cache) {
+            res = getCachedFolderNodes(folder_id);
+        }
 
-        String res = RAW_REQUEST(request, url_api);
+        if (res == null) {
+
+            String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\", \"ca\":\"1\"}]";
+
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&n=" + folder_id);
+
+            res = RAW_REQUEST(request, url_api);
+
+            if (res != null) {
+                writeCachedFolderNodes(folder_id, res);
+            }
+        }
+
+        LOG.log(Level.INFO, "MEGA FOLDER {0} JSON FILE TREE SIZE -> {1}", new Object[]{folder_id, MiscTools.formatBytes((long) res.length())});
 
         if (res != null) {
 

@@ -430,6 +430,19 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
 
+            int r = -1;
+
+            if (ma.existsCachedFolderNodes(folder_id)) {
+                r = JOptionPane.showConfirmDialog(this, "Do you want to use FOLDER CACHED VERSION?\n\n(It could speed up the loading of very large folders)", "FOLDER CACHE", JOptionPane.YES_NO_OPTION);
+
+            }
+
+            if (r == 0) {
+                MiscTools.GUIRun(() -> {
+                    folder_link_label.setText(_link + " (CACHED VERSION)");
+                });
+            }
+
             String subfolder_id = null;
 
             if (folder_id.contains("@")) {
@@ -443,7 +456,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             String folder_key = findFirstRegex("#F![^!]+!(.+)", _link, 1);
 
-            folder_nodes = ma.getFolderNodes(folder_id, folder_key, node_bar);
+            folder_nodes = ma.getFolderNodes(folder_id, folder_key, node_bar, (r == 0));
 
             MegaMutableTreeNode root = null;
 
