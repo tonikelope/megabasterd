@@ -206,6 +206,12 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             if (dialog.isUpload() && dialog.getFiles().size() > 0) {
 
+                MiscTools.GUIRun(() -> {
+                    upload_status_bar.setIndeterminate(true);
+
+                    upload_status_bar.setVisible(true);
+                });
+
                 getMain_panel().resumeUploads();
 
                 getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().addAll(dialog.getFiles());
@@ -371,6 +377,12 @@ public final class MainPanelView extends javax.swing.JFrame {
                         LOG.log(SEVERE, null, ex);
                     }
 
+                    if (getMain_panel().getUpload_manager().getTransference_preprocess_queue().isEmpty()) {
+                        MiscTools.GUIRun(() -> {
+
+                            upload_status_bar.setVisible(false);
+                        });
+                    }
                 };
 
                 getMain_panel().getUpload_manager().getTransference_preprocess_queue().add(run);
@@ -447,7 +459,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             translateLabels(this);
 
-            for (JComponent c : new JComponent[]{force_chunk_reset_button, unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
+            for (JComponent c : new JComponent[]{download_status_bar, upload_status_bar, force_chunk_reset_button, unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
 
                 c.setVisible(false);
             }
@@ -553,6 +565,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         down_remtime_label = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         force_chunk_reset_button = new javax.swing.JButton();
+        download_status_bar = new javax.swing.JProgressBar();
         uploads_panel = new javax.swing.JPanel();
         global_speed_up_label = new javax.swing.JLabel();
         status_up_label = new javax.swing.JLabel();
@@ -561,6 +574,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         jPanel_scroll_up = new javax.swing.JPanel();
         pause_all_up_button = new javax.swing.JButton();
         up_remtime_label = new javax.swing.JLabel();
+        upload_status_bar = new javax.swing.JProgressBar();
         unfreeze_transferences_button = new javax.swing.JButton();
         main_menubar = new javax.swing.JMenuBar();
         file_menu = new javax.swing.JMenu();
@@ -673,7 +687,6 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pause_all_down_button))
             .addGroup(downloads_panelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_down_button)
@@ -681,6 +694,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addComponent(jButton1))
             .addComponent(jScrollPane_down)
             .addComponent(down_remtime_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(download_status_bar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         downloads_panelLayout.setVerticalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -692,7 +706,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                         .addComponent(jButton1))
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                .addComponent(download_status_bar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(down_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -744,16 +760,16 @@ public final class MainPanelView extends javax.swing.JFrame {
         uploads_panelLayout.setHorizontalGroup(
             uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(uploads_panelLayout.createSequentialGroup()
-                .addComponent(global_speed_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(global_speed_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, 839, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pause_all_up_button))
             .addGroup(uploads_panelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_up_button))
             .addComponent(jScrollPane_up)
             .addComponent(up_remtime_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(upload_status_bar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         uploads_panelLayout.setVerticalGroup(
             uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -763,7 +779,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                .addComponent(upload_status_bar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(up_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1063,8 +1081,17 @@ public final class MainPanelView extends javax.swing.JFrame {
                 });
 
                 if (!urls.isEmpty()) {
+                    MiscTools.GUIRun(() -> {
+                        download_status_bar.setIndeterminate(true);
+
+                        download_status_bar.setVisible(true);
+                    });
 
                     Set<String> folder_file_links = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+#F\\*[^\r\n!]*?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
+
+                    getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(folder_file_links);
+
+                    getMain_panel().getDownload_manager().secureNotify();
 
                     if (!folder_file_links.isEmpty()) {
                         ArrayList<String> nlinks = ma.GENERATE_N_LINKS(folder_file_links);
@@ -1073,6 +1100,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         urls.addAll(nlinks);
                     }
+
+                    getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().removeAll(folder_file_links);
 
                     getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(urls);
 
@@ -1196,6 +1225,12 @@ public final class MainPanelView extends javax.swing.JFrame {
                             Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
                         }
 
+                    }
+
+                    if (getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+                        MiscTools.GUIRun(() -> {
+                            download_status_bar.setVisible(false);
+                        });
                     }
                 } else {
                     MiscTools.GUIRun(() -> {
@@ -1556,6 +1591,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JButton close_all_finished_down_button;
     private javax.swing.JButton close_all_finished_up_button;
     private javax.swing.JLabel down_remtime_label;
+    private javax.swing.JProgressBar download_status_bar;
     private javax.swing.JPanel downloads_panel;
     private javax.swing.JMenu edit_menu;
     private javax.swing.JMenuItem exit_menu;
@@ -1591,6 +1627,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JLabel status_up_label;
     private javax.swing.JButton unfreeze_transferences_button;
     private javax.swing.JLabel up_remtime_label;
+    private javax.swing.JProgressBar upload_status_bar;
     private javax.swing.JPanel uploads_panel;
     // End of variables declaration//GEN-END:variables
     private static final Logger LOG = Logger.getLogger(MainPanelView.class.getName());

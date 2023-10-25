@@ -381,7 +381,6 @@
                       <Component id="pause_all_down_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="status_down_label" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="close_all_finished_down_button" min="-2" max="-2" attributes="0"/>
@@ -390,12 +389,13 @@
                   </Group>
                   <Component id="jScrollPane_down" alignment="0" max="32767" attributes="0"/>
                   <Component id="down_remtime_label" alignment="0" max="32767" attributes="0"/>
+                  <Component id="download_status_bar" alignment="0" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Group type="103" groupAlignment="3" attributes="0">
                               <Component id="close_all_finished_down_button" alignment="3" max="32767" attributes="0"/>
@@ -403,8 +403,10 @@
                           </Group>
                           <Component id="status_down_label" max="32767" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="jScrollPane_down" pref="288" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="download_status_bar" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jScrollPane_down" pref="277" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                       <Component id="down_remtime_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -531,6 +533,8 @@
                 <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="force_chunk_reset_buttonActionPerformed"/>
               </Events>
             </Component>
+            <Component class="javax.swing.JProgressBar" name="download_status_bar">
+            </Component>
           </SubComponents>
         </Container>
         <Container class="javax.swing.JPanel" name="uploads_panel">
@@ -549,30 +553,32 @@
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="global_speed_up_label" max="32767" attributes="0"/>
+                      <Component id="global_speed_up_label" pref="839" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="pause_all_up_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="status_up_label" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="close_all_finished_up_button" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Component id="jScrollPane_up" alignment="0" max="32767" attributes="0"/>
                   <Component id="up_remtime_label" alignment="0" max="32767" attributes="0"/>
+                  <Component id="upload_status_bar" alignment="0" max="32767" attributes="0"/>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="102" alignment="1" attributes="0">
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Component id="close_all_finished_up_button" alignment="0" max="32767" attributes="0"/>
                           <Component id="status_up_label" alignment="0" max="32767" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" max="-2" attributes="0"/>
-                      <Component id="jScrollPane_up" pref="288" max="32767" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="upload_status_bar" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
+                      <Component id="jScrollPane_up" pref="277" max="32767" attributes="0"/>
                       <EmptySpace type="unrelated" min="-2" max="-2" attributes="0"/>
                       <Component id="up_remtime_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" max="-2" attributes="0"/>
@@ -664,6 +670,8 @@
                   <Font name="Dialog" size="20" style="1"/>
                 </Property>
               </Properties>
+            </Component>
+            <Component class="javax.swing.JProgressBar" name="upload_status_bar">
             </Component>
           </SubComponents>
         </Container>

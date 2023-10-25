@@ -1200,7 +1200,7 @@ public class MegaAPI implements Serializable {
 
         ArrayList<String> nlinks = new ArrayList<>();
 
-        String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\"}]";
+        String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\", \"ca\":\"1\"}]";
 
         URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&n=" + folder_id);
 
