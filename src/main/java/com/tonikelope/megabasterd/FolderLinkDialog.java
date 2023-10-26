@@ -47,6 +47,12 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private volatile boolean exit = false;
 
+    @Override
+    public void dispose() {
+        file_tree.setModel(null);
+        super.dispose();
+    }
+
     public List<HashMap> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
     }
@@ -430,6 +436,17 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
 
+            String subfolder_id = null;
+
+            if (folder_id.contains("@")) {
+
+                String[] fids = folder_id.split("@");
+
+                folder_id = fids[0];
+
+                subfolder_id = fids[1];
+            }
+
             int r = -1;
 
             if (ma.existsCachedFolderNodes(folder_id)) {
@@ -441,17 +458,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 MiscTools.GUIRun(() -> {
                     folder_link_label.setText(_link + " (CACHED VERSION)");
                 });
-            }
-
-            String subfolder_id = null;
-
-            if (folder_id.contains("@")) {
-
-                String[] fids = folder_id.split("@");
-
-                folder_id = fids[0];
-
-                subfolder_id = fids[1];
             }
 
             String folder_key = findFirstRegex("#F![^!]+!(.+)", _link, 1);

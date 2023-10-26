@@ -56,6 +56,12 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     private int _last_selected_index;
     private List<File> _drag_drop_files;
 
+    @Override
+    public void dispose() {
+        file_tree.setModel(null);
+        super.dispose();
+    }
+
     public JCheckBox getPriority_checkbox() {
         return priority_checkbox;
     }

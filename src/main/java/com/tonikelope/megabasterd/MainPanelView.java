@@ -62,6 +62,12 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private final MainPanel _main_panel;
 
+    private static volatile MainPanelView INSTANCE = null;
+
+    public static MainPanelView getINSTANCE() {
+        return INSTANCE;
+    }
+
     public JMenuItem getMerge_file_menu() {
         return merge_file_menu;
     }
@@ -539,6 +545,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             pack();
         });
 
+        INSTANCE = this;
     }
 
     /**

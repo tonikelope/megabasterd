@@ -70,7 +70,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.6";
+    public static final String VERSION = "8.7";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -393,11 +393,6 @@ public final class MainPanel {
 
         resumeUploads();
 
-        /* NOT REQUIRED 
-        if (MegaAPI.API_KEY == null && JOptionPane.showConfirmDialog(this._view, LabelTranslatorSingleton.getInstance().translate("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE.\n\nYOU SHOULD GET A KEY -> https://mega.nz/sdk (and set it in MegaBasterd ADVANCED SETTINGS).\n\nCREATE API KEY NOW?"), "MEGA API KEY ERROR", JOptionPane.ERROR_MESSAGE) == 0) {
-            openBrowserURL("https://mega.nz/sdk");
-
-        }*/
     }
 
     public static Boolean getResume_uploads() {
