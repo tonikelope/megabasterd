@@ -221,17 +221,18 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             if (dialog.isUpload() && dialog.getFiles().size() > 0) {
 
-                MiscTools.GUIRun(() -> {
-                    upload_status_bar.setIndeterminate(true);
-                    upload_status_bar.setMaximum(getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().size() + dialog.getFiles().size());
-                    upload_status_bar.setVisible(true);
-                });
-
                 getMain_panel().resumeUploads();
 
                 getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().addAll(dialog.getFiles());
 
                 getMain_panel().getUpload_manager().secureNotify();
+
+                MiscTools.GUIRun(() -> {
+                    upload_status_bar.setIndeterminate(true);
+                    upload_status_bar.setValue(upload_status_bar.getMinimum());
+                    upload_status_bar.setMaximum(getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().size() + getMain_panel().getUpload_manager().getTransference_preprocess_queue().size() + getMain_panel().getUpload_manager().getTransference_provision_queue().size());
+                    upload_status_bar.setVisible(true);
+                });
 
                 final String mega_account = (String) dialog.getAccount_combobox().getSelectedItem();
 
@@ -376,24 +377,11 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 LOG.log(SEVERE, null, ex);
                             }
-
-                            MiscTools.GUIRun(() -> {
-                                upload_status_bar.setIndeterminate(false);
-                                upload_status_bar.setValue(upload_status_bar.getValue() + 1);
-                            });
-
                         }
 
                     } catch (Exception ex) {
 
                         LOG.log(SEVERE, null, ex);
-                    }
-
-                    if (getMain_panel().getUpload_manager().getTransference_preprocess_queue().isEmpty()) {
-                        MiscTools.GUIRun(() -> {
-                            upload_status_bar.setValue(upload_status_bar.getMinimum());
-                            upload_status_bar.setVisible(false);
-                        });
                     }
                 };
 
@@ -1100,17 +1088,19 @@ public final class MainPanelView extends javax.swing.JFrame {
                 });
 
                 if (!urls.isEmpty()) {
-                    MiscTools.GUIRun(() -> {
-                        download_status_bar.setIndeterminate(true);
-                        download_status_bar.setMaximum(getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().size() + urls.size());
-                        download_status_bar.setVisible(true);
-                    });
 
                     Set<String> folder_file_links = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+#F\\*[^\r\n!]*?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
 
                     getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(folder_file_links);
 
                     getMain_panel().getDownload_manager().secureNotify();
+
+                    MiscTools.GUIRun(() -> {
+                        download_status_bar.setIndeterminate(true);
+                        download_status_bar.setValue(download_status_bar.getMinimum());
+                        download_status_bar.setMaximum(getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().size() + getMain_panel().getDownload_manager().getTransference_preprocess_queue().size() + getMain_panel().getDownload_manager().getTransference_provision_queue().size());
+                        download_status_bar.setVisible(true);
+                    });
 
                     if (!folder_file_links.isEmpty()) {
                         ArrayList<String> nlinks = ma.GENERATE_N_LINKS(folder_file_links);
@@ -1244,19 +1234,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                             Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
                         }
 
-                        MiscTools.GUIRun(() -> {
-                            download_status_bar.setIndeterminate(false);
-                            download_status_bar.setValue(upload_status_bar.getValue() + 1);
-                        });
-
                     }
 
-                    if (getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
-                        MiscTools.GUIRun(() -> {
-                            download_status_bar.setValue(download_status_bar.getMinimum());
-                            download_status_bar.setVisible(false);
-                        });
-                    }
                 } else {
                     MiscTools.GUIRun(() -> {
                         new_download_menu.setEnabled(true);

@@ -30,8 +30,8 @@ import javax.swing.JPanel;
  */
 abstract public class TransferenceManager implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int MAX_WAIT_QUEUE = 1000;
-    public static final int MAX_PROVISION_WORKERS = 25;
+    public static final int MAX_WAIT_QUEUE = 10000;
+    public static final int MAX_PROVISION_WORKERS = 50;
     private static final Logger LOG = Logger.getLogger(TransferenceManager.class.getName());
 
     protected final ConcurrentLinkedQueue<Object> _transference_preprocess_global_queue;
@@ -680,24 +680,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             _status.setText(_genStatus());
 
-            /*if (_transference_preprocess_queue.isEmpty() && !_transference_provision_queue.isEmpty()) {
-
-                if (this instanceof DownloadManager) {
-                    this._main_panel.getView().getDownload_status_bar().setIndeterminate(true);
-                    this._main_panel.getView().getDownload_status_bar().setVisible(true);
-                } else {
-                    this._main_panel.getView().getUpload_status_bar().setIndeterminate(true);
-                    this._main_panel.getView().getUpload_status_bar().setVisible(true);
-                }
-            } else if (_transference_preprocess_queue.isEmpty()) {
-                if (this instanceof DownloadManager) {
-                    this._main_panel.getView().getDownload_status_bar().setIndeterminate(false);
-                    this._main_panel.getView().getDownload_status_bar().setVisible(false);
-                } else {
-                    this._main_panel.getView().getUpload_status_bar().setIndeterminate(false);
-                    this._main_panel.getView().getUpload_status_bar().setVisible(false);
-                }
-            }*/
             _main_panel.getView().getUnfreeze_transferences_button().setVisible(_main_panel.getDownload_manager().hasFrozenTransferences() || _main_panel.getUpload_manager().hasFrozenTransferences());
 
             _main_panel.getView().revalidate();
@@ -832,6 +814,24 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                     try {
                                         bounded_executor.submitTask(() -> {
                                             provision(transference);
+
+                                            if (this instanceof DownloadManager) {
+                                                MiscTools.GUIRun(() -> {
+
+                                                    _main_panel.getView().getDownload_status_bar().setIndeterminate(false);
+                                                    _main_panel.getView().getDownload_status_bar().setValue(_main_panel.getView().getDownload_status_bar().getValue() + 1);
+                                                    _main_panel.getView().getDownload_status_bar().setVisible((_main_panel.getView().getDownload_status_bar().getValue() < _main_panel.getView().getDownload_status_bar().getMaximum()));
+
+                                                });
+                                            } else {
+                                                MiscTools.GUIRun(() -> {
+
+                                                    _main_panel.getView().getUpload_status_bar().setIndeterminate(false);
+                                                    _main_panel.getView().getUpload_status_bar().setValue(_main_panel.getView().getUpload_status_bar().getValue() + 1);
+                                                    _main_panel.getView().getUpload_status_bar().setVisible((_main_panel.getView().getUpload_status_bar().getValue() < _main_panel.getView().getUpload_status_bar().getMaximum()));
+
+                                                });
+                                            }
                                         });
                                     } catch (InterruptedException ex) {
                                         Logger.getLogger(TransferenceManager.class.getName()).log(Level.SEVERE, null, ex);
