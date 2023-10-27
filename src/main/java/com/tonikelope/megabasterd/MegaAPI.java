@@ -27,6 +27,7 @@ import java.net.Proxy;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1052,14 +1053,14 @@ public class MegaAPI implements Serializable {
     }
 
     public boolean existsCachedFolderNodes(String folder_id) {
-        return Files.exists(Path.of(System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id));
+        return Files.exists(Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id));
     }
 
     private String getCachedFolderNodes(String folder_id) {
 
         String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
 
-        if (Files.exists(Path.of(file_path))) {
+        if (Files.exists(Paths.get(file_path))) {
 
             LOG.log(Level.INFO, "MEGA FOLDER {0} USING CACHED JSON FILE TREE", new Object[]{folder_id});
 

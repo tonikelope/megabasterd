@@ -23,6 +23,8 @@ import java.util.logging.Logger;
 import javax.swing.JPanel;
 
 /**
+ * Yes, this class is a f*cking mess (inside "natural" MegaBasterd mess) and
+ * should be completely refactored (in another life maybe...).
  *
  * @author tonikelope
  */
@@ -57,7 +59,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private volatile boolean _starting_transferences;
     private volatile boolean _preprocessing_transferences;
     private volatile boolean _paused_all;
-    protected volatile boolean _frozen;
     private boolean _tray_icon_finish;
     protected volatile long _total_size;
     protected final Object _total_size_lock;
@@ -78,7 +79,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
         _paused_all = false;
-        _frozen = false;
         _removing_transferences = false;
         _provisioning_transferences = false;
         _starting_transferences = false;
@@ -120,10 +120,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void setPaused_all(boolean _paused_all) {
         this._paused_all = _paused_all;
-    }
-
-    public boolean isFrozen() {
-        return _frozen;
     }
 
     public boolean no_transferences() {
@@ -330,11 +326,15 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         _transference_provision_queue.clear();
 
+        _transference_remove_queue.addAll(new ArrayList(getTransference_waitstart_aux_queue()));
+
         _transference_remove_queue.addAll(new ArrayList(getTransference_waitstart_queue()));
 
         getTransference_waitstart_queue().clear();
 
-        for (Transference t : this.getTransference_running_list()) {
+        getTransference_waitstart_aux_queue().clear();
+
+        for (Transference t : getTransference_running_list()) {
 
             if (t instanceof Download) {
                 ((Download) t).setGlobal_cancel(true);
@@ -381,8 +381,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     getScroll_panel().add((Component) t1.getView());
                 });
             });
-
-            _frozen = false;
         }
 
         secureNotify();
@@ -419,8 +417,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     getScroll_panel().add((Component) t1.getView());
                 });
             });
-
-            _frozen = false;
         }
 
         secureNotify();
@@ -464,8 +460,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     getScroll_panel().add((Component) t1.getView());
                 });
             });
-
-            _frozen = false;
         }
 
         secureNotify();
@@ -509,8 +503,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                     getScroll_panel().add((Component) t2.getView());
                 });
             });
-
-            _frozen = false;
         }
 
         secureNotify();
@@ -611,6 +603,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
             }
         }
 
+        for (Transference t : getTransference_waitstart_aux_queue()) {
+
+            if (t.isFrozen()) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -640,7 +639,9 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 t.unfreeze();
             });
 
-            _frozen = false;
+            getTransference_waitstart_aux_queue().forEach((t) -> {
+                t.unfreeze();
+            });
         }
 
         secureNotify();
@@ -654,6 +655,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                 this._main_panel.getView().getForce_chunk_reset_button().setVisible(MainPanel.isUse_smart_proxy() && !getTransference_running_list().isEmpty());
                 this._main_panel.getView().getCancel_all_downloads_menu().setEnabled(!_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty() || !getTransference_waitstart_queue().isEmpty() || !getTransference_running_list().isEmpty());
+
             }
 
             if (_paused_all) {
@@ -678,6 +680,24 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             _status.setText(_genStatus());
 
+            /*if (_transference_preprocess_queue.isEmpty() && !_transference_provision_queue.isEmpty()) {
+
+                if (this instanceof DownloadManager) {
+                    this._main_panel.getView().getDownload_status_bar().setIndeterminate(true);
+                    this._main_panel.getView().getDownload_status_bar().setVisible(true);
+                } else {
+                    this._main_panel.getView().getUpload_status_bar().setIndeterminate(true);
+                    this._main_panel.getView().getUpload_status_bar().setVisible(true);
+                }
+            } else if (_transference_preprocess_queue.isEmpty()) {
+                if (this instanceof DownloadManager) {
+                    this._main_panel.getView().getDownload_status_bar().setIndeterminate(false);
+                    this._main_panel.getView().getDownload_status_bar().setVisible(false);
+                } else {
+                    this._main_panel.getView().getUpload_status_bar().setIndeterminate(false);
+                    this._main_panel.getView().getUpload_status_bar().setVisible(false);
+                }
+            }*/
             _main_panel.getView().getUnfreeze_transferences_button().setVisible(_main_panel.getDownload_manager().hasFrozenTransferences() || _main_panel.getUpload_manager().hasFrozenTransferences());
 
             _main_panel.getView().revalidate();
@@ -880,7 +900,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                     }
 
-                    _frozen = false;
                     setSort_wait_start_queue(true);
                     setProvisioning_transferences(false);
                     secureNotify();
@@ -888,13 +907,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             }
 
-            if (!_frozen && !_main_panel.isExit() && !_paused_all && !isRemoving_transferences() && !isStarting_transferences() && (!getTransference_waitstart_queue().isEmpty() || !getTransference_waitstart_aux_queue().isEmpty()) && getTransference_running_list().size() < _max_running_trans) {
+            if (!_main_panel.isExit() && !_paused_all && !isRemoving_transferences() && !isStarting_transferences() && (!getTransference_waitstart_queue().isEmpty() || !getTransference_waitstart_aux_queue().isEmpty()) && getTransference_running_list().size() < _max_running_trans) {
 
                 setStarting_transferences(true);
 
                 THREAD_POOL.execute(() -> {
 
-                    while (!_frozen && !_main_panel.isExit() && !_paused_all && (!getTransference_waitstart_queue().isEmpty() || !getTransference_waitstart_aux_queue().isEmpty()) && getTransference_running_list().size() < _max_running_trans) {
+                    while (!_main_panel.isExit() && !_paused_all && (!getTransference_waitstart_queue().isEmpty() || !getTransference_waitstart_aux_queue().isEmpty()) && getTransference_running_list().size() < _max_running_trans) {
 
                         synchronized (_transference_queue_sort_lock) {
                             Transference transference = getTransference_waitstart_queue().peek();
@@ -910,10 +929,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                 getTransference_waitstart_aux_queue().remove(transference);
 
                                 start(transference);
-
-                            } else {
-
-                                _frozen = true;
 
                             }
                         }

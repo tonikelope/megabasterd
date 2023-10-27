@@ -52,6 +52,7 @@ import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
 
 /**
@@ -63,6 +64,14 @@ public final class MainPanelView extends javax.swing.JFrame {
     private final MainPanel _main_panel;
 
     private static volatile MainPanelView INSTANCE = null;
+
+    public JProgressBar getDownload_status_bar() {
+        return download_status_bar;
+    }
+
+    public JProgressBar getUpload_status_bar() {
+        return upload_status_bar;
+    }
 
     public static MainPanelView getINSTANCE() {
         return INSTANCE;
@@ -214,7 +223,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 MiscTools.GUIRun(() -> {
                     upload_status_bar.setIndeterminate(true);
-
+                    upload_status_bar.setMaximum(getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().size() + dialog.getFiles().size());
                     upload_status_bar.setVisible(true);
                 });
 
@@ -351,30 +360,27 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     }
                                 }
 
-                                if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+                                Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, dialog.getPriority_checkbox().isSelected());
 
-                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, dialog.getPriority_checkbox().isSelected());
+                                getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                    getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+                                getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
 
-                                    getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
-
-                                    getMain_panel().getUpload_manager().secureNotify();
-
-                                }
+                                getMain_panel().getUpload_manager().secureNotify();
 
                             } catch (Exception ex) {
 
-                                if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+                                getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
 
-                                    getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
-
-                                    getMain_panel().getUpload_manager().secureNotify();
-
-                                }
+                                getMain_panel().getUpload_manager().secureNotify();
 
                                 LOG.log(SEVERE, null, ex);
                             }
+
+                            MiscTools.GUIRun(() -> {
+                                upload_status_bar.setIndeterminate(false);
+                                upload_status_bar.setValue(upload_status_bar.getValue() + 1);
+                            });
 
                         }
 
@@ -385,7 +391,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     if (getMain_panel().getUpload_manager().getTransference_preprocess_queue().isEmpty()) {
                         MiscTools.GUIRun(() -> {
-
+                            upload_status_bar.setValue(upload_status_bar.getMinimum());
                             upload_status_bar.setVisible(false);
                         });
                     }
@@ -469,6 +475,12 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 c.setVisible(false);
             }
+
+            download_status_bar.setMinimum(0);
+            upload_status_bar.setMinimum(0);
+
+            download_status_bar.setValue(download_status_bar.getMinimum());
+            upload_status_bar.setValue(upload_status_bar.getMinimum());
 
             clean_all_down_menu.setEnabled(false);
             clean_all_up_menu.setEnabled(false);
@@ -1090,7 +1102,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 if (!urls.isEmpty()) {
                     MiscTools.GUIRun(() -> {
                         download_status_bar.setIndeterminate(true);
-
+                        download_status_bar.setMaximum(getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().size() + urls.size());
                         download_status_bar.setVisible(true);
                     });
 
@@ -1232,10 +1244,16 @@ public final class MainPanelView extends javax.swing.JFrame {
                             Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
                         }
 
+                        MiscTools.GUIRun(() -> {
+                            download_status_bar.setIndeterminate(false);
+                            download_status_bar.setValue(upload_status_bar.getValue() + 1);
+                        });
+
                     }
 
                     if (getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
                         MiscTools.GUIRun(() -> {
+                            download_status_bar.setValue(download_status_bar.getMinimum());
                             download_status_bar.setVisible(false);
                         });
                     }

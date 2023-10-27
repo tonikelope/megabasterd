@@ -70,10 +70,6 @@ public class UploadManager extends TransferenceManager {
 
             getTransference_waitstart_queue().remove(u);
 
-            if (getTransference_waitstart_queue().isEmpty()) {
-                _frozen = false;
-            }
-
             getTransference_running_list().remove(u);
 
             getTransference_finished_queue().remove(u);

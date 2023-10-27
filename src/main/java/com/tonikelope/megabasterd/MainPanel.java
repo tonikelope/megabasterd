@@ -70,7 +70,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.8";
+    public static final String VERSION = "8.9";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -1525,9 +1525,6 @@ public final class MainPanel {
                                         getUpload_manager().getTransference_provision_queue().add(upload);
 
                                         conta_uploads++;
-
-                                        uploads_queue_iterator.remove();
-
                                     }
 
                                 } else {

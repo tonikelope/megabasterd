@@ -432,7 +432,7 @@ public class AboutDialog extends javax.swing.JDialog {
         THREAD_POOL.execute(() -> {
 
             if (_midi == null) {
-                _midi = MiscTools.midiLoopPlay("/midis/a-team.mid");
+                _midi = MiscTools.midiLoopPlay("/midis/a-team.mid", 70);
             } else {
                 _midi.start();
             }
