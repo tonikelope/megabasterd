@@ -26,7 +26,6 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1065,7 +1064,7 @@ public class MegaAPI implements Serializable {
             LOG.log(Level.INFO, "MEGA FOLDER {0} USING CACHED JSON FILE TREE", new Object[]{folder_id});
 
             try {
-                return Files.readString(Path.of(file_path));
+                return Files.readString(Paths.get(file_path));
             } catch (IOException ex) {
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -1078,7 +1077,7 @@ public class MegaAPI implements Serializable {
         String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
 
         try {
-            Files.writeString(Path.of(file_path), res);
+            Files.writeString(Paths.get(file_path), res);
         } catch (IOException ex) {
             Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
