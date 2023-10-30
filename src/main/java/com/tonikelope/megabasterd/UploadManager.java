@@ -92,4 +92,57 @@ public class UploadManager extends TransferenceManager {
         secureNotify();
     }
 
+    public int copyAllLinksToClipboard() {
+
+        int total = 0;
+
+        ArrayList<String> links = new ArrayList<>();
+
+        String out = "";
+
+        for (Transference t : _transference_waitstart_aux_queue) {
+            Upload up = (Upload) t;
+            links.add(up.getFile_name() + " [" + up.getMa().getEmail() + "] " + (up.getFolder_link() != null ? up.getFolder_link() : ""));
+        }
+
+        for (Transference t : _transference_waitstart_queue) {
+
+            Upload up = (Upload) t;
+            links.add(up.getFile_name() + " [" + up.getMa().getEmail() + "] " + (up.getFolder_link() != null ? up.getFolder_link() : ""));
+        }
+
+        out += String.join("\r\n", links);
+
+        total += links.size();
+
+        links.clear();
+
+        for (Transference t : _transference_running_list) {
+
+            Upload up = (Upload) t;
+            links.add(up.getFile_name() + " [" + up.getMa().getEmail() + "] " + (up.getFolder_link() != null ? up.getFolder_link() : "") + (up.getFile_link() != null ? " " + up.getFile_link() : ""));
+        }
+
+        out += String.join("\r\n", links);
+
+        total += links.size();
+
+        links.clear();
+
+        for (Transference t : _transference_finished_queue) {
+
+            Upload up = (Upload) t;
+            links.add("(UPLOAD FINISHED) " + up.getFile_name() + " [" + up.getMa().getEmail() + "] " + (up.getFolder_link() != null ? up.getFolder_link() : "") + (up.getFile_link() != null ? " " + up.getFile_link() : ""));
+        }
+
+        out += String.join("\r\n", links);
+
+        total += links.size();
+
+        MiscTools.copyTextToClipboard(out);
+
+        return total;
+
+    }
+
 }
