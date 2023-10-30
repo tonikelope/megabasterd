@@ -653,9 +653,12 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             if (this instanceof DownloadManager) {
 
-                this._main_panel.getView().getForce_chunk_reset_button().setVisible(MainPanel.isUse_smart_proxy() && !getTransference_running_list().isEmpty());
-                this._main_panel.getView().getCancel_all_downloads_menu().setEnabled(!_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty() || !getTransference_waitstart_queue().isEmpty() || !getTransference_running_list().isEmpty());
+                _main_panel.getView().getForce_chunk_reset_button().setVisible(MainPanel.isUse_smart_proxy() && !getTransference_running_list().isEmpty());
+                _main_panel.getView().getCancel_all_downloads_menu().setEnabled(!_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty() || !getTransference_waitstart_queue().isEmpty() || !getTransference_running_list().isEmpty());
+                _main_panel.getView().getDownload_status_bar().setVisible(!_transference_preprocess_global_queue.isEmpty() || !_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty());
 
+            } else {
+                _main_panel.getView().getUpload_status_bar().setVisible(!_transference_preprocess_global_queue.isEmpty() || !_transference_preprocess_queue.isEmpty() || !_transference_provision_queue.isEmpty());
             }
 
             if (_paused_all) {

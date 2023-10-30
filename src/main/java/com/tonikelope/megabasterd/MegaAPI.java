@@ -1064,7 +1064,7 @@ public class MegaAPI implements Serializable {
             LOG.log(Level.INFO, "MEGA FOLDER {0} USING CACHED JSON FILE TREE", new Object[]{folder_id});
 
             try {
-                return Files.readString(Paths.get(file_path));
+                return new String(Files.readAllBytes(Paths.get(file_path)), "UTF-8");
             } catch (IOException ex) {
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -1077,7 +1077,7 @@ public class MegaAPI implements Serializable {
         String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
 
         try {
-            Files.writeString(Paths.get(file_path), res);
+            Files.write(Paths.get(file_path), res.getBytes());
         } catch (IOException ex) {
             Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }
