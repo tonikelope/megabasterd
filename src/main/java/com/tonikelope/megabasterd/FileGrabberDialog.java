@@ -537,7 +537,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
             _base_path = files_selected[0].getParentFile().getAbsolutePath();
 
-            dir_name_textfield.setText(files_selected[0].getParentFile().getName() + "_" + String.valueOf(System.currentTimeMillis() / 1000));
+            dir_name_textfield.setText(files_selected[0].getParentFile().getName());
 
             dir_name_textfield.setEnabled(true);
 
@@ -639,7 +639,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
                     _base_path = filechooser.getSelectedFile().getAbsolutePath();
 
-                    dir_name_textfield.setText(filechooser.getSelectedFile().getName() + "_" + String.valueOf(System.currentTimeMillis() / 1000));
+                    dir_name_textfield.setText(filechooser.getSelectedFile().getName());
 
                     dir_name_textfield.setEnabled(true);
 
@@ -1022,7 +1022,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         _base_path = (files.size() == 1 && files.get(0).isDirectory()) ? files.get(0).getAbsolutePath() : files.get(0).getParentFile().getAbsolutePath();
 
         MiscTools.GUIRunAndWait(() -> {
-            dir_name_textfield.setText(((files.size() == 1 && files.get(0).isDirectory()) ? files.get(0).getName() : files.get(0).getParentFile().getName()) + "_" + String.valueOf(System.currentTimeMillis() / 1000));
+            dir_name_textfield.setText(((files.size() == 1 && files.get(0).isDirectory()) ? files.get(0).getName() : files.get(0).getParentFile().getName()));
 
             dir_name_textfield.setEnabled(true);
 

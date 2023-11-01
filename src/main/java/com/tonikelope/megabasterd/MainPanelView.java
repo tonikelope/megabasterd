@@ -252,7 +252,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         byte[] share_key = ma.genShareKey();
 
-                        HashMap<String, Object> res = ma.createDir(dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10), ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
+                        String root_name = dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10);
+
+                        HashMap<String, Object> res = ma.createDir(root_name, ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
 
                         String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
@@ -291,9 +293,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                         }
 
                         if (folder_share) {
-                            res = ma.createDirInsideAnotherSharedDir("MEGABASTERD", parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
+                            res = ma.createDirInsideAnotherSharedDir(root_name, parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
                         } else {
-                            res = ma.createDir("MEGABASTERD", parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()));
+                            res = ma.createDir(root_name, parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()));
 
                         }
 
@@ -303,7 +305,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         MegaDirNode file_paths_2 = new MegaDirNode(file_paths_2_node);
 
-                        file_paths.getChildren().put("MEGABASTERD", file_paths_2);
+                        file_paths.getChildren().put(root_name, file_paths_2);
 
                         file_paths = file_paths_2;
 

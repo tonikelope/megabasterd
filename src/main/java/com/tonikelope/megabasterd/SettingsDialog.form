@@ -486,14 +486,16 @@
                                           <Component id="rec_smart_proxy_label1" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="rec_smart_proxy_label" alignment="0" min="-2" max="-2" attributes="0"/>
                                           <Component id="rec_smart_proxy_label2" alignment="0" min="-2" max="-2" attributes="0"/>
-                                          <Group type="102" alignment="0" attributes="0">
-                                              <Group type="103" groupAlignment="0" attributes="0">
-                                                  <Component id="jLabel3" alignment="0" min="-2" max="-2" attributes="0"/>
-                                                  <Component id="jLabel5" alignment="0" min="-2" max="-2" attributes="0"/>
+                                          <Group type="102" attributes="0">
+                                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
+                                                  <Component id="jLabel5" max="32767" attributes="0"/>
+                                                  <Component id="jLabel3" alignment="1" max="32767" attributes="0"/>
+                                                  <Component id="jLabel8" alignment="1" max="32767" attributes="0"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
-                                              <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                                  <Component id="bad_proxy_time_spinner" max="32767" attributes="0"/>
+                                              <Group type="103" groupAlignment="1" max="-2" attributes="0">
+                                                  <Component id="bad_proxy_time_spinner" alignment="0" pref="150" max="32767" attributes="0"/>
+                                                  <Component id="auto_refresh_proxy_time_spinner" alignment="0" max="32767" attributes="0"/>
                                                   <Component id="proxy_timeout_spinner" max="32767" attributes="0"/>
                                               </Group>
                                               <EmptySpace max="-2" attributes="0"/>
@@ -526,6 +528,11 @@
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="rec_smart_proxy_label1" min="-2" max="-2" attributes="0"/>
                               <EmptySpace type="separate" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="jLabel8" alignment="3" min="-2" max="-2" attributes="0"/>
+                                  <Component id="auto_refresh_proxy_time_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="3" attributes="0">
                                   <Component id="jLabel3" alignment="3" min="-2" max="-2" attributes="0"/>
                                   <Component id="bad_proxy_time_spinner" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -682,6 +689,24 @@
                           <Font name="Noto Sans" size="16" style="2"/>
                         </Property>
                         <Property name="text" type="java.lang.String" value="Forces the use of smart proxy even if we still have direct bandwidth available (useful to test proxies)."/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JLabel" name="jLabel8">
+                      <Properties>
+                        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                          <Font name="Noto Sans" size="16" style="1"/>
+                        </Property>
+                        <Property name="text" type="java.lang.String" value="Proxy list refresh (minutes):"/>
+                      </Properties>
+                    </Component>
+                    <Component class="javax.swing.JSpinner" name="auto_refresh_proxy_time_spinner">
+                      <Properties>
+                        <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                          <Font name="Noto Sans" size="16" style="0"/>
+                        </Property>
+                        <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
+                          <SpinnerModel initial="60" minimum="1" numberType="java.lang.Integer" stepSize="1" type="number"/>
+                        </Property>
                       </Properties>
                     </Component>
                   </SubComponents>
@@ -908,7 +933,7 @@
                         </Property>
                         <Property name="lineWrap" type="boolean" value="true"/>
                         <Property name="rows" type="int" value="5"/>
-                        <Property name="text" type="java.lang.String" value="THIS OPTION IS NOT RECOMMENDED. Using this will cause MegaBasterd uploaded folder to appear in your account as NOT DECRYPTABLE. &#xa;&#xa;At the time of writing there is a method to FIX IT:&#xa;&#xa;1) Move &quot;MEGABASTERD&quot; FOLDER (first &quot;child&quot; folder of the upload folder) to the ROOT (cloud) folder of your account. &#xa;&#xa;2) Then go to account settings and RELOAD ACCOUNT. &#xa;&#xa;I don&apos;t know how long this method will last. USE THIS OPTION AT YOUR OWN RISK."/>
+                        <Property name="text" type="java.lang.String" value="THIS OPTION IS NOT RECOMMENDED. Using this will cause MegaBasterd uploaded folder to appear in your account as NOT DECRYPTABLE. &#xa;&#xa;At the time of writing this text, there is a method to FIX IT:&#xa;&#xa;1) Move first upload subfolder to the ROOT (CLOUD) folder of your account. &#xa;&#xa;2) Go to account settings and click RELOAD ACCOUNT. &#xa;&#xa;I don&apos;t know how long this method will last. USE THIS OPTION AT YOUR OWN RISK."/>
                         <Property name="wrapStyleWord" type="boolean" value="true"/>
                       </Properties>
                     </Component>
@@ -1265,31 +1290,26 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="run_command_textbox" max="32767" attributes="0"/>
                               </Group>
-                              <Group type="102" attributes="0">
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="start_frozen_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <Component id="debug_file_checkbox" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="debug_file_path" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <EmptySpace min="-2" pref="165" max="-2" attributes="0"/>
-                                          <Component id="custom_chunks_dir_current_label" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Component id="rec_zoom_label" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Component id="run_command_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                                      <Group type="102" alignment="0" attributes="0">
-                                          <Component id="custom_chunks_dir_checkbox" min="-2" max="-2" attributes="0"/>
-                                          <EmptySpace max="-2" attributes="0"/>
-                                          <Component id="custom_chunks_dir_button" min="-2" max="-2" attributes="0"/>
-                                      </Group>
-                                      <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
-                                          <Component id="jPanel1" alignment="0" max="32767" attributes="0"/>
-                                          <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
-                                      </Group>
-                                  </Group>
-                                  <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
+                              <Component id="start_frozen_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="debug_file_checkbox" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="debug_file_path" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <EmptySpace min="-2" pref="165" max="-2" attributes="0"/>
+                                  <Component id="custom_chunks_dir_current_label" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <Component id="rec_zoom_label" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Component id="run_command_checkbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="custom_chunks_dir_checkbox" min="-2" max="-2" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="custom_chunks_dir_button" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                              <Group type="103" alignment="0" groupAlignment="1" max="-2" attributes="0">
+                                  <Component id="jPanel1" alignment="0" max="32767" attributes="0"/>
+                                  <Component id="jPanel2" alignment="0" max="32767" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>

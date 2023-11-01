@@ -39,6 +39,7 @@ public final class SmartMegaProxyManager {
 
     public static String DEFAULT_SMART_PROXY_URL = null;
     public static final int PROXY_BLOCK_TIME = 300;
+    public static final int PROXY_AUTO_REFRESH_TIME = 60;
     public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 30;
 
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
@@ -49,6 +50,8 @@ public final class SmartMegaProxyManager {
     private volatile int _ban_time;
     private volatile int _proxy_timeout;
     private volatile boolean _force_smart_proxy;
+    private volatile int _autorefresh_time;
+    private volatile long _last_refresh_timestamp;
 
     public int getProxy_timeout() {
         return _proxy_timeout;
@@ -67,6 +70,22 @@ public final class SmartMegaProxyManager {
 
         THREAD_POOL.execute(() -> {
             refreshProxyList();
+
+            while (true) {
+
+                while (System.currentTimeMillis() < _last_refresh_timestamp + _autorefresh_time * 60 * 1000) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                if (MainPanel.isUse_smart_proxy()) {
+
+                    refreshProxyList();
+                }
+            }
         });
     }
 
@@ -114,7 +133,15 @@ public final class SmartMegaProxyManager {
             _force_smart_proxy = MainPanel.FORCE_SMART_PROXY;
         }
 
-        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + " TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + " FORCE: " + String.valueOf(_force_smart_proxy));
+        String autorefresh_smart_proxy_string = DBTools.selectSettingValue("smartproxy_autorefresh_time");
+
+        if (autorefresh_smart_proxy_string != null) {
+            _autorefresh_time = Integer.parseInt(autorefresh_smart_proxy_string);
+        } else {
+            _autorefresh_time = PROXY_AUTO_REFRESH_TIME;
+        }
+
+        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + " TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + " REFRESH: " + String.valueOf(_autorefresh_time) + " FORCE: " + String.valueOf(_force_smart_proxy));
     }
 
     public synchronized int getProxyCount() {
@@ -344,6 +371,8 @@ public final class SmartMegaProxyManager {
             }
 
         }
+
+        _last_refresh_timestamp = System.currentTimeMillis();
 
     }
 
