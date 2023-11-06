@@ -26,6 +26,7 @@ import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -38,6 +39,7 @@ import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLException;
+import javax.swing.JOptionPane;
 import javax.swing.JProgressBar;
 
 /**
@@ -1049,15 +1051,62 @@ public class MegaAPI implements Serializable {
         return ch;
     }
 
-    public HashMap<String, Object> getFolderNodes(String folder_id, String folder_key, JProgressBar bar) throws Exception {
+    public boolean existsCachedFolderNodes(String folder_id) {
+        return Files.exists(Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id));
+    }
+
+    private String getCachedFolderNodes(String folder_id) {
+
+        String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
+
+        if (Files.exists(Paths.get(file_path))) {
+
+            LOG.log(Level.INFO, "MEGA FOLDER {0} USING CACHED JSON FILE TREE", new Object[]{folder_id});
+
+            try {
+                return new String(Files.readAllBytes(Paths.get(file_path)), "UTF-8");
+            } catch (IOException ex) {
+                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return null;
+    }
+
+    private void writeCachedFolderNodes(String folder_id, String res) {
+        String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
+
+        try {
+            Files.write(Paths.get(file_path), res.getBytes());
+        } catch (IOException ex) {
+            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public HashMap<String, Object> getFolderNodes(String folder_id, String folder_key, JProgressBar bar, boolean cache) throws Exception {
 
         HashMap<String, Object> folder_nodes = null;
 
-        String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\", \"ca\":\"1\"}]";
+        String res = null;
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&n=" + folder_id);
+        if (cache) {
+            res = getCachedFolderNodes(folder_id);
+        }
 
-        String res = RAW_REQUEST(request, url_api);
+        if (res == null) {
+
+            String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\", \"ca\":\"1\"}]";
+
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&n=" + folder_id);
+
+            res = RAW_REQUEST(request, url_api);
+
+            if (res != null) {
+                writeCachedFolderNodes(folder_id, res);
+            }
+        }
+
+        LOG.log(Level.INFO, "MEGA FOLDER {0} JSON FILE TREE SIZE -> {1}", new Object[]{folder_id, MiscTools.formatBytes((long) res.length())});
 
         if (res != null) {
 
@@ -1184,8 +1233,14 @@ public class MegaAPI implements Serializable {
 
             String[] folder_parts = entry.getKey().split(":");
 
+            int r = -1;
+
+            if (existsCachedFolderNodes(folder_parts[0])) {
+                r = JOptionPane.showConfirmDialog(MainPanelView.getINSTANCE(), "Do you want to use FOLDER [" + folder_parts[0] + "] CACHED VERSION?\n\n(It could speed up the loading of very large folders)", "FOLDER CACHE", JOptionPane.YES_NO_OPTION);
+            }
+
             try {
-                nlinks.addAll(getNLinksFromFolder(folder_parts[0], folder_parts[1], entry.getValue()));
+                nlinks.addAll(getNLinksFromFolder(folder_parts[0], folder_parts[1], entry.getValue(), (r == 0)));
             } catch (Exception ex) {
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -1196,15 +1251,30 @@ public class MegaAPI implements Serializable {
 
     }
 
-    public ArrayList<String> getNLinksFromFolder(String folder_id, String folder_key, ArrayList<String> file_ids) throws Exception {
+    public ArrayList<String> getNLinksFromFolder(String folder_id, String folder_key, ArrayList<String> file_ids, boolean cache) throws Exception {
 
         ArrayList<String> nlinks = new ArrayList<>();
 
-        String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\"}]";
+        String res = null;
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&n=" + folder_id);
+        if (cache) {
+            res = getCachedFolderNodes(folder_id);
+        }
 
-        String res = RAW_REQUEST(request, url_api);
+        if (res == null) {
+
+            String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\", \"ca\":\"1\"}]";
+
+            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&n=" + folder_id);
+
+            res = RAW_REQUEST(request, url_api);
+
+            if (res != null) {
+                writeCachedFolderNodes(folder_id, res);
+            }
+        }
+
+        LOG.log(Level.INFO, "MEGA FOLDER {0} JSON FILE TREE SIZE -> {1}", new Object[]{folder_id, MiscTools.formatBytes((long) res.length())});
 
         if (res != null) {
 

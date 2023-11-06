@@ -47,6 +47,12 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private volatile boolean exit = false;
 
+    @Override
+    public void dispose() {
+        file_tree.setModel(null);
+        super.dispose();
+    }
+
     public List<HashMap> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
     }
@@ -232,7 +238,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         });
 
         total_space_label.setFont(new java.awt.Font("Dialog", 1, 32)); // NOI18N
-        total_space_label.setForeground(new java.awt.Color(0, 51, 255));
+        total_space_label.setForeground(new java.awt.Color(0, 0, 255));
         total_space_label.setText("[---]");
         total_space_label.setDoubleBuffered(true);
         total_space_label.setEnabled(false);
@@ -441,9 +447,22 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 subfolder_id = fids[1];
             }
 
+            int r = -1;
+
+            if (ma.existsCachedFolderNodes(folder_id)) {
+                r = JOptionPane.showConfirmDialog(this, "Do you want to use FOLDER CACHED VERSION?\n\n(It could speed up the loading of very large folders)", "FOLDER CACHE", JOptionPane.YES_NO_OPTION);
+
+            }
+
+            if (r == 0) {
+                MiscTools.GUIRun(() -> {
+                    folder_link_label.setText(_link + " (CACHED VERSION)");
+                });
+            }
+
             String folder_key = findFirstRegex("#F![^!]+!(.+)", _link, 1);
 
-            folder_nodes = ma.getFolderNodes(folder_id, folder_key, node_bar);
+            folder_nodes = ma.getFolderNodes(folder_id, folder_key, node_bar, (r == 0));
 
             MegaMutableTreeNode root = null;
 

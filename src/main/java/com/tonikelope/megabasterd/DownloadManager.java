@@ -151,10 +151,6 @@ public class DownloadManager extends TransferenceManager {
 
             getTransference_waitstart_queue().remove(d);
 
-            if (getTransference_waitstart_queue().isEmpty()) {
-                _frozen = false;
-            }
-
             getTransference_running_list().remove(d);
 
             getTransference_finished_queue().remove(d);

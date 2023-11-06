@@ -472,7 +472,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         folder_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Please wait..."));
 
-        copyTextToClipboard(_upload.getFolder_link());
+        copyTextToClipboard("[" + _upload.getMa().getEmail() + "] " + _upload.getFolder_link());
 
         folder_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Copy folder link"));
 
@@ -485,7 +485,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         file_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Please wait..."));
 
-        copyTextToClipboard(_upload.getFile_link());
+        copyTextToClipboard("[" + _upload.getMa().getEmail() + "] " + _upload.getFile_link());
 
         file_link_button.setText(LabelTranslatorSingleton.getInstance().translate("Copy file link"));
 
@@ -660,6 +660,15 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         MiscTools.GUIRunAndWait(() -> {
             status_label.setForeground(new Color(102, 102, 102));
+            status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
+        });
+
+    }
+
+    public void printStatusWarning(final String message) {
+
+        MiscTools.GUIRunAndWait(() -> {
+            status_label.setForeground(new Color(255, 0, 255));
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
 

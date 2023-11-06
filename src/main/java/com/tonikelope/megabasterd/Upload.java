@@ -906,7 +906,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                         LOG.log(Level.INFO, "{0} Uploader creating NEW MEGA NODE {1}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
-                        getView().printStatusNormal("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***");
+                        getView().printStatusWarning("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***");
 
                         File f = new File(_file_name);
 
@@ -960,7 +960,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 if (_thumbnail_file != null) {
 
-                                    getView().printStatusNormal("Creating thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
+                                    getView().printStatusWarning("Creating thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
                                     if (!Files.isReadable(Paths.get(_thumbnail_file))) {
                                         Thumbnailer thumbnailer = new Thumbnailer();
@@ -968,7 +968,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                         _thumbnail_file = thumbnailer.createThumbnail(_file_name);
                                     }
 
-                                    getView().printStatusNormal("Uploading thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
+                                    getView().printStatusWarning("Uploading thumbnail ... ***DO NOT EXIT MEGABASTERD NOW***");
 
                                     _ma.uploadThumbnails(this, _fid, _thumbnail_file, _thumbnail_file);
 

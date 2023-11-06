@@ -52,6 +52,7 @@ import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JPanel;
+import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
 
 /**
@@ -61,6 +62,20 @@ import javax.swing.JTabbedPane;
 public final class MainPanelView extends javax.swing.JFrame {
 
     private final MainPanel _main_panel;
+
+    private static volatile MainPanelView INSTANCE = null;
+
+    public JProgressBar getDownload_status_bar() {
+        return download_status_bar;
+    }
+
+    public JProgressBar getUpload_status_bar() {
+        return upload_status_bar;
+    }
+
+    public static MainPanelView getINSTANCE() {
+        return INSTANCE;
+    }
 
     public JMenuItem getMerge_file_menu() {
         return merge_file_menu;
@@ -212,6 +227,13 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 getMain_panel().getUpload_manager().secureNotify();
 
+                MiscTools.GUIRun(() -> {
+                    upload_status_bar.setIndeterminate(true);
+                    upload_status_bar.setValue(upload_status_bar.getMinimum());
+                    upload_status_bar.setMaximum(getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().size() + getMain_panel().getUpload_manager().getTransference_preprocess_queue().size() + getMain_panel().getUpload_manager().getTransference_provision_queue().size());
+                    upload_status_bar.setVisible(true);
+                });
+
                 final String mega_account = (String) dialog.getAccount_combobox().getSelectedItem();
 
                 final String base_path = dialog.getBase_path();
@@ -230,7 +252,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         byte[] share_key = ma.genShareKey();
 
-                        HashMap<String, Object> res = ma.createDir(dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10), ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
+                        String root_name = dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10);
+
+                        HashMap<String, Object> res = ma.createDir(root_name, ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
 
                         String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
@@ -269,9 +293,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                         }
 
                         if (folder_share) {
-                            res = ma.createDirInsideAnotherSharedDir("MEGABASTERD", parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
+                            res = ma.createDirInsideAnotherSharedDir(root_name, parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
                         } else {
-                            res = ma.createDir("MEGABASTERD", parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()));
+                            res = ma.createDir(root_name, parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()));
 
                         }
 
@@ -281,7 +305,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         MegaDirNode file_paths_2 = new MegaDirNode(file_paths_2_node);
 
-                        file_paths.getChildren().put("MEGABASTERD", file_paths_2);
+                        file_paths.getChildren().put(root_name, file_paths_2);
 
                         file_paths = file_paths_2;
 
@@ -291,7 +315,11 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                             try {
 
-                                LOG.log(Level.INFO, "{0} FILE_PATH -> {1}", new Object[]{Thread.currentThread().getName(), file_path});
+                                if (!file_path.isEmpty()) {
+
+                                    LOG.log(Level.INFO, "{0} FILE_PATH -> {1}", new Object[]{Thread.currentThread().getName(), file_path});
+
+                                }
 
                                 String[] dirs = file_path.split("\\" + File.separator);
 
@@ -301,9 +329,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 for (String d : dirs) {
 
-                                    LOG.log(Level.INFO, "{0} DIR -> {1}", new Object[]{Thread.currentThread().getName(), d});
-
                                     if (!d.isEmpty()) {
+
+                                        LOG.log(Level.INFO, "{0} DIR -> {1}", new Object[]{Thread.currentThread().getName(), d});
 
                                         if (current_node.getChildren().get(d) != null) {
 
@@ -335,38 +363,28 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     }
                                 }
 
-                                if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+                                Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, dialog.getPriority_checkbox().isSelected());
 
-                                    Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, dialog.getPriority_checkbox().isSelected());
+                                getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                    getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+                                getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
 
-                                    getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
-
-                                    getMain_panel().getUpload_manager().secureNotify();
-
-                                }
+                                getMain_panel().getUpload_manager().secureNotify();
 
                             } catch (Exception ex) {
 
-                                if (!getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+                                getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
 
-                                    getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
-
-                                    getMain_panel().getUpload_manager().secureNotify();
-
-                                }
+                                getMain_panel().getUpload_manager().secureNotify();
 
                                 LOG.log(SEVERE, null, ex);
                             }
-
                         }
 
                     } catch (Exception ex) {
 
                         LOG.log(SEVERE, null, ex);
                     }
-
                 };
 
                 getMain_panel().getUpload_manager().getTransference_preprocess_queue().add(run);
@@ -443,10 +461,16 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             translateLabels(this);
 
-            for (JComponent c : new JComponent[]{force_chunk_reset_button, unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
+            for (JComponent c : new JComponent[]{download_status_bar, upload_status_bar, force_chunk_reset_button, unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
 
                 c.setVisible(false);
             }
+
+            download_status_bar.setMinimum(0);
+            upload_status_bar.setMinimum(0);
+
+            download_status_bar.setValue(download_status_bar.getMinimum());
+            upload_status_bar.setValue(upload_status_bar.getMinimum());
 
             clean_all_down_menu.setEnabled(false);
             clean_all_up_menu.setEnabled(false);
@@ -523,6 +547,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             pack();
         });
 
+        INSTANCE = this;
     }
 
     /**
@@ -549,6 +574,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         down_remtime_label = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         force_chunk_reset_button = new javax.swing.JButton();
+        download_status_bar = new javax.swing.JProgressBar();
         uploads_panel = new javax.swing.JPanel();
         global_speed_up_label = new javax.swing.JLabel();
         status_up_label = new javax.swing.JLabel();
@@ -557,6 +583,8 @@ public final class MainPanelView extends javax.swing.JFrame {
         jPanel_scroll_up = new javax.swing.JPanel();
         pause_all_up_button = new javax.swing.JButton();
         up_remtime_label = new javax.swing.JLabel();
+        upload_status_bar = new javax.swing.JProgressBar();
+        copy_all_uploads = new javax.swing.JButton();
         unfreeze_transferences_button = new javax.swing.JButton();
         main_menubar = new javax.swing.JMenuBar();
         file_menu = new javax.swing.JMenu();
@@ -669,14 +697,15 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pause_all_down_button))
             .addGroup(downloads_panelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(18, 18, 18)
                 .addComponent(close_all_finished_down_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jButton1))
+                .addComponent(jButton1)
+                .addContainerGap())
             .addComponent(jScrollPane_down)
             .addComponent(down_remtime_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(download_status_bar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         downloads_panelLayout.setVerticalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -688,7 +717,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                         .addComponent(jButton1))
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                .addComponent(download_status_bar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane_down, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(down_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -735,31 +766,47 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         up_remtime_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
 
+        copy_all_uploads.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        copy_all_uploads.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-copy-to-clipboard-30.png"))); // NOI18N
+        copy_all_uploads.setText("COPY ALL UPLOAD LINKS");
+        copy_all_uploads.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copy_all_uploadsActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
         uploads_panelLayout.setHorizontalGroup(
             uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(uploads_panelLayout.createSequentialGroup()
-                .addComponent(global_speed_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(global_speed_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, 839, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(pause_all_up_button))
             .addGroup(uploads_panelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addGap(3, 3, 3)
+                .addComponent(close_all_finished_up_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(close_all_finished_up_button))
+                .addComponent(copy_all_uploads)
+                .addContainerGap())
             .addComponent(jScrollPane_up)
             .addComponent(up_remtime_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(upload_status_bar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
         );
         uploads_panelLayout.setVerticalGroup(
             uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(copy_all_uploads))
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 288, Short.MAX_VALUE)
+                .addComponent(upload_status_bar, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane_up, javax.swing.GroupLayout.DEFAULT_SIZE, 277, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(up_remtime_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1022,8 +1069,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             Runnable run = () -> {
 
-                //Convert to legacy link format
-                String link_data = MiscTools.newMegaLinks2Legacy(dialog.getLinks_textarea().getText());
+                String link_data = MiscTools.extractMegaLinksFromString(dialog.getLinks_textarea().getText());
 
                 Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
 
@@ -1063,6 +1109,17 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     Set<String> folder_file_links = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+#F\\*[^\r\n!]*?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
 
+                    getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(folder_file_links);
+
+                    getMain_panel().getDownload_manager().secureNotify();
+
+                    MiscTools.GUIRun(() -> {
+                        download_status_bar.setIndeterminate(true);
+                        download_status_bar.setValue(download_status_bar.getMinimum());
+                        download_status_bar.setMaximum(getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().size() + getMain_panel().getDownload_manager().getTransference_preprocess_queue().size() + getMain_panel().getDownload_manager().getTransference_provision_queue().size());
+                        download_status_bar.setVisible(true);
+                    });
+
                     if (!folder_file_links.isEmpty()) {
                         ArrayList<String> nlinks = ma.GENERATE_N_LINKS(folder_file_links);
 
@@ -1070,6 +1127,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         urls.addAll(nlinks);
                     }
+
+                    getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().removeAll(folder_file_links);
 
                     getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(urls);
 
@@ -1194,6 +1253,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                         }
 
                     }
+
                 } else {
                     MiscTools.GUIRun(() -> {
                         new_download_menu.setEnabled(true);
@@ -1544,6 +1604,14 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_force_chunk_reset_buttonActionPerformed
 
+    private void copy_all_uploadsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_all_uploadsActionPerformed
+        // TODO add your handling code here:
+        int total = _main_panel.getUpload_manager().copyAllLinksToClipboard();
+
+        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate(total > 0 ? "ALL UPLOAD LINKS COPIED!" : "NO UPLOAD LINKS TO COPY"));
+
+    }//GEN-LAST:event_copy_all_uploadsActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JMenuItem about_menu;
     private javax.swing.JCheckBoxMenuItem auto_close_menu;
@@ -1552,7 +1620,9 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JMenuItem clean_all_up_menu;
     private javax.swing.JButton close_all_finished_down_button;
     private javax.swing.JButton close_all_finished_up_button;
+    private javax.swing.JButton copy_all_uploads;
     private javax.swing.JLabel down_remtime_label;
+    private javax.swing.JProgressBar download_status_bar;
     private javax.swing.JPanel downloads_panel;
     private javax.swing.JMenu edit_menu;
     private javax.swing.JMenuItem exit_menu;
@@ -1588,6 +1658,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JLabel status_up_label;
     private javax.swing.JButton unfreeze_transferences_button;
     private javax.swing.JLabel up_remtime_label;
+    private javax.swing.JProgressBar upload_status_bar;
     private javax.swing.JPanel uploads_panel;
     // End of variables declaration//GEN-END:variables
     private static final Logger LOG = Logger.getLogger(MainPanelView.class.getName());

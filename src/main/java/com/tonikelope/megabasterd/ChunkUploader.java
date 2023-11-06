@@ -245,7 +245,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                             } else if (tot_bytes_up == chunk_size || reads == -1) {
 
                                 if (_upload.getProgress() == _upload.getFile_size()) {
-                                    _upload.getView().printStatusNormal("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***");
+                                    _upload.getView().printStatusWarning("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***");
                                     _upload.getView().getPause_button().setEnabled(false);
                                 }
 
