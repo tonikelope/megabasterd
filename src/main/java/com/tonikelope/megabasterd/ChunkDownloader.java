@@ -431,7 +431,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             setExit(true);
                         }
 
-                    } else {
+                    } else if (proxy_manager != null && proxy_manager.isReset_slot_proxy()) {
                         _current_smart_proxy = null;
                     }
 

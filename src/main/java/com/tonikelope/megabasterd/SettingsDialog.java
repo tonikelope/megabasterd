@@ -361,6 +361,32 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             ((JSpinner.DefaultEditor) proxy_timeout_spinner.getEditor()).getTextField().setEditable(true);
 
+            boolean reset_slot_proxy = SmartMegaProxyManager.RESET_SLOT_PROXY;
+
+            String sreset_slot_proxy = DBTools.selectSettingValue("reset_slot_proxy");
+
+            if (sreset_slot_proxy != null) {
+
+                reset_slot_proxy = sreset_slot_proxy.equals("yes");
+            }
+
+            proxy_reset_slot_checkbox.setSelected(reset_slot_proxy);
+
+            boolean random_select = SmartMegaProxyManager.RANDOM_SELECT;
+
+            String srandom_select = DBTools.selectSettingValue("random_proxy");
+
+            if (srandom_select != null) {
+
+                random_select = srandom_select.equals("yes");
+            }
+
+            if (random_select) {
+                proxy_random_radio.setSelected(true);
+            } else {
+                proxy_sequential_radio.setSelected(true);
+            }
+
             String max_ul_speed = DBTools.selectSettingValue("max_upload_speed");
 
             int max_upload_speed = Upload.MAX_TRANSFERENCE_SPEED_DEFAULT;
@@ -779,13 +805,18 @@ public class SettingsDialog extends javax.swing.JDialog {
         custom_proxy_textarea = new javax.swing.JTextArea();
         rec_smart_proxy_label1 = new javax.swing.JLabel();
         custom_proxy_list_label = new javax.swing.JLabel();
-        rec_smart_proxy_label2 = new javax.swing.JLabel();
         rec_smart_proxy_label = new javax.swing.JLabel();
         proxy_timeout_spinner = new javax.swing.JSpinner();
         force_smart_proxy_checkbox = new javax.swing.JCheckBox();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
         auto_refresh_proxy_time_spinner = new javax.swing.JSpinner();
+        proxy_random_radio = new javax.swing.JRadioButton();
+        proxy_sequential_radio = new javax.swing.JRadioButton();
+        jLabel9 = new javax.swing.JLabel();
+        proxy_reset_slot_checkbox = new javax.swing.JCheckBox();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
         uploads_scrollpane = new javax.swing.JScrollPane();
         uploads_panel = new javax.swing.JPanel();
         default_slots_up_label = new javax.swing.JLabel();
@@ -1035,9 +1066,6 @@ public class SettingsDialog extends javax.swing.JDialog {
         custom_proxy_list_label.setText("[*]IP:PORT[@user_b64:password_b64] OR #PROXY_LIST_URL");
         custom_proxy_list_label.setOpaque(true);
 
-        rec_smart_proxy_label2.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
-        rec_smart_proxy_label2.setText("Note2: proxies are selected RANDOMLY. ");
-
         rec_smart_proxy_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
         rec_smart_proxy_label.setText("Note1: enable it in order to mitigate bandwidth limit. (Multislot is required) ");
 
@@ -1048,7 +1076,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         force_smart_proxy_checkbox.setText("FORCE SMART PROXY");
 
         jLabel7.setFont(new java.awt.Font("Noto Sans", 2, 16)); // NOI18N
-        jLabel7.setText("Forces the use of smart proxy even if we still have direct bandwidth available (useful to test proxies).");
+        jLabel7.setText("Forces the use of smart proxy even if we still have direct bandwidth available (useful to test proxies)");
 
         jLabel8.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
         jLabel8.setText("Proxy list refresh (minutes):");
@@ -1056,39 +1084,79 @@ public class SettingsDialog extends javax.swing.JDialog {
         auto_refresh_proxy_time_spinner.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
         auto_refresh_proxy_time_spinner.setModel(new javax.swing.SpinnerNumberModel(60, 1, null, 1));
 
+        proxy_random_radio.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
+        proxy_random_radio.setText("RANDOM");
+        proxy_random_radio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                proxy_random_radioActionPerformed(evt);
+            }
+        });
+
+        proxy_sequential_radio.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
+        proxy_sequential_radio.setText("SEQUENTIAL");
+        proxy_sequential_radio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                proxy_sequential_radioActionPerformed(evt);
+            }
+        });
+
+        jLabel9.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
+        jLabel9.setText("Proxy selection order:");
+
+        proxy_reset_slot_checkbox.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
+        proxy_reset_slot_checkbox.setText("Reset slot proxy after successfully downloading a chunk");
+
+        jLabel10.setFont(new java.awt.Font("Noto Sans", 2, 16)); // NOI18N
+        jLabel10.setText("(Useful to avoid getting trapped in slow proxies)");
+
+        jLabel11.setFont(new java.awt.Font("Noto Sans", 2, 16)); // NOI18N
+        jLabel11.setText("(If you have a list of proxies sorted from best to worst, check sequential)");
+
         javax.swing.GroupLayout smart_proxy_settingsLayout = new javax.swing.GroupLayout(smart_proxy_settings);
         smart_proxy_settings.setLayout(smart_proxy_settingsLayout);
         smart_proxy_settingsLayout.setHorizontalGroup(
             smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
-                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                .addComponent(force_smart_proxy_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(custom_proxy_list_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
+            .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(rec_smart_proxy_label1)
                             .addComponent(rec_smart_proxy_label)
-                            .addComponent(rec_smart_proxy_label2)
                             .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
-                                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                                    .addComponent(bad_proxy_time_spinner, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
-                                    .addComponent(auto_refresh_proxy_time_spinner, javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(proxy_timeout_spinner))
+                                    .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                                        .addComponent(jLabel9)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 49, Short.MAX_VALUE)
+                                        .addComponent(proxy_random_radio)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(proxy_sequential_radio))
+                                    .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                                        .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addComponent(bad_proxy_time_spinner, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
+                                            .addComponent(auto_refresh_proxy_time_spinner, javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(proxy_timeout_spinner))))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(jLabel4)
-                                    .addComponent(jLabel6)))))
+                                    .addComponent(jLabel6)
+                                    .addComponent(jLabel11)))))
                     .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
-                        .addComponent(force_smart_proxy_checkbox)
+                        .addComponent(proxy_reset_slot_checkbox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(custom_proxy_list_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jScrollPane1))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addComponent(jLabel10)))
+                .addGap(0, 0, Short.MAX_VALUE))
         );
         smart_proxy_settingsLayout.setVerticalGroup(
             smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1096,10 +1164,14 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(rec_smart_proxy_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(rec_smart_proxy_label2)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rec_smart_proxy_label1)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(proxy_random_radio)
+                    .addComponent(proxy_sequential_radio)
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel11))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel8)
                     .addComponent(auto_refresh_proxy_time_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1113,6 +1185,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(jLabel5)
                     .addComponent(proxy_timeout_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel6))
+                .addGap(7, 7, 7)
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(proxy_reset_slot_checkbox)
+                    .addComponent(jLabel10))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(force_smart_proxy_checkbox)
@@ -1129,48 +1205,52 @@ public class SettingsDialog extends javax.swing.JDialog {
         downloads_panelLayout.setHorizontalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(smart_proxy_checkbox)
                     .addGroup(downloads_panelLayout.createSequentialGroup()
-                        .addComponent(max_downloads_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(max_downloads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(multi_slot_down_checkbox)
-                    .addGroup(downloads_panelLayout.createSequentialGroup()
-                        .addComponent(change_download_dir_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(down_dir_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(default_dir_label))
-                    .addComponent(megacrypter_reverse_checkbox)
-                    .addComponent(use_mega_account_down_checkbox)
-                    .addComponent(verify_file_down_checkbox)
-                    .addComponent(limit_download_speed_checkbox)
-                    .addComponent(clipboardspy_checkbox)
-                    .addGroup(downloads_panelLayout.createSequentialGroup()
-                        .addGap(21, 21, 21)
+                        .addContainerGap()
                         .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(rec_download_slots_label)
+                            .addComponent(smart_proxy_checkbox)
                             .addGroup(downloads_panelLayout.createSequentialGroup()
-                                .addComponent(default_slots_down_label)
+                                .addComponent(max_downloads_label)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(default_slots_down_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(max_downloads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(multi_slot_down_checkbox)
                             .addGroup(downloads_panelLayout.createSequentialGroup()
-                                .addComponent(use_mega_label)
+                                .addComponent(change_download_dir_button)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 700, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(megacrypter_reverse_warning_label)
+                                .addComponent(down_dir_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(default_dir_label))
+                            .addComponent(megacrypter_reverse_checkbox)
+                            .addComponent(use_mega_account_down_checkbox)
+                            .addComponent(verify_file_down_checkbox)
+                            .addComponent(limit_download_speed_checkbox)
+                            .addComponent(clipboardspy_checkbox)
                             .addGroup(downloads_panelLayout.createSequentialGroup()
-                                .addComponent(megacrypter_reverse_port_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(megacrypter_reverse_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(downloads_panelLayout.createSequentialGroup()
-                                .addComponent(max_down_speed_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                    .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(0, 0, 0))
+                                .addGap(21, 21, 21)
+                                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(rec_download_slots_label)
+                                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                                        .addComponent(default_slots_down_label)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(default_slots_down_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                                        .addComponent(use_mega_label)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 700, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(megacrypter_reverse_warning_label)
+                                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                                        .addComponent(megacrypter_reverse_port_label)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(megacrypter_reverse_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                                        .addComponent(max_down_speed_label)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -2020,6 +2100,8 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("thumbnails", thumbnail_checkbox.isSelected() ? "yes" : "no");
             settings.put("upload_log", upload_log_checkbox.isSelected() ? "yes" : "no");
             settings.put("force_smart_proxy", force_smart_proxy_checkbox.isSelected() ? "yes" : "no");
+            settings.put("reset_slot_proxy", proxy_reset_slot_checkbox.isSelected() ? "yes" : "no");
+            settings.put("random_proxy", proxy_random_radio.isSelected() ? "yes" : "no");
             settings.put("upload_public_folder", upload_public_folder_checkbox.isSelected() ? "yes" : "no");
             settings.put("smartproxy_ban_time", String.valueOf(bad_proxy_time_spinner.getValue()));
             settings.put("smartproxy_timeout", String.valueOf(proxy_timeout_spinner.getValue()));
@@ -3304,6 +3386,20 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_upload_public_folder_checkboxActionPerformed
 
+    private void proxy_random_radioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proxy_random_radioActionPerformed
+        // TODO add your handling code here:
+        proxy_random_radio.setSelected(true);
+        proxy_sequential_radio.setSelected(false);
+
+    }//GEN-LAST:event_proxy_random_radioActionPerformed
+
+    private void proxy_sequential_radioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proxy_sequential_radioActionPerformed
+        // TODO add your handling code here:
+        proxy_sequential_radio.setSelected(true);
+        proxy_random_radio.setSelected(false);
+
+    }//GEN-LAST:event_proxy_sequential_radioActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -3343,6 +3439,8 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JButton import_settings_button;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
@@ -3350,6 +3448,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JProgressBar jProgressBar1;
@@ -3382,6 +3481,9 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JPasswordField proxy_pass_textfield;
     private javax.swing.JLabel proxy_port_label;
     private javax.swing.JTextField proxy_port_textfield;
+    private javax.swing.JRadioButton proxy_random_radio;
+    private javax.swing.JCheckBox proxy_reset_slot_checkbox;
+    private javax.swing.JRadioButton proxy_sequential_radio;
     private javax.swing.JSpinner proxy_timeout_spinner;
     private javax.swing.JLabel proxy_user_label;
     private javax.swing.JTextField proxy_user_textfield;
@@ -3391,7 +3493,6 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel rec_download_slots_label;
     private javax.swing.JLabel rec_smart_proxy_label;
     private javax.swing.JLabel rec_smart_proxy_label1;
-    private javax.swing.JLabel rec_smart_proxy_label2;
     private javax.swing.JLabel rec_upload_slots_label;
     private javax.swing.JLabel rec_zoom_label;
     private javax.swing.JButton remove_elc_account_button;
