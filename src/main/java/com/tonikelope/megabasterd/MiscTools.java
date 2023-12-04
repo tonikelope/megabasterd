@@ -119,6 +119,8 @@ public class MiscTools {
     public static final int EXP_BACKOFF_MAX_WAIT_TIME = 8;
     public static final Object PASS_LOCK = new Object();
     public static final int HTTP_TIMEOUT = 30;
+    public static final String UPLOAD_LOGS_DIR = System.getProperty("user.home") + File.separator + "MEGABASTERD_UPLOAD_LOGS";
+
     private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = (DefaultMutableTreeNode a, DefaultMutableTreeNode b) -> {
         if (a.isLeaf() && !b.isLeaf()) {
             return 1;
@@ -158,6 +160,27 @@ public class MiscTools {
         }
 
         return null;
+    }
+
+    public static void createUploadLogDir() {
+
+        if (!Files.exists(Paths.get(UPLOAD_LOGS_DIR))) {
+            try {
+                Files.createDirectory(Paths.get(UPLOAD_LOGS_DIR));
+
+                File dir = new File(System.getProperty("user.home"));
+
+                for (File file : dir.listFiles()) {
+                    if (!file.isDirectory() && file.getName().startsWith("megabasterd_upload_")) {
+                        Files.move(file.toPath(), Paths.get(UPLOAD_LOGS_DIR + File.separator + file.getName()));
+                    }
+                }
+
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
     }
 
     public static void purgeFolderCache() {

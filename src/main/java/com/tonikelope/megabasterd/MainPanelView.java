@@ -276,7 +276,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         if (dialog.getUpload_log_checkbox().isSelected()) {
 
-                            File upload_log = new File(MainPanel.MEGABASTERD_HOME_DIR + "/megabasterd_upload_" + parent_node + ".log");
+                            File upload_log = new File(MiscTools.UPLOAD_LOGS_DIR + "/megabasterd_upload_" + parent_node + ".log");
                             upload_log.createNewFile();
 
                             FileWriter fr;
