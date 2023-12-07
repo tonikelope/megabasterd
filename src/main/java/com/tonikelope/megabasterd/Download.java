@@ -1534,7 +1534,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     _retrying_request = true;
 
                     MiscTools.GUIRun(() -> {
-                        getMain_panel().getView().getNew_download_menu().setEnabled(true);
 
                         getView().getStop_button().setVisible(true);
 

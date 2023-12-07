@@ -1026,8 +1026,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void new_download_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_download_menuActionPerformed
 
-        new_download_menu.setEnabled(false);
-
         final LinkGrabberDialog dialog = new LinkGrabberDialog(this, true, _main_panel.getDefault_download_path(), _main_panel.getClipboardspy());
 
         _main_panel.getClipboardspy().attachObserver(dialog);
@@ -1133,10 +1131,6 @@ public final class MainPanelView extends javax.swing.JFrame {
                     getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().addAll(urls);
 
                     getMain_panel().getDownload_manager().secureNotify();
-
-                    MiscTools.GUIRun(() -> {
-                        new_download_menu.setEnabled(true);
-                    });
 
                     boolean link_warning;
 
@@ -1254,10 +1248,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     }
 
-                } else {
-                    MiscTools.GUIRun(() -> {
-                        new_download_menu.setEnabled(true);
-                    });
                 }
             };
 
@@ -1265,9 +1255,6 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             getMain_panel().getDownload_manager().secureNotify();
 
-        } else {
-
-            new_download_menu.setEnabled(true);
         }
 
         dialog.dispose();
