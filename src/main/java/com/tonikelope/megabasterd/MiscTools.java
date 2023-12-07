@@ -11,6 +11,7 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MainPanel.VERSION;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Desktop;
@@ -99,6 +100,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -280,12 +283,35 @@ public class MiscTools {
         return font;
     }
 
-    public static void setNimbusLookAndFeel() {
+    public static void setNimbusLookAndFeel(boolean dark) {
 
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
+
+                    if (dark) {
+                        // Dark LAF
+                        UIManager.put("control", new Color(128, 128, 128));
+                        UIManager.put("info", new Color(128, 128, 128));
+                        UIManager.put("nimbusBase", new Color(18, 30, 49));
+                        UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
+                        UIManager.put("nimbusDisabledText", new Color(128, 128, 128));
+                        UIManager.put("nimbusFocus", new Color(115, 164, 209));
+                        UIManager.put("nimbusGreen", new Color(176, 179, 50));
+                        UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
+                        UIManager.put("nimbusLightBackground", new Color(18, 30, 49));
+                        UIManager.put("nimbusOrange", new Color(191, 98, 4));
+                        UIManager.put("nimbusRed", new Color(169, 46, 34));
+                        UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
+                        UIManager.put("nimbusSelectionBackground", new Color(104, 93, 156));
+                        UIManager.put("text", new Color(230, 230, 230));
+                        // SwingUtilities.updateComponentTreeUI(this);
+                    } else {
+                        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+                        defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
+                    }
+
                     break;
                 }
             }

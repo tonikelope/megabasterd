@@ -387,6 +387,17 @@ public class SettingsDialog extends javax.swing.JDialog {
                 proxy_sequential_radio.setSelected(true);
             }
 
+            boolean dark_mode = false;
+
+            String dark_mode_select = DBTools.selectSettingValue("dark_mode");
+
+            if (dark_mode_select != null) {
+
+                dark_mode = dark_mode_select.equals("yes");
+            }
+
+            dark_mode_checkbox.setSelected(dark_mode);
+
             String max_ul_speed = DBTools.selectSettingValue("max_upload_speed");
 
             int max_upload_speed = Upload.MAX_TRANSFERENCE_SPEED_DEFAULT;
@@ -883,6 +894,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         font_combo = new javax.swing.JComboBox<>();
         zoom_label = new javax.swing.JLabel();
         zoom_spinner = new javax.swing.JSpinner();
+        dark_mode_checkbox = new javax.swing.JCheckBox();
         debug_file_path = new javax.swing.JLabel();
         status = new javax.swing.JLabel();
 
@@ -996,6 +1008,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         default_dir_label.setBackground(new java.awt.Color(153, 255, 153));
         default_dir_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        default_dir_label.setForeground(new java.awt.Color(51, 0, 255));
         default_dir_label.setText("default dir");
         default_dir_label.setOpaque(true);
 
@@ -1364,6 +1377,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         public_folder_warning.setBackground(new java.awt.Color(255, 255, 51));
         public_folder_warning.setColumns(20);
         public_folder_warning.setFont(new java.awt.Font("Noto Sans", 1, 18)); // NOI18N
+        public_folder_warning.setForeground(new java.awt.Color(0, 51, 255));
         public_folder_warning.setLineWrap(true);
         public_folder_warning.setRows(5);
         public_folder_warning.setText("THIS OPTION IS NOT RECOMMENDED. Using this will cause MegaBasterd uploaded folder to appear in your account as NOT DECRYPTABLE. \n\nAt the time of writing this text, there is a method to FIX IT:\n\n1) Move first upload subfolder to the ROOT (CLOUD) folder of your account. \n\n2) Go to account settings and click RELOAD ACCOUNT. \n\nI don't know how long this method will last. USE THIS OPTION AT YOUR OWN RISK.");
@@ -1889,25 +1903,30 @@ public class SettingsDialog extends javax.swing.JDialog {
         zoom_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         zoom_spinner.setDoubleBuffered(true);
 
+        dark_mode_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        dark_mode_checkbox.setText("DARK MODE");
+
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
         jPanel2Layout.setHorizontalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(zoom_label)
-                            .addComponent(font_label))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(font_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addComponent(jLabel2)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(jPanel2Layout.createSequentialGroup()
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(zoom_label)
+                                .addComponent(font_label))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(font_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel2Layout.createSequentialGroup()
+                            .addComponent(jLabel2)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(dark_mode_checkbox))
                 .addContainerGap())
         );
         jPanel2Layout.setVerticalGroup(
@@ -1925,6 +1944,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(dark_mode_checkbox)
                 .addContainerGap())
         );
 
@@ -2102,6 +2123,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("force_smart_proxy", force_smart_proxy_checkbox.isSelected() ? "yes" : "no");
             settings.put("reset_slot_proxy", proxy_reset_slot_checkbox.isSelected() ? "yes" : "no");
             settings.put("random_proxy", proxy_random_radio.isSelected() ? "yes" : "no");
+            settings.put("dark_mode", dark_mode_checkbox.isSelected() ? "yes" : "no");
             settings.put("upload_public_folder", upload_public_folder_checkbox.isSelected() ? "yes" : "no");
             settings.put("smartproxy_ban_time", String.valueOf(bad_proxy_time_spinner.getValue()));
             settings.put("smartproxy_timeout", String.valueOf(proxy_timeout_spinner.getValue()));
@@ -2168,6 +2190,16 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
 
             String zoom = String.valueOf(zoom_spinner.getValue());
+
+            boolean old_dark_mode = false;
+
+            String dark_mode_val = DBTools.selectSettingValue("dark_mode");
+
+            if (dark_mode_val != null) {
+                old_dark_mode = (dark_mode_val.equals("yes"));
+            }
+
+            boolean dark_mode = dark_mode_checkbox.isSelected();
 
             boolean old_use_proxy = false;
 
@@ -2242,7 +2274,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                     || !proxy_host.equals(old_proxy_host)
                     || !proxy_port.equals(old_proxy_port)
                     || !proxy_user.equals(old_proxy_user)
-                    || !proxy_pass.equals(old_proxy_pass)) {
+                    || !proxy_pass.equals(old_proxy_pass)
+                    || dark_mode != old_dark_mode) {
 
                 _main_panel.setRestart(true);
             }
@@ -3416,6 +3449,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel custom_chunks_dir_current_label;
     private javax.swing.JLabel custom_proxy_list_label;
     private javax.swing.JTextArea custom_proxy_textarea;
+    private javax.swing.JCheckBox dark_mode_checkbox;
     private javax.swing.JCheckBox debug_file_checkbox;
     private javax.swing.JLabel debug_file_path;
     private javax.swing.JLabel default_dir_label;

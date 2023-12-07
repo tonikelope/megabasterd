@@ -61,7 +61,6 @@ import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JPopupMenu;
 import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 
 /**
@@ -70,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.16";
+    public static final String VERSION = "8.17";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -107,10 +106,7 @@ public final class MainPanel {
 
     public static void main(String args[]) {
 
-        setNimbusLookAndFeel();
-
-        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
-        defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
+        setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
 
         if (args.length > 0) {
 
