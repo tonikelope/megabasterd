@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.18";
+    public static final String VERSION = "8.19";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -106,7 +106,14 @@ public final class MainPanel {
 
     public static void main(String args[]) {
 
-        setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
+        boolean dark = false;
+
+        try {
+            dark = "yes".equals(DBTools.selectSettingValue("dark_mode"));
+        } catch (Exception ex) {
+        }
+
+        setNimbusLookAndFeel(dark);
 
         if (args.length > 0) {
 

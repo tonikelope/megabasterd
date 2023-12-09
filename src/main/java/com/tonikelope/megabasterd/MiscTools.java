@@ -287,7 +287,9 @@ public class MiscTools {
 
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+
                 if ("Nimbus".equals(info.getName())) {
+
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
 
                     if (dark) {
@@ -296,7 +298,7 @@ public class MiscTools {
                         UIManager.put("info", new Color(128, 128, 128));
                         UIManager.put("nimbusBase", new Color(18, 30, 49));
                         UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
-                        UIManager.put("nimbusDisabledText", new Color(128, 128, 128));
+                        UIManager.put("nimbusDisabledText", new Color(100, 100, 100));
                         UIManager.put("nimbusFocus", new Color(115, 164, 209));
                         UIManager.put("nimbusGreen", new Color(176, 179, 50));
                         UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
@@ -306,7 +308,7 @@ public class MiscTools {
                         UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
                         UIManager.put("nimbusSelectionBackground", new Color(104, 93, 156));
                         UIManager.put("text", new Color(230, 230, 230));
-                        // SwingUtilities.updateComponentTreeUI(this);
+
                     } else {
                         UIDefaults defaults = UIManager.getLookAndFeelDefaults();
                         defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
@@ -315,7 +317,7 @@ public class MiscTools {
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (Exception ex) {
             java.util.logging.Logger.getLogger(MiscTools.class.getName()).log(java.util.logging.Level.SEVERE, ex.getMessage());
         }
     }
