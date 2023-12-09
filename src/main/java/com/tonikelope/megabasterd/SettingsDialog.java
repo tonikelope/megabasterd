@@ -2129,6 +2129,10 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("smartproxy_timeout", String.valueOf(proxy_timeout_spinner.getValue()));
             settings.put("smartproxy_autorefresh_time", String.valueOf(auto_refresh_proxy_time_spinner.getValue()));
 
+            if (upload_log_checkbox.isSelected()) {
+                createUploadLogDir();
+            }
+
             if (custom_proxy_textarea.getText().trim().length() == 0) {
                 smart_proxy_checkbox.setSelected(false);
             }

@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.19";
+    public static final String VERSION = "8.20";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -106,14 +106,19 @@ public final class MainPanel {
 
     public static void main(String args[]) {
 
-        boolean dark = false;
-
         try {
-            dark = "yes".equals(DBTools.selectSettingValue("dark_mode"));
-        } catch (Exception ex) {
+
+            setupSqliteTables();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
-        setNimbusLookAndFeel(dark);
+        setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
+
+        if ("yes".equals(DBTools.selectSettingValue("upload_log"))) {
+            MiscTools.createUploadLogDir();
+        }
 
         if (args.length > 0) {
 
@@ -258,16 +263,6 @@ public final class MainPanel {
         _resume_uploads = false;
 
         _resume_downloads = false;
-
-        MiscTools.createUploadLogDir();
-
-        try {
-
-            setupSqliteTables();
-
-        } catch (SQLException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
-        }
 
         loadUserSettings();
 
