@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.20";
+    public static final String VERSION = "8.21";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -106,20 +106,6 @@ public final class MainPanel {
 
     public static void main(String args[]) {
 
-        try {
-
-            setupSqliteTables();
-
-        } catch (SQLException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
-        }
-
-        setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
-
-        if ("yes".equals(DBTools.selectSettingValue("upload_log"))) {
-            MiscTools.createUploadLogDir();
-        }
-
         if (args.length > 0) {
 
             if (args.length > 1) {
@@ -142,6 +128,20 @@ public final class MainPanel {
 
         if (f.exists()) {
             MEGABASTERD_HOME_DIR = f.getParentFile().getAbsolutePath();
+        }
+
+        try {
+
+            setupSqliteTables();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+        }
+
+        setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
+
+        if ("yes".equals(DBTools.selectSettingValue("upload_log"))) {
+            MiscTools.createUploadLogDir();
         }
 
         final MainPanel main_panel = new MainPanel();
