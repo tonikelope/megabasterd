@@ -41,6 +41,8 @@ public final class SmartMegaProxyManager {
     public static final int PROXY_BLOCK_TIME = 300;
     public static final int PROXY_AUTO_REFRESH_TIME = 60;
     public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 30;
+    public static final boolean RESET_SLOT_PROXY = true;
+    public static final boolean RANDOM_SELECT = true;
 
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
@@ -52,6 +54,16 @@ public final class SmartMegaProxyManager {
     private volatile boolean _force_smart_proxy;
     private volatile int _autorefresh_time;
     private volatile long _last_refresh_timestamp;
+    private volatile boolean _random_select;
+    private volatile boolean _reset_slot_proxy;
+
+    public boolean isRandom_select() {
+        return _random_select;
+    }
+
+    public boolean isReset_slot_proxy() {
+        return _reset_slot_proxy;
+    }
 
     public int getProxy_timeout() {
         return _proxy_timeout;
@@ -141,7 +153,25 @@ public final class SmartMegaProxyManager {
             _autorefresh_time = PROXY_AUTO_REFRESH_TIME;
         }
 
-        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + " TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + " REFRESH: " + String.valueOf(_autorefresh_time) + " FORCE: " + String.valueOf(_force_smart_proxy));
+        String reset_slot_proxy = DBTools.selectSettingValue("reset_slot_proxy");
+
+        if (reset_slot_proxy != null) {
+
+            _reset_slot_proxy = reset_slot_proxy.equals("yes");
+        } else {
+            _reset_slot_proxy = RESET_SLOT_PROXY;
+        }
+
+        String random_select = DBTools.selectSettingValue("random_proxy");
+
+        if (random_select != null) {
+
+            _random_select = random_select.equals("yes");
+        } else {
+            _random_select = RANDOM_SELECT;
+        }
+
+        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + "   TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + "   REFRESH: " + String.valueOf(_autorefresh_time) + "   FORCE: " + String.valueOf(_force_smart_proxy) + "   RANDOM: " + String.valueOf(_random_select) + "   RESET-SLOT-PROXY: " + String.valueOf(_reset_slot_proxy));
     }
 
     public synchronized int getProxyCount() {
@@ -157,7 +187,9 @@ public final class SmartMegaProxyManager {
 
             List<String> keysList = new ArrayList<>(keys);
 
-            Collections.shuffle(keysList);
+            if (isRandom_select()) {
+                Collections.shuffle(keysList);
+            }
 
             Long current_time = System.currentTimeMillis();
 

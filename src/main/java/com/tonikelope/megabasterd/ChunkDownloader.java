@@ -194,7 +194,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (_current_smart_proxy != null && chunk_error) {
 
-                        proxy_manager.blockProxy(_current_smart_proxy, timeout ? "TIMEOUT!" : "HTTP " + String.valueOf(http_error));
+                        if (!timeout && http_error != 429) {
+                            proxy_manager.blockProxy(_current_smart_proxy, timeout ? "TIMEOUT!" : "HTTP " + String.valueOf(http_error));
+                        } else if (timeout) {
+                            _excluded_proxy_list.add(_current_smart_proxy);
+                            LOG.log(Level.WARNING, "{0} Worker [{1}] PROXY {2} TIMEOUT", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
+                        } else {
+                            _excluded_proxy_list.add(_current_smart_proxy);
+                            LOG.log(Level.WARNING, "{0} Worker [{1}] PROXY {2} TOO MANY CONNECTIONS", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
+                        }
 
                         String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
@@ -273,6 +281,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 chunk_error = true;
 
                 timeout = false;
+
+                http_error = 0;
 
                 File tmp_chunk_file = null, chunk_file = null;
 
@@ -431,7 +441,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             setExit(true);
                         }
 
-                    } else {
+                    } else if (proxy_manager != null && proxy_manager.isReset_slot_proxy()) {
                         _current_smart_proxy = null;
                     }
 

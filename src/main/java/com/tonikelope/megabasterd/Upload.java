@@ -992,7 +992,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 synchronized (this.getMain_panel().getUpload_manager().getLog_file_lock()) {
 
-                                    File upload_log = new File(MainPanel.MEGABASTERD_HOME_DIR + "/megabasterd_upload_" + _root_node + ".log");
+                                    File upload_log = new File(MiscTools.UPLOAD_LOGS_DIR + "/megabasterd_upload_" + _root_node + ".log");
 
                                     if (upload_log.exists()) {
 

@@ -11,6 +11,7 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MainPanel.VERSION;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Desktop;
@@ -99,6 +100,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -119,6 +122,8 @@ public class MiscTools {
     public static final int EXP_BACKOFF_MAX_WAIT_TIME = 8;
     public static final Object PASS_LOCK = new Object();
     public static final int HTTP_TIMEOUT = 30;
+    public static final String UPLOAD_LOGS_DIR = System.getProperty("user.home") + File.separator + "MEGABASTERD_UPLOAD_LOGS";
+
     private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = (DefaultMutableTreeNode a, DefaultMutableTreeNode b) -> {
         if (a.isLeaf() && !b.isLeaf()) {
             return 1;
@@ -158,6 +163,27 @@ public class MiscTools {
         }
 
         return null;
+    }
+
+    public static void createUploadLogDir() {
+
+        if (!Files.exists(Paths.get(UPLOAD_LOGS_DIR))) {
+            try {
+                Files.createDirectory(Paths.get(UPLOAD_LOGS_DIR));
+
+                File dir = new File(System.getProperty("user.home"));
+
+                for (File file : dir.listFiles()) {
+                    if (!file.isDirectory() && file.getName().startsWith("megabasterd_upload_")) {
+                        Files.move(file.toPath(), Paths.get(UPLOAD_LOGS_DIR + File.separator + file.getName()));
+                    }
+                }
+
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
     }
 
     public static void purgeFolderCache() {
@@ -257,16 +283,41 @@ public class MiscTools {
         return font;
     }
 
-    public static void setNimbusLookAndFeel() {
+    public static void setNimbusLookAndFeel(boolean dark) {
 
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+
                 if ("Nimbus".equals(info.getName())) {
+
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
+
+                    if (dark) {
+                        // Dark LAF
+                        UIManager.put("control", new Color(128, 128, 128));
+                        UIManager.put("info", new Color(128, 128, 128));
+                        UIManager.put("nimbusBase", new Color(18, 30, 49));
+                        UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
+                        UIManager.put("nimbusDisabledText", new Color(100, 100, 100));
+                        UIManager.put("nimbusFocus", new Color(115, 164, 209));
+                        UIManager.put("nimbusGreen", new Color(176, 179, 50));
+                        UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
+                        UIManager.put("nimbusLightBackground", new Color(18, 30, 49));
+                        UIManager.put("nimbusOrange", new Color(191, 98, 4));
+                        UIManager.put("nimbusRed", new Color(169, 46, 34));
+                        UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
+                        UIManager.put("nimbusSelectionBackground", new Color(104, 93, 156));
+                        UIManager.put("text", new Color(230, 230, 230));
+
+                    } else {
+                        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+                        defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
+                    }
+
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (Exception ex) {
             java.util.logging.Logger.getLogger(MiscTools.class.getName()).log(java.util.logging.Level.SEVERE, ex.getMessage());
         }
     }
