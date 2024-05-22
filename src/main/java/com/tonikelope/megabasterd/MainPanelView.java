@@ -452,6 +452,8 @@ public final class MainPanelView extends javax.swing.JFrame {
     public MainPanelView(MainPanel main_panel) {
 
         _main_panel = main_panel;
+        
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
 
         MiscTools.GUIRunAndWait(() -> {
 
