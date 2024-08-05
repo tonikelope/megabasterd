@@ -276,6 +276,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         if (dialog.getUpload_log_checkbox().isSelected()) {
 
+                            MiscTools.createUploadLogDir();
+
                             File upload_log = new File(MiscTools.UPLOAD_LOGS_DIR + "/megabasterd_upload_" + parent_node + ".log");
                             upload_log.createNewFile();
 
