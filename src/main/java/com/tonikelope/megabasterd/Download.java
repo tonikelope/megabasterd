@@ -91,6 +91,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile boolean _pause;
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private volatile long _progress;
+    private volatile long _speed;
     private ChunkWriterManager _chunkmanager;
     private String _last_download_url;
     private boolean _provision_ok;
@@ -350,6 +351,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         return _progress;
     }
 
+    @Override
+    public long getSpeed() {
+        return _speed;
+    }
+
     public OutputStream getOutput_stream() {
         return _output_stream;
     }
@@ -376,6 +382,27 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     @Override
     public String getFile_name() {
         return _file_name;
+    }
+
+    public boolean setFile_name(String newName) {
+        try {
+            // don't rename unless completed
+            if(!isExit()) {
+                return false;
+            }
+
+            File file = new File(this.getDownload_path(), _file_name);
+            File renamedFile = new File(file.getParent(), newName);
+            boolean renamed = file.renameTo(renamedFile);
+            if(renamed) {
+                _file_name = newName;
+                this.getView().getFile_name_label().setText(_file_name);
+            }
+            return renamed;
+        } catch (Exception ex){
+            LOG.severe("Error renaming download. "+ex.toString());
+            return false;
+        }
     }
 
     public String getFile_pass() {
@@ -1730,6 +1757,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 getView().updateProgressBar(_progress, _progress_bar_rate);
             }
         }
+    }
+
+    @Override
+    public void setSpeed(long speed) {
+        _speed = speed;
     }
 
     @Override

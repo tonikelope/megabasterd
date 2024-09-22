@@ -34,6 +34,7 @@ public class SpeedMeter implements Runnable {
     private long _speed_counter;
     private long _speed_acumulator;
     private volatile long _max_avg_global_speed;
+    private volatile long _current_speed;
 
     SpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
         _speed_label = sp_label;
@@ -43,6 +44,7 @@ public class SpeedMeter implements Runnable {
         _speed_counter = 0L;
         _speed_acumulator = 0L;
         _max_avg_global_speed = 0L;
+        _current_speed = 0L;
     }
 
     private long _getAvgGlobalSpeed() {
@@ -69,6 +71,11 @@ public class SpeedMeter implements Runnable {
     }
 
     public long getMaxAvgGlobalSpeed() {
+
+        return _max_avg_global_speed;
+    }
+
+    public long getCurrentSpeed() {
 
         return _max_avg_global_speed;
     }
@@ -159,6 +166,8 @@ public class SpeedMeter implements Runnable {
 
                         long trans_sp = calcTransferenceSpeed(trans_info.getKey(), trans_info.getValue());
 
+                        trans_info.getKey().setSpeed(trans_sp);
+
                         if (trans_sp >= 0) {
                             global_speed += trans_sp;
                         }
@@ -190,6 +199,8 @@ public class SpeedMeter implements Runnable {
                         }
 
                         _speed_label.setText(formatBytes(global_speed) + "/s");
+
+                        _current_speed = global_speed;
 
                         _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ " + formatBytes(avg_global_speed) + "/s @ " + calcRemTime((long) Math.floor((global_size - global_progress) / avg_global_speed)));
 

@@ -73,6 +73,10 @@ public interface Transference {
 
     void setProgress(long progress);
 
+    long getSpeed();
+
+    void setSpeed(long speed);
+
     String getFile_name();
 
     long getFile_size();
