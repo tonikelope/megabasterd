@@ -17,7 +17,7 @@
 
 <p align="center"><a href="https://youtu.be/5TkBXT7osQI"><b>MegaBasterd DEMO</b></a></p>
 
-<p align="center"><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/src/main/resources/images/ethereum_toni.png"></p>
+<p align="center"><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/coffee.png"><br><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/src/main/resources/images/ethereum_toni.png"></p>
 
 <p align="center"><a href="https://github.com/tonikelope/megabasterd/issues/385#issuecomment-1019215670">BONUS: Why the f*ck has MegaBasterd stopped downloading?</a></p>
 
