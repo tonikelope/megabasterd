@@ -20,3 +20,5 @@
 <p align="center"><img src="https://raw.githubusercontent.com/tonikelope/megabasterd/master/src/main/resources/images/ethereum_toni.png"></p>
 
 <p align="center"><a href="https://github.com/tonikelope/megabasterd/issues/385#issuecomment-1019215670">BONUS: Why the f*ck has MegaBasterd stopped downloading?</a></p>
+
+<p align="center"><b>IMPORTANT:</b> You are not authorized to use MegaBasterd in any way that violates <a href="https://mega.io/es/terms"><b>MEGA's terms of use</b></a>.</p>
