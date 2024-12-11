@@ -18,13 +18,12 @@ import java.awt.Color;
 import static java.awt.EventQueue.invokeLater;
 import java.awt.Font;
 import static java.awt.Frame.NORMAL;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
 import static java.awt.SystemTray.getSystemTray;
 import static java.awt.Toolkit.getDefaultToolkit;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
@@ -53,12 +52,15 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
-import javax.swing.UIDefaults;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
 /**
@@ -67,18 +69,18 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "7.76";
+    public static final String VERSION = "8.22";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
-    public static final int RUN_COMMAND_TIME = 600;
+    public static final int RUN_COMMAND_TIME = 120;
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = false;
     public static final double FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT = 0.7;
-    public static Font GUI_FONT = createAndRegisterFont("/fonts/Roboto-Regular.ttf");
+    public static Font GUI_FONT = new JLabel().getFont();
     public static final float ZOOM_FACTOR = 0.8f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
@@ -98,16 +100,11 @@ public final class MainPanel {
     private static String _new_version;
     private static Boolean _resume_uploads;
     private static Boolean _resume_downloads;
-    private static long _last_run_command;
+    public static volatile long LAST_EXTERNAL_COMMAND_TIMESTAMP;
     private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
     private static volatile boolean CHECK_RUNNING = true;
 
     public static void main(String args[]) {
-
-        setNimbusLookAndFeel();
-
-        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
-        defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
 
         if (args.length > 0) {
 
@@ -131,6 +128,20 @@ public final class MainPanel {
 
         if (f.exists()) {
             MEGABASTERD_HOME_DIR = f.getParentFile().getAbsolutePath();
+        }
+
+        try {
+
+            setupSqliteTables();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+        }
+
+        setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
+
+        if ("yes".equals(DBTools.selectSettingValue("upload_log"))) {
+            MiscTools.createUploadLogDir();
         }
 
         final MainPanel main_panel = new MainPanel();
@@ -225,7 +236,7 @@ public final class MainPanel {
 
         _exit = false;
 
-        _last_run_command = -1;
+        LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
 
         _restart = false;
 
@@ -253,14 +264,6 @@ public final class MainPanel {
 
         _resume_downloads = false;
 
-        try {
-
-            setupSqliteTables();
-
-        } catch (SQLException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
-        }
-
         loadUserSettings();
 
         if (_debug_file) {
@@ -268,7 +271,7 @@ public final class MainPanel {
             PrintStream fileOut;
 
             try {
-                fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/.MEGABASTERD_DEBUG.log"));
+                fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log"));
 
                 System.setOut(fileOut);
                 System.setErr(fileOut);
@@ -342,10 +345,6 @@ public final class MainPanel {
         } else {
             _mega_proxy_server = null;
 
-            MiscTools.GUIRun(() -> {
-                getView().updateMCReverseStatus("MC reverse mode: OFF");
-            });
-
         }
 
         if (_use_smart_proxy) {
@@ -380,7 +379,7 @@ public final class MainPanel {
                 long used_memory = instance.totalMemory() - instance.freeMemory();
                 long max_memory = instance.maxMemory();
                 MiscTools.GUIRun(() -> {
-                    _view.getMemory_status().setText(MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
+                    _view.getMemory_status().setText("JVM-RAM used: " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
                 });
                 try {
                     Thread.sleep(2000);
@@ -394,11 +393,6 @@ public final class MainPanel {
 
         resumeUploads();
 
-        /* NOT REQUIRED 
-        if (MegaAPI.API_KEY == null && JOptionPane.showConfirmDialog(this._view, LabelTranslatorSingleton.getInstance().translate("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE.\n\nYOU SHOULD GET A KEY -> https://mega.nz/sdk (and set it in MegaBasterd ADVANCED SETTINGS).\n\nCREATE API KEY NOW?"), "MEGA API KEY ERROR", JOptionPane.ERROR_MESSAGE) == 0) {
-            openBrowserURL("https://mega.nz/sdk");
-
-        }*/
     }
 
     public static Boolean getResume_uploads() {
@@ -644,7 +638,7 @@ public final class MainPanel {
         if (_font != null) {
             if (_font.equals("DEFAULT")) {
 
-                GUI_FONT = createAndRegisterFont("/fonts/Roboto-Regular.ttf");
+                GUI_FONT = new JLabel().getFont();
 
             } else {
 
@@ -812,7 +806,7 @@ public final class MainPanel {
         _run_command_path = DBTools.selectSettingValue("run_command_path");
 
         if (_run_command && old_run_command_path != null && !old_run_command_path.equals(_run_command_path)) {
-            _last_run_command = -1;
+            LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
         }
 
         String use_megacrypter_reverse = selectSettingValue("megacrypter_reverse");
@@ -866,7 +860,7 @@ public final class MainPanel {
 
     public static synchronized void run_external_command() {
 
-        if (_run_command && (_last_run_command == -1 || _last_run_command + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
+        if (_run_command && (LAST_EXTERNAL_COMMAND_TIMESTAMP == -1 || LAST_EXTERNAL_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
 
             if (_run_command_path != null && !_run_command_path.equals("")) {
                 try {
@@ -875,7 +869,7 @@ public final class MainPanel {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
 
-                _last_run_command = System.currentTimeMillis();
+                LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
             }
         }
     }
@@ -924,6 +918,8 @@ public final class MainPanel {
     }
 
     public void byebyenow(boolean restart) {
+
+        MiscTools.purgeFolderCache();
 
         synchronized (DBTools.class) {
 
@@ -1257,32 +1253,38 @@ public final class MainPanel {
 
                     while (downloads_queue_iterator.hasNext()) {
 
-                        String url = (String) downloads_queue_iterator.next();
+                        try {
 
-                        HashMap<String, Object> o = res.remove(url);
+                            String url = (String) downloads_queue_iterator.next();
 
-                        if (o != null) {
+                            HashMap<String, Object> o = res.remove(url);
 
-                            String email = (String) o.get("email");
+                            if (o != null) {
 
-                            if (_mega_accounts.get(email) == null) {
-                                email = null;
+                                String email = (String) o.get("email");
+
+                                if (_mega_accounts.get(email) == null) {
+                                    email = null;
+                                }
+
+                                MegaAPI ma = new MegaAPI();
+
+                                if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+
+                                    Download download = new Download(tthis, ma, (String) url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
+
+                                    getDownload_manager().getTransference_provision_queue().add(download);
+
+                                    conta_downloads++;
+
+                                    downloads_queue_iterator.remove();
+                                } else {
+                                    tot_downloads--;
+                                }
                             }
 
-                            MegaAPI ma = new MegaAPI();
-
-                            if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
-
-                                Download download = new Download(tthis, ma, (String) url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
-
-                                getDownload_manager().getTransference_provision_queue().add(download);
-
-                                conta_downloads++;
-
-                                downloads_queue_iterator.remove();
-                            } else {
-                                tot_downloads--;
-                            }
+                        } catch (Exception ex) {
+                            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                         }
                     }
 
@@ -1296,34 +1298,39 @@ public final class MainPanel {
 
                         for (Map.Entry<String, HashMap<String, Object>> entry : res.entrySet()) {
 
-                            String email = (String) entry.getValue().get("email");
+                            try {
 
-                            if (_mega_accounts.get(email) == null) {
-                                email = null;
+                                String email = (String) entry.getValue().get("email");
+
+                                if (_mega_accounts.get(email) == null) {
+                                    email = null;
+                                }
+
+                                MegaAPI ma = new MegaAPI();
+
+                                if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+
+                                    Download download = new Download(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
+
+                                    getDownload_manager().getTransference_provision_queue().add(download);
+
+                                    conta_downloads++;
+
+                                } else {
+
+                                    tot_downloads--;
+                                }
+
+                            } catch (Exception ex) {
+                                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                             }
 
-                            MegaAPI ma = new MegaAPI();
-
-                            if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
-
-                                Download download = new Download(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
-
-                                getDownload_manager().getTransference_provision_queue().add(download);
-
-                                conta_downloads++;
-
-                            } else {
-
-                                tot_downloads--;
-                            }
                         }
 
                     }
 
-                } catch (SQLException ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
-                } catch (Exception ex2) {
-                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex2);
                 }
 
                 if (conta_downloads > 0) {
@@ -1355,29 +1362,29 @@ public final class MainPanel {
 
         if (java.awt.SystemTray.isSupported()) {
 
-            PopupMenu menu = new PopupMenu();
+            JPopupMenu menu = new JPopupMenu();
 
             Font new_font = GUI_FONT;
 
             menu.setFont(new_font.deriveFont(Font.BOLD, Math.round(14 * ZOOM_FACTOR)));
 
-            MenuItem messageItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("Restore window"));
+            JMenuItem messageItem = new JMenuItem(LabelTranslatorSingleton.getInstance().translate("Restore window"));
 
             messageItem.addActionListener((ActionEvent e) -> {
-                MiscTools.GUIRun(() -> {
-                    getView().setExtendedState(NORMAL);
 
-                    getView().setVisible(true);
+                getView().setExtendedState(NORMAL);
 
-                    getView().revalidate();
+                getView().setVisible(true);
 
-                    getView().repaint();
-                });
+                getView().revalidate();
+
+                getView().repaint();
+
             });
 
             menu.add(messageItem);
 
-            MenuItem closeItem = new MenuItem(LabelTranslatorSingleton.getInstance().translate("EXIT"));
+            JMenuItem closeItem = new JMenuItem(LabelTranslatorSingleton.getInstance().translate("EXIT"));
 
             closeItem.addActionListener((ActionEvent e) -> {
                 if (!getView().isVisible()) {
@@ -1394,28 +1401,34 @@ public final class MainPanel {
 
             menu.add(closeItem);
 
-            ActionListener actionListener = (ActionEvent e) -> {
-                MiscTools.GUIRun(() -> {
-                    if (!getView().isVisible()) {
-                        getView().setExtendedState(NORMAL);
-                        getView().setVisible(true);
-                        getView().revalidate();
-                        getView().repaint();
-
-                    } else {
-
-                        getView().dispatchEvent(new WindowEvent(getView(), WINDOW_CLOSING));
-                    }
-                });
-            };
-
-            _trayicon = new TrayIcon(getDefaultToolkit().getImage(getClass().getResource(ICON_FILE)), "MegaBasterd", menu);
+            _trayicon = new TrayIcon(getDefaultToolkit().getImage(getClass().getResource(ICON_FILE)), "MegaBasterd", null);
 
             _trayicon.setToolTip("MegaBasterd " + VERSION);
 
             _trayicon.setImageAutoSize(true);
 
-            _trayicon.addActionListener(actionListener);
+            _trayicon.addMouseListener(new MouseAdapter() {
+                public void mouseReleased(MouseEvent e) {
+
+                    if (SwingUtilities.isRightMouseButton(e)) {
+                        menu.setLocation(e.getX(), e.getY());
+                        menu.setInvoker(menu);
+                        menu.setVisible(true);
+                    } else {
+                        if (!getView().isVisible()) {
+                            getView().setExtendedState(NORMAL);
+                            getView().setVisible(true);
+                            getView().revalidate();
+                            getView().repaint();
+
+                        } else {
+
+                            getView().dispatchEvent(new WindowEvent(getView(), WINDOW_CLOSING));
+                        }
+                    }
+
+                }
+            });
 
             getSystemTray().add(_trayicon);
 
@@ -1447,39 +1460,44 @@ public final class MainPanel {
 
                     while (uploads_queue_iterator.hasNext()) {
 
-                        String filename = (String) uploads_queue_iterator.next();
+                        try {
+                            String filename = (String) uploads_queue_iterator.next();
 
-                        HashMap<String, Object> o = res.remove(filename);
+                            HashMap<String, Object> o = res.remove(filename);
 
-                        if (o != null) {
+                            if (o != null) {
 
-                            String email = (String) o.get("email");
+                                String email = (String) o.get("email");
 
-                            if (_mega_accounts.get(email) != null) {
+                                if (_mega_accounts.get(email) != null) {
 
-                                MegaAPI ma;
+                                    MegaAPI ma;
 
-                                if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
-                                    Upload upload = new Upload(tthis, ma, (String) filename, (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), false);
+                                        Upload upload = new Upload(tthis, ma, (String) filename, (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), false);
 
-                                    getUpload_manager().getTransference_provision_queue().add(upload);
+                                        getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                    conta_uploads++;
+                                        conta_uploads++;
+
+                                        uploads_queue_iterator.remove();
+
+                                    }
+
+                                } else {
+
+                                    deleteUpload((String) o.get("filename"), email);
+
+                                    tot_uploads--;
 
                                     uploads_queue_iterator.remove();
-
                                 }
 
-                            } else {
-
-                                deleteUpload((String) o.get("filename"), email);
-
-                                tot_uploads--;
-
-                                uploads_queue_iterator.remove();
                             }
 
+                        } catch (Exception ex) {
+                            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                         }
                     }
 
@@ -1493,38 +1511,38 @@ public final class MainPanel {
 
                         for (Map.Entry<String, HashMap<String, Object>> entry : res.entrySet()) {
 
-                            String email = (String) entry.getValue().get("email");
+                            try {
+                                String email = (String) entry.getValue().get("email");
 
-                            if (_mega_accounts.get(email) != null) {
+                                if (_mega_accounts.get(email) != null) {
 
-                                MegaAPI ma;
+                                    MegaAPI ma;
 
-                                if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
-                                    Upload upload = new Upload(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
+                                        Upload upload = new Upload(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
 
-                                    getUpload_manager().getTransference_provision_queue().add(upload);
+                                        getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                    conta_uploads++;
+                                        conta_uploads++;
+                                    }
 
-                                    uploads_queue_iterator.remove();
+                                } else {
 
+                                    deleteUpload((String) entry.getValue().get("filename"), email);
+
+                                    tot_uploads--;
                                 }
 
-                            } else {
-
-                                deleteUpload((String) entry.getValue().get("filename"), email);
-
-                                tot_uploads--;
+                            } catch (Exception ex) {
+                                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                             }
                         }
 
                     }
 
-                } catch (SQLException ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
-                } catch (Exception ex2) {
-                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex2);
                 }
 
                 if (conta_uploads > 0) {
@@ -1545,7 +1563,8 @@ public final class MainPanel {
                 MiscTools.GUIRun(() -> {
                     getView().getStatus_up_label().setText("");
                 });
-            });
+            }
+            );
         }
     }
 

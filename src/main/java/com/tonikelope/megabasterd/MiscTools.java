@@ -11,6 +11,7 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MainPanel.VERSION;
+import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Desktop;
@@ -39,6 +40,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -79,6 +81,15 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiEvent;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Synthesizer;
+import javax.sound.midi.Track;
 import javax.swing.AbstractButton;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
@@ -89,6 +100,8 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.border.TitledBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -109,6 +122,8 @@ public class MiscTools {
     public static final int EXP_BACKOFF_MAX_WAIT_TIME = 8;
     public static final Object PASS_LOCK = new Object();
     public static final int HTTP_TIMEOUT = 30;
+    public static final String UPLOAD_LOGS_DIR = System.getProperty("user.home") + File.separator + "MEGABASTERD_UPLOAD_LOGS";
+
     private static final Comparator<DefaultMutableTreeNode> TREE_NODE_COMPARATOR = (DefaultMutableTreeNode a, DefaultMutableTreeNode b) -> {
         if (a.isLeaf() && !b.isLeaf()) {
             return 1;
@@ -148,6 +163,50 @@ public class MiscTools {
         }
 
         return null;
+    }
+
+    public static void createUploadLogDir() {
+
+        if (!Files.exists(Paths.get(UPLOAD_LOGS_DIR))) {
+            try {
+                Files.createDirectory(Paths.get(UPLOAD_LOGS_DIR));
+
+                File dir = new File(System.getProperty("user.home"));
+
+                for (File file : dir.listFiles()) {
+                    if (!file.isDirectory() && file.getName().startsWith("megabasterd_upload_")) {
+                        Files.move(file.toPath(), Paths.get(UPLOAD_LOGS_DIR + File.separator + file.getName()));
+                    }
+                }
+
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            }
+
+        }
+    }
+
+    public static void purgeFolderCache() {
+        File directory = new File(System.getProperty("java.io.tmpdir"));
+
+        for (File f : directory.listFiles()) {
+            if (f.isFile() && f.getName().startsWith("megabasterd_folder_cache_")) {
+                f.delete();
+                Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "REMOVING FOLDER CACHE FILE {0}", f.getAbsolutePath());
+            }
+        }
+    }
+
+    public static void containerSetEnabled(Container panel, boolean enabled) {
+
+        for (Component cp : panel.getComponents()) {
+
+            if (cp instanceof Container) {
+                containerSetEnabled((Container) cp, enabled);
+            }
+
+            cp.setEnabled(enabled);
+        }
     }
 
     public static String getFechaHoraActual() {
@@ -231,16 +290,41 @@ public class MiscTools {
         return font;
     }
 
-    public static void setNimbusLookAndFeel() {
+    public static void setNimbusLookAndFeel(boolean dark) {
 
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+
                 if ("Nimbus".equals(info.getName())) {
+
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
+
+                    if (dark) {
+                        // Dark LAF
+                        UIManager.put("control", new Color(128, 128, 128));
+                        UIManager.put("info", new Color(128, 128, 128));
+                        UIManager.put("nimbusBase", new Color(18, 30, 49));
+                        UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
+                        UIManager.put("nimbusDisabledText", new Color(100, 100, 100));
+                        UIManager.put("nimbusFocus", new Color(115, 164, 209));
+                        UIManager.put("nimbusGreen", new Color(176, 179, 50));
+                        UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
+                        UIManager.put("nimbusLightBackground", new Color(18, 30, 49));
+                        UIManager.put("nimbusOrange", new Color(191, 98, 4));
+                        UIManager.put("nimbusRed", new Color(169, 46, 34));
+                        UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
+                        UIManager.put("nimbusSelectionBackground", new Color(104, 93, 156));
+                        UIManager.put("text", new Color(230, 230, 230));
+
+                    } else {
+                        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+                        defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
+                    }
+
                     break;
                 }
             }
-        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+        } catch (Exception ex) {
             java.util.logging.Logger.getLogger(MiscTools.class.getName()).log(java.util.logging.Level.SEVERE, ex.getMessage());
         }
     }
@@ -452,6 +536,37 @@ public class MiscTools {
         }
     }
 
+    public static Sequencer midiLoopPlay(String midi, int volume) {
+        try {
+            Sequencer sequencer = MidiSystem.getSequencer();
+
+            if (sequencer == null) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, "MIDI Sequencer device not supported");
+                return null;
+            }
+
+            Synthesizer synthesizer = MidiSystem.getSynthesizer();
+
+            Sequence sequence = MidiSystem.getSequence(MiscTools.class.getResource(midi));
+
+            for (Track t : sequence.getTracks()) {
+
+                for (int k = 0; k < synthesizer.getChannels().length; k++) {
+                    t.add(new MidiEvent(new ShortMessage(ShortMessage.CONTROL_CHANGE, k, 7, volume), t.ticks()));
+                }
+            }
+
+            sequencer.open();
+            sequencer.setSequence(sequence);
+            sequencer.setLoopCount(Sequencer.LOOP_CONTINUOUSLY);
+            sequencer.start();
+            return sequencer;
+        } catch (MidiUnavailableException | InvalidMidiDataException | IOException ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+
     public static void updateTitledBorderFont(final TitledBorder border, final Font font, final float zoom_factor) {
 
         Font old_title_font = border.getTitleFont();
@@ -461,12 +576,20 @@ public class MiscTools {
         border.setTitleFont(new_title_font);
     }
 
-    public static String HashString(String algo, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        MessageDigest md = MessageDigest.getInstance(algo);
+    public static String HashString(String algo, String data) {
+        try {
+            MessageDigest md = MessageDigest.getInstance(algo);
 
-        byte[] thedigest = md.digest(data.getBytes("UTF-8"));
+            byte[] thedigest = md.digest(data.getBytes("UTF-8"));
 
-        return bin2hex(thedigest);
+            return bin2hex(thedigest);
+        } catch (NoSuchAlgorithmException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+        return null;
     }
 
     public static String HashString(String algo, byte[] data) throws NoSuchAlgorithmException {
@@ -630,6 +753,24 @@ public class MiscTools {
 
     }
 
+    public static MegaMutableTreeNode findMegaTreeNodeByID(MegaMutableTreeNode root, String node_id) {
+
+        Enumeration e = root.depthFirstEnumeration();
+
+        while (e.hasMoreElements()) {
+
+            MegaMutableTreeNode node = (MegaMutableTreeNode) e.nextElement();
+
+            HashMap<String, Object> mega_node = (HashMap<String, Object>) node.getUserObject();
+
+            if (mega_node.get("h").equals(node_id)) {
+                return node;
+            }
+        }
+
+        return null;
+    }
+
     public static DefaultMutableTreeNode sortTree(DefaultMutableTreeNode root) {
 
         Enumeration e = root.depthFirstEnumeration();
@@ -739,6 +880,18 @@ public class MiscTools {
         return false;
     }
 
+    public static boolean isDirEmpty(Path path) {
+        if (Files.isDirectory(path)) {
+            try (DirectoryStream<Path> directory = Files.newDirectoryStream(path)) {
+                return !directory.iterator().hasNext();
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        return false;
+    }
+
     public static boolean deleteAllExceptSelectedTreeItems(JTree tree) {
 
         TreePath[] paths = tree.getSelectionPaths();
@@ -755,12 +908,14 @@ public class MiscTools {
 
             try {
 
-                new_root = node_class.newInstance();
+                new_root = node_class.getDeclaredConstructor().newInstance();
 
-                ((MutableTreeNode) new_root).setUserObject(((DefaultMutableTreeNode) tree_model.getRoot()).getUserObject());
+                ((DefaultMutableTreeNode) new_root).setUserObject(((DefaultMutableTreeNode) tree_model.getRoot()).getUserObject());
 
             } catch (InstantiationException | IllegalAccessException ex) {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
             }
 
             for (TreePath path : paths) {
@@ -770,13 +925,13 @@ public class MiscTools {
 
                     for (Object path_element : path.getPath()) {
 
-                        if ((MutableTreeNode) path_element != (MutableTreeNode) tree_model.getRoot()) {
+                        if ((DefaultMutableTreeNode) path_element != (DefaultMutableTreeNode) tree_model.getRoot()) {
 
                             if (hashmap_old.get(path_element) == null) {
 
                                 Object node = null;
 
-                                if ((MutableTreeNode) path_element == (MutableTreeNode) path.getLastPathComponent()) {
+                                if ((DefaultMutableTreeNode) path_element == (DefaultMutableTreeNode) path.getLastPathComponent()) {
 
                                     node = path_element;
 
@@ -786,7 +941,7 @@ public class MiscTools {
 
                                         node = node_class.newInstance();
 
-                                        ((MutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
+                                        ((DefaultMutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
 
                                     } catch (InstantiationException | IllegalAccessException ex) {
                                         Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
@@ -795,11 +950,11 @@ public class MiscTools {
 
                                 if (parent != null) {
 
-                                    ((DefaultMutableTreeNode) parent).add((MutableTreeNode) node);
+                                    ((DefaultMutableTreeNode) parent).add((DefaultMutableTreeNode) node);
 
                                     if (!((TreeNode) path_element).isLeaf()) {
 
-                                        hashmap_old.put((MutableTreeNode) path_element, (MutableTreeNode) node);
+                                        hashmap_old.put((DefaultMutableTreeNode) path_element, (DefaultMutableTreeNode) node);
 
                                         parent = node;
                                     }
@@ -973,39 +1128,35 @@ public class MiscTools {
 
         int http_status = 0, http_error = 0;
 
-        SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
-
         String current_smart_proxy = null;
 
         boolean smart_proxy_socks = false;
 
         ArrayList<String> excluded_proxy_list = new ArrayList<>();
 
-        if (MainPanel.FORCE_SMART_PROXY) {
-
-            String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-            current_smart_proxy = pickRandomProxy(smart_proxy);
-
-            smart_proxy_socks = smart_proxy[1].equals("socks");
-
-        }
-
         do {
+
+            SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
+
+            if (MainPanel.isUse_smart_proxy() && proxy_manager != null && proxy_manager.isForce_smart_proxy()) {
+
+                String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+
+                current_smart_proxy = pickRandomProxy(smart_proxy);
+
+                smart_proxy_socks = smart_proxy[1].equals("socks");
+
+            }
 
             try {
 
                 URL url = new URL(string_url + "/0-0");
 
-                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && proxy_manager != null && !MainPanel.isUse_proxy()) {
 
                     if (current_smart_proxy != null && http_error != 0) {
 
-                        if (http_error == 509) {
-                            proxy_manager.blockProxy(current_smart_proxy);
-                        }
-
-                        excluded_proxy_list.add(current_smart_proxy);
+                        proxy_manager.blockProxy(current_smart_proxy, "HTTP " + String.valueOf(http_error));
 
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
@@ -1062,9 +1213,9 @@ public class MiscTools {
                     }
                 }
 
-                if (current_smart_proxy != null) {
-                    con.setConnectTimeout(Transference.HTTP_PROXY_CONNECT_TIMEOUT);
-                    con.setReadTimeout(Transference.HTTP_PROXY_READ_TIMEOUT);
+                if (current_smart_proxy != null && proxy_manager != null) {
+                    con.setConnectTimeout(proxy_manager.getProxy_timeout());
+                    con.setReadTimeout(proxy_manager.getProxy_timeout() * 2);
                 }
 
                 con.setUseCaches(false);
@@ -1537,6 +1688,8 @@ public class MiscTools {
         data = MiscTools.addBackSlashToLinks(MiscTools.addHTTPSToMegaLinks(data));
 
         data = data.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/folder/([^#]+)#([^\r\n/]+)/file/([^\r\n/]+)", "https://mega.nz/#F*$3!$1!$2");
+
+        data = data.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/folder/([^#]+)#([^\r\n/]+)/folder/([^\r\n/]+)", "https://mega.nz/#F!$1@$3!$2");
 
         return data.replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/folder/([^#]+)#([^\r\n]+)", "https://mega.nz/#F!$1!$2").replaceAll("(?:https://)?mega(?:\\.co)?\\.nz/file/([^#]+)#([^\r\n]+)", "https://mega.nz/#!$1!$2");
     }

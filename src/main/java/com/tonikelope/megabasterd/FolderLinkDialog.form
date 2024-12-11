@@ -27,25 +27,25 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="1" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="1" attributes="0">
-                  <Component id="node_bar" max="32767" attributes="0"/>
-                  <Component id="link_detected_label" alignment="0" max="32767" attributes="0"/>
-                  <Component id="file_tree_scrollpane" alignment="0" max="32767" attributes="0"/>
-                  <Component id="total_space_label" alignment="0" max="32767" attributes="0"/>
+              <Group type="103" groupAlignment="0" attributes="0">
+                  <Component id="link_detected_label" max="32767" attributes="0"/>
+                  <Group type="102" alignment="0" attributes="0">
+                      <Component id="folder_link_label" max="32767" attributes="0"/>
+                      <EmptySpace min="-2" pref="29" max="-2" attributes="0"/>
+                      <Component id="restore_button" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Component id="node_bar" alignment="0" max="32767" attributes="0"/>
+                  <Component id="file_tree_scrollpane" alignment="1" max="32767" attributes="0"/>
                   <Component id="warning_label" alignment="0" max="32767" attributes="0"/>
+                  <Component id="total_space_label" alignment="1" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="skip_rest_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace type="unrelated" max="-2" attributes="0"/>
                       <Component id="skip_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="32767" attributes="0"/>
                       <Component id="dance_button" min="-2" max="-2" attributes="0"/>
-                  </Group>
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="folder_link_label" max="32767" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
-                      <Component id="restore_button" min="-2" max="-2" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -63,9 +63,11 @@
                   <Component id="restore_button" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
-              <Component id="file_tree_scrollpane" pref="295" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" pref="289" max="32767" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="node_bar" min="-2" pref="14" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="total_space_label" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
                   <Group type="103" alignment="1" groupAlignment="3" attributes="0">
@@ -74,8 +76,6 @@
                       <Component id="dance_button" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="1" attributes="0">
-                      <Component id="total_space_label" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="warning_label" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="-2" pref="49" max="-2" attributes="0"/>
                   </Group>
@@ -210,9 +210,12 @@
     <Component class="javax.swing.JLabel" name="total_space_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="28" style="1"/>
+          <Font name="Dialog" size="32" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="[0 B]"/>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="ff" green="0" red="0" type="rgb"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="[---]"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>

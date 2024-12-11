@@ -12,7 +12,8 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Color;
+import static com.tonikelope.megabasterd.SmartMegaProxyManager.PROXY_AUTO_REFRESH_TIME;
+import static com.tonikelope.megabasterd.SmartMegaProxyManager.PROXY_BLOCK_TIME;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
@@ -215,6 +216,20 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             upload_log_checkbox.setSelected(upload_log);
 
+            boolean upload_public_folder = Upload.UPLOAD_PUBLIC_FOLDER;
+
+            String upload_public_folder_string = DBTools.selectSettingValue("upload_public_folder");
+
+            if (upload_public_folder_string != null) {
+                upload_public_folder = upload_public_folder_string.equals("yes");
+            }
+
+            upload_public_folder_checkbox.setSelected(upload_public_folder);
+
+            upload_public_folder_checkbox.setBackground(upload_public_folder_checkbox.isSelected() ? java.awt.Color.RED : null);
+
+            this.public_folder_panel.setVisible(this.upload_public_folder_checkbox.isSelected());
+
             clipboardspy_checkbox.setSelected(monitor_clipboard);
 
             String default_download_dir = DBTools.selectSettingValue("default_down_dir");
@@ -309,6 +324,79 @@ public class SettingsDialog extends javax.swing.JDialog {
             max_up_speed_label.setEnabled(limit_ul_speed);
 
             max_up_speed_spinner.setEnabled(limit_ul_speed);
+
+            String smartproxy_auto_refresh = DBTools.selectSettingValue("smartproxy_autorefresh_time");
+
+            int smartproxy_auto_refresh_int = PROXY_AUTO_REFRESH_TIME;
+
+            if (smartproxy_auto_refresh != null) {
+                smartproxy_auto_refresh_int = Integer.parseInt(smartproxy_auto_refresh);
+            }
+
+            auto_refresh_proxy_time_spinner.setModel(new SpinnerNumberModel(smartproxy_auto_refresh_int, 1, Integer.MAX_VALUE, 1));
+
+            ((JSpinner.DefaultEditor) auto_refresh_proxy_time_spinner.getEditor()).getTextField().setEditable(true);
+
+            String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
+
+            int smartproxy_ban_time_int = PROXY_BLOCK_TIME;
+
+            if (smartproxy_ban_time != null) {
+                smartproxy_ban_time_int = Integer.parseInt(smartproxy_ban_time);
+            }
+
+            bad_proxy_time_spinner.setModel(new SpinnerNumberModel(smartproxy_ban_time_int, 0, Integer.MAX_VALUE, 1));
+
+            ((JSpinner.DefaultEditor) bad_proxy_time_spinner.getEditor()).getTextField().setEditable(true);
+
+            String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
+
+            int smartproxy_timeout_int = (int) ((float) Transference.HTTP_PROXY_TIMEOUT / 1000);
+
+            if (smartproxy_timeout != null) {
+                smartproxy_timeout_int = Integer.parseInt(smartproxy_timeout);
+            }
+
+            proxy_timeout_spinner.setModel(new SpinnerNumberModel(smartproxy_timeout_int, 1, Integer.MAX_VALUE, 1));
+
+            ((JSpinner.DefaultEditor) proxy_timeout_spinner.getEditor()).getTextField().setEditable(true);
+
+            boolean reset_slot_proxy = SmartMegaProxyManager.RESET_SLOT_PROXY;
+
+            String sreset_slot_proxy = DBTools.selectSettingValue("reset_slot_proxy");
+
+            if (sreset_slot_proxy != null) {
+
+                reset_slot_proxy = sreset_slot_proxy.equals("yes");
+            }
+
+            proxy_reset_slot_checkbox.setSelected(reset_slot_proxy);
+
+            boolean random_select = SmartMegaProxyManager.RANDOM_SELECT;
+
+            String srandom_select = DBTools.selectSettingValue("random_proxy");
+
+            if (srandom_select != null) {
+
+                random_select = srandom_select.equals("yes");
+            }
+
+            if (random_select) {
+                proxy_random_radio.setSelected(true);
+            } else {
+                proxy_sequential_radio.setSelected(true);
+            }
+
+            boolean dark_mode = false;
+
+            String dark_mode_select = DBTools.selectSettingValue("dark_mode");
+
+            if (dark_mode_select != null) {
+
+                dark_mode = dark_mode_select.equals("yes");
+            }
+
+            dark_mode_checkbox.setSelected(dark_mode);
 
             String max_ul_speed = DBTools.selectSettingValue("max_upload_speed");
 
@@ -544,10 +632,19 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
 
             smart_proxy_checkbox.setSelected(use_smart_proxy);
-            rec_smart_proxy_label.setEnabled(use_smart_proxy);
-            rec_smart_proxy_label1.setEnabled(use_smart_proxy);
-            custom_proxy_list_label.setEnabled(use_smart_proxy);
-            custom_proxy_textarea.setEnabled(use_smart_proxy);
+
+            MiscTools.containerSetEnabled(smart_proxy_settings, use_smart_proxy);
+
+            boolean force_smart_proxy = MainPanel.FORCE_SMART_PROXY;
+
+            String force_smart_proxy_string = DBTools.selectSettingValue("force_smart_proxy");
+
+            if (force_smart_proxy_string != null) {
+
+                force_smart_proxy = force_smart_proxy_string.equals("yes");
+            }
+
+            force_smart_proxy_checkbox.setSelected(force_smart_proxy);
 
             boolean run_command = false;
 
@@ -661,21 +758,9 @@ public class SettingsDialog extends javax.swing.JDialog {
                 custom_proxy_textarea.setText(custom_proxy_list);
             }
 
-            String mega_api_key_sql = DBTools.selectSettingValue("mega_api_key");
+            revalidate();
 
-            if (mega_api_key_sql != null && !"".equals(mega_api_key_sql)) {
-                mega_api_key.setText(mega_api_key_sql);
-                mega_api_key_panel.setBackground(new Color(153, 255, 153));
-                mega_api_key_warning.setVisible(false);
-                mega_api_key_label.setVisible(modal);
-                MegaAPI.API_KEY = mega_api_key_sql.trim();
-            } else {
-                mega_api_key_panel.setBackground(Color.red);
-                mega_api_key_warning.setForeground(Color.white);
-                mega_api_key_label.setForeground(Color.WHITE);
-                mega_api_key_warning.setVisible(true);
-                MegaAPI.API_KEY = null;
-            }
+            repaint();
 
             setPreferredSize(parent.getSize());
 
@@ -720,12 +805,29 @@ public class SettingsDialog extends javax.swing.JDialog {
         default_slots_down_spinner = new javax.swing.JSpinner();
         megacrypter_reverse_port_spinner = new javax.swing.JSpinner();
         down_dir_label = new javax.swing.JLabel();
-        rec_smart_proxy_label = new javax.swing.JLabel();
+        clipboardspy_checkbox = new javax.swing.JCheckBox();
+        smart_proxy_settings = new javax.swing.JPanel();
+        jLabel5 = new javax.swing.JLabel();
+        jLabel3 = new javax.swing.JLabel();
+        jLabel4 = new javax.swing.JLabel();
+        bad_proxy_time_spinner = new javax.swing.JSpinner();
+        jLabel6 = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
         custom_proxy_textarea = new javax.swing.JTextArea();
-        custom_proxy_list_label = new javax.swing.JLabel();
         rec_smart_proxy_label1 = new javax.swing.JLabel();
-        clipboardspy_checkbox = new javax.swing.JCheckBox();
+        custom_proxy_list_label = new javax.swing.JLabel();
+        rec_smart_proxy_label = new javax.swing.JLabel();
+        proxy_timeout_spinner = new javax.swing.JSpinner();
+        force_smart_proxy_checkbox = new javax.swing.JCheckBox();
+        jLabel7 = new javax.swing.JLabel();
+        jLabel8 = new javax.swing.JLabel();
+        auto_refresh_proxy_time_spinner = new javax.swing.JSpinner();
+        proxy_random_radio = new javax.swing.JRadioButton();
+        proxy_sequential_radio = new javax.swing.JRadioButton();
+        jLabel9 = new javax.swing.JLabel();
+        proxy_reset_slot_checkbox = new javax.swing.JCheckBox();
+        jLabel10 = new javax.swing.JLabel();
+        jLabel11 = new javax.swing.JLabel();
         uploads_scrollpane = new javax.swing.JScrollPane();
         uploads_panel = new javax.swing.JPanel();
         default_slots_up_label = new javax.swing.JLabel();
@@ -738,6 +840,9 @@ public class SettingsDialog extends javax.swing.JDialog {
         rec_upload_slots_label = new javax.swing.JLabel();
         thumbnail_checkbox = new javax.swing.JCheckBox();
         upload_log_checkbox = new javax.swing.JCheckBox();
+        upload_public_folder_checkbox = new javax.swing.JCheckBox();
+        public_folder_panel = new javax.swing.JScrollPane();
+        public_folder_warning = new javax.swing.JTextArea();
         accounts_panel = new javax.swing.JPanel();
         mega_accounts_scrollpane = new javax.swing.JScrollPane();
         mega_accounts_table = new javax.swing.JTable();
@@ -768,16 +873,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         proxy_user_textfield = new javax.swing.JTextField();
         proxy_pass_label = new javax.swing.JLabel();
         proxy_pass_textfield = new javax.swing.JPasswordField();
-        import_settings_button = new javax.swing.JButton();
-        export_settings_button = new javax.swing.JButton();
-        zoom_label = new javax.swing.JLabel();
-        zoom_spinner = new javax.swing.JSpinner();
         rec_zoom_label = new javax.swing.JLabel();
-        jButton1 = new javax.swing.JButton();
-        jLabel2 = new javax.swing.JLabel();
-        language_combo = new javax.swing.JComboBox<>();
-        font_label = new javax.swing.JLabel();
-        font_combo = new javax.swing.JComboBox<>();
         custom_chunks_dir_button = new javax.swing.JButton();
         custom_chunks_dir_current_label = new javax.swing.JLabel();
         custom_chunks_dir_checkbox = new javax.swing.JCheckBox();
@@ -787,11 +883,19 @@ public class SettingsDialog extends javax.swing.JDialog {
         run_command_textbox.addMouseListener(new ContextMenuMouseListener());
         run_command_test_button = new javax.swing.JButton();
         debug_file_checkbox = new javax.swing.JCheckBox();
-        mega_api_key_panel = new javax.swing.JPanel();
-        mega_api_key_label = new javax.swing.JLabel();
-        mega_api_key = new javax.swing.JTextField();
-        mega_api_key.addMouseListener(new ContextMenuMouseListener());
-        mega_api_key_warning = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jButton1 = new javax.swing.JButton();
+        import_settings_button = new javax.swing.JButton();
+        export_settings_button = new javax.swing.JButton();
+        jPanel2 = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        font_label = new javax.swing.JLabel();
+        language_combo = new javax.swing.JComboBox<>();
+        font_combo = new javax.swing.JComboBox<>();
+        zoom_label = new javax.swing.JLabel();
+        zoom_spinner = new javax.swing.JSpinner();
+        dark_mode_checkbox = new javax.swing.JCheckBox();
+        debug_file_path = new javax.swing.JLabel();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -824,9 +928,11 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         megacrypter_reverse_warning_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
         megacrypter_reverse_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
+        megacrypter_reverse_warning_label.setEnabled(false);
 
-        rec_download_slots_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        rec_download_slots_label.setText("Note: if you want to download without using a MEGA PREMIUM account you SHOULD enable it. (Slots consume RAM, so use them moderately).");
+        rec_download_slots_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
+        rec_download_slots_label.setText("Note: slots consume resources, so use them moderately.");
+        rec_download_slots_label.setEnabled(false);
 
         megacrypter_reverse_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         megacrypter_reverse_checkbox.setText("Use MegaCrypter reverse mode");
@@ -862,6 +968,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         });
 
         max_down_speed_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        max_down_speed_spinner.setEnabled(false);
 
         verify_file_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         verify_file_down_checkbox.setText("Verify file integrity (when download is finished)");
@@ -879,6 +986,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         max_downloads_spinner.setDoubleBuffered(true);
 
         use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 20)); // NOI18N
+        use_mega_account_down_combobox.setEnabled(false);
 
         change_download_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         change_download_dir_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-folder-30.png"))); // NOI18N
@@ -892,21 +1000,26 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         max_down_speed_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         max_down_speed_label.setText("Max speed (KB/s):");
+        max_down_speed_label.setEnabled(false);
 
         megacrypter_reverse_port_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         megacrypter_reverse_port_label.setText("TCP Port:");
+        megacrypter_reverse_port_label.setEnabled(false);
 
         default_dir_label.setBackground(new java.awt.Color(153, 255, 153));
         default_dir_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        default_dir_label.setForeground(new java.awt.Color(51, 0, 255));
         default_dir_label.setText("default dir");
         default_dir_label.setOpaque(true);
 
         default_slots_down_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         default_slots_down_label.setText("Default slots per file:");
         default_slots_down_label.setDoubleBuffered(true);
+        default_slots_down_label.setEnabled(false);
 
         use_mega_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         use_mega_label.setText("Default account:");
+        use_mega_label.setEnabled(false);
 
         multi_slot_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         multi_slot_down_checkbox.setText("Use multi slot download mode");
@@ -919,16 +1032,35 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         default_slots_down_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         default_slots_down_spinner.setDoubleBuffered(true);
+        default_slots_down_spinner.setEnabled(false);
         default_slots_down_spinner.setValue(2);
 
         megacrypter_reverse_port_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        megacrypter_reverse_port_spinner.setEnabled(false);
 
         down_dir_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         down_dir_label.setText("Download folder:");
         down_dir_label.setDoubleBuffered(true);
 
-        rec_smart_proxy_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
-        rec_smart_proxy_label.setText("Note: enable it in order to mitigate bandwidth limit. (Multi slot required).");
+        clipboardspy_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        clipboardspy_checkbox.setText("Monitor clipboard looking for new links");
+
+        smart_proxy_settings.setEnabled(false);
+
+        jLabel5.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
+        jLabel5.setText("Proxy timeout (seconds):");
+
+        jLabel3.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
+        jLabel3.setText("Proxy error ban time (seconds):");
+
+        jLabel4.setFont(new java.awt.Font("Noto Sans", 2, 16)); // NOI18N
+        jLabel4.setText("(0 for permanent ban)");
+
+        bad_proxy_time_spinner.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
+        bad_proxy_time_spinner.setModel(new javax.swing.SpinnerNumberModel(300, 0, null, 1));
+
+        jLabel6.setFont(new java.awt.Font("Noto Sans", 2, 16)); // NOI18N
+        jLabel6.setText("(Lower values can speed up finding working proxies but it could ban slow proxies)");
 
         custom_proxy_textarea.setColumns(20);
         custom_proxy_textarea.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
@@ -937,24 +1069,158 @@ public class SettingsDialog extends javax.swing.JDialog {
         jScrollPane1.setViewportView(custom_proxy_textarea);
         custom_proxy_textarea.addMouseListener(new ContextMenuMouseListener());
 
-        custom_proxy_list_label.setFont(new java.awt.Font("Dialog", 0, 12)); // NOI18N
-        custom_proxy_list_label.setText("Use this proxy list Format is [*]IP:PORT[@user_b64:password_b64] OR #PROXY_LIST_URL");
-
-        rec_smart_proxy_label1.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        rec_smart_proxy_label1.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        rec_smart_proxy_label1.setForeground(new java.awt.Color(255, 51, 0));
         rec_smart_proxy_label1.setText("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.");
 
-        clipboardspy_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        clipboardspy_checkbox.setText("Monitor clipboard looking for new links");
+        custom_proxy_list_label.setBackground(new java.awt.Color(0, 0, 0));
+        custom_proxy_list_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        custom_proxy_list_label.setForeground(new java.awt.Color(255, 255, 255));
+        custom_proxy_list_label.setText("[*]IP:PORT[@user_b64:password_b64] OR #PROXY_LIST_URL");
+        custom_proxy_list_label.setOpaque(true);
+
+        rec_smart_proxy_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
+        rec_smart_proxy_label.setText("Note1: enable it in order to mitigate bandwidth limit. (Multislot is required) ");
+
+        proxy_timeout_spinner.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
+        proxy_timeout_spinner.setModel(new javax.swing.SpinnerNumberModel(10, 1, null, 1));
+
+        force_smart_proxy_checkbox.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
+        force_smart_proxy_checkbox.setText("FORCE SMART PROXY");
+
+        jLabel7.setFont(new java.awt.Font("Noto Sans", 2, 16)); // NOI18N
+        jLabel7.setText("Forces the use of smart proxy even if we still have direct bandwidth available (useful to test proxies)");
+
+        jLabel8.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
+        jLabel8.setText("Proxy list refresh (minutes):");
+
+        auto_refresh_proxy_time_spinner.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
+        auto_refresh_proxy_time_spinner.setModel(new javax.swing.SpinnerNumberModel(60, 1, null, 1));
+
+        proxy_random_radio.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
+        proxy_random_radio.setText("RANDOM");
+        proxy_random_radio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                proxy_random_radioActionPerformed(evt);
+            }
+        });
+
+        proxy_sequential_radio.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
+        proxy_sequential_radio.setText("SEQUENTIAL");
+        proxy_sequential_radio.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                proxy_sequential_radioActionPerformed(evt);
+            }
+        });
+
+        jLabel9.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
+        jLabel9.setText("Proxy selection order:");
+
+        proxy_reset_slot_checkbox.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
+        proxy_reset_slot_checkbox.setText("Reset slot proxy after successfully downloading a chunk");
+
+        jLabel10.setFont(new java.awt.Font("Noto Sans", 2, 16)); // NOI18N
+        jLabel10.setText("(Useful to avoid getting trapped in slow proxies)");
+
+        jLabel11.setFont(new java.awt.Font("Noto Sans", 2, 16)); // NOI18N
+        jLabel11.setText("(If you have a list of proxies sorted from best to worst, check sequential)");
+
+        javax.swing.GroupLayout smart_proxy_settingsLayout = new javax.swing.GroupLayout(smart_proxy_settings);
+        smart_proxy_settings.setLayout(smart_proxy_settingsLayout);
+        smart_proxy_settingsLayout.setHorizontalGroup(
+            smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                .addComponent(force_smart_proxy_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel7, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addComponent(custom_proxy_list_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addComponent(jScrollPane1)
+            .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(rec_smart_proxy_label1)
+                            .addComponent(rec_smart_proxy_label)
+                            .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                    .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                                        .addComponent(jLabel9)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 49, Short.MAX_VALUE)
+                                        .addComponent(proxy_random_radio)
+                                        .addGap(18, 18, 18)
+                                        .addComponent(proxy_sequential_radio))
+                                    .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                                        .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(jLabel5, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 248, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                            .addComponent(jLabel3, javax.swing.GroupLayout.Alignment.LEADING))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                            .addComponent(bad_proxy_time_spinner, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 150, Short.MAX_VALUE)
+                                            .addComponent(auto_refresh_proxy_time_spinner, javax.swing.GroupLayout.Alignment.LEADING)
+                                            .addComponent(proxy_timeout_spinner))))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(jLabel4)
+                                    .addComponent(jLabel6)
+                                    .addComponent(jLabel11)))))
+                    .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                        .addComponent(proxy_reset_slot_checkbox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel10)))
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        smart_proxy_settingsLayout.setVerticalGroup(
+            smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(smart_proxy_settingsLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(rec_smart_proxy_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(rec_smart_proxy_label1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(proxy_random_radio)
+                    .addComponent(proxy_sequential_radio)
+                    .addComponent(jLabel9)
+                    .addComponent(jLabel11))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel8)
+                    .addComponent(auto_refresh_proxy_time_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel3)
+                    .addComponent(bad_proxy_time_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel4))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel5)
+                    .addComponent(proxy_timeout_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel6))
+                .addGap(7, 7, 7)
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(proxy_reset_slot_checkbox)
+                    .addComponent(jLabel10))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(smart_proxy_settingsLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(force_smart_proxy_checkbox)
+                    .addComponent(jLabel7))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(custom_proxy_list_label)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 344, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
+        );
 
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
         downloads_panelLayout.setHorizontalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(downloads_panelLayout.createSequentialGroup()
+                        .addContainerGap()
                         .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(smart_proxy_checkbox)
                             .addGroup(downloads_panelLayout.createSequentialGroup()
@@ -962,6 +1228,17 @@ public class SettingsDialog extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(max_downloads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addComponent(multi_slot_down_checkbox)
+                            .addGroup(downloads_panelLayout.createSequentialGroup()
+                                .addComponent(change_download_dir_button)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(down_dir_label)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(default_dir_label))
+                            .addComponent(megacrypter_reverse_checkbox)
+                            .addComponent(use_mega_account_down_checkbox)
+                            .addComponent(verify_file_down_checkbox)
+                            .addComponent(limit_download_speed_checkbox)
+                            .addComponent(clipboardspy_checkbox)
                             .addGroup(downloads_panelLayout.createSequentialGroup()
                                 .addGap(21, 21, 21)
                                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -973,38 +1250,19 @@ public class SettingsDialog extends javax.swing.JDialog {
                                     .addGroup(downloads_panelLayout.createSequentialGroup()
                                         .addComponent(use_mega_label)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 700, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addGroup(downloads_panelLayout.createSequentialGroup()
-                                .addGap(26, 26, 26)
-                                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(rec_smart_proxy_label, javax.swing.GroupLayout.PREFERRED_SIZE, 542, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(custom_proxy_list_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(rec_smart_proxy_label1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addGroup(downloads_panelLayout.createSequentialGroup()
-                                .addComponent(change_download_dir_button)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(down_dir_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(default_dir_label))
-                            .addComponent(megacrypter_reverse_checkbox)
-                            .addComponent(use_mega_account_down_checkbox)
-                            .addComponent(verify_file_down_checkbox)
-                            .addGroup(downloads_panelLayout.createSequentialGroup()
-                                .addGap(21, 21, 21)
-                                .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(use_mega_account_down_combobox, javax.swing.GroupLayout.PREFERRED_SIZE, 700, javax.swing.GroupLayout.PREFERRED_SIZE))
                                     .addComponent(megacrypter_reverse_warning_label)
                                     .addGroup(downloads_panelLayout.createSequentialGroup()
                                         .addComponent(megacrypter_reverse_port_label)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(megacrypter_reverse_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                            .addComponent(limit_download_speed_checkbox)
-                            .addGroup(downloads_panelLayout.createSequentialGroup()
-                                .addGap(21, 21, 21)
-                                .addComponent(max_down_speed_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(clipboardspy_checkbox))
-                        .addGap(0, 132, Short.MAX_VALUE)))
+                                        .addComponent(megacrypter_reverse_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                                        .addComponent(max_down_speed_label)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
+                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                        .addGap(12, 12, 12)
+                        .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
@@ -1054,13 +1312,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addComponent(smart_proxy_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(rec_smart_proxy_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(rec_smart_proxy_label1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(custom_proxy_list_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 318, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -1087,8 +1339,10 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         max_up_speed_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         max_up_speed_label.setText("Max speed (KB/s):");
+        max_up_speed_label.setEnabled(false);
 
         max_up_speed_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        max_up_speed_spinner.setEnabled(false);
 
         limit_upload_speed_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         limit_upload_speed_checkbox.setText("Limit upload speed");
@@ -1098,8 +1352,8 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
-        rec_upload_slots_label.setText("Note: slots consume RAM, so use them moderately.");
+        rec_upload_slots_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
+        rec_upload_slots_label.setText("Note: slots consume resources, so use them moderately.");
 
         thumbnail_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         thumbnail_checkbox.setText("Create and upload image/video thumbnails");
@@ -1109,6 +1363,27 @@ public class SettingsDialog extends javax.swing.JDialog {
         upload_log_checkbox.setText("Create upload logs");
         upload_log_checkbox.setDoubleBuffered(true);
 
+        upload_public_folder_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        upload_public_folder_checkbox.setText("CREATE UPLOAD FOLDER PUBLIC LINK");
+        upload_public_folder_checkbox.setDoubleBuffered(true);
+        upload_public_folder_checkbox.setOpaque(true);
+        upload_public_folder_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                upload_public_folder_checkboxActionPerformed(evt);
+            }
+        });
+
+        public_folder_warning.setEditable(false);
+        public_folder_warning.setBackground(new java.awt.Color(255, 255, 51));
+        public_folder_warning.setColumns(20);
+        public_folder_warning.setFont(new java.awt.Font("Noto Sans", 1, 18)); // NOI18N
+        public_folder_warning.setForeground(new java.awt.Color(0, 51, 255));
+        public_folder_warning.setLineWrap(true);
+        public_folder_warning.setRows(5);
+        public_folder_warning.setText("THIS OPTION IS NOT RECOMMENDED. Using this will cause MegaBasterd uploaded folder to appear in your account as NOT DECRYPTABLE. \n\nAt the time of writing this text, there is a method to FIX IT:\n\n1) Move first upload subfolder to the ROOT (CLOUD) folder of your account. \n\n2) Go to account settings and click RELOAD ACCOUNT. \n\nI don't know how long this method will last. USE THIS OPTION AT YOUR OWN RISK.");
+        public_folder_warning.setWrapStyleWord(true);
+        public_folder_panel.setViewportView(public_folder_warning);
+
         javax.swing.GroupLayout uploads_panelLayout = new javax.swing.GroupLayout(uploads_panel);
         uploads_panel.setLayout(uploads_panelLayout);
         uploads_panelLayout.setHorizontalGroup(
@@ -1116,27 +1391,26 @@ public class SettingsDialog extends javax.swing.JDialog {
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(rec_upload_slots_label, javax.swing.GroupLayout.DEFAULT_SIZE, 1185, Short.MAX_VALUE)
                     .addGroup(uploads_panelLayout.createSequentialGroup()
+                        .addGap(20, 20, 20)
+                        .addComponent(max_up_speed_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(limit_upload_speed_checkbox)
+                    .addGroup(uploads_panelLayout.createSequentialGroup()
+                        .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(default_slots_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(max_uploads_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(uploads_panelLayout.createSequentialGroup()
-                                .addGap(20, 20, 20)
-                                .addComponent(max_up_speed_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(max_up_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(limit_upload_speed_checkbox)
-                            .addGroup(uploads_panelLayout.createSequentialGroup()
-                                .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(default_slots_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(max_uploads_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                            .addComponent(thumbnail_checkbox)
-                            .addComponent(upload_log_checkbox))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap())
+                            .addComponent(default_slots_up_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(max_uploads_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(thumbnail_checkbox)
+                    .addComponent(upload_log_checkbox)
+                    .addComponent(upload_public_folder_checkbox)
+                    .addComponent(public_folder_panel, javax.swing.GroupLayout.PREFERRED_SIZE, 1003, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(rec_upload_slots_label))
+                .addGap(0, 0, 0))
         );
         uploads_panelLayout.setVerticalGroup(
             uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1161,6 +1435,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addComponent(thumbnail_checkbox)
                 .addGap(18, 18, 18)
                 .addComponent(upload_log_checkbox)
+                .addGap(18, 18, 18)
+                .addComponent(upload_public_folder_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(public_folder_panel, javax.swing.GroupLayout.PREFERRED_SIZE, 324, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
@@ -1296,7 +1574,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         jLabel1.setText("Note: you can use a (optional) alias for your email addresses -> bob@supermail.com#bob_mail (don't forget to save after entering your accounts).");
         jLabel1.setDoubleBuffered(true);
 
@@ -1339,7 +1617,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                             .addComponent(mega_accounts_label)
                             .addComponent(elc_accounts_label))
                         .addGap(0, 0, Short.MAX_VALUE))
-                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, 1072, Short.MAX_VALUE))
+                    .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         accounts_panelLayout.setVerticalGroup(
@@ -1355,7 +1633,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
+                .addComponent(mega_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 395, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
@@ -1364,7 +1642,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 154, Short.MAX_VALUE)
+                .addComponent(elc_accounts_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 395, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
@@ -1408,7 +1686,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
-        proxy_warning_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        proxy_warning_label.setFont(new java.awt.Font("Dialog", 2, 14)); // NOI18N
         proxy_warning_label.setText("Note: MegaBasterd will use this proxy for ALL connections.");
         proxy_warning_label.setEnabled(false);
 
@@ -1441,11 +1719,11 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(proxy_user_label)
                 .addGap(6, 6, 6)
-                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 371, Short.MAX_VALUE)
+                .addComponent(proxy_user_textfield)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(proxy_pass_label)
                 .addGap(6, 6, 6)
-                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 530, Short.MAX_VALUE)
+                .addComponent(proxy_pass_textfield)
                 .addContainerGap())
         );
         proxy_auth_panelLayout.setVerticalGroup(
@@ -1502,56 +1780,9 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
-        import_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        import_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-import-30.png"))); // NOI18N
-        import_settings_button.setText("IMPORT SETTINGS");
-        import_settings_button.setDoubleBuffered(true);
-        import_settings_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                import_settings_buttonActionPerformed(evt);
-            }
-        });
-
-        export_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        export_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-export-30.png"))); // NOI18N
-        export_settings_button.setText("EXPORT SETTINGS");
-        export_settings_button.setDoubleBuffered(true);
-        export_settings_button.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                export_settings_buttonActionPerformed(evt);
-            }
-        });
-
-        zoom_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        zoom_label.setText("Font ZOOM (%):");
-        zoom_label.setDoubleBuffered(true);
-
-        zoom_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        zoom_spinner.setDoubleBuffered(true);
-
-        rec_zoom_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        rec_zoom_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
         rec_zoom_label.setText("Note: restart might be required.");
         rec_zoom_label.setDoubleBuffered(true);
-
-        jButton1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        jButton1.setForeground(new java.awt.Color(255, 0, 0));
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
-        jButton1.setText("RESET MEGABASTERD");
-        jButton1.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton1ActionPerformed(evt);
-            }
-        });
-
-        jLabel2.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        jLabel2.setText("Language:");
-
-        language_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-
-        font_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        font_label.setText("Font:");
-
-        font_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
         custom_chunks_dir_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         custom_chunks_dir_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-folder-30.png"))); // NOI18N
@@ -1597,50 +1828,129 @@ public class SettingsDialog extends javax.swing.JDialog {
         });
 
         debug_file_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        debug_file_checkbox.setText("Save debug info to file");
+        debug_file_checkbox.setText("Save debug info to file -> ");
 
-        mega_api_key_panel.setOpaque(false);
+        jButton1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jButton1.setForeground(new java.awt.Color(255, 0, 0));
+        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
+        jButton1.setText("RESET MEGABASTERD");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
-        mega_api_key_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        mega_api_key_label.setText("MEGA API KEY:");
-        mega_api_key_label.setDoubleBuffered(true);
+        import_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        import_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-import-30.png"))); // NOI18N
+        import_settings_button.setText("IMPORT SETTINGS");
+        import_settings_button.setDoubleBuffered(true);
+        import_settings_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                import_settings_buttonActionPerformed(evt);
+            }
+        });
 
-        mega_api_key.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        mega_api_key.setDoubleBuffered(true);
-        mega_api_key.setEnabled(false);
+        export_settings_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        export_settings_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-export-30.png"))); // NOI18N
+        export_settings_button.setText("EXPORT SETTINGS");
+        export_settings_button.setDoubleBuffered(true);
+        export_settings_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                export_settings_buttonActionPerformed(evt);
+            }
+        });
 
-        mega_api_key_warning.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
-        mega_api_key_warning.setForeground(new java.awt.Color(0, 0, 255));
-        mega_api_key_warning.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        mega_api_key_warning.setText("MEGA API KEY IS NO LONGER REQUIRED (DISABLED)");
-        mega_api_key_warning.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-        mega_api_key_warning.setDoubleBuffered(true);
-
-        javax.swing.GroupLayout mega_api_key_panelLayout = new javax.swing.GroupLayout(mega_api_key_panel);
-        mega_api_key_panel.setLayout(mega_api_key_panelLayout);
-        mega_api_key_panelLayout.setHorizontalGroup(
-            mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mega_api_key_panelLayout.createSequentialGroup()
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(mega_api_key_warning, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(mega_api_key_panelLayout.createSequentialGroup()
-                        .addComponent(mega_api_key_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(mega_api_key)))
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(import_settings_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(export_settings_button, javax.swing.GroupLayout.PREFERRED_SIZE, 232, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
-        mega_api_key_panelLayout.setVerticalGroup(
-            mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(mega_api_key_panelLayout.createSequentialGroup()
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(mega_api_key_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(mega_api_key_label)
-                    .addComponent(mega_api_key, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(mega_api_key_warning)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(import_settings_button)
+                    .addComponent(export_settings_button))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jButton1)
                 .addContainerGap())
         );
+
+        jLabel2.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        jLabel2.setText("Language:");
+
+        font_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        font_label.setText("Font:");
+
+        language_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+
+        font_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+
+        zoom_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        zoom_label.setText("Font ZOOM (%):");
+        zoom_label.setDoubleBuffered(true);
+
+        zoom_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        zoom_spinner.setDoubleBuffered(true);
+
+        dark_mode_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        dark_mode_checkbox.setText("DARK MODE");
+
+        javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
+        jPanel2.setLayout(jPanel2Layout);
+        jPanel2Layout.setHorizontalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addGroup(jPanel2Layout.createSequentialGroup()
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(zoom_label)
+                                .addComponent(font_label))
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                .addComponent(font_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(jPanel2Layout.createSequentialGroup()
+                            .addComponent(jLabel2)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(dark_mode_checkbox))
+                .addContainerGap())
+        );
+        jPanel2Layout.setVerticalGroup(
+            jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel2Layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(font_label)
+                    .addComponent(font_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(zoom_label)
+                    .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel2)
+                    .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(dark_mode_checkbox)
+                .addContainerGap())
+        );
+
+        debug_file_path.setFont(new java.awt.Font("Noto Sans", 0, 18)); // NOI18N
+        debug_file_path.setText(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log");
 
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
@@ -1649,86 +1959,55 @@ public class SettingsDialog extends javax.swing.JDialog {
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(mega_api_key_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(advanced_panelLayout.createSequentialGroup()
-                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(font_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(font_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(zoom_label)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 100, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(0, 425, Short.MAX_VALUE))
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(jLabel2)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(language_combo, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addGap(18, 18, 18)
-                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(import_settings_button)
-                                .addGap(18, 18, 18)
-                                .addComponent(export_settings_button))
-                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addComponent(run_command_textbox, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addComponent(proxy_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(advanced_panelLayout.createSequentialGroup()
-                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(start_frozen_checkbox)
-                            .addComponent(debug_file_checkbox)
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(custom_chunks_dir_checkbox)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(custom_chunks_dir_button))
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addGap(165, 165, 165)
-                                .addComponent(custom_chunks_dir_current_label))
-                            .addComponent(rec_zoom_label)
-                            .addGroup(advanced_panelLayout.createSequentialGroup()
-                                .addComponent(run_command_checkbox)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(run_command_test_button)))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addComponent(run_command_test_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(run_command_textbox))
+                    .addComponent(start_frozen_checkbox)
+                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addComponent(debug_file_checkbox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(debug_file_path))
+                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addGap(165, 165, 165)
+                        .addComponent(custom_chunks_dir_current_label))
+                    .addComponent(rec_zoom_label)
+                    .addComponent(run_command_checkbox)
+                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addComponent(custom_chunks_dir_checkbox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(custom_chunks_dir_button))
+                    .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         advanced_panelLayout.setVerticalGroup(
             advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(advanced_panelLayout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(font_label)
-                    .addComponent(font_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(import_settings_button)
-                    .addComponent(export_settings_button))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(zoom_label)
-                    .addComponent(zoom_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel2)
-                    .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jButton1))
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jPanel2, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(custom_chunks_dir_checkbox)
                     .addComponent(custom_chunks_dir_button))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(0, 0, 0)
                 .addComponent(custom_chunks_dir_current_label)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(mega_api_key_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(start_frozen_checkbox)
                 .addGap(18, 18, 18)
-                .addComponent(debug_file_checkbox)
-                .addGap(18, 18, 18)
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(run_command_checkbox)
-                    .addComponent(run_command_test_button))
+                    .addComponent(debug_file_checkbox)
+                    .addComponent(debug_file_path))
+                .addGap(18, 18, 18)
+                .addComponent(run_command_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(run_command_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(run_command_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(run_command_test_button))
                 .addGap(18, 18, 18)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -1748,22 +2027,22 @@ public class SettingsDialog extends javax.swing.JDialog {
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(panel_tabs, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(status, javax.swing.GroupLayout.DEFAULT_SIZE, 809, Short.MAX_VALUE)
+                        .addContainerGap()
+                        .addComponent(status, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(save_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cancel_button)))
+                        .addComponent(cancel_button))
+                    .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 1194, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 600, Short.MAX_VALUE)
+                .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 1082, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -1838,10 +2117,21 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("custom_chunks_dir", _custom_chunks_dir);
             settings.put("run_command", run_command_checkbox.isSelected() ? "yes" : "no");
             settings.put("run_command_path", run_command_textbox.getText());
-            settings.put("mega_api_key", mega_api_key.getText().trim());
             settings.put("clipboardspy", clipboardspy_checkbox.isSelected() ? "yes" : "no");
             settings.put("thumbnails", thumbnail_checkbox.isSelected() ? "yes" : "no");
             settings.put("upload_log", upload_log_checkbox.isSelected() ? "yes" : "no");
+            settings.put("force_smart_proxy", force_smart_proxy_checkbox.isSelected() ? "yes" : "no");
+            settings.put("reset_slot_proxy", proxy_reset_slot_checkbox.isSelected() ? "yes" : "no");
+            settings.put("random_proxy", proxy_random_radio.isSelected() ? "yes" : "no");
+            settings.put("dark_mode", dark_mode_checkbox.isSelected() ? "yes" : "no");
+            settings.put("upload_public_folder", upload_public_folder_checkbox.isSelected() ? "yes" : "no");
+            settings.put("smartproxy_ban_time", String.valueOf(bad_proxy_time_spinner.getValue()));
+            settings.put("smartproxy_timeout", String.valueOf(proxy_timeout_spinner.getValue()));
+            settings.put("smartproxy_autorefresh_time", String.valueOf(auto_refresh_proxy_time_spinner.getValue()));
+
+            if (upload_log_checkbox.isSelected()) {
+                createUploadLogDir();
+            }
 
             if (custom_proxy_textarea.getText().trim().length() == 0) {
                 smart_proxy_checkbox.setSelected(false);
@@ -1904,6 +2194,16 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
 
             String zoom = String.valueOf(zoom_spinner.getValue());
+
+            boolean old_dark_mode = false;
+
+            String dark_mode_val = DBTools.selectSettingValue("dark_mode");
+
+            if (dark_mode_val != null) {
+                old_dark_mode = (dark_mode_val.equals("yes"));
+            }
+
+            boolean dark_mode = dark_mode_checkbox.isSelected();
 
             boolean old_use_proxy = false;
 
@@ -1978,7 +2278,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                     || !proxy_host.equals(old_proxy_host)
                     || !proxy_port.equals(old_proxy_port)
                     || !proxy_user.equals(old_proxy_user)
-                    || !proxy_pass.equals(old_proxy_pass)) {
+                    || !proxy_pass.equals(old_proxy_pass)
+                    || dark_mode != old_dark_mode) {
 
                 _main_panel.setRestart(true);
             }
@@ -3029,22 +3330,10 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     private void smart_proxy_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_smart_proxy_checkboxStateChanged
 
-        if (smart_proxy_checkbox.isSelected()) {
+        MiscTools.containerSetEnabled(smart_proxy_settings, smart_proxy_checkbox.isSelected());
+        revalidate();
+        repaint();
 
-            rec_smart_proxy_label.setEnabled(true);
-            rec_smart_proxy_label1.setEnabled(true);
-            multi_slot_down_checkbox.setSelected(true);
-            use_proxy_checkbox.setSelected(false);
-            custom_proxy_list_label.setEnabled(true);
-            custom_proxy_textarea.setEnabled(true);
-
-        } else {
-
-            rec_smart_proxy_label.setEnabled(false);
-            rec_smart_proxy_label1.setEnabled(false);
-            custom_proxy_list_label.setEnabled(false);
-            custom_proxy_textarea.setEnabled(false);
-        }
     }//GEN-LAST:event_smart_proxy_checkboxStateChanged
 
     private void limit_download_speed_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_limit_download_speed_checkboxStateChanged
@@ -3064,6 +3353,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_port_label.setEnabled(megacrypter_reverse_checkbox.isSelected());
         megacrypter_reverse_port_spinner.setEnabled(megacrypter_reverse_checkbox.isSelected());
         megacrypter_reverse_warning_label.setEnabled(megacrypter_reverse_checkbox.isSelected());
+
     }//GEN-LAST:event_megacrypter_reverse_checkboxStateChanged
 
     private void import_mega_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_mega_buttonActionPerformed
@@ -3116,12 +3406,45 @@ public class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_import_mega_buttonActionPerformed
 
+    private void upload_public_folder_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_upload_public_folder_checkboxActionPerformed
+        // TODO add your handling code here:
+        if (this.upload_public_folder_checkbox.isSelected()) {
+            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Using this option may irreversibly corrupt your uploads.\n\nUSE IT AT YOUR OWN RISK"), LabelTranslatorSingleton.getInstance().translate("WARNING"), JOptionPane.WARNING_MESSAGE);
+
+        }
+
+        this.upload_public_folder_checkbox.setBackground(this.upload_public_folder_checkbox.isSelected() ? java.awt.Color.RED : null);
+
+        this.public_folder_panel.setVisible(this.upload_public_folder_checkbox.isSelected());
+
+        revalidate();
+
+        repaint();
+
+    }//GEN-LAST:event_upload_public_folder_checkboxActionPerformed
+
+    private void proxy_random_radioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proxy_random_radioActionPerformed
+        // TODO add your handling code here:
+        proxy_random_radio.setSelected(true);
+        proxy_sequential_radio.setSelected(false);
+
+    }//GEN-LAST:event_proxy_random_radioActionPerformed
+
+    private void proxy_sequential_radioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proxy_sequential_radioActionPerformed
+        // TODO add your handling code here:
+        proxy_sequential_radio.setSelected(true);
+        proxy_random_radio.setSelected(false);
+
+    }//GEN-LAST:event_proxy_sequential_radioActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
     private javax.swing.JButton add_mega_account_button;
     private javax.swing.JPanel advanced_panel;
     private javax.swing.JScrollPane advanced_scrollpane;
+    private javax.swing.JSpinner auto_refresh_proxy_time_spinner;
+    private javax.swing.JSpinner bad_proxy_time_spinner;
     private javax.swing.JButton cancel_button;
     private javax.swing.JButton change_download_dir_button;
     private javax.swing.JCheckBox clipboardspy_checkbox;
@@ -3130,7 +3453,9 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel custom_chunks_dir_current_label;
     private javax.swing.JLabel custom_proxy_list_label;
     private javax.swing.JTextArea custom_proxy_textarea;
+    private javax.swing.JCheckBox dark_mode_checkbox;
     private javax.swing.JCheckBox debug_file_checkbox;
+    private javax.swing.JLabel debug_file_path;
     private javax.swing.JLabel default_dir_label;
     private javax.swing.JLabel default_slots_down_label;
     private javax.swing.JSpinner default_slots_down_spinner;
@@ -3147,11 +3472,23 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JButton export_settings_button;
     private javax.swing.JComboBox<String> font_combo;
     private javax.swing.JLabel font_label;
+    private javax.swing.JCheckBox force_smart_proxy_checkbox;
     private javax.swing.JButton import_mega_button;
     private javax.swing.JButton import_settings_button;
     private javax.swing.JButton jButton1;
     private javax.swing.JLabel jLabel1;
+    private javax.swing.JLabel jLabel10;
+    private javax.swing.JLabel jLabel11;
     private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel4;
+    private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel6;
+    private javax.swing.JLabel jLabel7;
+    private javax.swing.JLabel jLabel8;
+    private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
+    private javax.swing.JPanel jPanel2;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JComboBox<String> language_combo;
@@ -3168,10 +3505,6 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel mega_accounts_label;
     private javax.swing.JScrollPane mega_accounts_scrollpane;
     private javax.swing.JTable mega_accounts_table;
-    private javax.swing.JTextField mega_api_key;
-    private javax.swing.JLabel mega_api_key_label;
-    private javax.swing.JPanel mega_api_key_panel;
-    private javax.swing.JLabel mega_api_key_warning;
     private javax.swing.JCheckBox megacrypter_reverse_checkbox;
     private javax.swing.JLabel megacrypter_reverse_port_label;
     private javax.swing.JSpinner megacrypter_reverse_port_spinner;
@@ -3186,9 +3519,15 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JPasswordField proxy_pass_textfield;
     private javax.swing.JLabel proxy_port_label;
     private javax.swing.JTextField proxy_port_textfield;
+    private javax.swing.JRadioButton proxy_random_radio;
+    private javax.swing.JCheckBox proxy_reset_slot_checkbox;
+    private javax.swing.JRadioButton proxy_sequential_radio;
+    private javax.swing.JSpinner proxy_timeout_spinner;
     private javax.swing.JLabel proxy_user_label;
     private javax.swing.JTextField proxy_user_textfield;
     private javax.swing.JLabel proxy_warning_label;
+    private javax.swing.JScrollPane public_folder_panel;
+    private javax.swing.JTextArea public_folder_warning;
     private javax.swing.JLabel rec_download_slots_label;
     private javax.swing.JLabel rec_smart_proxy_label;
     private javax.swing.JLabel rec_smart_proxy_label1;
@@ -3201,11 +3540,13 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JTextField run_command_textbox;
     private javax.swing.JButton save_button;
     private javax.swing.JCheckBox smart_proxy_checkbox;
+    private javax.swing.JPanel smart_proxy_settings;
     private javax.swing.JCheckBox start_frozen_checkbox;
     private javax.swing.JLabel status;
     private javax.swing.JCheckBox thumbnail_checkbox;
     private javax.swing.JButton unlock_accounts_button;
     private javax.swing.JCheckBox upload_log_checkbox;
+    private javax.swing.JCheckBox upload_public_folder_checkbox;
     private javax.swing.JPanel uploads_panel;
     private javax.swing.JScrollPane uploads_scrollpane;
     private javax.swing.JCheckBox use_mega_account_down_checkbox;

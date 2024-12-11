@@ -13,9 +13,11 @@ import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -28,6 +30,32 @@ public class DownloadManager extends TransferenceManager {
     public DownloadManager(MainPanel main_panel) {
 
         super(main_panel, main_panel.getMax_dl(), main_panel.getView().getStatus_down_label(), main_panel.getView().getjPanel_scroll_down(), main_panel.getView().getClose_all_finished_down_button(), main_panel.getView().getPause_all_down_button(), main_panel.getView().getClean_all_down_menu());
+    }
+
+    public synchronized void forceResetAllChunks() {
+        THREAD_POOL.execute(() -> {
+
+            ConcurrentLinkedQueue<Transference> transference_running_list = getMain_panel().getDownload_manager().getTransference_running_list();
+
+            if (!transference_running_list.isEmpty()) {
+                transference_running_list.forEach((transference) -> {
+
+                    ArrayList<ChunkDownloader> chunkworkers = ((Download) transference).getChunkworkers();
+
+                    chunkworkers.forEach((worker) -> {
+                        worker.RESET_CURRENT_CHUNK();
+                    });
+
+                });
+
+                MiscTools.GUIRun(() -> {
+                    getMain_panel().getView().getForce_chunk_reset_button().setEnabled(true);
+                });
+
+                JOptionPane.showMessageDialog(getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("CURRENT DOWNLOAD CHUNKS RESET!"));
+            }
+
+        });
     }
 
     @Override
@@ -43,7 +71,9 @@ public class DownloadManager extends TransferenceManager {
         secureNotify();
     }
 
-    public void copyAllLinksToClipboard() {
+    public int copyAllLinksToClipboard() {
+
+        int total = 0;
 
         ArrayList<String> links = new ArrayList<>();
 
@@ -55,6 +85,8 @@ public class DownloadManager extends TransferenceManager {
         }
 
         out += String.join("\r\n", links);
+
+        total += links.size();
 
         links.clear();
 
@@ -72,6 +104,8 @@ public class DownloadManager extends TransferenceManager {
 
         out += String.join("\r\n", links);
 
+        total += links.size();
+
         links.clear();
 
         out += "\r\n\r\n***RUNNING DOWNLOADS***\r\n\r\n";
@@ -82,6 +116,8 @@ public class DownloadManager extends TransferenceManager {
         }
 
         out += String.join("\r\n", links);
+
+        total += links.size();
 
         links.clear();
 
@@ -94,7 +130,11 @@ public class DownloadManager extends TransferenceManager {
 
         out += String.join("\r\n", links);
 
+        total += links.size();
+
         MiscTools.copyTextToClipboard(out);
+
+        return total;
 
     }
 
@@ -110,10 +150,6 @@ public class DownloadManager extends TransferenceManager {
             });
 
             getTransference_waitstart_queue().remove(d);
-
-            if (getTransference_waitstart_queue().isEmpty()) {
-                _frozen = false;
-            }
 
             getTransference_running_list().remove(d);
 

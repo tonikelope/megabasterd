@@ -41,7 +41,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
     private volatile boolean _exit;
     private final Object _secure_notify_lock;
     private volatile boolean _error_wait;
-    private boolean _notified;
+    private volatile boolean _notified;
     private volatile boolean _chunk_exception;
 
     public ChunkUploader(int id, Upload upload) {
@@ -245,7 +245,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                             } else if (tot_bytes_up == chunk_size || reads == -1) {
 
                                 if (_upload.getProgress() == _upload.getFile_size()) {
-                                    _upload.getView().printStatusNormal("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***");
+                                    _upload.getView().printStatusWarning("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***");
                                     _upload.getView().getPause_button().setEnabled(false);
                                 }
 

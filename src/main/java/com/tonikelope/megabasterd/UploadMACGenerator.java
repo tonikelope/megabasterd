@@ -31,7 +31,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
     private final Upload _upload;
     private final Object _secure_notify_lock;
-    private boolean _notified;
+    private volatile boolean _notified;
     private volatile boolean _exit;
     public final ConcurrentHashMap<Long, ByteArrayOutputStream> CHUNK_QUEUE = new ConcurrentHashMap<>();
 
@@ -84,8 +84,6 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
     @Override
     public void run() {
-
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
 
         LOG.log(Level.INFO, "{0} MAC GENERATOR {1} Hello!", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
 

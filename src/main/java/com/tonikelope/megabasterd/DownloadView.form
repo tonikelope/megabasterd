@@ -38,11 +38,11 @@
                           </Group>
                           <Group type="102" attributes="0">
                               <Component id="queue_top_button" min="-2" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="queue_up_button" min="-2" pref="42" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
-                              <Component id="queue_down_button" min="-2" pref="42" max="-2" attributes="0"/>
-                              <EmptySpace type="unrelated" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="queue_up_button" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
+                              <Component id="queue_down_button" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace max="-2" attributes="0"/>
                               <Component id="queue_bottom_button" min="-2" max="-2" attributes="0"/>
                               <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                           </Group>
@@ -86,10 +86,10 @@
           <Group type="102" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                  <Component id="queue_down_button" max="32767" attributes="0"/>
-                  <Component id="queue_up_button" max="32767" attributes="0"/>
-                  <Component id="queue_top_button" alignment="0" max="32767" attributes="0"/>
-                  <Component id="queue_bottom_button" alignment="0" max="32767" attributes="0"/>
+                  <Component id="queue_down_button" max="-2" attributes="0"/>
+                  <Component id="queue_up_button" max="-2" attributes="0"/>
+                  <Component id="queue_top_button" alignment="0" max="-2" attributes="0"/>
+                  <Component id="queue_bottom_button" alignment="0" max="-2" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
@@ -358,9 +358,8 @@
           <Font name="Dialog" size="14" style="1"/>
         </Property>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/images/arriba_1.png"/>
+          <Image iconType="3" name="/images/arrow_up.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="TOP"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="queue_top_buttonActionPerformed"/>
@@ -372,9 +371,8 @@
           <Font name="Dialog" size="14" style="1"/>
         </Property>
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-          <Image iconType="3" name="/images/abajo_1.png"/>
+          <Image iconType="3" name="/images/arrow_down.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="BOTTOM"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="queue_bottom_buttonActionPerformed"/>

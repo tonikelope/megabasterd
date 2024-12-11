@@ -70,13 +70,6 @@
   </Layout>
   <SubComponents>
     <Container class="javax.swing.JPanel" name="jPanel1">
-      <Properties>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Files"/>
-          </Border>
-        </Property>
-      </Properties>
 
       <Layout>
         <DimensionLayout dim="0">
@@ -86,7 +79,7 @@
         </DimensionLayout>
         <DimensionLayout dim="1">
           <Group type="103" groupAlignment="0" attributes="0">
-              <Component id="file_tree_scrollpane" alignment="0" pref="310" max="32767" attributes="0"/>
+              <Component id="file_tree_scrollpane" alignment="0" pref="236" max="32767" attributes="0"/>
           </Group>
         </DimensionLayout>
       </Layout>
@@ -100,6 +93,9 @@
           <SubComponents>
             <Component class="javax.swing.JTree" name="file_tree">
               <Properties>
+                <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
+                  <Border info="null"/>
+                </Property>
                 <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                   <Font name="Dialog" size="18" style="0"/>
                 </Property>
@@ -116,19 +112,12 @@
       </SubComponents>
     </Container>
     <Container class="javax.swing.JPanel" name="jPanel2">
-      <Properties>
-        <Property name="border" type="javax.swing.border.Border" editor="org.netbeans.modules.form.editors2.BorderEditor">
-          <Border info="org.netbeans.modules.form.compat2.border.TitledBorderInfo">
-            <TitledBorder title="Upload info"/>
-          </Border>
-        </Property>
-      </Properties>
 
       <Layout>
         <DimensionLayout dim="0">
           <Group type="103" groupAlignment="0" attributes="0">
               <Group type="102" alignment="0" attributes="0">
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" attributes="0">
                           <Component id="upload_log_checkbox" min="-2" max="-2" attributes="0"/>
@@ -148,12 +137,16 @@
                                   <Component id="add_folder_button" max="32767" attributes="0"/>
                               </Group>
                               <Component id="dir_name_textfield" max="32767" attributes="0"/>
-                              <Component id="account_combobox" max="32767" attributes="0"/>
                               <Component id="used_space_label" alignment="0" max="32767" attributes="0"/>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <Component id="account_combobox" max="32767" attributes="0"/>
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="copy_email_button" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                       </Group>
                   </Group>
-                  <EmptySpace max="-2" attributes="0"/>
+                  <EmptySpace min="0" pref="0" max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -165,10 +158,11 @@
                       <Component id="dir_name_label" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="dir_name_textfield" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace type="separate" max="-2" attributes="0"/>
+                  <EmptySpace type="unrelated" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="account_label" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="account_combobox" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="account_combobox" max="32767" attributes="0"/>
+                      <Component id="copy_email_button" alignment="3" min="-2" pref="38" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Component id="used_space_label" min="-2" max="-2" attributes="0"/>
@@ -182,7 +176,7 @@
                       <Component id="upload_log_checkbox" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="priority_checkbox" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace max="-2" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -283,7 +277,7 @@
         <Component class="javax.swing.JCheckBox" name="upload_log_checkbox">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="14" style="1"/>
+              <Font name="Dialog" size="16" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Enable log file"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
@@ -293,12 +287,27 @@
         <Component class="javax.swing.JCheckBox" name="priority_checkbox">
           <Properties>
             <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-              <Font name="Dialog" size="14" style="1"/>
+              <Font name="Dialog" size="16" style="1"/>
             </Property>
             <Property name="text" type="java.lang.String" value="Put on TOP of waiting queue"/>
             <Property name="doubleBuffered" type="boolean" value="true"/>
             <Property name="enabled" type="boolean" value="false"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="copy_email_button">
+          <Properties>
+            <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+              <Font name="Dialog" size="18" style="1"/>
+            </Property>
+            <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+              <Image iconType="3" name="/images/icons8-copy-to-clipboard-30.png"/>
+            </Property>
+            <Property name="text" type="java.lang.String" value="Copy email"/>
+            <Property name="enabled" type="boolean" value="false"/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="copy_email_buttonActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>
@@ -324,9 +333,12 @@
     <Component class="javax.swing.JLabel" name="total_file_size_label">
       <Properties>
         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
-          <Font name="Dialog" size="28" style="1"/>
+          <Font name="Dialog" size="32" style="1"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="[0 B]"/>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="ff" green="0" red="0" type="rgb"/>
+        </Property>
+        <Property name="text" type="java.lang.String" value="[---]"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>

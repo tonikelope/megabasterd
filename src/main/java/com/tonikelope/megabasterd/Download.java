@@ -72,7 +72,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private final Object _chunkid_lock;
     private final Object _dl_url_lock;
     private final Object _turbo_proxy_lock;
-    private boolean _notified;
+    private volatile boolean _notified;
     private final String _url;
     private final String _download_path;
     private final String _custom_chunks_dir;
@@ -247,6 +247,19 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
 
             return i;
+        }
+    }
+
+    public void disableTurboMode() {
+        synchronized (_turbo_proxy_lock) {
+            if (_turbo) {
+                _turbo = false;
+                MiscTools.GUIRun(() -> {
+
+                    getView().getSpeed_label().setForeground(new Color(0, 128, 255));
+
+                });
+            }
         }
     }
 
@@ -715,13 +728,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             if (!isExit() && !_thread_pool.isShutdown() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
                                 stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
-
-                                if (MainPanel.getProxy_manager() != null) {
-                                    String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
-
-                                    String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
-                                    MainPanel.getProxy_manager().refreshProxyList(url_list); //Force SmartProxy proxy list refresh
-                                }
                             }
 
                             LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
@@ -1347,8 +1353,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         int old_thread_priority = Thread.currentThread().getPriority();
 
-        Thread.currentThread().setPriority(Thread.MIN_PRIORITY);
-
         int[] int_key = bin2i32a(UrlBASE642Bin(_file_key));
         int[] iv = new int[]{int_key[4], int_key[5]};
         int[] meta_mac = new int[]{int_key[6], int_key[7]};
@@ -1423,8 +1427,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
 
             int[] cbc = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};
-
-            Thread.currentThread().setPriority(old_thread_priority);
 
             return (cbc[0] == meta_mac[0] && cbc[1] == meta_mac[1]);
         }
@@ -1512,11 +1514,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 error_code = ex.getCode();
 
+                if (error_code == -16) {
+                    _status_error = "ERROR: MEGA FILE BLOCKED/DELETED";
+                }
+
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
-                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
+                    stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 
                 } else {
 
@@ -1528,7 +1534,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     _retrying_request = true;
 
                     MiscTools.GUIRun(() -> {
-                        getMain_panel().getView().getNew_download_menu().setEnabled(true);
 
                         getView().getStop_button().setVisible(true);
 
@@ -1598,11 +1603,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 error_code = ex.getCode();
 
+                if (error_code == -16) {
+                    _status_error = "ERROR: MEGA FILE BLOCKED/DELETED";
+                }
+
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
-                    stopDownloader(ex.getMessage() + " " + truncateText(link, 80));
+                    stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 
                 } else {
 

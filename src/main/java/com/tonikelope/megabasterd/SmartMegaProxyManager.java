@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,9 +22,12 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -34,19 +38,140 @@ import java.util.logging.Logger;
 public final class SmartMegaProxyManager {
 
     public static String DEFAULT_SMART_PROXY_URL = null;
-    public static final int PROXY_BLOCK_TIME = 90;
-    public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 60;
+    public static final int PROXY_BLOCK_TIME = 300;
+    public static final int PROXY_AUTO_REFRESH_TIME = 60;
+    public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 30;
+    public static final boolean RESET_SLOT_PROXY = true;
+    public static final boolean RANDOM_SELECT = true;
+
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
-    private final LinkedHashMap<String, Long[]> _proxy_list;
+    private final ConcurrentHashMap<String, Long[]> _proxy_list;
     private static final HashMap<String, String> PROXY_LIST_AUTH = new HashMap<>();
     private final MainPanel _main_panel;
+    private volatile int _ban_time;
+    private volatile int _proxy_timeout;
+    private volatile boolean _force_smart_proxy;
+    private volatile int _autorefresh_time;
+    private volatile long _last_refresh_timestamp;
+    private volatile boolean _random_select;
+    private volatile boolean _reset_slot_proxy;
+
+    public boolean isRandom_select() {
+        return _random_select;
+    }
+
+    public boolean isReset_slot_proxy() {
+        return _reset_slot_proxy;
+    }
+
+    public int getProxy_timeout() {
+        return _proxy_timeout;
+    }
+
+    public boolean isForce_smart_proxy() {
+        return _force_smart_proxy;
+    }
 
     public SmartMegaProxyManager(String proxy_list_url, MainPanel main_panel) {
         _proxy_list_url = (proxy_list_url != null && !"".equals(proxy_list_url)) ? proxy_list_url : DEFAULT_SMART_PROXY_URL;
-        _proxy_list = new LinkedHashMap<>();
+        _proxy_list = new ConcurrentHashMap<>();
         _main_panel = main_panel;
-        refreshProxyList();
+
+        refreshSmartProxySettings();
+
+        THREAD_POOL.execute(() -> {
+            refreshProxyList();
+
+            while (true) {
+
+                while (System.currentTimeMillis() < _last_refresh_timestamp + _autorefresh_time * 60 * 1000) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException ex) {
+                        Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+
+                if (MainPanel.isUse_smart_proxy()) {
+
+                    refreshProxyList();
+                }
+            }
+        });
+    }
+
+    private synchronized int countBlockedProxies() {
+
+        int i = 0;
+
+        Long current_time = System.currentTimeMillis();
+
+        for (String k : _proxy_list.keySet()) {
+
+            if (_proxy_list.get(k)[0] != -1 && _proxy_list.get(k)[0] > current_time - _ban_time * 1000) {
+
+                i++;
+            }
+        }
+
+        return i;
+
+    }
+
+    public synchronized void refreshSmartProxySettings() {
+        String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
+
+        if (smartproxy_ban_time != null) {
+            _ban_time = Integer.parseInt(smartproxy_ban_time);
+        } else {
+            _ban_time = PROXY_BLOCK_TIME;
+        }
+
+        String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
+
+        if (smartproxy_timeout != null) {
+            _proxy_timeout = Integer.parseInt(smartproxy_timeout) * 1000;
+        } else {
+            _proxy_timeout = Transference.HTTP_PROXY_TIMEOUT;
+        }
+
+        String force_smart_proxy_string = DBTools.selectSettingValue("force_smart_proxy");
+
+        if (force_smart_proxy_string != null) {
+
+            _force_smart_proxy = force_smart_proxy_string.equals("yes");
+        } else {
+            _force_smart_proxy = MainPanel.FORCE_SMART_PROXY;
+        }
+
+        String autorefresh_smart_proxy_string = DBTools.selectSettingValue("smartproxy_autorefresh_time");
+
+        if (autorefresh_smart_proxy_string != null) {
+            _autorefresh_time = Integer.parseInt(autorefresh_smart_proxy_string);
+        } else {
+            _autorefresh_time = PROXY_AUTO_REFRESH_TIME;
+        }
+
+        String reset_slot_proxy = DBTools.selectSettingValue("reset_slot_proxy");
+
+        if (reset_slot_proxy != null) {
+
+            _reset_slot_proxy = reset_slot_proxy.equals("yes");
+        } else {
+            _reset_slot_proxy = RESET_SLOT_PROXY;
+        }
+
+        String random_select = DBTools.selectSettingValue("random_proxy");
+
+        if (random_select != null) {
+
+            _random_select = random_select.equals("yes");
+        } else {
+            _random_select = RANDOM_SELECT;
+        }
+
+        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + "   TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + "   REFRESH: " + String.valueOf(_autorefresh_time) + "   FORCE: " + String.valueOf(_force_smart_proxy) + "   RANDOM: " + String.valueOf(_random_select) + "   RESET-SLOT-PROXY: " + String.valueOf(_reset_slot_proxy));
     }
 
     public synchronized int getProxyCount() {
@@ -60,11 +185,17 @@ public final class SmartMegaProxyManager {
 
             Set<String> keys = _proxy_list.keySet();
 
+            List<String> keysList = new ArrayList<>(keys);
+
+            if (isRandom_select()) {
+                Collections.shuffle(keysList);
+            }
+
             Long current_time = System.currentTimeMillis();
 
-            for (String k : keys) {
+            for (String k : keysList) {
 
-                if (_proxy_list.get(k)[0] < current_time && (excluded == null || !excluded.contains(k))) {
+                if ((_proxy_list.get(k)[0] == -1 || _proxy_list.get(k)[0] < current_time - _ban_time * 1000) && (excluded == null || !excluded.contains(k))) {
 
                     return new String[]{k, _proxy_list.get(k)[1] == -1L ? "http" : "socks"};
                 }
@@ -84,17 +215,30 @@ public final class SmartMegaProxyManager {
         return getProxyCount() > 0 ? getProxy(excluded) : null;
     }
 
-    public synchronized void blockProxy(String proxy) {
+    public synchronized void blockProxy(String proxy, String cause) {
 
         if (_proxy_list.containsKey(proxy)) {
 
-            Long[] proxy_data = _proxy_list.get(proxy);
+            if (this._ban_time == 0) {
 
-            proxy_data[0] = System.currentTimeMillis() + PROXY_BLOCK_TIME * 1000;
+                _proxy_list.remove(proxy);
 
-            _proxy_list.put(proxy, proxy_data);
+                LOG.log(Level.WARNING, "[Smart Proxy] REMOVING PROXY {0} ({1})", new Object[]{proxy, cause});
 
-            LOG.log(Level.WARNING, "{0} Smart Proxy Manager: BLOCKING PROXY -> {1} ({2} secs)", new Object[]{Thread.currentThread().getName(), proxy, PROXY_BLOCK_TIME});
+            } else {
+
+                Long[] proxy_data = _proxy_list.get(proxy);
+
+                proxy_data[0] = System.currentTimeMillis();
+
+                _proxy_list.put(proxy, proxy_data);
+
+                LOG.log(Level.WARNING, "[Smart Proxy] BLOCKING PROXY {0} ({1} secs) ({2})", new Object[]{proxy, _ban_time, cause});
+
+            }
+
+            _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount() - countBlockedProxies()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
+
         }
     }
 
@@ -105,7 +249,9 @@ public final class SmartMegaProxyManager {
             _proxy_list_url = null;
         }
 
-        refreshProxyList();
+        THREAD_POOL.execute(() -> {
+            refreshProxyList();
+        });
     }
 
     public synchronized void refreshProxyList() {
@@ -128,8 +274,6 @@ public final class SmartMegaProxyManager {
 
                 if (!custom_list.isEmpty()) {
 
-                    Long current_time = System.currentTimeMillis();
-
                     for (String proxy : custom_list) {
 
                         boolean socks = false;
@@ -146,13 +290,13 @@ public final class SmartMegaProxyManager {
 
                             custom_clean_list_auth.put(proxy_parts[0], proxy_parts[1]);
 
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
 
                             custom_clean_list.put(proxy_parts[0], proxy_data);
 
                         } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
 
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
 
                             custom_clean_list.put(proxy, proxy_data);
                         }
@@ -207,8 +351,6 @@ public final class SmartMegaProxyManager {
 
                     PROXY_LIST_AUTH.clear();
 
-                    Long current_time = System.currentTimeMillis();
-
                     for (String proxy : proxy_list) {
 
                         boolean socks = false;
@@ -225,29 +367,29 @@ public final class SmartMegaProxyManager {
 
                             PROXY_LIST_AUTH.put(proxy_parts[0], proxy_parts[1]);
 
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
 
                             _proxy_list.put(proxy_parts[0], proxy_data);
 
                         } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            Long[] proxy_data = new Long[]{current_time, socks ? 1L : -1L};
+                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
                             _proxy_list.put(proxy, proxy_data);
                         }
 
                     }
                 }
 
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")");
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
 
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
 
             } else if (!custom_clean_list.isEmpty()) {
 
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")*");
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
 
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
             } else {
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (0)");
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (0 proxies!)" + (this.isForce_smart_proxy() ? " F!" : ""));
                 LOG.log(Level.INFO, "{0} Smart Proxy Manager: NO PROXYS");
             }
 
@@ -261,6 +403,9 @@ public final class SmartMegaProxyManager {
             }
 
         }
+
+        _last_refresh_timestamp = System.currentTimeMillis();
+
     }
 
     public static class SmartProxyAuthenticator extends Authenticator {

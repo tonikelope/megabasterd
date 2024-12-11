@@ -47,6 +47,12 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private volatile boolean exit = false;
 
+    @Override
+    public void dispose() {
+        file_tree.setModel(null);
+        super.dispose();
+    }
+
     public List<HashMap> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
     }
@@ -83,6 +89,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             translateLabels(this);
 
+            file_tree.setRootVisible(false);
+
             node_bar.setIndeterminate(true);
 
             folder_link_label.setText(link);
@@ -108,7 +116,15 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else if (_mega_error == -18) {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+
+                        setVisible(false);
+                    });
+
+                } else if (_mega_error == -16) {
+
+                    MiscTools.GUIRun(() -> {
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER BLOCKED/DELETED"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -116,7 +132,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -221,8 +237,9 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             }
         });
 
-        total_space_label.setFont(new java.awt.Font("Dialog", 1, 28)); // NOI18N
-        total_space_label.setText("[0 B]");
+        total_space_label.setFont(new java.awt.Font("Dialog", 1, 32)); // NOI18N
+        total_space_label.setForeground(new java.awt.Color(0, 0, 255));
+        total_space_label.setText("[---]");
         total_space_label.setDoubleBuffered(true);
         total_space_label.setEnabled(false);
 
@@ -230,24 +247,24 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+            .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(link_detected_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(folder_link_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGap(29, 29, 29)
+                        .addComponent(restore_button))
                     .addComponent(node_bar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(link_detected_label, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(total_space_label, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(warning_label, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                    .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(warning_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(total_space_label, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
                         .addComponent(skip_rest_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(skip_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(dance_button))
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
-                        .addComponent(folder_link_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(restore_button)))
+                        .addComponent(dance_button)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -260,9 +277,11 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     .addComponent(folder_link_label)
                     .addComponent(restore_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 295, Short.MAX_VALUE)
+                .addComponent(file_tree_scrollpane, javax.swing.GroupLayout.DEFAULT_SIZE, 289, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(node_bar, javax.swing.GroupLayout.PREFERRED_SIZE, 14, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(total_space_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -270,8 +289,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                         .addComponent(skip_button)
                         .addComponent(dance_button))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addComponent(total_space_label)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(warning_label)
                         .addGap(49, 49, 49)))
                 .addContainerGap())
@@ -326,12 +343,16 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             node_bar.setVisible(true);
             skip_rest_button.setEnabled(false);
             skip_button.setEnabled(false);
+
             THREAD_POOL.execute(() -> {
+
                 MiscTools.resetTreeFolderSizes(((MegaMutableTreeNode) file_tree.getModel().getRoot()));
+
                 MiscTools.calculateTreeFolderSizes(((MegaMutableTreeNode) file_tree.getModel().getRoot()));
 
                 _genDownloadLiks();
-                MiscTools.GUIRun(() -> {
+
+                MiscTools.GUIRunAndWait(() -> {
                     restore_button.setVisible(true);
 
                     file_tree.setEnabled(true);
@@ -345,6 +366,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     skip_button.setEnabled(root_childs);
 
                     skip_rest_button.setEnabled(root_childs);
+
                 });
             });
 
@@ -414,9 +436,33 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
 
+            String subfolder_id = null;
+
+            if (folder_id.contains("@")) {
+
+                String[] fids = folder_id.split("@");
+
+                folder_id = fids[0];
+
+                subfolder_id = fids[1];
+            }
+
+            int r = -1;
+
+            if (ma.existsCachedFolderNodes(folder_id)) {
+                r = JOptionPane.showConfirmDialog(this, "Do you want to use FOLDER CACHED VERSION?\n\n(It could speed up the loading of very large folders)", "FOLDER CACHE", JOptionPane.YES_NO_OPTION);
+
+            }
+
+            if (r == 0) {
+                MiscTools.GUIRun(() -> {
+                    folder_link_label.setText(_link + " (CACHED VERSION)");
+                });
+            }
+
             String folder_key = findFirstRegex("#F![^!]+!(.+)", _link, 1);
 
-            folder_nodes = ma.getFolderNodes(folder_id, folder_key, node_bar);
+            folder_nodes = ma.getFolderNodes(folder_id, folder_key, node_bar, (r == 0));
 
             MegaMutableTreeNode root = null;
 
@@ -439,8 +485,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 conta_nodo++;
 
                 int c = conta_nodo;
-                MiscTools.GUIRun(() -> {
 
+                MiscTools.GUIRun(() -> {
                     node_bar.setValue(c);
                 });
 
@@ -461,11 +507,13 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                 String parent_id = (String) current_hashmap_node.get("parent");
 
-                root = null;
+                String current_id = (String) current_hashmap_node.get("h");
+
+                boolean ignore_node = false;
 
                 do {
 
-                    if (folder_nodes.get(parent_id) != null) {
+                    if ((subfolder_id == null && folder_nodes.get(parent_id) != null) || (subfolder_id != null && !subfolder_id.equals(current_id) && folder_nodes.get(parent_id) != null)) {
 
                         HashMap<String, Object> parent_hashmap_node = (HashMap) folder_nodes.get(parent_id);
 
@@ -488,12 +536,20 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                         current_node = parent_node;
 
-                    } else {
+                    } else if (subfolder_id != null && subfolder_id.equals(current_id)) {
+
+                        root = current_node;
+
+                    } else if (subfolder_id != null && folder_nodes.get(parent_id) == null) {
+
+                        ignore_node = true;
+
+                    } else if (subfolder_id == null && folder_nodes.get(parent_id) == null) {
 
                         root = current_node;
                     }
 
-                } while (current_node != root);
+                } while (current_node != root && !ignore_node);
             }
 
             MiscTools.GUIRun(() -> {
@@ -501,9 +557,11 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 node_bar.setIndeterminate(true);
             });
 
-            MiscTools.sortTree(root);
+            if (root != null) {
+                MiscTools.sortTree(root);
 
-            MiscTools.calculateTreeFolderSizes(root);
+                MiscTools.calculateTreeFolderSizes(root);
+            }
 
             if (root == null) {
                 LOG.log(SEVERE, null, "MEGA FOLDER ERROR (EMPTY?)");
@@ -511,11 +569,14 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 _mega_error = 2;
 
             } else {
+
+                root.setParent(null);
+
                 final JTree ftree = file_tree;
 
                 final MegaMutableTreeNode roott = root;
 
-                MiscTools.GUIRun(() -> {
+                MiscTools.GUIRunAndWait(() -> {
 
                     node_bar.setIndeterminate(true);
 
@@ -552,15 +613,24 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         MiscTools.GUIRun(() -> {
             working = true;
 
-            String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
-
             _download_links.clear();
 
             MegaMutableTreeNode root = (MegaMutableTreeNode) file_tree.getModel().getRoot();
 
             Enumeration files_tree = root.depthFirstEnumeration();
 
+            total_space_label.setText("[---]");
+
             THREAD_POOL.execute(() -> {
+
+                String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
+
+                if (folder_id.contains("@")) {
+
+                    String[] fids = folder_id.split("@");
+
+                    folder_id = fids[0];
+                }
 
                 _total_space = 0L;
 
@@ -620,7 +690,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     }
                 }
 
-                MiscTools.GUIRun(() -> {
+                MiscTools.GUIRunAndWait(() -> {
 
                     total_space_label.setText("[" + formatBytes(_total_space) + "]");
 
