@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.*;
 import java.util.*;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -19,6 +20,7 @@ public class RemoteAPI {
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
     private final MainPanel _main_panel;
     private final DownloadManager _download_manager;
+    private final javax.swing.JTree file_tree = new javax.swing.JTree();
     private final MegaAPI ma = new MegaAPI();
     public boolean enabled = false;
     public int port = 0;
@@ -56,39 +58,27 @@ public class RemoteAPI {
             // get downloads
             ArrayList<Map<String, Object>> downloads = new ArrayList<>();
             for (Download dl : getDownloads()) {
-                String dlStatus = "Unknown";
+                String dlStatus = dl.getView().getStatus_label().getText();
                 boolean finished = false;
 
-                String statusText = dl.getView().getStatus_label().getText();
-                switch(statusText) {
-                    case "Provisioning download, please wait...":
-                    case "Starting download, please wait...":
-                    case "Starting download (retrieving MEGA temp link), please wait...":
-                    case "File exists, resuming download...":
-                    case "Truncating temp file...":
-                        dlStatus = "Starting...";
-                        break;
-                    case "Download paused!":
-                        dlStatus = "Paused";
-                        break;
-                    case "Download CANCELED!":
-                        dlStatus = "Canceled";
-                        break;
-                    case "Waiting to check file integrity...":
-                    case "Checking file integrity, please wait...":
-                    case "Download finished. Joining file chunks, please wait...":
-                        dlStatus = "Decrypting";
-                        break;
+                switch(dlStatus) {
                     case "File successfully downloaded!":
                     case "File successfully downloaded! (Integrity check PASSED)":
                     case "File successfully downloaded! (but integrity check CANCELED)":
-                        dlStatus = "Finished";
                         finished = true;
                         break;
                 }
 
-                if (dl.getView().getStatus_label().getText().startsWith("Downloading file from mega")){
-                    dlStatus = "Download";
+                // Check if  Bandwidth Limit is Exceeded
+                int error509Count = 0;
+                ArrayList<ChunkDownloader> workers = dl.getChunkworkers();
+                for (ChunkDownloader chunkDownloader : dl.getChunkworkers()) {
+                    if(chunkDownloader.isBandwidthExceeded()){
+                        error509Count ++;
+                    }
+                }
+                if(error509Count > 0){
+                    dlStatus = "509 Bandwidth Limit Exceeded";
                 }
 
                 if (dl.isStatusError()){
@@ -97,12 +87,27 @@ public class RemoteAPI {
 
                 downloads.add(createDownloadStatus(dl.getUrl(), dl.getFile_name(), getDownloadPath(dl),
                         dl.getFile_size(), dl.getProgress(), dl.getFile_size() == dl.getProgress() ? 0 : dl.getSpeed(),
-                        dlStatus, dl.getStatus_error(), finished));
+                        dlStatus, dl.getStatus_error(), finished, workers.size(), error509Count));
             }
             status.put("downloads", downloads);
 
             ObjectMapper mapper = new ObjectMapper();
             return mapper.writeValueAsString(status);
+        });
+
+        post("/clear509", (req, res) -> {
+            res.type("application/json");
+
+            for (Download dl : getDownloads()) {
+                for (ChunkDownloader chunkDownloader : dl.getChunkworkers()) {
+                    if(chunkDownloader.isBandwidthExceeded()) {
+                        chunkDownloader.forceRestartAfter509();
+                        chunkDownloader.run();
+                    }
+                }
+            }
+
+            return "{\"messsage\": \"Cleared 509 Errors.\"}";
         });
 
         post("/pause", (req, res) -> {
@@ -252,7 +257,7 @@ public class RemoteAPI {
 
                 // Parse the JSON body
                 JsonObject jsonBody = JsonParser.parseString(req.body()).getAsJsonObject();
-                if (!jsonBody.has("url") || !jsonBody.has("url")) {
+                if (!jsonBody.has("url") || !jsonBody.has("newName")) {
                     res.status(400); // Bad Request
                     return gson.toJson(new ErrorResponse("Missing required parameters."));
                 }
@@ -265,8 +270,15 @@ public class RemoteAPI {
                     return "{\"message\": \"Download not found.\"}";
                 }
 
+                String statusText = download.getView().getStatus_label().getText();
+                if(!statusText.contains("File successfully downloaded!")) {
+                    res.status(500);
+                    return "{\"message\": \"Download is not completed.\"}";
+                }
+
                 boolean renamed = download.setFile_name(newName);
                 if(renamed) {
+                    DBTools.updateDownloadFilename(newName, downloadUrl);
                     return "{\"message\": \"Renamed download\"}";
                 } else {
                     res.status(400);
@@ -334,23 +346,28 @@ public class RemoteAPI {
         String link_data = MiscTools.extractMegaLinksFromString(linksText);
         Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
 
+
         // remove folder links (not supported yet)
         if (!urls.isEmpty()) {
             Set<String> folder_file_links = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+#F\\*[^\r\n!]*?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
             if (!folder_file_links.isEmpty()) {
-                ArrayList<String> nlinks = ma.GENERATE_N_LINKS(folder_file_links);
+                ArrayList<String> nlinks = ma.GENERATE_N_LINKS(folder_file_links, true);
                 urls.removeAll(folder_file_links);
                 urls.addAll(nlinks);
             }
         }
-        urls.removeIf(url -> findFirstRegex("#F!", url, 0) != null);
 
-        // validate url exists
+        // get links for folder files
         for (String url : urls) {
-            try{
-                ma.getMegaFileMetadata(url);
-            } catch (Exception ex){
+            if (findFirstRegex("#F!", url, 0) != null) {
                 urls.remove(url);
+
+                FolderLinkDialog fdialog = new FolderLinkDialog(_main_panel.getView(), false, url);
+                while (!fdialog.isReady) { }
+                for (var link : fdialog.getDownload_links()) {
+                    urls.add(link.get("url").toString());
+                }
+                fdialog.dispose();
             }
         }
 
@@ -374,17 +391,19 @@ public class RemoteAPI {
     }
 
     // Helper method to create a DownloadStatus JSONObject
-    public static Map<String, Object> createDownloadStatus(String url, String name, String path, long size, long bytesLoaded, long speed, String status, String error, Boolean finished) {
+    public static Map<String, Object> createDownloadStatus(String url, String name, String path, long size, long bytesLoaded, long speed, String status, String error, Boolean finished, int workers, int error509Count) {
         Map<String, Object> downloadStatus = new HashMap<>();
         downloadStatus.put("url", url);
         downloadStatus.put("name", name);
         downloadStatus.put("path", path);
         downloadStatus.put("bytesTotal", size);
-        downloadStatus.put("bytesLoaded", bytesLoaded);
+        downloadStatus.put("bytesLoaded", finished ? size : bytesLoaded);
         downloadStatus.put("speed", speed);
         downloadStatus.put("status", status);
         downloadStatus.put("finished", finished);
         downloadStatus.put("error", error);
+        downloadStatus.put("workers", workers);
+        downloadStatus.put("error509Count", error509Count);
         return downloadStatus;
     }
 }

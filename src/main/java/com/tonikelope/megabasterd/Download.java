@@ -911,13 +911,19 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     }
 
                 } else {
-                    getView().hideAllExceptStatus();
+                    var dl = selectDownload(_url);
 
-                    _status_error = "FILE WITH SAME NAME AND SIZE ALREADY EXISTS";
+                    if(dl.isEmpty()){
+                        getView().hideAllExceptStatus();
 
-                    _auto_retry_on_error = false;
+                        _status_error = "FILE WITH SAME NAME AND SIZE ALREADY EXISTS";
 
-                    getView().printStatusError(_status_error);
+                        _auto_retry_on_error = false;
+
+                        getView().printStatusError(_status_error);
+                    } else {
+                        getView().printStatusOK("File successfully downloaded!");
+                    }
                 }
 
             } else if (_status_error != null) {
@@ -947,6 +953,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             getView().printStatusError(_status_error);
 
             LOG.log(Level.SEVERE, ex.getMessage());
+
+            this.close();
         }
 
         if (_file != null && !getView().isKeepTempFileSelected()) {
@@ -972,11 +980,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         if ((_status_error == null && !_canceled) || global_cancel || !_auto_retry_on_error) {
 
-            try {
-                deleteDownload(_url);
-            } catch (SQLException ex) {
-                LOG.log(SEVERE, null, ex);
-            }
+            // try {
+            //     deleteDownload(_url);
+            // } catch (SQLException ex) {
+            //     LOG.log(SEVERE, null, ex);
+            // }
 
         }
 
