@@ -129,6 +129,19 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             Border original_regex_textfield_border = file_regex_textfield.getBorder();
             
+            file_regex101_label.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent evt) {
+                    String currentRegex = file_regex_textfield.getText();
+                    if (currentRegex.isEmpty()) return;
+                    
+                    String url = (String) file_regex101_label.getClientProperty("regexUrl");
+                    if (url != null) {
+                        MiscTools.openBrowserURL(url);
+                    }
+                }
+            });
+            
             file_regex_textfield.setInputVerifier(new InputVerifier() {
                 @Override
                 public boolean verify(JComponent input) {
@@ -141,10 +154,17 @@ public class SettingsDialog extends javax.swing.JDialog {
                         String localizedRegex101Display = LabelTranslatorSingleton.getInstance().translate("Test on Regex101");
                         String formattedHtml = String.format("<HTML><a target=\"_blank\" href=\"%s\">%s</a></HTML>", regex101Url, localizedRegex101Display);
                         file_regex101_label.setText(formattedHtml);
+                        file_regex101_label.putClientProperty("regexUrl", regex101Url);
                         return true;
                     } catch (PatternSyntaxException ex) {
                         input.setBorder(BorderFactory.createLineBorder(Color.RED));
                         file_regex101_label.setText("");
+                        file_regex101_label.putClientProperty("regexUrl", "");
+                        return false;
+                    } catch (Exception ex) {
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        file_regex101_label.setText("");
+                        file_regex101_label.putClientProperty("regexUrl", "");
                         return false;
                     }
                 }
@@ -2029,12 +2049,9 @@ public class SettingsDialog extends javax.swing.JDialog {
         file_regex_textfield.setEnabled(false);
 
         file_regex101_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        file_regex101_label.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        file_regex101_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         file_regex101_label.setEnabled(false);
-        file_regex101_label.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                file_regex101_labelMouseClicked(evt);
-            }
-        });
 
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
@@ -3541,21 +3558,12 @@ public class SettingsDialog extends javax.swing.JDialog {
         // TODO add your handling code here:
         file_regex_textfield.setEnabled(file_regex_checkbox.isSelected());
         file_regex101_label.setEnabled(file_regex_checkbox.isSelected());
-        InputVerifier regexVerifier = file_regex101_label.getInputVerifier();
+        InputVerifier regexVerifier = file_regex_textfield.getInputVerifier();
         if (regexVerifier != null && file_regex_checkbox.isSelected())
             regexVerifier.verify(file_regex_textfield);
         else
             file_regex101_label.setText("");
     }//GEN-LAST:event_file_regex_checkboxActionPerformed
-
-    private void file_regex101_labelMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_file_regex101_labelMouseClicked
-        // TODO add your handling code here:
-        String currentRegex = file_regex101_label.getText();
-        if (currentRegex.isBlank()) {
-            return;
-        }
-        openBrowserURL(String.format("https://regex101.com/?regex=${encodeURIComponent(%s)}&flags=gm", currentRegex));
-    }//GEN-LAST:event_file_regex101_labelMouseClicked
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
