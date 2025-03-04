@@ -153,17 +153,18 @@ public class SettingsDialog extends javax.swing.JDialog {
                         String regex101Url = String.format("https://regex101.com/?regex=%s&flags=gm", encodedRegex);
                         String localizedRegex101Display = LabelTranslatorSingleton.getInstance().translate("Test on Regex101");
                         String formattedHtml = String.format("<HTML><a target=\"_blank\" href=\"%s\">%s</a></HTML>", regex101Url, localizedRegex101Display);
+                        file_regex101_label.setEnabled(true);
                         file_regex101_label.setText(formattedHtml);
                         file_regex101_label.putClientProperty("regexUrl", regex101Url);
                         return true;
                     } catch (PatternSyntaxException ex) {
                         input.setBorder(BorderFactory.createLineBorder(Color.RED));
-                        file_regex101_label.setText("");
+                        file_regex101_label.setEnabled(false);
                         file_regex101_label.putClientProperty("regexUrl", "");
                         return false;
                     } catch (Exception ex) {
                         Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-                        file_regex101_label.setText("");
+                        file_regex101_label.setEnabled(false);
                         file_regex101_label.putClientProperty("regexUrl", "");
                         return false;
                     }
