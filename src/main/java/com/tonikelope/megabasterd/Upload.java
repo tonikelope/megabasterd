@@ -57,6 +57,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private final Object _chunkid_lock;
     private byte[] _byte_file_key;
     private volatile long _progress;
+    private volatile long _speed;
     private byte[] _byte_file_iv;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
     private long _last_chunk_id_dispatched;
@@ -208,6 +209,11 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     @Override
     public long getProgress() {
         return _progress;
+    }
+
+    @Override
+    public long getSpeed() {
+        return _speed;
     }
 
     public byte[] getByte_file_iv() {
@@ -1295,6 +1301,11 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                 getView().updateProgressBar(_progress, _progress_bar_rate);
             }
         }
+    }
+
+    @Override
+    public void setSpeed(long speed) {
+        _speed = speed;
     }
 
     @Override

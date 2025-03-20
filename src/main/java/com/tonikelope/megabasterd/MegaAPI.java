@@ -1201,6 +1201,10 @@ public class MegaAPI implements Serializable {
     }
 
     public ArrayList<String> GENERATE_N_LINKS(Set<String> links) {
+        // Call overloaded method with default value for the optional parameter
+        return GENERATE_N_LINKS(links, false);  // 10 is an example default value
+    }
+    public ArrayList<String> GENERATE_N_LINKS(Set<String> links, boolean quite) {
 
         HashMap<String, ArrayList<String>> map = new HashMap<>();
 
@@ -1235,7 +1239,7 @@ public class MegaAPI implements Serializable {
 
             int r = -1;
 
-            if (existsCachedFolderNodes(folder_parts[0])) {
+            if (!quite && existsCachedFolderNodes(folder_parts[0])) {
                 r = JOptionPane.showConfirmDialog(MainPanelView.getINSTANCE(), "Do you want to use FOLDER [" + folder_parts[0] + "] CACHED VERSION?\n\n(It could speed up the loading of very large folders)", "FOLDER CACHE", JOptionPane.YES_NO_OPTION);
             }
 

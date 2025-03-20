@@ -699,6 +699,24 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
 
             debug_file_checkbox.setSelected(debug_file);
+            
+            boolean enable_remote_api = false;
+
+            String enable_remote_api_val = DBTools.selectSettingValue("enable_remote_api");
+
+            if (enable_remote_api_val != null) {
+                enable_remote_api = (enable_remote_api_val.equals("yes"));
+            }
+            
+            enable_remote_api_checkbox.setSelected(enable_remote_api);
+            
+            String remote_api_p = DBTools.selectSettingValue("remote_api_port");
+            
+            if (remote_api_p == null) {
+                remote_api_p = String.valueOf(MainPanel.DEFAULT_REMOTE_API_PORT);
+            }
+            
+            remote_api_port_spinner.setModel(new SpinnerNumberModel(Integer.parseInt(remote_api_p), 1024, 65535, 1));
 
             String font = DBTools.selectSettingValue("font");
 
@@ -896,6 +914,11 @@ public class SettingsDialog extends javax.swing.JDialog {
         zoom_spinner = new javax.swing.JSpinner();
         dark_mode_checkbox = new javax.swing.JCheckBox();
         debug_file_path = new javax.swing.JLabel();
+        remote_api_panel = new javax.swing.JPanel();
+        enable_remote_api_checkbox = new javax.swing.JCheckBox();
+        remote_api_port_label = new javax.swing.JLabel();
+        remote_api_port_spinner = new javax.swing.JSpinner();
+        remote_api_warning_label = new javax.swing.JLabel();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -1719,11 +1742,11 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(proxy_user_label)
                 .addGap(6, 6, 6)
-                .addComponent(proxy_user_textfield)
+                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 459, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(proxy_pass_label)
                 .addGap(6, 6, 6)
-                .addComponent(proxy_pass_textfield)
+                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 514, Short.MAX_VALUE)
                 .addContainerGap())
         );
         proxy_auth_panelLayout.setVerticalGroup(
@@ -1952,6 +1975,58 @@ public class SettingsDialog extends javax.swing.JDialog {
         debug_file_path.setFont(new java.awt.Font("Noto Sans", 0, 18)); // NOI18N
         debug_file_path.setText(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log");
 
+        remote_api_panel.setBorder(javax.swing.BorderFactory.createTitledBorder((String)null));
+
+        enable_remote_api_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        enable_remote_api_checkbox.setText("Enable Remote API");
+        enable_remote_api_checkbox.setDoubleBuffered(true);
+        enable_remote_api_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                enable_remote_api_checkboxStateChanged(evt);
+            }
+        });
+
+        remote_api_port_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        remote_api_port_label.setText("Port:");
+        remote_api_port_label.setDoubleBuffered(true);
+        remote_api_port_label.setEnabled(false);
+
+        remote_api_port_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        remote_api_port_spinner.setEnabled(false);
+
+        remote_api_warning_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        remote_api_warning_label.setText("Note: you MUST \"OPEN\" this port in your router/firewall.");
+        remote_api_warning_label.setEnabled(false);
+
+        javax.swing.GroupLayout remote_api_panelLayout = new javax.swing.GroupLayout(remote_api_panel);
+        remote_api_panel.setLayout(remote_api_panelLayout);
+        remote_api_panelLayout.setHorizontalGroup(
+            remote_api_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(remote_api_panelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(remote_api_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(enable_remote_api_checkbox)
+                    .addGroup(remote_api_panelLayout.createSequentialGroup()
+                        .addComponent(remote_api_port_label)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(remote_api_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, 120, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(remote_api_warning_label))
+                .addGap(0, 0, Short.MAX_VALUE))
+        );
+        remote_api_panelLayout.setVerticalGroup(
+            remote_api_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, remote_api_panelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(enable_remote_api_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(remote_api_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(remote_api_port_label)
+                    .addComponent(remote_api_port_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(remote_api_warning_label)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
         advanced_panelLayout.setHorizontalGroup(
@@ -1980,7 +2055,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                         .addComponent(custom_chunks_dir_button))
                     .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
                         .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(remote_api_panel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         advanced_panelLayout.setVerticalGroup(
@@ -2011,8 +2087,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
+                .addComponent(remote_api_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(rec_zoom_label)
-                .addGap(34, 34, 34))
+                .addContainerGap())
         );
 
         advanced_scrollpane.setViewportView(advanced_panel);
@@ -2035,7 +2113,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                         .addComponent(save_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cancel_button))
-                    .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 1194, Short.MAX_VALUE))
+                    .addComponent(panel_tabs))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -2128,6 +2206,8 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("smartproxy_ban_time", String.valueOf(bad_proxy_time_spinner.getValue()));
             settings.put("smartproxy_timeout", String.valueOf(proxy_timeout_spinner.getValue()));
             settings.put("smartproxy_autorefresh_time", String.valueOf(auto_refresh_proxy_time_spinner.getValue()));
+            settings.put("enable_remote_api", enable_remote_api_checkbox.isSelected() ? "yes" : "no");
+            settings.put("remote_api_port", String.valueOf(remote_api_port_spinner.getValue()));
 
             if (upload_log_checkbox.isSelected()) {
                 createUploadLogDir();
@@ -3042,208 +3122,6 @@ public class SettingsDialog extends javax.swing.JDialog {
         max_up_speed_spinner.setEnabled(limit_upload_speed_checkbox.isSelected());
     }//GEN-LAST:event_limit_upload_speed_checkboxStateChanged
 
-    private void run_command_test_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_test_buttonActionPerformed
-        // TODO add your handling code here:
-
-        if (run_command_textbox.getText() != null && !"".equals(run_command_textbox.getText().trim())) {
-
-            try {
-                Runtime.getRuntime().exec(run_command_textbox.getText().trim());
-            } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }//GEN-LAST:event_run_command_test_buttonActionPerformed
-
-    private void run_command_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_checkboxActionPerformed
-        // TODO add your handling code here:
-
-        run_command_textbox.setEnabled(run_command_checkbox.isSelected());
-    }//GEN-LAST:event_run_command_checkboxActionPerformed
-
-    private void custom_chunks_dir_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_custom_chunks_dir_checkboxActionPerformed
-
-        if (custom_chunks_dir_checkbox.isSelected()) {
-
-            custom_chunks_dir_button.setEnabled(true);
-            custom_chunks_dir_current_label.setEnabled(true);
-
-        } else {
-
-            custom_chunks_dir_button.setEnabled(false);
-            custom_chunks_dir_current_label.setEnabled(false);
-
-        }
-    }//GEN-LAST:event_custom_chunks_dir_checkboxActionPerformed
-
-    private void custom_chunks_dir_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_custom_chunks_dir_buttonActionPerformed
-        javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
-        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
-
-        filechooser.setCurrentDirectory(new java.io.File(_download_path));
-        filechooser.setDialogTitle("Temporary chunks directory");
-        filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
-        filechooser.setAcceptAllFileFilterUsed(false);
-
-        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-            File file = filechooser.getSelectedFile();
-
-            _custom_chunks_dir = file.getAbsolutePath();
-
-            this.custom_chunks_dir_current_label.setText(truncateText(_custom_chunks_dir, 80));
-        }
-    }//GEN-LAST:event_custom_chunks_dir_buttonActionPerformed
-
-    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
-
-        Object[] options = {"No",
-            LabelTranslatorSingleton.getInstance().translate("Yes")};
-
-        int n = showOptionDialog(this,
-                LabelTranslatorSingleton.getInstance().translate("ALL YOUR SETTINGS, ACCOUNTS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?"),
-                LabelTranslatorSingleton.getInstance().translate("RESET MEGABASTERD"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
-                null,
-                options,
-                options[0]);
-
-        if (n == 1) {
-
-            setVisible(false);
-            _main_panel.byebyenow(true, true);
-
-        }
-    }//GEN-LAST:event_jButton1ActionPerformed
-
-    private void export_settings_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_export_settings_buttonActionPerformed
-
-        Object[] options = {"No",
-            LabelTranslatorSingleton.getInstance().translate("Yes")};
-
-        int n = showOptionDialog(this,
-                LabelTranslatorSingleton.getInstance().translate("Only SAVED settings and accounts will be exported. (If you are unsure, it is better to save your current settings and then export them).\n\nDo you want to continue?"),
-                LabelTranslatorSingleton.getInstance().translate("EXPORT SETTINGS"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
-                null,
-                options,
-                options[0]);
-
-        if (n == 1) {
-            JFileChooser filechooser = new JFileChooser();
-            updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
-            filechooser.setCurrentDirectory(new File(_download_path));
-            filechooser.setDialogTitle("Save as");
-
-            if (filechooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-                File file = filechooser.getSelectedFile();
-
-                try {
-
-                    if (file.exists()) {
-                        file.delete();
-                    }
-
-                    file.createNewFile();
-
-                    try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(file)); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
-
-                        HashMap<String, Object> settings = new HashMap<>();
-
-                        settings.put("settings", selectSettingsValues());
-
-                        settings.put("mega_accounts", selectMegaAccounts());
-
-                        settings.put("elc_accounts", selectELCAccounts());
-
-                        oos.writeObject(settings);
-
-                        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Settings successfully exported!"), LabelTranslatorSingleton.getInstance().translate("Settings exported"), JOptionPane.INFORMATION_MESSAGE);
-
-                        setVisible(false);
-
-                    } catch (SQLException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    }
-
-                } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
-                }
-            }
-        }
-    }//GEN-LAST:event_export_settings_buttonActionPerformed
-
-    private void import_settings_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_settings_buttonActionPerformed
-
-        Object[] options = {"No",
-            LabelTranslatorSingleton.getInstance().translate("Yes")};
-
-        int n = showOptionDialog(this,
-                LabelTranslatorSingleton.getInstance().translate("All your current settings and accounts will be deleted after import. (It is recommended to export your current settings before importing). \n\nDo you want to continue?"),
-                LabelTranslatorSingleton.getInstance().translate("IMPORT SETTINGS"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
-                null,
-                options,
-                options[0]);
-
-        if (n == 1) {
-            JFileChooser filechooser = new JFileChooser();
-            updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
-            filechooser.setCurrentDirectory(new File(_download_path));
-            filechooser.setDialogTitle("Select settings file");
-
-            if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-                File file = filechooser.getSelectedFile();
-
-                try {
-
-                    try (InputStream fis = new BufferedInputStream(new FileInputStream(file)); ObjectInputStream ois = new ObjectInputStream(fis)) {
-
-                        HashMap<String, Object> settings = (HashMap<String, Object>) ois.readObject();
-
-                        insertSettingsValues((HashMap<String, Object>) settings.get("settings"));
-
-                        insertMegaAccounts((HashMap<String, Object>) settings.get("mega_accounts"));
-
-                        insertELCAccounts((HashMap<String, Object>) settings.get("elc_accounts"));
-
-                        _main_panel.loadUserSettings();
-
-                        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Settings successfully imported!"), LabelTranslatorSingleton.getInstance().translate("Settings imported"), JOptionPane.INFORMATION_MESSAGE);
-
-                        _settings_ok = true;
-
-                        setVisible(false);
-
-                    } catch (SQLException | ClassNotFoundException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    }
-
-                } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
-                }
-            }
-        }
-    }//GEN-LAST:event_import_settings_buttonActionPerformed
-
-    private void use_proxy_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_use_proxy_checkboxStateChanged
-
-        proxy_host_label.setEnabled(use_proxy_checkbox.isSelected());
-        proxy_host_textfield.setEnabled(use_proxy_checkbox.isSelected());
-        proxy_port_label.setEnabled(use_proxy_checkbox.isSelected());
-        proxy_port_textfield.setEnabled(use_proxy_checkbox.isSelected());
-        proxy_user_label.setEnabled(use_proxy_checkbox.isSelected());
-        proxy_user_textfield.setEnabled(use_proxy_checkbox.isSelected());
-        proxy_pass_label.setEnabled(use_proxy_checkbox.isSelected());
-        proxy_pass_textfield.setEnabled(use_proxy_checkbox.isSelected());
-        proxy_warning_label.setEnabled(use_proxy_checkbox.isSelected());
-
-        if (use_proxy_checkbox.isSelected()) {
-            smart_proxy_checkbox.setSelected(false);
-        }
-    }//GEN-LAST:event_use_proxy_checkboxStateChanged
-
     private void multi_slot_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multi_slot_down_checkboxStateChanged
 
         if (!multi_slot_down_checkbox.isSelected() && !smart_proxy_checkbox.isSelected()) {
@@ -3437,6 +3315,214 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_proxy_sequential_radioActionPerformed
 
+    private void enable_remote_api_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_enable_remote_api_checkboxStateChanged
+        remote_api_port_label.setEnabled(enable_remote_api_checkbox.isSelected());
+        remote_api_port_spinner.setEnabled(enable_remote_api_checkbox.isSelected());
+        remote_api_warning_label.setEnabled(enable_remote_api_checkbox.isSelected());
+    }//GEN-LAST:event_enable_remote_api_checkboxStateChanged
+
+    private void export_settings_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_export_settings_buttonActionPerformed
+
+        Object[] options = {"No",
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
+
+        int n = showOptionDialog(this,
+            LabelTranslatorSingleton.getInstance().translate("Only SAVED settings and accounts will be exported. (If you are unsure, it is better to save your current settings and then export them).\n\nDo you want to continue?"),
+            LabelTranslatorSingleton.getInstance().translate("EXPORT SETTINGS"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+            null,
+            options,
+            options[0]);
+
+        if (n == 1) {
+            JFileChooser filechooser = new JFileChooser();
+            updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+            filechooser.setCurrentDirectory(new File(_download_path));
+            filechooser.setDialogTitle("Save as");
+
+            if (filechooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+                File file = filechooser.getSelectedFile();
+
+                try {
+
+                    if (file.exists()) {
+                        file.delete();
+                    }
+
+                    file.createNewFile();
+
+                    try (BufferedOutputStream fos = new BufferedOutputStream(new FileOutputStream(file)); ObjectOutputStream oos = new ObjectOutputStream(fos)) {
+
+                        HashMap<String, Object> settings = new HashMap<>();
+
+                        settings.put("settings", selectSettingsValues());
+
+                        settings.put("mega_accounts", selectMegaAccounts());
+
+                        settings.put("elc_accounts", selectELCAccounts());
+
+                        oos.writeObject(settings);
+
+                        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Settings successfully exported!"), LabelTranslatorSingleton.getInstance().translate("Settings exported"), JOptionPane.INFORMATION_MESSAGE);
+
+                        setVisible(false);
+
+                    } catch (SQLException ex) {
+                        LOG.log(Level.SEVERE, ex.getMessage());
+                    }
+
+                } catch (IOException ex) {
+                    LOG.log(Level.SEVERE, ex.getMessage());
+                }
+            }
+        }
+    }//GEN-LAST:event_export_settings_buttonActionPerformed
+
+    private void import_settings_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_settings_buttonActionPerformed
+
+        Object[] options = {"No",
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
+
+        int n = showOptionDialog(this,
+            LabelTranslatorSingleton.getInstance().translate("All your current settings and accounts will be deleted after import. (It is recommended to export your current settings before importing). \n\nDo you want to continue?"),
+            LabelTranslatorSingleton.getInstance().translate("IMPORT SETTINGS"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+            null,
+            options,
+            options[0]);
+
+        if (n == 1) {
+            JFileChooser filechooser = new JFileChooser();
+            updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+            filechooser.setCurrentDirectory(new File(_download_path));
+            filechooser.setDialogTitle("Select settings file");
+
+            if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+                File file = filechooser.getSelectedFile();
+
+                try {
+
+                    try (InputStream fis = new BufferedInputStream(new FileInputStream(file)); ObjectInputStream ois = new ObjectInputStream(fis)) {
+
+                        HashMap<String, Object> settings = (HashMap<String, Object>) ois.readObject();
+
+                        insertSettingsValues((HashMap<String, Object>) settings.get("settings"));
+
+                        insertMegaAccounts((HashMap<String, Object>) settings.get("mega_accounts"));
+
+                        insertELCAccounts((HashMap<String, Object>) settings.get("elc_accounts"));
+
+                        _main_panel.loadUserSettings();
+
+                        JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Settings successfully imported!"), LabelTranslatorSingleton.getInstance().translate("Settings imported"), JOptionPane.INFORMATION_MESSAGE);
+
+                        _settings_ok = true;
+
+                        setVisible(false);
+
+                    } catch (SQLException | ClassNotFoundException ex) {
+                        LOG.log(Level.SEVERE, ex.getMessage());
+                    }
+
+                } catch (IOException ex) {
+                    LOG.log(Level.SEVERE, ex.getMessage());
+                }
+            }
+        }
+    }//GEN-LAST:event_import_settings_buttonActionPerformed
+
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+
+        Object[] options = {"No",
+            LabelTranslatorSingleton.getInstance().translate("Yes")};
+
+        int n = showOptionDialog(this,
+            LabelTranslatorSingleton.getInstance().translate("ALL YOUR SETTINGS, ACCOUNTS AND TRANSFERENCES WILL BE REMOVED. (THIS CAN'T BE UNDONE)\n\nDo you want to continue?"),
+            LabelTranslatorSingleton.getInstance().translate("RESET MEGABASTERD"), YES_NO_CANCEL_OPTION, javax.swing.JOptionPane.WARNING_MESSAGE,
+            null,
+            options,
+            options[0]);
+
+        if (n == 1) {
+
+            setVisible(false);
+            _main_panel.byebyenow(true, true);
+
+        }
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void run_command_test_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_test_buttonActionPerformed
+        // TODO add your handling code here:
+
+        if (run_command_textbox.getText() != null && !"".equals(run_command_textbox.getText().trim())) {
+
+            try {
+                Runtime.getRuntime().exec(run_command_textbox.getText().trim());
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }//GEN-LAST:event_run_command_test_buttonActionPerformed
+
+    private void run_command_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_checkboxActionPerformed
+        // TODO add your handling code here:
+
+        run_command_textbox.setEnabled(run_command_checkbox.isSelected());
+    }//GEN-LAST:event_run_command_checkboxActionPerformed
+
+    private void custom_chunks_dir_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_custom_chunks_dir_checkboxActionPerformed
+
+        if (custom_chunks_dir_checkbox.isSelected()) {
+
+            custom_chunks_dir_button.setEnabled(true);
+            custom_chunks_dir_current_label.setEnabled(true);
+
+        } else {
+
+            custom_chunks_dir_button.setEnabled(false);
+            custom_chunks_dir_current_label.setEnabled(false);
+
+        }
+    }//GEN-LAST:event_custom_chunks_dir_checkboxActionPerformed
+
+    private void custom_chunks_dir_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_custom_chunks_dir_buttonActionPerformed
+        javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
+        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+
+        filechooser.setCurrentDirectory(new java.io.File(_download_path));
+        filechooser.setDialogTitle("Temporary chunks directory");
+        filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+        filechooser.setAcceptAllFileFilterUsed(false);
+
+        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+            File file = filechooser.getSelectedFile();
+
+            _custom_chunks_dir = file.getAbsolutePath();
+
+            this.custom_chunks_dir_current_label.setText(truncateText(_custom_chunks_dir, 80));
+        }
+    }//GEN-LAST:event_custom_chunks_dir_buttonActionPerformed
+
+    private void use_proxy_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_use_proxy_checkboxStateChanged
+
+        proxy_host_label.setEnabled(use_proxy_checkbox.isSelected());
+        proxy_host_textfield.setEnabled(use_proxy_checkbox.isSelected());
+        proxy_port_label.setEnabled(use_proxy_checkbox.isSelected());
+        proxy_port_textfield.setEnabled(use_proxy_checkbox.isSelected());
+        proxy_user_label.setEnabled(use_proxy_checkbox.isSelected());
+        proxy_user_textfield.setEnabled(use_proxy_checkbox.isSelected());
+        proxy_pass_label.setEnabled(use_proxy_checkbox.isSelected());
+        proxy_pass_textfield.setEnabled(use_proxy_checkbox.isSelected());
+        proxy_warning_label.setEnabled(use_proxy_checkbox.isSelected());
+
+        if (use_proxy_checkbox.isSelected()) {
+            smart_proxy_checkbox.setSelected(false);
+        }
+    }//GEN-LAST:event_use_proxy_checkboxStateChanged
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -3468,6 +3554,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel elc_accounts_label;
     private javax.swing.JScrollPane elc_accounts_scrollpane;
     private javax.swing.JTable elc_accounts_table;
+    private javax.swing.JCheckBox enable_remote_api_checkbox;
     private javax.swing.JCheckBox encrypt_pass_checkbox;
     private javax.swing.JButton export_settings_button;
     private javax.swing.JComboBox<String> font_combo;
@@ -3533,6 +3620,10 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel rec_smart_proxy_label1;
     private javax.swing.JLabel rec_upload_slots_label;
     private javax.swing.JLabel rec_zoom_label;
+    private javax.swing.JPanel remote_api_panel;
+    private javax.swing.JLabel remote_api_port_label;
+    private javax.swing.JSpinner remote_api_port_spinner;
+    private javax.swing.JLabel remote_api_warning_label;
     private javax.swing.JButton remove_elc_account_button;
     private javax.swing.JButton remove_mega_account_button;
     private javax.swing.JCheckBox run_command_checkbox;
