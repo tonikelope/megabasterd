@@ -91,7 +91,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile boolean _pause;
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private volatile long _progress;
-    private volatile long _speed;
     private ChunkWriterManager _chunkmanager;
     private String _last_download_url;
     private boolean _provision_ok;
@@ -351,11 +350,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         return _progress;
     }
 
-    @Override
-    public long getSpeed() {
-        return _speed;
-    }
-
     public OutputStream getOutput_stream() {
         return _output_stream;
     }
@@ -382,27 +376,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     @Override
     public String getFile_name() {
         return _file_name;
-    }
-
-    public boolean setFile_name(String newName) {
-        try {
-            // don't rename unless completed
-            if(!isExit()) {
-                return false;
-            }
-
-            File file = new File(this.getDownload_path(), _file_name);
-            File renamedFile = new File(file.getParent(), newName);
-            boolean renamed = file.renameTo(renamedFile);
-            if(renamed) {
-                _file_name = newName;
-                this.getView().getFile_name_label().setText(_file_name);
-            }
-            return renamed;
-        } catch (Exception ex){
-            LOG.severe("Error renaming download. "+ex.toString());
-            return false;
-        }
     }
 
     public String getFile_pass() {
@@ -911,19 +884,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     }
 
                 } else {
-                    var dl = selectDownload(_url);
+                    getView().hideAllExceptStatus();
 
-                    if(dl.isEmpty()){
-                        getView().hideAllExceptStatus();
+                    _status_error = "FILE WITH SAME NAME AND SIZE ALREADY EXISTS";
 
-                        _status_error = "FILE WITH SAME NAME AND SIZE ALREADY EXISTS";
+                    _auto_retry_on_error = false;
 
-                        _auto_retry_on_error = false;
-
-                        getView().printStatusError(_status_error);
-                    } else {
-                        getView().printStatusOK("File successfully downloaded!");
-                    }
+                    getView().printStatusError(_status_error);
                 }
 
             } else if (_status_error != null) {
@@ -953,8 +920,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             getView().printStatusError(_status_error);
 
             LOG.log(Level.SEVERE, ex.getMessage());
-
-            this.close();
         }
 
         if (_file != null && !getView().isKeepTempFileSelected()) {
@@ -980,11 +945,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         if ((_status_error == null && !_canceled) || global_cancel || !_auto_retry_on_error) {
 
-            // try {
-            //     deleteDownload(_url);
-            // } catch (SQLException ex) {
-            //     LOG.log(SEVERE, null, ex);
-            // }
+            try {
+                deleteDownload(_url);
+            } catch (SQLException ex) {
+                LOG.log(SEVERE, null, ex);
+            }
 
         }
 
@@ -1765,11 +1730,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 getView().updateProgressBar(_progress, _progress_bar_rate);
             }
         }
-    }
-
-    @Override
-    public void setSpeed(long speed) {
-        _speed = speed;
     }
 
     @Override

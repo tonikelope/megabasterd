@@ -37,8 +37,6 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private boolean _download;
 
-    public boolean isReady = false;
-
     private final List<HashMap> _download_links;
 
     private long _total_space;
@@ -118,7 +116,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else if (_mega_error == -18) {
 
                     MiscTools.GUIRun(() -> {
-                        if(isVisible()) JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -126,14 +124,15 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else if (_mega_error == -16) {
 
                     MiscTools.GUIRun(() -> {
-                        if(isVisible()) JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER BLOCKED/DELETED"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER BLOCKED/DELETED"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
 
                 } else {
+
                     MiscTools.GUIRun(() -> {
-                        if(isVisible()) JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -416,7 +415,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
 
-        if (working && isVisible() && JOptionPane.showConfirmDialog(this, "EXIT?") == 0) {
+        if (working && JOptionPane.showConfirmDialog(this, "EXIT?") == 0) {
             dispose();
             exit = true;
         } else if (!working) {
@@ -450,7 +449,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             int r = -1;
 
-            if (isVisible() && ma.existsCachedFolderNodes(folder_id)) {
+            if (ma.existsCachedFolderNodes(folder_id)) {
                 r = JOptionPane.showConfirmDialog(this, "Do you want to use FOLDER CACHED VERSION?\n\n(It could speed up the loading of very large folders)", "FOLDER CACHE", JOptionPane.YES_NO_OPTION);
 
             }
@@ -703,9 +702,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     node_bar.setVisible(false);
 
                     working = false;
-
-                    isReady = true;
                 });
+
             });
         });
     }

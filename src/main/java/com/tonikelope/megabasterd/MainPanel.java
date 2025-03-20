@@ -49,8 +49,6 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
-
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -78,7 +76,6 @@ public final class MainPanel {
     public static final int STREAMER_PORT = 1337;
     public static final int WATCHDOG_PORT = 1338;
     public static final int DEFAULT_MEGA_PROXY_PORT = 9999;
-    public static final int DEFAULT_REMOTE_API_PORT = 8127;
     public static final int RUN_COMMAND_TIME = 120;
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = false;
@@ -106,7 +103,6 @@ public final class MainPanel {
     public static volatile long LAST_EXTERNAL_COMMAND_TIMESTAMP;
     private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
     private static volatile boolean CHECK_RUNNING = true;
-    private RemoteAPI _megabasterd_api;
 
     public static void main(String args[]) {
 
@@ -321,8 +317,6 @@ public final class MainPanel {
         THREAD_POOL.execute((_stream_supervisor = new StreamThrottlerSupervisor(_limit_download_speed ? _max_dl_speed * 1024 : 0, _limit_upload_speed ? _max_up_speed * 1024 : 0, THROTTLE_SLICE_SIZE)));
 
         THREAD_POOL.execute((_clipboardspy = new ClipboardSpy()));
-
-        _megabasterd_api = new RemoteAPI(this);
 
         try {
             _streamserver = new KissVideoStreamServer(this);
@@ -1255,15 +1249,7 @@ public final class MainPanel {
 
                     tot_downloads = res.size();
 
-                    String max_down = DBTools.selectSettingValue("max_downloads");
-                    int max_dl = Download.SIM_TRANSFERENCES_DEFAULT;
-                    if (max_down != null) {
-                        max_dl = Integer.parseInt(max_down);
-                    }
-
                     Iterator downloads_queue_iterator = downloads_queue.iterator();
-
-                    int processed_downloads = 0; // Counter to track number of downloads processed
 
                     while (downloads_queue_iterator.hasNext()) {
 
@@ -1290,19 +1276,11 @@ public final class MainPanel {
                                     getDownload_manager().getTransference_provision_queue().add(download);
 
                                     conta_downloads++;
-                                    processed_downloads++; // Increment the processed download counter
 
                                     downloads_queue_iterator.remove();
                                 } else {
                                     tot_downloads--;
                                 }
-                                
-                                // Check if 5 downloads have been processed, then wait for 10 seconds
-                                if (processed_downloads == max_dl) {
-                                    System.out.println("Pausing for 10 seconds...");
-                                    TimeUnit.SECONDS.sleep(10); // Wait for 10 seconds
-                                }
-                                TimeUnit.MILLISECONDS.sleep(500); // Wait for 0.5 second
                             }
 
                         } catch (Exception ex) {

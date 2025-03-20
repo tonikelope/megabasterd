@@ -31,7 +31,7 @@ import java.util.logging.Logger;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int SMART_PROXY_RECHECK_509_TIME = 300;
+    public static final int SMART_PROXY_RECHECK_509_TIME = 3600;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
     private final int _id;
     private final Download _download;
@@ -44,7 +44,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private volatile boolean _reset_current_chunk;
     private volatile InputStream _chunk_inputstream = null;
     private volatile long _509_timestamp = -1;
-    private volatile boolean _bandwidth_exceeded;
 
     private String _current_smart_proxy;
 
@@ -75,7 +74,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _excluded_proxy_list = new ArrayList<>();
         _error_wait = false;
         _reset_current_chunk = false;
-        _bandwidth_exceeded = false;
+
     }
 
     public boolean isChunk_exception() {
@@ -84,23 +83,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     public String getCurrent_smart_proxy() {
         return _current_smart_proxy;
-    }
-
-    public boolean isBandwidthExceeded() {
-        return _bandwidth_exceeded;
-    }
-
-    public void forceRestartAfter509() {
-        // Reset the 509 timestamp to allow an immediate retry
-        _509_timestamp = -1;
-
-        // Optionally reset other states to prepare for a restart
-        _reset_current_chunk = true;  // Mark the current chunk for reset if needed
-
-        LOG.log(Level.INFO, "Force restarting download after 509 error for Worker [{0}]", new Object[]{_id});
-
-        // Wake up any waiting process (if it's paused or waiting due to an error)
-        secureNotify();  // Notify the secure wait to ensure the process can proceed
     }
 
     public void setExit(boolean exit) {
@@ -318,9 +300,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             http_error = http_status;
 
-                            _bandwidth_exceeded = http_status == 509;
                         } else {
-                            _bandwidth_exceeded = false;
 
                             chunk_file = new File(_download.getChunkmanager().getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + chunk_id);
 
