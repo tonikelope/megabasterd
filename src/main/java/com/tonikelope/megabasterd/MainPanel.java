@@ -267,17 +267,16 @@ public final class MainPanel {
         loadUserSettings();
 
         if (_debug_file) {
-
-            PrintStream fileOut;
-
             try {
-                fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log"));
-
+                final PrintStream fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log"));
                 System.setOut(fileOut);
                 System.setErr(fileOut);
-
+                // Register a shutdown hook to close the debug stream
+                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                    fileOut.close();
+                }));
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
         }
 
@@ -375,7 +374,7 @@ public final class MainPanel {
 
         THREAD_POOL.execute(() -> {
             Runtime instance = Runtime.getRuntime();
-            while (true) {
+            while (!_exit) {
                 long used_memory = instance.totalMemory() - instance.freeMemory();
                 long max_memory = instance.maxMemory();
                 MiscTools.GUIRun(() -> {
@@ -385,6 +384,7 @@ public final class MainPanel {
                     Thread.sleep(2000);
                 } catch (InterruptedException ex) {
                     Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    Thread.currentThread().interrupt();
                 }
             }
         });
@@ -940,6 +940,14 @@ public final class MainPanel {
 
     public void byebyenow(boolean restart, boolean delete_db) {
 
+        if (_trayicon != null) {
+            try {
+                getSystemTray().remove(_trayicon);
+            } catch (Exception e) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, "Error removing tray icon: " + e.getMessage());
+            }
+        }
+        
         synchronized (DBTools.class) {
 
             if (delete_db) {
@@ -1200,28 +1208,30 @@ public final class MainPanel {
             app_is_running = false;
 
             try {
-
                 final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
-
                 THREAD_POOL.execute(() -> {
-                    final ServerSocket socket = serverSocket;
-                    while (true) {
+                    while (!_exit) {
                         try {
-                            socket.accept();
+                            Socket clientSocket = serverSocket.accept();
                             MiscTools.GUIRun(() -> {
                                 getView().setExtendedState(NORMAL);
-
                                 getView().setVisible(true);
                             });
+                            clientSocket.close();
                         } catch (Exception ex1) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex1.getMessage());
+                            if (!_exit) { // Only log errors if not exiting
+                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex1.getMessage());
+                            }
                         }
+                    }
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, e.getMessage());
                     }
                 });
             } catch (Exception ex2) {
-
                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex2.getMessage());
-
             }
 
         }

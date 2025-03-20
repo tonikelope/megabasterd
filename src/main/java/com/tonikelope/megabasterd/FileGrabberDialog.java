@@ -28,6 +28,8 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -545,8 +547,21 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
             DefaultMutableTreeNode root = new DefaultMutableTreeNode(filechooser.getSelectedFile().getParent());
 
-            for (File file : files_selected) {
+            String useFileRegexString = DBTools.selectSettingValue("use_file_regex");
+            boolean useFileRegex = "yes".equalsIgnoreCase(useFileRegexString);
+            String regexPattern = DBTools.selectSettingValue("file_regex_pattern");
 
+            Pattern pattern = null;
+            if (useFileRegex && regexPattern != null && !regexPattern.isEmpty()) {
+                pattern = Pattern.compile(regexPattern);
+            }
+            
+            for (File file : files_selected) {
+                if (useFileRegex && pattern != null) {
+                    Matcher matcher = pattern.matcher(file.getName());
+                    if (matcher.find()) continue;
+                }
+                
                 DefaultMutableTreeNode current_file = new DefaultMutableTreeNode(file.getName() + (file.isFile() ? " [" + formatBytes(file.length()) + "]" : ""));
 
                 root.add(current_file);
