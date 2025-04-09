@@ -462,7 +462,9 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
         MiscTools.GUIRun(() -> {
             String current_text = links_textarea.getText();
 
-            links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
+            String extractedMegaLinksFromString = extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents()));
+            if(! current_text.contains(extractedMegaLinksFromString))
+                links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + extractedMegaLinksFromString);
         });
     }
 
