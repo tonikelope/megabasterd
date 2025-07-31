@@ -14,6 +14,8 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -27,6 +29,13 @@ public class DownloadManager extends TransferenceManager {
 
     private static final Logger LOG = Logger.getLogger(DownloadManager.class.getName());
 
+    private static final ExecutorService DB_EXECUTOR =
+    Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "DB-IO");
+        t.setDaemon(true);
+        return t;
+    });
+    
     public DownloadManager(MainPanel main_panel) {
 
         super(main_panel, main_panel.getMax_dl(), main_panel.getView().getStatus_down_label(), main_panel.getView().getjPanel_scroll_down(), main_panel.getView().getClose_all_finished_down_button(), main_panel.getView().getPause_all_down_button(), main_panel.getView().getClean_all_down_menu());
@@ -167,11 +176,14 @@ public class DownloadManager extends TransferenceManager {
             }
         }
 
-        try {
-            deleteDownloads(delete_down.toArray(new String[delete_down.size()]));
-        } catch (SQLException ex) {
-            LOG.log(SEVERE, null, ex);
-        }
+        final String[] urlsToDelete = delete_down.toArray(new String[0]);
+        DB_EXECUTOR.execute(() -> {
+            try {
+                deleteDownloads(urlsToDelete);
+            } catch (SQLException ex) {
+                LOG.log(SEVERE, null, ex);
+            } 
+        });
 
         secureNotify();
     }

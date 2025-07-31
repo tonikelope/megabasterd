@@ -37,9 +37,11 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import static java.util.concurrent.Executors.newCachedThreadPool;
+import java.util.concurrent.Future;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -121,6 +123,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private static final ScheduledExecutorService SHUTDOWN_SCHEDULER =
     Executors.newSingleThreadScheduledExecutor(r -> {
         Thread t = new Thread(r, "shutdown-checker");
+        t.setDaemon(true);
+        return t;
+    });
+    
+    private static final ExecutorService DB_EXECUTOR =
+    Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "DB-IO");
         t.setDaemon(true);
         return t;
     });
@@ -550,11 +559,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _closed = true;
 
         if (_provision_ok) {
-            try {
-                deleteDownload(_url);
-            } catch (SQLException ex) {
-                LOG.log(SEVERE, null, ex);
-            }
+            DB_EXECUTOR.execute(() -> {
+                try {
+                    deleteDownload(_url);
+                } catch (SQLException ex) {
+                    LOG.log(SEVERE, null, ex);
+                }
+            });
         }
 
         _main_panel.getDownload_manager().getTransference_remove_queue().add(this);
@@ -965,11 +976,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         if ((_status_error == null && !_canceled) || global_cancel || !_auto_retry_on_error) {
 
-            try {
-                deleteDownload(_url);
-            } catch (SQLException ex) {
-                LOG.log(SEVERE, null, ex);
-            }
+            DB_EXECUTOR.execute(() -> {
+                try {
+                    deleteDownload(_url);
+                } catch (SQLException ex) {
+                    LOG.log(SEVERE, null, ex);
+                }
+            });
 
         }
 
@@ -1100,18 +1113,40 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 }
 
                 //Resuming single file links and new/resuming folder links
+                Future<?> f = DB_EXECUTOR.submit(() -> {
+                    try {
+
+                        deleteDownload(_url); //If resuming
+
+                        insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
+
+                        _provision_ok = true;
+
+                    } catch (SQLException ex) {
+
+                        _status_error = "Error registering download: " + ex.getMessage();
+
+                    }
+                });
+                
                 try {
-
-                    deleteDownload(_url); //If resuming
-
-                    insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
-
+                    
+                    f.get();
+                    
                     _provision_ok = true;
-
-                } catch (SQLException ex) {
-
-                    _status_error = "Error registering download: " + ex.getMessage();
-
+                    
+                } catch (InterruptedException ie) {
+                    
+                    Thread.currentThread().interrupt();
+                    
+                    _status_error = "Interrupted while registering download";
+                    
+                } catch (ExecutionException ee) {
+                    
+                    Throwable cause = ee.getCause();
+                    
+                    if (cause instanceof SQLException) _status_error = "DB error: " + cause.getMessage();
+                    else _status_error = "Unexpected error: " + cause;
                 }
             }
 
