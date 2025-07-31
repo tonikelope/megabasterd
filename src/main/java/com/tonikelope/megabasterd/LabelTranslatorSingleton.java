@@ -385,6 +385,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("IMPORT ACCOUNTS (FILE)", "IMPORT ACCOUNTS (FILE)");
         _addTranslation("Monitor clipboard looking for new links", "Monitor clipboard looking for new links");
         _addTranslation("SURE?", "SURE?");
+        _addTranslation("Automatically remove files that match this REGEX:", "Automatisches Entfernen von Dateien, die mit diesem REGEX übereinstimmen:");
     }
 
     private void Hungarian() {
@@ -693,6 +694,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("IMPORT ACCOUNTS (FILE)", "IMPORT ACCOUNTS (FILE)");
         _addTranslation("Monitor clipboard looking for new links", "Monitor clipboard looking for new links");
         _addTranslation("SURE?", "SURE?");
+        _addTranslation("Test on Regex101", "Test auf Regex101");
+        _addTranslation("Automatically remove files that match this REGEX:", "Automatisches Entfernen von Dateien, die diesem REGEX entsprechen:");
     }
 
     private void Vietnamese() {
@@ -1001,6 +1004,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("IMPORT ACCOUNTS (FILE)", "IMPORT ACCOUNTS (FILE)");
         _addTranslation("Monitor clipboard looking for new links", "Monitor clipboard looking for new links");
         _addTranslation("SURE?", "SURE?");
+        _addTranslation("Test on Regex101", "Kiểm tra trên Regex101");
+        _addTranslation("Automatically remove files that match this REGEX:", "Tự động xóa các tệp khớp với REGEX này:");
     }
 
     private void Italian() {
@@ -1309,7 +1314,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("IMPORT ACCOUNTS (FILE)", "Importa account (file)");
         _addTranslation("Monitor clipboard looking for new links", "Monitora appunti alla ricerca di nuovi collegamenti");
         _addTranslation("SURE?", "Sei sicuro?");
-
+        _addTranslation("Test on Regex101", "Test su Regex101");
+        _addTranslation("Automatically remove files that match this REGEX:", "Rimuove automaticamente i file che corrispondono a questo REGEX:");
     }
 
     private void Chinese() {
@@ -1618,8 +1624,10 @@ public class LabelTranslatorSingleton {
         _addTranslation("IMPORT ACCOUNTS (FILE)", "IMPORT ACCOUNTS (FILE)");
         _addTranslation("Monitor clipboard looking for new links", "Monitor clipboard looking for new links");
         _addTranslation("SURE?", "SURE?");
+        _addTranslation("Test on Regex101", "使用 Regex101 进行验证");
+        _addTranslation("Automatically remove files that match this REGEX:", "自动删除与此 REGEX 匹配的文件:");
     }
-
+    
     private void Turkish() {
         _addTranslation("COPY ALL", "HEPSİNİ KOPYALA");
         _addTranslation("ALL COPIED!", "HEPSİ KOPYALANDI!");
@@ -1926,6 +1934,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("IMPORT ACCOUNTS (FILE)", "IMPORT ACCOUNTS (FILE)");
         _addTranslation("Monitor clipboard looking for new links", "Monitor clipboard looking for new links");
         _addTranslation("SURE?", "SURE?");
+        _addTranslation("Test on Regex101", "Regex101 üzerinde test");
+        _addTranslation("Automatically remove files that match this REGEX:", "Bu REGEX ile eşleşen dosyaları otomatik olarak kaldırın:");
     }
 
     private void Spanish() {
@@ -2238,6 +2248,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("IMPORT ACCOUNTS (FILE)", "IMPORTAR CUENTAS (FICHERO)");
         _addTranslation("Monitor clipboard looking for new links", "Vigilar portapapeles en busca de enlaces nuevos");
         _addTranslation("SURE?", "SEGURO?");
+        _addTranslation("Test on Regex101", "Prueba en Regex101");
+        _addTranslation("Automatically remove files that match this REGEX:", "Eliminar automáticamente los archivos de la lista que coincidan con este REGEX:");
 
     }
 

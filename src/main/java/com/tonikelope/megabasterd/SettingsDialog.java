@@ -14,6 +14,7 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.SmartMegaProxyManager.PROXY_AUTO_REFRESH_TIME;
 import static com.tonikelope.megabasterd.SmartMegaProxyManager.PROXY_BLOCK_TIME;
+import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
@@ -26,6 +27,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
@@ -41,21 +44,28 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.swing.BorderFactory;
 import javax.swing.DefaultRowSorter;
+import javax.swing.InputVerifier;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JSpinner;
+import javax.swing.JTextField;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.SpinnerNumberModel;
 import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
+import javax.swing.border.Border;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 
@@ -90,7 +100,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     public boolean isRemember_master_pass() {
         return _remember_master_pass;
     }
-
+    
     public SettingsDialog(MainPanelView parent, boolean modal) {
 
         super(parent, modal);
@@ -117,6 +127,50 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             translateLabels(this);
 
+            Border original_regex_textfield_border = file_regex_textfield.getBorder();
+            
+            file_regex101_label.addMouseListener(new java.awt.event.MouseAdapter() {
+                @Override
+                public void mouseClicked(java.awt.event.MouseEvent evt) {
+                    String currentRegex = file_regex_textfield.getText();
+                    if (currentRegex.isEmpty()) return;
+                    
+                    String url = (String) file_regex101_label.getClientProperty("regexUrl");
+                    if (url != null) {
+                        MiscTools.openBrowserURL(url);
+                    }
+                }
+            });
+            
+            file_regex_textfield.setInputVerifier(new InputVerifier() {
+                @Override
+                public boolean verify(JComponent input) {
+                    String currentRegex = ((JTextField) input).getText();
+                    try {
+                        Pattern.compile(currentRegex);
+                        input.setBorder(original_regex_textfield_border);
+                        String encodedRegex = URLEncoder.encode(currentRegex, StandardCharsets.UTF_8);
+                        String regex101Url = String.format("https://regex101.com/?regex=%s&flags=gm", encodedRegex);
+                        String localizedRegex101Display = LabelTranslatorSingleton.getInstance().translate("Test on Regex101");
+                        String formattedHtml = String.format("<HTML><a target=\"_blank\" href=\"%s\">%s</a></HTML>", regex101Url, localizedRegex101Display);
+                        file_regex101_label.setEnabled(true);
+                        file_regex101_label.setText(formattedHtml);
+                        file_regex101_label.putClientProperty("regexUrl", regex101Url);
+                        return true;
+                    } catch (PatternSyntaxException ex) {
+                        input.setBorder(BorderFactory.createLineBorder(Color.RED));
+                        file_regex101_label.setEnabled(false);
+                        file_regex101_label.putClientProperty("regexUrl", "");
+                        return false;
+                    } catch (Exception ex) {
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        file_regex101_label.setEnabled(false);
+                        file_regex101_label.putClientProperty("regexUrl", "");
+                        return false;
+                    }
+                }
+            });
+            
             panel_tabs.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
 
             panel_tabs.setTitleAt(1, LabelTranslatorSingleton.getInstance().translate("Uploads"));
@@ -661,6 +715,31 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             run_command_textbox.setText(DBTools.selectSettingValue("run_command_path"));
 
+            String use_file_regex_string = DBTools.selectSettingValue("use_file_regex");
+            
+            boolean use_file_regex = false;
+            
+            if (use_file_regex_string != null) {
+                
+                use_file_regex = use_file_regex_string.equals("yes");
+            }
+
+            file_regex_checkbox.setSelected(use_file_regex);
+            
+            file_regex_textfield.setEnabled(use_file_regex);
+
+            file_regex_textfield.setText(DBTools.selectSettingValue("file_regex_pattern"));
+            
+            if (use_file_regex) {
+
+                InputVerifier verifier = file_regex_textfield.getInputVerifier();
+
+                if (verifier != null) {
+                    verifier.verify(file_regex_textfield);
+                }
+
+            }
+
             boolean init_paused = false;
 
             String init_paused_string = DBTools.selectSettingValue("start_frozen");
@@ -896,6 +975,10 @@ public class SettingsDialog extends javax.swing.JDialog {
         zoom_spinner = new javax.swing.JSpinner();
         dark_mode_checkbox = new javax.swing.JCheckBox();
         debug_file_path = new javax.swing.JLabel();
+        file_regex_checkbox = new javax.swing.JCheckBox();
+        file_regex_textfield = new javax.swing.JTextField();
+        run_command_textbox.addMouseListener(new ContextMenuMouseListener());
+        file_regex101_label = new javax.swing.JLabel();
         status = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
@@ -1719,11 +1802,11 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap()
                 .addComponent(proxy_user_label)
                 .addGap(6, 6, 6)
-                .addComponent(proxy_user_textfield)
+                .addComponent(proxy_user_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 443, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(proxy_pass_label)
                 .addGap(6, 6, 6)
-                .addComponent(proxy_pass_textfield)
+                .addComponent(proxy_pass_textfield, javax.swing.GroupLayout.DEFAULT_SIZE, 499, Short.MAX_VALUE)
                 .addContainerGap())
         );
         proxy_auth_panelLayout.setVerticalGroup(
@@ -1952,6 +2035,25 @@ public class SettingsDialog extends javax.swing.JDialog {
         debug_file_path.setFont(new java.awt.Font("Noto Sans", 0, 18)); // NOI18N
         debug_file_path.setText(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log");
 
+        file_regex_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        file_regex_checkbox.setText("Automatically remove files that match this REGEX:");
+        file_regex_checkbox.setToolTipText("");
+        file_regex_checkbox.setDoubleBuffered(true);
+        file_regex_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                file_regex_checkboxActionPerformed(evt);
+            }
+        });
+
+        file_regex_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        file_regex_textfield.setDoubleBuffered(true);
+        file_regex_textfield.setEnabled(false);
+
+        file_regex101_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        file_regex101_label.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
+        file_regex101_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+        file_regex101_label.setEnabled(false);
+
         javax.swing.GroupLayout advanced_panelLayout = new javax.swing.GroupLayout(advanced_panel);
         advanced_panel.setLayout(advanced_panelLayout);
         advanced_panelLayout.setHorizontalGroup(
@@ -1964,23 +2066,31 @@ public class SettingsDialog extends javax.swing.JDialog {
                         .addComponent(run_command_test_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(run_command_textbox))
-                    .addComponent(start_frozen_checkbox)
                     .addGroup(advanced_panelLayout.createSequentialGroup()
-                        .addComponent(debug_file_checkbox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(debug_file_path))
+                        .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(start_frozen_checkbox)
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addComponent(debug_file_checkbox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(debug_file_path))
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addGap(165, 165, 165)
+                                .addComponent(custom_chunks_dir_current_label))
+                            .addComponent(rec_zoom_label)
+                            .addComponent(run_command_checkbox)
+                            .addGroup(advanced_panelLayout.createSequentialGroup()
+                                .addComponent(custom_chunks_dir_checkbox)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(custom_chunks_dir_button))
+                            .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                                .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(file_regex_textfield)
                     .addGroup(advanced_panelLayout.createSequentialGroup()
-                        .addGap(165, 165, 165)
-                        .addComponent(custom_chunks_dir_current_label))
-                    .addComponent(rec_zoom_label)
-                    .addComponent(run_command_checkbox)
-                    .addGroup(advanced_panelLayout.createSequentialGroup()
-                        .addComponent(custom_chunks_dir_checkbox)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(custom_chunks_dir_button))
-                    .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addComponent(file_regex_checkbox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(file_regex101_label)))
                 .addContainerGap())
         );
         advanced_panelLayout.setVerticalGroup(
@@ -2008,11 +2118,17 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(run_command_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(run_command_test_button))
-                .addGap(18, 18, 18)
+                .addGap(7, 7, 7)
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(file_regex_checkbox)
+                    .addComponent(file_regex101_label))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(file_regex_textfield, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(2, 2, 2)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(rec_zoom_label)
-                .addGap(34, 34, 34))
+                .addContainerGap(278, Short.MAX_VALUE))
         );
 
         advanced_scrollpane.setViewportView(advanced_panel);
@@ -2035,7 +2151,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                         .addComponent(save_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cancel_button))
-                    .addComponent(panel_tabs, javax.swing.GroupLayout.DEFAULT_SIZE, 1194, Short.MAX_VALUE))
+                    .addComponent(panel_tabs))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -2117,6 +2233,8 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("custom_chunks_dir", _custom_chunks_dir);
             settings.put("run_command", run_command_checkbox.isSelected() ? "yes" : "no");
             settings.put("run_command_path", run_command_textbox.getText());
+            settings.put("use_file_regex", file_regex_checkbox.isSelected() ? "yes" : "no");
+            settings.put("file_regex_pattern", file_regex_textfield.getText());
             settings.put("clipboardspy", clipboardspy_checkbox.isSelected() ? "yes" : "no");
             settings.put("thumbnails", thumbnail_checkbox.isSelected() ? "yes" : "no");
             settings.put("upload_log", upload_log_checkbox.isSelected() ? "yes" : "no");
@@ -3437,6 +3555,17 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     }//GEN-LAST:event_proxy_sequential_radioActionPerformed
 
+    private void file_regex_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_file_regex_checkboxActionPerformed
+        // TODO add your handling code here:
+        file_regex_textfield.setEnabled(file_regex_checkbox.isSelected());
+        file_regex101_label.setEnabled(file_regex_checkbox.isSelected());
+        InputVerifier regexVerifier = file_regex_textfield.getInputVerifier();
+        if (regexVerifier != null && file_regex_checkbox.isSelected())
+            regexVerifier.verify(file_regex_textfield);
+        else
+            file_regex101_label.setText("");
+    }//GEN-LAST:event_file_regex_checkboxActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
     private javax.swing.JButton add_elc_account_button;
@@ -3470,6 +3599,9 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JTable elc_accounts_table;
     private javax.swing.JCheckBox encrypt_pass_checkbox;
     private javax.swing.JButton export_settings_button;
+    private javax.swing.JLabel file_regex101_label;
+    private javax.swing.JCheckBox file_regex_checkbox;
+    private javax.swing.JTextField file_regex_textfield;
     private javax.swing.JComboBox<String> font_combo;
     private javax.swing.JLabel font_label;
     private javax.swing.JCheckBox force_smart_proxy_checkbox;

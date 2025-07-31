@@ -20,7 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import static java.util.logging.Level.SEVERE;
+import static java.util.logging.Level.WARNING;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 import javax.swing.JComponent;
 import javax.swing.JOptionPane;
 import javax.swing.JTree;
@@ -579,6 +582,21 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 MiscTools.GUIRunAndWait(() -> {
 
                     node_bar.setIndeterminate(true);
+                    
+                    String useRegex = DBTools.selectSettingValue("use_file_regex");
+                    String regexPattern = DBTools.selectSettingValue("file_regex_pattern");
+                    boolean filterEnabled = "yes".equalsIgnoreCase(useRegex) && regexPattern != null && !regexPattern.isEmpty();
+
+                    if (filterEnabled) {
+                        Pattern filePattern;
+                        try {
+                            filePattern = Pattern.compile(regexPattern);
+                        } catch (PatternSyntaxException pse) {
+                            Logger.getLogger(FolderLinkDialog.class.getName()).log(WARNING, "Invalid regex pattern", pse);
+                            filePattern = Pattern.compile(".*");
+                        }
+                        removeNonMatchingNodes(roott, filePattern);
+                    }
 
                     ftree.setModel(new DefaultTreeModel(roott));
 
@@ -706,6 +724,21 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             });
         });
+    }
+    
+    private void removeNonMatchingNodes(MegaMutableTreeNode node, Pattern filePattern) {
+        if (node == null) return;
+        for (int i = node.getChildCount() - 1; i >= 0; i--) {
+            MegaMutableTreeNode child = (MegaMutableTreeNode) node.getChildAt(i);
+            if (child.isLeaf()) {
+                Object nameObj = ((Map<String, Object>) child.getUserObject()).get("name");
+                String name = nameObj != null ? nameObj.toString() : "";
+                if (filePattern.matcher(name).find()) node.remove(i);
+            } else {
+                removeNonMatchingNodes(child, filePattern);
+                if (child.getChildCount() == 0) node.remove(i); // Remove empty folders
+            }
+        }
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
