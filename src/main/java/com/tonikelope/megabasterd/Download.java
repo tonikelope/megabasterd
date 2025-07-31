@@ -38,8 +38,13 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import static java.util.concurrent.Executors.newCachedThreadPool;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -112,6 +117,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private final Object _progress_watchdog_lock;
     private final boolean _priority;
     private volatile boolean global_cancel = false;
+    
+    private static final ScheduledExecutorService SHUTDOWN_SCHEDULER =
+    Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "shutdown-checker");
+        t.setDaemon(true);
+        return t;
+    });
 
     public void setGlobal_cancel(boolean global_cancel) {
         this.global_cancel = global_cancel;
@@ -747,10 +759,18 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                             _thread_pool.shutdown();
 
                             LOG.log(Level.INFO, "{0} Waiting all threads to finish...", Thread.currentThread().getName());
-
-                            _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
-
-                        } catch (InterruptedException ex) {
+                            
+                            AtomicReference<ScheduledFuture<?>> checkerRef = new AtomicReference<>();
+                            
+                            ScheduledFuture<?> checker = SHUTDOWN_SCHEDULER.scheduleWithFixedDelay(() -> {
+                                if (_thread_pool.isTerminated()) {
+                                    LOG.log(Level.INFO, "{0} Worker pool fully terminated", Thread.currentThread().getName());
+                                    checkerRef.get().cancel(false);
+                                } else LOG.log(Level.INFO, "{0} Still waiting for worker threads…", Thread.currentThread().getName());
+                            }, 0, 200, TimeUnit.MILLISECONDS);
+                            
+                            checkerRef.set(checker);
+                        } catch (RejectedExecutionException ex) {
                             LOG.log(Level.SEVERE, ex.getMessage());
                         }
 
