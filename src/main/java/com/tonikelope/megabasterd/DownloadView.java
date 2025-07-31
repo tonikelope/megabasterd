@@ -592,14 +592,14 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     @Override
     public void updateProgressBar(final long progress, final double bar_rate) {
 
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             progress_pbar.setValue((int) Math.floor(bar_rate * progress));
         });
     }
 
     @Override
     public void updateProgressBar(final int value) {
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             progress_pbar.setValue(value);
         });
     }
