@@ -698,11 +698,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         return (pre + prov + rem + wait + run + finish > 0) ? LabelTranslatorSingleton.getInstance().translate("Pre:") + " " + pre + " / " + LabelTranslatorSingleton.getInstance().translate("Pro:") + " " + prov + " / " + LabelTranslatorSingleton.getInstance().translate("Wait:") + " " + wait + " / " + LabelTranslatorSingleton.getInstance().translate("Run:") + " " + run + " / " + LabelTranslatorSingleton.getInstance().translate("Finish:") + " " + finish + " / " + LabelTranslatorSingleton.getInstance().translate("Rem:") + " " + rem : "";
     }
 
-    private boolean _isOKFinishedInQueue() {
-
-        return _transference_finished_queue.stream().anyMatch((t) -> (!t.isStatusError() && !t.isCanceled()));
-    }
-
     @Override
     public void run() {
 
@@ -804,7 +799,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                                                     _main_panel.getView().getDownload_status_bar().setIndeterminate(false);
                                                     _main_panel.getView().getDownload_status_bar().setValue(_main_panel.getView().getDownload_status_bar().getValue() + 1);
-                                                    _main_panel.getView().getDownload_status_bar().setVisible((_main_panel.getView().getDownload_status_bar().getValue() < _main_panel.getView().getDownload_status_bar().getMaximum()));
 
                                                 });
                                             } else {
@@ -812,7 +806,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                                                     _main_panel.getView().getUpload_status_bar().setIndeterminate(false);
                                                     _main_panel.getView().getUpload_status_bar().setValue(_main_panel.getView().getUpload_status_bar().getValue() + 1);
-                                                    _main_panel.getView().getUpload_status_bar().setVisible((_main_panel.getView().getUpload_status_bar().getValue() < _main_panel.getView().getUpload_status_bar().getMaximum()));
 
                                                 });
                                             }
