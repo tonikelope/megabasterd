@@ -1,0 +1,8 @@
+I know. Tests are important. In fact, I would say that they are essential if you 
+want to develop something fairly serious and maintainable over time. No excuses, 
+I'm lazy. It's not my fault, it's the DNA. Nothing can be done. The good news is 
+that although I'm lazy, I'm also a perfectionist, so I've put a lot of care and 
+love into making everything work as it should. However, if you really like to do 
+QA I encourage you to collaborate with me developing some tests.
+
+Carpe diem.
