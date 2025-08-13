@@ -604,21 +604,30 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         secureNotify();
     }
 
+    private boolean lastPausedAllState = false;
+    private boolean lastHasFrozen = false;
+    private boolean lastIsDownloadManager = false;
+    private boolean lastForceChunkResetVisible = false;
+    private boolean lastCancelAllEnabled = false;
+    private boolean lastDownloadBarVisible = false;
+    private boolean lastUploadBarVisible = false;
+    private String lastStatusText = "";
+
     private void _updateView() {
         // if the window is hidden there's no point in doing any of this
         if (!_main_panel.getView().isVisible()) return;
-            
+
         List<Transference> waiting, running, finished;
         boolean hasPreprocess, pausedAll, hasFrozen, isDownloadManager;
         String statusText;
         boolean forceChunkResetVisible, cancelAllEnabled, downloadBarVisible, uploadBarVisible;
-        
-        synchronized(_transference_queue_sort_lock) {
+
+        synchronized (_transference_queue_sort_lock) {
             waiting = new ArrayList<>(getTransference_waitstart_queue());
             running = new ArrayList<>(getTransference_running_list());
             finished = new ArrayList<>(getTransference_finished_queue());
         }
-        
+
         pausedAll = _paused_all;
         hasFrozen = _main_panel.getDownload_manager().hasFrozenTransferences() || _main_panel.getUpload_manager().hasFrozenTransferences();
         isDownloadManager = (this instanceof DownloadManager);
@@ -628,10 +637,31 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         cancelAllEnabled = hasPreprocess || !getTransference_provision_queue().isEmpty() || !waiting.isEmpty() || !running.isEmpty();
         downloadBarVisible = isDownloadManager && (!_transference_preprocess_global_queue.isEmpty() || hasPreprocess || !getTransference_provision_queue().isEmpty());
         uploadBarVisible = !isDownloadManager && (!_transference_preprocess_global_queue.isEmpty() || hasPreprocess || !getTransference_provision_queue().isEmpty());
-        
+
+        // Check if any important state has changed before updating the view
+        if (pausedAll == lastPausedAllState &&
+                hasFrozen == lastHasFrozen &&
+                isDownloadManager == lastIsDownloadManager &&
+                statusText.equals(lastStatusText) &&
+                forceChunkResetVisible == lastForceChunkResetVisible &&
+                cancelAllEnabled == lastCancelAllEnabled &&
+                downloadBarVisible == lastDownloadBarVisible &&
+                uploadBarVisible == lastUploadBarVisible) {
+            return; // No state change, no need to update the UI
+        }
+
+        lastPausedAllState = pausedAll;
+        lastHasFrozen = hasFrozen;
+        lastIsDownloadManager = isDownloadManager;
+        lastStatusText = statusText;
+        lastForceChunkResetVisible = forceChunkResetVisible;
+        lastCancelAllEnabled = cancelAllEnabled;
+        lastDownloadBarVisible = downloadBarVisible;
+        lastUploadBarVisible = uploadBarVisible;
+
         MiscTools.GUIRun(() -> {
             MainPanelView view = _main_panel.getView();
-            
+
             if (isDownloadManager) {
                 if (view.getForce_chunk_reset_button().isVisible() != forceChunkResetVisible)
                     view.getForce_chunk_reset_button().setVisible(forceChunkResetVisible);
@@ -646,7 +676,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("RESUME ALL"));
             } else {
                 _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE ALL"));
-                if (_pause_all_button.isVisible() != !running.isEmpty())
+                if (_pause_all_button.isVisible() == running.isEmpty())
                     _pause_all_button.setVisible(!running.isEmpty());
             }
 
@@ -655,10 +685,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             if (!finished.isEmpty()) {
                 _close_all_button.setText(LabelTranslatorSingleton.getInstance().translate("Clear finished"));
-                if (_close_all_button.isVisible() != true)
+                if (!_close_all_button.isVisible())
                     _close_all_button.setVisible(true);
             } else {
-                if (_close_all_button.isVisible() != false)
+                if (_close_all_button.isVisible())
                     _close_all_button.setVisible(false);
             }
 

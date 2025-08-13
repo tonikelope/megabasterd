@@ -53,6 +53,7 @@ import java.net.URLDecoder;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -1305,9 +1306,9 @@ public class MiscTools {
 
                 con = (HttpURLConnection) mb_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                 }
             } else {
 
@@ -1327,7 +1328,7 @@ public class MiscTools {
                     byte_res.write(buffer, 0, reads);
                 }
 
-                String latest_version_res = new String(byte_res.toByteArray(), "UTF-8");
+                String latest_version_res = byte_res.toString(StandardCharsets.UTF_8);
 
                 String latest_version = findFirstRegex("releases\\/tag\\/v?([0-9]+\\.[0-9]+)", latest_version_res, 1);
 

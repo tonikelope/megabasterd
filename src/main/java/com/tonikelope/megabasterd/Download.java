@@ -807,10 +807,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         if (_progress == _file_size) {
 
-                            if (_file.length() != _file_size) {
+                            /*if (_file.length() != _file_size) {
 
                                 throw new IOException("El tamaño del fichero es incorrecto!");
-                            }
+                            }*/
 
                             Files.move(Paths.get(_file.getAbsolutePath()), Paths.get(filename), StandardCopyOption.REPLACE_EXISTING);
 
@@ -1246,58 +1246,46 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     public String getDownloadUrlForWorker() {
+        if (checkMegaDownloadUrl(_last_download_url)) {
+            return _last_download_url;
+        }
 
-        synchronized (_dl_url_lock) {
+        boolean error;
+        int conta_error = 0;
+        String download_url;
 
-            if (_last_download_url != null && checkMegaDownloadUrl(_last_download_url)) {
+        do {
+            error = false;
 
-                return _last_download_url;
-            }
-
-            boolean error;
-
-            int conta_error = 0;
-
-            String download_url;
-
-            do {
-
-                error = false;
-
-                try {
-                    if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
-
-                        download_url = _ma.getMegaFileDownloadUrl(_url);
-
-                    } else {
-                        download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
-                    }
-
-                    if (checkMegaDownloadUrl(download_url)) {
-
-                        _last_download_url = download_url;
-
-                    } else {
-
-                        error = true;
-                    }
-
-                } catch (Exception ex) {
-
-                    error = true;
-
-                    try {
-                        Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
-                    } catch (InterruptedException ex2) {
-                        LOG.log(Level.SEVERE, ex2.getMessage());
-                    }
+            try {
+                if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
+                    download_url = _ma.getMegaFileDownloadUrl(_url);
+                } else {
+                    download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire,
+                            _ma.getSid(), getMain_panel().getMega_proxy_server() != null ?
+                                    (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" +
+                                            getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
 
-            } while (error);
+                if (checkMegaDownloadUrl(download_url)) {
+                    synchronized (_dl_url_lock) {
+                        _last_download_url = download_url;
+                    }
+                } else {
+                    error = true;
+                }
 
-            return _last_download_url;
+            } catch (Exception ex) {
+                error = true;
+                try {
+                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                } catch (InterruptedException ex2) {
+                    LOG.log(Level.SEVERE, ex2.getMessage());
+                }
+            }
+        } while (error);
 
-        }
+        return _last_download_url;
     }
 
     public void startSlot() {
