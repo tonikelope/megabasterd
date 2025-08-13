@@ -612,6 +612,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private boolean lastDownloadBarVisible = false;
     private boolean lastUploadBarVisible = false;
     private String lastStatusText = "";
+    private int lastCombinedQueueHash = 0;
 
     private void _updateView() {
         // if the window is hidden there's no point in doing any of this
@@ -621,6 +622,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         boolean hasPreprocess, pausedAll, hasFrozen, isDownloadManager;
         String statusText;
         boolean forceChunkResetVisible, cancelAllEnabled, downloadBarVisible, uploadBarVisible;
+        int combinedQueueHash;
 
         synchronized (_transference_queue_sort_lock) {
             waiting = new ArrayList<>(getTransference_waitstart_queue());
@@ -628,6 +630,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
             finished = new ArrayList<>(getTransference_finished_queue());
         }
 
+        combinedQueueHash = finished.hashCode() * 31 + waiting.hashCode() * 23 + running.hashCode() * 37;
         pausedAll = _paused_all;
         hasFrozen = _main_panel.getDownload_manager().hasFrozenTransferences() || _main_panel.getUpload_manager().hasFrozenTransferences();
         isDownloadManager = (this instanceof DownloadManager);
@@ -646,10 +649,12 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 forceChunkResetVisible == lastForceChunkResetVisible &&
                 cancelAllEnabled == lastCancelAllEnabled &&
                 downloadBarVisible == lastDownloadBarVisible &&
-                uploadBarVisible == lastUploadBarVisible) {
+                uploadBarVisible == lastUploadBarVisible &&
+                combinedQueueHash == lastCombinedQueueHash) {
             return; // No state change, no need to update the UI
         }
 
+        lastCombinedQueueHash = combinedQueueHash;
         lastPausedAllState = pausedAll;
         lastHasFrozen = hasFrozen;
         lastIsDownloadManager = isDownloadManager;
