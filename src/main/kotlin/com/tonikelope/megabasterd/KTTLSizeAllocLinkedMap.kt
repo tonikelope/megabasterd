@@ -14,14 +14,19 @@ import kotlin.time.Duration.Companion.seconds
  */
 @Suppress("UNCHECKED_CAST")
 class KTTLSizeAllocLinkedMap<T> : LinkedHashMap<Int?, T?>() {
+    private val backingCache = object : LinkedHashMap<Int?, CacheEntry<T?>>(CACHE_MAX_SIZE, 0.75f, true) {
+        override fun removeEldestEntry(eldest: Map.Entry<Int?, CacheEntry<T?>>): Boolean {
+            return size > CACHE_MAX_SIZE || eldest.value.isExpired
+        }
+    }
+
     companion object {
         private val CACHE_TTL: Duration = 20.seconds
         private const val CACHE_MAX_SIZE = 100
     }
 
-    // Internal cache entry class with timestamp
-    private class CacheEntry<T>(var data: T) {
-        var lastAccessTime: SimpleTimeMark = SimpleTimeMark.now()
+    class CacheEntry<T>(var data: T) {
+        private var lastAccessTime: SimpleTimeMark = SimpleTimeMark.now()
 
         fun updateAccessTime() {
             this.lastAccessTime = SimpleTimeMark.now()
@@ -40,7 +45,7 @@ class KTTLSizeAllocLinkedMap<T> : LinkedHashMap<Int?, T?>() {
 
     override fun computeIfAbsent(key: Int?, mappingFunction: Function<in Int?, out T?>): T? {
         // Check if the entry is present and not expired
-        var existing = super.get(key)
+        var existing = backingCache[key]
         if (existing is CacheEntry<*>) {
             val entry = existing as CacheEntry<T>
             if (entry.isExpired) {
@@ -53,17 +58,17 @@ class KTTLSizeAllocLinkedMap<T> : LinkedHashMap<Int?, T?>() {
         if (existing == null) {
             val value = mappingFunction.apply(key)
             val newEntry = CacheEntry(value)
-            super.put(key, newEntry as T)
+            backingCache[key] = newEntry
             return value
         }
-        return existing
+        return existing.data
     }
 
     override fun get(key: Int?): T? {
-        val entry = super.get(key).takeIf { it is CacheEntry<*> } as? CacheEntry<T> ?: return null
+        val entry = backingCache[key] ?: return null
         entry.updateAccessTime()
         return if (entry.isExpired) {
-            super.remove(key)
+            backingCache.remove(key)
             null
         } else entry.data
     }
