@@ -2,6 +2,7 @@ plugins {
     kotlin("jvm") version "2.2.0"
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.github.ben-manes.versions") version "0.52.0"
 }
 
 group = "com.tonikelope"
@@ -15,8 +16,8 @@ repositories {
 }
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 application {
@@ -28,7 +29,7 @@ sourceSets {
         java.srcDirs("src/main/java", "src/main/kotlin")
     }
     val test by getting {
-        java.srcDirs("src/test/java")
+        java.srcDirs("src/test/java", "src/test/kotlin")
     }
 }
 
