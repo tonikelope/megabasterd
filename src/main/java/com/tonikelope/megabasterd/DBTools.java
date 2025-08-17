@@ -188,22 +188,32 @@ public class DBTools {
         return session;
     }
 
-    public static synchronized void insertDownload(String url, String email, String path, String filename, String filekey, Long size, String filepass, String filenoexpire, String custom_chunks_dir) throws SQLException {
-
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT INTO downloads (url, email, path, filename, filekey, filesize, filepass, filenoexpire, custom_chunks_dir) VALUES (?,?,?,?,?,?,?,?,?)")) {
-
-            ps.setString(1, url);
-            ps.setString(2, email);
-            ps.setString(3, path);
-            ps.setString(4, filename);
-            ps.setString(5, filekey);
-            ps.setLong(6, size);
-            ps.setString(7, filepass);
-            ps.setString(8, filenoexpire);
-            ps.setString(9, custom_chunks_dir);
+    private static synchronized void executeDownloadPs(String statement, Download download) throws SQLException {
+        try (
+            Connection conn = SqliteSingleton.getInstance().getConn();
+            PreparedStatement ps = conn.prepareStatement(statement);
+        ) {
+            ps.setString(1, download.getUrl());
+            ps.setString(2, download.getMa().getFull_email());
+            ps.setString(3, download.getDownload_path());
+            ps.setString(4, download.getFile_name());
+            ps.setString(5, download.getFile_key());
+            ps.setLong(6, download.getFile_size());
+            ps.setString(7, download.getFile_pass());
+            ps.setString(8, download.getFile_noexpire());
+            ps.setString(9, download.getCustom_chunks_dir());
 
             ps.executeUpdate();
         }
+
+    }
+
+    public static synchronized void insertOrReplaceDownload(Download download) throws SQLException {
+        executeDownloadPs(
+            //language=SQL
+            "INSERT OR REPLACE INTO downloads (url, email, path, filename, filekey, filesize, filepass, filenoexpire, custom_chunks_dir) VALUES (?,?,?,?,?,?,?,?,?)",
+            download
+        );
     }
 
     public static synchronized void deleteDownload(String url) throws SQLException {
@@ -218,17 +228,20 @@ public class DBTools {
     }
 
     public static synchronized void deleteDownloads(String[] urls) throws SQLException {
-
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE url=?")) {
-
-            for (String url : urls) {
-
-                ps.setString(1, url);
-
-                ps.addBatch();
+        try (Connection conn = SqliteSingleton.getInstance().getConn()) {
+            conn.setAutoCommit(false);
+            try (PreparedStatement ps = conn.prepareStatement("DELETE FROM downloads WHERE url=?")) {
+                for (String url : urls) {
+                    ps.setString(1, url);
+                    ps.addBatch();
+                }
+                ps.executeBatch();
+                conn.commit();
+            } catch (SQLException e) {
+                conn.rollback();
+            } finally {
+                conn.setAutoCommit(true);
             }
-
-            ps.executeBatch();
         }
     }
 

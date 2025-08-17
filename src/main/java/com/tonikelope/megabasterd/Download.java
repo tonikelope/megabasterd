@@ -807,10 +807,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         if (_progress == _file_size) {
 
-                            /*if (_file.length() != _file_size) {
+                            if (_file.length() != _file_size) {
 
                                 throw new IOException("El tamaño del fichero es incorrecto!");
-                            }*/
+                            }
 
                             Files.move(Paths.get(_file.getAbsolutePath()), Paths.get(filename), StandardCopyOption.REPLACE_EXISTING);
 
@@ -1090,7 +1090,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     try {
 
-                        insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
+                        insertOrReplaceDownload(this);
 
                         _provision_ok = true;
 
@@ -1116,9 +1116,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 Future<?> f = DB_EXECUTOR.submit(() -> {
                     try {
 
-                        deleteDownload(_url); //If resuming
-
-                        insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
+                        insertOrReplaceDownload(this);
 
                         _provision_ok = true;
 
