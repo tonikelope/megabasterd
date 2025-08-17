@@ -1,4 +1,5 @@
 plugins {
+    kotlin("jvm") version "2.2.0"
     application
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
@@ -24,7 +25,7 @@ application {
 
 sourceSets {
     val main by getting {
-        java.srcDirs("src/main/java")
+        java.srcDirs("src/main/java", "src/main/kotlin")
     }
     val test by getting {
         java.srcDirs("src/test/java")

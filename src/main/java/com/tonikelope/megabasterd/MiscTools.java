@@ -320,13 +320,7 @@ public class MiscTools {
         }
     }
 
-    private static final int CACHE_MAX_SIZE = 100;
-    private static final LinkedHashMap<Integer, int[]> _int_alloc_targets = new LinkedHashMap<Integer, int[]>(CACHE_MAX_SIZE, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<Integer, int[]> eldest) {
-            return size() > CACHE_MAX_SIZE;
-        }
-    };
+    private static final KTTLSizeAllocLinkedMap<int[]> _int_alloc_targets = new KTTLSizeAllocLinkedMap<>();
 
     // Cursed bit shifting that replaces byte buffer allocs
     public static int[] bin2i32a(byte[] bin) {
@@ -344,12 +338,7 @@ public class MiscTools {
         return out;
     }
 
-    private static final LinkedHashMap<Integer, byte[]> _byte_alloc_targets = new LinkedHashMap<Integer, byte[]>(CACHE_MAX_SIZE, 0.75f, true) {
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<Integer, byte[]> eldest) {
-            return size() > CACHE_MAX_SIZE;
-        }
-    };
+    private static final KTTLSizeAllocLinkedMap<byte[]> _byte_alloc_targets = new KTTLSizeAllocLinkedMap<>();
 
     public static byte[] i32a2bin(int[] values) {
         int resultSize = values.length * 4;
@@ -1012,21 +1001,21 @@ public class MiscTools {
 
     public static String cleanFilename(String filename) {
 
-        return (System.getProperty("os.name").toLowerCase().contains("win") ? filename.replaceAll("[<>:\"/\\\\\\|\\?\\*\t]+", "") : filename).replaceAll("\\" + File.separator, "").replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim();
+        return (System.getProperty("os.name").toLowerCase().contains("win") ? filename.replaceAll("[<>:\"/\\\\\\|\\?\\*\t]+", "") : filename).replaceAll("\\\\" + File.separator, "").replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim();
     }
 
     public static String cleanFilePath(String path) {
 
-        return !path.equals(".") ? ((System.getProperty("os.name").toLowerCase().contains("win") ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\" + File.separator, "\\" + File.separator).replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim()) : path;
+        return !path.equals(".") ? ((System.getProperty("os.name").toLowerCase().contains("win") ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\\\" + File.separator, "\\" + File.separator).replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim()) : path;
     }
 
     public static byte[] genRandomByteArray(int length) {
 
         byte[] the_array = new byte[length];
 
-        Random randomno = new Random();
+        Random random = new Random();
 
-        randomno.nextBytes(the_array);
+        random.nextBytes(the_array);
 
         return the_array;
     }
