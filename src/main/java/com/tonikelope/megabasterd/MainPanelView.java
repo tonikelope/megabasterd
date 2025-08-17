@@ -285,7 +285,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                             try {
                                 fr = new FileWriter(upload_log, true);
                                 fr.write("***** MegaBasterd UPLOAD LOG FILE *****\n\n");
-                                fr.write(MiscTools.getFechaHoraActual() + "\n\n");
+                                fr.write(MiscTools.getDateTimeActual() + "\n\n");
                                 fr.write(ma.getEmail() + "\n\n");
                                 fr.write(dir_name + "   " + folder_link + "\n\n");
                                 fr.close();

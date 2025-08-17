@@ -14,9 +14,12 @@ import java.awt.TrayIcon;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -117,6 +120,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         });
         uiRefreshTimer.setRepeats(true);
         uiRefreshTimer.start();
+        startCacheUpdateTask();
     }
 
     public Boolean getSort_wait_start_queue() {
@@ -707,30 +711,73 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         });
     }
 
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
+    private int cachedPreSize = 0;
+    private int cachedProvSize = 0;
+    private int cachedRemSize = 0;
+    private int cachedWaitSize = 0;
+    private int cachedRunSize = 0;
+    private int cachedFinishSize = 0;
+    private void startCacheUpdateTask() {
+        scheduler.scheduleAtFixedRate(this::updateQueueSizes, 0, 500, TimeUnit.MILLISECONDS);
+    }
+
+    private void updateQueueSizes() {
+        cachedPreSize = _transference_preprocess_global_queue.size();
+        cachedProvSize = _transference_provision_queue.size();
+        cachedRemSize = _transference_remove_queue.size();
+        cachedWaitSize = _transference_waitstart_queue.size() + _transference_waitstart_aux_queue.size();
+        cachedRunSize = _transference_running_list.size();
+        cachedFinishSize = _transference_finished_queue.size();
+    }
+
+    private long lastHash = 0;
+    private String lastStatus = "";
+
     private String _genStatus() {
+        long allQueueHash = Objects.hash(
+            cachedPreSize,
+            cachedProvSize,
+            cachedRemSize,
+            cachedWaitSize,
+            cachedRunSize,
+            cachedFinishSize
+        );
 
-        int pre = _transference_preprocess_global_queue.size();
+        if (allQueueHash == lastHash) return lastStatus;
+        lastHash = allQueueHash;
 
-        int prov = _transference_provision_queue.size();
-
-        int rem = _transference_remove_queue.size();
-
-        int wait = _transference_waitstart_queue.size() + _transference_waitstart_aux_queue.size();
-
-        int run = _transference_running_list.size();
-
-        int finish = _transference_finished_queue.size();
+        // Use cached sizes
+        int pre = cachedPreSize;
+        int prov = cachedProvSize;
+        int rem = cachedRemSize;
+        int wait = cachedWaitSize;
+        int run = cachedRunSize;
+        int finish = cachedFinishSize;
 
         if (!_all_finished && !_tray_icon_finish && finish > 0 && pre + prov + wait + run == 0 && !_main_panel.getView().isVisible()) {
-
             _tray_icon_finish = true;
-
             _all_finished = true;
-
             _main_panel.getTrayicon().displayMessage("MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
         }
 
-        return (pre + prov + rem + wait + run + finish > 0) ? LabelTranslatorSingleton.getInstance().translate("Pre:") + " " + pre + " / " + LabelTranslatorSingleton.getInstance().translate("Pro:") + " " + prov + " / " + LabelTranslatorSingleton.getInstance().translate("Wait:") + " " + wait + " / " + LabelTranslatorSingleton.getInstance().translate("Run:") + " " + run + " / " + LabelTranslatorSingleton.getInstance().translate("Finish:") + " " + finish + " / " + LabelTranslatorSingleton.getInstance().translate("Rem:") + " " + rem : "";
+        if ((pre + prov + rem + wait + run + finish) <= 0) {
+            lastStatus = "";
+            return lastStatus;
+        }
+
+        LabelTranslatorSingleton translator = LabelTranslatorSingleton.getInstance();
+        List<String> statuses = new ArrayList<>();
+        if (pre > 0) statuses.add(translator.translate("Pre:") + " " + pre);
+        if (prov > 0) statuses.add(translator.translate("Pro:") + " " + prov);
+        if (wait > 0) statuses.add(translator.translate("Wait:") + " " + wait);
+        if (run > 0) statuses.add(translator.translate("Run:") + " " + run);
+        if (finish > 0) statuses.add(translator.translate("Finish:") + " " + finish);
+        if (rem > 0) statuses.add(translator.translate("Rem:") + " " + rem);
+
+        lastStatus = String.join(" / ", statuses);
+        return lastStatus;
     }
 
     @Override

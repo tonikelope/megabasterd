@@ -31,7 +31,6 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -50,9 +49,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
-import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -73,6 +69,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -210,11 +207,11 @@ public class MiscTools {
         }
     }
 
-    public static String getFechaHoraActual() {
+    public static String getDateTimeActual() {
 
         String format = "dd-MM-yyyy HH:mm:ss";
 
-        return getFechaHoraActual(format);
+        return getDateTimeActual(format);
     }
 
     public static boolean isVideoFile(String filename) {
@@ -245,7 +242,7 @@ public class MiscTools {
         return false;
     }
 
-    public static String getFechaHoraActual(String format) {
+    public static String getDateTimeActual(String format) {
 
         Date currentDate = new Date(System.currentTimeMillis());
 
@@ -323,32 +320,52 @@ public class MiscTools {
         }
     }
 
+    private static final int CACHE_MAX_SIZE = 100;
+    private static final LinkedHashMap<Integer, int[]> _int_alloc_targets = new LinkedHashMap<Integer, int[]>(CACHE_MAX_SIZE, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Integer, int[]> eldest) {
+            return size() > CACHE_MAX_SIZE;
+        }
+    };
+
+    // Cursed bit shifting that replaces byte buffer allocs
     public static int[] bin2i32a(byte[] bin) {
-        int l = (int) (4 * Math.ceil((double) bin.length / 4));
+        int outSize = bin.length / 4;
+        int[] out = _int_alloc_targets.computeIfAbsent(outSize, k -> new int[outSize]);
 
-        IntBuffer intBuf = ByteBuffer.wrap(bin, 0, l).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
-
-        int[] array = new int[intBuf.remaining()];
-
-        intBuf.get(array);
-
-        return array;
-    }
-
-    public static byte[] i32a2bin(int[] values) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        DataOutputStream dos = new DataOutputStream(baos);
-
-        for (int i = 0; i < values.length; ++i) {
-            try {
-                dos.writeInt(values[i]);
-            } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        for (int i = 0; i < out.length; i++) {
+            int idx = i * 4;
+            out[i] = ((bin[idx] & 0xFF) << 24)
+                | ((bin[idx + 1] & 0xFF) << 16)
+                | ((bin[idx + 2] & 0xFF) << 8)
+                | (bin[idx + 3] & 0xFF);
         }
 
-        return baos.toByteArray();
+        return out;
+    }
+
+    private static final LinkedHashMap<Integer, byte[]> _byte_alloc_targets = new LinkedHashMap<Integer, byte[]>(CACHE_MAX_SIZE, 0.75f, true) {
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<Integer, byte[]> eldest) {
+            return size() > CACHE_MAX_SIZE;
+        }
+    };
+
+    public static byte[] i32a2bin(int[] values) {
+        int resultSize = values.length * 4;
+        byte[] result = _byte_alloc_targets.computeIfAbsent(resultSize, k -> new byte[resultSize]);
+
+        for (int i = 0; i < values.length; ++i) {
+            int value = values[i];
+            int index = i * 4;
+
+            result[index] = (byte) (value >> 24);
+            result[index + 1] = (byte) (value >> 16);
+            result[index + 2] = (byte) (value >> 8);
+            result[index + 3] = (byte) value;
+        }
+
+        return result;
     }
 
     public static BigInteger mpi2big(byte[] s) {

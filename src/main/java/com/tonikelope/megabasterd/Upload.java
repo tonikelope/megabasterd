@@ -11,7 +11,7 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.Transference.PROGRESS_WATCHDOG_TIMEOUT;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -999,7 +999,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                         FileWriter fr;
                                         try {
                                             fr = new FileWriter(upload_log, true);
-                                            fr.write("[" + MiscTools.getFechaHoraActual() + "] " + _file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
+                                            fr.write("[" + MiscTools.getDateTimeActual() + "] " + _file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
                                             fr.close();
                                         } catch (IOException ex) {
                                             Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());

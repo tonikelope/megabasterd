@@ -1250,7 +1250,7 @@ public final class MainPanel {
             final MainPanel tthis = this;
 
             THREAD_POOL.execute(() -> {
-                int conta_downloads = 0, tot_downloads = -1;
+                int downloadCount = 0, tot_downloads = -1;
                 try {
 
                     ArrayList<String> downloads_queue = DBTools.selectDownloadsQueue();
@@ -1259,13 +1259,13 @@ public final class MainPanel {
 
                     tot_downloads = res.size();
 
-                    Iterator downloads_queue_iterator = downloads_queue.iterator();
+                    Iterator<String> downloads_queue_iterator = downloads_queue.iterator();
 
                     while (downloads_queue_iterator.hasNext()) {
 
                         try {
 
-                            String url = (String) downloads_queue_iterator.next();
+                            String url = downloads_queue_iterator.next();
 
                             HashMap<String, Object> o = res.remove(url);
 
@@ -1281,11 +1281,11 @@ public final class MainPanel {
 
                                 if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
-                                    Download download = new Download(tthis, ma, (String) url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
+                                    Download download = new Download(tthis, ma, url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
 
                                     getDownload_manager().getTransference_provision_queue().add(download);
 
-                                    conta_downloads++;
+                                    downloadCount++;
 
                                     downloads_queue_iterator.remove();
                                 } else {
@@ -1324,7 +1324,7 @@ public final class MainPanel {
 
                                     getDownload_manager().getTransference_provision_queue().add(download);
 
-                                    conta_downloads++;
+                                    downloadCount++;
 
                                 } else {
 
@@ -1343,9 +1343,9 @@ public final class MainPanel {
                     Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
                 }
 
-                if (conta_downloads > 0) {
+                if (downloadCount > 0) {
 
-                    if (conta_downloads == tot_downloads) {
+                    if (downloadCount == tot_downloads) {
                         setResume_downloads(true);
                     }
 

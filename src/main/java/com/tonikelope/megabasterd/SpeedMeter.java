@@ -24,13 +24,14 @@ import javax.swing.JLabel;
  */
 public class SpeedMeter implements Runnable {
 
-    public static final int SLEEP = 3000;
+    public static final double SLEEP = 3000.0;
+    public static final int SLEEP_MILLIS = (int) SLEEP;
     public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 20;
     private static final Logger LOG = Logger.getLogger(SpeedMeter.class.getName());
     private final JLabel _speed_label;
     private final JLabel _rem_label;
     private final TransferenceManager _trans_manager;
-    private final ConcurrentHashMap<Transference, HashMap> _transferences;
+    private final ConcurrentHashMap<Transference, TransferenceData> _transferences;
     private long _speed_counter;
     private long _speed_acumulator;
     private volatile long _max_avg_global_speed;
@@ -49,15 +50,18 @@ public class SpeedMeter implements Runnable {
         return Math.round((double) _speed_acumulator / _speed_counter);
     }
 
+    static class TransferenceData {
+        long last_progress;
+        int no_data_count;
+
+        public TransferenceData(Transference transference) {
+            this.last_progress = transference.getProgress();
+            this.no_data_count = 0;
+        }
+    }
+
     public void attachTransference(Transference transference) {
-
-        HashMap<String, Object> properties = new HashMap<>();
-
-        properties.put("last_progress", transference.getProgress());
-        properties.put("no_data_count", 0);
-
-        _transferences.put(transference, properties);
-
+        _transferences.put(transference, new TransferenceData(transference));
     }
 
     public void detachTransference(Transference transference) {
@@ -66,11 +70,6 @@ public class SpeedMeter implements Runnable {
             _transferences.remove(transference);
         }
 
-    }
-
-    public long getMaxAvgGlobalSpeed() {
-
-        return _max_avg_global_speed;
     }
 
     private String calcRemTime(long seconds) {
@@ -91,11 +90,11 @@ public class SpeedMeter implements Runnable {
         return String.format("%dd %d:%02d:%02d", days, hours, minutes, secs);
     }
 
-    private long calcTransferenceSpeed(Transference transference, HashMap properties) {
+    private long calcTransferenceSpeed(Transference transference, TransferenceData properties) {
 
-        long sp, progress = transference.getProgress(), last_progress = (long) properties.get("last_progress");
+        long sp, progress = transference.getProgress(), last_progress = properties.last_progress;
 
-        int no_data_count = (int) properties.get("no_data_count");
+        int no_data_count = properties.no_data_count;
 
         if (transference.isPaused()) {
 
@@ -103,7 +102,7 @@ public class SpeedMeter implements Runnable {
 
         } else if (progress > last_progress) {
 
-            double sleep_time = ((double) SLEEP * (no_data_count + 1)) / 1000;
+            double sleep_time = (SLEEP * (no_data_count + 1)) / 1000;
 
             double current_speed = (progress - last_progress) / sleep_time;
 
@@ -126,9 +125,8 @@ public class SpeedMeter implements Runnable {
             no_data_count++;
         }
 
-        properties.put("last_progress", last_progress);
-
-        properties.put("no_data_count", no_data_count);
+        properties.last_progress = last_progress;
+        properties.no_data_count = no_data_count;
 
         _transferences.put(transference, properties);
 
@@ -155,7 +153,7 @@ public class SpeedMeter implements Runnable {
 
                     global_speed = 0L;
 
-                    for (Map.Entry<Transference, HashMap> trans_info : _transferences.entrySet()) {
+                    for (Map.Entry<Transference, TransferenceData> trans_info : _transferences.entrySet()) {
 
                         long trans_sp = calcTransferenceSpeed(trans_info.getKey(), trans_info.getValue());
 
@@ -207,7 +205,7 @@ public class SpeedMeter implements Runnable {
                     visible = false;
                 }
 
-                Thread.sleep(SLEEP);
+                Thread.sleep(SLEEP_MILLIS);
 
             } catch (InterruptedException ex) {
                 LOG.log(Level.SEVERE, ex.getMessage());

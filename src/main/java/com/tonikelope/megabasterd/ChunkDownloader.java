@@ -10,12 +10,9 @@
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
@@ -23,14 +20,10 @@ import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
+import java.nio.channels.CompletionHandler;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -146,6 +139,62 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
             }
 
             _notified = false;
+        }
+    }
+
+    static class ChunkState {
+        long position;
+        long chunkReads;
+
+        public ChunkState(long position, long chunkReads) {
+            this.position = position;
+            this.chunkReads = chunkReads;
+        }
+
+        public ChunkState copy() {
+            return new ChunkState(this.position, this.chunkReads);
+        }
+    }
+
+    public class ChunkWriteCompletionHandler implements CompletionHandler<Integer, Void> {
+        private final ChunkState globalChunKState;
+        private final ChunkState localChunkState;
+        private final Download download;
+        private final boolean resetCurrentChunk;
+        private final boolean exit;
+        private final long chunkSize;
+        private final long id;
+        private final long chunkId;
+
+        public ChunkWriteCompletionHandler(ChunkState globalChunKState, ChunkState localChunkState, Download download, boolean resetCurrentChunk, boolean exit, long chunkSize, long id, long chunkId) {
+            this.globalChunKState = globalChunKState;
+            this.localChunkState = localChunkState;
+            this.download = download;
+            this.resetCurrentChunk = resetCurrentChunk;
+            this.exit = exit;
+            this.chunkSize = chunkSize;
+            this.id = id;
+            this.chunkId = chunkId;
+        }
+
+        @Override
+        public void completed(Integer result, Void attachment) {
+            localChunkState.position += result;
+            globalChunKState.chunkReads += result;
+
+            download.getPartialProgress().add((long) result);
+            if (globalChunKState.chunkReads % 1024 == 0) download.getProgress_meter().secureNotify();
+
+            if (!resetCurrentChunk && download.isPaused() && !exit && !download.isStopped() && !download.getChunkmanager().isExit() && globalChunKState.chunkReads < chunkSize) {
+                download.pause_worker();
+                secureWait();
+            }
+        }
+
+        @Override
+        public void failed(Throwable exc, Void attachment) {
+            LOG.log(Level.SEVERE, "{0} Worker [{1}] Failed to write chunk [{2}] to file: {3}",
+                    new Object[]{Thread.currentThread().getName(), id, chunkId, exc.getMessage()});
         }
     }
 
@@ -328,15 +377,12 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 Path tmpChunkFilePath = tmp_chunk_file.toPath();
                                 try (AsynchronousFileChannel asyncFileChannel = AsynchronousFileChannel.open(tmpChunkFilePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
-
                                     ByteBuffer byteBuffer = ByteBuffer.allocate(buffer.length);
                                     long position = 0;
 
                                     while (!_reset_current_chunk && !_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size) {
                                         int bytesRead = _chunk_inputstream.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length));
-                                        if (bytesRead == -1) {
-                                            break;
-                                        }
+                                        if (bytesRead == -1) break;
 
                                         byteBuffer.clear();
                                         byteBuffer.put(buffer, 0, bytesRead);

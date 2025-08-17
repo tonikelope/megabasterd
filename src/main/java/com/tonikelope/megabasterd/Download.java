@@ -1394,8 +1394,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     private boolean verifyFileCBCMAC(String filename) throws FileNotFoundException, Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
-        int old_thread_priority = Thread.currentThread().getPriority();
-
         int[] int_key = bin2i32a(UrlBASE642Bin(_file_key));
         int[] iv = new int[]{int_key[4], int_key[5]};
         int[] meta_mac = new int[]{int_key[6], int_key[7]};
@@ -1406,7 +1404,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", byte_file_key, i32a2bin(cbc_iv));
 
-        try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(filename))) {
+        try (BufferedInputStream is = new BufferedInputStream(Files.newInputStream(Paths.get(filename)))) {
 
             long chunk_id = 1L;
             long tot = 0L;
