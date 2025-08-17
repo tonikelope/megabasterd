@@ -920,18 +920,18 @@ public class MiscTools {
 
             for (TreePath path : paths) {
 
-                if ((MutableTreeNode) path.getLastPathComponent() != (MutableTreeNode) tree_model.getRoot()) {
+                if (path.getLastPathComponent() != tree_model.getRoot()) {
                     Object parent = new_root;
 
                     for (Object path_element : path.getPath()) {
 
-                        if ((DefaultMutableTreeNode) path_element != (DefaultMutableTreeNode) tree_model.getRoot()) {
+                        if (path_element != tree_model.getRoot()) {
 
                             if (hashmap_old.get(path_element) == null) {
 
                                 Object node = null;
 
-                                if ((DefaultMutableTreeNode) path_element == (DefaultMutableTreeNode) path.getLastPathComponent()) {
+                                if (path_element == path.getLastPathComponent()) {
 
                                     node = path_element;
 
