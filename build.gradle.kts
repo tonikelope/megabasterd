@@ -34,14 +34,16 @@ sourceSets {
 }
 
 dependencies {
-    implementation("commons-io:commons-io:2.14.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.10.2")
+    implementation("commons-io:commons-io:2.20.0")
     implementation("org.sejda.webp-imageio:webp-imageio-sejda:0.1.0")
-    implementation("org.xerial:sqlite-jdbc:3.43.0.0")
-    implementation("com.fasterxml.jackson.core:jackson-core:2.15.3")
-    implementation("com.fasterxml.jackson.core:jackson-annotations:2.15.3")
-    implementation("org.apache.commons:commons-collections4:4.4")
-    implementation("javax.xml.bind:jaxb-api:2.3.1")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
+    implementation("org.xerial:sqlite-jdbc:3.50.3.0")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.20.0-rc1")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:3.0-rc5")
+    implementation("org.apache.commons:commons-collections4:4.5.0")
+    implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.20.0-rc1")
     implementation("xuggle:xuggle-xuggler-server-all:5.7.0-SNAPSHOT")
 }
 
