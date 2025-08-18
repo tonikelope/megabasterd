@@ -876,6 +876,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                     _status_error = "BAD NEWS :( File is DAMAGED!";
 
+                                    String autoRestartDamagedSetting = selectSettingValue("auto_restart_damaged");
+
+                                    if (autoRestartDamagedSetting != null) _auto_retry_on_error = autoRestartDamagedSetting.equals("yes");
+
                                     getView().printStatusError(_status_error);
 
                                 } else {
