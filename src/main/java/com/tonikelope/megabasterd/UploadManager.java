@@ -37,9 +37,7 @@ public class UploadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference upload) {
-        MiscTools.GUIRun(() -> {
-            getScroll_panel().add(((Upload) upload).getView());
-        });
+        MiscTools.GUIRun(() -> getScroll_panel().add(((Upload) upload).getView()));
 
         ((Upload) upload).provisionIt();
 
@@ -69,9 +67,7 @@ public class UploadManager extends TransferenceManager {
             });
 
             getTransference_waitstart_queue().remove(u);
-
             getTransference_running_list().remove(u);
-
             getTransference_finished_queue().remove(u);
 
             increment_total_size(-1 * u.getFile_size());

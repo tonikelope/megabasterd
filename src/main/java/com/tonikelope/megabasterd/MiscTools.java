@@ -76,6 +76,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
@@ -325,29 +326,46 @@ public class MiscTools {
     }
 
     public static int[] bin2i32a(byte[] bin) {
+        Objects.requireNonNull(bin, "bin must not be null");
+        if (bin.length == 0) return new int[0];
         int l = (int) (4 * Math.ceil((double) bin.length / 4));
         byte[] data = (l == bin.length) ? bin : Arrays.copyOf(bin, l);
-
-        java.nio.IntBuffer intBuf = java.nio.ByteBuffer
-            .wrap(data)
-            .order(java.nio.ByteOrder.BIG_ENDIAN)
-            .asIntBuffer();
-
-        int[] array = new int[intBuf.remaining()];
-        intBuf.get(array);
-        return array;
+        IntBuffer ib = java.nio.ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+        int[] out = new int[ib.remaining()];
+        ib.get(out);
+        return out;
     }
 
     public static byte[] i32a2bin(int[] values) {
+        Objects.requireNonNull(values, "values must not be null");
+        if (values.length == 0) return new byte[0];
         byte[] out = new byte[values.length * 4];
+        i32a2bin(values, out);
+        return out;
+    }
+
+    public static void bin2i32a(byte[] bin, int[] out) {
+        int l = (int) (4 * Math.ceil((double) bin.length / 4));
+        byte[] data = (l == bin.length) ? bin : Arrays.copyOf(bin, l);
+        IntBuffer ib = java.nio.ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+        int n = ib.remaining();
+        if (out == null) {
+            out = new int[ib.remaining()];
+        }
+        if (out.length < n) throw new IllegalArgumentException("out too small");
+        ib.get(out, 0, n);
+    }
+
+    public static void i32a2bin(int[] values, byte[] out) {
+        Objects.requireNonNull(values); Objects.requireNonNull(out);
+        if (out.length < values.length * 4) throw new IllegalArgumentException("out too small");
         int j = 0;
         for (int v : values) {
             out[j++] = (byte) (v >>> 24);
             out[j++] = (byte) (v >>> 16);
             out[j++] = (byte) (v >>> 8);
-            out[j++] = (byte) v;
+            out[j++] = (byte)  v;
         }
-        return out;
     }
 
     public static BigInteger mpi2big(byte[] s) {

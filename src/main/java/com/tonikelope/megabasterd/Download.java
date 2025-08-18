@@ -1436,6 +1436,12 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         };
     }
 
+    private static void ecbEncryptBlock(Cipher ecb, byte[] inOut, byte[] tmp16) throws ShortBufferException, IllegalBlockSizeException, BadPaddingException {
+        int n = ecb.update(inOut, 0, 16, tmp16, 0);
+        if (n == 0) n = ecb.doFinal(inOut, 0, 16, tmp16, 0);
+        System.arraycopy(tmp16, 0, inOut, 0, 16);
+    }
+
     private boolean verifyFileCBCMAC(String filename) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         int[] intKey = bin2i32a(UrlBASE642Bin(_file_key));
@@ -1445,7 +1451,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         byte[] byte_file_key = initMEGALinkKey(getFile_key());
 
-        Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", byte_file_key, cbcIV);
+        Cipher cryptor = genCrypter("AES", "AES/ECB/NoPadding", byte_file_key, null);
 
         try (BufferedInputStream is = new BufferedInputStream(Files.newInputStream(Paths.get(filename)))) {
 
@@ -1465,6 +1471,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     System.arraycopy(ivBytes, 0, chunkMac, 0, 8);
                     System.arraycopy(ivBytes, 0, chunkMac, 8, 8);
 
+                    byte[] tmp = new byte[16];
+
                     long chunkCount = 0L;
                     while (chunkCount < chunk_size && (reads = is.read(byteBlock)) != -1) {
                         if (reads < byteBlock.length) {
@@ -1473,14 +1481,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         for (int i = 0; i < 16; i++) {
                             chunkMac[i] ^= byteBlock[i];
                         }
-                        cryptor.update(chunkMac, 0, 16, chunkMac, 0);
+                        ecbEncryptBlock(cryptor, chunkMac, tmp);
                         chunkCount += reads;
                     }
 
                     for (int i = 0; i < fileMac.length; i++) {
                         fileMac[i] ^= chunkMac[i];
                     }
-                    cryptor.update(fileMac, 0, 16, fileMac, 0);
+                    ecbEncryptBlock(cryptor, fileMac, tmp);
                     setProgress(totalSize);
                     chunkId++;
                 }

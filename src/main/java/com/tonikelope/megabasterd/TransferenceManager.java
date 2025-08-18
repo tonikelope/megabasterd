@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.logging.Level;
@@ -41,109 +42,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public static final int MAX_PROVISION_WORKERS = 50;
     private static final Logger LOG = Logger.getLogger(TransferenceManager.class.getName());
 
-    public static class TransferenceQueue<T> extends ConcurrentLinkedQueue<T> {
-        private final AtomicInteger queueSize = new AtomicInteger(super.size());
-
-        @Override
-        public boolean add(T t) {
-            boolean added = super.add(t);
-            if (added) queueSize.incrementAndGet();
-            return added;
-        }
-
-        @Override
-        public boolean addAll(Collection<? extends T> c) {
-            boolean added = super.addAll(c);
-            if (added) queueSize.addAndGet(c.size());
-            return added;
-        }
-
-        @Override
-        public boolean offer(T t) {
-            boolean offered = super.offer(t);
-            if (offered) queueSize.incrementAndGet();
-            return offered;
-        }
-
-        @Override
-        public T poll() {
-            T val = super.poll();
-            if (val != null) queueSize.decrementAndGet();
-            return val;
-        }
-
-        @Override
-        public boolean remove(Object o) {
-            boolean removed = super.remove(o);
-            if (removed) queueSize.decrementAndGet();
-            return removed;
-        }
-
-        @Override
-        public void clear() {
-            super.clear();
-            queueSize.set(0);
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return queueSize.get() == 0;
-        }
-
-        @Override
-        public int size() {
-            return queueSize.get();
-        }
-
-        @Override
-        public boolean removeAll(Collection<?> c) {
-            int removedCount = 0;
-            for (Object o : c) {
-                while (super.remove(o)) {
-                    removedCount++;
-                }
-            }
-            queueSize.addAndGet(-removedCount);
-            return removedCount > 0;
-        }
-
-        @Override
-        public boolean retainAll(Collection<?> c) {
-            boolean changed = super.retainAll(c);
-            if (changed) queueSize.set(super.size());
-            return changed;
-        }
-
-        @Override
-        public boolean removeIf(Predicate<? super T> filter) {
-            boolean changed = super.removeIf(filter);
-            if (changed) queueSize.set(super.size());
-            return changed;
-        }
-
-        @Override
-        public @NotNull Iterator<T> iterator() {
-            Iterator<T> it = super.iterator();
-            return new Iterator<>() {
-                @Override public boolean hasNext() { return it.hasNext(); }
-                @Override public T next() {
-                    return it.next(); }
-                @Override public void remove() {
-                    it.remove();
-                    queueSize.decrementAndGet();
-                }
-            };
-        }
-    }
-
-    protected final TransferenceQueue<Object> _transference_preprocess_global_queue;
-    protected final TransferenceQueue<Runnable> _transference_preprocess_queue;
-    protected final TransferenceQueue<Transference> _transference_provision_queue;
-    protected final TransferenceQueue<Transference> _transference_waitstart_queue;
-    protected final TransferenceQueue<Transference> _transference_waitstart_aux_queue;
-    protected final TransferenceQueue<Transference> _transference_remove_queue;
-    protected final TransferenceQueue<Transference> _transference_finished_queue;
-    protected final TransferenceQueue<Transference> _transference_running_list;
+    protected final LinkedBlockingQueue<Object> _transference_preprocess_global_queue;
+    protected final LinkedBlockingQueue<Runnable> _transference_preprocess_queue;
+    protected final LinkedBlockingQueue<Transference> _transference_provision_queue;
+    protected final LinkedBlockingQueue<Transference> _transference_waitstart_queue;
+    protected final LinkedBlockingQueue<Transference> _transference_waitstart_aux_queue;
+    protected final LinkedBlockingQueue<Transference> _transference_remove_queue;
+    protected final LinkedBlockingQueue<Transference> _transference_finished_queue;
+    protected final LinkedBlockingQueue<Transference> _transference_running_list;
 
     private final javax.swing.JPanel _scroll_panel;
     private final javax.swing.JLabel _status;
@@ -202,14 +108,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_queue_sort_lock = new Object();
         _wait_queue_lock = new Object();
         _sort_wait_start_queue = true;
-        _transference_preprocess_global_queue = new TransferenceQueue<>();
-        _transference_waitstart_queue = new TransferenceQueue<>();
-        _transference_waitstart_aux_queue = new TransferenceQueue<>();
-        _transference_provision_queue = new TransferenceQueue<>();
-        _transference_remove_queue = new TransferenceQueue<>();
-        _transference_finished_queue = new TransferenceQueue<>();
-        _transference_running_list = new TransferenceQueue<>();
-        _transference_preprocess_queue = new TransferenceQueue<>();
+        _transference_preprocess_global_queue = new LinkedBlockingQueue<>();
+        _transference_waitstart_queue = new LinkedBlockingQueue<>();
+        _transference_waitstart_aux_queue = new LinkedBlockingQueue<>();
+        _transference_provision_queue = new LinkedBlockingQueue<>();
+        _transference_remove_queue = new LinkedBlockingQueue<>();
+        _transference_finished_queue = new LinkedBlockingQueue<>();
+        _transference_running_list = new LinkedBlockingQueue<>();
+        _transference_preprocess_queue = new LinkedBlockingQueue<>();
         // only repaint if there is something to show
         Timer uiRefreshTimer = new Timer(50, e -> {
             // only repaint if there is something to show
@@ -244,7 +150,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         return _wait_queue_lock;
     }
 
-    public ConcurrentLinkedQueue<Object> getTransference_preprocess_global_queue() {
+    public LinkedBlockingQueue<Object> getTransference_preprocess_global_queue() {
         return _transference_preprocess_global_queue;
     }
 
@@ -311,7 +217,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _preprocessing_transferences = preprocessing;
     }
 
-    public ConcurrentLinkedQueue<Runnable> getTransference_preprocess_queue() {
+    public LinkedBlockingQueue<Runnable> getTransference_preprocess_queue() {
         return _transference_preprocess_queue;
     }
 
@@ -355,31 +261,31 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         return _preprocessing_transferences;
     }
 
-    public TransferenceQueue<Transference> getTransference_provision_queue() {
+    public LinkedBlockingQueue<Transference> getTransference_provision_queue() {
 
         return _transference_provision_queue;
 
     }
 
-    public TransferenceQueue<Transference> getTransference_waitstart_queue() {
+    public LinkedBlockingQueue<Transference> getTransference_waitstart_queue() {
 
         return _transference_waitstart_queue;
 
     }
 
-    public TransferenceQueue<Transference> getTransference_remove_queue() {
+    public LinkedBlockingQueue<Transference> getTransference_remove_queue() {
 
         return _transference_remove_queue;
 
     }
 
-    public TransferenceQueue<Transference> getTransference_finished_queue() {
+    public LinkedBlockingQueue<Transference> getTransference_finished_queue() {
 
         return _transference_finished_queue;
 
     }
 
-    public TransferenceQueue<Transference> getTransference_running_list() {
+    public LinkedBlockingQueue<Transference> getTransference_running_list() {
 
         return _transference_running_list;
 
@@ -658,11 +564,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         return false;
     }
 
-    public ConcurrentLinkedQueue<Transference> getTransference_waitstart_aux_queue() {
+    public LinkedBlockingQueue<Transference> getTransference_waitstart_aux_queue() {
         return _transference_waitstart_aux_queue;
     }
 
-    protected void sortTransferenceQueue(ConcurrentLinkedQueue<Transference> queue) {
+    protected void sortTransferenceQueue(LinkedBlockingQueue<Transference> queue) {
 
         synchronized (_transference_queue_sort_lock) {
 

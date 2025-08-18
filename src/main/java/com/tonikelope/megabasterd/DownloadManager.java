@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -44,7 +45,7 @@ public class DownloadManager extends TransferenceManager {
     public synchronized void forceResetAllChunks() {
         THREAD_POOL.execute(() -> {
 
-            ConcurrentLinkedQueue<Transference> transference_running_list = getMain_panel().getDownload_manager().getTransference_running_list();
+            LinkedBlockingQueue<Transference> transference_running_list = getMain_panel().getDownload_manager().getTransference_running_list();
 
             if (!transference_running_list.isEmpty()) {
                 transference_running_list.forEach((transference) -> {
@@ -140,9 +141,7 @@ public class DownloadManager extends TransferenceManager {
             MiscTools.GUIRun(() -> getScroll_panel().remove(((Download) d).getView()));
 
             getTransference_waitstart_queue().remove(d);
-
             getTransference_running_list().remove(d);
-
             getTransference_finished_queue().remove(d);
 
             if (((Download) d).isProvision_ok()) {
