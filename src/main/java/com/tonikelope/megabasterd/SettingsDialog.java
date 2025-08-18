@@ -2240,6 +2240,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("max_downloads", String.valueOf(max_downloads_spinner.getValue()));
             settings.put("max_uploads", String.valueOf(max_uploads_spinner.getValue()));
             settings.put("verify_down_file", verify_file_down_checkbox.isSelected() ? "yes" : "no");
+            settings.put("remove_no_restart", remove_no_restart_checkbox.isSelected() ? "yes" : "no");
             settings.put("limit_download_speed", limit_download_speed_checkbox.isSelected() ? "yes" : "no");
             settings.put("max_download_speed", String.valueOf(max_down_speed_spinner.getValue()));
             settings.put("limit_upload_speed", limit_upload_speed_checkbox.isSelected() ? "yes" : "no");
