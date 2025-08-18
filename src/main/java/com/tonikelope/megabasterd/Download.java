@@ -1090,7 +1090,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     try {
 
-                        insertOrReplaceDownload(this);
+                        insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
 
                         _provision_ok = true;
 
@@ -1116,7 +1116,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 Future<?> f = DB_EXECUTOR.submit(() -> {
                     try {
 
-                        insertOrReplaceDownload(this);
+                        insertOrReplaceDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
 
                         _provision_ok = true;
 

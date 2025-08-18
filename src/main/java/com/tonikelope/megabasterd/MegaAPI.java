@@ -1184,10 +1184,12 @@ public class MegaAPI implements Serializable {
 
                     } catch (Exception e) {
                         LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                        LOG.log(Level.SEVERE, "Exception while processing node: " + node, e);
                     }
 
                 } else {
                     LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                    LOG.log(Level.SEVERE, "Exception while processing node: " + node, new Exception("Invalid node key format (1)"));
                 }
 
             }
@@ -1303,10 +1305,12 @@ public class MegaAPI implements Serializable {
 
                     } catch (Exception e) {
                         LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                        LOG.log(Level.SEVERE, "Exception while processing node: " + node, e);
                     }
 
                 } else {
                     LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                    LOG.log(Level.SEVERE, "Exception while processing node: " + node, new Exception("Invalid node key format (2)"));
                 }
 
             }
