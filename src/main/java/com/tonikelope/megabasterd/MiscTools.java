@@ -50,6 +50,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
@@ -323,20 +326,16 @@ public class MiscTools {
 
     private static final KTTLSizeAllocLinkedMap<int[]> _int_alloc_targets = new KTTLSizeAllocLinkedMap<>();
 
-    // Cursed bit shifting that replaces byte buffer allocs
     public static int[] bin2i32a(byte[] bin) {
-        int outSize = bin.length / 4;
-        int[] out = _int_alloc_targets.computeIfAbsent(outSize, k -> new int[outSize]);
+        int l = (int) (4 * Math.ceil((double) bin.length / 4));
 
-        for (int i = 0; i < out.length; i++) {
-            int idx = i * 4;
-            out[i] = ((bin[idx] & 0xFF) << 24)
-                | ((bin[idx + 1] & 0xFF) << 16)
-                | ((bin[idx + 2] & 0xFF) << 8)
-                | (bin[idx + 3] & 0xFF);
-        }
+        IntBuffer intBuf = ByteBuffer.wrap(bin, 0, l).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
 
-        return out;
+        int[] array = new int[intBuf.remaining()];
+
+        intBuf.get(array);
+
+        return array;
     }
 
     public static byte[] i32a2bin(int[] values) {
@@ -1054,7 +1053,7 @@ public class MiscTools {
             ArrayList<String> links = new ArrayList<>();
             String url_decoded;
             try {
-                url_decoded = URLDecoder.decode(data, "UTF-8");
+                url_decoded = URLDecoder.decode(data, StandardCharsets.UTF_8);
             } catch (Exception ex) {
                 url_decoded = data;
             }
@@ -1078,7 +1077,7 @@ public class MiscTools {
                 }
             }
             try {
-                url_decoded = URLDecoder.decode(data, "UTF-8");
+                url_decoded = URLDecoder.decode(data, StandardCharsets.UTF_8);
             } catch (Exception ex) {
                 url_decoded = data;
             }
@@ -1118,7 +1117,7 @@ public class MiscTools {
 
     public static boolean checkMegaDownloadUrl(String string_url) {
 
-        if (string_url == null || "".equals(string_url)) {
+        if (string_url == null || string_url.isEmpty()) {
             return false;
         }
 
@@ -1154,7 +1153,7 @@ public class MiscTools {
 
                     if (current_smart_proxy != null && http_error != 0) {
 
-                        proxy_manager.blockProxy(current_smart_proxy, "HTTP " + String.valueOf(http_error));
+                        proxy_manager.blockProxy(current_smart_proxy, "HTTP " + http_error);
 
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 

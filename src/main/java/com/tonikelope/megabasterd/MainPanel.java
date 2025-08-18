@@ -639,7 +639,7 @@ public final class MainPanel {
         if (_font != null) {
             if (_font.equals("DEFAULT")) {
 
-                GUI_FONT = new JLabel().getFont();
+                GUI_FONT = new Font(defaultFont.getName(), defaultFont.getStyle(), defaultFont.getSize());
 
             } else {
 
