@@ -827,9 +827,12 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="18" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Auto-remove no-restart transfers"/>
+                    <Property name="text" type="java.lang.String" value="Auto-remove failed no-restart transfers"/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="remove_no_restart_checkboxActionPerformed"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="remove_no_restart_checkbox1">
                   <Properties>
@@ -846,7 +849,6 @@
                       <Font name="Dialog" size="18" style="1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Auto-restart damaged transfers"/>
-                    <Property name="actionCommand" type="java.lang.String" value="Auto-restart damaged transfers"/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                   </Properties>
                 </Component>

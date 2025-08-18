@@ -1320,8 +1320,13 @@ public class SettingsDialog extends javax.swing.JDialog {
         );
 
         remove_no_restart_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        remove_no_restart_checkbox.setText("Auto-remove no-restart transfers");
+        remove_no_restart_checkbox.setText("Auto-remove failed no-restart transfers");
         remove_no_restart_checkbox.setDoubleBuffered(true);
+        remove_no_restart_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                remove_no_restart_checkboxActionPerformed(evt);
+            }
+        });
 
         remove_no_restart_checkbox1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         remove_no_restart_checkbox1.setText("Auto-remove no-restart transfers");
@@ -1329,7 +1334,6 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         auto_restart_damaged_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         auto_restart_damaged_checkbox.setText("Auto-restart damaged transfers");
-        auto_restart_damaged_checkbox.setActionCommand("Auto-restart damaged transfers");
         auto_restart_damaged_checkbox.setDoubleBuffered(true);
 
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
@@ -3625,6 +3629,10 @@ public class SettingsDialog extends javax.swing.JDialog {
         auto_restart_damaged_checkbox.setEnabled(verify_file_down_checkbox.isSelected());
 
     }//GEN-LAST:event_verify_file_down_checkboxStateChanged
+
+    private void remove_no_restart_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_no_restart_checkboxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_remove_no_restart_checkboxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
