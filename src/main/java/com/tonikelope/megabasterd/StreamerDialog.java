@@ -11,7 +11,8 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Dialog;
+
+import java.awt.*;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.UnsupportedEncodingException;
@@ -120,12 +121,12 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
         setTitle("Streamer");
         setResizable(false);
 
-        put_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        put_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         put_label.setText("Put your MEGA/MegaCrypter/ELC link here in order to get a streaming link:");
         put_label.setDoubleBuffered(true);
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
-        dance_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
+        dance_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 22)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
@@ -135,13 +136,13 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
             }
         });
 
-        original_link_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        original_link_textfield.setFont(new java.awt.Font("Dialog", Font.PLAIN, 18)); // NOI18N
         original_link_textfield.setDoubleBuffered(true);
 
-        use_mega_account_down_label.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        use_mega_account_down_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 16)); // NOI18N
         use_mega_account_down_label.setText("Use this account for streaming:");
 
-        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        use_mega_account_down_combobox.setFont(new java.awt.Font("Dialog", Font.PLAIN, 16)); // NOI18N
         use_mega_account_down_combobox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 use_mega_account_down_comboboxItemStateChanged(evt);

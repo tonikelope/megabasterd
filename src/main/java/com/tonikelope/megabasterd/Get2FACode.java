@@ -11,6 +11,8 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.logging.Logger;
 
@@ -77,7 +79,7 @@ public class Get2FACode extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle("2FA CODE");
 
-        cancel_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        cancel_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         cancel_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
         cancel_button.setText("CANCEL");
         cancel_button.setDoubleBuffered(true);
@@ -87,7 +89,7 @@ public class Get2FACode extends javax.swing.JDialog {
             }
         });
 
-        ok_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        ok_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         ok_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
         ok_button.setText("OK");
         ok_button.setDoubleBuffered(true);
@@ -100,19 +102,19 @@ public class Get2FACode extends javax.swing.JDialog {
         lock_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock_medium.png"))); // NOI18N
         lock_label.setDoubleBuffered(true);
 
-        email_label.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        email_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 24)); // NOI18N
         email_label.setForeground(new java.awt.Color(255, 102, 0));
         email_label.setDoubleBuffered(true);
 
-        status_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        status_label.setFont(new java.awt.Font("Dialog", Font.PLAIN, 14)); // NOI18N
         status_label.setDoubleBuffered(true);
 
-        please_label.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
+        please_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 24)); // NOI18N
         please_label.setText(LabelTranslatorSingleton.getInstance().translate("Please enter 2FA PIN CODE"));
         please_label.setDoubleBuffered(true);
 
         current_code_textfield.setBackground(new java.awt.Color(0, 153, 255));
-        current_code_textfield.setFont(new java.awt.Font("Dialog", 0, 24)); // NOI18N
+        current_code_textfield.setFont(new java.awt.Font("Dialog", Font.PLAIN, 24)); // NOI18N
         current_code_textfield.setForeground(new java.awt.Color(255, 255, 255));
         current_code_textfield.setHorizontalAlignment(javax.swing.JTextField.CENTER);
         current_code_textfield.setDoubleBuffered(true);

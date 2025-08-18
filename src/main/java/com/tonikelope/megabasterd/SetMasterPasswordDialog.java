@@ -11,7 +11,8 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Dialog;
+
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -104,7 +105,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         setTitle("Master password setup");
         setResizable(false);
 
-        confirm_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        confirm_pass_textfield.setFont(new java.awt.Font("Dialog", Font.PLAIN, 18)); // NOI18N
         confirm_pass_textfield.setDoubleBuffered(true);
         confirm_pass_textfield.setMargin(new java.awt.Insets(2, 2, 2, 2));
         confirm_pass_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -113,11 +114,11 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
             }
         });
 
-        confirm_pass_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        confirm_pass_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         confirm_pass_label.setText("Confirm new:");
         confirm_pass_label.setDoubleBuffered(true);
 
-        cancel_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        cancel_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         cancel_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
         cancel_button.setText("CANCEL");
         cancel_button.setDoubleBuffered(true);
@@ -127,7 +128,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
             }
         });
 
-        ok_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        ok_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         ok_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
         ok_button.setText("OK");
         ok_button.setDoubleBuffered(true);
@@ -140,20 +141,20 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         lock_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock_medium.png"))); // NOI18N
         lock_label.setDoubleBuffered(true);
 
-        warning_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        warning_label.setFont(new java.awt.Font("Dialog", Font.PLAIN, 14)); // NOI18N
         warning_label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         warning_label.setText("WARNING: if you forget this password, you will have to insert all your accounts again.");
         warning_label.setDoubleBuffered(true);
 
-        new_pass_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        new_pass_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         new_pass_label.setText("New pass:");
         new_pass_label.setDoubleBuffered(true);
 
-        new_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        new_pass_textfield.setFont(new java.awt.Font("Dialog", Font.PLAIN, 18)); // NOI18N
         new_pass_textfield.setDoubleBuffered(true);
         new_pass_textfield.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
-        status_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        status_label.setFont(new java.awt.Font("Dialog", Font.PLAIN, 14)); // NOI18N
         status_label.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());

@@ -31,6 +31,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -338,23 +339,20 @@ public class MiscTools {
         return out;
     }
 
-    private static final KTTLSizeAllocLinkedMap<byte[]> _byte_alloc_targets = new KTTLSizeAllocLinkedMap<>();
-
     public static byte[] i32a2bin(int[] values) {
-        int resultSize = values.length * 4;
-        byte[] result = _byte_alloc_targets.computeIfAbsent(resultSize, k -> new byte[resultSize]);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        for (int i = 0; i < values.length; ++i) {
-            int value = values[i];
-            int index = i * 4;
+        DataOutputStream dos = new DataOutputStream(baos);
 
-            result[index] = (byte) (value >> 24);
-            result[index + 1] = (byte) (value >> 16);
-            result[index + 2] = (byte) (value >> 8);
-            result[index + 3] = (byte) value;
+        for (int value : values) {
+            try {
+                dos.writeInt(value);
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
 
-        return result;
+        return baos.toByteArray();
     }
 
     public static BigInteger mpi2big(byte[] s) {

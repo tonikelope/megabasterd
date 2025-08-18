@@ -25,6 +25,7 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -662,6 +663,8 @@ public class MegaAPI implements Serializable {
         return ret;
     }
 
+    private boolean loggedAtt = false;
+
     private HashMap _decAttr(String encAttr, byte[] key) {
 
         HashMap res_map = null;
@@ -672,7 +675,12 @@ public class MegaAPI implements Serializable {
 
             decrypted_at = aes_cbc_decrypt_nopadding(UrlBASE642Bin(encAttr), key, AES_ZERO_IV);
 
-            String att = new String(decrypted_at, "UTF-8").replaceAll("\0+$", "").replaceAll("^MEGA", "");
+            String att = new String(decrypted_at, StandardCharsets.UTF_8).replaceAll("\0+$", "").replaceAll("^MEGA", "");
+
+            if (!loggedAtt) {
+                LOG.info("Decrypted attributes: " + att);
+                loggedAtt = true;
+            }
 
             ObjectMapper objectMapper = new ObjectMapper();
 

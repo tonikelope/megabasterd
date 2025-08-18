@@ -11,8 +11,8 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Color;
-import java.awt.Dialog;
+
+import java.awt.*;
 import java.util.logging.Logger;
 import javax.sound.midi.Sequencer;
 import javax.swing.JOptionPane;
@@ -91,7 +91,7 @@ public class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        title_label.setFont(new java.awt.Font("Dialog", 1, 48)); // NOI18N
+        title_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 48)); // NOI18N
         title_label.setText("MegaBasterd " + VERSION + " ");
         title_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         title_label.setDoubleBuffered(true);
@@ -116,7 +116,7 @@ public class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        subtitle_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        subtitle_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 20)); // NOI18N
         subtitle_label.setForeground(new java.awt.Color(102, 102, 102));
         subtitle_label.setText("Yet another unofficial (and ugly) cross-platform MEGA downloader/uploader/streaming suite.");
         subtitle_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -142,7 +142,7 @@ public class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        mcdown_url_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        mcdown_url_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 14)); // NOI18N
         mcdown_url_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-copy-to-clipboard-30.png"))); // NOI18N
         mcdown_url_button.setText("Download latest version");
         mcdown_url_button.setDoubleBuffered(true);
@@ -153,7 +153,7 @@ public class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        author_webpage_label.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        author_webpage_label.setFont(new java.awt.Font("Dialog", Font.PLAIN, 18)); // NOI18N
         author_webpage_label.setForeground(new java.awt.Color(102, 102, 102));
         author_webpage_label.setText("Made with love (and with no warranty) by tonikelope.");
         author_webpage_label.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
@@ -179,7 +179,7 @@ public class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        check_version_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        check_version_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 14)); // NOI18N
         check_version_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-restart-30.png"))); // NOI18N
         check_version_button.setText("Check version");
         check_version_button.setDoubleBuffered(true);
@@ -197,33 +197,33 @@ public class AboutDialog extends javax.swing.JDialog {
             }
         });
 
-        java_version.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        java_version.setFont(new java.awt.Font("Dialog", Font.PLAIN, 14)); // NOI18N
         java_version.setForeground(new java.awt.Color(102, 102, 102));
         java_version.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         java_version.setText(System.getProperty("java.vm.name")+" "+System.getProperty("java.version"));
 
-        jLabel5.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel5.setFont(new java.awt.Font("Dialog", Font.PLAIN, 16)); // NOI18N
         jLabel5.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/turkey.png"))); // NOI18N
         jLabel5.setText("FabrieI");
 
-        jLabel2.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel2.setFont(new java.awt.Font("Dialog", Font.PLAIN, 16)); // NOI18N
         jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/germany.png"))); // NOI18N
         jLabel2.setText("NieckLikesCode");
 
-        jLabel3.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel3.setFont(new java.awt.Font("Dialog", Font.PLAIN, 16)); // NOI18N
         jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/hungary.png"))); // NOI18N
         jLabel3.setText("Roschach96 ");
 
-        jLabel1.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel1.setFont(new java.awt.Font("Dialog", Font.PLAIN, 16)); // NOI18N
         jLabel1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/china.png"))); // NOI18N
         jLabel1.setText("linkea131");
         jLabel1.setDoubleBuffered(true);
 
-        jLabel4.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel4.setFont(new java.awt.Font("Dialog", Font.PLAIN, 16)); // NOI18N
         jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/italy.png"))); // NOI18N
         jLabel4.setText("bovirus ");
 
-        jLabel6.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
+        jLabel6.setFont(new java.awt.Font("Dialog", Font.PLAIN, 16)); // NOI18N
         jLabel6.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/flags/vietnam.png"))); // NOI18N
         jLabel6.setText("rattybox");
 

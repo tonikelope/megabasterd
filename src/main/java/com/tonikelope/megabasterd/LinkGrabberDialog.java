@@ -11,6 +11,8 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+
+import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -142,14 +144,14 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
         setTitle("Link Grabber");
 
         links_textarea.setColumns(20);
-        links_textarea.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        links_textarea.setFont(new java.awt.Font("Dialog", Font.PLAIN, 18)); // NOI18N
         links_textarea.setRows(5);
         links_textarea.setDoubleBuffered(true);
         links_scrollpane.setViewportView(links_textarea);
         links_textarea.addMouseListener(new ContextMenuMouseListener());
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
-        dance_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
+        dance_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 22)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);

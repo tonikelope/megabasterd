@@ -80,7 +80,8 @@ public final class MainPanel {
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = false;
     public static final double FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT = 0.7;
-    public static Font GUI_FONT = new JLabel().getFont();
+    public static Font defaultFont = new JLabel().getFont();
+    public static Font GUI_FONT = new Font(defaultFont.getName(), defaultFont.getStyle(), defaultFont.getSize());
     public static final float ZOOM_FACTOR = 0.8f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
