@@ -720,7 +720,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private int cachedRunSize = 0;
     private int cachedFinishSize = 0;
     private void startCacheUpdateTask() {
-        scheduler.scheduleAtFixedRate(this::updateQueueSizes, 0, 500, TimeUnit.MILLISECONDS);
+        scheduler.scheduleAtFixedRate(this::updateQueueSizes, 0, 200, TimeUnit.MILLISECONDS);
     }
 
     private void updateQueueSizes() {
