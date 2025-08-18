@@ -1042,6 +1042,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     view.getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
                 }
             });
+        } else if (_status_error == null && !_canceled && !global_cancel) {
+            manager.getTransference_remove_queue().add(this);
         }
 
         manager.secureNotify();

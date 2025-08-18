@@ -9,16 +9,20 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.jetbrains.annotations.NotNull;
+
 import static com.tonikelope.megabasterd.MainPanel.*;
 import java.awt.TrayIcon;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Predicate;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -76,13 +80,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         }
 
         @Override
-        public boolean removeAll(Collection<?> c) {
-            boolean removed = super.removeAll(c);
-            if (removed) queueSize.addAndGet(-c.size());
-            return removed;
-        }
-
-        @Override
         public void clear() {
             super.clear();
             queueSize.set(0);
@@ -96,6 +93,46 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         @Override
         public int size() {
             return queueSize.get();
+        }
+
+        @Override
+        public boolean removeAll(Collection<?> c) {
+            int removedCount = 0;
+            for (Object o : c) {
+                while (super.remove(o)) {
+                    removedCount++;
+                }
+            }
+            queueSize.addAndGet(-removedCount);
+            return removedCount > 0;
+        }
+
+        @Override
+        public boolean retainAll(Collection<?> c) {
+            boolean changed = super.retainAll(c);
+            if (changed) queueSize.set(super.size());
+            return changed;
+        }
+
+        @Override
+        public boolean removeIf(Predicate<? super T> filter) {
+            boolean changed = super.removeIf(filter);
+            if (changed) queueSize.set(super.size());
+            return changed;
+        }
+
+        @Override
+        public @NotNull Iterator<T> iterator() {
+            Iterator<T> it = super.iterator();
+            return new Iterator<>() {
+                @Override public boolean hasNext() { return it.hasNext(); }
+                @Override public T next() {
+                    return it.next(); }
+                @Override public void remove() {
+                    it.remove();
+                    queueSize.decrementAndGet();
+                }
+            };
         }
     }
 

@@ -49,30 +49,18 @@ public class DownloadManager extends TransferenceManager {
             if (!transference_running_list.isEmpty()) {
                 transference_running_list.forEach((transference) -> {
 
-                    ArrayList<ChunkDownloader> chunkworkers = ((Download) transference).getChunkworkers();
+                    ArrayList<ChunkDownloader> chunkWorkers = ((Download) transference).getChunkworkers();
 
-                    chunkworkers.forEach((worker) -> {
-                        worker.RESET_CURRENT_CHUNK();
-                    });
+                    chunkWorkers.forEach(ChunkDownloader::RESET_CURRENT_CHUNK);
 
                 });
 
-                MiscTools.GUIRun(() -> {
-                    getMain_panel().getView().getForce_chunk_reset_button().setEnabled(true);
-                });
+                MiscTools.GUIRun(() -> getMain_panel().getView().getForce_chunk_reset_button().setEnabled(true));
 
                 JOptionPane.showMessageDialog(getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("CURRENT DOWNLOAD CHUNKS RESET!"));
             }
 
         });
-    }
-
-    @Override
-    public void closeAllFinished() {
-
-        _transference_finished_queue.stream().filter((t) -> (!t.isCanceled())).peek(_transference_finished_queue::remove).forEachOrdered(_transference_remove_queue::add);
-
-        secureNotify();
     }
 
     public int copyAllLinksToClipboard() {
@@ -149,9 +137,7 @@ public class DownloadManager extends TransferenceManager {
 
         for (final Transference d : downloads) {
 
-            MiscTools.GUIRun(() -> {
-                getScroll_panel().remove(((Download) d).getView());
-            });
+            MiscTools.GUIRun(() -> getScroll_panel().remove(((Download) d).getView()));
 
             getTransference_waitstart_queue().remove(d);
 
@@ -185,9 +171,7 @@ public class DownloadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference download) {
-        MiscTools.GUIRun(() -> {
-            getScroll_panel().add(((Download) download).getView());
-        });
+        MiscTools.GUIRun(() -> getScroll_panel().add(((Download) download).getView()));
 
         try {
 

@@ -326,30 +326,28 @@ public class MiscTools {
 
     public static int[] bin2i32a(byte[] bin) {
         int l = (int) (4 * Math.ceil((double) bin.length / 4));
+        byte[] data = (l == bin.length) ? bin : Arrays.copyOf(bin, l);
 
-        IntBuffer intBuf = ByteBuffer.wrap(bin, 0, l).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+        java.nio.IntBuffer intBuf = java.nio.ByteBuffer
+            .wrap(data)
+            .order(java.nio.ByteOrder.BIG_ENDIAN)
+            .asIntBuffer();
 
         int[] array = new int[intBuf.remaining()];
-
         intBuf.get(array);
-
         return array;
     }
 
     public static byte[] i32a2bin(int[] values) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-        DataOutputStream dos = new DataOutputStream(baos);
-
-        for (int value : values) {
-            try {
-                dos.writeInt(value);
-            } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-            }
+        byte[] out = new byte[values.length * 4];
+        int j = 0;
+        for (int v : values) {
+            out[j++] = (byte) (v >>> 24);
+            out[j++] = (byte) (v >>> 16);
+            out[j++] = (byte) (v >>> 8);
+            out[j++] = (byte) v;
         }
-
-        return baos.toByteArray();
+        return out;
     }
 
     public static BigInteger mpi2big(byte[] s) {

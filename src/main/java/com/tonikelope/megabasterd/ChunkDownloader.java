@@ -156,48 +156,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         }
     }
 
-    public class ChunkWriteCompletionHandler implements CompletionHandler<Integer, Void> {
-        private final ChunkState globalChunKState;
-        private final ChunkState localChunkState;
-        private final Download download;
-        private final boolean resetCurrentChunk;
-        private final boolean exit;
-        private final long chunkSize;
-        private final long id;
-        private final long chunkId;
-
-        public ChunkWriteCompletionHandler(ChunkState globalChunKState, ChunkState localChunkState, Download download, boolean resetCurrentChunk, boolean exit, long chunkSize, long id, long chunkId) {
-            this.globalChunKState = globalChunKState;
-            this.localChunkState = localChunkState;
-            this.download = download;
-            this.resetCurrentChunk = resetCurrentChunk;
-            this.exit = exit;
-            this.chunkSize = chunkSize;
-            this.id = id;
-            this.chunkId = chunkId;
-        }
-
-        @Override
-        public void completed(Integer result, Void attachment) {
-            localChunkState.position += result;
-            globalChunKState.chunkReads += result;
-
-            download.getPartialProgress().add((long) result);
-            if (globalChunKState.chunkReads % 1024 == 0) download.getProgress_meter().secureNotify();
-
-            if (!resetCurrentChunk && download.isPaused() && !exit && !download.isStopped() && !download.getChunkmanager().isExit() && globalChunKState.chunkReads < chunkSize) {
-                download.pause_worker();
-                secureWait();
-            }
-        }
-
-        @Override
-        public void failed(Throwable exc, Void attachment) {
-            LOG.log(Level.SEVERE, "{0} Worker [{1}] Failed to write chunk [{2}] to file: {3}",
-                    new Object[]{Thread.currentThread().getName(), id, chunkId, exc.getMessage()});
-        }
-    }
-
     @Override
     public void run() {
 
@@ -318,7 +276,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                         con = (HttpURLConnection) url.openConnection(new Proxy(smartProxySocks.get() ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                        if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                        if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
                             con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                         }
