@@ -624,12 +624,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 boolean verify_cbc_mac = verifyFile != null && verifyFile.equals("yes");
                 boolean cbcSuccess = true;
                 String verbiage = "SIZE";
-                if (verify_cbc_mac) {
+                if (verify_cbc_mac && _file.exists()) {
                     if (!verifyFileCBCMAC(filename)) {
                         cbcSuccess = false;
-                        boolean deleted = true;
-                        if (_file.exists()) deleted = _file.delete();
-                        if (deleted) {
+                        if (_file.delete()) {
                             _status_error = "CBC MAC verification failed, file deleted!";
                             _auto_retry_on_error = true;
                         } else {
@@ -976,6 +974,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             _status_error = "I/O ERROR " + ex.getMessage();
 
             getView().printStatusError(_status_error);
+
+            ex.printStackTrace();
 
             LOG.log(Level.SEVERE, ex.getMessage());
         }
