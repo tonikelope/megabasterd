@@ -1447,7 +1447,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         int[] intKey = bin2i32a(UrlBASE642Bin(_file_key));
         int[] metaMac = new int[]{intKey[6], intKey[7]};
         byte[] fileMac = new byte[16];
-        byte[] cbcIV = new byte[16];
+        byte[] ebcIV = new byte[16];
 
         byte[] byte_file_key = initMEGALinkKey(getFile_key());
 
@@ -1471,8 +1471,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     System.arraycopy(ivBytes, 0, chunkMac, 0, 8);
                     System.arraycopy(ivBytes, 0, chunkMac, 8, 8);
 
-                    byte[] tmp = new byte[16];
-
                     long chunkCount = 0L;
                     while (chunkCount < chunk_size && (reads = is.read(byteBlock)) != -1) {
                         if (reads < byteBlock.length) {
@@ -1481,14 +1479,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         for (int i = 0; i < 16; i++) {
                             chunkMac[i] ^= byteBlock[i];
                         }
-                        ecbEncryptBlock(cryptor, chunkMac, tmp);
+                        ecbEncryptBlock(cryptor, chunkMac, ebcIV;
                         chunkCount += reads;
                     }
 
                     for (int i = 0; i < fileMac.length; i++) {
                         fileMac[i] ^= chunkMac[i];
                     }
-                    ecbEncryptBlock(cryptor, fileMac, tmp);
+                    ecbEncryptBlock(cryptor, fileMac, ebcIV);
                     setProgress(totalSize);
                     chunkId++;
                 }
