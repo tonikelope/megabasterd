@@ -324,8 +324,6 @@ public class MiscTools {
         }
     }
 
-    private static final KTTLSizeAllocLinkedMap<int[]> _int_alloc_targets = new KTTLSizeAllocLinkedMap<>();
-
     public static int[] bin2i32a(byte[] bin) {
         int l = (int) (4 * Math.ceil((double) bin.length / 4));
 
