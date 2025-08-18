@@ -12,14 +12,12 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import java.awt.TrayIcon;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
@@ -50,6 +48,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         }
 
         @Override
+        public boolean addAll(Collection<? extends T> c) {
+            boolean added = super.addAll(c);
+            if (added) queueSize.addAndGet(c.size());
+            return added;
+        }
+
+        @Override
         public boolean offer(T t) {
             boolean offered = super.offer(t);
             if (offered) queueSize.incrementAndGet();
@@ -71,9 +76,21 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         }
 
         @Override
+        public boolean removeAll(Collection<?> c) {
+            boolean removed = super.removeAll(c);
+            if (removed) queueSize.addAndGet(-c.size());
+            return removed;
+        }
+
+        @Override
         public void clear() {
             super.clear();
             queueSize.set(0);
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return queueSize.get() == 0;
         }
 
         @Override
@@ -115,8 +132,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final Object _transference_queue_sort_lock;
     private volatile Boolean _sort_wait_start_queue;
     protected volatile boolean _all_finished = false;
-    private final Timer uiRefreshTimer;
-    
+
     public boolean isAll_finished() {
         return _all_finished;
     }
@@ -157,7 +173,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_finished_queue = new TransferenceQueue<>();
         _transference_running_list = new TransferenceQueue<>();
         _transference_preprocess_queue = new TransferenceQueue<>();
-        uiRefreshTimer = new javax.swing.Timer(50, e -> {
+        // only repaint if there is something to show
+        Timer uiRefreshTimer = new Timer(50, e -> {
             // only repaint if there is something to show
             if (!_main_panel.getView().isVisible()) return;
             _updateView();
@@ -301,31 +318,31 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         return _preprocessing_transferences;
     }
 
-    public ConcurrentLinkedQueue<Transference> getTransference_provision_queue() {
+    public TransferenceQueue<Transference> getTransference_provision_queue() {
 
         return _transference_provision_queue;
 
     }
 
-    public ConcurrentLinkedQueue<Transference> getTransference_waitstart_queue() {
+    public TransferenceQueue<Transference> getTransference_waitstart_queue() {
 
         return _transference_waitstart_queue;
 
     }
 
-    public ConcurrentLinkedQueue<Transference> getTransference_remove_queue() {
+    public TransferenceQueue<Transference> getTransference_remove_queue() {
 
         return _transference_remove_queue;
 
     }
 
-    public ConcurrentLinkedQueue<Transference> getTransference_finished_queue() {
+    public TransferenceQueue<Transference> getTransference_finished_queue() {
 
         return _transference_finished_queue;
 
     }
 
-    public ConcurrentLinkedQueue<Transference> getTransference_running_list() {
+    public TransferenceQueue<Transference> getTransference_running_list() {
 
         return _transference_running_list;
 
@@ -337,24 +354,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void closeAllFinished() {
 
-        _transference_finished_queue.stream().filter((t) -> !t.isCanceled()).map((t) -> {
-            _transference_finished_queue.remove(t);
-            return t;
-        }).forEachOrdered((t) -> {
-            _transference_remove_queue.add(t);
-        });
+        _transference_finished_queue.stream().filter((t) -> !t.isCanceled())
+            .peek(_transference_finished_queue::remove)
+            .forEachOrdered(_transference_remove_queue::add);
 
         secureNotify();
-    }
-
-    public int calcTotalSlotsCount() {
-
-        int slots = 0;
-
-        slots = _transference_running_list.stream().map((trans) -> trans.getSlotsCount()).reduce(slots, Integer::sum);
-
-        return slots;
-
     }
 
     public void closeAllPreProWaiting() {
@@ -364,7 +368,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         _transference_provision_queue.clear();
 
-        _transference_remove_queue.addAll(new ArrayList(getTransference_waitstart_queue()));
+        _transference_remove_queue.addAll(new ArrayList<>(getTransference_waitstart_queue()));
 
         getTransference_waitstart_queue().clear();
 
@@ -382,9 +386,9 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         _transference_provision_queue.clear();
 
-        _transference_remove_queue.addAll(new ArrayList(getTransference_waitstart_aux_queue()));
+        _transference_remove_queue.addAll(new ArrayList<>(getTransference_waitstart_aux_queue()));
 
-        _transference_remove_queue.addAll(new ArrayList(getTransference_waitstart_queue()));
+        _transference_remove_queue.addAll(new ArrayList<>(getTransference_waitstart_queue()));
 
         getTransference_waitstart_queue().clear();
 
@@ -410,7 +414,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         synchronized (getWait_queue_lock()) {
 
-            ArrayList<Transference> wait_array = new ArrayList();
+            ArrayList<Transference> wait_array = new ArrayList<>();
 
             wait_array.add(t);
 
@@ -433,7 +437,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         synchronized (getWait_queue_lock()) {
 
-            ArrayList<Transference> wait_array = new ArrayList();
+            ArrayList<Transference> wait_array = new ArrayList<>();
 
             for (Transference t1 : getTransference_waitstart_queue()) {
 
@@ -487,7 +491,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         synchronized (getWait_queue_lock()) {
 
-            ArrayList<Transference> wait_array = new ArrayList(getTransference_waitstart_queue());
+            ArrayList<Transference> wait_array = new ArrayList<>(getTransference_waitstart_queue());
 
             int pos = 0;
 
@@ -625,7 +629,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         synchronized (_transference_queue_sort_lock) {
 
-            ArrayList<Transference> trans_list = new ArrayList(queue);
+            ArrayList<Transference> trans_list = new ArrayList<>(queue);
 
             trans_list.sort((Transference o1, Transference o2) -> MiscTools.naturalCompare(o1.getFile_name(), o2.getFile_name(), true));
 
@@ -638,14 +642,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected void unfreezeTransferenceWaitStartQueue() {
 
         synchronized (getTransference_waitstart_aux_queue()) {
-
-            getTransference_waitstart_queue().forEach((t) -> {
-                t.unfreeze();
-            });
-
-            getTransference_waitstart_aux_queue().forEach((t) -> {
-                t.unfreeze();
-            });
+            getTransference_waitstart_queue().forEach(Transference::unfreeze);
+            getTransference_waitstart_aux_queue().forEach(Transference::unfreeze);
         }
 
         secureNotify();
@@ -793,11 +791,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                     if (!getTransference_remove_queue().isEmpty()) {
 
-                        ArrayList<Transference> transferences = new ArrayList(getTransference_remove_queue());
+                        ArrayList<Transference> transferences = new ArrayList<>(getTransference_remove_queue());
 
                         getTransference_remove_queue().clear();
 
-                        remove(transferences.toArray(new Transference[transferences.size()]));
+                        remove(transferences.toArray(new Transference[0]));
                     }
 
                     setRemoving_transferences(false);
@@ -925,9 +923,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                             sortTransferenceQueue(getTransference_waitstart_aux_queue());
                         }
 
-                        if (getTransference_waitstart_aux_queue().peek() != null && getTransference_waitstart_aux_queue().peek().isPriority()) {
+                        Transference peeked = getTransference_waitstart_aux_queue().peek();
+                        if (peeked != null && peeked.isPriority()) {
 
-                            ArrayList<Transference> trans_list = new ArrayList(getTransference_waitstart_queue());
+                            ArrayList<Transference> trans_list = new ArrayList<>(getTransference_waitstart_queue());
 
                             trans_list.addAll(0, getTransference_waitstart_aux_queue());
 
