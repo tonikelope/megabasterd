@@ -1314,7 +1314,7 @@ public class MiscTools {
 
                 if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                 }
             } else {
 
@@ -1334,7 +1334,7 @@ public class MiscTools {
                     byte_res.write(buffer, 0, reads);
                 }
 
-                String latest_version_res = byte_res.toString(StandardCharsets.UTF_8);
+                String latest_version_res = byte_res.toString("UTF-8");
 
                 String latest_version = findFirstRegex("releases\\/tag\\/v?([0-9]+\\.[0-9]+)", latest_version_res, 1);
 

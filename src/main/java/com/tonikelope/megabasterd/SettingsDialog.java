@@ -149,7 +149,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                     try {
                         Pattern.compile(currentRegex);
                         input.setBorder(original_regex_textfield_border);
-                        String encodedRegex = URLEncoder.encode(currentRegex, StandardCharsets.UTF_8.name());
+                        String encodedRegex = URLEncoder.encode(currentRegex, "UTF-8");
                         String regex101Url = String.format("https://regex101.com/?regex=%s&flags=gm", encodedRegex);
                         String localizedRegex101Display = LabelTranslatorSingleton.getInstance().translate("Test on Regex101");
                         String formattedHtml = String.format("<HTML><a target=\"_blank\" href=\"%s\">%s</a></HTML>", regex101Url, localizedRegex101Display);
