@@ -28,6 +28,8 @@ public class DBTools {
 
     private static final Logger LOG = Logger.getLogger(DBTools.class.getName());
 
+    private static final HashMap<String, Object> settingsCache = new HashMap<>();
+
     public static synchronized void setupSqliteTables() throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
@@ -345,6 +347,10 @@ public class DBTools {
 
     public static synchronized String selectSettingValue(String key) {
 
+        if (settingsCache.containsKey(key)) {
+            return (String) settingsCache.get(key);
+        }
+
         String value = null;
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT value from settings WHERE key=?")) {
@@ -372,10 +378,16 @@ public class DBTools {
             ps.setString(2, value);
 
             ps.executeUpdate();
+
+            settingsCache.put(key, value);
         }
     }
 
     public static synchronized HashMap<String, Object> selectSettingsValues() throws SQLException {
+
+        if (!settingsCache.isEmpty()) {
+            return new HashMap<>(settingsCache);
+        }
 
         HashMap<String, Object> settings = new HashMap<>();
 
@@ -403,6 +415,8 @@ public class DBTools {
                 ps.setString(1, entry.getKey());
                 ps.setString(2, (String) entry.getValue());
                 ps.addBatch();
+
+                settingsCache.put(entry.getKey(), entry.getValue());
             }
 
             ps.executeBatch();

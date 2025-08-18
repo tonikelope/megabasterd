@@ -473,6 +473,16 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
 
             verify_file_down_checkbox.setSelected(cbc_mac);
+            
+            boolean rem_def = Download.REMOVE_NO_RESTART_DEFAULT;
+            
+            String remove_no_restart = DBTools.selectSettingValue("remove_no_restart");
+            
+            if (remove_no_restart != null) {
+                rem_def = (remove_no_restart.equals("yes"));
+            }
+            
+            remove_no_restart_checkbox.setSelected(rem_def);
 
             boolean use_slots = Download.USE_SLOTS_DEFAULT;
 
@@ -907,6 +917,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         proxy_reset_slot_checkbox = new javax.swing.JCheckBox();
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
+        remove_no_restart_checkbox = new javax.swing.JCheckBox();
         uploads_scrollpane = new javax.swing.JScrollPane();
         uploads_panel = new javax.swing.JPanel();
         default_slots_up_label = new javax.swing.JLabel();
@@ -1296,6 +1307,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addContainerGap())
         );
 
+        remove_no_restart_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        remove_no_restart_checkbox.setText("Auto-remove no-restart transfers");
+        remove_no_restart_checkbox.setDoubleBuffered(true);
+
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
         downloads_panelLayout.setHorizontalGroup(
@@ -1345,7 +1360,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                                         .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
                     .addGroup(downloads_panelLayout.createSequentialGroup()
                         .addGap(12, 12, 12)
-                        .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(remove_no_restart_checkbox)))
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
@@ -1378,7 +1396,9 @@ public class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(max_down_speed_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(verify_file_down_checkbox)
-                .addGap(18, 18, 18)
+                .addGap(2, 2, 2)
+                .addComponent(remove_no_restart_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(use_mega_account_down_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -3667,6 +3687,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel rec_zoom_label;
     private javax.swing.JButton remove_elc_account_button;
     private javax.swing.JButton remove_mega_account_button;
+    private javax.swing.JCheckBox remove_no_restart_checkbox;
     private javax.swing.JCheckBox run_command_checkbox;
     private javax.swing.JButton run_command_test_button;
     private javax.swing.JTextField run_command_textbox;

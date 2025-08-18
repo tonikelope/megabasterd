@@ -188,6 +188,10 @@
                                   <EmptySpace min="-2" pref="12" max="-2" attributes="0"/>
                                   <Component id="smart_proxy_settings" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="remove_no_restart_checkbox" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -227,7 +231,9 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="verify_file_down_checkbox" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                          <Component id="remove_no_restart_checkbox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="use_mega_account_down_checkbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="3" attributes="0">
@@ -793,6 +799,15 @@
                     </Component>
                   </SubComponents>
                 </Container>
+                <Component class="javax.swing.JCheckBox" name="remove_no_restart_checkbox">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Dialog" size="18" style="1"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Auto-remove no-restart transfers"/>
+                    <Property name="doubleBuffered" type="boolean" value="true"/>
+                  </Properties>
+                </Component>
               </SubComponents>
             </Container>
           </SubComponents>

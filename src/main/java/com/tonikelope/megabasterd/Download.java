@@ -11,13 +11,13 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.DBTools.*;
+import static com.tonikelope.megabasterd.DBTools.selectSettingValue;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -63,6 +63,7 @@ import javax.swing.JComponent;
 public class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
+    public static final boolean REMOVE_NO_RESTART_DEFAULT = false;
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
@@ -619,7 +620,29 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     path.mkdirs();
                 }
 
-                if (!_file.exists() || _file.length() != _file_size) {
+                String verifyFile = selectSettingValue("verify_down_file");
+                boolean verify_cbc_mac = verifyFile != null && verifyFile.equals("yes");
+                boolean cbcSuccess = true;
+                String verbiage = "SIZE";
+                if (verify_cbc_mac) {
+                    if (!verifyFileCBCMAC(filename)) {
+                        cbcSuccess = false;
+                        boolean deleted = true;
+                        if (_file.exists()) deleted = _file.delete();
+                        if (deleted) {
+                            _status_error = "CBC MAC verification failed, file deleted!";
+                            _auto_retry_on_error = true;
+                        } else {
+                            _status_error = "CBC MAC verification failed, but file could not be deleted!";
+                            _auto_retry_on_error = false;
+                        }
+                        getView().printStatusError(_status_error);
+                    } else {
+                        verbiage = "HASH";
+                    }
+                }
+
+                if (!_file.exists() || _file.length() != _file_size || !cbcSuccess) {
 
                     if (_file.exists()) {
                         _file_name = _file_name.replaceFirst("\\..*$", "_" + MiscTools.genID(8) + "_$0");
@@ -915,13 +938,17 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     }
 
                 } else {
-                    getView().hideAllExceptStatus();
 
-                    _status_error = "FILE WITH SAME NAME AND SIZE ALREADY EXISTS";
-
-                    _auto_retry_on_error = false;
-
-                    getView().printStatusError(_status_error);
+                    String removeNoRestart = DBTools.selectSettingValue("remove_no_restart");
+                    if (removeNoRestart != null && removeNoRestart.equals("yes")) {
+                        getView().printStatusOK("FILE WITH CORRECT NAME AND HASH FOUND");
+                        _exit = true;
+                    } else {
+                        getView().hideAllExceptStatus();
+                        _status_error = "FILE WITH SAME NAME AND " + verbiage + " ALREADY EXISTS";
+                        _auto_retry_on_error = false;
+                        getView().printStatusError(_status_error);
+                    }
                 }
 
             } else if (_status_error != null) {
