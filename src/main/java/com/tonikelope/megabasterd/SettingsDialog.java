@@ -473,16 +473,21 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
 
             verify_file_down_checkbox.setSelected(cbc_mac);
+            auto_restart_damaged_checkbox.setEnabled(cbc_mac);
             
-            boolean rem_def = Download.REMOVE_NO_RESTART_DEFAULT;
-            
-            String remove_no_restart = DBTools.selectSettingValue("remove_no_restart");
-            
-            if (remove_no_restart != null) {
-                rem_def = (remove_no_restart.equals("yes"));
+            boolean removeNoRestart = Download.REMOVE_NO_RESTART_DEFAULT;
+            String settingValueRemoveNoRestart = DBTools.selectSettingValue("remove_no_restart");
+            if (settingValueRemoveNoRestart != null) {
+                removeNoRestart = (settingValueRemoveNoRestart.equals("yes"));
             }
-            
-            remove_no_restart_checkbox.setSelected(rem_def);
+            remove_no_restart_checkbox.setSelected(removeNoRestart);
+
+            boolean auto_restart_damaged = Download.AUTO_RESTART_DAMAGED_DEFAULT;
+            String settingValueAutoRestartDamaged = DBTools.selectSettingValue("auto_restart_damaged");
+            if (settingValueAutoRestartDamaged != null) {
+                auto_restart_damaged = (settingValueAutoRestartDamaged.equals("yes"));
+            }
+            auto_restart_damaged_checkbox.setSelected(auto_restart_damaged);
 
             boolean use_slots = Download.USE_SLOTS_DEFAULT;
 
@@ -918,6 +923,8 @@ public class SettingsDialog extends javax.swing.JDialog {
         jLabel10 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         remove_no_restart_checkbox = new javax.swing.JCheckBox();
+        remove_no_restart_checkbox1 = new javax.swing.JCheckBox();
+        auto_restart_damaged_checkbox = new javax.swing.JCheckBox();
         uploads_scrollpane = new javax.swing.JScrollPane();
         uploads_panel = new javax.swing.JPanel();
         default_slots_up_label = new javax.swing.JLabel();
@@ -1067,6 +1074,11 @@ public class SettingsDialog extends javax.swing.JDialog {
         verify_file_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         verify_file_down_checkbox.setText("Verify file integrity (when download is finished)");
         verify_file_down_checkbox.setDoubleBuffered(true);
+        verify_file_down_checkbox.addChangeListener(new javax.swing.event.ChangeListener() {
+            public void stateChanged(javax.swing.event.ChangeEvent evt) {
+                verify_file_down_checkboxStateChanged(evt);
+            }
+        });
 
         use_mega_account_down_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         use_mega_account_down_checkbox.setText("Allow using MEGA accounts for download/streaming");
@@ -1311,6 +1323,15 @@ public class SettingsDialog extends javax.swing.JDialog {
         remove_no_restart_checkbox.setText("Auto-remove no-restart transfers");
         remove_no_restart_checkbox.setDoubleBuffered(true);
 
+        remove_no_restart_checkbox1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        remove_no_restart_checkbox1.setText("Auto-remove no-restart transfers");
+        remove_no_restart_checkbox1.setDoubleBuffered(true);
+
+        auto_restart_damaged_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        auto_restart_damaged_checkbox.setText("Auto-restart damaged transfers");
+        auto_restart_damaged_checkbox.setActionCommand("Auto-restart damaged transfers");
+        auto_restart_damaged_checkbox.setDoubleBuffered(true);
+
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
         downloads_panelLayout.setHorizontalGroup(
@@ -1363,8 +1384,16 @@ public class SettingsDialog extends javax.swing.JDialog {
                         .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(downloads_panelLayout.createSequentialGroup()
                         .addContainerGap()
-                        .addComponent(remove_no_restart_checkbox)))
+                        .addComponent(remove_no_restart_checkbox))
+                    .addGroup(downloads_panelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(auto_restart_damaged_checkbox)))
                 .addContainerGap())
+            .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(downloads_panelLayout.createSequentialGroup()
+                    .addGap(0, 435, Short.MAX_VALUE)
+                    .addComponent(remove_no_restart_checkbox1)
+                    .addGap(0, 436, Short.MAX_VALUE)))
         );
         downloads_panelLayout.setVerticalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1396,7 +1425,9 @@ public class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(max_down_speed_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(verify_file_down_checkbox)
-                .addGap(2, 2, 2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(auto_restart_damaged_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(remove_no_restart_checkbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(use_mega_account_down_checkbox)
@@ -1417,6 +1448,11 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
+            .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(downloads_panelLayout.createSequentialGroup()
+                    .addGap(0, 1037, Short.MAX_VALUE)
+                    .addComponent(remove_no_restart_checkbox1)
+                    .addGap(0, 217, Short.MAX_VALUE)))
         );
 
         downloads_scrollpane.setViewportView(downloads_panel);
@@ -2240,6 +2276,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("max_downloads", String.valueOf(max_downloads_spinner.getValue()));
             settings.put("max_uploads", String.valueOf(max_uploads_spinner.getValue()));
             settings.put("verify_down_file", verify_file_down_checkbox.isSelected() ? "yes" : "no");
+            settings.put("auto_restart_damaged", auto_restart_damaged_checkbox.isSelected() ? "yes" : "no");
             settings.put("remove_no_restart", remove_no_restart_checkbox.isSelected() ? "yes" : "no");
             settings.put("limit_download_speed", limit_download_speed_checkbox.isSelected() ? "yes" : "no");
             settings.put("max_download_speed", String.valueOf(max_down_speed_spinner.getValue()));
@@ -3383,6 +3420,96 @@ public class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_use_proxy_checkboxStateChanged
 
+    private void import_mega_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_mega_buttonActionPerformed
+        // TODO add your handling code here:
+
+        if (!unlock_accounts_button.isVisible() || !unlock_accounts_button.isEnabled()) {
+
+            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("EMAIL1#PASS1\nEMAIL2#PASS2"), "TXT FILE FORMAT", JOptionPane.INFORMATION_MESSAGE);
+
+            javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
+
+            updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+
+            filechooser.setDialogTitle("Select MEGA ACCOUNTS FILE");
+
+            filechooser.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
+
+            filechooser.addChoosableFileFilter(new FileNameExtensionFilter("TXT", "txt"));
+
+            filechooser.setAcceptAllFileFilterUsed(false);
+
+            if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+
+                try {
+                    final File file = filechooser.getSelectedFile();
+
+                    Stream<String> filter = Files.lines(file.toPath()).map(s -> s.trim()).filter(s -> !s.isEmpty());
+
+                    List<String> result = filter.collect(Collectors.toList());
+
+                    DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
+
+                    for (String line : result) {
+
+                        String email = MiscTools.findFirstRegex("^[^#]+", line, 0).trim();
+                        String pass = MiscTools.findFirstRegex("^[^#]+#(.+)$", line, 1);
+                        model.addRow(new Object[]{email, pass});
+                    }
+
+                    mega_accounts_table.setModel(model);
+
+                } catch (IOException ex) {
+                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
+                }
+
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("MEGA ACCOUNTS ARE LOCKED"), "ERROR", JOptionPane.ERROR_MESSAGE);
+
+        }
+    }//GEN-LAST:event_import_mega_buttonActionPerformed
+
+    private void upload_public_folder_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_upload_public_folder_checkboxActionPerformed
+        // TODO add your handling code here:
+        if (this.upload_public_folder_checkbox.isSelected()) {
+            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Using this option may irreversibly corrupt your uploads.\n\nUSE IT AT YOUR OWN RISK"), LabelTranslatorSingleton.getInstance().translate("WARNING"), JOptionPane.WARNING_MESSAGE);
+
+        }
+
+        this.upload_public_folder_checkbox.setBackground(this.upload_public_folder_checkbox.isSelected() ? java.awt.Color.RED : null);
+
+        this.public_folder_panel.setVisible(this.upload_public_folder_checkbox.isSelected());
+
+        revalidate();
+
+        repaint();
+
+    }//GEN-LAST:event_upload_public_folder_checkboxActionPerformed
+
+    private void file_regex_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_file_regex_checkboxActionPerformed
+        // TODO add your handling code here:
+        file_regex_textfield.setEnabled(file_regex_checkbox.isSelected());
+        file_regex101_label.setEnabled(file_regex_checkbox.isSelected());
+        InputVerifier regexVerifier = file_regex_textfield.getInputVerifier();
+        if (regexVerifier != null && file_regex_checkbox.isSelected())
+            regexVerifier.verify(file_regex_textfield);
+        else
+            file_regex101_label.setText("");
+    }//GEN-LAST:event_file_regex_checkboxActionPerformed
+
+    private void proxy_sequential_radioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proxy_sequential_radioActionPerformed
+        // TODO add your handling code here:
+        proxy_sequential_radio.setSelected(true);
+        proxy_random_radio.setSelected(false);
+    }//GEN-LAST:event_proxy_sequential_radioActionPerformed
+
+    private void proxy_random_radioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proxy_random_radioActionPerformed
+        // TODO add your handling code here:
+        proxy_random_radio.setSelected(true);
+        proxy_sequential_radio.setSelected(false);
+    }//GEN-LAST:event_proxy_random_radioActionPerformed
+
     private void multi_slot_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_multi_slot_down_checkboxStateChanged
 
         if (!multi_slot_down_checkbox.isSelected() && !smart_proxy_checkbox.isSelected()) {
@@ -3472,7 +3599,6 @@ public class SettingsDialog extends javax.swing.JDialog {
         MiscTools.containerSetEnabled(smart_proxy_settings, smart_proxy_checkbox.isSelected());
         revalidate();
         repaint();
-
     }//GEN-LAST:event_smart_proxy_checkboxStateChanged
 
     private void limit_download_speed_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_limit_download_speed_checkboxStateChanged
@@ -3492,100 +3618,13 @@ public class SettingsDialog extends javax.swing.JDialog {
         megacrypter_reverse_port_label.setEnabled(megacrypter_reverse_checkbox.isSelected());
         megacrypter_reverse_port_spinner.setEnabled(megacrypter_reverse_checkbox.isSelected());
         megacrypter_reverse_warning_label.setEnabled(megacrypter_reverse_checkbox.isSelected());
-
     }//GEN-LAST:event_megacrypter_reverse_checkboxStateChanged
 
-    private void import_mega_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_import_mega_buttonActionPerformed
+    private void verify_file_down_checkboxStateChanged(javax.swing.event.ChangeEvent evt) {//GEN-FIRST:event_verify_file_down_checkboxStateChanged
         // TODO add your handling code here:
+        auto_restart_damaged_checkbox.setEnabled(verify_file_down_checkbox.isSelected());
 
-        if (!unlock_accounts_button.isVisible() || !unlock_accounts_button.isEnabled()) {
-
-            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("EMAIL1#PASS1\nEMAIL2#PASS2"), "TXT FILE FORMAT", JOptionPane.INFORMATION_MESSAGE);
-
-            javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
-
-            updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
-
-            filechooser.setDialogTitle("Select MEGA ACCOUNTS FILE");
-
-            filechooser.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
-
-            filechooser.addChoosableFileFilter(new FileNameExtensionFilter("TXT", "txt"));
-
-            filechooser.setAcceptAllFileFilterUsed(false);
-
-            if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
-
-                try {
-                    final File file = filechooser.getSelectedFile();
-
-                    Stream<String> filter = Files.lines(file.toPath()).map(s -> s.trim()).filter(s -> !s.isEmpty());
-
-                    List<String> result = filter.collect(Collectors.toList());
-
-                    DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
-
-                    for (String line : result) {
-
-                        String email = MiscTools.findFirstRegex("^[^#]+", line, 0).trim();
-                        String pass = MiscTools.findFirstRegex("^[^#]+#(.+)$", line, 1);
-                        model.addRow(new Object[]{email, pass});
-                    }
-
-                    mega_accounts_table.setModel(model);
-
-                } catch (IOException ex) {
-                    Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, null, ex);
-                }
-
-            }
-        } else {
-            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("MEGA ACCOUNTS ARE LOCKED"), "ERROR", JOptionPane.ERROR_MESSAGE);
-
-        }
-    }//GEN-LAST:event_import_mega_buttonActionPerformed
-
-    private void upload_public_folder_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_upload_public_folder_checkboxActionPerformed
-        // TODO add your handling code here:
-        if (this.upload_public_folder_checkbox.isSelected()) {
-            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("Using this option may irreversibly corrupt your uploads.\n\nUSE IT AT YOUR OWN RISK"), LabelTranslatorSingleton.getInstance().translate("WARNING"), JOptionPane.WARNING_MESSAGE);
-
-        }
-
-        this.upload_public_folder_checkbox.setBackground(this.upload_public_folder_checkbox.isSelected() ? java.awt.Color.RED : null);
-
-        this.public_folder_panel.setVisible(this.upload_public_folder_checkbox.isSelected());
-
-        revalidate();
-
-        repaint();
-
-    }//GEN-LAST:event_upload_public_folder_checkboxActionPerformed
-
-    private void proxy_random_radioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proxy_random_radioActionPerformed
-        // TODO add your handling code here:
-        proxy_random_radio.setSelected(true);
-        proxy_sequential_radio.setSelected(false);
-
-    }//GEN-LAST:event_proxy_random_radioActionPerformed
-
-    private void proxy_sequential_radioActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_proxy_sequential_radioActionPerformed
-        // TODO add your handling code here:
-        proxy_sequential_radio.setSelected(true);
-        proxy_random_radio.setSelected(false);
-
-    }//GEN-LAST:event_proxy_sequential_radioActionPerformed
-
-    private void file_regex_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_file_regex_checkboxActionPerformed
-        // TODO add your handling code here:
-        file_regex_textfield.setEnabled(file_regex_checkbox.isSelected());
-        file_regex101_label.setEnabled(file_regex_checkbox.isSelected());
-        InputVerifier regexVerifier = file_regex_textfield.getInputVerifier();
-        if (regexVerifier != null && file_regex_checkbox.isSelected())
-            regexVerifier.verify(file_regex_textfield);
-        else
-            file_regex101_label.setText("");
-    }//GEN-LAST:event_file_regex_checkboxActionPerformed
+    }//GEN-LAST:event_verify_file_down_checkboxStateChanged
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel accounts_panel;
@@ -3594,6 +3633,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JPanel advanced_panel;
     private javax.swing.JScrollPane advanced_scrollpane;
     private javax.swing.JSpinner auto_refresh_proxy_time_spinner;
+    private javax.swing.JCheckBox auto_restart_damaged_checkbox;
     private javax.swing.JSpinner bad_proxy_time_spinner;
     private javax.swing.JButton cancel_button;
     private javax.swing.JButton change_download_dir_button;
@@ -3689,6 +3729,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JButton remove_elc_account_button;
     private javax.swing.JButton remove_mega_account_button;
     private javax.swing.JCheckBox remove_no_restart_checkbox;
+    private javax.swing.JCheckBox remove_no_restart_checkbox1;
     private javax.swing.JCheckBox run_command_checkbox;
     private javax.swing.JButton run_command_test_button;
     private javax.swing.JTextField run_command_textbox;

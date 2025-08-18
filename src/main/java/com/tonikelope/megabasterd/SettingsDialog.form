@@ -192,8 +192,19 @@
                                   <EmptySpace max="-2" attributes="0"/>
                                   <Component id="remove_no_restart_checkbox" min="-2" max="-2" attributes="0"/>
                               </Group>
+                              <Group type="102" alignment="0" attributes="0">
+                                  <EmptySpace max="-2" attributes="0"/>
+                                  <Component id="auto_restart_damaged_checkbox" min="-2" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
+                          <Group type="102" attributes="0">
+                              <EmptySpace min="0" pref="435" max="32767" attributes="0"/>
+                              <Component id="remove_no_restart_checkbox1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="436" max="32767" attributes="0"/>
+                          </Group>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -231,7 +242,9 @@
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="verify_file_down_checkbox" min="-2" max="-2" attributes="0"/>
-                          <EmptySpace min="-2" pref="2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Component id="auto_restart_damaged_checkbox" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Component id="remove_no_restart_checkbox" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="use_mega_account_down_checkbox" min="-2" max="-2" attributes="0"/>
@@ -254,6 +267,13 @@
                           <EmptySpace max="-2" attributes="0"/>
                           <Component id="smart_proxy_settings" min="-2" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
+                      </Group>
+                      <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
+                          <Group type="102" attributes="0">
+                              <EmptySpace min="0" pref="1037" max="32767" attributes="0"/>
+                              <Component id="remove_no_restart_checkbox1" min="-2" max="-2" attributes="0"/>
+                              <EmptySpace min="0" pref="217" max="32767" attributes="0"/>
+                          </Group>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -336,6 +356,9 @@
                     <Property name="text" type="java.lang.String" value="Verify file integrity (when download is finished)"/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="stateChanged" listener="javax.swing.event.ChangeListener" parameters="javax.swing.event.ChangeEvent" handler="verify_file_down_checkboxStateChanged"/>
+                  </Events>
                 </Component>
                 <Component class="javax.swing.JCheckBox" name="use_mega_account_down_checkbox">
                   <Properties>
@@ -805,6 +828,25 @@
                       <Font name="Dialog" size="18" style="1"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Auto-remove no-restart transfers"/>
+                    <Property name="doubleBuffered" type="boolean" value="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="remove_no_restart_checkbox1">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Dialog" size="18" style="1"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Auto-remove no-restart transfers"/>
+                    <Property name="doubleBuffered" type="boolean" value="true"/>
+                  </Properties>
+                </Component>
+                <Component class="javax.swing.JCheckBox" name="auto_restart_damaged_checkbox">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Dialog" size="18" style="1"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Auto-restart damaged transfers"/>
+                    <Property name="actionCommand" type="java.lang.String" value="Auto-restart damaged transfers"/>
                     <Property name="doubleBuffered" type="boolean" value="true"/>
                   </Properties>
                 </Component>

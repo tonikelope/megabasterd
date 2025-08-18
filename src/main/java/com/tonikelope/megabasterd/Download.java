@@ -64,6 +64,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
     public static final boolean REMOVE_NO_RESTART_DEFAULT = false;
+    public static final boolean AUTO_RESTART_DAMAGED_DEFAULT = true;
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
@@ -1417,84 +1418,73 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     }
 
-    private boolean verifyFileCBCMAC(String filename) throws FileNotFoundException, Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    private static byte[] intToBytes(int v) {
+        return new byte[] {
+            (byte)(v >>> 24),
+            (byte)(v >>> 16),
+            (byte)(v >>> 8),
+            (byte) v
+        };
+    }
 
-        int[] int_key = bin2i32a(UrlBASE642Bin(_file_key));
-        int[] iv = new int[]{int_key[4], int_key[5]};
-        int[] meta_mac = new int[]{int_key[6], int_key[7]};
-        int[] file_mac = {0, 0, 0, 0};
-        int[] cbc_iv = {0, 0, 0, 0};
+    private boolean verifyFileCBCMAC(String filename) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+
+        int[] intKey = bin2i32a(UrlBASE642Bin(_file_key));
+        int[] metaMac = new int[]{intKey[6], intKey[7]};
+        byte[] fileMac = new byte[16];
+        byte[] cbcIV = new byte[16];
 
         byte[] byte_file_key = initMEGALinkKey(getFile_key());
 
-        Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", byte_file_key, i32a2bin(cbc_iv));
+        Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", byte_file_key, cbcIV);
 
         try (BufferedInputStream is = new BufferedInputStream(Files.newInputStream(Paths.get(filename)))) {
 
-            long chunk_id = 1L;
-            long tot = 0L;
-            byte[] byte_block = new byte[16];
-            int[] int_block;
             int reads;
-            int[] chunk_mac = new int[4];
+            long chunkId = 1L, totalSize = 0L;
+            byte[] byteBlock = new byte[16], chunkMac = new byte[16], ivBytes = new byte[8];
+            System.arraycopy(intToBytes(intKey[4]), 0, ivBytes, 0, 4);
+            System.arraycopy(intToBytes(intKey[5]), 0, ivBytes, 4, 4);
 
             try {
                 while (!_exit) {
+                    long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunkId, 1);
+                    long chunk_size = ChunkWriterManager.calculateChunkSize(chunkId, this.getFile_size(), chunk_offset, 1);
+                    ChunkWriterManager.checkChunkID(chunkId, this.getFile_size(), chunk_offset);
+                    totalSize += chunk_size;
 
-                    long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, 1);
+                    System.arraycopy(ivBytes, 0, chunkMac, 0, 8);
+                    System.arraycopy(ivBytes, 0, chunkMac, 8, 8);
 
-                    long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, this.getFile_size(), chunk_offset, 1);
-
-                    ChunkWriterManager.checkChunkID(chunk_id, this.getFile_size(), chunk_offset);
-
-                    tot += chunk_size;
-
-                    chunk_mac[0] = iv[0];
-                    chunk_mac[1] = iv[1];
-                    chunk_mac[2] = iv[0];
-                    chunk_mac[3] = iv[1];
-
-                    long conta_chunk = 0L;
-
-                    while (conta_chunk < chunk_size && (reads = is.read(byte_block)) != -1) {
-
-                        if (reads < byte_block.length) {
-
-                            for (int i = reads; i < byte_block.length; i++) {
-                                byte_block[i] = 0;
-                            }
+                    long chunkCount = 0L;
+                    while (chunkCount < chunk_size && (reads = is.read(byteBlock)) != -1) {
+                        if (reads < byteBlock.length) {
+                            Arrays.fill(byteBlock, reads, byteBlock.length, (byte)0);
                         }
-
-                        int_block = bin2i32a(byte_block);
-
-                        for (int i = 0; i < chunk_mac.length; i++) {
-                            chunk_mac[i] ^= int_block[i];
+                        for (int i = 0; i < 16; i++) {
+                            chunkMac[i] ^= byteBlock[i];
                         }
-
-                        chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
-
-                        conta_chunk += reads;
+                        chunkMac = cryptor.doFinal(chunkMac);
+                        chunkCount += reads;
                     }
 
-                    for (int i = 0; i < file_mac.length; i++) {
-                        file_mac[i] ^= chunk_mac[i];
+                    for (int i = 0; i < fileMac.length; i++) {
+                        fileMac[i] ^= chunkMac[i];
                     }
-
-                    file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
-
-                    setProgress(tot);
-
-                    chunk_id++;
-
+                    fileMac = cryptor.doFinal(fileMac);
+                    setProgress(totalSize);
+                    chunkId++;
                 }
 
-            } catch (ChunkInvalidException e) {
+            } catch (ChunkInvalidException ignored) { }
 
-            }
+            int[] fileMacInts = bin2i32a(fileMac);
+            int[] cbc = {
+                fileMacInts[0] ^ fileMacInts[1],
+                fileMacInts[2] ^ fileMacInts[3]
+            };
 
-            int[] cbc = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};
-
-            return (cbc[0] == meta_mac[0] && cbc[1] == meta_mac[1]);
+            return (cbc[0] == metaMac[0] && cbc[1] == metaMac[1]);
         }
     }
 
