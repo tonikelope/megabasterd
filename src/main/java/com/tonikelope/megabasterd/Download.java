@@ -55,6 +55,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
 import javax.swing.JComponent;
 
 /**
@@ -1470,19 +1471,19 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         for (int i = 0; i < 16; i++) {
                             chunkMac[i] ^= byteBlock[i];
                         }
-                        chunkMac = cryptor.doFinal(chunkMac);
+                        cryptor.update(chunkMac, 0, 16, chunkMac, 0);
                         chunkCount += reads;
                     }
 
                     for (int i = 0; i < fileMac.length; i++) {
                         fileMac[i] ^= chunkMac[i];
                     }
-                    fileMac = cryptor.doFinal(fileMac);
+                    cryptor.update(fileMac, 0, 16, fileMac, 0);
                     setProgress(totalSize);
                     chunkId++;
                 }
 
-            } catch (ChunkInvalidException ignored) { }
+            } catch (ChunkInvalidException | ShortBufferException ignored) { }
 
             int[] fileMacInts = bin2i32a(fileMac);
             int[] cbc = {

@@ -70,12 +70,7 @@ public class DownloadManager extends TransferenceManager {
     @Override
     public void closeAllFinished() {
 
-        _transference_finished_queue.stream().filter((t) -> (!t.isCanceled())).map((t) -> {
-            _transference_finished_queue.remove(t);
-            return t;
-        }).forEachOrdered((t) -> {
-            _transference_remove_queue.add(t);
-        });
+        _transference_finished_queue.stream().filter((t) -> (!t.isCanceled())).peek(_transference_finished_queue::remove).forEachOrdered(_transference_remove_queue::add);
 
         secureNotify();
     }

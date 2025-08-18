@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -38,14 +39,57 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public static final int MAX_PROVISION_WORKERS = 50;
     private static final Logger LOG = Logger.getLogger(TransferenceManager.class.getName());
 
-    protected final ConcurrentLinkedQueue<Object> _transference_preprocess_global_queue;
-    protected final ConcurrentLinkedQueue<Runnable> _transference_preprocess_queue;
-    protected final ConcurrentLinkedQueue<Transference> _transference_provision_queue;
-    protected final ConcurrentLinkedQueue<Transference> _transference_waitstart_queue;
-    protected final ConcurrentLinkedQueue<Transference> _transference_waitstart_aux_queue;
-    protected final ConcurrentLinkedQueue<Transference> _transference_remove_queue;
-    protected final ConcurrentLinkedQueue<Transference> _transference_finished_queue;
-    protected final ConcurrentLinkedQueue<Transference> _transference_running_list;
+    public static class TransferenceQueue<T> extends ConcurrentLinkedQueue<T> {
+        private final AtomicInteger queueSize = new AtomicInteger(super.size());
+
+        @Override
+        public boolean add(T t) {
+            boolean added = super.add(t);
+            if (added) queueSize.incrementAndGet();
+            return added;
+        }
+
+        @Override
+        public boolean offer(T t) {
+            boolean offered = super.offer(t);
+            if (offered) queueSize.incrementAndGet();
+            return offered;
+        }
+
+        @Override
+        public T poll() {
+            T val = super.poll();
+            if (val != null) queueSize.decrementAndGet();
+            return val;
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            boolean removed = super.remove(o);
+            if (removed) queueSize.decrementAndGet();
+            return removed;
+        }
+
+        @Override
+        public void clear() {
+            super.clear();
+            queueSize.set(0);
+        }
+
+        @Override
+        public int size() {
+            return queueSize.get();
+        }
+    }
+
+    protected final TransferenceQueue<Object> _transference_preprocess_global_queue;
+    protected final TransferenceQueue<Runnable> _transference_preprocess_queue;
+    protected final TransferenceQueue<Transference> _transference_provision_queue;
+    protected final TransferenceQueue<Transference> _transference_waitstart_queue;
+    protected final TransferenceQueue<Transference> _transference_waitstart_aux_queue;
+    protected final TransferenceQueue<Transference> _transference_remove_queue;
+    protected final TransferenceQueue<Transference> _transference_finished_queue;
+    protected final TransferenceQueue<Transference> _transference_running_list;
 
     private final javax.swing.JPanel _scroll_panel;
     private final javax.swing.JLabel _status;
@@ -105,14 +149,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_queue_sort_lock = new Object();
         _wait_queue_lock = new Object();
         _sort_wait_start_queue = true;
-        _transference_preprocess_global_queue = new ConcurrentLinkedQueue<>();
-        _transference_waitstart_queue = new ConcurrentLinkedQueue<>();
-        _transference_waitstart_aux_queue = new ConcurrentLinkedQueue<>();
-        _transference_provision_queue = new ConcurrentLinkedQueue<>();
-        _transference_remove_queue = new ConcurrentLinkedQueue<>();
-        _transference_finished_queue = new ConcurrentLinkedQueue<>();
-        _transference_running_list = new ConcurrentLinkedQueue<>();
-        _transference_preprocess_queue = new ConcurrentLinkedQueue<>();
+        _transference_preprocess_global_queue = new TransferenceQueue<>();
+        _transference_waitstart_queue = new TransferenceQueue<>();
+        _transference_waitstart_aux_queue = new TransferenceQueue<>();
+        _transference_provision_queue = new TransferenceQueue<>();
+        _transference_remove_queue = new TransferenceQueue<>();
+        _transference_finished_queue = new TransferenceQueue<>();
+        _transference_running_list = new TransferenceQueue<>();
+        _transference_preprocess_queue = new TransferenceQueue<>();
         uiRefreshTimer = new javax.swing.Timer(50, e -> {
             // only repaint if there is something to show
             if (!_main_panel.getView().isVisible()) return;
@@ -120,7 +164,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         });
         uiRefreshTimer.setRepeats(true);
         uiRefreshTimer.start();
-        startCacheUpdateTask();
     }
 
     public Boolean getSort_wait_start_queue() {
@@ -711,60 +754,18 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         });
     }
 
-    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
-    private int cachedPreSize = 0;
-    private int cachedProvSize = 0;
-    private int cachedRemSize = 0;
-    private int cachedWaitSize = 0;
-    private int cachedRunSize = 0;
-    private int cachedFinishSize = 0;
-    private void startCacheUpdateTask() {
-        scheduler.scheduleAtFixedRate(this::updateQueueSizes, 0, 200, TimeUnit.MILLISECONDS);
-    }
-
-    private void updateQueueSizes() {
-        cachedPreSize = _transference_preprocess_global_queue.size();
-        cachedProvSize = _transference_provision_queue.size();
-        cachedRemSize = _transference_remove_queue.size();
-        cachedWaitSize = _transference_waitstart_queue.size() + _transference_waitstart_aux_queue.size();
-        cachedRunSize = _transference_running_list.size();
-        cachedFinishSize = _transference_finished_queue.size();
-    }
-
-    private long lastHash = 0;
-    private String lastStatus = "";
-
     private String _genStatus() {
-        long allQueueHash = Objects.hash(
-            cachedPreSize,
-            cachedProvSize,
-            cachedRemSize,
-            cachedWaitSize,
-            cachedRunSize,
-            cachedFinishSize
-        );
-
-        if (allQueueHash == lastHash) return lastStatus;
-        lastHash = allQueueHash;
-
-        // Use cached sizes
-        int pre = cachedPreSize;
-        int prov = cachedProvSize;
-        int rem = cachedRemSize;
-        int wait = cachedWaitSize;
-        int run = cachedRunSize;
-        int finish = cachedFinishSize;
+        int pre = _transference_preprocess_global_queue.size();
+        int prov = _transference_provision_queue.size();
+        int rem = _transference_remove_queue.size();
+        int wait = _transference_waitstart_queue.size() + _transference_waitstart_aux_queue.size();
+        int run = _transference_running_list.size();
+        int finish = _transference_finished_queue.size();
 
         if (!_all_finished && !_tray_icon_finish && finish > 0 && pre + prov + wait + run == 0 && !_main_panel.getView().isVisible()) {
             _tray_icon_finish = true;
             _all_finished = true;
             _main_panel.getTrayicon().displayMessage("MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
-        }
-
-        if ((pre + prov + rem + wait + run + finish) <= 0) {
-            lastStatus = "";
-            return lastStatus;
         }
 
         LabelTranslatorSingleton translator = LabelTranslatorSingleton.getInstance();
@@ -776,8 +777,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         if (finish > 0) statuses.add(translator.translate("Finish:") + " " + finish);
         if (rem > 0) statuses.add(translator.translate("Rem:") + " " + rem);
 
-        lastStatus = String.join(" / ", statuses);
-        return lastStatus;
+        return String.join(" / ", statuses);
     }
 
     @Override
