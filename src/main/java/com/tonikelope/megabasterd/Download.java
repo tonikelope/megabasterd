@@ -36,6 +36,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -591,6 +592,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         DownloadView view = getView();
         MainPanel mainPanel = getMain_panel();
         DownloadManager manager = mainPanel.getDownload_manager();
+        ProgressMeter meter = getProgress_meter();
         JComponent[] commons = new JComponent[] {
                 view.getSlots_label(),
                 view.getSlots_spinner(),
@@ -702,7 +704,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         _output_stream = new BufferedOutputStream(new FileOutputStream(_file, (_progress > 0)));
 
-                        _thread_pool.execute(getProgress_meter());
+                        _thread_pool.execute(meter);
 
                         mainPanel.getGlobal_dl_speed().attachTransference(this);
 
@@ -784,9 +786,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         LOG.log(Level.INFO, "{0} Chunkdownloaders finished!", Thread.currentThread().getName());
 
-                        getProgress_meter().setExit(true);
+                        meter.setExit(true);
 
-                        getProgress_meter().secureNotify();
+                        meter.secureNotify();
 
                         try {
 
@@ -841,7 +843,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                 File temp_parent_download_dir = new File(temp_filename).getParentFile();
 
-                                while (!temp_parent_download_dir.getAbsolutePath().equals(_custom_chunks_dir) && temp_parent_download_dir.listFiles().length == 0) {
+                                while (!temp_parent_download_dir.getAbsolutePath().equals(_custom_chunks_dir) && Objects.requireNonNull(temp_parent_download_dir.listFiles()).length == 0) {
                                     temp_parent_download_dir.delete();
                                     temp_parent_download_dir = temp_parent_download_dir.getParentFile();
                                 }
@@ -946,6 +948,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     String removeNoRestart = DBTools.selectSettingValue("remove_no_restart");
                     if (removeNoRestart != null && removeNoRestart.equals("yes")) {
                         view.printStatusOK("FILE WITH CORRECT NAME AND HASH FOUND");
+                        _status_error = null;
                         _exit = true;
                     } else {
                         view.hideAllExceptStatus();
