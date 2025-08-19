@@ -1614,7 +1614,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JMenu help_menu;
     private javax.swing.JMenuItem hide_tray_menu;
     private javax.swing.JButton jButton1;
-    public javax.swing.JPanel jPanel_scroll_down;
+    private javax.swing.JPanel jPanel_scroll_down;
     private javax.swing.JPanel jPanel_scroll_up;
     private javax.swing.JScrollPane jScrollPane_down;
     private javax.swing.JScrollPane jScrollPane_up;
