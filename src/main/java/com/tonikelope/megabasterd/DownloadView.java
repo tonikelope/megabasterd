@@ -144,14 +144,14 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     }
     
-    private static final int ROW_HEIGHT = 264;
+    public static final int DEFAULT_ROW_HEIGHT = 264;
     private Dimension cachedPref;
 
     @Override
     public Dimension getPreferredSize() {
         if (cachedPref == null) {
             Dimension d = super.getPreferredSize();
-            d.height = ROW_HEIGHT;
+            d.height = DEFAULT_ROW_HEIGHT;
             cachedPref = d;
         }
         return cachedPref;
@@ -159,7 +159,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public Dimension getMaximumSize() {
-        return new Dimension(Integer.MAX_VALUE, ROW_HEIGHT);
+        return new Dimension(Integer.MAX_VALUE, DEFAULT_ROW_HEIGHT);
     }
 
     @Override

@@ -18,7 +18,6 @@ import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -1030,7 +1029,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         String autoRemoveNoRestartSetting = DBTools.selectSettingValue("auto_remove_no_restart");
         boolean autoRemoveNoRestart = autoRemoveNoRestartSetting != null && autoRemoveNoRestartSetting.equals("yes");
-        MiscTools.GUIRun(() -> manager.getDownload_list().removeDownload(this));
+        MiscTools.GUIRun(() -> manager.getDownload_panel().removeDownload(this));
         if (!autoRemoveNoRestart) {
             manager.getTransference_finished_queue().add(this);
             MiscTools.GUIRun(() -> {
@@ -1040,7 +1039,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 } else if (!global_cancel) {
                     view.getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
                 }
-                manager.getDownload_list().addDownload(this);
+                manager.getDownload_panel().addDownload(this);
             });
         } else if (_status_error == null && !_canceled && !global_cancel) {
             manager.getTransference_remove_queue().add(this);

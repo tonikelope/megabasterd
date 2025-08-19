@@ -13,7 +13,6 @@ import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -138,7 +137,7 @@ public class DownloadManager extends TransferenceManager {
 
         for (final Transference d : downloads) {
 
-            MiscTools.GUIRun(() -> getDownload_list().removeDownload((Download) d));
+            MiscTools.GUIRun(() -> getDownload_panel().removeDownload((Download) d));
 
             getTransference_waitstart_queue().remove(d);
             getTransference_running_list().remove(d);
@@ -170,7 +169,7 @@ public class DownloadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference download) {
-        MiscTools.GUIRun(() -> getDownload_list().addDownload((Download) download));
+        MiscTools.GUIRun(() -> getDownload_panel().addDownload((Download) download));
 
         try {
 

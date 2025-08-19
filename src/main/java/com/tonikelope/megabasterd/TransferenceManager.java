@@ -9,21 +9,14 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.jetbrains.annotations.NotNull;
-
 import static com.tonikelope.megabasterd.MainPanel.*;
 import java.awt.TrayIcon;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Predicate;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -50,8 +43,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final LinkedBlockingQueue<Transference> _transference_remove_queue;
     protected final LinkedBlockingQueue<Transference> _transference_finished_queue;
     protected final LinkedBlockingQueue<Transference> _transference_running_list;
-
-    private final DownloadList _download_list = MainPanel.getDownload_list();
 
     private final javax.swing.JPanel _scroll_panel;
     private final javax.swing.JLabel _status;
@@ -294,8 +285,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     }
 
     // todo change to getTransference_list once UploadList exists
-    public DownloadList getDownload_list() {
-        return _download_list;
+    public VirtualizedDownloadPanel getDownload_panel() {
+        return _main_panel.getDownload_panel();
     }
 
     public JPanel getScroll_panel() {

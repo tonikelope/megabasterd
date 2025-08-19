@@ -101,7 +101,7 @@ public final class MainPanel {
     private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
     private static volatile boolean CHECK_RUNNING = true;
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
 
         if (args.length > 0) {
 
@@ -204,7 +204,6 @@ public final class MainPanel {
     private final SpeedMeter _global_dl_speed, _global_up_speed;
     private final DownloadManager _download_manager;
     private final UploadManager _upload_manager;
-    private static final DownloadList _download_list = new DownloadList();
     private final StreamThrottlerSupervisor _stream_supervisor;
     private int _max_dl, _max_ul, _default_slots_down, _default_slots_up, _max_dl_speed, _max_up_speed;
     private boolean _use_slots_down, _limit_download_speed, _limit_upload_speed, _use_mega_account_down, _init_paused, _debug_file;
@@ -365,6 +364,7 @@ public final class MainPanel {
         }
 
         MiscTools.GUIRun(() -> {
+
             getView().getGlobal_speed_down_label().setForeground(_limit_download_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
 
             getView().getGlobal_speed_up_label().setForeground(_limit_upload_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
@@ -527,12 +527,10 @@ public final class MainPanel {
         return _download_manager;
     }
 
+    public VirtualizedDownloadPanel getDownload_panel() { return (VirtualizedDownloadPanel) getView().jPanel_scroll_down; }
+
     public UploadManager getUpload_manager() {
         return _upload_manager;
-    }
-
-    public static DownloadList getDownload_list() {
-        return _download_list;
     }
 
     public StreamThrottlerSupervisor getStream_supervisor() {
