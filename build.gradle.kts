@@ -34,6 +34,7 @@ sourceSets {
 }
 
 dependencies {
+    implementation("org.apache.httpcomponents.client5:httpclient5:5.5")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
     implementation("org.swinglabs.swingx:swingx-all:1.6.5-1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")

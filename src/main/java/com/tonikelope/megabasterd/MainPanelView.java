@@ -563,7 +563,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_down_label = new javax.swing.JLabel();
         close_all_finished_down_button = new javax.swing.JButton();
         jScrollPane_down = new javax.swing.JScrollPane();
-        jPanel_scroll_down = new javax.swing.JPanel();
+        jPanel_scroll_down = new BatchPanel();
         pause_all_down_button = new javax.swing.JButton();
         down_remtime_label = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();

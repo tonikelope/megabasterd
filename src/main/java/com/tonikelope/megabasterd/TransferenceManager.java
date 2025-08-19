@@ -10,10 +10,12 @@
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
-import java.awt.TrayIcon;
+
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -44,7 +46,46 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final LinkedBlockingQueue<Transference> _transference_finished_queue;
     protected final LinkedBlockingQueue<Transference> _transference_running_list;
 
-    private final javax.swing.JPanel _scroll_panel;
+    private final ConcurrentLinkedQueue<Component> additionQueue = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Component> removalQueue = new ConcurrentLinkedQueue<>();
+
+    private void flushAdditions() {
+        if (additionQueue.isEmpty()) return;
+        MiscTools.GUIRun(() -> {
+            JPanel scrollPanel = getScroll_panel();
+            if (scrollPanel instanceof BatchPanel)
+                ((BatchPanel) scrollPanel).setSuspendLayout(true);
+
+            Component comp;
+            while ((comp = additionQueue.poll()) != null) {
+                scrollPanel.add(comp);
+            }
+            if (scrollPanel instanceof BatchPanel)
+                ((BatchPanel) scrollPanel).setSuspendLayout(false);
+            scrollPanel.revalidate();
+            scrollPanel.repaint();
+        });
+    }
+
+    private void flushRemovals() {
+        if (removalQueue.isEmpty()) return;
+        MiscTools.GUIRun(() -> {
+            JPanel scrollPanel = getScroll_panel();
+            if (scrollPanel instanceof BatchPanel)
+                ((BatchPanel) scrollPanel).setSuspendLayout(true);
+
+            Component comp;
+            while ((comp = removalQueue.poll()) != null) {
+                scrollPanel.remove(comp);
+            }
+            if (scrollPanel instanceof BatchPanel)
+                ((BatchPanel) scrollPanel).setSuspendLayout(false);
+            scrollPanel.revalidate();
+            scrollPanel.repaint();
+        });
+    }
+
+    private final JPanel _scroll_panel;
     private final javax.swing.JLabel _status;
     private final javax.swing.JButton _close_all_button;
     private final javax.swing.JButton _pause_all_button;
@@ -77,7 +118,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         this._all_finished = all_finished;
     }
 
-    public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
+    public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
         _notified = false;
         _paused_all = false;
         _removing_transferences = false;
@@ -109,14 +150,19 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_finished_queue = new LinkedBlockingQueue<>();
         _transference_running_list = new LinkedBlockingQueue<>();
         _transference_preprocess_queue = new LinkedBlockingQueue<>();
-        // only repaint if there is something to show
-        Timer uiRefreshTimer = new Timer(50, e -> {
-            // only repaint if there is something to show
+        Timer uiRefreshTimer = new Timer(100, e -> {
             if (!_main_panel.getView().isVisible()) return;
             _updateView();
         });
         uiRefreshTimer.setRepeats(true);
         uiRefreshTimer.start();
+        Timer flushTimer = new Timer(1000, e -> {
+            if (!_main_panel.getView().isVisible()) return;
+            flushAdditions();
+            flushRemovals();
+        });
+        flushTimer.setRepeats(true);
+        flushTimer.start();
     }
 
     public Boolean getSort_wait_start_queue() {
@@ -282,6 +328,18 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         return _transference_running_list;
 
+    }
+
+    public void flagForPanelAddition(Transference transference) {
+        if (transference != null && transference.getView() != null) {
+            additionQueue.add((Component) transference.getView());
+        }
+    }
+
+    public void flagForPanelRemoval(Transference transference) {
+        if (transference != null && transference.getView() != null) {
+            removalQueue.add((Component) transference.getView());
+        }
     }
 
     public JPanel getScroll_panel() {

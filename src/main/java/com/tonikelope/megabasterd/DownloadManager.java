@@ -137,7 +137,7 @@ public class DownloadManager extends TransferenceManager {
 
         for (final Transference d : downloads) {
 
-            MiscTools.GUIRun(() -> getScroll_panel().remove(((Download) d).getView()));
+            flagForPanelRemoval(d);
 
             getTransference_waitstart_queue().remove(d);
             getTransference_running_list().remove(d);
@@ -169,7 +169,7 @@ public class DownloadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference download) {
-        MiscTools.GUIRun(() -> getScroll_panel().add(((Download) download).getView()));
+        flagForPanelAddition(download);
 
         try {
 

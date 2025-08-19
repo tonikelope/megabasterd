@@ -138,3 +138,7 @@ gradle-wrapper.jar
 
 #Kotlin
 .kotlin
+
+# Profiler
+.profileconfig.json
+profile.jfr
