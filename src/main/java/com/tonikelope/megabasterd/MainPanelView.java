@@ -608,7 +608,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         setPreferredSize(new java.awt.Dimension(1024, 650));
         setSize(new java.awt.Dimension(1024, 650));
 
-        logo_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/mbasterd_logo_nuevo-picsay.png"))); // NOI18N
         logo_label.setDoubleBuffered(true);
 
         kiss_server_status.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
@@ -635,7 +634,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_down_label.setDoubleBuffered(true);
 
         close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        close_all_finished_down_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
         close_all_finished_down_button.setText("Clear finished");
         close_all_finished_down_button.setDoubleBuffered(true);
         close_all_finished_down_button.addActionListener(new java.awt.event.ActionListener() {
@@ -645,6 +643,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         });
 
         jScrollPane_down.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
+        jScrollPane_down.setForeground(null);
 
         pause_all_down_button.setBackground(new java.awt.Color(255, 153, 0));
         pause_all_down_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
@@ -660,7 +659,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         down_remtime_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
 
         jButton1.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        jButton1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-copy-to-clipboard-30.png"))); // NOI18N
         jButton1.setText("COPY ALL DOWNLOAD LINKS");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -722,7 +720,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(force_chunk_reset_button)))
         );
 
-        jTabbedPane1.addTab("Downloads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-download-from-ftp-30.png")), downloads_panel); // NOI18N
+        jTabbedPane1.addTab("Downloads", downloads_panel);
 
         global_speed_up_label.setFont(new java.awt.Font("Dialog", 1, 54)); // NOI18N
         global_speed_up_label.setText("Speed");
@@ -732,7 +730,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_up_label.setForeground(new java.awt.Color(102, 102, 102));
 
         close_all_finished_up_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        close_all_finished_up_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
         close_all_finished_up_button.setText("Clear finished");
         close_all_finished_up_button.setDoubleBuffered(true);
         close_all_finished_up_button.addActionListener(new java.awt.event.ActionListener() {
@@ -760,7 +757,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         up_remtime_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
 
         copy_all_uploads.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
-        copy_all_uploads.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-copy-to-clipboard-30.png"))); // NOI18N
         copy_all_uploads.setText("COPY ALL UPLOAD LINKS");
         copy_all_uploads.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -808,7 +804,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     .addComponent(pause_all_up_button)))
         );
 
-        jTabbedPane1.addTab("Uploads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png")), uploads_panel); // NOI18N
+        jTabbedPane1.addTab("Uploads", uploads_panel);
 
         unfreeze_transferences_button.setBackground(new java.awt.Color(255, 255, 204));
         unfreeze_transferences_button.setFont(new java.awt.Font("Dialog", 1, 24)); // NOI18N
@@ -826,7 +822,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
         new_download_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        new_download_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-download-from-ftp-30.png"))); // NOI18N
         new_download_menu.setText("New download");
         new_download_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -836,7 +831,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(new_download_menu);
 
         new_upload_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        new_upload_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-upload-to-ftp-30.png"))); // NOI18N
         new_upload_menu.setText("New upload");
         new_upload_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -846,7 +840,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(new_upload_menu);
 
         new_stream_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        new_stream_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-video-playlist-30.png"))); // NOI18N
         new_stream_menu.setText("New streaming");
         new_stream_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -857,7 +850,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(jSeparator5);
 
         split_file_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        split_file_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cut-30.png"))); // NOI18N
         split_file_menu.setText("Split file");
         split_file_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -867,7 +859,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(split_file_menu);
 
         merge_file_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        merge_file_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-glue-30.png"))); // NOI18N
         merge_file_menu.setText("Merge file");
         merge_file_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -878,7 +869,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(jSeparator4);
 
         clean_all_down_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        clean_all_down_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-trash-can-30.png"))); // NOI18N
         clean_all_down_menu.setText("Remove all no running downloads");
         clean_all_down_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -888,7 +878,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(clean_all_down_menu);
 
         clean_all_up_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        clean_all_up_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-trash-can-30.png"))); // NOI18N
         clean_all_up_menu.setText("Remove all no running uploads");
         clean_all_up_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -898,7 +887,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(clean_all_up_menu);
 
         cancel_all_downloads_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        cancel_all_downloads_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-minus-30.png"))); // NOI18N
         cancel_all_downloads_menu.setText("CANCEL ALL DOWNLOADS");
         cancel_all_downloads_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -909,7 +897,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(jSeparator2);
 
         hide_tray_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        hide_tray_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/pica_roja_menu.png"))); // NOI18N
         hide_tray_menu.setText("Hide to tray");
         hide_tray_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -921,7 +908,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         auto_close_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         auto_close_menu.setText("Close MegaBasterd when all transfers finish");
         auto_close_menu.setDoubleBuffered(true);
-        auto_close_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
         auto_close_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 auto_close_menuActionPerformed(evt);
@@ -930,7 +916,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         file_menu.add(auto_close_menu);
 
         exit_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        exit_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-shutdown-30.png"))); // NOI18N
         exit_menu.setText("Exit");
         exit_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -946,7 +931,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         edit_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
         settings_menu.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
-        settings_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png"))); // NOI18N
         settings_menu.setText("Settings");
         settings_menu.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {

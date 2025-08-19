@@ -9,6 +9,8 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.sun.tools.javac.Main;
+
 import static com.tonikelope.megabasterd.CryptTools.*;
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -163,16 +165,21 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
     }
 
     private void finishDownload() {
-        _download.getMain_panel().getDownload_manager().getTransference_running_list().remove(_download);
-        _download.getMain_panel().getDownload_manager().secureNotify();
-        _download.getView().printStatusNormal("Download finished. Joining file chunks, please wait...");
-        _download.getView().getPause_button().setVisible(false);
-        _download.getMain_panel().getGlobal_dl_speed().detachTransference(_download);
-        _download.getView().getSpeed_label().setVisible(false);
-        _download.getView().getSlots_label().setVisible(false);
-        _download.getView().getSlot_status_label().setVisible(false);
-        _download.getView().getSlots_spinner().setVisible(false);
+        MiscTools.GUIRun(() -> {
+            DownloadView downloadView = _download.getView();
+            MainPanel mainPanel = _download.getMain_panel();
+            DownloadManager manager = mainPanel.getDownload_manager();
 
+            manager.getTransference_running_list().remove(_download);
+            manager.secureNotify();
+            downloadView.printStatusNormal("Download finished. Joining file chunks, please wait...");
+            downloadView.getPause_button().setVisible(false);
+            mainPanel.getGlobal_dl_speed().detachTransference(_download);
+            downloadView.getSpeed_label().setVisible(false);
+            downloadView.getSlots_label().setVisible(false);
+            downloadView.getSlot_status_label().setVisible(false);
+            downloadView.getSlots_spinner().setVisible(false);
+        });
     }
 
     @Override

@@ -10,7 +10,7 @@ class DownloadList : JXList() {
     init {
         setModel(model)
 
-        cellRenderer = ListCellRenderer { list, value, _, isSelected, _ ->
+        cellRenderer = ListCellRenderer<DownloadView> { list, value, _, isSelected, _ ->
             value.apply {
                 background = if (isSelected) list.selectionBackground else list.background
                 foreground = if (isSelected) list.selectionForeground else list.foreground
@@ -22,12 +22,12 @@ class DownloadList : JXList() {
         fixedCellWidth = -1
     }
 
-    fun addDownload(view: DownloadView) {
-        model.addElement(view)
+    fun addDownload(download: Download) {
+        model.addElement(download.view)
     }
 
-    fun removeDownload(view: DownloadView) {
-        model.removeElement(view)
+    fun removeDownload(download: Download) {
+        model.removeElement(download.view)
     }
 }
 
