@@ -187,7 +187,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
-        _view = new DownloadView(this);
+        MiscTools.GUIRun(() -> this._view = new DownloadView(this));
         _progress_meter = new ProgressMeter(this);
         _custom_chunks_dir = custom_chunks_dir;
         _turbo = false;
@@ -233,7 +233,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
-        _view = new DownloadView(this);
+        MiscTools.GUIRun(() -> this._view = new DownloadView(this));
         _progress_meter = new ProgressMeter(this);
         _custom_chunks_dir = download.getCustom_chunks_dir();
         _turbo = false;
