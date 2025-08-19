@@ -117,6 +117,10 @@ public final class MainPanelView extends javax.swing.JFrame {
         return global_speed_up_label;
     }
 
+    public JPanel getjPanel_scroll_down() {
+        return jPanel_scroll_down;
+    }
+
     public JPanel getjPanel_scroll_up() {
         return jPanel_scroll_up;
     }
@@ -466,6 +470,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             clean_all_up_menu.setEnabled(false);
             cancel_all_downloads_menu.setEnabled(false);
 
+            jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
             jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
 
             jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
@@ -558,7 +563,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_down_label = new javax.swing.JLabel();
         close_all_finished_down_button = new javax.swing.JButton();
         jScrollPane_down = new javax.swing.JScrollPane();
-        jPanel_scroll_down = new VirtualizedDownloadPanel();
+        jPanel_scroll_down = new javax.swing.JPanel();
         pause_all_down_button = new javax.swing.JButton();
         down_remtime_label = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();

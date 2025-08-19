@@ -1029,7 +1029,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         String autoRemoveNoRestartSetting = DBTools.selectSettingValue("auto_remove_no_restart");
         boolean autoRemoveNoRestart = autoRemoveNoRestartSetting != null && autoRemoveNoRestartSetting.equals("yes");
-        MiscTools.GUIRun(() -> manager.getDownload_panel().removeDownload(this));
+        MiscTools.GUIRun(() -> manager.getScroll_panel().remove(this._view));
         if (!autoRemoveNoRestart) {
             manager.getTransference_finished_queue().add(this);
             MiscTools.GUIRun(() -> {
@@ -1039,7 +1039,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 } else if (!global_cancel) {
                     view.getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
                 }
-                manager.getDownload_panel().addDownload(this);
+                manager.getScroll_panel().add(this._view);
             });
         } else if (_status_error == null && !_canceled && !global_cancel) {
             manager.getTransference_remove_queue().add(this);

@@ -284,11 +284,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     }
 
-    // todo change to getTransference_list once UploadList exists
-    public VirtualizedDownloadPanel getDownload_panel() {
-        return _main_panel.getDownload_panel();
-    }
-
     public JPanel getScroll_panel() {
         return _scroll_panel;
     }

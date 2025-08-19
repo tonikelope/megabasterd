@@ -38,7 +38,7 @@ public class DownloadManager extends TransferenceManager {
     
     public DownloadManager(MainPanel main_panel) {
 
-        super(main_panel, main_panel.getMax_dl(), main_panel.getView().getStatus_down_label(), null, main_panel.getView().getClose_all_finished_down_button(), main_panel.getView().getPause_all_down_button(), main_panel.getView().getClean_all_down_menu());
+        super(main_panel, main_panel.getMax_dl(), main_panel.getView().getStatus_down_label(), main_panel.getView().getjPanel_scroll_down(), main_panel.getView().getClose_all_finished_down_button(), main_panel.getView().getPause_all_down_button(), main_panel.getView().getClean_all_down_menu());
     }
 
     public synchronized void forceResetAllChunks() {
@@ -137,7 +137,7 @@ public class DownloadManager extends TransferenceManager {
 
         for (final Transference d : downloads) {
 
-            MiscTools.GUIRun(() -> getDownload_panel().removeDownload((Download) d));
+            MiscTools.GUIRun(() -> getScroll_panel().remove(((Download) d).getView()));
 
             getTransference_waitstart_queue().remove(d);
             getTransference_running_list().remove(d);
@@ -169,7 +169,7 @@ public class DownloadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference download) {
-        MiscTools.GUIRun(() -> getDownload_panel().addDownload((Download) download));
+        MiscTools.GUIRun(() -> getScroll_panel().add(((Download) download).getView()));
 
         try {
 

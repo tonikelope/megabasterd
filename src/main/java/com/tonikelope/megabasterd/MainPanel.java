@@ -527,8 +527,6 @@ public final class MainPanel {
         return _download_manager;
     }
 
-    public VirtualizedDownloadPanel getDownload_panel() { return (VirtualizedDownloadPanel) getView().jPanel_scroll_down; }
-
     public UploadManager getUpload_manager() {
         return _upload_manager;
     }
