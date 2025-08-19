@@ -35,6 +35,7 @@ sourceSets {
 
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
+    implementation("org.swinglabs.swingx:swingx-all:1.6.5-1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-swing:1.7.3")
     implementation("commons-io:commons-io:2.20.0")
     implementation("org.sejda.webp-imageio:webp-imageio-sejda:0.1.0")

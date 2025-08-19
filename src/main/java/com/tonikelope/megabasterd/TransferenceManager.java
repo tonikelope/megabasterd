@@ -51,6 +51,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final LinkedBlockingQueue<Transference> _transference_finished_queue;
     protected final LinkedBlockingQueue<Transference> _transference_running_list;
 
+    private final DownloadList _download_list = MainPanel.getDownload_list();
+
     private final javax.swing.JPanel _scroll_panel;
     private final javax.swing.JLabel _status;
     private final javax.swing.JButton _close_all_button;
@@ -289,6 +291,11 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         return _transference_running_list;
 
+    }
+
+    // todo change to getTransference_list once UploadList exists
+    public DownloadList getDownload_list() {
+        return _download_list;
     }
 
     public JPanel getScroll_panel() {

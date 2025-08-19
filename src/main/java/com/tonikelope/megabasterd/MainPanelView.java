@@ -125,10 +125,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         return global_speed_up_label;
     }
 
-    public JPanel getjPanel_scroll_down() {
-        return jPanel_scroll_down;
-    }
-
     public JPanel getjPanel_scroll_up() {
         return jPanel_scroll_up;
     }
@@ -478,7 +474,6 @@ public final class MainPanelView extends javax.swing.JFrame {
             clean_all_up_menu.setEnabled(false);
             cancel_all_downloads_menu.setEnabled(false);
 
-            jScrollPane_down.getVerticalScrollBar().setUnitIncrement(20);
             jScrollPane_up.getVerticalScrollBar().setUnitIncrement(20);
 
             jTabbedPane1.setTitleAt(0, LabelTranslatorSingleton.getInstance().translate("Downloads"));
@@ -570,8 +565,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         global_speed_down_label = new javax.swing.JLabel();
         status_down_label = new javax.swing.JLabel();
         close_all_finished_down_button = new javax.swing.JButton();
-        jScrollPane_down = new javax.swing.JScrollPane();
-        jPanel_scroll_down = new javax.swing.JPanel();
+        jScrollPane_down = new javax.swing.JScrollPane(MainPanel.getDownload_list());
         pause_all_down_button = new javax.swing.JButton();
         down_remtime_label = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
@@ -651,9 +645,6 @@ public final class MainPanelView extends javax.swing.JFrame {
         });
 
         jScrollPane_down.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(153, 153, 153)));
-
-        jPanel_scroll_down.setLayout(new javax.swing.BoxLayout(jPanel_scroll_down, javax.swing.BoxLayout.Y_AXIS));
-        jScrollPane_down.setViewportView(jPanel_scroll_down);
 
         pause_all_down_button.setBackground(new java.awt.Color(255, 153, 0));
         pause_all_down_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
@@ -1622,7 +1613,6 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JMenu help_menu;
     private javax.swing.JMenuItem hide_tray_menu;
     private javax.swing.JButton jButton1;
-    private javax.swing.JPanel jPanel_scroll_down;
     private javax.swing.JPanel jPanel_scroll_up;
     private javax.swing.JScrollPane jScrollPane_down;
     private javax.swing.JScrollPane jScrollPane_up;

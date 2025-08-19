@@ -52,16 +52,12 @@ import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
+import javax.swing.*;
+
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 /**
  *
@@ -208,6 +204,8 @@ public final class MainPanel {
     private final SpeedMeter _global_dl_speed, _global_up_speed;
     private final DownloadManager _download_manager;
     private final UploadManager _upload_manager;
+    private static final ListModel<Download> _download_model = new DefaultListModel<>();
+    private static final DownloadList _download_list = new DownloadList(_download_model);
     private final StreamThrottlerSupervisor _stream_supervisor;
     private int _max_dl, _max_ul, _default_slots_down, _default_slots_up, _max_dl_speed, _max_up_speed;
     private boolean _use_slots_down, _limit_download_speed, _limit_upload_speed, _use_mega_account_down, _init_paused, _debug_file;
@@ -532,6 +530,10 @@ public final class MainPanel {
 
     public UploadManager getUpload_manager() {
         return _upload_manager;
+    }
+
+    public static DownloadList getDownload_list() {
+        return _download_list;
     }
 
     public StreamThrottlerSupervisor getStream_supervisor() {
