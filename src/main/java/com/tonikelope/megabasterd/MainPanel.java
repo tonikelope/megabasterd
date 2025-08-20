@@ -263,6 +263,8 @@ public final class MainPanel {
 
         loadUserSettings();
 
+        Logger.getLogger("org.apache.hc.client5.http.wire").setLevel(Level.INFO);
+
         if (_debug_file) {
             try {
                 final PrintStream fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log"));

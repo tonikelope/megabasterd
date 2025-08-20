@@ -49,6 +49,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     private final ConcurrentLinkedQueue<Component> removalQueue = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<Component> additionQueue = new ConcurrentLinkedQueue<>();
 
+    // todo, don't flush if there have been new additions/removals in the list in the last 50ms
+    //  however, if there are ever over 100, do it anyways
     private void flushAdditions() {
         if (additionQueue.isEmpty()) return;
         MiscTools.GUIRun(() -> {
