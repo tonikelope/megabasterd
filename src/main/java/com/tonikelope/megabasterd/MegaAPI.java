@@ -11,7 +11,16 @@ package com.tonikelope.megabasterd;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpHost;
+
 import static com.tonikelope.megabasterd.CryptTools.*;
+import static com.tonikelope.megabasterd.MainPanel.getProxy_manager;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -24,6 +33,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -35,6 +45,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
@@ -56,6 +67,7 @@ public class MegaAPI implements Serializable {
     public static final int PBKDF2_ITERATIONS = 100000;
     public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
     private static final Logger LOG = Logger.getLogger(MegaAPI.class.getName());
+    private static final ArrayList<String> _excluded_proxy_list = new ArrayList<>();
 
     public static int checkMEGAError(String data) {
         String error = findFirstRegex("^\\[?(\\-[0-9]+)\\]?$", data, 1);
@@ -109,6 +121,78 @@ public class MegaAPI implements Serializable {
 
         Random randomno = new Random();
         _seqno = randomno.nextLong() & 0xffffffffL;
+    }
+
+    private static String _current_smart_proxy = null;
+
+    private static FastMegaHttpClientBuilder.MegaHttpProxyConfiguration createProxyConfig(HttpSet statusSet) {
+        return new FastMegaHttpClientBuilder.MegaHttpProxyConfiguration(
+                FastMegaHttpClientBuilder.FMProxyType.SMART,
+                () -> _excluded_proxy_list,
+                () -> statusSet.httpError.get() == 509,
+                /* Extra smart conditions */ () -> statusSet.httpError.get() == 509,
+                true,
+                false,
+                (newCurrentSmartProxy) -> {
+                    _current_smart_proxy = newCurrentSmartProxy;
+                    return Unit.INSTANCE;
+                }
+        );
+    }
+
+    private static Map<FastMegaHttpClientBuilder.FMEventType, Function0<Unit>> getClientListenerMap(HttpSet statusSet) {
+        return new HashMap<>() {{
+            put(FastMegaHttpClientBuilder.FMEventType.CURRENT_SMART_PROXY_ERRORED, () -> {
+                if (_current_smart_proxy != null && statusSet.httpError.get() != 0) {
+                    getProxy_manager().blockProxy(_current_smart_proxy, "HTTP " + statusSet.httpError.get());
+                }
+                return Unit.INSTANCE;
+            });
+        }};
+    }
+
+    private static CloseableHttpClient createMegaDownloaderClient(HttpGet request, HttpSet statusSet) {
+        return new FastMegaHttpClientBuilder<>(
+            request,
+            RequestConfig.custom(),
+            createProxyConfig(statusSet),
+            getClientListenerMap(statusSet)
+        ).withProperty(FastMegaHttpClientBuilder.FMProperty.NO_CACHE).build();
+    }
+
+    private static class HttpSet {
+        AtomicInteger httpError = new AtomicInteger(0);
+        AtomicInteger httpStatus = new AtomicInteger(0);
+    }
+
+    public boolean checkMegaDownloadUrl(String string_url) throws MalformedURLException {
+        if (string_url == null || string_url.isEmpty()) return false;
+
+        HttpSet statusSet = new HttpSet();
+
+        String hostString = findFirstRegex("https?://([^/]+)", string_url, 1);
+        HttpHost httpHost = new HttpHost(hostString);
+
+        URL url = new URL("http://" + httpHost.getHostName() + string_url.substring(hostString.length()) + "/0-0");
+        LOG.info("Checking mega download url: " + url + ", host: " + httpHost + ", host.getHostName(): " + httpHost.getHostName());
+        HttpGet request = new HttpGet(url.toString());
+
+        do {
+            try (
+                CloseableHttpClient client = createMegaDownloaderClient(request, statusSet);
+                CloseableHttpResponse response = client.execute(request)
+            ) {
+                statusSet.httpStatus.set(response.getCode());
+                if (statusSet.httpStatus.get() != 200) {
+                    statusSet.httpError.set(statusSet.httpStatus.get());
+                } else statusSet.httpError.set(0);
+            } catch (Exception ex) {
+                LOG.log(Level.SEVERE, "FAILED TO CHECK DOWNLOAD URL: {0} : {1}", new Object[]{url, ex.getMessage()});
+                ex.printStackTrace();
+            }
+        } while (statusSet.httpError.get() == 509);
+
+        return statusSet.httpStatus.get() != 403;
     }
 
     public int getAccount_version() {
@@ -456,7 +540,7 @@ public class MegaAPI implements Serializable {
 
                 con.setDoOutput(true);
 
-                con.getOutputStream().write(request.getBytes("UTF-8"));
+                con.getOutputStream().write(request.getBytes(StandardCharsets.UTF_8));
 
                 con.getOutputStream().close();
 

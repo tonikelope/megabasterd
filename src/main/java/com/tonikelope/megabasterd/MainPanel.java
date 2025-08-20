@@ -12,6 +12,10 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import com.tonikelope.megabasterd.SmartMegaProxyManager.SmartProxyAuthenticator;
+import org.apache.hc.client5.http.impl.classic.ConnectExec;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
+import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+
 import static com.tonikelope.megabasterd.Transference.*;
 import java.awt.AWTException;
 import java.awt.Color;
@@ -263,7 +267,20 @@ public final class MainPanel {
 
         loadUserSettings();
 
-        Logger.getLogger("org.apache.hc.client5.http.wire").setLevel(Level.INFO);
+        //todo fix
+        /*System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.Jdk14Logger");
+        Logger.getLogger("").setLevel(Level.SEVERE);
+
+        Logger.getLogger("org.apache.hc.client5.http.wire").setLevel(Level.SEVERE);
+        Logger.getLogger("org.apache.hc.core5").setLevel(Level.SEVERE);
+        Logger.getLogger("org.apache.http.impl").setLevel(Level.SEVERE);
+        Logger.getLogger("org.apache.http.conn").setLevel(Level.SEVERE);
+        Logger.getLogger("org.apache.http.client").setLevel(Level.SEVERE);
+        Logger.getLogger("org.apache.http.impl.client").setLevel(Level.SEVERE);
+        Logger.getLogger("org.apache.http.impl.conn").setLevel(Level.SEVERE);
+        Logger.getLogger("org.apache.http.impl.conn.PoolingHttpClientConnectionManager").setLevel(Level.SEVERE);
+        Logger.getLogger(ConnectExec.class.getCanonicalName()).setLevel(Level.SEVERE);*/
+
 
         if (_debug_file) {
             try {
@@ -279,7 +296,7 @@ public final class MainPanel {
             }
         }
 
-        System.out.println(System.getProperty("os.name") + "" + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " " + System.getProperty("java.home"));
+        System.out.println(System.getProperty("os.name") + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " " + System.getProperty("java.home"));
 
         UIManager.put("OptionPane.messageFont", GUI_FONT.deriveFont(15f * getZoom_factor()));
 

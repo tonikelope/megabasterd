@@ -9,8 +9,17 @@
  */
 package com.tonikelope.megabasterd;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MainPanel.VERSION;
+import static com.tonikelope.megabasterd.MainPanel.getProxy_manager;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Container;
@@ -80,6 +89,9 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -1129,10 +1141,10 @@ public class MiscTools {
         return res;
     }
 
-    public static boolean checkMegaDownloadUrl(String string_url) {
+    public static boolean OLD_checkMegaDownloadUrl(String string_url) throws MalformedURLException {
 
         if (string_url == null || string_url.isEmpty()) {
-            return false;
+            throw new MalformedURLException("");
         }
 
         HttpURLConnection con = null;
@@ -1162,6 +1174,8 @@ public class MiscTools {
             try {
 
                 URL url = new URL(string_url + "/0-0");
+
+                //LOG.info("URL: " + url);
 
                 if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && proxy_manager != null && !MainPanel.isUse_proxy()) {
 

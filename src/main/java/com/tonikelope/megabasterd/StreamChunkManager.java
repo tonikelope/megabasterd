@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PipedOutputStream;
@@ -36,14 +35,14 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
     private final ConcurrentHashMap<Thread, Boolean> _notified_threads;
     private final PipedOutputStream _pipeos;
     private String _url;
-    private final HashMap _file_info;
+    private final HashMap<String, Object> _file_info;
     private final String _link;
     private final Object _secure_notify_lock;
     private final Object _chunk_offset_lock;
     private final KissVideoStreamServer _server;
     private volatile boolean _exit;
 
-    public StreamChunkManager(KissVideoStreamServer server, String link, HashMap file_info, String mega_account, PipedOutputStream pipeos, String url, long start_offset, long end_offset) {
+    public StreamChunkManager(KissVideoStreamServer server, String link, HashMap<String, Object> file_info, String mega_account, PipedOutputStream pipeos, String url, long start_offset, long end_offset) {
         _server = server;
         _link = link;
         _mega_account = mega_account;
@@ -63,7 +62,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
     public String getUrl() throws Exception {
 
-        if (!checkMegaDownloadUrl(_url)) {
+        if (!_server.getMega_api().checkMegaDownloadUrl(_url)) {
 
             _url = _server.getMegaFileDownloadUrl(_link, (String) _file_info.get("pass_hash"), (String) _file_info.get("noexpiretoken"), _mega_account);
             _file_info.put("url", _url);
@@ -79,10 +78,6 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
     public ConcurrentHashMap<Long, StreamChunk> getChunk_queue() {
         return _chunk_queue;
-    }
-
-    public KissVideoStreamServer getServer() {
-        return _server;
     }
 
     @Override
@@ -194,9 +189,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
         synchronized (_secure_notify_lock) {
 
-            _notified_threads.entrySet().forEach((entry) -> {
-                entry.setValue(true);
-            });
+            _notified_threads.entrySet().forEach((entry) -> entry.setValue(true));
 
             _secure_notify_lock.notifyAll();
         }

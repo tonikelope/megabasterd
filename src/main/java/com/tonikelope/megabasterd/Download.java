@@ -24,6 +24,8 @@ import java.io.OutputStream;
 import static java.lang.Integer.MAX_VALUE;
 import static java.lang.Long.valueOf;
 import static java.lang.Thread.sleep;
+
+import java.net.MalformedURLException;
 import java.nio.channels.FileChannel;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
@@ -1245,8 +1247,12 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     public String getDownloadUrlForWorker() {
-        if (checkMegaDownloadUrl(_last_download_url)) {
-            return _last_download_url;
+        try {
+            if (getMa().checkMegaDownloadUrl(_last_download_url)) {
+                return _last_download_url;
+            }
+        } catch (MalformedURLException ex) {
+            LOG.severe("MALFORMED URL: " + ex.getMessage());
         }
 
         boolean error;
@@ -1266,7 +1272,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                             getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
 
-                if (checkMegaDownloadUrl(download_url)) {
+                if (getMa().checkMegaDownloadUrl(download_url)) {
                     synchronized (_dl_url_lock) {
                         _last_download_url = download_url;
                     }

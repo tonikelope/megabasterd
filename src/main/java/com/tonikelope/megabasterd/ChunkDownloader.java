@@ -174,14 +174,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
         }
     }
 
+    private final AtomicBoolean chunkError = new AtomicBoolean(false);
     private final AtomicBoolean timeoutError = new AtomicBoolean(false);
     private final AtomicInteger httpError = new AtomicInteger(0);
 
     private final FastMegaHttpClientBuilder.MegaHttpProxyConfiguration chunkDownloaderProxyConfig = new FastMegaHttpClientBuilder.MegaHttpProxyConfiguration(
         FastMegaHttpClientBuilder.FMProxyType.SMART,
         () -> _excluded_proxy_list,
+        chunkError::get,
         /* Extra smart conditions */ () -> httpError.get() == 509 || (_509_timestamp != -1 && _509_timestamp + SMART_PROXY_RECHECK_509_TIME * 1000 > System.currentTimeMillis()),
-        /* Re-use smart condition */ () ->  httpError.get() != 429,
         true,
         false,
         (newCurrentSmartProxy) -> {
@@ -227,7 +228,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
             httpError.set(0);
             AtomicInteger httpStatus = new AtomicInteger(0);
             AtomicInteger errorCount = new AtomicInteger(0);
-            AtomicBoolean chunkError = new AtomicBoolean(false);
             String worker_url = null;
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
             byte[] buffer = getScaledBuffer();
@@ -268,10 +268,10 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                 LOG.log(Level.INFO, "{0} Worker [{1}] is downloading chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
 
-                HttpGet getRequest = new HttpGet(chunk_url);
+                HttpGet request = new HttpGet(chunk_url);
                 try (
-                        CloseableHttpClient client = createChunkDownloaderClient(getRequest);
-                        CloseableHttpResponse response = client.execute(getRequest)
+                    CloseableHttpClient client = createChunkDownloaderClient(request);
+                    CloseableHttpResponse response = client.execute(request)
                 ) {
 
                     HttpEntity entity = response.getEntity();
@@ -299,8 +299,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                                 _chunk_inputstream = new KThrottledInputStream(rawStream, _download.getMain_panel().getStream_supervisor()) {
                                     @Override
                                     public void close() throws IOException {
-                                        super.close();
                                         response.close();
+                                        super.close();
                                     }
                                 };
 

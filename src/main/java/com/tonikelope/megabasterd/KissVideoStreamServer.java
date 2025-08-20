@@ -23,6 +23,7 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -52,6 +53,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
     private final ContentType _ctype;
     private volatile boolean _notified;
     private final Object _secure_notify_lock;
+    private MegaAPI mega_api = new MegaAPI();
 
     public KissVideoStreamServer(MainPanel panel) {
         _main_panel = panel;
@@ -65,6 +67,10 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
     public MainPanel getMain_panel() {
         return _main_panel;
+    }
+
+    public MegaAPI getMega_api() {
+        return mega_api;
     }
 
     public ConcurrentHashMap<String, HashMap<String, Object>> getLink_cache() {
@@ -161,13 +167,11 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {
 
-                    MegaAPI ma = new MegaAPI();
-
-                    file_info = ma.getMegaFileMetadata(link);
+                    file_info = mega_api.getMegaFileMetadata(link);
 
                 } else {
 
-                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8"))) : null);
+                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes(StandardCharsets.UTF_8))) : null);
 
                 }
 
@@ -203,18 +207,16 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             try {
 
-                MegaAPI ma = new MegaAPI();
-
                 if (mega_account != null) {
 
-                    ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, _main_panel.getView(), mega_account);
+                    mega_api = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, _main_panel.getView(), mega_account);
                 }
 
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {
-                    dl_url = ma.getMegaFileDownloadUrl(link);
+                    dl_url = mega_api.getMegaFileDownloadUrl(link);
 
                 } else {
-                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
+                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, mega_api.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
 
             } catch (APIException ex) {
@@ -299,7 +301,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             LOG.log(Level.INFO, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), link, mega_account});
 
-            HashMap cache_info, file_info;
+            HashMap<String, Object> cache_info, file_info;
 
             cache_info = getLink_cache().get(link);
 
@@ -376,7 +378,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
                     temp_url = (String) file_info.get("url");
 
-                    if (!checkMegaDownloadUrl(temp_url)) {
+                    if (!mega_api.checkMegaDownloadUrl(temp_url)) {
 
                         temp_url = getMegaFileDownloadUrl(link, pass_hash, noexpire_token, mega_account);
 

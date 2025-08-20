@@ -34,6 +34,8 @@ sourceSets {
 }
 
 dependencies {
+    implementation("org.apache.logging.log4j:log4j-api:2.25.1")
+    implementation("org.apache.logging.log4j:log4j-core:2.25.1")
     implementation("org.apache.httpcomponents.client5:httpclient5:5.5")
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.0")
     implementation("org.swinglabs.swingx:swingx-all:1.6.5-1")
