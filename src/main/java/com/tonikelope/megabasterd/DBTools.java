@@ -17,6 +17,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,7 +29,7 @@ public class DBTools {
 
     private static final Logger LOG = Logger.getLogger(DBTools.class.getName());
 
-    private static final HashMap<String, Object> settingsCache = new HashMap<>();
+    private static final ConcurrentHashMap<String, Object> settingsCache = new ConcurrentHashMap<>();
 
     public static synchronized void setupSqliteTables() throws SQLException {
 
@@ -384,11 +385,8 @@ public class DBTools {
         }
     }
 
-    public static synchronized HashMap<String, Object> selectSettingsValues() throws SQLException {
-
-        if (!settingsCache.isEmpty()) {
-            return new HashMap<>(settingsCache);
-        }
+    public static HashMap<String, Object> getSettingsCache() throws SQLException {
+        if (!settingsCache.isEmpty()) return new HashMap<>(settingsCache);
 
         HashMap<String, Object> settings = new HashMap<>();
 

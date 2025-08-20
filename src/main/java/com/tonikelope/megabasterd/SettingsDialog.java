@@ -3331,7 +3331,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                         HashMap<String, Object> settings = new HashMap<>();
 
-                        settings.put("settings", selectSettingsValues());
+                        settings.put("settings", getSettingsCache());
 
                         settings.put("mega_accounts", selectMegaAccounts());
 

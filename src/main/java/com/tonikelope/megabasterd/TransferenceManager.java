@@ -15,8 +15,6 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -33,6 +31,7 @@ import javax.swing.*;
  */
 abstract public class TransferenceManager implements Runnable, SecureSingleThreadNotifiable {
 
+    public static final int MAX_TRANSFERENCES_DISPLAYED = 250;
     public static final int MAX_WAIT_QUEUE = 10000;
     public static final int MAX_PROVISION_WORKERS = 50;
     private static final Logger LOG = Logger.getLogger(TransferenceManager.class.getName());
@@ -46,22 +45,41 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final LinkedBlockingQueue<Transference> _transference_finished_queue;
     protected final LinkedBlockingQueue<Transference> _transference_running_list;
 
-    private final ConcurrentLinkedQueue<Component> removalQueue = new ConcurrentLinkedQueue<>();
-    private final ConcurrentLinkedQueue<Component> additionQueue = new ConcurrentLinkedQueue<>();
+    private final LinkedBlockingQueue<Component> removalQueue = new LinkedBlockingQueue<>(MAX_TRANSFERENCES_DISPLAYED);
+    private final LinkedBlockingQueue<Component> additionQueue = new LinkedBlockingQueue<>(MAX_TRANSFERENCES_DISPLAYED);
 
-    // todo, don't flush if there have been new additions/removals in the list in the last 50ms
-    //  however, if there are ever over 100, do it anyways
+    private final LinkedBlockingQueue<Component> removalWaitQueue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<Component> additionWaitQueue = new LinkedBlockingQueue<>();
+
+    private void safeDrainWaitingToQueue(LinkedBlockingQueue<Component> source, LinkedBlockingQueue<Component> target) {
+        int capacity = target.remainingCapacity();
+        if (capacity <= 0) return;
+
+        int sourceSize = source.size();
+        int toDrain = Math.min(capacity, sourceSize);
+
+        List<Component> drained = new ArrayList<>(toDrain);
+        source.drainTo(drained, toDrain);
+        target.addAll(drained);
+    }
+
     private void flushAdditions() {
+        safeDrainWaitingToQueue(additionWaitQueue, additionQueue);
         if (additionQueue.isEmpty()) return;
         MiscTools.GUIRun(() -> {
             JPanel scrollPanel = getScroll_panel();
+            if (scrollPanel.getComponentCount() >= MAX_TRANSFERENCES_DISPLAYED) return;
+            int toPull = Math.min(MAX_TRANSFERENCES_DISPLAYED - scrollPanel.getComponentCount(), additionQueue.size());
+
             if (scrollPanel instanceof BatchPanel)
                 ((BatchPanel) scrollPanel).setSuspendLayout(true);
-
-            Component comp;
-            while ((comp = additionQueue.poll()) != null) {
-                scrollPanel.add(comp);
-            }
+            do {
+                Component comp = additionQueue.poll();
+                if (comp != null) {
+                    scrollPanel.add(comp);
+                }
+                toPull--;
+            } while (toPull > 0);
             if (scrollPanel instanceof BatchPanel)
                 ((BatchPanel) scrollPanel).setSuspendLayout(false);
             scrollPanel.revalidate();
@@ -70,6 +88,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     }
 
     private void flushRemovals() {
+        safeDrainWaitingToQueue(removalWaitQueue, removalQueue);
         if (removalQueue.isEmpty()) return;
         MiscTools.GUIRun(() -> {
             JPanel scrollPanel = getScroll_panel();
@@ -334,13 +353,13 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void flagForPanelRemoval(Transference transference) {
         if (transference != null && transference.getView() != null) {
-            removalQueue.add((Component) transference.getView());
+            removalWaitQueue.add((Component) transference.getView());
         }
     }
 
     public void flagForPanelAddition(Transference transference) {
         if (transference != null && transference.getView() != null) {
-            additionQueue.add((Component) transference.getView());
+            additionWaitQueue.add((Component) transference.getView());
         }
     }
 

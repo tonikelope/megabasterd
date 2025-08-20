@@ -37,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -95,7 +96,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private final boolean _use_slots;
     private int _slots;
     private final boolean _restart;
-    private final ArrayList<ChunkDownloader> _chunkworkers;
+    private final ConcurrentSkipListSet<ChunkDownloader> _chunkworkers;
     private final ExecutorService _thread_pool;
     private volatile boolean _exit;
     private volatile boolean _pause;
@@ -1381,46 +1382,26 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     public void stopThisSlot(ChunkDownloader chunkdownloader) {
-
-        synchronized (_workers_lock) {
-
-            if (_chunkworkers.remove(chunkdownloader) && !_exit) {
-
-                if (_use_slots) {
-
-                    if (chunkdownloader.isChunk_exception() || getMain_panel().isExit()) {
-
-                        _finalizing = true;
-
-                        MiscTools.GUIRun(() -> {
-                            getView().getSlots_spinner().setEnabled(false);
-
-                            getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
-                        });
-
-                    } else if (!_finalizing) {
-                        MiscTools.GUIRun(() -> {
-                            getView().getSlots_spinner().setEnabled(true);
-                        });
-                    }
-
-                    getView().updateSlotsStatus();
-                }
-
-                if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
-
-                    getView().printStatusNormal("Download paused!");
-
-                    MiscTools.GUIRun(() -> {
-                        getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
-
-                        getView().getPause_button().setEnabled(true);
-                    });
-
-                }
+        if (!_chunkworkers.remove(chunkdownloader) || _exit) return;
+        if (_use_slots) {
+            if (chunkdownloader.isChunk_exception() || getMain_panel().isExit()) {
+                _finalizing = true;
+                MiscTools.GUIRun(() -> {
+                    getView().getSlots_spinner().setEnabled(false);
+                    getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
+                });
+            } else if (!_finalizing) {
+                MiscTools.GUIRun(() -> getView().getSlots_spinner().setEnabled(true));
             }
+            getView().updateSlotsStatus();
         }
-
+        if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
+            getView().printStatusNormal("Download paused!");
+            MiscTools.GUIRun(() -> {
+                getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
+                getView().getPause_button().setEnabled(true);
+            });
+        }
     }
 
     private static byte[] intToBytes(int v) {
