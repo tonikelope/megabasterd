@@ -346,80 +346,74 @@ public class DBTools {
         }
     }
 
-    public static synchronized String selectSettingValue(String key) {
-
-        if (settingsCache.containsKey(key)) {
-            return (String) settingsCache.get(key);
-        }
+    public static String selectSettingValue(String key) {
+        if (settingsCache.containsKey(key)) return (String) settingsCache.get(key);
 
         String value = null;
-
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT value from settings WHERE key=?")) {
-
-            ps.setString(1, key);
-
-            ResultSet res = ps.executeQuery();
-
-            if (res.next()) {
-                value = res.getString(1);
-            }
+            value = selectSettingValueFromDb(key);
         } catch (SQLException ex) {
             Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
 
-        if (value != null) {
-            settingsCache.put(key, value);
+        if (value != null) settingsCache.put(key, value);
+        return value;
+    }
+
+    private static synchronized String selectSettingValueFromDb(String key) throws SQLException {
+        String value = null;
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT value from settings WHERE key=?")) {
+            ps.setString(1, key);
+            ResultSet res = ps.executeQuery();
+            if (res.next()) {
+                value = res.getString(1);
+            }
         }
         return value;
     }
 
     public static synchronized void insertSettingValue(String key, String value) throws SQLException {
-
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO settings (key,value) VALUES (?, ?)")) {
-
             ps.setString(1, key);
-
             ps.setString(2, value);
-
             ps.executeUpdate();
-
             settingsCache.put(key, value);
         }
     }
 
     public static HashMap<String, Object> getSettingsCache() throws SQLException {
         if (!settingsCache.isEmpty()) return new HashMap<>(settingsCache);
+        HashMap<String, Object> settings = null;
+        try {
+            settings = getSettingsCacheFromDb();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+        }
 
+        if (settings != null && settingsCache.isEmpty()) settingsCache.putAll(settings);
+        return settings;
+    }
+
+    private static synchronized HashMap<String, Object> getSettingsCacheFromDb() throws SQLException {
         HashMap<String, Object> settings = new HashMap<>();
-
         ResultSet res;
-
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
-
             res = stat.executeQuery("SELECT * FROM settings");
-
             while (res.next()) {
-
                 settings.put(res.getString("key"), res.getString("value"));
             }
         }
-
         return settings;
     }
 
     public static synchronized void insertSettingsValues(HashMap<String, Object> settings) throws SQLException {
-
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO settings (key,value) VALUES (?, ?)")) {
-
             for (Map.Entry<String, Object> entry : settings.entrySet()) {
-
                 ps.setString(1, entry.getKey());
                 ps.setString(2, (String) entry.getValue());
                 ps.addBatch();
-
                 settingsCache.put(entry.getKey(), entry.getValue());
             }
-
             ps.executeBatch();
         }
     }
