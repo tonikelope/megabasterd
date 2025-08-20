@@ -367,7 +367,9 @@ public class DBTools {
             Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         }
 
-        settingsCache.put(key, value);
+        if (value != null) {
+            settingsCache.put(key, value);
+        }
         return value;
     }
 

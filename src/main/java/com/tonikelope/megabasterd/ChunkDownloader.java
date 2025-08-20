@@ -38,7 +38,7 @@ import java.util.logging.Logger;
  *
  * @author tonikelope
  */
-public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
+public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, Comparable<ChunkDownloader> {
 
     public static final int SMART_PROXY_RECHECK_509_TIME = 3600;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
@@ -71,6 +71,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             _chunk_inputstream = null;
         }
+    }
+
+    @Override
+    public int compareTo(ChunkDownloader other) {
+        return Integer.compare(this._id, other._id);
     }
 
     public ChunkDownloader(int id, Download download) {

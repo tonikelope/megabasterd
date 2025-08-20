@@ -553,17 +553,12 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void pause() {
-
         printStatusNormal("Pausing download ...");
-
         MiscTools.GUIRun(() -> {
             for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
                 c.setEnabled(false);
             }
-
             for (JComponent c : new JComponent[]{stop_button, keep_temp_checkbox}) {
-
                 c.setVisible(true);
             }
         });
@@ -571,20 +566,14 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void resume() {
-
         printStatusNormal("Downloading file from mega ...");
-
         MiscTools.GUIRun(() -> {
             for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
                 c.setEnabled(true);
             }
-
             for (JComponent c : new JComponent[]{stop_button, keep_temp_checkbox}) {
-
                 c.setVisible(false);
             }
-
             pause_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE DOWNLOAD"));
             _download.getMain_panel().getView().getPause_all_down_button().setVisible(true);
         });
@@ -593,12 +582,9 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void stop(String status) {
-
         printStatusNormal(status);
-
         MiscTools.GUIRun(() -> {
             for (JComponent c : new JComponent[]{pause_button, keep_temp_checkbox, stop_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
                 c.setEnabled(false);
             }
         });
@@ -607,12 +593,10 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void updateSpeed(final String speed, final Boolean visible) {
-
         MiscTools.GUIRun(() -> {
             if (speed != null) {
                 speed_label.setText(speed);
             }
-
             if (visible != null) {
                 speed_label.setVisible(visible);
             }
@@ -621,22 +605,16 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void updateProgressBar(final long progress, final double bar_rate) {
-
-        MiscTools.GUIRun(() -> {
-            progress_pbar.setValue((int) Math.floor(bar_rate * progress));
-        });
+        MiscTools.GUIRun(() -> progress_pbar.setValue((int) Math.floor(bar_rate * progress)));
     }
 
     @Override
     public void updateProgressBar(final int value) {
-        MiscTools.GUIRun(() -> {
-            progress_pbar.setValue(value);
-        });
+        MiscTools.GUIRun(() -> progress_pbar.setValue(value));
     }
 
     @Override
     public void printStatusError(final String message) {
-
         MiscTools.GUIRun(() -> {
             status_label.setForeground(Color.red);
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
@@ -645,7 +623,6 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void printStatusOK(final String message) {
-
         MiscTools.GUIRun(() -> {
             status_label.setForeground(new Color(0, 170, 0));
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
@@ -654,7 +631,6 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void printStatusNormal(final String message) {
-
         MiscTools.GUIRun(() -> {
             status_label.setForeground(new Color(102, 102, 102));
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
@@ -664,41 +640,28 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void updateSlotsStatus() {
-
-        synchronized (_download.getWorkers_lock()) {
-
-            int conta_error = 0;
-
-            conta_error = _download.getChunkworkers().stream().filter((c) -> (c.isError_wait())).map((_item) -> 1).reduce(conta_error, Integer::sum);
-
-            final String status = conta_error > 0 ? "(" + String.valueOf(conta_error) + ")" : "";
-
-            MiscTools.GUIRun(() -> {
-                slot_status_label.setForeground(Color.RED);
-                slot_status_label.setText(status);
-            });
-        }
+        int errorCount = (int)_download.getChunkworkers().stream().filter(ChunkDownloader::isError_wait).count();
+        final String status = errorCount > 0 ? "(" + errorCount + ")" : "";
+        MiscTools.GUIRun(() -> {
+            slot_status_label.setForeground(Color.RED);
+            slot_status_label.setText(status);
+        });
     }
 
     @Override
     public int getSlots() {
         try {
-            return (int) (MiscTools.futureRun((Callable) getSlots_spinner()::getValue).get());
-        } catch (InterruptedException ex) {
-            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
+            return (int) (MiscTools.futureRun(getSlots_spinner()::getValue).get());
+        } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
         }
         return 0;
     }
 
     public boolean isKeepTempFileSelected() {
-
         try {
-            return (boolean) (MiscTools.futureRun((Callable) getKeep_temp_checkbox()::isSelected).get());
-        } catch (InterruptedException ex) {
-            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
+            return (boolean) (MiscTools.futureRun(getKeep_temp_checkbox()::isSelected).get());
+        } catch (InterruptedException | ExecutionException ex) {
             Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
         }
         return false;
