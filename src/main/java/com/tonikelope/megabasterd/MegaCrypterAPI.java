@@ -11,8 +11,12 @@ package com.tonikelope.megabasterd;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static com.tonikelope.megabasterd.CryptTools.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.crypto.Cipher;
+import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -21,15 +25,22 @@ import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.crypto.Cipher;
-import javax.swing.JOptionPane;
+
+import static com.tonikelope.megabasterd.CryptTools.PBKDF2HMACSHA256;
+import static com.tonikelope.megabasterd.CryptTools.aes_cbc_decrypt_pkcs7;
+import static com.tonikelope.megabasterd.CryptTools.genDecrypter;
+import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.Bin2UrlBASE64;
+import static com.tonikelope.megabasterd.MiscTools.cleanFilePath;
+import static com.tonikelope.megabasterd.MiscTools.cleanFilename;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
 
 /**
  *
@@ -39,7 +50,7 @@ public class MegaCrypterAPI {
 
     public static final Set<String> PASS_CACHE = new HashSet<>();
     public static final Object PASS_LOCK = new Object();
-    private static final Logger LOG = Logger.getLogger(MegaCrypterAPI.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private static String _rawRequest(String request, URL url_api) throws MegaCrypterAPIException {
 
@@ -53,7 +64,7 @@ public class MegaCrypterAPI {
 
                 con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
                     con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
                 }
@@ -72,12 +83,12 @@ public class MegaCrypterAPI {
 
             con.setDoOutput(true);
 
-            con.getOutputStream().write(request.getBytes("UTF-8"));
+            con.getOutputStream().write(request.getBytes(StandardCharsets.UTF_8));
 
             con.getOutputStream().close();
 
             if (con.getResponseCode() != 200) {
-                Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), con.getResponseCode()});
+                LOG.log(Level.INFO, "{} Failed : HTTP error code : {}", Thread.currentThread().getName(), con.getResponseCode());
 
             } else {
 
@@ -107,7 +118,7 @@ public class MegaCrypterAPI {
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         } finally {
 
             if (con != null) {

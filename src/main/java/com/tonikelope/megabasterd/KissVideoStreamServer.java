@@ -13,8 +13,11 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.crypto.CipherInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,12 +32,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.crypto.CipherInputStream;
+
+import static com.tonikelope.megabasterd.MainPanel.STREAMER_PORT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.UrlBASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.checkMegaAccountLoginAndShowMasterPassDialog;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.getWaitTimeExpBackOff;
 
 /**
  *
@@ -45,7 +52,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
     public static final int THREAD_START = 0x01;
     public static final int THREAD_STOP = 0x02;
     public static final int DEFAULT_WORKERS = 10;
-    private static final Logger LOG = Logger.getLogger(KissVideoStreamServer.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private final MainPanel _main_panel;
     private final ConcurrentHashMap<String, HashMap<String, Object>> _link_cache;
@@ -57,7 +64,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
     public KissVideoStreamServer(MainPanel panel) {
         _main_panel = panel;
-        _link_cache = new ConcurrentHashMap();
+        _link_cache = new ConcurrentHashMap<>();
         _working_threads = new ConcurrentLinkedQueue<>();
         _ctype = new ContentType();
         _notified = false;
@@ -104,7 +111,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(SEVERE, null, ex);
+                    LOG.log(Level.FATAL, "Sleep interrupted!", ex);
                 }
             }
 
@@ -179,12 +186,12 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
                 error = true;
 
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.log(Level.SEVERE, ex2.getMessage());
+                    LOG.log(Level.FATAL, ex2.getMessage());
 
                 }
 
@@ -223,12 +230,12 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
                 error = true;
 
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.log(Level.SEVERE, ex2.getMessage());
+                    LOG.log(Level.FATAL, ex2.getMessage());
                 }
 
             }
@@ -299,7 +306,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             link = url_parts[1];
 
-            LOG.log(Level.INFO, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), link, mega_account});
+            LOG.log(Level.INFO, "{} {} {}", new Object[]{Thread.currentThread().getName(), link, mega_account});
 
             HashMap<String, Object> cache_info, file_info;
 
@@ -472,11 +479,11 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
         } catch (Exception ex) {
 
             if (!(ex instanceof IOException)) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
 
         } finally {
-            LOG.log(Level.INFO, "{0} KissVideoStreamerHandle: bye bye", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{} KissVideoStreamerHandle: bye bye", Thread.currentThread().getName());
 
             if (chunkwriter != null) {
 

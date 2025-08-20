@@ -9,9 +9,11 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 //https://github.com/tonikelope/megabasterd/issues/397
 
@@ -33,7 +35,7 @@ import java.util.logging.Logger;
  */
 public class LabelTranslatorSingleton {
 
-    private static final Logger LOG = Logger.getLogger(LabelTranslatorSingleton.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     public static LabelTranslatorSingleton getInstance() {
 
@@ -2257,7 +2259,7 @@ public class LabelTranslatorSingleton {
 
         if (_rosetta.putIfAbsent(key, val) != null) {
 
-            Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING, "Rosetta: {0} aready exists!", new Object[]{key});
+            LOG.log(Level.WARN, "Rosetta: {} aready exists!", new Object[]{key});
         }
     }
 

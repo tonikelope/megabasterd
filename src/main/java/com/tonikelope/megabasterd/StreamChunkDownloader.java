@@ -9,7 +9,10 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -18,8 +21,8 @@ import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static com.tonikelope.megabasterd.MainPanel.DEFAULT_BYTE_BUFFER_SIZE;
 
 /**
  *
@@ -27,7 +30,7 @@ import java.util.logging.Logger;
  */
 public class StreamChunkDownloader implements Runnable {
 
-    private static final Logger LOG = Logger.getLogger(StreamChunkDownloader.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private final int _id;
     private final StreamChunkManager _chunkmanager;
@@ -46,7 +49,7 @@ public class StreamChunkDownloader implements Runnable {
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
+        LOG.log(Level.INFO, "{} Worker [{}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
 
         HttpURLConnection con = null;
 
@@ -79,7 +82,7 @@ public class StreamChunkDownloader implements Runnable {
 
                 while (!_exit && !_chunkmanager.isExit() && _chunkmanager.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
 
-                    LOG.log(Level.INFO, "{0} Worker [{1}]: Chunk buffer is full. I pause myself.", new Object[]{Thread.currentThread().getName(), _id});
+                    LOG.log(Level.INFO, "{} Worker [{}]: Chunk buffer is full. I pause myself.", new Object[]{Thread.currentThread().getName(), _id});
 
                     _chunkmanager.secureWait();
                 }
@@ -172,7 +175,7 @@ public class StreamChunkDownloader implements Runnable {
 
                     byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
-                    LOG.log(Level.INFO, "{0} Worker [{1}]: offset: {2} size: {3}", new Object[]{Thread.currentThread().getName(), _id, offset, chunk_stream.getSize()});
+                    LOG.log(Level.INFO, "{} Worker [{}]: offset: {} size: {}", new Object[]{Thread.currentThread().getName(), _id, offset, chunk_stream.getSize()});
 
                     http_error = 0;
 
@@ -184,7 +187,7 @@ public class StreamChunkDownloader implements Runnable {
 
                             if (http_status != 200) {
 
-                                LOG.log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                                LOG.log(Level.INFO, "{} Failed : HTTP error code : {}", new Object[]{Thread.currentThread().getName(), http_status});
 
                                 http_error = http_status;
 
@@ -203,7 +206,7 @@ public class StreamChunkDownloader implements Runnable {
 
                                     if (chunk_stream.getSize() == chunk_writes) {
 
-                                        LOG.log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
+                                        LOG.log(Level.INFO, "{} Worker [{}] has downloaded chunk [{}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
 
                                         _chunkmanager.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
 
@@ -218,7 +221,7 @@ public class StreamChunkDownloader implements Runnable {
                         }
 
                     } catch (IOException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
+                        LOG.log(Level.FATAL, ex.getMessage());
                     } finally {
                         con.disconnect();
                     }
@@ -230,14 +233,14 @@ public class StreamChunkDownloader implements Runnable {
             }
 
         } catch (IOException | URISyntaxException | ChunkInvalidException | InterruptedException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         } catch (OutOfMemoryError | Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         _chunkmanager.secureNotifyAll();
 
-        LOG.log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
+        LOG.log(Level.INFO, "{} Worker [{}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
     }
 
 }

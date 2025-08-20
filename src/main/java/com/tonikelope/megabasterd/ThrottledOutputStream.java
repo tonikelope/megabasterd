@@ -11,15 +11,13 @@ package com.tonikelope.megabasterd;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.logging.Logger;
+
 
 /**
  *
  * @author tonikelope
  */
 public class ThrottledOutputStream extends OutputStream {
-
-    private static final Logger LOG = Logger.getLogger(ThrottledOutputStream.class.getName());
 
     private final OutputStream _rawStream;
 

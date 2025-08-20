@@ -9,14 +9,16 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.util.HashMap;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JLabel;
+
+import static com.tonikelope.megabasterd.MiscTools.formatBytes;
 
 /**
  *
@@ -27,7 +29,7 @@ public class SpeedMeter implements Runnable {
     public static final double SLEEP = 3000.0;
     public static final int SLEEP_MILLIS = (int) SLEEP;
     public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 20;
-    private static final Logger LOG = Logger.getLogger(SpeedMeter.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
     private final JLabel _speed_label;
     private final JLabel _rem_label;
     private final TransferenceManager _trans_manager;
@@ -208,7 +210,7 @@ public class SpeedMeter implements Runnable {
                 Thread.sleep(SLEEP_MILLIS);
 
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
 
         } while (true);

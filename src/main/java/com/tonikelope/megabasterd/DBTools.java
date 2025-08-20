@@ -9,6 +9,10 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -18,8 +22,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -27,7 +29,7 @@ import java.util.logging.Logger;
  */
 public class DBTools {
 
-    private static final Logger LOG = Logger.getLogger(DBTools.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private static final ConcurrentHashMap<String, Object> settingsCache = new ConcurrentHashMap<>();
 
@@ -185,7 +187,7 @@ public class DBTools {
                 return session;
             }
         } catch (SQLException ex) {
-            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return session;
@@ -350,10 +352,10 @@ public class DBTools {
         if (settingsCache.containsKey(key)) return (String) settingsCache.get(key);
 
         String value = null;
-        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT value from settings WHERE key=?")) {
+        try {
             value = selectSettingValueFromDb(key);
         } catch (SQLException ex) {
-            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         if (value != null) settingsCache.put(key, value);
@@ -387,7 +389,7 @@ public class DBTools {
         try {
             settings = getSettingsCacheFromDb();
         } catch (SQLException ex) {
-            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         if (settings != null && settingsCache.isEmpty()) settingsCache.putAll(settings);

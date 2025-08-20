@@ -12,15 +12,13 @@ package com.tonikelope.megabasterd;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.logging.Logger;
+import java.io.InputStream;
 
 /**
  *
  * @author tonikelope
  */
 public class StreamChunk {
-
-    private static final Logger LOG = Logger.getLogger(StreamChunk.class.getName());
 
     private final long _offset;
     private final long _size;
@@ -67,7 +65,7 @@ public class StreamChunk {
         return _data_os;
     }
 
-    public class ByteArrayOutInputStream extends ByteArrayOutputStream {
+    public static class ByteArrayOutInputStream extends ByteArrayOutputStream {
 
         public ByteArrayOutInputStream(int size) {
             super(size);

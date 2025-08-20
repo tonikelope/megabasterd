@@ -9,13 +9,17 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-
-import java.awt.*;
-import java.util.logging.Logger;
 import javax.sound.midi.Sequencer;
-import javax.swing.JOptionPane;
+import javax.swing.*;
+import java.awt.*;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MainPanel.VERSION;
+import static com.tonikelope.megabasterd.MiscTools.checkNewVersion;
+import static com.tonikelope.megabasterd.MiscTools.openBrowserURL;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 
 /**
  *
@@ -466,5 +470,4 @@ public class AboutDialog extends javax.swing.JDialog {
     private javax.swing.JLabel subtitle_label;
     private javax.swing.JLabel title_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(AboutDialog.class.getName());
 }

@@ -1,6 +1,7 @@
 package com.tonikelope.megabasterd
 
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase
+import org.apache.hc.client5.http.config.ConnectionConfig
 import org.apache.hc.client5.http.config.RequestConfig
 import org.apache.hc.client5.http.entity.DeflateInputStreamFactory
 import org.apache.hc.client5.http.entity.GZIPInputStreamFactory
@@ -10,11 +11,15 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder
+import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy
+import org.apache.hc.core5.http.HttpEntity
 import org.apache.hc.core5.http.HttpHost
+import org.apache.hc.core5.http.io.HttpClientResponseHandler
 import org.apache.hc.core5.http.io.SocketConfig
 import org.apache.hc.core5.io.CloseMode
 import org.apache.hc.core5.io.ModalCloseable
 import org.apache.hc.core5.util.Timeout
+import org.apache.logging.log4j.LogManager
 import java.net.InetSocketAddress
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -28,6 +33,10 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
     private val eventListeners: Map<FMEventType, () -> Unit> = mutableMapOf(),
 ) : HttpClientBuilder(), ModalCloseable {
 
+    // TODO Setup logging of requests and responses for debugging purposes
+
+    private lateinit var connectionManager: PoolingHttpClientConnectionManager
+    private var isSharedManager: Boolean = true
     private lateinit var httpClient: CloseableHttpClient
     private val request: T = requestFactory(targetUrl)
 
@@ -36,18 +45,20 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
 
     companion object {
         @JvmStatic
+        private val LOG = LogManager.getLogger();
+
+        @JvmStatic
         private val contentDecoderMap: LinkedHashMap<String, InputStreamFactory> = linkedMapOf(
             "gzip" to GZIPInputStreamFactory.getInstance(),
             "deflate" to DeflateInputStreamFactory.getInstance(),
         )
 
+        @JvmStatic
         private fun getDefaultManagerBuilder() = PoolingHttpClientConnectionManagerBuilder.create().apply {
             setMaxConnTotal(200)
             setMaxConnPerRoute(20)
+            setTlsSocketStrategy(DefaultClientTlsStrategy.createDefault())
         }
-
-        @JvmStatic
-        private val manager = getDefaultManagerBuilder().build()
 
         @JvmStatic
         private fun getSocksProxyManagerBuilder(proxyAddress: InetSocketAddress): PoolingHttpClientConnectionManager =
@@ -56,7 +67,6 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
             ).build()
     }
 
-    private var useDefaultManager: Boolean = true
     private var timeoutIfNotSmartProxy = true
 
     enum class FMProperty(private val block: FastMegaHttpClient<*>.() -> Unit) {
@@ -82,14 +92,6 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
         WILL_USE_SMART_PROXY,
     }
 
-    /**
-     * Represents the configuration for the Mega HTTP proxy.
-     * @param mostAggressiveProxyType Indicates the highest 'level' of proxy we will attempt to use for this client.
-     *                                for example, if set to FMProxyType.SMART, it will use the smart proxy if available.
-     *                                If NOT available, it will fallback to FMProxyType.BASIC, and finally to FMProxyType.NONE.
-     * @param excludedProxies List of proxies to exclude from use for this client.
-     * @param smartProxyCallback Callback function executed when smart proxy 'changes'.
-     */
     class MegaHttpProxyConfiguration(
         val mostAggressiveProxyType: FMProxyType = FMProxyType.NONE,
         val excludedProxies: () -> List<String> = { emptyList() },
@@ -100,11 +102,27 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
         val smartProxyCallback: (String?) -> Unit = { },
     )
 
-    fun execute(): CloseableHttpResponse {
+    @Throws(Exception::class)
+    fun execute(): CloseableHttpResponse = executeOrThrow { it as CloseableHttpResponse }
+    fun executeAndEntity(): HttpEntity = executeOrThrow { response ->
+        val status = response.code
+        if (status in 200..299) {
+            val entity = response.entity
+            entity ?: throw RuntimeException("Response contains no content")
+        } else null
+    }
+
+    fun <T> execute(handler: HttpClientResponseHandler<T>): T {
         if (!::httpClient.isInitialized) {
             httpClient = build()
         }
-        return httpClient.execute(request)
+        return httpClient.execute(request, handler)
+    }
+
+    private fun <T> executeOrThrow(handler: HttpClientResponseHandler<T?>): T {
+        if (!::httpClient.isInitialized) httpClient = build()
+        return httpClient.execute(request, handler)
+            ?: throw RuntimeException("Could not handle the response, execution returned null")
     }
 
     override fun build(): CloseableHttpClient {
@@ -112,10 +130,11 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
         setUserAgent(MainPanel.DEFAULT_USER_AGENT)
         disableDefaultUserAgent()
         setContentDecoderRegistry(contentDecoderMap)
-        if (useDefaultManager) {
-            setConnectionManager(manager)
-            setConnectionManagerShared(true)
-        }
+        setConnectionManager(
+            if (::connectionManager.isInitialized) { connectionManager }
+            else getDefaultManagerBuilder().build()
+        )
+        setConnectionManagerShared(isSharedManager)
         disableAuthCaching()
         configBuilder.setContentCompressionEnabled(false)
         setDefaultRequestConfig(configBuilder.build())
@@ -138,19 +157,19 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
         else if (shouldUseBasicProxy()) setupBasicProxy()
         else if (trySmartAfterNoUseBasic) setupSmartProxy()
 
-        val proxyManager = proxyManager
+        val megaProxyManager = megaProxyManager
         val currentSmartProxy = currentSmartProxy
         val (connectMillis, responseMillis) = when {
-            proxyManager != null && currentSmartProxy != null -> {
-                val timeoutMillis = proxyManager.proxy_timeout.toLong()
+            megaProxyManager != null && currentSmartProxy != null -> {
+                val timeoutMillis = megaProxyManager.proxy_timeout.toLong()
                 timeoutMillis to timeoutMillis * 2L
             }
             timeoutIfNotSmartProxy -> Transference.HTTP_CONNECT_TIMEOUT.toLong() to Transference.HTTP_READ_TIMEOUT.toLong()
             else -> 0L to 0L
         }
 
-        // Todo deal with this deprecation
-        configBuilder.setConnectTimeout(Timeout.ofMilliseconds(connectMillis))
+        if (!::connectionManager.isInitialized) connectionManager = getDefaultManagerBuilder().build()
+        connectionManager.setDefaultConnectionConfig(ConnectionConfig.custom().setConnectTimeout(Timeout.ofMilliseconds(connectMillis)).build())
         configBuilder.setResponseTimeout(Timeout.ofMilliseconds(responseMillis))
     }
 
@@ -178,13 +197,10 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
         }
 
         if (smartProxySocks.get()) {
-            // 1080 is the default SOCKS port
             val proxyHostAddress = InetSocketAddress(proxyHost, proxyPort)
-            val newManager = getSocksProxyManagerBuilder(proxyHostAddress)
-            useDefaultManager = false
-            setConnectionManager(newManager)
-            setConnectionManagerShared(false)
-        } else setProxy(HttpHost("http", proxyHost, proxyPort))
+            connectionManager = getSocksProxyManagerBuilder(proxyHostAddress)
+            isSharedManager = false
+        } else setProxy(getProxyHttpHost(proxyHost, proxyPort))
 
         return@with true
     }
@@ -198,7 +214,7 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
         request.setHeader("Proxy-Authorization", "Basic $hashedProxyAuth")
     }
 
-    private fun shouldUseSmartProxy() = isUseSmartProxy && !isUseProxy && proxyManager != null &&
+    private fun shouldUseSmartProxy() = isUseSmartProxy && !isUseProxy && megaProxyManager != null &&
         (forcedSmartProxy || currentSmartProxy != null || megaProxyConfig.smartProxyExtraConditions()) &&
         megaProxyConfig.mostAggressiveProxyType == FMProxyType.SMART
 
@@ -206,7 +222,7 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
         megaProxyConfig.mostAggressiveProxyType >= FMProxyType.BASIC
 
     private fun getAndDigestSmartProxy(discardCurrentOnFail: Boolean = true) {
-        val smartProxy = proxyManager?.getProxy(ArrayList<String>(megaProxyConfig.excludedProxies.invoke()))
+        val smartProxy = megaProxyManager?.getProxy(ArrayList<String>(megaProxyConfig.excludedProxies.invoke()))
         if (smartProxy == null || smartProxy.size < 2) {
             if (discardCurrentOnFail) currentSmartProxy = null
             return
@@ -218,11 +234,11 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
     private fun getProxyHttpHost(
         hostname: String = MainPanel.getProxy_host(),
         port: Int = MainPanel.getProxy_port(),
-    ) = HttpHost("http", hostname, port)
+    ) = HttpHost(hostname, port)
 
     // <editor-fold desc="Panel Wrappers">
-    private val proxyManager: SmartMegaProxyManager? get() = MainPanel.getProxy_manager()
-    private val forcedSmartProxy: Boolean get() = proxyManager?.isForce_smart_proxy ?: false
+    private val megaProxyManager: SmartMegaProxyManager? get() = MainPanel.getProxy_manager()
+    private val forcedSmartProxy: Boolean get() = megaProxyManager?.isForce_smart_proxy ?: false
     private val isUseProxy: Boolean get() = MainPanel.isUse_proxy()
     private val isUseSmartProxy: Boolean get() = MainPanel.isUse_smart_proxy()
     private val proxyUser: String get() = MainPanel.getProxy_user()

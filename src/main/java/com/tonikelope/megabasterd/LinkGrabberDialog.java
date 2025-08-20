@@ -9,9 +9,12 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
@@ -23,14 +26,16 @@ import java.io.InputStream;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JTextArea;
-import javax.swing.filechooser.FileNameExtensionFilter;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.checkMegaAccountLoginAndShowMasterPassDialog;
+import static com.tonikelope.megabasterd.MiscTools.extractMegaLinksFromString;
+import static com.tonikelope.megabasterd.MiscTools.extractStringFromClipboardContents;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.truncateText;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 
 /**
  *
@@ -363,9 +368,9 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                         });
                     }
                 } catch (FileNotFoundException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
                 MiscTools.GUIRun(() -> {
                     dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
@@ -472,5 +477,5 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
         return priority_checkbox;
     }
 
-    private static final Logger LOG = Logger.getLogger(LinkGrabberDialog.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 }

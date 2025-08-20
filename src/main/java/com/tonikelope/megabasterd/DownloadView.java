@@ -9,23 +9,21 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
-import static java.lang.Integer.MAX_VALUE;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.copyTextToClipboard;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  *
@@ -653,16 +651,16 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         try {
             return (int) (MiscTools.futureRun(getSlots_spinner()::getValue).get());
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Error in getSlots!", ex);
         }
         return 0;
     }
 
     public boolean isKeepTempFileSelected() {
         try {
-            return (boolean) (MiscTools.futureRun(getKeep_temp_checkbox()::isSelected).get());
+            return (MiscTools.futureRun(getKeep_temp_checkbox()::isSelected).get());
         } catch (InterruptedException | ExecutionException ex) {
-            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Error in isKeepTempFileSelected!", ex);
         }
         return false;
     }
@@ -688,6 +686,6 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     private javax.swing.JLabel status_label;
     private javax.swing.JButton stop_button;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(DownloadView.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
 }

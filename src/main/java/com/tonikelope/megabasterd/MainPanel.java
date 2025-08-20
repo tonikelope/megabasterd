@@ -9,34 +9,22 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.DBTools.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
 import com.tonikelope.megabasterd.SmartMegaProxyManager.SmartProxyAuthenticator;
-import org.apache.hc.client5.http.impl.classic.ConnectExec;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
-import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import static com.tonikelope.megabasterd.Transference.*;
-import java.awt.AWTException;
-import java.awt.Color;
-import static java.awt.EventQueue.invokeLater;
-import java.awt.Font;
-import static java.awt.Frame.NORMAL;
-import static java.awt.SystemTray.getSystemTray;
-import static java.awt.Toolkit.getDefaultToolkit;
-import java.awt.TrayIcon;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
-import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import static java.lang.Integer.parseInt;
-import static java.lang.System.exit;
 import java.net.Authenticator;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -52,12 +40,35 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import static java.util.concurrent.Executors.newCachedThreadPool;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
-import javax.swing.*;
 
+import static com.tonikelope.megabasterd.DBTools.deleteUpload;
+import static com.tonikelope.megabasterd.DBTools.selectDownloads;
+import static com.tonikelope.megabasterd.DBTools.selectELCAccounts;
+import static com.tonikelope.megabasterd.DBTools.selectMegaAccounts;
+import static com.tonikelope.megabasterd.DBTools.selectSettingValue;
+import static com.tonikelope.megabasterd.DBTools.selectUploads;
+import static com.tonikelope.megabasterd.DBTools.setupSqliteTables;
+import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.bin2i32a;
+import static com.tonikelope.megabasterd.MiscTools.checkMegaAccountLoginAndShowMasterPassDialog;
+import static com.tonikelope.megabasterd.MiscTools.checkNewVersion;
+import static com.tonikelope.megabasterd.MiscTools.createAndRegisterFont;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.genRandomByteArray;
+import static com.tonikelope.megabasterd.MiscTools.getCurrentJarParentPath;
+import static com.tonikelope.megabasterd.MiscTools.restartApplication;
+import static com.tonikelope.megabasterd.MiscTools.setNimbusLookAndFeel;
+import static com.tonikelope.megabasterd.Transference.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
+import static com.tonikelope.megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
+import static java.awt.EventQueue.invokeLater;
+import static java.awt.Frame.NORMAL;
+import static java.awt.SystemTray.getSystemTray;
+import static java.awt.Toolkit.getDefaultToolkit;
+import static java.awt.event.WindowEvent.WINDOW_CLOSING;
+import static java.lang.Integer.parseInt;
+import static java.lang.System.exit;
+import static java.util.concurrent.Executors.newCachedThreadPool;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
@@ -102,7 +113,7 @@ public final class MainPanel {
     private static Boolean _resume_uploads;
     private static Boolean _resume_downloads;
     public static volatile long LAST_EXTERNAL_COMMAND_TIMESTAMP;
-    private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
+    private static final Logger LOG = LogManager.getLogger(MainPanel.class.getName());
     private static volatile boolean CHECK_RUNNING = true;
 
     public static void main(String[] args) {
@@ -111,7 +122,7 @@ public final class MainPanel {
 
             if (args.length > 1) {
                 try {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "{0} Waiting {1} seconds before start...", new Object[]{Thread.currentThread().getName(), args[1]});
+                    LOG.log(Level.INFO, "{} Waiting {} seconds before start...", new Object[]{Thread.currentThread().getName(), args[1]});
 
                     if (Long.parseLong(args[1]) >= 0) {
                         Thread.sleep(Long.parseLong(args[1]) * 1000);
@@ -119,7 +130,7 @@ public final class MainPanel {
                         CHECK_RUNNING = false;
                     }
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
             }
 
@@ -132,11 +143,9 @@ public final class MainPanel {
         }
 
         try {
-
             setupSqliteTables();
-
         } catch (SQLException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Failed to initialize SQL tables!", ex);
         }
 
         setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
@@ -267,20 +276,9 @@ public final class MainPanel {
 
         loadUserSettings();
 
-        //todo fix
-        /*System.setProperty("org.apache.commons.logging.Log", "org.apache.commons.logging.impl.Jdk14Logger");
-        Logger.getLogger("").setLevel(Level.SEVERE);
-
-        Logger.getLogger("org.apache.hc.client5.http.wire").setLevel(Level.SEVERE);
-        Logger.getLogger("org.apache.hc.core5").setLevel(Level.SEVERE);
-        Logger.getLogger("org.apache.http.impl").setLevel(Level.SEVERE);
-        Logger.getLogger("org.apache.http.conn").setLevel(Level.SEVERE);
-        Logger.getLogger("org.apache.http.client").setLevel(Level.SEVERE);
-        Logger.getLogger("org.apache.http.impl.client").setLevel(Level.SEVERE);
-        Logger.getLogger("org.apache.http.impl.conn").setLevel(Level.SEVERE);
-        Logger.getLogger("org.apache.http.impl.conn.PoolingHttpClientConnectionManager").setLevel(Level.SEVERE);
-        Logger.getLogger(ConnectExec.class.getCanonicalName()).setLevel(Level.SEVERE);*/
-
+        // todo exclude org.apache.hc.client5.* from logging
+        System.out.println("Log4j config path: " + System.getProperty("log4j.configuration"));
+        System.setProperty("org.apache.commons.logging.simplelog.showlogname", "true");
 
         if (_debug_file) {
             try {
@@ -292,7 +290,7 @@ public final class MainPanel {
                     fileOut.close();
                 }));
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         }
 
@@ -318,7 +316,7 @@ public final class MainPanel {
         try {
             trayIcon();
         } catch (AWTException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         THREAD_POOL.execute((_download_manager = new DownloadManager(this)));
@@ -337,7 +335,7 @@ public final class MainPanel {
             _streamserver = new KissVideoStreamServer(this);
             _streamserver.start(STREAMER_PORT, "/video");
         } catch (IOException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+            LOG.log(Level.FATAL, "", ex);
         }
 
         _check_old_version();
@@ -400,7 +398,7 @@ public final class MainPanel {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                     Thread.currentThread().interrupt();
                 }
             }
@@ -527,7 +525,7 @@ public final class MainPanel {
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         }
 
@@ -764,7 +762,7 @@ public final class MainPanel {
             _mega_accounts = selectMegaAccounts();
             _elc_accounts = selectELCAccounts();
         } catch (SQLException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Could not load Mega or ELC accounts!", ex);
         }
 
         _mega_account_down = DBTools.selectSettingValue("mega_account_down");
@@ -786,7 +784,7 @@ public final class MainPanel {
                 DBTools.insertSettingValue("master_pass_salt", _master_pass_salt);
 
             } catch (SQLException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         }
 
@@ -883,7 +881,7 @@ public final class MainPanel {
                 try {
                     Runtime.getRuntime().exec(_run_command_path);
                 } catch (IOException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
 
                 LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
@@ -943,7 +941,7 @@ public final class MainPanel {
             try {
                 DBTools.vaccum();
             } catch (SQLException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
 
             if (restart) {
@@ -961,7 +959,7 @@ public final class MainPanel {
             try {
                 getSystemTray().remove(_trayicon);
             } catch (Exception e) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, "Error removing tray icon: " + e.getMessage());
+                LOG.log(Level.FATAL, "Error removing tray icon: " + e.getMessage());
             }
         }
         
@@ -977,7 +975,7 @@ public final class MainPanel {
                 try {
                     DBTools.vaccum();
                 } catch (SQLException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
             }
 
@@ -1068,7 +1066,7 @@ public final class MainPanel {
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
     }
@@ -1153,7 +1151,7 @@ public final class MainPanel {
                                     try {
                                         DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
                                     } catch (SQLException ex) {
-                                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                        LOG.log(Level.FATAL, ex.getMessage());
                                     }
                                 }
                             }
@@ -1184,7 +1182,7 @@ public final class MainPanel {
                             DBTools.truncateUploadsQueue();
                             DBTools.insertUploadsQueue(uploads_queue);
                         } catch (SQLException ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                            LOG.log(Level.FATAL, "Caught SQL Exception trying to truncate!", ex);
                         }
 
                         if (wait) {
@@ -1192,7 +1190,7 @@ public final class MainPanel {
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException ex) {
-                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                LOG.log(Level.FATAL, ex.getMessage());
                             }
                         }
                     } while (wait);
@@ -1237,18 +1235,18 @@ public final class MainPanel {
                             clientSocket.close();
                         } catch (Exception ex1) {
                             if (!_exit) { // Only log errors if not exiting
-                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex1.getMessage());
+                                LOG.log(Level.FATAL, ex1.getMessage());
                             }
                         }
                     }
                     try {
                         serverSocket.close();
                     } catch (IOException e) {
-                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, e.getMessage());
+                        LOG.log(Level.FATAL, e.getMessage());
                     }
                 });
             } catch (Exception ex2) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex2.getMessage());
+                LOG.log(Level.FATAL, ex2.getMessage());
             }
 
         }
@@ -1311,7 +1309,7 @@ public final class MainPanel {
                             }
 
                         } catch (Exception ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                            LOG.log(Level.FATAL, "Caught exception in queue iterator!", ex);
                         }
                     }
 
@@ -1337,7 +1335,7 @@ public final class MainPanel {
 
                                 if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
-                                    Download download = new Download(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
+                                    Download download = new Download(tthis, ma, entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
 
                                     getDownload_manager().getTransference_provision_queue().add(download);
 
@@ -1349,7 +1347,7 @@ public final class MainPanel {
                                 }
 
                             } catch (Exception ex) {
-                                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                                LOG.log(Level.FATAL, "Error in Download response iterator!", ex);
                             }
 
                         }
@@ -1357,7 +1355,7 @@ public final class MainPanel {
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                    LOG.log(Level.FATAL, "Error in main Download thread!", ex);
                 }
 
                 if (downloadCount > 0) {
@@ -1376,9 +1374,7 @@ public final class MainPanel {
                     setResume_downloads(true);
                 }
 
-                MiscTools.GUIRun(() -> {
-                    getView().getStatus_down_label().setText("");
-                });
+                MiscTools.GUIRun(() -> getView().getStatus_down_label().setText(""));
             });
 
         }
@@ -1524,7 +1520,7 @@ public final class MainPanel {
                             }
 
                         } catch (Exception ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                            LOG.log(Level.FATAL, "Caught exception in Upload iterator!", ex);
                         }
                     }
 
@@ -1562,14 +1558,14 @@ public final class MainPanel {
                                 }
 
                             } catch (Exception ex) {
-                                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                                LOG.log(Level.FATAL, "Error in Upload response iterator!", ex);
                             }
                         }
 
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                    LOG.log(Level.FATAL, "Error in main Upload thread!", ex);
                 }
 
                 if (conta_uploads > 0) {

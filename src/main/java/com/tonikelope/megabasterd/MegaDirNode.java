@@ -10,15 +10,12 @@
 package com.tonikelope.megabasterd;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 /**
  *
  * @author tonikelope
  */
 public class MegaDirNode {
-
-    private static final Logger LOG = Logger.getLogger(MegaDirNode.class.getName());
 
     private final String _node_id;
 

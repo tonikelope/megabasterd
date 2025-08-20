@@ -9,22 +9,30 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.Bin2UrlBASE64;
+import static com.tonikelope.megabasterd.MiscTools.checkMegaAccountLoginAndShowMasterPassDialog;
+import static com.tonikelope.megabasterd.MiscTools.copyTextToClipboard;
+import static com.tonikelope.megabasterd.MiscTools.extractFirstMegaLinkFromString;
+import static com.tonikelope.megabasterd.MiscTools.extractStringFromClipboardContents;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
+import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 
 /**
  *
@@ -224,7 +232,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
 
                         error = true;
 
-                        LOG.log(Level.SEVERE, ex.getMessage());
+                        LOG.log(Level.FATAL, ex.getMessage());
                     }
 
                     String data;
@@ -283,7 +291,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
                     });
                 }
             } catch (UnsupportedEncodingException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         });
 
@@ -358,6 +366,6 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
     private javax.swing.JComboBox<String> use_mega_account_down_combobox;
     private javax.swing.JLabel use_mega_account_down_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(StreamerDialog.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
 }

@@ -9,6 +9,10 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.DBTools.selectSettingValue;
@@ -50,9 +54,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
+
 import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
@@ -74,7 +76,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
     public static final boolean DEFAULT_CLIPBOARD_LINK_MONITOR = true;
     public static final int CHUNK_SIZE_MULTI = 20;
-    private static final Logger LOG = Logger.getLogger(Download.class.getName());
+    public static final Logger LOG = LogManager.getLogger(Download.class.getName());
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view;
@@ -422,7 +424,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         }
 
@@ -436,7 +438,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         }
 
@@ -536,7 +538,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 try {
                     deleteDownload(_url);
                 } catch (SQLException ex) {
-                    LOG.log(SEVERE, null, ex);
+                    LOG.log(Level.FATAL, "Could not delete download!", ex);
                 }
             });
         }
@@ -655,7 +657,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             if (max_size != _file.length()) {
 
-                                LOG.log(Level.INFO, "{0} Downloader truncating mctemp file {1} -> {2} ", new Object[]{Thread.currentThread().getName(), _file.length(), max_size});
+                                LOG.log(Level.INFO, "{} Downloader truncating mctemp file {} -> {} ", new Object[]{Thread.currentThread().getName(), _file.length(), max_size});
 
                                 view.printStatusNormal("Truncating temp file...");
 
@@ -725,7 +727,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         THREAD_POOL.execute(() -> {
 
                             //PROGRESS WATCHDOG If a download remains more than PROGRESS_WATCHDOG_TIMEOUT seconds without receiving data, we force fatal error in order to restart it.
-                            LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
+                            LOG.log(Level.INFO, "{} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
 
                             long last_progress, progress = getProgress();
 
@@ -738,7 +740,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                         progress = getProgress();
                                     } catch (InterruptedException ex) {
                                         progress = -1;
-                                        Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+                                        LOG.log(Level.FATAL, "PROGRESS WATCHDOG INTERRUPTED", ex);
                                     }
                                 }
 
@@ -748,13 +750,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                 stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
                             }
 
-                            LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
+                            LOG.log(Level.INFO, "{} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
 
                         });
 
                         secureWait();
 
-                        LOG.log(Level.INFO, "{0} Chunkdownloaders finished!", Thread.currentThread().getName());
+                        LOG.log(Level.INFO, "{} Chunkdownloaders finished!", Thread.currentThread().getName());
 
                         meter.setExit(true);
 
@@ -764,30 +766,30 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             _thread_pool.shutdown();
 
-                            LOG.log(Level.INFO, "{0} Waiting all threads to finish...", Thread.currentThread().getName());
+                            LOG.log(Level.INFO, "{} Waiting all threads to finish...", Thread.currentThread().getName());
 
                             AtomicReference<ScheduledFuture<?>> checkerRef = new AtomicReference<>();
 
                             ScheduledFuture<?> checker = SHUTDOWN_SCHEDULER.scheduleWithFixedDelay(() -> {
                                 if (_thread_pool.isTerminated()) {
-                                    LOG.log(Level.INFO, "{0} Worker pool fully terminated", Thread.currentThread().getName());
+                                    LOG.log(Level.INFO, "{} Worker pool fully terminated", Thread.currentThread().getName());
                                     checkerRef.get().cancel(false);
-                                } else LOG.log(Level.INFO, "{0} Still waiting for worker threads…", Thread.currentThread().getName());
+                                } else LOG.log(Level.INFO, "{} Still waiting for worker threads…", Thread.currentThread().getName());
                             }, 0, 200, TimeUnit.MILLISECONDS);
 
                             checkerRef.set(checker);
                         } catch (RejectedExecutionException ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
+                            LOG.log(Level.FATAL, ex.getMessage());
                         }
 
                         if (!_thread_pool.isTerminated()) {
 
-                            LOG.log(Level.INFO, "{0} Closing thread pool ''mecag\u00fcen'' style...", Thread.currentThread().getName());
+                            LOG.log(Level.INFO, "{} Closing thread pool ''mecag\u00fcen'' style...", Thread.currentThread().getName());
 
                             _thread_pool.shutdownNow();
                         }
 
-                        LOG.log(Level.INFO, "{0} Downloader thread pool finished!", Thread.currentThread().getName());
+                        LOG.log(Level.INFO, "{} Downloader thread pool finished!", Thread.currentThread().getName());
 
                         mainPanel.getGlobal_dl_speed().detachTransference(this);
 
@@ -954,13 +956,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             view.printStatusError(_status_error);
 
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         if (_file != null && !view.isKeepTempFileSelected()) {
             boolean success = _file.delete();
             if (!success) {
-                LOG.log(Level.WARNING, "{0} Could not delete temp file {1}", new Object[]{Thread.currentThread().getName(), _file.getAbsolutePath()});
+                LOG.log(Level.WARN, "{} Could not delete temp file {}", new Object[]{Thread.currentThread().getName(), _file.getAbsolutePath()});
                 _status_error = "I/O ERROR " + _status_error;
                 view.printStatusError(_status_error);
             }
@@ -989,7 +991,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 try {
                     deleteDownload(_url);
                 } catch (SQLException ex) {
-                    LOG.log(SEVERE, null, ex);
+                    LOG.log(Level.FATAL, "Could not delete download!", ex);
                 }
             });
 
@@ -1024,11 +1026,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        LOG.log(Level.FATAL, ex.getMessage());
                     }
                 }
                 if (!_closed) {
-                    LOG.log(Level.INFO, "{0} Downloader {1} AUTO RESTARTING DOWNLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
+                    LOG.log(Level.INFO, "{} Downloader {} AUTO RESTARTING DOWNLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
                     restart();
                 }
             });
@@ -1046,7 +1048,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             _progress_watchdog_lock.notifyAll();
         }
 
-        LOG.log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
+        LOG.log(Level.INFO, "{}{} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
     }
 
     public void provisionIt(boolean retry) throws APIException {
@@ -1252,7 +1254,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 return _last_download_url;
             }
         } catch (MalformedURLException ex) {
-            LOG.severe("MALFORMED URL: " + ex.getMessage());
+            LOG.fatal("MALFORMED URL: {}", ex.getMessage());
         }
 
         boolean error;
@@ -1285,7 +1287,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.log(Level.SEVERE, ex2.getMessage());
+                    LOG.log(Level.FATAL, ex2.getMessage());
                 }
             }
         } while (error);
@@ -1690,7 +1692,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(SEVERE, null, ex);
+                    LOG.log(Level.FATAL, "Secure wait interrupted!", ex);
                 }
             }
 

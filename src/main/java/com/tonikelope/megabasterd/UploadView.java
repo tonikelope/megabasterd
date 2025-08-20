@@ -9,21 +9,23 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import static com.tonikelope.megabasterd.Transference.*;
-import java.awt.Color;
-import static java.lang.Integer.MAX_VALUE;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.copyTextToClipboard;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
+import static com.tonikelope.megabasterd.Transference.MAX_WORKERS;
+import static com.tonikelope.megabasterd.Transference.MIN_WORKERS;
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  *
@@ -694,11 +696,9 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
     @Override
     public int getSlots() {
         try {
-            return (int) (MiscTools.futureRun((Callable) getSlots_spinner()::getValue).get());
-        } catch (InterruptedException ex) {
-            Logger.getLogger(UploadView.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
-            Logger.getLogger(UploadView.class.getName()).log(Level.SEVERE, null, ex);
+            return (int) (MiscTools.futureRun(getSlots_spinner()::getValue).get());
+        } catch (InterruptedException | ExecutionException ex) {
+            LOG.log(Level.FATAL, "Error in getSlots!", ex);
         }
         return 0;
     }
@@ -725,6 +725,6 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
     private javax.swing.JLabel status_label;
     private javax.swing.JButton stop_button;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(UploadView.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
 }

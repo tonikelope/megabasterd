@@ -9,9 +9,9 @@
  */
 package com.tonikelope.megabasterd;
 
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  *
@@ -19,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
 
-    private static final Logger LOG = Logger.getLogger(ProgressMeter.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private final Transference _transference;
     private volatile boolean _exit;
@@ -59,7 +59,7 @@ public class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(SEVERE, null, ex);
+                    LOG.log(Level.FATAL, "Sleep interrupted!", ex);
                 }
             }
 
@@ -69,7 +69,7 @@ public class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
 
     @Override
     public void run() {
-        LOG.log(Level.INFO, "{0} ProgressMeter hello! {1}", new Object[]{Thread.currentThread().getName(), _transference.getFile_name()});
+        LOG.log(Level.INFO, "{} ProgressMeter hello! {}", new Object[]{Thread.currentThread().getName(), _transference.getFile_name()});
 
         _progress = _transference.getProgress();
 
@@ -86,7 +86,7 @@ public class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
             }
         }
 
-        LOG.log(Level.INFO, "{0} ProgressMeter bye bye! {1}", new Object[]{Thread.currentThread().getName(), _transference.getFile_name()});
+        LOG.log(Level.INFO, "{} ProgressMeter bye bye! {}", new Object[]{Thread.currentThread().getName(), _transference.getFile_name()});
 
     }
 

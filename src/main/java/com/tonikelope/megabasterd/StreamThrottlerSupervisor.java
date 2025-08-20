@@ -9,12 +9,14 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -22,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNotifiable {
 
-    private static final Logger LOG = Logger.getLogger(StreamThrottlerSupervisor.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private ConcurrentLinkedQueue<Integer> _input_slice_queue, _output_slice_queue;
 
@@ -107,7 +109,7 @@ public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNot
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
             }
 
@@ -181,7 +183,7 @@ public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNot
                 try {
                     _timer_lock.wait();
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
             }
         }

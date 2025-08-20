@@ -3,17 +3,12 @@ package com.tonikelope.megabasterd
 import java.io.InputStream
 import java.lang.System.nanoTime
 import java.util.concurrent.atomic.AtomicBoolean
-import java.util.logging.Logger
 import kotlin.math.min
 
 open class KThrottledInputStream(
     private val rawStream: InputStream,
     private val streamSupervisor: StreamThrottlerSupervisor
 ) : InputStream() {
-
-    companion object {
-        private val LOG: Logger = Logger.getLogger(ThrottledInputStream::class.java.name)
-    }
 
     private val streamFinished = AtomicBoolean(false)
 

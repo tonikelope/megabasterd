@@ -9,17 +9,19 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.DBTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
-import javax.swing.JOptionPane;
+
+import static com.tonikelope.megabasterd.DBTools.deleteDownloads;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 
 /**
  *
@@ -27,7 +29,7 @@ import javax.swing.JOptionPane;
  */
 public class DownloadManager extends TransferenceManager {
 
-    private static final Logger LOG = Logger.getLogger(DownloadManager.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private static final ExecutorService DB_EXECUTOR =
     Executors.newSingleThreadExecutor(r -> {
@@ -160,7 +162,7 @@ public class DownloadManager extends TransferenceManager {
             try {
                 deleteDownloads(urlsToDelete);
             } catch (SQLException ex) {
-                LOG.log(SEVERE, null, ex);
+                LOG.log(Level.FATAL, "Error deleting downloads!", ex);
             } 
         });
 
@@ -179,16 +181,13 @@ public class DownloadManager extends TransferenceManager {
 
         } catch (APIException ex) {
 
-            LOG.log(Level.INFO, "{0} Provision failed! Retrying in separated thread...", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{} Provision failed! Retrying in separated thread...", Thread.currentThread().getName());
 
             THREAD_POOL.execute(() -> {
                 try {
-
                     _provision((Download) download, true);
-
                 } catch (APIException ex1) {
-
-                    LOG.log(SEVERE, null, ex1);
+                    LOG.log(Level.FATAL, "Error provisioning download!", ex1);
                 }
 
                 secureNotify();

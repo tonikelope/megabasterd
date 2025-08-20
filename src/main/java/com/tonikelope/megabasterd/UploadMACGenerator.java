@@ -9,17 +9,23 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.CryptTools.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
+
+import static com.tonikelope.megabasterd.CryptTools.genCrypter;
+import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.bin2i32a;
+import static com.tonikelope.megabasterd.MiscTools.i32a2bin;
 
 /**
  *
@@ -27,7 +33,7 @@ import javax.crypto.IllegalBlockSizeException;
  */
 public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiable {
 
-    private static final Logger LOG = Logger.getLogger(UploadMACGenerator.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private final Upload _upload;
     private final Object _secure_notify_lock;
@@ -62,7 +68,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
             }
 
@@ -85,7 +91,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "{0} MAC GENERATOR {1} Hello!", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
+        LOG.log(Level.INFO, "{} MAC GENERATOR {} Hello!", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
 
         try {
 
@@ -137,7 +143,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                     ChunkWriterManager.checkChunkID(chunk_id, _upload.getFile_size(), chunk_offset);
 
                     while (!CHUNK_QUEUE.containsKey(chunk_offset)) {
-                        MiscTools.pausar(1000);
+                        MiscTools.pause(1000);
                     }
 
                     try {
@@ -184,7 +190,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                         file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
 
                     } catch (IllegalBlockSizeException | BadPaddingException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
+                        LOG.log(Level.FATAL, ex.getMessage());
                     }
 
                     chunk_id++;
@@ -213,7 +219,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
                 _upload.setFile_meta_mac(meta_mac);
 
-                LOG.log(Level.INFO, "{0} MAC GENERATOR {1} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
+                LOG.log(Level.INFO, "{} MAC GENERATOR {} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
 
             }
 
@@ -228,10 +234,10 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
             _upload.secureNotify();
 
-            LOG.log(Level.INFO, "{0} MAC GENERATOR {1} BYE BYE...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
+            LOG.log(Level.INFO, "{} MAC GENERATOR {} BYE BYE...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
     }

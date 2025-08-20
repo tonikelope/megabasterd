@@ -13,15 +13,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.logging.Logger;
 
 /**
  *
  * @author tonikelope
  */
 public class ThrottledInputStream extends InputStream {
-
-    private static final Logger LOG = Logger.getLogger(ThrottledInputStream.class.getName());
 
     private final InputStream _rawStream;
 

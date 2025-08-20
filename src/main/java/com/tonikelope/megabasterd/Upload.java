@@ -9,13 +9,14 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import javax.swing.*;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import static java.lang.Integer.MAX_VALUE;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.sql.SQLException;
@@ -28,9 +29,13 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JComponent;
+
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.formatBytes;
+import static com.tonikelope.megabasterd.MiscTools.i32a2bin;
+import static com.tonikelope.megabasterd.MiscTools.truncateText;
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  *
@@ -42,7 +47,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     public static final boolean DEFAULT_THUMBNAILS = true;
     public static final boolean UPLOAD_LOG = true;
     public static final boolean UPLOAD_PUBLIC_FOLDER = false;
-    private static final Logger LOG = Logger.getLogger(Upload.class.getName());
+    public static final Logger LOG = LogManager.getLogger(Upload.class.getName());
     private final MainPanel _main_panel;
     private volatile UploadView _view;
     private volatile ProgressMeter _progress_meter;
@@ -336,7 +341,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         }
 
@@ -350,7 +355,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         }
 
@@ -377,7 +382,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
             }
 
@@ -425,11 +430,11 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     _provision_ok = true;
 
-                    LOG.log(Level.INFO, "LAST CHUNK ID UPLOADED -> {0}", _last_chunk_id_dispatched);
+                    LOG.log(Level.INFO, "LAST CHUNK ID UPLOADED -> {}", _last_chunk_id_dispatched);
                 }
 
             } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         }
 
@@ -554,7 +559,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             try {
                 DBTools.deleteUpload(_file_name, _ma.getFull_email());
             } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         }
         _main_panel.getUpload_manager().getTransference_remove_queue().add(this);
@@ -624,7 +629,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 try {
 
-                    LOG.log(Level.INFO, "{0} Starting chunkuploader from startslot()...", Thread.currentThread().getName());
+                    LOG.log(Level.INFO, "{} Starting chunkuploader from startslot()...", Thread.currentThread().getName());
 
                     _thread_pool.execute(c);
 
@@ -688,7 +693,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "{0} Uploader hello! {1}", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
+        LOG.log(Level.INFO, "{} Uploader hello! {}", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
         MiscTools.GUIRun(() -> {
             getView().getQueue_down_button().setVisible(false);
@@ -725,7 +730,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                         _ul_url = _ma.initUploadFile(_file_name);
                     } catch (MegaAPIException ex) {
 
-                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        LOG.log(Level.FATAL, ex.getMessage());
 
                         if (Arrays.asList(FATAL_API_ERROR_CODES).contains(ex.getCode())) {
                             stopUploader(ex.getMessage());
@@ -738,7 +743,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                         long wait_time = MiscTools.getWaitTimeExpBackOff(++conta_error);
 
-                        LOG.log(Level.INFO, "{0} Uploader {1} Upload URL is null, retrying in {2} secs...", new Object[]{Thread.currentThread().getName(), this.getFile_name(), wait_time});
+                        LOG.log(Level.INFO, "{} Uploader {} Upload URL is null, retrying in {} secs...", new Object[]{Thread.currentThread().getName(), this.getFile_name(), wait_time});
 
                         try {
 
@@ -746,7 +751,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                         } catch (InterruptedException ex) {
 
-                            LOG.log(Level.SEVERE, ex.getMessage());
+                            LOG.log(Level.FATAL, ex.getMessage());
                         }
                     }
 
@@ -761,7 +766,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                         _auto_retry_on_error = true;
 
                     } catch (SQLException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
+                        LOG.log(Level.FATAL, ex.getMessage());
                     }
                 }
             }
@@ -810,7 +815,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                         _chunkworkers.add(c);
 
-                        LOG.log(Level.INFO, "{0} Starting chunkuploader {1} ...", new Object[]{Thread.currentThread().getName(), t});
+                        LOG.log(Level.INFO, "{} Starting chunkuploader {} ...", new Object[]{Thread.currentThread().getName(), t});
 
                         _thread_pool.execute(c);
                     }
@@ -836,7 +841,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                 THREAD_POOL.execute(() -> {
 
                     //PROGRESS WATCHDOG If a upload remains more than PROGRESS_WATCHDOG_TIMEOUT seconds without receiving data, we force fatal error in order to restart it.
-                    LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
+                    LOG.log(Level.INFO, "{} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
 
                     long last_progress, progress = getProgress();
 
@@ -849,7 +854,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                 progress = getProgress();
                             } catch (InterruptedException ex) {
                                 progress = -1;
-                                Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+                                LOG.log(Level.FATAL, "PROGRESS WATCHDOG INTERRUPTED", ex);
                             }
                         }
 
@@ -859,13 +864,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                         stopUploader("PROGRESS WATCHDOG TIMEOUT!");
                     }
 
-                    LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
+                    LOG.log(Level.INFO, "{} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
 
                 });
 
                 secureWait();
 
-                LOG.log(Level.INFO, "{0} Chunkuploaders finished! {1}", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
+                LOG.log(Level.INFO, "{} Chunkuploaders finished! {}", Thread.currentThread().getName(), this.getFile_name());
 
                 getProgress_meter().setExit(true);
 
@@ -875,22 +880,22 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     _thread_pool.shutdown();
 
-                    LOG.log(Level.INFO, "{0}Waiting for all threads to finish {1}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
+                    LOG.log(Level.INFO, "{}Waiting for all threads to finish {}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
                     _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
 
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
 
                 if (!_thread_pool.isTerminated()) {
 
-                    LOG.log(Level.INFO, "{0} Closing thread pool in ''mecag\u00fcen'' style {1}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
+                    LOG.log(Level.INFO, "{} Closing thread pool in ''mecag\u00fcen'' style {}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
                     _thread_pool.shutdownNow();
                 }
 
-                LOG.log(Level.INFO, "{0} Uploader thread pool finished! {1}", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
+                LOG.log(Level.INFO, "{} Uploader thread pool finished! {}", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
                 getMain_panel().getGlobal_up_speed().detachTransference(this);
 
@@ -904,7 +909,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     if (_completion_handler != null) {
 
-                        LOG.log(Level.INFO, "{0} Uploader creating NEW MEGA NODE {1}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
+                        LOG.log(Level.INFO, "{} Uploader creating NEW MEGA NODE {}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
                         getView().printStatusWarning("Creating new MEGA node ... ***DO NOT EXIT MEGABASTERD NOW***");
 
@@ -922,7 +927,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                             try {
                                 upload_res = _ma.finishUploadFile(f.getName(), ul_key, node_key, _file_meta_mac, _completion_handler, _parent_node, i32a2bin(_ma.getMaster_key()), _root_node, _share_key);
                             } catch (MegaAPIException ex) {
-                                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                LOG.log(Level.FATAL, ex.getMessage());
 
                                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(ex.getCode())) {
                                     stopUploader(ex.getMessage());
@@ -934,7 +939,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 long wait_time = MiscTools.getWaitTimeExpBackOff(++conta_error);
 
-                                LOG.log(Level.INFO, "{0} Uploader {1} Finisih upload res is null, retrying in {2} secs...", new Object[]{Thread.currentThread().getName(), this.getFile_name(), wait_time});
+                                LOG.log(Level.INFO, "{} Uploader {} Finisih upload res is null, retrying in {} secs...", new Object[]{Thread.currentThread().getName(), this.getFile_name(), wait_time});
 
                                 try {
 
@@ -942,7 +947,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 } catch (InterruptedException ex) {
 
-                                    LOG.log(Level.SEVERE, ex.getMessage());
+                                    LOG.log(Level.FATAL, ex.getMessage());
                                 }
                             }
 
@@ -955,7 +960,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                 _fid = (String) ((Map<String, Object>) files.get(0)).get("h");
 
                                 while (_thumbnail_file != null && "".equals(_thumbnail_file)) {
-                                    MiscTools.pausar(1000);
+                                    MiscTools.pause(1000);
                                 }
 
                                 if (_thumbnail_file != null) {
@@ -985,7 +990,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                     });
 
                                 } catch (Exception ex) {
-                                    LOG.log(Level.SEVERE, ex.getMessage());
+                                    LOG.log(Level.FATAL, ex.getMessage());
                                 }
 
                                 getView().printStatusOK(LabelTranslatorSingleton.getInstance().translate("File successfully uploaded! (") + _ma.getFull_email() + ")");
@@ -1002,16 +1007,14 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                             fr.write("[" + MiscTools.getDateTimeActual() + "] " + _file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
                                             fr.close();
                                         } catch (IOException ex) {
-                                            Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                            LOG.log(Level.FATAL, ex.getMessage());
                                         }
 
                                     }
                                 }
 
-                            } catch (MegaAPIException ex) {
-                                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
-                            } catch (IOException ex) {
-                                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                            } catch (MegaAPIException | IOException ex) {
+                                LOG.log(Level.FATAL, "Exception captured in Upload!", ex);
                             }
 
                         } else if (_status_error != null) {
@@ -1086,13 +1089,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             try {
                 DBTools.deleteUpload(_file_name, _ma.getFull_email());
             } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         } else {
             try {
                 DBTools.updateUploadProgress(getFile_name(), getMa().getFull_email(), getProgress(), getTemp_mac_data() != null ? getTemp_mac_data() : null);
             } catch (SQLException ex) {
-                Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.FATAL, "Could not delete upload!", ex);
             }
         }
 
@@ -1125,16 +1128,16 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                 for (int i = 3; !_closed && i > 0; i--) {
                     final int j = i;
                     MiscTools.GUIRun(() -> {
-                        getView().getRestart_button().setText("Restart (" + String.valueOf(j) + " secs...)");
+                        getView().getRestart_button().setText("Restart (" + j + " secs...)");
                     });
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        LOG.log(Level.FATAL, ex.getMessage());
                     }
                 }
                 if (!_closed) {
-                    LOG.log(Level.INFO, "{0} Uploader {1} AUTO RESTARTING UPLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
+                    LOG.log(Level.INFO, "{} Uploader {} AUTO RESTARTING UPLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
                     restart();
                 }
             });
@@ -1152,7 +1155,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             _progress_watchdog_lock.notifyAll();
         }
 
-        LOG.log(Level.INFO, "{0} Uploader {1} BYE BYE", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
+        LOG.log(Level.INFO, "{} Uploader {} BYE BYE", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
     }
 
     public void pause_worker() {

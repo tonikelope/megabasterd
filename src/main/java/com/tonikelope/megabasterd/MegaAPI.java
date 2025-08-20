@@ -15,13 +15,15 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import static com.tonikelope.megabasterd.CryptTools.*;
-import static com.tonikelope.megabasterd.MainPanel.getProxy_manager;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLException;
+import javax.swing.*;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -46,13 +48,29 @@ import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLException;
-import javax.swing.JOptionPane;
-import javax.swing.JProgressBar;
+
+import static com.tonikelope.megabasterd.CryptTools.AES_ZERO_IV;
+import static com.tonikelope.megabasterd.CryptTools.MEGAPrepareMasterKey;
+import static com.tonikelope.megabasterd.CryptTools.MEGAUserHash;
+import static com.tonikelope.megabasterd.CryptTools.aes_cbc_decrypt_nopadding;
+import static com.tonikelope.megabasterd.CryptTools.aes_cbc_encrypt_nopadding;
+import static com.tonikelope.megabasterd.CryptTools.aes_cbc_encrypt_pkcs7;
+import static com.tonikelope.megabasterd.CryptTools.aes_ecb_decrypt_nopadding;
+import static com.tonikelope.megabasterd.CryptTools.aes_ecb_encrypt_nopadding;
+import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
+import static com.tonikelope.megabasterd.CryptTools.rsaDecrypt;
+import static com.tonikelope.megabasterd.MainPanel.getProxy_manager;
+import static com.tonikelope.megabasterd.MiscTools.Bin2UrlBASE64;
+import static com.tonikelope.megabasterd.MiscTools.UrlBASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.bin2i32a;
+import static com.tonikelope.megabasterd.MiscTools.cleanFilename;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.genID;
+import static com.tonikelope.megabasterd.MiscTools.genRandomByteArray;
+import static com.tonikelope.megabasterd.MiscTools.getWaitTimeExpBackOff;
+import static com.tonikelope.megabasterd.MiscTools.i32a2bin;
+import static com.tonikelope.megabasterd.MiscTools.mpi2big;
 
 /**
  *
@@ -66,7 +84,7 @@ public class MegaAPI implements Serializable {
     public static final Integer[] MEGA_ERROR_NO_EXCEPTION_CODES = {-1, -3};
     public static final int PBKDF2_ITERATIONS = 100000;
     public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
-    private static final Logger LOG = Logger.getLogger(MegaAPI.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
     private static final ArrayList<String> _excluded_proxy_list = new ArrayList<>();
 
     public static int checkMEGAError(String data) {
@@ -165,7 +183,7 @@ public class MegaAPI implements Serializable {
         if (hostString == null) throw new MalformedURLException("Invalid URL: " + string_url);
 
         HttpHost httpHost = new HttpHost(hostString);
-        URI uri = URI.create("https://" + httpHost.getHostName() + string_url.substring(hostString.length()) + "/0-0");
+        URI uri = URI.create("http://" + httpHost.getHostName() + string_url.substring(hostString.length()) + "/0-0");
         LOG.info("Checking mega download uri: " + uri + ", host: " + httpHost + ", host.getHostName(): " + httpHost.getHostName());
 
         do {
@@ -184,7 +202,7 @@ public class MegaAPI implements Serializable {
                     statusSet.httpError.set(statusSet.httpStatus.get());
                 } else statusSet.httpError.set(0);
             } catch (Exception ex) {
-                LOG.log(Level.SEVERE, "FAILED TO CHECK DOWNLOAD URL: {0} : {1}", new Object[]{uri, ex.getMessage()});
+                LOG.log(Level.FATAL, "FAILED TO CHECK DOWNLOAD URL: {} : {}", new Object[]{uri, ex.getMessage()});
                 ex.printStackTrace();
             }
         } while (statusSet.httpError.get() == 509);
@@ -400,7 +418,7 @@ public class MegaAPI implements Serializable {
 
         } catch (Exception ex) {
 
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return quota;
@@ -445,7 +463,7 @@ public class MegaAPI implements Serializable {
             }
 
         } catch (IOException | MegaAPIException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
     }
@@ -545,9 +563,9 @@ public class MegaAPI implements Serializable {
 
                 if (http_status != 200) {
 
-                    LOG.log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
+                    LOG.log(Level.WARN, "{} {} {}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
 
-                    LOG.log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                    LOG.log(Level.WARN, "{} Failed : HTTP error code : {}", new Object[]{Thread.currentThread().getName(), http_status});
 
                     http_error = http_status;
 
@@ -585,31 +603,22 @@ public class MegaAPI implements Serializable {
                 }
 
             } catch (SSLException ssl_ex) {
-
                 empty_response = true;
-
-                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, ssl_ex.getMessage());
-
+                LOG.log(Level.FATAL, ssl_ex.getMessage());
             } catch (IOException ex) {
-
-                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, ex.getMessage());
-
+                LOG.log(Level.FATAL, ex.getMessage());
             } finally {
-
-                if (con != null) {
-                    con.disconnect();
-                }
-
+                if (con != null) con.disconnect();
             }
 
             if ((empty_response || mega_error != 0 || http_error != 0) && http_error != 509) {
 
-                LOG.log(Level.WARNING, "{0} MegaAPI ERROR {1} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(mega_error)});
+                LOG.log(Level.WARN, "{} MegaAPI ERROR {} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(mega_error)});
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
 
             }
@@ -717,7 +726,7 @@ public class MegaAPI implements Serializable {
             return aes_cbc_encrypt_pkcs7(attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return null;
@@ -738,7 +747,7 @@ public class MegaAPI implements Serializable {
             ret = aes_cbc_encrypt_nopadding(new_attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return ret;
@@ -765,7 +774,7 @@ public class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(att, HashMap.class);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
 
         }
 
@@ -797,7 +806,7 @@ public class MegaAPI implements Serializable {
             throw mae;
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return ul_url;
@@ -898,7 +907,7 @@ public class MegaAPI implements Serializable {
             throw mae;
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return "";
@@ -927,7 +936,7 @@ public class MegaAPI implements Serializable {
             throw mae;
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -980,7 +989,7 @@ public class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -1010,7 +1019,7 @@ public class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -1029,7 +1038,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"l\", \"n\":\"" + node + "\"}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -1037,12 +1046,12 @@ public class MegaAPI implements Serializable {
 
             res_map = objectMapper.readValue(res, List.class);
 
-            file_id = (String) res_map.get(0);
+            file_id = (String) res_map.getFirst();
 
             public_link = "https://mega.nz/#!" + file_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return public_link;
@@ -1073,7 +1082,7 @@ public class MegaAPI implements Serializable {
             public_link = "https://mega.nz/#F!" + folder_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return public_link;
@@ -1112,7 +1121,7 @@ public class MegaAPI implements Serializable {
             return RAW_REQUEST(request, url_api);
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return null;
@@ -1127,7 +1136,7 @@ public class MegaAPI implements Serializable {
             ch = Bin2UrlBASE64(encryptKey((h + h).getBytes("UTF-8"), i32a2bin(getMaster_key())));
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return ch;
@@ -1143,12 +1152,12 @@ public class MegaAPI implements Serializable {
 
         if (Files.exists(Paths.get(file_path))) {
 
-            LOG.log(Level.INFO, "MEGA FOLDER {0} USING CACHED JSON FILE TREE", new Object[]{folder_id});
+            LOG.log(Level.INFO, "MEGA FOLDER {} USING CACHED JSON FILE TREE", new Object[]{folder_id});
 
             try {
                 return new String(Files.readAllBytes(Paths.get(file_path)), "UTF-8");
             } catch (IOException ex) {
-                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.FATAL, "IO Exception getting cached folder nodes!", ex);
             }
         }
 
@@ -1161,7 +1170,7 @@ public class MegaAPI implements Serializable {
         try {
             Files.write(Paths.get(file_path), res.getBytes());
         } catch (IOException ex) {
-            Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "IO Exception writing cached folder nodes!", ex);
         }
     }
 
@@ -1188,7 +1197,7 @@ public class MegaAPI implements Serializable {
             }
         }
 
-        LOG.log(Level.INFO, "MEGA FOLDER {0} JSON FILE TREE SIZE -> {1}", new Object[]{folder_id, MiscTools.formatBytes((long) res.length())});
+        LOG.log(Level.INFO, "MEGA FOLDER {} JSON FILE TREE SIZE -> {}", new Object[]{folder_id, MiscTools.formatBytes((long) res.length())});
 
         if (res != null) {
 
@@ -1265,13 +1274,13 @@ public class MegaAPI implements Serializable {
                         folder_nodes.put((String) node.get("h"), the_node);
 
                     } catch (Exception e) {
-                        LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
-                        LOG.log(Level.SEVERE, "Exception while processing node: " + node, e);
+                        LOG.log(Level.WARN, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                        LOG.log(Level.FATAL, "Exception while processing node: " + node, e);
                     }
 
                 } else {
-                    LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
-                    LOG.log(Level.SEVERE, "Exception while processing node: " + node, new Exception("Invalid node key format (1)"));
+                    LOG.log(Level.WARN, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                    LOG.log(Level.FATAL, "Exception while processing node: " + node, new Exception("Invalid node key format (1)"));
                 }
 
             }
@@ -1326,7 +1335,7 @@ public class MegaAPI implements Serializable {
             try {
                 nlinks.addAll(getNLinksFromFolder(folder_parts[0], folder_parts[1], entry.getValue(), (r == 0)));
             } catch (Exception ex) {
-                Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.FATAL, "Exceptions iterating over links!", ex);
             }
 
         }
@@ -1358,7 +1367,7 @@ public class MegaAPI implements Serializable {
             }
         }
 
-        LOG.log(Level.INFO, "MEGA FOLDER {0} JSON FILE TREE SIZE -> {1}", new Object[]{folder_id, MiscTools.formatBytes((long) res.length())});
+        LOG.log(Level.INFO, "MEGA FOLDER {} JSON FILE TREE SIZE -> {}", new Object[]{folder_id, MiscTools.formatBytes((long) res.length())});
 
         if (res != null) {
 
@@ -1386,13 +1395,13 @@ public class MegaAPI implements Serializable {
                         }
 
                     } catch (Exception e) {
-                        LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
-                        LOG.log(Level.SEVERE, "Exception while processing node: " + node, e);
+                        LOG.log(Level.WARN, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                        LOG.log(Level.FATAL, "Exception while processing node: " + node, e);
                     }
 
                 } else {
-                    LOG.log(Level.WARNING, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
-                    LOG.log(Level.SEVERE, "Exception while processing node: " + node, new Exception("Invalid node key format (2)"));
+                    LOG.log(Level.WARN, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                    LOG.log(Level.FATAL, "Exception while processing node: " + node, new Exception("Invalid node key format (2)"));
                 }
 
             }
@@ -1425,7 +1434,7 @@ public class MegaAPI implements Serializable {
             }
 
         } catch (Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return null;

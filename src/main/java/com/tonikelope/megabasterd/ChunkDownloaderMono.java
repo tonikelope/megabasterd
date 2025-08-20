@@ -9,20 +9,23 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.CryptTools.forwardMEGALinkKeyIV;
-import static com.tonikelope.megabasterd.CryptTools.genDecrypter;
-import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
-import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKeyIV;
-import static com.tonikelope.megabasterd.MainPanel.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.crypto.CipherInputStream;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.URL;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.crypto.CipherInputStream;
+
+import static com.tonikelope.megabasterd.CryptTools.forwardMEGALinkKeyIV;
+import static com.tonikelope.megabasterd.CryptTools.genDecrypter;
+import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
+import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKeyIV;
+import static com.tonikelope.megabasterd.MainPanel.DEFAULT_BYTE_BUFFER_SIZE;
 
 /**
  *
@@ -30,7 +33,7 @@ import javax.crypto.CipherInputStream;
  */
 public class ChunkDownloaderMono extends ChunkDownloader {
 
-    private static final Logger LOG = Logger.getLogger(ChunkDownloaderMono.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     public static final int READ_TIMEOUT_RETRY = 3;
 
@@ -41,7 +44,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work! {2}", new Object[]{Thread.currentThread().getName(), getId(), getDownload().getFile_name()});
+        LOG.log(Level.INFO, "{} Worker [{}]: let''s do some work! {}", new Object[]{Thread.currentThread().getName(), getId(), getDownload().getFile_name()});
 
         HttpURLConnection con = null;
 
@@ -117,7 +120,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     if (http_status != 200) {
 
-                        LOG.log(Level.INFO, "{0} Failed : HTTP error code : {1} {2}", new Object[]{Thread.currentThread().getName(), http_status, getDownload().getFile_name()});
+                        LOG.log(Level.INFO, "{} Failed : HTTP error code : {} {}", new Object[]{Thread.currentThread().getName(), http_status, getDownload().getFile_name()});
 
                         http_error = http_status;
 
@@ -179,9 +182,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     if (ex instanceof SocketTimeoutException) {
                         timeout = true;
-                        LOG.log(Level.SEVERE, "{0} TIMEOUT downloading chunk {1}", new Object[]{Thread.currentThread().getName(), chunk_id});
+                        LOG.log(Level.FATAL, "{} TIMEOUT downloading chunk {}", new Object[]{Thread.currentThread().getName(), chunk_id});
                     } else {
-                        LOG.log(Level.SEVERE, ex.getMessage());
+                        LOG.log(Level.FATAL, ex.getMessage());
                     }
 
                 } finally {
@@ -223,14 +226,14 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         } catch (OutOfMemoryError | Exception error) {
             getDownload().stopDownloader(error.getMessage());
-            LOG.log(Level.SEVERE, error.getMessage());
+            LOG.log(Level.FATAL, error.getMessage());
         }
 
         getDownload().stopThisSlot(this);
 
         getDownload().secureNotify();
 
-        LOG.log(Level.INFO, "{0} ChunkDownloaderMONO {1}: bye bye", new Object[]{Thread.currentThread().getName(), getDownload().getFile_name()});
+        LOG.log(Level.INFO, "{} ChunkDownloaderMONO {}: bye bye", new Object[]{Thread.currentThread().getName(), getDownload().getFile_name()});
 
     }
 }

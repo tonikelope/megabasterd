@@ -9,15 +9,18 @@
  */
 package com.tonikelope.megabasterd;
 
-import static java.awt.Toolkit.getDefaultToolkit;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.Transferable;
-import static java.lang.Thread.sleep;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
+
+import static java.awt.Toolkit.getDefaultToolkit;
+import static java.lang.Thread.sleep;
+
 
 /**
  *
@@ -26,7 +29,7 @@ import java.util.logging.Logger;
 public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThreadNotifiable, ClipboardChangeObservable {
 
     private static final int SLEEP = 250;
-    private static final Logger LOG = Logger.getLogger(ClipboardSpy.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private final Clipboard _sysClip;
 
@@ -74,10 +77,10 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
 
             gainOwnership(_contents);
 
-            LOG.log(Level.INFO, "{0} Monitoring clipboard ON...", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{} Monitoring clipboard ON...", Thread.currentThread().getName());
 
         } else if (monitor_clipboard) {
-            LOG.log(Level.INFO, "{0} Monitoring clipboard OFF...", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "{} Monitoring clipboard OFF...", Thread.currentThread().getName());
         }
     }
 
@@ -100,7 +103,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
             }
 
@@ -147,7 +150,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    LOG.log(SEVERE, ex1.getMessage());
+                    LOG.log(Level.FATAL, ex1.getMessage());
                 }
             }
 
@@ -174,7 +177,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    LOG.log(SEVERE, ex1.getMessage());
+                    LOG.log(Level.FATAL, ex1.getMessage());
                 }
             }
 
@@ -213,9 +216,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
     @Override
     public void notifyChangeToMyObservers() {
 
-        _observers.forEach((o) -> {
-            o.notifyClipboardChange();
-        });
+        _observers.forEach(ClipboardChangeObserver::notifyClipboardChange);
     }
 
 }

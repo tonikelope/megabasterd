@@ -9,26 +9,26 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
 import static com.tonikelope.megabasterd.MiscTools.truncateText;
 import static com.tonikelope.megabasterd.MiscTools.updateFonts;
-import java.awt.Desktop;
-import java.awt.Dialog;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import static java.lang.Integer.MAX_VALUE;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.BorderFactory;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 
@@ -148,9 +148,9 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                             }
                         });
                     }
-                    MiscTools.pausar(2000);
+                    MiscTools.pause(2000);
                 } catch (IOException ex) {
-                    Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.log(Level.FATAL, "IOException monitoring progress!", ex);
                 }
             }
 
@@ -436,7 +436,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                                         try {
                                             Desktop.getDesktop().open(_output_dir);
                                         } catch (Exception ex) {
-                                            Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                            LOG.log(Level.FATAL, ex.getMessage());
                                         }
                                     }
 
@@ -480,7 +480,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
             });
 
@@ -523,5 +523,5 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private javax.swing.JLabel split_size_label;
     private javax.swing.JTextField split_size_text;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(FileSplitterDialog.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 }

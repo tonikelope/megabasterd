@@ -9,14 +9,21 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.io.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
 
 /**
  *
@@ -27,7 +34,7 @@ import java.util.regex.Pattern;
  */
 public class MegaProxyServer implements Runnable {
 
-    private static final Logger LOG = Logger.getLogger(MegaProxyServer.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private final String _password;
     private final int _port;
@@ -74,14 +81,14 @@ public class MegaProxyServer implements Runnable {
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         } finally {
 
             if (!_serverSocket.isClosed()) {
                 try {
                     _serverSocket.close();
                 } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.log(Level.FATAL, ex.getMessage());
                 }
             }
         }

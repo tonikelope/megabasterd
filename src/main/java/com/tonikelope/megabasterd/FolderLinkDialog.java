@@ -9,9 +9,14 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Dialog;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,16 +24,18 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static java.util.logging.Level.SEVERE;
-import static java.util.logging.Level.WARNING;
-import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
-import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.cleanFilePath;
+import static com.tonikelope.megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
+import static com.tonikelope.megabasterd.MiscTools.deleteSelectedTreeItems;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.formatBytes;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 
 /**
  *
@@ -36,11 +43,13 @@ import javax.swing.tree.TreeNode;
  */
 public class FolderLinkDialog extends javax.swing.JDialog {
 
+    private static final Logger LOG = LogManager.getLogger();
+
     private final String _link;
 
     private boolean _download;
 
-    private final List<HashMap> _download_links;
+    private final List<HashMap<String, Object>> _download_links;
 
     private long _total_space;
 
@@ -56,7 +65,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         super.dispose();
     }
 
-    public List<HashMap> getDownload_links() {
+    public List<HashMap<String, Object>> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
     }
 
@@ -567,7 +576,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             }
 
             if (root == null) {
-                LOG.log(SEVERE, null, "MEGA FOLDER ERROR (EMPTY?)");
+                LOG.log(Level.FATAL, "MEGA FOLDER ERROR (EMPTY?)");
 
                 _mega_error = 2;
 
@@ -592,7 +601,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                         try {
                             filePattern = Pattern.compile(regexPattern);
                         } catch (PatternSyntaxException pse) {
-                            Logger.getLogger(FolderLinkDialog.class.getName()).log(WARNING, "Invalid regex pattern", pse);
+                            LOG.log(Level.WARN, "Invalid regex pattern", pse);
                             filePattern = Pattern.compile(".*");
                         }
                         removeNonMatchingNodes(roott, filePattern);
@@ -600,7 +609,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                     ftree.setModel(new DefaultTreeModel(roott));
 
-                    ftree.setRootVisible(roott != null ? roott.getChildCount() > 0 : false);
+                    ftree.setRootVisible(roott.getChildCount() > 0);
 
                     ftree.setEnabled(true);
                 });
@@ -609,13 +618,13 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
         } catch (MegaAPIException mex) {
 
-            LOG.log(SEVERE, null, mex);
+            LOG.log(Level.FATAL, "", mex);
 
             _mega_error = mex.getCode();
 
         } catch (Exception ex) {
 
-            LOG.log(SEVERE, null, ex);
+            LOG.log(Level.FATAL, "", ex);
 
             _mega_error = 1;
         }
@@ -754,5 +763,4 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private javax.swing.JLabel total_space_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(FolderLinkDialog.class.getName());
 }

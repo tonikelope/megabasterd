@@ -9,10 +9,12 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
 
 /**
  *
@@ -20,7 +22,7 @@ import java.util.logging.Logger;
  */
 public class UploadManager extends TransferenceManager {
 
-    private static final Logger LOG = Logger.getLogger(UploadManager.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     private final Object _log_file_lock;
 
@@ -82,7 +84,7 @@ public class UploadManager extends TransferenceManager {
         try {
             DBTools.deleteUploads(delete_up.toArray(new String[delete_up.size()][]));
         } catch (SQLException ex) {
-            LOG.log(SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Error deleting uploads!", ex);
         }
 
         secureNotify();

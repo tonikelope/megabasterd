@@ -10,7 +10,19 @@
 package com.tonikelope.megabasterd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
+import javax.crypto.spec.SecretKeySpec;
+import javax.swing.*;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
@@ -20,6 +32,7 @@ import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyFactory;
@@ -32,18 +45,18 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
-import javax.crypto.spec.SecretKeySpec;
-import javax.swing.JOptionPane;
+
+import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.Bin2UrlBASE64;
+import static com.tonikelope.megabasterd.MiscTools.UrlBASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.bin2i32a;
+import static com.tonikelope.megabasterd.MiscTools.findAllRegex;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.hex2bin;
+import static com.tonikelope.megabasterd.MiscTools.i32a2bin;
+import static com.tonikelope.megabasterd.MiscTools.long2bytearray;
+import static com.tonikelope.megabasterd.MiscTools.recReverseArray;
 
 /**
  *
@@ -60,7 +73,7 @@ public class CryptTools {
     public static final int MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH = 256;
 
     public static final int MASTER_PASSWORD_PBKDF2_ITERATIONS = 65536;
-    private static final Logger LOG = Logger.getLogger(CryptTools.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     public static Cipher genDecrypter(String algo, String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
         SecretKeySpec skeySpec = new SecretKeySpec(key, algo);
@@ -470,7 +483,7 @@ public class CryptTools {
 
                         byte[] bin_links_dec = CryptTools.aes_cbc_decrypt_nopadding(bin_links, key, iv);
 
-                        String[] links_string = (new String(bin_links_dec, "UTF-8").trim()).split("\\|");
+                        String[] links_string = (new String(bin_links_dec, StandardCharsets.UTF_8).trim()).split("\\|");
 
                         for (String s : links_string) {
 
@@ -478,13 +491,13 @@ public class CryptTools {
                         }
 
                     } else {
-                        throw new Exception(url.getAuthority() + " ELC SERVER ERROR " + new String(out.toByteArray(), "UTF-8"));
+                        throw new Exception(url.getAuthority() + " ELC SERVER ERROR " + out.toString(StandardCharsets.UTF_8));
                     }
 
                 }
 
             } catch (Exception ex) {
-                Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
                 JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "ELC ERROR", JOptionPane.ERROR_MESSAGE);
             } finally {
                 if (con != null) {
@@ -586,7 +599,7 @@ public class CryptTools {
 
         } catch (Exception ex) {
 
-            Logger.getLogger(CryptTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
 
             JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "DLC ERROR", JOptionPane.ERROR_MESSAGE);
         } finally {

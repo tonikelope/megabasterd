@@ -9,16 +9,12 @@
  */
 package com.tonikelope.megabasterd;
 
-import kotlin.Unit;
-import kotlin.jvm.functions.Function0;
-import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MainPanel.VERSION;
-import static com.tonikelope.megabasterd.MainPanel.getProxy_manager;
 
 import java.awt.Color;
 import java.awt.Component;
@@ -40,14 +36,12 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
@@ -59,7 +53,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
 import java.nio.charset.StandardCharsets;
@@ -82,18 +75,12 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.sound.midi.InvalidMidiDataException;
@@ -157,7 +144,7 @@ public class MiscTools {
             }
         }
     };
-    private static final Logger LOG = Logger.getLogger(MiscTools.class.getName());
+    private static final Logger LOG = LogManager.getLogger();
 
     public static String computeFileSHA1(File file) throws IOException {
 
@@ -174,7 +161,7 @@ public class MiscTools {
             }
             return new HexBinaryAdapter().marshal(digest.digest()).toLowerCase().trim();
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Could not find algorithm!", ex);
         }
 
         return null;
@@ -195,7 +182,7 @@ public class MiscTools {
                 }
 
             } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.FATAL, "Captured IO Exception trying to log!", ex);
             }
 
         }
@@ -207,7 +194,7 @@ public class MiscTools {
         for (File f : directory.listFiles()) {
             if (f.isFile() && f.getName().startsWith("megabasterd_folder_cache_")) {
                 f.delete();
-                Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "REMOVING FOLDER CACHE FILE {0}", f.getAbsolutePath());
+                LOG.log(Level.INFO, "REMOVING FOLDER CACHE FILE {}", f.getAbsolutePath());
             }
         }
     }
@@ -239,7 +226,7 @@ public class MiscTools {
 
             return part_file == null && Files.probeContentType(Paths.get(filename)).startsWith("video/");
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Captured IO Exception in isVideoFile!", ex);
         }
 
         return false;
@@ -253,7 +240,7 @@ public class MiscTools {
 
             return part_file == null && Files.probeContentType(Paths.get(filename)).startsWith("image/");
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Captured IO Exception in isImageFile!", ex);
         }
 
         return false;
@@ -292,7 +279,7 @@ public class MiscTools {
             ge.registerFont(font);
 
         } catch (FontFormatException | IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         return font;
@@ -333,7 +320,7 @@ public class MiscTools {
                 }
             }
         } catch (Exception ex) {
-            java.util.logging.Logger.getLogger(MiscTools.class.getName()).log(java.util.logging.Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
     }
 
@@ -564,7 +551,7 @@ public class MiscTools {
             Sequencer sequencer = MidiSystem.getSequencer();
 
             if (sequencer == null) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, "MIDI Sequencer device not supported");
+                LOG.log(Level.FATAL, "MIDI Sequencer device not supported");
                 return null;
             }
 
@@ -602,14 +589,10 @@ public class MiscTools {
     public static String HashString(String algo, String data) {
         try {
             MessageDigest md = MessageDigest.getInstance(algo);
-
-            byte[] thedigest = md.digest(data.getBytes("UTF-8"));
-
-            return bin2hex(thedigest);
+            byte[] theDigest = md.digest(data.getBytes(StandardCharsets.UTF_8));
+            return bin2hex(theDigest);
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Captured exception in HashString!", ex);
         }
 
         return null;
@@ -617,16 +600,14 @@ public class MiscTools {
 
     public static String HashString(String algo, byte[] data) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algo);
-
-        byte[] thedigest = md.digest(data);
-
-        return bin2hex(thedigest);
+        byte[] theDigest = md.digest(data);
+        return bin2hex(theDigest);
     }
 
-    public static byte[] HashBin(String algo, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static byte[] HashBin(String algo, String data) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algo);
 
-        return md.digest(data.getBytes("UTF-8"));
+        return md.digest(data.getBytes(StandardCharsets.UTF_8));
     }
 
     public static byte[] HashBin(String algo, byte[] data) throws NoSuchAlgorithmException {
@@ -651,13 +632,12 @@ public class MiscTools {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
-    public static void pausar(long pause) {
+    public static void pause(long pause) {
         try {
             Thread.sleep(pause);
         } catch (InterruptedException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Interrupted while pausing!", ex);
         }
-
     }
 
     public static void GUIRun(Runnable r) {
@@ -680,15 +660,15 @@ public class MiscTools {
             }
         } catch (Exception ex) {
 
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Exception in GUIRunAndWait!", ex);
 
         }
 
     }
 
-    public static FutureTask futureRun(Callable c) {
+    public static <T> FutureTask<T> futureRun(Callable<T> c) {
 
-        FutureTask f = new FutureTask(c);
+        FutureTask<T> f = new FutureTask<>(c);
 
         Thread hilo = new Thread(f);
 
@@ -886,7 +866,7 @@ public class MiscTools {
                             tree.setEnabled(true);
 
                         } catch (InstantiationException | IllegalAccessException ex) {
-                            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                            LOG.log(Level.FATAL, ex.getMessage());
                         }
 
                         return true;
@@ -908,7 +888,7 @@ public class MiscTools {
             try (DirectoryStream<Path> directory = Files.newDirectoryStream(path)) {
                 return !directory.iterator().hasNext();
             } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.FATAL, "IOException checking isDirEmpty!", ex);
             }
         }
 
@@ -925,7 +905,7 @@ public class MiscTools {
 
         if (paths != null) {
 
-            Class node_class = tree_model.getRoot().getClass();
+            Class<?> node_class = tree_model.getRoot().getClass();
 
             Object new_root = null;
 
@@ -936,9 +916,9 @@ public class MiscTools {
                 ((DefaultMutableTreeNode) new_root).setUserObject(((DefaultMutableTreeNode) tree_model.getRoot()).getUserObject());
 
             } catch (InstantiationException | IllegalAccessException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.log(Level.FATAL, "Misc. exception caught deleting!", ex);
             }
 
             for (TreePath path : paths) {
@@ -967,7 +947,7 @@ public class MiscTools {
                                         ((DefaultMutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
 
                                     } catch (InstantiationException | IllegalAccessException ex) {
-                                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                        LOG.log(Level.FATAL, ex.getMessage());
                                     }
                                 }
 
@@ -1122,19 +1102,15 @@ public class MiscTools {
 
         if (data != null) {
 
-            try {
-                String clean_data = MiscTools.newMegaLinks2Legacy(URLDecoder.decode(data, "UTF-8"));
+            String clean_data = MiscTools.newMegaLinks2Legacy(URLDecoder.decode(data, StandardCharsets.UTF_8));
 
-                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
+            ArrayList<String> links = findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
 
-                links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
+            links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
 
-                if (links.size() > 0) {
+            if (links.size() > 0) {
 
-                    res = links.get(0);
-                }
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                res = links.get(0);
             }
         }
 
@@ -1214,7 +1190,7 @@ public class MiscTools {
 
                             if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                             }
                         } else {
 
@@ -1230,7 +1206,7 @@ public class MiscTools {
 
                         if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                         }
                     } else {
 
@@ -1256,7 +1232,7 @@ public class MiscTools {
                 }
 
             } catch (Exception ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             } finally {
 
                 if (con != null) {
@@ -1285,7 +1261,7 @@ public class MiscTools {
 
                 if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                 }
             } else {
 
@@ -1305,13 +1281,13 @@ public class MiscTools {
                     byte_res.write(buffer, 0, reads);
                 }
 
-                public_ip = new String(byte_res.toByteArray(), "UTF-8");
+                public_ip = new String(byte_res.toByteArray(), StandardCharsets.UTF_8);
             }
 
         } catch (MalformedURLException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         } finally {
             if (con != null) {
                 con.disconnect();
@@ -1339,7 +1315,7 @@ public class MiscTools {
 
                 if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                 }
             } else {
 
@@ -1359,7 +1335,7 @@ public class MiscTools {
                     byte_res.write(buffer, 0, reads);
                 }
 
-                String latest_version_res = byte_res.toString("UTF-8");
+                String latest_version_res = byte_res.toString(StandardCharsets.UTF_8);
 
                 String latest_version = findFirstRegex("releases\\/tag\\/v?([0-9]+\\.[0-9]+)", latest_version_res, 1);
 
@@ -1379,9 +1355,9 @@ public class MiscTools {
             }
 
         } catch (MalformedURLException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         } finally {
             if (con != null) {
                 con.disconnect();
@@ -1394,7 +1370,7 @@ public class MiscTools {
     public static void openBrowserURL(final String url) {
         THREAD_POOL.execute(() -> {
             try {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Trying to open URL in external browser: {0}", url);
+                LOG.log(Level.INFO, "Trying to open URL in external browser: {}", url);
 
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     Desktop.getDesktop().browse(new URI(url));
@@ -1406,9 +1382,9 @@ public class MiscTools {
                     p.destroy();
                     return;
                 }
-                Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "Unable to open URL: Unsupported platform.", url);
+                LOG.log(Level.WARN, "Unable to open URL: Unsupported platform.", url);
             } catch (Exception ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.log(Level.FATAL, ex.getMessage());
             }
         });
     }
@@ -1440,7 +1416,7 @@ public class MiscTools {
             return jarFile.getParentFile().getAbsolutePath();
 
         } catch (URISyntaxException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.log(Level.FATAL, "Invalid URI in getCurrentJarParentPath!", ex);
         }
 
         return null;
@@ -1463,7 +1439,7 @@ public class MiscTools {
         try {
             Runtime.getRuntime().exec(cmd.toString());
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.FATAL, ex.getMessage());
         }
 
         System.exit(2);
@@ -1610,7 +1586,7 @@ public class MiscTools {
 
                     if (old_session_data != null) {
 
-                        Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Reutilizando sesión de MEGA guardada para {0}", email);
+                        LOG.log(Level.INFO, "Reutilizando sesión de MEGA guardada para {}", email);
 
                         MegaAPI old_ma = new MegaAPI();
 
