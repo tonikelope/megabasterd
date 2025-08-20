@@ -181,7 +181,7 @@ public final class SmartMegaProxyManager {
 
     public synchronized String[] getProxy(ArrayList<String> excluded) {
 
-        if (_proxy_list.size() > 0) {
+        if (!_proxy_list.isEmpty()) {
 
             Set<String> keys = _proxy_list.keySet();
 
@@ -191,18 +191,18 @@ public final class SmartMegaProxyManager {
                 Collections.shuffle(keysList);
             }
 
-            Long current_time = System.currentTimeMillis();
+            long current_time = System.currentTimeMillis();
 
             for (String k : keysList) {
 
-                if ((_proxy_list.get(k)[0] == -1 || _proxy_list.get(k)[0] < current_time - _ban_time * 1000) && (excluded == null || !excluded.contains(k))) {
+                if ((_proxy_list.get(k)[0] == -1 || _proxy_list.get(k)[0] < current_time - _ban_time * 1000L) && (excluded == null || !excluded.contains(k))) {
 
                     return new String[]{k, _proxy_list.get(k)[1] == -1L ? "http" : "socks"};
                 }
             }
         }
 
-        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing in " + String.valueOf(PROXY_AUTO_REFRESH_SLEEP_TIME) + " secs...)", new Object[]{Thread.currentThread().getName()});
+        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing in " + PROXY_AUTO_REFRESH_SLEEP_TIME + " secs...)", new Object[]{Thread.currentThread().getName()});
 
         try {
             Thread.sleep(PROXY_AUTO_REFRESH_SLEEP_TIME * 1000);

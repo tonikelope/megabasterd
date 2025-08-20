@@ -15,6 +15,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -22,8 +23,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
-import javax.swing.JPanel;
-import javax.swing.Timer;
+import javax.swing.*;
 
 /**
  * Yes, this class is a f*cking mess (inside "natural" MegaBasterd mess) and
@@ -46,8 +46,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final LinkedBlockingQueue<Transference> _transference_finished_queue;
     protected final LinkedBlockingQueue<Transference> _transference_running_list;
 
-    private final ConcurrentLinkedQueue<Component> additionQueue = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<Component> removalQueue = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Component> additionQueue = new ConcurrentLinkedQueue<>();
 
     private void flushAdditions() {
         if (additionQueue.isEmpty()) return;
@@ -150,16 +150,16 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_finished_queue = new LinkedBlockingQueue<>();
         _transference_running_list = new LinkedBlockingQueue<>();
         _transference_preprocess_queue = new LinkedBlockingQueue<>();
-        Timer uiRefreshTimer = new Timer(100, e -> {
+        Timer uiRefreshTimer = new Timer(150, e -> {
             if (!_main_panel.getView().isVisible()) return;
             _updateView();
         });
         uiRefreshTimer.setRepeats(true);
         uiRefreshTimer.start();
-        Timer flushTimer = new Timer(1000, e -> {
+        Timer flushTimer = new Timer(800, e -> {
             if (!_main_panel.getView().isVisible()) return;
-            flushAdditions();
             flushRemovals();
+            flushAdditions();
         });
         flushTimer.setRepeats(true);
         flushTimer.start();
@@ -330,15 +330,15 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     }
 
-    public void flagForPanelAddition(Transference transference) {
-        if (transference != null && transference.getView() != null) {
-            additionQueue.add((Component) transference.getView());
-        }
-    }
-
     public void flagForPanelRemoval(Transference transference) {
         if (transference != null && transference.getView() != null) {
             removalQueue.add((Component) transference.getView());
+        }
+    }
+
+    public void flagForPanelAddition(Transference transference) {
+        if (transference != null && transference.getView() != null) {
+            additionQueue.add((Component) transference.getView());
         }
     }
 
@@ -349,8 +349,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     public void closeAllFinished() {
 
         _transference_finished_queue.stream().filter((t) -> !t.isCanceled())
-            .peek(_transference_finished_queue::remove)
-            .forEachOrdered(_transference_remove_queue::add);
+                .peek(_transference_finished_queue::remove)
+                .forEachOrdered(_transference_remove_queue::add);
 
         secureNotify();
     }
@@ -657,6 +657,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         // if the window is hidden there's no point in doing any of this
         if (!_main_panel.getView().isVisible()) return;
 
+        boolean hashWasZero = (lastCombinedQueueHash == 0);
+
         List<Transference> waiting, running, finished;
         boolean hasPreprocess, pausedAll, hasFrozen, isDownloadManager;
         String statusText;
@@ -684,7 +686,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         if (pausedAll == lastPausedAllState &&
                 hasFrozen == lastHasFrozen &&
                 isDownloadManager == lastIsDownloadManager &&
-                statusText.equals(lastStatusText) &&
+                (statusText.equals(lastStatusText) || (lastStatusText.isEmpty() && hashWasZero)) &&
                 forceChunkResetVisible == lastForceChunkResetVisible &&
                 cancelAllEnabled == lastCancelAllEnabled &&
                 downloadBarVisible == lastDownloadBarVisible &&

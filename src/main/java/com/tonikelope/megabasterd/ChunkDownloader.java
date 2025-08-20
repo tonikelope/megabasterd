@@ -9,21 +9,25 @@
  */
 package com.tonikelope.megabasterd;
 
+import kotlin.Unit;
+import kotlin.jvm.functions.Function0;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.HttpEntity;
+
 import static com.tonikelope.megabasterd.MainPanel.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.HttpURLConnection;
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.net.SocketTimeoutException;
-import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
-import java.nio.channels.CompletionHandler;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -45,10 +49,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private volatile boolean _error_wait;
     private volatile boolean _chunk_exception;
     private volatile boolean _notified;
-    private final ArrayList<String> _excluded_proxy_list;
+    private final ArrayList<String> _excluded_proxy_list = new ArrayList<>();
     private volatile boolean _reset_current_chunk;
     private volatile InputStream _chunk_inputstream = null;
     private volatile long _509_timestamp = -1;
+    private final HashMap<FastMegaHttpClientBuilder.FMEventType, Function0<Unit>> clientListenerMap;
 
     private String _current_smart_proxy;
 
@@ -76,10 +81,32 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _id = id;
         _download = download;
         _current_smart_proxy = null;
-        _excluded_proxy_list = new ArrayList<>();
         _error_wait = false;
         _reset_current_chunk = false;
+        clientListenerMap = new HashMap<>() {{
+            put(FastMegaHttpClientBuilder.FMEventType.CURRENT_SMART_PROXY_ERRORED, () -> {
+                if (!timeoutError.get() && httpError.get() != 429) {
+                    MainPanel.getProxy_manager().blockProxy(_current_smart_proxy, timeoutError.get() ? "TIMEOUT!" : "HTTP " + httpError.get());
+                } else if (timeoutError.get()) {
+                    _excluded_proxy_list.add(_current_smart_proxy);
+                    LOG.log(Level.WARNING, "{0} Worker [{1}] PROXY {2} TIMEOUT", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
+                } else {
+                    _excluded_proxy_list.add(_current_smart_proxy);
+                    LOG.log(Level.WARNING, "{0} Worker [{1}] PROXY {2} TOO MANY CONNECTIONS", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
+                }
+                return Unit.INSTANCE;
+            });
 
+            put(FastMegaHttpClientBuilder.FMEventType.SMART_PROXY_NULL, () -> {
+                LOG.log(Level.INFO, "{0} Worker [{1}] SmartProxy getProxy returned NULL! {2}", new Object[]{Thread.currentThread().getName(), _id, _download.getFile_name()});
+                return Unit.INSTANCE;
+            });
+
+            put(FastMegaHttpClientBuilder.FMEventType.WILL_USE_SMART_PROXY, () -> {
+                if (!download.isTurbo()) download.enableTurboMode();
+                return Unit.INSTANCE;
+            });
+        }};
     }
 
     public boolean isChunk_exception() {
@@ -142,18 +169,47 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         }
     }
 
-    static class ChunkState {
-        long position;
-        long chunkReads;
+    private final AtomicBoolean timeoutError = new AtomicBoolean(false);
+    private final AtomicInteger httpError = new AtomicInteger(0);
 
-        public ChunkState(long position, long chunkReads) {
-            this.position = position;
-            this.chunkReads = chunkReads;
+    private final FastMegaHttpClientBuilder.MegaHttpProxyConfiguration chunkDownloaderProxyConfig = new FastMegaHttpClientBuilder.MegaHttpProxyConfiguration(
+        FastMegaHttpClientBuilder.FMProxyType.SMART,
+        () -> _excluded_proxy_list,
+        /* Extra smart conditions */ () -> httpError.get() == 509 || (_509_timestamp != -1 && _509_timestamp + SMART_PROXY_RECHECK_509_TIME * 1000 > System.currentTimeMillis()),
+        /* Re-use smart condition */ () ->  httpError.get() != 429,
+        true,
+        false,
+        (newCurrentSmartProxy) -> {
+            _current_smart_proxy = newCurrentSmartProxy;
+            return Unit.INSTANCE;
         }
+    );
 
-        public ChunkState copy() {
-            return new ChunkState(this.position, this.chunkReads);
+    private CloseableHttpClient createChunkDownloaderClient(HttpGet request) {
+        return new FastMegaHttpClientBuilder<>(
+            request,
+            RequestConfig.custom(),
+            chunkDownloaderProxyConfig,
+            clientListenerMap
+        ).withProperty(FastMegaHttpClientBuilder.FMProperty.NO_CACHE).build();
+    }
+
+    private byte[] getScaledBuffer() {
+        // Dynamically scale buffer
+        int bufferSize = DEFAULT_BYTE_BUFFER_SIZE;
+        long fileSize = _download.getFile_size();
+        if (fileSize > 1_000_000_000) { // 1 GB
+            // Realistically we _could_ go higher here, but there are diminishing returns
+            // after scaling above 512 KB due to HTTP overhead and memory usage.
+            bufferSize = 512 * 1024; // 512 KB
+        } else if (fileSize > 100_000_000) { // 100 MB
+            bufferSize = 256 * 1024; // 256 KB
+        } else if (fileSize > 10_000_000) { // 10 MB
+            bufferSize = 128 * 1024; // 128 KB
+        } else if (fileSize > 1_000_000) { // 1 MB
+            bufferSize = 64 * 1024; // 64 KB
         }
+        return new byte[bufferSize];
     }
 
     @Override
@@ -161,30 +217,19 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work! {2}", new Object[]{Thread.currentThread().getName(), _id, _download.getFile_name()});
 
-        HttpURLConnection con;
-
         try {
-
-            AtomicInteger httpError = new AtomicInteger(0);
+            timeoutError.set(false);
+            httpError.set(0);
             AtomicInteger httpStatus = new AtomicInteger(0);
             AtomicInteger errorCount = new AtomicInteger(0);
-
             AtomicBoolean chunkError = new AtomicBoolean(false);
-            AtomicBoolean timeoutError = new AtomicBoolean(false);
-            AtomicBoolean smartProxySocks = new AtomicBoolean(false);
-
             String worker_url = null;
-
-            byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
-
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
+            byte[] buffer = getScaledBuffer();
 
             while (!_download.getMain_panel().isExit() && !_exit && !_download.isStopped()) {
-
                 if (_download.isPaused() && !_download.isStopped() && !_download.getChunkmanager().isExit()) {
-
                     _download.pause_worker();
-
                     secureWait();
                 }
 
@@ -193,14 +238,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 }
 
                 if (worker_url == null || httpError.get() == 403) {
-
                     worker_url = _download.getDownloadUrlForWorker();
                 }
 
                 long chunk_id = _download.nextChunkId();
-
                 long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, Download.CHUNK_SIZE_MULTI);
-
                 long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, _download.getFile_size(), chunk_offset, Download.CHUNK_SIZE_MULTI);
 
                 ChunkWriterManager.checkChunkID(chunk_id, _download.getFile_size(), chunk_offset);
@@ -213,109 +255,25 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     MainPanel.LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
                 }
 
-                if (MainPanel.isUse_smart_proxy() && ((proxy_manager != null && proxy_manager.isForce_smart_proxy()) || _current_smart_proxy != null || httpError.get() == 509 || (_509_timestamp != -1 && _509_timestamp + SMART_PROXY_RECHECK_509_TIME * 1000 > System.currentTimeMillis())) && !MainPanel.isUse_proxy()) {
-
-                    if (_current_smart_proxy != null && chunkError.get()) {
-
-                        if (!timeoutError.get() && httpError.get() != 429) {
-                            proxy_manager.blockProxy(_current_smart_proxy, timeoutError.get() ? "TIMEOUT!" : "HTTP " + httpError.get());
-                        } else if (timeoutError.get()) {
-                            _excluded_proxy_list.add(_current_smart_proxy);
-                            LOG.log(Level.WARNING, "{0} Worker [{1}] PROXY {2} TIMEOUT", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
-                        } else {
-                            _excluded_proxy_list.add(_current_smart_proxy);
-                            LOG.log(Level.WARNING, "{0} Worker [{1}] PROXY {2} TOO MANY CONNECTIONS", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
-                        }
-
-                        String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
-
-                        _current_smart_proxy = smart_proxy[0];
-
-                        smartProxySocks.set(smart_proxy[1].equals("socks"));
-
-                    } else if (_current_smart_proxy == null) {
-
-                        String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
-
-                        _current_smart_proxy = smart_proxy[0];
-
-                        smartProxySocks.set(smart_proxy[1].equals("socks"));
-
-                    }
-
-                    if (_current_smart_proxy != null) {
-
-                        if (!getDownload().isTurbo()) {
-                            getDownload().enableTurboMode();
-                        }
-
-                        String[] proxy_info = _current_smart_proxy.split(":");
-
-                        Proxy proxy = new Proxy(smartProxySocks.get() ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
-
-                        URL url = new URL(chunk_url);
-
-                        con = (HttpURLConnection) url.openConnection(proxy);
-
-                    } else {
-
-                        LOG.log(Level.INFO, "{0} Worker [{1}] SmartProxy getProxy returned NULL! {2}", new Object[]{Thread.currentThread().getName(), _id, _download.getFile_name()});
-
-                        URL url = new URL(chunk_url);
-
-                        con = (HttpURLConnection) url.openConnection();
-                    }
-
-                } else {
-
-                    URL url = new URL(chunk_url);
-
-                    if (MainPanel.isUse_proxy()) {
-
-                        _current_smart_proxy = null;
-
-                        con = (HttpURLConnection) url.openConnection(new Proxy(smartProxySocks.get() ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-
-                        if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
-
-                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
-                        }
-
-                    } else {
-
-                        con = (HttpURLConnection) url.openConnection();
-                    }
-                }
-
-                if (_current_smart_proxy != null && proxy_manager != null) {
-                    con.setConnectTimeout(proxy_manager.getProxy_timeout());
-                    con.setReadTimeout(proxy_manager.getProxy_timeout() * 2);
-                } else {
-                    con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
-                    con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
-                }
-
-                con.setUseCaches(false);
-
-                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
-
                 long chunk_reads = 0;
-
                 chunkError.set(true);
-
                 timeoutError.set(false);
-
                 httpError.set(0);
-
                 File tmp_chunk_file = null, chunk_file = null;
 
                 LOG.log(Level.INFO, "{0} Worker [{1}] is downloading chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
 
-                try {
+                HttpGet getRequest = new HttpGet(chunk_url);
+                try (
+                        CloseableHttpClient client = createChunkDownloaderClient(getRequest);
+                        CloseableHttpResponse response = client.execute(getRequest)
+                ) {
+
+                    HttpEntity entity = response.getEntity();
 
                     if (!_exit && !_download.isStopped()) {
 
-                        httpStatus.set(con.getResponseCode());
+                        httpStatus.set(response.getCode());
 
                         if (httpStatus.get() != 200) {
 
@@ -331,7 +289,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 tmp_chunk_file = new File(_download.getChunkmanager().getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + chunk_id + ".tmp");
 
-                                _chunk_inputstream = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor());
+                                InputStream rawStream = entity.getContent();
+
+                                _chunk_inputstream = new KThrottledInputStream(rawStream, _download.getMain_panel().getStream_supervisor()) {
+                                    @Override
+                                    public void close() throws IOException {
+                                        super.close();
+                                        response.close();
+                                    }
+                                };
 
                                 Path tmpChunkFilePath = tmp_chunk_file.toPath();
                                 try (AsynchronousFileChannel asyncFileChannel = AsynchronousFileChannel.open(tmpChunkFilePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE)) {
@@ -475,8 +441,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         _current_smart_proxy = null;
                         _reset_current_chunk = false;
                     }
-
-                    con.disconnect();
                 }
             }
 

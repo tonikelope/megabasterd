@@ -1026,24 +1026,21 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         }
 
         manager.getTransference_running_list().remove(this);
-
-        String autoRemoveNoRestartSetting = DBTools.selectSettingValue("auto_remove_no_restart");
-        boolean autoRemoveNoRestart = autoRemoveNoRestartSetting != null && autoRemoveNoRestartSetting.equals("yes");
+        manager.getTransference_finished_queue().add(this);
         manager.flagForPanelRemoval(this);
-        if (!autoRemoveNoRestart) {
-            manager.getTransference_finished_queue().add(this);
-            MiscTools.GUIRun(() -> {
-                view.getClose_button().setVisible(true);
-                if ((_status_error != null || _canceled) && isProvision_ok() && !global_cancel) {
-                    view.getRestart_button().setVisible(true);
-                } else if (!global_cancel) {
-                    view.getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
-                }
-                manager.flagForPanelAddition(this);
-            });
-        } else if (_status_error == null && !_canceled && !global_cancel) {
-            manager.getTransference_remove_queue().add(this);
-        }
+        manager.flagForPanelAddition(this);
+
+        getMain_panel().getDownload_manager().secureNotify();
+
+        MiscTools.GUIRun(() -> {
+            view.getClose_button().setVisible(true);
+
+            if ((_status_error != null || _canceled) && isProvision_ok() && !global_cancel) {
+                view.getRestart_button().setVisible(true);
+            } else if (!global_cancel) {
+                view.getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
+            }
+        });
 
         manager.secureNotify();
 

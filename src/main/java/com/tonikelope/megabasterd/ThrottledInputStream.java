@@ -9,6 +9,8 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
@@ -117,7 +119,7 @@ public class ThrottledInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(byte @NotNull [] b, int off, int len) throws IOException {
 
         int readLen;
 
@@ -161,7 +163,7 @@ public class ThrottledInputStream extends InputStream {
         _rawStream.reset();
     }
 
-    private void throttle(int req_slice_size) throws IOException {
+    private void throttle(int req_slice_size) {
 
         _slice_size = null;
 
