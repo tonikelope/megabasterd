@@ -13,7 +13,6 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
 
@@ -22,6 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.Path;
@@ -53,7 +53,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
     private volatile boolean _reset_current_chunk;
     private volatile InputStream _chunk_inputstream = null;
     private volatile long _509_timestamp = -1;
-    private final HashMap<FastMegaHttpClientBuilder.FMEventType, Function0<Unit>> clientListenerMap;
+    private final HashMap<FastMegaHttpClient.FMEventType, Function0<Unit>> clientListenerMap;
 
     private String _current_smart_proxy;
 
@@ -89,7 +89,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
         _error_wait = false;
         _reset_current_chunk = false;
         clientListenerMap = new HashMap<>() {{
-            put(FastMegaHttpClientBuilder.FMEventType.CURRENT_SMART_PROXY_ERRORED, () -> {
+            put(FastMegaHttpClient.FMEventType.CURRENT_SMART_PROXY_ERRORED, () -> {
                 if (!timeoutError.get() && httpError.get() != 429) {
                     MainPanel.getProxy_manager().blockProxy(_current_smart_proxy, timeoutError.get() ? "TIMEOUT!" : "HTTP " + httpError.get());
                 } else if (timeoutError.get()) {
@@ -102,12 +102,12 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                 return Unit.INSTANCE;
             });
 
-            put(FastMegaHttpClientBuilder.FMEventType.SMART_PROXY_NULL, () -> {
+            put(FastMegaHttpClient.FMEventType.SMART_PROXY_NULL, () -> {
                 LOG.log(Level.INFO, "{0} Worker [{1}] SmartProxy getProxy returned NULL! {2}", new Object[]{Thread.currentThread().getName(), _id, _download.getFile_name()});
                 return Unit.INSTANCE;
             });
 
-            put(FastMegaHttpClientBuilder.FMEventType.WILL_USE_SMART_PROXY, () -> {
+            put(FastMegaHttpClient.FMEventType.WILL_USE_SMART_PROXY, () -> {
                 if (!download.isTurbo()) download.enableTurboMode();
                 return Unit.INSTANCE;
             });
@@ -178,8 +178,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
     private final AtomicBoolean timeoutError = new AtomicBoolean(false);
     private final AtomicInteger httpError = new AtomicInteger(0);
 
-    private final FastMegaHttpClientBuilder.MegaHttpProxyConfiguration chunkDownloaderProxyConfig = new FastMegaHttpClientBuilder.MegaHttpProxyConfiguration(
-        FastMegaHttpClientBuilder.FMProxyType.SMART,
+    private final FastMegaHttpClient.MegaHttpProxyConfiguration chunkDownloaderProxyConfig = new FastMegaHttpClient.MegaHttpProxyConfiguration(
+        FastMegaHttpClient.FMProxyType.SMART,
         () -> _excluded_proxy_list,
         chunkError::get,
         /* Extra smart conditions */ () -> httpError.get() == 509 || (_509_timestamp != -1 && _509_timestamp + SMART_PROXY_RECHECK_509_TIME * 1000 > System.currentTimeMillis()),
@@ -190,15 +190,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
             return Unit.INSTANCE;
         }
     );
-
-    private CloseableHttpClient createChunkDownloaderClient(HttpGet request) {
-        return new FastMegaHttpClientBuilder<>(
-            request,
-            RequestConfig.custom(),
-            chunkDownloaderProxyConfig,
-            clientListenerMap
-        ).withProperty(FastMegaHttpClientBuilder.FMProperty.NO_CACHE).build();
-    }
 
     private byte[] getScaledBuffer() {
         // Dynamically scale buffer
@@ -268,10 +259,15 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                 LOG.log(Level.INFO, "{0} Worker [{1}] is downloading chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
 
-                HttpGet request = new HttpGet(chunk_url);
                 try (
-                    CloseableHttpClient client = createChunkDownloaderClient(request);
-                    CloseableHttpResponse response = client.execute(request)
+                    FastMegaHttpClient<HttpGet> fastClient = new FastMegaHttpClient<>(
+                        URI.create(chunk_url),
+                        HttpGet::new,
+                        RequestConfig.custom(),
+                        chunkDownloaderProxyConfig,
+                        clientListenerMap
+                    ).withProperty(FastMegaHttpClient.FMProperty.NO_CACHE);
+                    CloseableHttpResponse response = fastClient.execute()
                 ) {
 
                     HttpEntity entity = response.getEntity();
@@ -351,7 +347,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                             LOG.log(Level.INFO, "{0} Worker [{1}] has OK DOWNLOADED (" + (_current_smart_proxy != null ? "smartproxy" : "direct") + ") chunk [{2}]! {3}", new Object[]{Thread.currentThread().getName(), _id, chunk_id, _download.getFile_name()});
 
-                            if (tmp_chunk_file != null && chunk_file != null && (!chunk_file.exists() || chunk_file.length() != chunk_size)) {
+                            if (tmp_chunk_file != null && (!chunk_file.exists() || chunk_file.length() != chunk_size)) {
 
                                 if (chunk_file.exists()) {
                                     chunk_file.delete();
@@ -426,8 +422,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                             try {
                                 Thread.sleep(MiscTools.getWaitTimeExpBackOff(errorCount.addAndGet(1)) * 1000);
-                            } catch (InterruptedException exc) {
-                            }
+                            } catch (InterruptedException ignored) { }
 
                             _error_wait = false;
 

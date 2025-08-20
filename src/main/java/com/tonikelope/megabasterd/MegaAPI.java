@@ -125,9 +125,9 @@ public class MegaAPI implements Serializable {
 
     private static String _current_smart_proxy = null;
 
-    private static FastMegaHttpClientBuilder.MegaHttpProxyConfiguration createProxyConfig(HttpSet statusSet) {
-        return new FastMegaHttpClientBuilder.MegaHttpProxyConfiguration(
-                FastMegaHttpClientBuilder.FMProxyType.SMART,
+    private static FastMegaHttpClient.MegaHttpProxyConfiguration createProxyConfig(HttpSet statusSet) {
+        return new FastMegaHttpClient.MegaHttpProxyConfiguration(
+                FastMegaHttpClient.FMProxyType.SMART,
                 () -> _excluded_proxy_list,
                 () -> statusSet.httpError.get() == 509,
                 /* Extra smart conditions */ () -> statusSet.httpError.get() == 509,
@@ -140,24 +140,15 @@ public class MegaAPI implements Serializable {
         );
     }
 
-    private static Map<FastMegaHttpClientBuilder.FMEventType, Function0<Unit>> getClientListenerMap(HttpSet statusSet) {
+    private static Map<FastMegaHttpClient.FMEventType, Function0<Unit>> getClientListenerMap(HttpSet statusSet) {
         return new HashMap<>() {{
-            put(FastMegaHttpClientBuilder.FMEventType.CURRENT_SMART_PROXY_ERRORED, () -> {
+            put(FastMegaHttpClient.FMEventType.CURRENT_SMART_PROXY_ERRORED, () -> {
                 if (_current_smart_proxy != null && statusSet.httpError.get() != 0) {
                     getProxy_manager().blockProxy(_current_smart_proxy, "HTTP " + statusSet.httpError.get());
                 }
                 return Unit.INSTANCE;
             });
         }};
-    }
-
-    private static CloseableHttpClient createMegaDownloaderClient(HttpGet request, HttpSet statusSet) {
-        return new FastMegaHttpClientBuilder<>(
-            request,
-            RequestConfig.custom(),
-            createProxyConfig(statusSet),
-            getClientListenerMap(statusSet)
-        ).withProperty(FastMegaHttpClientBuilder.FMProperty.NO_CACHE).build();
     }
 
     private static class HttpSet {
@@ -171,23 +162,29 @@ public class MegaAPI implements Serializable {
         HttpSet statusSet = new HttpSet();
 
         String hostString = findFirstRegex("https?://([^/]+)", string_url, 1);
-        HttpHost httpHost = new HttpHost(hostString);
+        if (hostString == null) throw new MalformedURLException("Invalid URL: " + string_url);
 
-        URL url = new URL("http://" + httpHost.getHostName() + string_url.substring(hostString.length()) + "/0-0");
-        LOG.info("Checking mega download url: " + url + ", host: " + httpHost + ", host.getHostName(): " + httpHost.getHostName());
-        HttpGet request = new HttpGet(url.toString());
+        HttpHost httpHost = new HttpHost(hostString);
+        URI uri = URI.create("https://" + httpHost.getHostName() + string_url.substring(hostString.length()) + "/0-0");
+        LOG.info("Checking mega download uri: " + uri + ", host: " + httpHost + ", host.getHostName(): " + httpHost.getHostName());
 
         do {
             try (
-                CloseableHttpClient client = createMegaDownloaderClient(request, statusSet);
-                CloseableHttpResponse response = client.execute(request)
+                FastMegaHttpClient<HttpGet> fastClient = new FastMegaHttpClient<>(
+                    uri,
+                    (pUrl) -> new HttpGet(pUrl.toString()),
+                    RequestConfig.custom(),
+                    createProxyConfig(statusSet),
+                    getClientListenerMap(statusSet)
+                ).withProperty(FastMegaHttpClient.FMProperty.NO_CACHE);
+                CloseableHttpResponse response = fastClient.execute()
             ) {
                 statusSet.httpStatus.set(response.getCode());
                 if (statusSet.httpStatus.get() != 200) {
                     statusSet.httpError.set(statusSet.httpStatus.get());
                 } else statusSet.httpError.set(0);
             } catch (Exception ex) {
-                LOG.log(Level.SEVERE, "FAILED TO CHECK DOWNLOAD URL: {0} : {1}", new Object[]{url, ex.getMessage()});
+                LOG.log(Level.SEVERE, "FAILED TO CHECK DOWNLOAD URL: {0} : {1}", new Object[]{uri, ex.getMessage()});
                 ex.printStackTrace();
             }
         } while (statusSet.httpError.get() == 509);

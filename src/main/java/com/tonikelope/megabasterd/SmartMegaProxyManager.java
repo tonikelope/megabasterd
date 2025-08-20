@@ -202,7 +202,7 @@ public final class SmartMegaProxyManager {
             }
         }
 
-        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing in " + PROXY_AUTO_REFRESH_SLEEP_TIME + " secs...)", new Object[]{Thread.currentThread().getName()});
+        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXIES AVAILABLE!! (Refreshing in " + PROXY_AUTO_REFRESH_SLEEP_TIME + " secs...)", new Object[]{Thread.currentThread().getName()});
 
         try {
             Thread.sleep(PROXY_AUTO_REFRESH_SLEEP_TIME * 1000);
