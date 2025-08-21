@@ -1201,11 +1201,6 @@ public final class MainPanel {
                             if (!_exit) LOG.fatal("Generic exception caught [1]! {}", ex1.getMessage());
                         }
                     }
-                    try {
-                        serverSocket.close();
-                    } catch (IOException e) {
-                        LOG.fatal("IO Exception closing server! {}", e.getMessage());
-                    }
                 });
             } catch (Exception ex2) {
                 LOG.fatal("Generic exception caught [2]! {}", ex2.getMessage());
