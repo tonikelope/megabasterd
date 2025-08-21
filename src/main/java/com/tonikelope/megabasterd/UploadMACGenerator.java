@@ -33,7 +33,7 @@ import static com.tonikelope.megabasterd.MiscTools.i32a2bin;
  */
 public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiable {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(UploadMACGenerator.class);
 
     private final Upload _upload;
     private final Object _secure_notify_lock;
@@ -68,7 +68,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -91,7 +91,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "{} MAC GENERATOR {} Hello!", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
+        LOG.log(Level.INFO, "MAC GENERATOR {} Hello!", getUpload().getFile_name());
 
         try {
 
@@ -107,19 +107,19 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
             if (upload_progress != null) {
 
-                if ((String) upload_progress.get("meta_mac") != null) {
+                if (upload_progress.get("meta_mac") != null) {
 
                     String[] temp_meta_mac = ((String) upload_progress.get("meta_mac")).split("#");
 
-                    tot = Long.valueOf(temp_meta_mac[0]);
+                    tot = Long.parseLong(temp_meta_mac[0]);
 
-                    chunk_id = Long.valueOf(temp_meta_mac[1]);
+                    chunk_id = Long.parseLong(temp_meta_mac[1]);
 
                     file_mac = bin2i32a(BASE642Bin(temp_meta_mac[2]));
 
                     cbc_per = (int) ((((double) tot) / _upload.getFile_size()) * 100);
 
-                    _upload.getView().updateCBC("CBC-MAC " + String.valueOf(cbc_per) + "%");
+                    _upload.getView().updateCBC("CBC-MAC " + cbc_per + "%");
                 }
             }
 
@@ -190,7 +190,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                         file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
 
                     } catch (IllegalBlockSizeException | BadPaddingException ex) {
-                        LOG.log(Level.FATAL, ex.getMessage());
+                        LOG.log(Level.FATAL, "Failed to generate MAC! {}", ex.getMessage());
                     }
 
                     chunk_id++;
@@ -198,7 +198,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                     int new_cbc_per = (int) ((((double) tot) / _upload.getFile_size()) * 100);
 
                     if (new_cbc_per != cbc_per) {
-                        _upload.getView().updateCBC("CBC-MAC " + String.valueOf(new_cbc_per) + "%");
+                        _upload.getView().updateCBC("CBC-MAC " + new_cbc_per + "%");
                         cbc_per = new_cbc_per;
                     }
 
@@ -211,7 +211,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                 mac = true;
             }
 
-            _upload.setTemp_mac_data(String.valueOf(tot) + "#" + String.valueOf(chunk_id) + "#" + Bin2BASE64(i32a2bin(file_mac)));
+            _upload.setTemp_mac_data(tot + "#" + chunk_id + "#" + Bin2BASE64(i32a2bin(file_mac)));
 
             if (mac) {
 
@@ -219,7 +219,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
                 _upload.setFile_meta_mac(meta_mac);
 
-                LOG.log(Level.INFO, "{} MAC GENERATOR {} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
+                LOG.log(Level.INFO, "MAC GENERATOR {} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", getUpload().getFile_name());
 
             }
 
@@ -234,10 +234,10 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
             _upload.secureNotify();
 
-            LOG.log(Level.INFO, "{} MAC GENERATOR {} BYE BYE...", new Object[]{Thread.currentThread().getName(), getUpload().getFile_name()});
+            LOG.log(Level.INFO, "MAC GENERATOR {} BYE BYE...", getUpload().getFile_name());
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Generic exception in run! {}", ex.getMessage());
         }
 
     }

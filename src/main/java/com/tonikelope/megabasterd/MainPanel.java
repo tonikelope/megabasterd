@@ -122,15 +122,14 @@ public final class MainPanel {
 
             if (args.length > 1) {
                 try {
-                    LOG.log(Level.INFO, "{} Waiting {} seconds before start...", new Object[]{Thread.currentThread().getName(), args[1]});
-
+                    LOG.log(Level.INFO, "Waiting {} seconds before start...", args[1]);
                     if (Long.parseLong(args[1]) >= 0) {
                         Thread.sleep(Long.parseLong(args[1]) * 1000);
                     } else {
                         CHECK_RUNNING = false;
                     }
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Pre-start sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -276,25 +275,19 @@ public final class MainPanel {
 
         loadUserSettings();
 
-        // todo exclude org.apache.hc.client5.* from logging
-        System.out.println("Log4j config path: " + System.getProperty("log4j.configuration"));
-        System.setProperty("org.apache.commons.logging.simplelog.showlogname", "true");
-
         if (_debug_file) {
             try {
                 final PrintStream fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log"));
                 System.setOut(fileOut);
                 System.setErr(fileOut);
                 // Register a shutdown hook to close the debug stream
-                Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-                    fileOut.close();
-                }));
+                Runtime.getRuntime().addShutdownHook(new Thread(fileOut::close));
             } catch (FileNotFoundException ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "Debug file not found! {}", ex.getMessage());
             }
         }
 
-        System.out.println(System.getProperty("os.name") + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " " + System.getProperty("java.home"));
+        System.out.println(System.getProperty("os.name") + " " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " " + System.getProperty("java.home"));
 
         UIManager.put("OptionPane.messageFont", GUI_FONT.deriveFont(15f * getZoom_factor()));
 
@@ -316,7 +309,7 @@ public final class MainPanel {
         try {
             trayIcon();
         } catch (AWTException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Unable to render Tray Icon! {}", ex.getMessage());
         }
 
         THREAD_POOL.execute((_download_manager = new DownloadManager(this)));
@@ -392,22 +385,18 @@ public final class MainPanel {
             while (!_exit) {
                 long used_memory = instance.totalMemory() - instance.freeMemory();
                 long max_memory = instance.maxMemory();
-                MiscTools.GUIRun(() -> {
-                    _view.getMemory_status().setText("JVM-RAM used: " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
-                });
+                MiscTools.GUIRun(() -> _view.getMemory_status().setText("JVM-RAM used: " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory)));
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Planned memory sleep interrupted! {}", ex.getMessage());
                     Thread.currentThread().interrupt();
                 }
             }
         });
 
         resumeDownloads();
-
         resumeUploads();
-
     }
 
     public static Boolean getResume_uploads() {
@@ -525,7 +514,7 @@ public final class MainPanel {
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "Pre-view-existing sleep interrupted! {}", ex.getMessage());
             }
         }
 
@@ -778,13 +767,10 @@ public final class MainPanel {
         if (_master_pass_salt == null) {
 
             try {
-
                 _master_pass_salt = Bin2BASE64(genRandomByteArray(CryptTools.MASTER_PASSWORD_PBKDF2_SALT_BYTE_LENGTH));
-
                 DBTools.insertSettingValue("master_pass_salt", _master_pass_salt);
-
             } catch (SQLException ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "Failed to insert master salt! {}", ex.getMessage());
             }
         }
 
@@ -863,7 +849,7 @@ public final class MainPanel {
 
         String api_key = DBTools.selectSettingValue("mega_api_key");
 
-        if (api_key != null && !"".equals(api_key)) {
+        if (api_key != null && !api_key.isEmpty()) {
 
             MegaAPI.API_KEY = api_key.trim();
 
@@ -877,11 +863,11 @@ public final class MainPanel {
 
         if (_run_command && (LAST_EXTERNAL_COMMAND_TIMESTAMP == -1 || LAST_EXTERNAL_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
 
-            if (_run_command_path != null && !_run_command_path.equals("")) {
+            if (_run_command_path != null && !_run_command_path.isEmpty()) {
                 try {
                     Runtime.getRuntime().exec(_run_command_path);
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Could not run command! {}", ex.getMessage());
                 }
 
                 LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
@@ -932,59 +918,42 @@ public final class MainPanel {
         return exit;
     }
 
-    public void byebyenow(boolean restart) {
-
+    public void byeByeNow(boolean restart) {
         MiscTools.purgeFolderCache();
-
         synchronized (DBTools.class) {
-
             try {
                 DBTools.vaccum();
             } catch (SQLException ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "Failed to vacuum DB! {}", ex.getMessage());
             }
 
-            if (restart) {
-                restartApplication();
-            } else {
-                exit(0);
-            }
-
+            if (restart) restartApplication();
+            else exit(0);
         }
     }
 
-    public void byebyenow(boolean restart, boolean delete_db) {
+    public void byeByeNow(boolean restart, boolean delete_db) {
 
         if (_trayicon != null) {
             try {
                 getSystemTray().remove(_trayicon);
             } catch (Exception e) {
-                LOG.log(Level.FATAL, "Error removing tray icon: " + e.getMessage());
+                LOG.log(Level.FATAL, "Error removing tray icon! {}", e.getMessage());
             }
         }
         
         synchronized (DBTools.class) {
-
             if (delete_db) {
-
                 File db_file = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE);
-
                 db_file.delete();
-
-            } else {
-                try {
-                    DBTools.vaccum();
-                } catch (SQLException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
-                }
+            } else try {
+                DBTools.vaccum();
+            } catch (SQLException ex) {
+                LOG.log(Level.FATAL, "Failed to vacuum DB! {}", ex.getMessage());
             }
 
-            if (restart) {
-                restartApplication();
-            } else {
-                exit(0);
-            }
-
+            if (restart) restartApplication();
+            else exit(0);
         }
     }
 
@@ -1039,9 +1008,7 @@ public final class MainPanel {
                             }
 
                         }
-                    } catch (Exception e) {
-                    }
-
+                    } catch (Exception ignored) {}
                 }
 
                 if (!old_version.equals("0.0") && (Integer.parseInt(version_major) > Integer.parseInt(old_version_major) || (Integer.parseInt(version_major) == Integer.parseInt(old_version_major) && Integer.parseInt(version_minor) > Integer.parseInt(old_version_minor)))) {
@@ -1066,22 +1033,22 @@ public final class MainPanel {
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "IO Exception checking old version! {}", ex.getMessage());
         }
 
     }
 
-    public void byebye(boolean restart) {
+    public void byeBye(boolean restart) {
 
-        _byebye(restart, true);
+        _byeBye(restart, true);
     }
 
-    public void byebye(boolean restart, boolean restart_warning) {
+    public void byeBye(boolean restart, boolean restart_warning) {
 
-        _byebye(restart, restart_warning);
+        _byeBye(restart, restart_warning);
     }
 
-    private void _byebye(boolean restart, boolean restart_warning) {
+    private void _byeBye(boolean restart, boolean restart_warning) {
 
         if (!_exit && checkByeBye()) {
 
@@ -1151,7 +1118,7 @@ public final class MainPanel {
                                     try {
                                         DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
                                     } catch (SQLException ex) {
-                                        LOG.log(Level.FATAL, ex.getMessage());
+                                        LOG.log(Level.FATAL, "Failed to update DB! {}", ex.getMessage());
                                     }
                                 }
                             }
@@ -1186,15 +1153,14 @@ public final class MainPanel {
                         }
 
                         if (wait) {
-
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException ex) {
-                                LOG.log(Level.FATAL, ex.getMessage());
+                                LOG.log(Level.FATAL, "Planned waiting sleep interrupted! {}", ex.getMessage());
                             }
                         }
                     } while (wait);
-                    byebyenow(restart);
+                    byeByeNow(restart);
                 });
 
                 WarningExitMessage exit_message = new WarningExitMessage(getView(), true, this, restart);
@@ -1204,7 +1170,7 @@ public final class MainPanel {
                 exit_message.setVisible(true);
 
             } else {
-                byebyenow(restart);
+                byeByeNow(restart);
             }
         }
     }
@@ -1222,8 +1188,7 @@ public final class MainPanel {
 
             app_is_running = false;
 
-            try {
-                final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
+            try (ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress())) {
                 THREAD_POOL.execute(() -> {
                     while (!_exit) {
                         try {
@@ -1234,19 +1199,17 @@ public final class MainPanel {
                             });
                             clientSocket.close();
                         } catch (Exception ex1) {
-                            if (!_exit) { // Only log errors if not exiting
-                                LOG.log(Level.FATAL, ex1.getMessage());
-                            }
+                            if (!_exit) LOG.log(Level.FATAL, "Generic exception caught [1]! {}", ex1.getMessage());
                         }
                     }
                     try {
                         serverSocket.close();
                     } catch (IOException e) {
-                        LOG.log(Level.FATAL, e.getMessage());
+                        LOG.log(Level.FATAL, "IO Exception closing server! {}", e.getMessage());
                     }
                 });
             } catch (Exception ex2) {
-                LOG.log(Level.FATAL, ex2.getMessage());
+                LOG.log(Level.FATAL, "Generic exception caught [2]! {}", ex2.getMessage());
             }
 
         }
@@ -1258,9 +1221,7 @@ public final class MainPanel {
 
         if (!getResume_downloads()) {
 
-            MiscTools.GUIRun(() -> {
-                getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait..."));
-            });
+            MiscTools.GUIRun(() -> getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait...")));
 
             final MainPanel tthis = this;
 
@@ -1419,7 +1380,7 @@ public final class MainPanel {
 
                 }
 
-                byebye(false);
+                byeBye(false);
             });
 
             menu.add(closeItem);

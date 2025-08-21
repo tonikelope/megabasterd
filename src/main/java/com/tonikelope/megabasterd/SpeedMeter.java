@@ -26,10 +26,11 @@ import static com.tonikelope.megabasterd.MiscTools.formatBytes;
  */
 public class SpeedMeter implements Runnable {
 
+    private static final Logger LOG = LogManager.getLogger(SpeedMeter.class);
+
     public static final double SLEEP = 3000.0;
     public static final int SLEEP_MILLIS = (int) SLEEP;
     public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 20;
-    private static final Logger LOG = LogManager.getLogger();
     private final JLabel _speed_label;
     private final JLabel _rem_label;
     private final TransferenceManager _trans_manager;
@@ -194,14 +195,10 @@ public class SpeedMeter implements Runnable {
                         _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ " + formatBytes(avg_global_speed) + "/s @ " + calcRemTime((long) Math.floor((global_size - global_progress) / avg_global_speed)));
 
                     } else {
-
                         _speed_label.setText("------");
                         _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ --d --:--:--");
-
                     }
-
                 } else if (visible) {
-
                     _speed_label.setText("");
                     _rem_label.setText("");
                     visible = false;
@@ -210,7 +207,7 @@ public class SpeedMeter implements Runnable {
                 Thread.sleep(SLEEP_MILLIS);
 
             } catch (InterruptedException ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "Planned sleep interrupted! {}", ex.getMessage());
             }
 
         } while (true);

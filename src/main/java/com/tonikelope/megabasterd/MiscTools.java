@@ -118,6 +118,7 @@ import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
  * @author tonikelope
  */
 public class MiscTools {
+    private static final Logger LOG = LogManager.getLogger(MiscTools.class);
 
     public static final int EXP_BACKOFF_BASE = 2;
     public static final int EXP_BACKOFF_SECS_RETRY = 1;
@@ -144,7 +145,6 @@ public class MiscTools {
             }
         }
     };
-    private static final Logger LOG = LogManager.getLogger();
 
     public static String computeFileSHA1(File file) throws IOException {
 
@@ -279,7 +279,7 @@ public class MiscTools {
             ge.registerFont(font);
 
         } catch (FontFormatException | IOException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to create font {}! {}", name, ex.getMessage());
         }
 
         return font;
@@ -320,7 +320,7 @@ public class MiscTools {
                 }
             }
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to set Nimbus look! {}", ex.getMessage());
         }
     }
 
@@ -852,23 +852,15 @@ public class MiscTools {
                         }
 
                     } else {
-
                         MutableTreeNode new_root;
-
                         try {
-
                             new_root = (MutableTreeNode) tree_model.getRoot().getClass().newInstance();
-
                             tree.setModel(new DefaultTreeModel(new_root));
-
                             tree.setRootVisible(new_root.getChildCount() > 0);
-
                             tree.setEnabled(true);
-
                         } catch (InstantiationException | IllegalAccessException ex) {
-                            LOG.log(Level.FATAL, ex.getMessage());
+                            LOG.log(Level.FATAL, "Could not instantiate Tree! {}", ex.getMessage());
                         }
-
                         return true;
                     }
                 }
@@ -915,10 +907,9 @@ public class MiscTools {
 
                 ((DefaultMutableTreeNode) new_root).setUserObject(((DefaultMutableTreeNode) tree_model.getRoot()).getUserObject());
 
-            } catch (InstantiationException | IllegalAccessException ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
-            } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-                LOG.log(Level.FATAL, "Misc. exception caught deleting!", ex);
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException |
+                     IllegalArgumentException | InvocationTargetException ex) {
+                LOG.log(Level.FATAL, "Exception deleting tree elements! {}", ex.getMessage());
             }
 
             for (TreePath path : paths) {
@@ -935,20 +926,12 @@ public class MiscTools {
                                 Object node = null;
 
                                 if (path_element == path.getLastPathComponent()) {
-
                                     node = path_element;
-
-                                } else {
-
-                                    try {
-
-                                        node = node_class.newInstance();
-
-                                        ((DefaultMutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
-
-                                    } catch (InstantiationException | IllegalAccessException ex) {
-                                        LOG.log(Level.FATAL, ex.getMessage());
-                                    }
+                                } else try {
+                                    node = node_class.newInstance();
+                                    ((DefaultMutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
+                                } catch (InstantiationException | IllegalAccessException ex) {
+                                    LOG.log(Level.FATAL, "Could not instantiate tree! {}", ex.getMessage());
                                 }
 
                                 if (parent != null) {
@@ -1117,135 +1100,6 @@ public class MiscTools {
         return res;
     }
 
-    public static boolean OLD_checkMegaDownloadUrl(String string_url) throws MalformedURLException {
-
-        if (string_url == null || string_url.isEmpty()) {
-            throw new MalformedURLException("");
-        }
-
-        HttpURLConnection con = null;
-
-        int http_status = 0, http_error = 0;
-
-        String current_smart_proxy = null;
-
-        boolean smart_proxy_socks = false;
-
-        ArrayList<String> excluded_proxy_list = new ArrayList<>();
-
-        do {
-
-            SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
-
-            if (MainPanel.isUse_smart_proxy() && proxy_manager != null && proxy_manager.isForce_smart_proxy()) {
-
-                String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-                current_smart_proxy = smart_proxy[0];
-
-                smart_proxy_socks = smart_proxy[1].equals("socks");
-
-            }
-
-            try {
-
-                URL url = new URL(string_url + "/0-0");
-
-                //LOG.info("URL: " + url);
-
-                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && proxy_manager != null && !MainPanel.isUse_proxy()) {
-
-                    if (current_smart_proxy != null && http_error != 0) {
-
-                        proxy_manager.blockProxy(current_smart_proxy, "HTTP " + http_error);
-
-                        String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-                        current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
-
-                    } else if (current_smart_proxy == null) {
-
-                        String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-                        current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
-                    }
-
-                    if (current_smart_proxy != null) {
-
-                        String[] proxy_info = current_smart_proxy.split(":");
-
-                        Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
-
-                        con = (HttpURLConnection) url.openConnection(proxy);
-
-                    } else {
-
-                        if (MainPanel.isUse_proxy()) {
-
-                            con = (HttpURLConnection) url.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-
-                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
-
-                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
-                            }
-                        } else {
-
-                            con = (HttpURLConnection) url.openConnection();
-                        }
-                    }
-
-                } else {
-
-                    if (MainPanel.isUse_proxy()) {
-
-                        con = (HttpURLConnection) url.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-
-                        if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
-
-                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
-                        }
-                    } else {
-
-                        con = (HttpURLConnection) url.openConnection();
-                    }
-                }
-
-                if (current_smart_proxy != null && proxy_manager != null) {
-                    con.setConnectTimeout(proxy_manager.getProxy_timeout());
-                    con.setReadTimeout(proxy_manager.getProxy_timeout() * 2);
-                }
-
-                con.setUseCaches(false);
-
-                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
-
-                http_status = con.getResponseCode();
-
-                if (http_status != 200) {
-                    http_error = http_status;
-                } else {
-                    http_error = 0;
-                }
-
-            } catch (Exception ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
-            } finally {
-
-                if (con != null) {
-                    con.disconnect();
-                }
-
-            }
-
-        } while (http_error == 509);
-
-        return http_status != 403;
-    }
-
     public static String getMyPublicIP() {
 
         String public_ip = null;
@@ -1281,17 +1135,13 @@ public class MiscTools {
                     byte_res.write(buffer, 0, reads);
                 }
 
-                public_ip = new String(byte_res.toByteArray(), StandardCharsets.UTF_8);
+                public_ip = byte_res.toString(StandardCharsets.UTF_8);
             }
 
-        } catch (MalformedURLException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "IO Exception getting public IP! {}", ex.getMessage());
         } finally {
-            if (con != null) {
-                con.disconnect();
-            }
+            if (con != null) con.disconnect();
         }
 
         return public_ip;
@@ -1299,10 +1149,8 @@ public class MiscTools {
 
     public static String checkNewVersion(String url) {
 
-        String new_version_major = null, new_version_minor = null, current_version_major = null, current_version_minor = null;
-
+        String new_version_major, new_version_minor, current_version_major, current_version_minor;
         URL mb_url;
-
         HttpURLConnection con = null;
 
         try {
@@ -1354,14 +1202,10 @@ public class MiscTools {
                 }
             }
 
-        } catch (MalformedURLException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "IO Exception checking new version! {}", ex.getMessage());
         } finally {
-            if (con != null) {
-                con.disconnect();
-            }
+            if (con != null) con.disconnect();
         }
 
         return null;
@@ -1382,9 +1226,9 @@ public class MiscTools {
                     p.destroy();
                     return;
                 }
-                LOG.log(Level.WARN, "Unable to open URL: Unsupported platform.", url);
+                LOG.log(Level.WARN, "Unable to open URL ({}): Unsupported platform.", url);
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "Generic exception opening URL ({}): {}", url, ex.getMessage());
             }
         });
     }
@@ -1439,7 +1283,7 @@ public class MiscTools {
         try {
             Runtime.getRuntime().exec(cmd.toString());
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Could not run command !{}", ex.getMessage());
         }
 
         System.exit(2);

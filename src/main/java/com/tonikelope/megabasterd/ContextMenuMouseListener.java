@@ -9,9 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
@@ -26,8 +23,6 @@ import java.awt.event.MouseEvent;
  * @author tonikelope
  */
 public class ContextMenuMouseListener extends MouseAdapter {
-
-    private static final Logger LOG = LogManager.getLogger();
 
     private final JPopupMenu _popup;
     private final Action _cutAction;

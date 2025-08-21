@@ -9,9 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.HashMap;
 
 /**
@@ -19,8 +16,6 @@ import java.util.HashMap;
  * @author tonikelope
  */
 public class ContentType {
-
-    private static final Logger LOG = LogManager.getLogger();
 
     private final HashMap<String, String> _content_type;
 

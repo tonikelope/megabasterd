@@ -15,7 +15,6 @@ import org.apache.logging.log4j.Logger;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 
 import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
@@ -32,6 +31,8 @@ import static java.lang.Integer.MAX_VALUE;
  * @author tonikelope
  */
 public class UploadView extends javax.swing.JPanel implements TransferenceView {
+
+    private static final Logger LOG = LogManager.getLogger(UploadView.class);
 
     private final Upload _upload;
 
@@ -725,6 +726,4 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
     private javax.swing.JLabel status_label;
     private javax.swing.JButton stop_button;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = LogManager.getLogger();
-
 }

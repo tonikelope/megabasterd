@@ -22,7 +22,7 @@ import java.util.ArrayList;
  */
 public class UploadManager extends TransferenceManager {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(UploadManager.class);
 
     private final Object _log_file_lock;
 

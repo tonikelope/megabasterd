@@ -27,9 +27,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable {
 
+    private static final Logger LOG = LogManager.getLogger(StreamChunkManager.class);
+
     public static final int CHUNK_SIZE = 1048576;
     public static final int BUFFER_CHUNKS_SIZE = 20;
-    private static final Logger LOG = LogManager.getLogger();
     private long _next_offset_required;
     private long _bytes_written;
     private final long _start_offset;
@@ -89,7 +90,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
         try {
 
-            LOG.log(Level.INFO, "{} StreamChunkManager: let''s do some work! Start: {}   End: {}", Thread.currentThread().getName(), _start_offset, _end_offset);
+            LOG.log(Level.INFO, "StreamChunkManager: let''s do some work! Start: {}   End: {}", _start_offset, _end_offset);
 
             while (!_exit && _bytes_written < _end_offset) {
 
@@ -112,34 +113,31 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
                     secureNotifyAll();
 
-                    LOG.log(Level.INFO, "{} StreamChunkManager has written {} / {} ...", new Object[]{Thread.currentThread().getName(), _bytes_written, _end_offset});
+                    LOG.log(Level.INFO, "StreamChunkManager has written {} / {} ...", _bytes_written, _end_offset);
 
                 }
 
                 if (!_exit && _bytes_written < _end_offset) {
-
-                    LOG.log(Level.INFO, "{} StreamChunkManager waiting for offset {}...", new Object[]{Thread.currentThread().getName(), _bytes_written});
-
+                    LOG.log(Level.INFO, "StreamChunkManager waiting for offset {}...", _bytes_written);
                     secureWait();
                 }
             }
 
         } catch (Exception ex) {
-
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Generic exception in run! {}", ex.getMessage());
         }
 
         try {
             _pipeos.close();
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Error closing PipeOS! {}", ex.getMessage());
         }
 
         _exit = true;
 
         secureNotifyAll();
 
-        LOG.log(Level.INFO, "{} StreamChunkManager: bye bye", Thread.currentThread().getName());
+        LOG.log(Level.INFO, "StreamChunkManager: bye bye");
     }
 
     public long nextOffset() {
@@ -180,7 +178,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Lock wait interrupted! {}", ex.getMessage());
                 }
             }
 

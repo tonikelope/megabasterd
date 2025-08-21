@@ -34,6 +34,7 @@ sourceSets {
 }
 
 dependencies {
+    implementation("org.apache.logging.log4j:log4j-slf4j-impl:2.25.1")
     implementation("org.apache.logging.log4j:log4j-api:2.25.1")
     implementation("org.apache.logging.log4j:log4j-core:2.25.1")
     implementation("org.apache.httpcomponents.client5:httpclient5:5.5")
@@ -48,7 +49,10 @@ dependencies {
     implementation("org.apache.commons:commons-collections4:4.5.0")
     implementation("javax.xml.bind:jaxb-api:2.3.1")
     implementation("com.fasterxml.jackson.core:jackson-databind:2.15.3")
-    implementation("xuggle:xuggle-xuggler-server-all:5.7.0-SNAPSHOT")
+    implementation("xuggle:xuggle-xuggler-server-all:5.7.0-SNAPSHOT") {
+        exclude(group = "ch.qos.logback", module = "logback-classic")
+        exclude(group = "ch.qos.logback", module = "logback-core")
+    }
 }
 
 tasks.shadowJar {

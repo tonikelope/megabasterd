@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
  */
 public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNotifiable {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(StreamThrottlerSupervisor.class);
 
     private ConcurrentLinkedQueue<Integer> _input_slice_queue, _output_slice_queue;
 
@@ -100,16 +100,14 @@ public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNot
             Thread current_thread = Thread.currentThread();
 
             if (!_notified_threads.containsKey(current_thread)) {
-
                 _notified_threads.put(current_thread, false);
             }
 
             while (!_notified_threads.get(current_thread)) {
-
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -183,7 +181,7 @@ public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNot
                 try {
                     _timer_lock.wait();
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
                 }
             }
         }

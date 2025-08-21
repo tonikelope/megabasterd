@@ -33,7 +33,7 @@ import static com.tonikelope.megabasterd.MainPanel.DEFAULT_BYTE_BUFFER_SIZE;
  */
 public class ChunkDownloaderMono extends ChunkDownloader {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(ChunkDownloaderMono.class);
 
     public static final int READ_TIMEOUT_RETRY = 3;
 
@@ -44,7 +44,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "{} Worker [{}]: let''s do some work! {}", new Object[]{Thread.currentThread().getName(), getId(), getDownload().getFile_name()});
+        LOG.log(Level.INFO, "Worker [{}]: let''s do some work! {}", getId(), getDownload().getFile_name());
 
         HttpURLConnection con = null;
 
@@ -113,37 +113,26 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     }
 
                     chunk_error = true;
-
                     timeout = false;
-
                     http_error = 0;
 
                     if (http_status != 200) {
-
-                        LOG.log(Level.INFO, "{} Failed : HTTP error code : {} {}", new Object[]{Thread.currentThread().getName(), http_status, getDownload().getFile_name()});
-
+                        LOG.log(Level.INFO, "Failed : HTTP error code : {} {}", http_status, getDownload().getFile_name());
                         http_error = http_status;
-
                         getDownload().rejectChunkId(chunk_id);
 
                         if (!isExit() && http_error != 403) {
-
                             setError_wait(true);
-
                             try {
                                 Thread.sleep(1000);
-                            } catch (InterruptedException excep) {
-
-                            }
-
+                            } catch (InterruptedException ignore) { }
                             setError_wait(false);
                         }
-
                     } else {
 
                         if (!isExit() && !getDownload().isStopped() && cis != null) {
 
-                            int reads = 0;
+                            int reads;
 
                             while (!getDownload().isStopped() && chunk_reads < chunk_size && (reads = cis.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
                                 getDownload().getOutput_stream().write(buffer, 0, reads);
@@ -182,9 +171,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     if (ex instanceof SocketTimeoutException) {
                         timeout = true;
-                        LOG.log(Level.FATAL, "{} TIMEOUT downloading chunk {}", new Object[]{Thread.currentThread().getName(), chunk_id});
+                        LOG.log(Level.FATAL, "TIMEOUT downloading chunk {}!", chunk_id);
                     } else {
-                        LOG.log(Level.FATAL, ex.getMessage());
+                        LOG.log(Level.FATAL, "ERROR downloading chunk {}! {}", chunk_id, ex);
                     }
 
                 } finally {
@@ -222,7 +211,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
             }
 
-        } catch (ChunkInvalidException e) {
+        } catch (ChunkInvalidException ignored) {
 
         } catch (OutOfMemoryError | Exception error) {
             getDownload().stopDownloader(error.getMessage());
@@ -233,7 +222,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         getDownload().secureNotify();
 
-        LOG.log(Level.INFO, "{} ChunkDownloaderMONO {}: bye bye", new Object[]{Thread.currentThread().getName(), getDownload().getFile_name()});
+        LOG.log(Level.INFO, "ChunkDownloaderMONO {}: bye bye", getDownload().getFile_name());
 
     }
 }

@@ -20,7 +20,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Paths;
@@ -42,6 +41,8 @@ import static com.tonikelope.megabasterd.MiscTools.updateFonts;
  * @author tonikelope
  */
 public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
+
+    private static final Logger LOG = LogManager.getLogger(LinkGrabberDialog.class);
 
     private boolean _download;
     private String _download_path, _selected_item;
@@ -367,10 +368,8 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                             }
                         });
                     }
-                } catch (FileNotFoundException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "IO Exception in LinkGrabberDialog! {}", ex.getMessage());
                 }
                 MiscTools.GUIRun(() -> {
                     dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
@@ -476,6 +475,4 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
     public JCheckBox getPriority_checkbox() {
         return priority_checkbox;
     }
-
-    private static final Logger LOG = LogManager.getLogger();
 }

@@ -43,7 +43,7 @@ import static com.tonikelope.megabasterd.MiscTools.updateFonts;
  */
 public class FolderLinkDialog extends javax.swing.JDialog {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(FolderLinkDialog.class);
 
     private final String _link;
 

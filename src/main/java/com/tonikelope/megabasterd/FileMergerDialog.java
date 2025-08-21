@@ -40,6 +40,8 @@ import static javax.swing.JOptionPane.showOptionDialog;
  */
 public class FileMergerDialog extends javax.swing.JDialog {
 
+    private static final Logger LOG = LogManager.getLogger(FileMergerDialog.class);
+
     private final MainPanel _main_panel;
     private File _output_dir = null;
     private volatile long _progress = 0L;
@@ -440,7 +442,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                                     try {
                                         Desktop.getDesktop().open(_output_dir);
                                     } catch (Exception ex) {
-                                        LOG.log(Level.FATAL, ex.getMessage());
+                                        LOG.log(Level.FATAL, "Cannot open output dir! {}", ex.getMessage());
                                     }
                                 }
 
@@ -487,7 +489,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                         });
                     }
                 } catch (Exception ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Generic exception in FileMergerDialog! {}", ex.getMessage());
                 }
             });
 
@@ -529,5 +531,4 @@ public class FileMergerDialog extends javax.swing.JDialog {
     private javax.swing.JButton output_button;
     private javax.swing.JLabel output_folder_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = LogManager.getLogger();
 }

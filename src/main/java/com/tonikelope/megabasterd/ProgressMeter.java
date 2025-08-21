@@ -19,7 +19,7 @@ import org.apache.logging.log4j.Logger;
  */
 public class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(ProgressMeter.class);
 
     private final Transference _transference;
     private volatile boolean _exit;
@@ -69,7 +69,7 @@ public class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
 
     @Override
     public void run() {
-        LOG.log(Level.INFO, "{} ProgressMeter hello! {}", new Object[]{Thread.currentThread().getName(), _transference.getFile_name()});
+        LOG.log(Level.INFO, "ProgressMeter hello! {}", _transference.getFile_name());
 
         _progress = _transference.getProgress();
 
@@ -86,7 +86,7 @@ public class ProgressMeter implements Runnable, SecureSingleThreadNotifiable {
             }
         }
 
-        LOG.log(Level.INFO, "{} ProgressMeter bye bye! {}", new Object[]{Thread.currentThread().getName(), _transference.getFile_name()});
+        LOG.log(Level.INFO, "ProgressMeter bye bye! {}", _transference.getFile_name());
 
     }
 

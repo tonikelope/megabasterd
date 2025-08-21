@@ -23,7 +23,7 @@ public class Thumbnailer {
 
     public Thumbnailer() {}
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(Thumbnailer.class);
 
     public static final int IMAGE_THUMB_SIZE = 250;
 

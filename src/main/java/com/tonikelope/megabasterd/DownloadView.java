@@ -31,6 +31,8 @@ import static java.lang.Integer.MAX_VALUE;
  */
 public class DownloadView extends javax.swing.JPanel implements TransferenceView {
 
+    private static final Logger LOG = LogManager.getLogger(DownloadView.class);
+
     private final Download _download;
 
     public JButton getQueue_bottom_button() {
@@ -491,7 +493,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             try {
                 Desktop.getDesktop().open(new File(_download.getDownload_path() + "/" + _download.getFile_name()).getParentFile());
             } catch (Exception ex) {
-                LOG.log(Level.INFO, ex.getMessage());
+                LOG.log(Level.FATAL, "Cannot open folder! {}", ex.getMessage());
             }
         }
 
@@ -686,6 +688,4 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     private javax.swing.JLabel status_label;
     private javax.swing.JButton stop_button;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = LogManager.getLogger();
-
 }

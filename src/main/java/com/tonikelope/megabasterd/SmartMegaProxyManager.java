@@ -46,7 +46,7 @@ public final class SmartMegaProxyManager {
     public static final boolean RESET_SLOT_PROXY = true;
     public static final boolean RANDOM_SELECT = true;
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(SmartMegaProxyManager.class);
     private volatile String _proxy_list_url;
     private final ConcurrentHashMap<String, Long[]> _proxy_list;
     private static final HashMap<String, String> PROXY_LIST_AUTH = new HashMap<>();
@@ -173,7 +173,7 @@ public final class SmartMegaProxyManager {
             _random_select = RANDOM_SELECT;
         }
 
-        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + "   TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + "   REFRESH: " + String.valueOf(_autorefresh_time) + "   FORCE: " + String.valueOf(_force_smart_proxy) + "   RANDOM: " + String.valueOf(_random_select) + "   RESET-SLOT-PROXY: " + String.valueOf(_reset_slot_proxy));
+        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + _ban_time + "   TIMEOUT: " + _proxy_timeout / 1000 + "   REFRESH: " + _autorefresh_time + "   FORCE: " + _force_smart_proxy + "   RANDOM: " + _random_select + "   RESET-SLOT-PROXY: " + _reset_slot_proxy);
     }
 
     public synchronized int getProxyCount() {
@@ -204,7 +204,7 @@ public final class SmartMegaProxyManager {
             }
         }
 
-        LOG.log(Level.WARN, "{} Smart Proxy Manager: NO PROXIES AVAILABLE!! (Refreshing in " + PROXY_AUTO_REFRESH_SLEEP_TIME + " secs...)", new Object[]{Thread.currentThread().getName()});
+        LOG.log(Level.WARN, "Smart Proxy Manager: NO PROXIES AVAILABLE!! (Refreshing in " + PROXY_AUTO_REFRESH_SLEEP_TIME + " secs...)");
 
         try {
             Thread.sleep(PROXY_AUTO_REFRESH_SLEEP_TIME * 1000);
@@ -225,7 +225,7 @@ public final class SmartMegaProxyManager {
 
                 _proxy_list.remove(proxy);
 
-                LOG.log(Level.WARN, "[Smart Proxy] REMOVING PROXY {} ({})", new Object[]{proxy, cause});
+                LOG.log(Level.WARN, "[Smart Proxy] REMOVING PROXY {} ({})", proxy, cause);
 
             } else {
 
@@ -235,25 +235,18 @@ public final class SmartMegaProxyManager {
 
                 _proxy_list.put(proxy, proxy_data);
 
-                LOG.log(Level.WARN, "[Smart Proxy] BLOCKING PROXY {} ({} secs) ({})", new Object[]{proxy, _ban_time, cause});
+                LOG.log(Level.WARN, "[Smart Proxy] BLOCKING PROXY {} ({} secs) ({})", proxy, _ban_time, cause);
 
             }
 
-            _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount() - countBlockedProxies()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
+            _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + (getProxyCount() - countBlockedProxies()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
 
         }
     }
 
     public synchronized void refreshProxyList(String url_list) {
-        if (url_list != null) {
-            _proxy_list_url = url_list;
-        } else {
-            _proxy_list_url = null;
-        }
-
-        THREAD_POOL.execute(() -> {
-            refreshProxyList();
-        });
+        _proxy_list_url = url_list;
+        THREAD_POOL.execute(this::refreshProxyList);
     }
 
     public synchronized void refreshProxyList() {
@@ -382,21 +375,17 @@ public final class SmartMegaProxyManager {
                 }
 
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + getProxyCount() + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
-
-                LOG.log(Level.INFO, "{} Smart Proxy Manager: proxy list refreshed ({})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
-
+                LOG.log(Level.INFO, "Smart Proxy Manager: proxy list refreshed ({})", _proxy_list.size());
             } else if (!custom_clean_list.isEmpty()) {
-
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + getProxyCount() + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
-
-                LOG.log(Level.INFO, "{} Smart Proxy Manager: proxy list refreshed ({})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
+                LOG.log(Level.INFO, "Smart Proxy Manager: proxy list refreshed ({})", _proxy_list.size());
             } else {
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (0 proxies!)" + (this.isForce_smart_proxy() ? " F!" : ""));
-                LOG.log(Level.INFO, "{} Smart Proxy Manager: NO PROXYS", Thread.currentThread().getName());
+                LOG.log(Level.INFO, "Smart Proxy Manager: NO PROXIES");
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "IO Exception refreshing proxy list! {}", ex.getMessage());
         } finally {
             if (con != null) con.disconnect();
         }
@@ -415,7 +404,7 @@ public final class SmartMegaProxyManager {
 
             String auth_data;
 
-            if ((auth_data = PROXY_LIST_AUTH.get(ipaddr.getHostAddress() + ":" + String.valueOf(port))) != null) {
+            if ((auth_data = PROXY_LIST_AUTH.get(ipaddr.getHostAddress() + ":" + port)) != null) {
                 String[] auth_data_parts = auth_data.split(":");
                 String user = new String(MiscTools.BASE642Bin(auth_data_parts[0]), StandardCharsets.UTF_8);
                 String password = new String(MiscTools.BASE642Bin(auth_data_parts[1]), StandardCharsets.UTF_8);

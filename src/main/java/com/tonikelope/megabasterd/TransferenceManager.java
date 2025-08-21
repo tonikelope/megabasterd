@@ -32,10 +32,11 @@ import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
  */
 abstract public class TransferenceManager implements Runnable, SecureSingleThreadNotifiable {
 
+    private static final Logger LOG = LogManager.getLogger(TransferenceManager.class);
+
     public static final int MAX_TRANSFERENCES_DISPLAYED = 250;
     public static final int MAX_WAIT_QUEUE = 10000;
     public static final int MAX_PROVISION_WORKERS = 50;
-    private static final Logger LOG = LogManager.getLogger();
 
     protected final LinkedBlockingQueue<Object> _transference_preprocess_global_queue;
     protected final LinkedBlockingQueue<Runnable> _transference_preprocess_queue;
@@ -305,7 +306,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
                 }
             }
 

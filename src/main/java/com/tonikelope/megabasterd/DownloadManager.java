@@ -29,7 +29,7 @@ import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
  */
 public class DownloadManager extends TransferenceManager {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(DownloadManager.class);
 
     private static final ExecutorService DB_EXECUTOR =
     Executors.newSingleThreadExecutor(r -> {
@@ -180,16 +180,13 @@ public class DownloadManager extends TransferenceManager {
             secureNotify();
 
         } catch (APIException ex) {
-
-            LOG.log(Level.INFO, "{} Provision failed! Retrying in separated thread...", Thread.currentThread().getName());
-
+            LOG.log(Level.INFO, "Provision failed! Retrying in separated thread...");
             THREAD_POOL.execute(() -> {
                 try {
                     _provision((Download) download, true);
                 } catch (APIException ex1) {
-                    LOG.log(Level.FATAL, "Error provisioning download!", ex1);
+                    LOG.log(Level.FATAL, "Provision in separate thread failed!", ex1);
                 }
-
                 secureNotify();
             });
         }

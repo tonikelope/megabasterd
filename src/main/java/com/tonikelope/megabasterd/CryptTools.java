@@ -64,6 +64,8 @@ import static com.tonikelope.megabasterd.MiscTools.recReverseArray;
  */
 public class CryptTools {
 
+    private static final Logger LOG = LogManager.getLogger(CryptTools.class);
+
     public static final int[] AES_ZERO_IV_I32A = {0, 0, 0, 0};
 
     public static final byte[] AES_ZERO_IV = i32a2bin(AES_ZERO_IV_I32A);
@@ -73,7 +75,6 @@ public class CryptTools {
     public static final int MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH = 256;
 
     public static final int MASTER_PASSWORD_PBKDF2_ITERATIONS = 65536;
-    private static final Logger LOG = LogManager.getLogger();
 
     public static Cipher genDecrypter(String algo, String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
         SecretKeySpec skeySpec = new SecretKeySpec(key, algo);
@@ -258,7 +259,7 @@ public class CryptTools {
         return new_iv;
     }
 
-    public static String decryptMegaDownloaderLink(String link) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, Exception, IllegalBlockSizeException, BadPaddingException {
+    public static String decryptMegaDownloaderLink(String link) throws Exception {
         String[] keys = {"6B316F36416C2D316B7A3F217A30357958585858585858585858585858585858", "ED1F4C200B35139806B260563B3D3876F011B4750F3A1A4A5EFD0BBE67554B44"};
         String iv = "79F10A01844A0B27FF5B2D4E0ED3163E";
 
@@ -267,16 +268,11 @@ public class CryptTools {
         if ((enc_type = findFirstRegex("mega://f?(enc[0-9]*)\\?", link, 1)) != null) {
             Cipher decrypter;
 
-            String the_key = null;
-
-            switch (enc_type.toLowerCase()) {
-                case "enc":
-                    the_key = keys[0];
-                    break;
-                case "enc2":
-                    the_key = keys[1];
-                    break;
-            }
+            String the_key = switch (enc_type.toLowerCase()) {
+                case "enc" -> keys[0];
+                case "enc2" -> keys[1];
+                default -> null;
+            };
 
             folder = findFirstRegex("mega://(f)?enc[0-9]*\\?", link, 1);
 
@@ -284,7 +280,7 @@ public class CryptTools {
 
             byte[] decrypted_data = decrypter.doFinal(UrlBASE642Bin(findFirstRegex("mega://f?enc[0-9]*\\?([\\da-zA-Z_,-]*)", link, 1)));
 
-            dec_link = new String(decrypted_data, "UTF-8").trim();
+            dec_link = new String(decrypted_data, StandardCharsets.UTF_8).trim();
 
             return "https://mega.nz/#" + (folder != null ? "f" : "") + dec_link;
 
@@ -346,7 +342,7 @@ public class CryptTools {
 
                 byte[] url_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2, 4 + bin_links_length + 2 + url_bin_length);
 
-                if (!new String(url_bin, "UTF-8").contains("http")) {
+                if (!new String(url_bin, StandardCharsets.UTF_8).contains("http")) {
 
                     throw new Exception("BAD ELC HOST URL!");
                 }
@@ -355,15 +351,15 @@ public class CryptTools {
 
                 byte[] pass_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2 + url_bin_length + 2, 4 + bin_links_length + 2 + url_bin_length + 2 + pass_bin_length);
 
-                URL url = new URL(new String(url_bin, "UTF-8").trim());
+                URL url = new URL(new String(url_bin, StandardCharsets.UTF_8).trim());
 
                 if (MainPanel.isUse_proxy()) {
 
                     con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                    if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                    if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                        con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                        con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                     }
                 } else {
 
@@ -408,9 +404,9 @@ public class CryptTools {
 
                                 dialog.dispose();
 
-                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
 
-                                api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+                                api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
 
                                 if (!remember_master_pass) {
 
@@ -426,9 +422,9 @@ public class CryptTools {
 
                         } else {
 
-                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
 
-                            api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+                            api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
 
                         }
 
@@ -444,9 +440,9 @@ public class CryptTools {
                     throw new Exception("NO valid ELC account available!");
                 }
 
-                String postdata = "OPERATION_TYPE=D&DATA=" + new String(pass_bin, "UTF-8") + "&USER=" + user + "&APIKEY=" + api_key;
+                String postdata = "OPERATION_TYPE=D&DATA=" + new String(pass_bin, StandardCharsets.UTF_8) + "&USER=" + user + "&APIKEY=" + api_key;
 
-                con.getOutputStream().write(postdata.getBytes("UTF-8"));
+                con.getOutputStream().write(postdata.getBytes(StandardCharsets.UTF_8));
 
                 con.getOutputStream().close();
 
@@ -463,11 +459,11 @@ public class CryptTools {
 
                     ObjectMapper objectMapper = new ObjectMapper();
 
-                    HashMap res_map = objectMapper.readValue(new String(out.toByteArray(), "UTF-8"), HashMap.class);
+                    HashMap res_map = objectMapper.readValue(out.toString(StandardCharsets.UTF_8), HashMap.class);
 
                     String dec_pass = (String) res_map.get("d");
 
-                    if (dec_pass != null && dec_pass.length() > 0) {
+                    if (dec_pass != null && !dec_pass.isEmpty()) {
 
                         dec_pass = (String) res_map.get("d");
 
@@ -493,18 +489,13 @@ public class CryptTools {
                     } else {
                         throw new Exception(url.getAuthority() + " ELC SERVER ERROR " + out.toString(StandardCharsets.UTF_8));
                     }
-
                 }
-
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "Failed to decrypt ELC! {}", ex.getMessage());
                 JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "ELC ERROR", JOptionPane.ERROR_MESSAGE);
             } finally {
-                if (con != null) {
-                    con.disconnect();
-                }
+                if (con != null) con.disconnect();
             }
-
         }
 
         return links;
@@ -534,9 +525,9 @@ public class CryptTools {
 
                 con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                 }
             } else {
 
@@ -565,7 +556,7 @@ public class CryptTools {
 
             String postdata = "destType=jdtc6&b=JD&srcType=dlc&data=" + dlc_id + "&v=" + dlc_rev;
 
-            con.getOutputStream().write(postdata.getBytes("UTF-8"));
+            con.getOutputStream().write(postdata.getBytes(StandardCharsets.UTF_8));
 
             con.getOutputStream().close();
 
@@ -578,14 +569,14 @@ public class CryptTools {
 
                     out.write(buffer, 0, reads);
                 }
-                enc_dlc_key = findFirstRegex("< *rc *>(.+?)< */ *rc *>", new String(out.toByteArray(), "UTF-8"), 1);
+                enc_dlc_key = findFirstRegex("< *rc *>(.+?)< */ *rc *>", out.toString(StandardCharsets.UTF_8), 1);
             }
 
-            String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt_nopadding(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key)), "UTF-8").trim();
+            String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt_nopadding(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key)), StandardCharsets.UTF_8).trim();
 
-            String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt_nopadding(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key)), "UTF-8").trim();
+            String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt_nopadding(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key)), StandardCharsets.UTF_8).trim();
 
-            ArrayList<String> files = findAllRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), "UTF-8"), 1);
+            ArrayList<String> files = findAllRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), StandardCharsets.UTF_8), 1);
 
             for (String f : files) {
 
@@ -593,13 +584,13 @@ public class CryptTools {
 
                 for (String s : urls) {
 
-                    links.add(new String(BASE642Bin(s), "UTF-8"));
+                    links.add(new String(BASE642Bin(s), StandardCharsets.UTF_8));
                 }
             }
 
         } catch (Exception ex) {
 
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to decrypt DLC! {}", ex.getMessage());
 
             JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "DLC ERROR", JOptionPane.ERROR_MESSAGE);
         } finally {
@@ -611,7 +602,7 @@ public class CryptTools {
         return links;
     }
 
-    public static String MEGAUserHash(byte[] str, int[] aeskey) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException, Exception {
+    public static String MEGAUserHash(byte[] str, int[] aesKey) throws Exception {
 
         int[] s32 = bin2i32a(str);
 
@@ -626,7 +617,7 @@ public class CryptTools {
 
         for (int i = 0; i < 0x4000; i++) {
 
-            h32 = CryptTools.aes_cbc_encrypt_ia32(h32, aeskey, iv);
+            h32 = CryptTools.aes_cbc_encrypt_ia32(h32, aesKey, iv);
         }
 
         int[] res = {h32[0], h32[2]};

@@ -78,13 +78,13 @@ import static com.tonikelope.megabasterd.MiscTools.mpi2big;
  */
 public class MegaAPI implements Serializable {
 
+    private static final Logger LOG = LogManager.getLogger(MegaAPI.class);
     public static final String API_URL = "https://g.api.mega.co.nz";
     public static String API_KEY = null;
     public static final int REQ_ID_LENGTH = 10;
     public static final Integer[] MEGA_ERROR_NO_EXCEPTION_CODES = {-1, -3};
     public static final int PBKDF2_ITERATIONS = 100000;
     public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
-    private static final Logger LOG = LogManager.getLogger();
     private static final ArrayList<String> _excluded_proxy_list = new ArrayList<>();
 
     public static int checkMEGAError(String data) {
@@ -184,7 +184,6 @@ public class MegaAPI implements Serializable {
 
         HttpHost httpHost = new HttpHost(hostString);
         URI uri = URI.create("http://" + httpHost.getHostName() + string_url.substring(hostString.length()) + "/0-0");
-        LOG.info("Checking mega download uri: " + uri + ", host: " + httpHost + ", host.getHostName(): " + httpHost.getHostName());
 
         do {
             try (
@@ -202,8 +201,7 @@ public class MegaAPI implements Serializable {
                     statusSet.httpError.set(statusSet.httpStatus.get());
                 } else statusSet.httpError.set(0);
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, "FAILED TO CHECK DOWNLOAD URL: {} : {}", new Object[]{uri, ex.getMessage()});
-                ex.printStackTrace();
+                LOG.log(Level.FATAL, "FAILED TO CHECK DOWNLOAD URL: {} : {}", uri, ex.getMessage());
             }
         } while (statusSet.httpError.get() == 509);
 
@@ -264,7 +262,7 @@ public class MegaAPI implements Serializable {
             request = "[{\"a\":\"us\",\"user\":\"" + _email + "\",\"uh\":\"" + _user_hash + "\"}]";
         }
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno));
+        URL url_api = new URL(API_URL + "/cs?id=" + _seqno);
 
         String res = RAW_REQUEST(request, url_api);
 
@@ -300,7 +298,7 @@ public class MegaAPI implements Serializable {
 
         String request = "[{\"a\":\"us0\",\"user\":\"" + _email + "\"}]";
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno));
+        URL url_api = new URL(API_URL + "/cs?id=" + _seqno);
 
         String res = RAW_REQUEST(request, url_api);
 
@@ -318,7 +316,7 @@ public class MegaAPI implements Serializable {
 
         String request = "[{\"a\":\"mfag\",\"e\":\"" + email + "\"}]";
 
-        URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno));
+        URL url_api = new URL(API_URL + "/cs?id=" + _seqno);
 
         String res = RAW_REQUEST(request, url_api);
 
@@ -344,9 +342,9 @@ public class MegaAPI implements Serializable {
 
         if (_account_version == 1) {
 
-            _password_aes = MEGAPrepareMasterKey(bin2i32a(password.getBytes("UTF-8")));
+            _password_aes = MEGAPrepareMasterKey(bin2i32a(password.getBytes(StandardCharsets.UTF_8)));
 
-            _user_hash = MEGAUserHash(_email.toLowerCase().getBytes("UTF-8"), _password_aes);
+            _user_hash = MEGAUserHash(_email.toLowerCase().getBytes(StandardCharsets.UTF_8), _password_aes);
 
         } else {
 
@@ -388,7 +386,7 @@ public class MegaAPI implements Serializable {
 
             URL url_api;
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -418,7 +416,7 @@ public class MegaAPI implements Serializable {
 
         } catch (Exception ex) {
 
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to get quota! {}", ex.getMessage());
         }
 
         return quota;
@@ -432,7 +430,7 @@ public class MegaAPI implements Serializable {
 
         try {
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -463,7 +461,7 @@ public class MegaAPI implements Serializable {
             }
 
         } catch (IOException | MegaAPIException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Exception captured fetching nodes! {}", ex.getMessage());
         }
 
     }
@@ -490,7 +488,7 @@ public class MegaAPI implements Serializable {
 
                     if (current_smart_proxy != null && (http_error != 0 || empty_response)) {
 
-                        proxy_manager.blockProxy(current_smart_proxy, "HTTP " + String.valueOf(http_error));
+                        proxy_manager.blockProxy(current_smart_proxy, "HTTP " + http_error);
 
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
@@ -526,9 +524,9 @@ public class MegaAPI implements Serializable {
 
                         con = (HttpsURLConnection) url_api.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                        if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                        if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                         }
                     } else {
 
@@ -563,9 +561,9 @@ public class MegaAPI implements Serializable {
 
                 if (http_status != 200) {
 
-                    LOG.log(Level.WARN, "{} {} {}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
+                    LOG.log(Level.WARN, "{} {}",  request, url_api.toString());
 
-                    LOG.log(Level.WARN, "{} Failed : HTTP error code : {}", new Object[]{Thread.currentThread().getName(), http_status});
+                    LOG.log(Level.WARN, "Failed : HTTP error code: {}", http_status);
 
                     http_error = http_status;
 
@@ -582,7 +580,7 @@ public class MegaAPI implements Serializable {
                             byte_res.write(buffer, 0, reads);
                         }
 
-                        response = new String(byte_res.toByteArray(), "UTF-8");
+                        response = new String(byte_res.toByteArray(), StandardCharsets.UTF_8);
 
                         if (response.length() > 0) {
 
@@ -604,23 +602,22 @@ public class MegaAPI implements Serializable {
 
             } catch (SSLException ssl_ex) {
                 empty_response = true;
-                LOG.log(Level.FATAL, ssl_ex.getMessage());
+                LOG.log(Level.FATAL, "SSL Error in RAW_REQUEST! {}", ssl_ex.getMessage());
             } catch (IOException ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "IO Exception in RAW_REQUEST! {}", ex.getMessage());
             } finally {
                 if (con != null) con.disconnect();
             }
 
             if ((empty_response || mega_error != 0 || http_error != 0) && http_error != 509) {
 
-                LOG.log(Level.WARN, "{} MegaAPI ERROR {} Waiting for retry...", new Object[]{Thread.currentThread().getName(), String.valueOf(mega_error)});
+                LOG.log(Level.WARN, "MegaAPI ERROR {} Waiting for retry...", String.valueOf(mega_error));
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Back-off sleep interrupted! {}", ex.getMessage());
                 }
-
             }
 
         } while (http_error == 500 || empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()));
@@ -644,12 +641,12 @@ public class MegaAPI implements Serializable {
 
             request = "[{\"a\":\"g\", \"g\":\"1\", \"n\":\"" + file_id + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + "&n=" + folder_id);
+            url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : "") + "&n=" + folder_id);
 
         } else {
 
             request = "[{\"a\":\"g\", \"g\":\"1\", \"p\":\"" + file_id + "\"}]";
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
         }
 
         String data = RAW_REQUEST(request, url_api);
@@ -660,7 +657,7 @@ public class MegaAPI implements Serializable {
 
         String download_url = (String) res_map[0].get("g");
 
-        if (download_url == null || "".equals(download_url)) {
+        if (download_url == null || download_url.isEmpty()) {
             throw new MegaAPIException(-101);
         }
 
@@ -682,13 +679,13 @@ public class MegaAPI implements Serializable {
 
             request = "[{\"a\":\"g\", \"g\":\"1\", \"n\":\"" + file_id + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : "") + "&n=" + folder_id);
+            url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : "") + "&n=" + folder_id);
 
         } else {
 
             request = "[{\"a\":\"g\", \"p\":\"" + file_id + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
         }
 
         String data = RAW_REQUEST(request, url_api);
@@ -726,7 +723,7 @@ public class MegaAPI implements Serializable {
             return aes_cbc_encrypt_pkcs7(attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Exception while encoding attributes! {}", ex.getMessage());
         }
 
         return null;
@@ -738,7 +735,7 @@ public class MegaAPI implements Serializable {
 
         try {
 
-            byte[] attr_byte = ("MEGA" + attr).getBytes("UTF-8");
+            byte[] attr_byte = ("MEGA" + attr).getBytes(StandardCharsets.UTF_8);
 
             int l = (int) (16 * Math.ceil((double) attr_byte.length / 16));
 
@@ -747,7 +744,7 @@ public class MegaAPI implements Serializable {
             ret = aes_cbc_encrypt_nopadding(new_attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Exception encoding attribute! {}", ex.getMessage());
         }
 
         return ret;
@@ -769,13 +766,13 @@ public class MegaAPI implements Serializable {
 
             objectMapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
 
+            // todo migrate to JsonReadFeature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER
             objectMapper.configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
 
             res_map = objectMapper.readValue(att, HashMap.class);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
-
+            LOG.log(Level.FATAL, "Exception decoding attribute! {}", ex.getMessage());
         }
 
         return res_map;
@@ -789,9 +786,9 @@ public class MegaAPI implements Serializable {
 
             File f = new File(filename);
 
-            String request = "[{\"a\":\"u\", \"s\":" + String.valueOf(f.length()) + "}]";
+            String request = "[{\"a\":\"u\", \"s\":" + f.length() + "}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -802,11 +799,9 @@ public class MegaAPI implements Serializable {
             ul_url = (String) res_map[0].get("p");
 
         } catch (MegaAPIException mae) {
-
             throw mae;
-
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Could not initialize upload! {}", ex.getMessage());
         }
 
         return ul_url;
@@ -815,26 +810,19 @@ public class MegaAPI implements Serializable {
     public String uploadThumbnails(Upload upload, String node_handle, String filename0, String filename1) throws MegaAPIException {
 
         String[] ul_url = new String[2];
-
         String[] hash = new String[2];
 
         try {
 
             File[] files = new File[2];
-
             files[0] = new File(filename0);
-
             byte[][] file_bytes = new byte[2][];
-
             file_bytes[0] = _encThumbAttr(Files.readAllBytes(files[0].toPath()), upload.getByte_file_key());
-
             files[1] = new File(filename1);
-
             file_bytes[1] = _encThumbAttr(Files.readAllBytes(files[1].toPath()), upload.getByte_file_key());
+            String request = "[{\"a\":\"ufa\", \"s\":" + file_bytes[0].length + ", \"ssl\":1}, {\"a\":\"ufa\", \"s\":" + file_bytes[1].length + ", \"ssl\":1}]";
 
-            String request = "[{\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[0].length) + ", \"ssl\":1}, {\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[1].length) + ", \"ssl\":1}]";
-
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -851,40 +839,27 @@ public class MegaAPI implements Serializable {
             for (String u : ul_url) {
 
                 URL url = new URL(u);
-
                 HttpURLConnection con;
-
                 con = (HttpURLConnection) url.openConnection();
-
                 con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
-
                 con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
-
                 con.setRequestMethod("POST");
-
                 con.setDoOutput(true);
-
                 con.setUseCaches(false);
-
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 byte[] buffer = new byte[8192];
-
                 int reads;
 
                 try (OutputStream out = new ThrottledOutputStream(con.getOutputStream(), upload.getMain_panel().getStream_supervisor())) {
-
                     out.write(file_bytes[h]);
                 }
 
                 try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
                     while ((reads = is.read(buffer)) != -1) {
                         byte_res.write(buffer, 0, reads);
                     }
-
                     hash[h] = MiscTools.Bin2UrlBASE64(byte_res.toByteArray());
-
                 }
 
                 h++;
@@ -892,7 +867,7 @@ public class MegaAPI implements Serializable {
 
             request = "[{\"a\":\"pfa\", \"fa\":\"0*" + hash[0] + "/1*" + hash[1] + "\", \"n\":\"" + node_handle + "\"}]";
 
-            url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             res = RAW_REQUEST(request, url_api);
 
@@ -900,30 +875,27 @@ public class MegaAPI implements Serializable {
 
             String[] resp = objectMapper.readValue(res, String[].class);
 
-            return (String) resp[0];
-
+            return resp[0];
         } catch (MegaAPIException mae) {
-
             throw mae;
-
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to upload thumbnails! {}", ex.getMessage());
         }
 
         return "";
     }
 
-    public HashMap<String, Object> finishUploadFile(String fbasename, int[] ul_key, int[] fkey, int[] meta_mac, String completion_handle, String mega_parent, byte[] master_key, String root_node, byte[] share_key) throws MegaAPIException {
+    public HashMap<String, Object> finishUploadFile(String fBaseName, int[] ul_key, int[] fKey, String completion_handle, String mega_parent, byte[] master_key, String root_node, byte[] share_key) throws MegaAPIException {
 
         HashMap[] res_map = null;
 
         try {
 
-            byte[] enc_att = _encAttr("{\"n\":\"" + fbasename + "\"}", i32a2bin(Arrays.copyOfRange(ul_key, 0, 4)));
+            byte[] enc_att = _encAttr("{\"n\":\"" + fBaseName + "\"}", i32a2bin(Arrays.copyOfRange(ul_key, 0, 4)));
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
-            String request = "[{\"a\":\"p\", \"t\":\"" + mega_parent + "\", \"n\":[{\"h\":\"" + completion_handle + "\", \"t\":0, \"a\":\"" + Bin2UrlBASE64(enc_att) + "\", \"k\":\"" + Bin2UrlBASE64(encryptKey(i32a2bin(fkey), master_key)) + "\"}], \"i\":\"" + _req_id + "\", \"cr\" : [ [\"" + root_node + "\"] , [\"" + completion_handle + "\"] , [0,0, \"" + Bin2UrlBASE64(encryptKey(i32a2bin(fkey), share_key)) + "\"]]}]";
+            String request = "[{\"a\":\"p\", \"t\":\"" + mega_parent + "\", \"n\":[{\"h\":\"" + completion_handle + "\", \"t\":0, \"a\":\"" + Bin2UrlBASE64(enc_att) + "\", \"k\":\"" + Bin2UrlBASE64(encryptKey(i32a2bin(fKey), master_key)) + "\"}], \"i\":\"" + _req_id + "\", \"cr\" : [ [\"" + root_node + "\"] , [\"" + completion_handle + "\"] , [0,0, \"" + Bin2UrlBASE64(encryptKey(i32a2bin(fKey), share_key)) + "\"]]}]";
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -932,11 +904,9 @@ public class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (MegaAPIException mae) {
-
             throw mae;
-
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Generic error in finishUploadFile! {}", ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -978,7 +948,7 @@ public class MegaAPI implements Serializable {
 
             byte[] enc_node_key = encryptKey(node_key, master_key);
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             String request = "[{\"a\":\"p\", \"t\":\"" + parent_node + "\", \"n\":[{\"h\":\"xxxxxxxx\",\"t\":1,\"a\":\"" + Bin2UrlBASE64(enc_att) + "\",\"k\":\"" + Bin2UrlBASE64(enc_node_key) + "\"}],\"i\":\"" + _req_id + "\"}]";
 
@@ -989,7 +959,7 @@ public class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Could not create dir! {}", ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -1008,7 +978,7 @@ public class MegaAPI implements Serializable {
 
             byte[] enc_node_key_s = encryptKey(node_key, share_key);
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             String request = "[{\"a\":\"p\", \"t\":\"" + parent_node + "\", \"n\":[{\"h\":\"xxxxxxxx\",\"t\":1,\"a\":\"" + Bin2UrlBASE64(enc_att) + "\",\"k\":\"" + Bin2UrlBASE64(enc_node_key) + "\"}],\"i\":\"" + _req_id + "\", \"cr\" : [ [\"" + root_node + "\"] , [\"xxxxxxxx\"] , [0,0, \"" + Bin2UrlBASE64(enc_node_key_s) + "\"]]}]";
 
@@ -1019,7 +989,7 @@ public class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to create dir {} inside shared dir {}! {}", name, parent_node, ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -1051,7 +1021,7 @@ public class MegaAPI implements Serializable {
             public_link = "https://mega.nz/#!" + file_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to get public file link! {}", ex.getMessage());
         }
 
         return public_link;
@@ -1069,7 +1039,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"l\", \"n\":\"" + node + "\", \"i\":\"" + _req_id + "\"}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             String res = RAW_REQUEST(request, url_api);
 
@@ -1077,12 +1047,12 @@ public class MegaAPI implements Serializable {
 
             res_map = objectMapper.readValue(res, List.class);
 
-            folder_id = (String) res_map.get(0);
+            folder_id = (String) res_map.getFirst();
 
             public_link = "https://mega.nz/#F!" + folder_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to get public folder link! {}", ex.getMessage());
         }
 
         return public_link;
@@ -1111,32 +1081,30 @@ public class MegaAPI implements Serializable {
 
             String enc_nk = Bin2UrlBASE64(encryptKey(node_key, share_key));
 
-            String ha = cryptoHandleauth(node);
+            String ha = cryptoHandleAuth(node);
 
             //OJO
             String request = "[{\"a\":\"s2\",\"n\":\"" + node + "\",\"s\":[{\"u\":\"EXP\",\"r\":0}],\"i\":\"" + _req_id + "\",\"ok\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"ha\":\"AAAAAAAAAAAAAAAAAAAAAA\",\"cr\":[[\"" + node + "\"],[\"" + node + "\"],[0,0,\"" + enc_nk + "\"]]}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + (_sid != null ? "&sid=" + _sid : ""));
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + (_sid != null ? "&sid=" + _sid : ""));
 
             return RAW_REQUEST(request, url_api);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Exception sharing folder! {}", ex.getMessage());
         }
 
         return null;
     }
 
-    public String cryptoHandleauth(String h) {
+    public String cryptoHandleAuth(String h) {
 
         String ch = null;
 
         try {
-
-            ch = Bin2UrlBASE64(encryptKey((h + h).getBytes("UTF-8"), i32a2bin(getMaster_key())));
-
+            ch = Bin2UrlBASE64(encryptKey((h + h).getBytes(StandardCharsets.UTF_8), i32a2bin(getMaster_key())));
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to handle crypto auth! {}", ex.getMessage());
         }
 
         return ch;
@@ -1152,10 +1120,10 @@ public class MegaAPI implements Serializable {
 
         if (Files.exists(Paths.get(file_path))) {
 
-            LOG.log(Level.INFO, "MEGA FOLDER {} USING CACHED JSON FILE TREE", new Object[]{folder_id});
+            LOG.log(Level.INFO, "MEGA FOLDER {} USING CACHED JSON FILE TREE", folder_id);
 
             try {
-                return new String(Files.readAllBytes(Paths.get(file_path)), "UTF-8");
+                return new String(Files.readAllBytes(Paths.get(file_path)), StandardCharsets.UTF_8);
             } catch (IOException ex) {
                 LOG.log(Level.FATAL, "IO Exception getting cached folder nodes!", ex);
             }
@@ -1188,7 +1156,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\", \"ca\":\"1\"}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&n=" + folder_id);
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + "&n=" + folder_id);
 
             res = RAW_REQUEST(request, url_api);
 
@@ -1197,7 +1165,7 @@ public class MegaAPI implements Serializable {
             }
         }
 
-        LOG.log(Level.INFO, "MEGA FOLDER {} JSON FILE TREE SIZE -> {}", new Object[]{folder_id, MiscTools.formatBytes((long) res.length())});
+        LOG.log(Level.INFO, "MEGA FOLDER {} JSON FILE TREE SIZE -> {}", folder_id, MiscTools.formatBytes((long) res.length()));
 
         if (res != null) {
 
@@ -1358,7 +1326,7 @@ public class MegaAPI implements Serializable {
 
             String request = "[{\"a\":\"f\", \"c\":\"1\", \"r\":\"1\", \"ca\":\"1\"}]";
 
-            URL url_api = new URL(API_URL + "/cs?id=" + String.valueOf(_seqno) + "&n=" + folder_id);
+            URL url_api = new URL(API_URL + "/cs?id=" + _seqno + "&n=" + folder_id);
 
             res = RAW_REQUEST(request, url_api);
 
@@ -1367,7 +1335,7 @@ public class MegaAPI implements Serializable {
             }
         }
 
-        LOG.log(Level.INFO, "MEGA FOLDER {} JSON FILE TREE SIZE -> {}", new Object[]{folder_id, MiscTools.formatBytes((long) res.length())});
+        LOG.log(Level.INFO, "MEGA FOLDER {} JSON FILE TREE SIZE -> {}", folder_id, MiscTools.formatBytes((long) res.length()));
 
         if (res != null) {
 
@@ -1434,7 +1402,7 @@ public class MegaAPI implements Serializable {
             }
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to b64 decode with key {}! {}", key, ex.getMessage());
         }
 
         return null;

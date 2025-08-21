@@ -48,9 +48,10 @@ import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
  */
 public class MegaCrypterAPI {
 
+    private static final Logger LOG = LogManager.getLogger(MegaCrypterAPI.class);
+
     public static final Set<String> PASS_CACHE = new HashSet<>();
     public static final Object PASS_LOCK = new Object();
-    private static final Logger LOG = LogManager.getLogger();
 
     private static String _rawRequest(String request, URL url_api) throws MegaCrypterAPIException {
 
@@ -66,7 +67,7 @@ public class MegaCrypterAPI {
 
                 if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                 }
             } else {
 
@@ -74,22 +75,15 @@ public class MegaCrypterAPI {
             }
 
             con.setRequestProperty("Content-type", "application/json");
-
             con.setUseCaches(false);
-
             con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
-
             con.setRequestMethod("POST");
-
             con.setDoOutput(true);
-
             con.getOutputStream().write(request.getBytes(StandardCharsets.UTF_8));
-
             con.getOutputStream().close();
 
             if (con.getResponseCode() != 200) {
-                LOG.log(Level.INFO, "{} Failed : HTTP error code : {}", Thread.currentThread().getName(), con.getResponseCode());
-
+                LOG.log(Level.INFO, "Failed : HTTP error code : {}", con.getResponseCode());
             } else {
 
                 try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
@@ -99,13 +93,11 @@ public class MegaCrypterAPI {
                     int reads;
 
                     while ((reads = is.read(buffer)) != -1) {
-
                         byte_res.write(buffer, 0, reads);
                     }
 
-                    response = new String(byte_res.toByteArray(), "UTF-8");
-
-                    if (response.length() > 0) {
+                    response = byte_res.toString(StandardCharsets.UTF_8);
+                    if (!response.isEmpty()) {
 
                         int mc_error;
 
@@ -118,16 +110,12 @@ public class MegaCrypterAPI {
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "IO Exception in _rawRequest! {}", ex.getMessage());
         } finally {
-
-            if (con != null) {
-                con.disconnect();
-            }
+            if (con != null) con.disconnect();
         }
 
         return response;
-
     }
 
     public static String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String sid, String reverse) throws IOException, MegaCrypterAPIException {

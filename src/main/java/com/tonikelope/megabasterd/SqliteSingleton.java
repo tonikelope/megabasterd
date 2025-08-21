@@ -30,7 +30,7 @@ public class SqliteSingleton {
     public static final String SQLITE_FILE = "megabasterd.db";
 
     public static final int VALIDATION_TIMEOUT = 15;
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(SqliteSingleton.class);
 
     public static SqliteSingleton getInstance() {
 
@@ -39,11 +39,8 @@ public class SqliteSingleton {
     private final ConcurrentHashMap<Thread, Connection> _connections_map;
 
     private SqliteSingleton() {
-
         _connections_map = new ConcurrentHashMap<>();
-
         File database_path = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION);
-
         database_path.mkdirs();
     }
 
@@ -63,7 +60,7 @@ public class SqliteSingleton {
             }
 
         } catch (ClassNotFoundException | SQLException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Exception in DB Connection! {}", ex.getMessage());
         }
 
         return conn;

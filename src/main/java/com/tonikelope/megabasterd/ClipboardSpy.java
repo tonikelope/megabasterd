@@ -28,8 +28,9 @@ import static java.lang.Thread.sleep;
  */
 public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThreadNotifiable, ClipboardChangeObservable {
 
+    private static final Logger LOG = LogManager.getLogger(ClipboardSpy.class);
+
     private static final int SLEEP = 250;
-    private static final Logger LOG = LogManager.getLogger();
 
     private final Clipboard _sysClip;
 
@@ -70,17 +71,12 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
         }
 
         if (_enabled && monitor_clipboard) {
-
             _contents = getClipboardContents();
-
             notifyChangeToMyObservers();
-
             gainOwnership(_contents);
-
-            LOG.log(Level.INFO, "{} Monitoring clipboard ON...", Thread.currentThread().getName());
-
+            LOG.log(Level.INFO, "Monitoring clipboard ON...");
         } else if (monitor_clipboard) {
-            LOG.log(Level.INFO, "{} Monitoring clipboard OFF...", Thread.currentThread().getName());
+            LOG.log(Level.INFO, "Monitoring clipboard OFF...");
         }
     }
 
@@ -99,11 +95,10 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
 
         synchronized (_secure_notify_lock) {
             while (!_notified) {
-
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
                 }
             }
 

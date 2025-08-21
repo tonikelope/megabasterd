@@ -35,7 +35,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class LabelTranslatorSingleton {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(LabelTranslatorSingleton.class);
 
     public static LabelTranslatorSingleton getInstance() {
 
@@ -46,7 +46,7 @@ public class LabelTranslatorSingleton {
 
     private LabelTranslatorSingleton() {
 
-        _rosetta = new ConcurrentHashMap();
+        _rosetta = new ConcurrentHashMap<>();
 
         switch (MainPanel.getLanguage()) {
 
@@ -87,8 +87,8 @@ public class LabelTranslatorSingleton {
         _addTranslation("FILE WITH SAME NAME AND SIZE ALREADY EXISTS", "EINE DATEI MIT DEMSELBEN NAMEN UND DATEIGRÖßE EXISTIERT BEREITS");
         _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE. YOU SHOULD GET A KEY -> https://mega.nz/sdk", "WARNUNG: DIE MEGA API OHNE EINEN API-SCHLÜSSEL ZU BENUTZEN KÖNNTE GEGEN DIE NUTZUNGSBEDINGUNGEN VERSTOßEN. SIE SOLLTEN EINEN SCHLÜSSEL BEANTRAGEN -> https://mega.nz/sdk");
         _addTranslation("WARNING: USING MEGA API WITHOUT API KEY MAY VIOLATE ITS TERM OF USE.\n\nYOU SHOULD GET A KEY -> https://mega.nz/sdk (and set it in MegaBasterd ADVANCED SETTINGS).\n\nCREATE API KEY NOW?", "WARNUNG: DIE MEGA API OHNE EINEN API-SCHLÜSSEL ZU BENUTZEN KÖNNTE GEGEN DIE NUTZUNGSBEDINGUNGEN VERSTOßEN. \n\n SIE SOLLTEN EINEN SCHLÜSSEL BEANTRAGEN ->  https://mega.nz/sdk (UND IHN IN DEN MegaBasterd ERWEITERTEN EINSTELLUNGEN FESTLEGEN).\n\nJETZT EINEN API-SCHLÜSSEL ERSTELLEN?");
-        _addTranslation("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.", "WARNUNG: DIE VERWENDUNG VON PROXYS ODER VPN-ANBIETERN ZUR UMGEHUNG DER TÄGLICHEN DOWNLOAD-BESCHRÄNKUNGEN KANN GEGEN DIE NUTZUNGSBEDINGUNGEN VERSTOßEN. NUTZEN SIE DIESE OPTION AUF EIGENES RISIKO HIN:");
-        _addTranslation("Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use.\n\nUSE THIS OPTION AT YOUR OWN RISK.", "DIE VERWENDUNG VON PROXYS ODER VPN-ANBIETERN ZUR UMGEHUNG DER TÄGLICHEN DOWNLOAD-BESCHRÄNKUNGEN KANN GEGEN DIE NUTZUNGSBEDINGUNGEN VERSTOßEN.\n\n NUTZEN SIE DIESE OPTION AUF EIGENES RISIKO HIN.");
+        _addTranslation("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.", "WARNUNG: DIE VERWENDUNG VON PROXIES ODER VPN-ANBIETERN ZUR UMGEHUNG DER TÄGLICHEN DOWNLOAD-BESCHRÄNKUNGEN KANN GEGEN DIE NUTZUNGSBEDINGUNGEN VERSTOßEN. NUTZEN SIE DIESE OPTION AUF EIGENES RISIKO HIN:");
+        _addTranslation("Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use.\n\nUSE THIS OPTION AT YOUR OWN RISK.", "DIE VERWENDUNG VON PROXIES ODER VPN-ANBIETERN ZUR UMGEHUNG DER TÄGLICHEN DOWNLOAD-BESCHRÄNKUNGEN KANN GEGEN DIE NUTZUNGSBEDINGUNGEN VERSTOßEN.\n\n NUTZEN SIE DIESE OPTION AUF EIGENES RISIKO HIN.");
         _addTranslation("Execute this command when MEGA download limit is reached:", "Führen Sie diesen Befehl aus, wenn das Mega-Download-Limit erreicht ist:");
         _addTranslation("Use this proxy list (instead of the one included in MegaBasterd) Format is [*]IP:PORT[@user_b64:password_b64]", "Nutze diese Proxy Liste (anstelle der in MegaBasterd enthaltenen Liste) Format ist [*]IP:PORT[@user_b64:passwort_b64]");
         _addTranslation("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***", "Warte auf den Abschluss-Handler ... *** MEGABASTARD JETZT NICHT VERLASSEN ***");
@@ -178,7 +178,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("PAUSE UPLOAD", "UPLOAD PAUSIEREN");
         _addTranslation("CANCEL CHECK", "ÜBERPRÜFUNG ABBRECHEN");
         _addTranslation("Keep temp file", "TEMP-DATEI BEHALTEN");
-        _addTranslation("Use HTTP(S) PROXY", "HTTP(S) PROXYS BENUTZEN");
+        _addTranslation("Use HTTP(S) PROXY", "HTTP(S) PROXIES BENUTZEN");
         _addTranslation("MERGING FILE...", "DATEI WIRD ZUSAMMENGEFÜHRT...");
         _addTranslation("Checking MEGA account...", "Überprüfe MEGA Konto...");
         _addTranslation("SAVE", "SPEICHERN");
@@ -1953,7 +1953,7 @@ public class LabelTranslatorSingleton {
         _addTranslation("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.", "AVISO: El uso de proxies o VPN para saltar el límite diario de descarga de MEGA podría violar sus Términos de Uso. UTILIZA ESTA OPCIÓN BAJO TU RESPONSABILIDAD.");
         _addTranslation("Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use.\n\nUSE THIS OPTION AT YOUR OWN RISK.", "El uso de proxies o VPN para saltar el límite diario de descarga de MEGA podría violar sus Términos de Uso.\n\nUTILIZA ESTA OPCIÓN BAJO TU RESPONSABILIDAD.");
         _addTranslation("Execute this command when MEGA download limit is reached:", "Ejecutar este comando cuando se alcance el límite de descarga de MEGA:");
-        _addTranslation("Use this proxy list (instead of the one included in MegaBasterd) Format is [*]IP:PORT[@user_b64:password_b64]", "Usar esta lista de proxys (en vez de la incluida en MegaBasterd) El formato es [*]IP:PUERTO[@usuario_b64:password_b64]");
+        _addTranslation("Use this proxy list (instead of the one included in MegaBasterd) Format is [*]IP:PORT[@user_b64:password_b64]", "Usar esta lista de proxies (en vez de la incluida en MegaBasterd) El formato es [*]IP:PUERTO[@usuario_b64:password_b64]");
         _addTranslation("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***", "Esperando manejador de finalización ... ***NO CIERRES MEGABASTERD EN ESTE MOMENTO***");
         _addTranslation("Finishing calculating CBC-MAC code (this could take a while) ... ***DO NOT EXIT MEGABASTERD NOW***", "Terminando de calcular código CBC-MAC (esto podría llevar tiempo) ... ***NO CIERRES MEGABASTERD EN ESTE MOMENTO***");
         _addTranslation("Split content in different uploads", "Separar contenido en diferentes subidas");
@@ -2256,10 +2256,8 @@ public class LabelTranslatorSingleton {
     }
 
     private void _addTranslation(String key, String val) {
-
         if (_rosetta.putIfAbsent(key, val) != null) {
-
-            LOG.log(Level.WARN, "Rosetta: {} aready exists!", new Object[]{key});
+            LOG.log(Level.WARN, "Rosetta: {} already exists!", key);
         }
     }
 

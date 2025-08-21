@@ -32,6 +32,8 @@ import static com.tonikelope.megabasterd.MiscTools.updateFonts;
  */
 public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
+    private static final Logger LOG = LogManager.getLogger(SetMasterPasswordDialog.class);
+
     private boolean _pass_ok;
 
     private String _new_pass_hash;
@@ -266,7 +268,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                     });
                 }
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "Failure in ok button thread! {}", ex.getMessage());
             }
         });
     }//GEN-LAST:event_ok_buttonActionPerformed
@@ -290,5 +292,4 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
     private javax.swing.JLabel status_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = LogManager.getLogger();
 }

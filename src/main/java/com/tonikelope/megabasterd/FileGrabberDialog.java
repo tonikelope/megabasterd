@@ -51,6 +51,8 @@ import static com.tonikelope.megabasterd.MiscTools.updateFonts;
  */
 public class FileGrabberDialog extends javax.swing.JDialog {
 
+    private static final Logger LOG = LogManager.getLogger(FileGrabberDialog.class);
+
     private boolean _upload;
     private final ArrayList<File> _files;
     private String _base_path;
@@ -60,7 +62,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     private boolean _inserting_mega_accounts;
     private boolean _quota_ok;
     private int _last_selected_index;
-    private List<File> _drag_drop_files;
+    private final List<File> _drag_drop_files;
 
     @Override
     public void dispose() {
@@ -142,20 +144,17 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 }
 
                 @Override
-                public synchronized void drop(DropTargetDropEvent dtde) {
+                public synchronized void drop(DropTargetDropEvent event) {
                     changeToNormal();
-                    dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+                    event.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 
                     List<File> files;
 
                     try {
 
-                        if (canImport(dtde.getTransferable().getTransferDataFlavors())) {
-                            files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-
-                            THREAD_POOL.execute(() -> {
-                                _file_drop_notify(files);
-                            });
+                        if (canImport(event.getTransferable().getTransferDataFlavors())) {
+                            files = (List<File>) event.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                            THREAD_POOL.execute(() -> _file_drop_notify(files));
                         }
 
                     } catch (Exception ex) {
@@ -164,12 +163,12 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 }
 
                 @Override
-                public synchronized void dragEnter(DropTargetDragEvent dtde) {
+                public synchronized void dragEnter(DropTargetDragEvent event) {
                     changeToDrop();
                 }
 
                 @Override
-                public synchronized void dragExit(DropTargetEvent dtde) {
+                public synchronized void dragExit(DropTargetEvent event) {
                     changeToNormal();
                 }
 
@@ -197,23 +196,16 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 _file_drop_notify(_drag_drop_files);
             }
 
-            if (_main_panel.getMega_accounts().size() > 0) {
+            if (!_main_panel.getMega_accounts().isEmpty()) {
 
-                ArrayList<String> cuentas = new ArrayList<>();
-
-                _main_panel.getMega_accounts().keySet().forEach((o) -> {
-                    cuentas.add(o);
-                });
-
-                Collections.sort(cuentas);
+                ArrayList<String> accounts = new ArrayList<>(_main_panel.getMega_accounts().keySet());
+                Collections.sort(accounts);
 
                 MiscTools.GUIRunAndWait(() -> {
                     if (!_main_panel.getMega_active_accounts().isEmpty()) {
                         _inserting_mega_accounts = true;
 
-                        cuentas.forEach((o) -> {
-                            account_combobox.addItem(o);
-                        });
+                        accounts.forEach((o) -> account_combobox.addItem(o));
 
                         _inserting_mega_accounts = false;
 
@@ -228,7 +220,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
                     } else {
 
-                        cuentas.forEach((o) -> {
+                        accounts.forEach((o) -> {
                             account_combobox.addItem(o);
                         });
                     }
@@ -1018,7 +1010,6 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     private javax.swing.JLabel used_space_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = LogManager.getLogger();
 
     private void _file_drop_notify(List<File> files) {
 

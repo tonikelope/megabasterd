@@ -34,7 +34,7 @@ import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
  */
 public class MegaProxyServer implements Runnable {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(MegaProxyServer.class);
 
     private final String _password;
     private final int _port;
@@ -72,23 +72,19 @@ public class MegaProxyServer implements Runnable {
             Socket socket;
 
             try {
-
                 while ((socket = _serverSocket.accept()) != null) {
                     (new Handler(socket, _password)).start();
                 }
-            } catch (IOException e) {
-
-            }
+            } catch (IOException ignored) { }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "IOException in MegaProxyServer! {}", ex.getMessage());
         } finally {
-
             if (!_serverSocket.isClosed()) {
                 try {
                     _serverSocket.close();
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Server socket closure failure! {}", ex.getMessage());
                 }
             }
         }

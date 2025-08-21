@@ -34,6 +34,8 @@ import static com.tonikelope.megabasterd.MiscTools.updateFonts;
  */
 public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
+    private static final Logger LOG = LogManager.getLogger(GetMasterPasswordDialog.class);
+
     private boolean _pass_ok;
 
     private String _current_pass_hash;
@@ -247,7 +249,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                     }
                 });
             } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+                LOG.log(Level.FATAL, "Exception in password dialog pool! {}", ex.getMessage());
             }
         });
 
@@ -270,5 +272,4 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox remember_checkbox;
     private javax.swing.JLabel status_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = LogManager.getLogger();
 }

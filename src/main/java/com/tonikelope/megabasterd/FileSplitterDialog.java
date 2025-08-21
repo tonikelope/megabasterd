@@ -38,6 +38,8 @@ import static javax.swing.JOptionPane.showOptionDialog;
  */
 public class FileSplitterDialog extends javax.swing.JDialog {
 
+    private static final Logger LOG = LogManager.getLogger(FileSplitterDialog.class);
+
     private final MainPanel _main_panel;
     private File[] _files = null;
     private File _output_dir = null;
@@ -436,7 +438,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                                         try {
                                             Desktop.getDesktop().open(_output_dir);
                                         } catch (Exception ex) {
-                                            LOG.log(Level.FATAL, ex.getMessage());
+                                            LOG.log(Level.FATAL, "Unable to open output dir! {}", ex.getMessage());
                                         }
                                     }
 
@@ -480,7 +482,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
                     }
                 } catch (Exception ex) {
-                    LOG.log(Level.FATAL, ex.getMessage());
+                    LOG.log(Level.FATAL, "Generic exception in FileSplitterDialog! {}", ex.getMessage());
                 }
             });
 
@@ -523,5 +525,4 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private javax.swing.JLabel split_size_label;
     private javax.swing.JTextField split_size_text;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = LogManager.getLogger();
 }

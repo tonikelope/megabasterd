@@ -29,7 +29,7 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DBTools {
 
-    private static final Logger LOG = LogManager.getLogger();
+    private static final Logger LOG = LogManager.getLogger(DBTools.class);
 
     private static final ConcurrentHashMap<String, Object> settingsCache = new ConcurrentHashMap<>();
 
@@ -187,7 +187,7 @@ public class DBTools {
                 return session;
             }
         } catch (SQLException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to fetch session (for {}) from DB! {}", email, ex.getMessage());
         }
 
         return session;
@@ -196,7 +196,7 @@ public class DBTools {
     private static synchronized void executeDownloadPs(String statement, Download download) throws SQLException {
         try (
             Connection conn = SqliteSingleton.getInstance().getConn();
-            PreparedStatement ps = conn.prepareStatement(statement);
+            PreparedStatement ps = conn.prepareStatement(statement)
         ) {
             ps.setString(1, download.getUrl());
             ps.setString(2, download.getMa().getFull_email());
@@ -355,7 +355,7 @@ public class DBTools {
         try {
             value = selectSettingValueFromDb(key);
         } catch (SQLException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Failed to fetch setting value {}! {}", key, ex.getMessage());
         }
 
         if (value != null) settingsCache.put(key, value);
@@ -389,7 +389,7 @@ public class DBTools {
         try {
             settings = getSettingsCacheFromDb();
         } catch (SQLException ex) {
-            LOG.log(Level.FATAL, ex.getMessage());
+            LOG.log(Level.FATAL, "Unable to fetch settings from DB! {}", ex.getMessage());
         }
 
         if (settings != null && settingsCache.isEmpty()) settingsCache.putAll(settings);

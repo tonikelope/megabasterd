@@ -30,7 +30,6 @@ import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.SQLException;
@@ -57,11 +56,11 @@ import static org.apache.logging.log4j.Level.FATAL;
  */
 public final class MainPanelView extends javax.swing.JFrame {
 
+    private static final Logger LOG = LogManager.getLogger(MainPanelView.class);
+
     private final MainPanel _main_panel;
 
     private static volatile MainPanelView INSTANCE = null;
-
-    private static final Logger LOG = LogManager.getLogger();
 
     public JProgressBar getDownload_status_bar() {
         return download_status_bar;
@@ -247,7 +246,6 @@ public final class MainPanelView extends javax.swing.JFrame {
                     try {
 
                         byte[] parent_key = ma.genFolderKey();
-
                         byte[] share_key = ma.genShareKey();
 
                         String root_name = dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10);
@@ -256,7 +254,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
-                        LOG.log(Level.INFO, "{} Dir {} created", new Object[]{Thread.currentThread().getName(), parent_node});
+                        LOG.log(Level.INFO, "Dir {} created", parent_node);
 
                         String upload_folder_string = DBTools.selectSettingValue("upload_public_folder");
 
@@ -317,7 +315,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 if (!file_path.isEmpty()) {
 
-                                    LOG.log(Level.INFO, "{} FILE_PATH -> {}", new Object[]{Thread.currentThread().getName(), file_path});
+                                    LOG.log(Level.INFO, "FILE_PATH -> {}", file_path);
 
                                 }
 
@@ -331,7 +329,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                     if (!d.isEmpty()) {
 
-                                        LOG.log(Level.INFO, "{} DIR -> {}", new Object[]{Thread.currentThread().getName(), d});
+                                        LOG.log(Level.INFO, "DIR -> {}", d);
 
                                         if (current_node.getChildren().get(d) != null) {
 
@@ -1289,7 +1287,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             if (_main_panel.isRestart()) {
 
-                _main_panel.byebye(true);
+                _main_panel.byeBye(true);
             } else {
                 _main_panel.loadUserSettings();
 
@@ -1415,7 +1413,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void exit_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exit_menuActionPerformed
 
-        _main_panel.byebye(false);
+        _main_panel.byeBye(false);
     }//GEN-LAST:event_exit_menuActionPerformed
 
     private void close_all_finished_down_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_all_finished_down_buttonActionPerformed

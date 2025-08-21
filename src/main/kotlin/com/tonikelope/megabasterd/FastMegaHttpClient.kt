@@ -45,7 +45,7 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
 
     companion object {
         @JvmStatic
-        private val LOG = LogManager.getLogger();
+        private val LOG = LogManager.getLogger(FastMegaHttpClient::class.java)
 
         @JvmStatic
         private val contentDecoderMap: LinkedHashMap<String, InputStreamFactory> = linkedMapOf(

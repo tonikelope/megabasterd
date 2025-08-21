@@ -16,8 +16,8 @@ import org.apache.logging.log4j.Logger;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.WindowEvent;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -40,6 +40,8 @@ import static java.awt.event.WindowEvent.WINDOW_CLOSING;
  */
 public class StreamerDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
 
+    private static final Logger LOG = LogManager.getLogger(StreamerDialog.class);
+
     private final ClipboardSpy _clipboardspy;
     private final MainPanelView _mainPanelView;
     private final MainPanel _main_panel;
@@ -60,7 +62,6 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
     /**
      * Creates new form Streamer
      *
-     * @param clipboardspy
      */
     public StreamerDialog(MainPanelView parent, boolean modal, ClipboardSpy clipboardspy) {
 
@@ -82,7 +83,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
 
             translateLabels(this);
 
-            if (_main_panel.isUse_mega_account_down() && _main_panel.getMega_accounts().size() > 0) {
+            if (_main_panel.isUse_mega_account_down() && !_main_panel.getMega_accounts().isEmpty()) {
 
                 THREAD_POOL.execute(() -> {
                     MiscTools.GUIRun(() -> {
@@ -203,95 +204,71 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
         final Dialog tthis = this;
 
         THREAD_POOL.execute(() -> {
-            try {
-                boolean error = false;
+            boolean error = false;
 
-                String stream_link = null;
+            String stream_link = null;
 
-                String link = URLDecoder.decode(original_link_textfield.getText(), "UTF-8").trim();
+            String link = URLDecoder.decode(original_link_textfield.getText(), StandardCharsets.UTF_8).trim();
 
-                if (link.length() > 0) {
+            if (!link.isEmpty()) {
 
-                    try {
+                try {
+                    if (findFirstRegex("://enc", link, 0) != null) {
+                        link = CryptTools.decryptMegaDownloaderLink(link);
+                    } else if (findFirstRegex("://elc", link, 0) != null) {
+                        HashSet<String> links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
+                        link = links.iterator().next();
+                    }
+                } catch (Exception ex) {
+                    error = true;
+                    LOG.log(Level.FATAL, "Error parsing link! {}", ex.getMessage());
+                }
 
-                        if (findFirstRegex("://enc", link, 0) != null) {
+                String data;
 
-                            link = CryptTools.decryptMegaDownloaderLink(link);
+                if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("://mega(\\.co)?\\.nz/#F*", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
 
-                        } else if (findFirstRegex("://elc", link, 0) != null) {
-
-                            HashSet links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
-
-                            if (links != null) {
-
-                                link = (String) links.iterator().next();
-                            }
-                        }
-
-                    } catch (Exception ex) {
-
-                        error = true;
-
-                        LOG.log(Level.FATAL, ex.getMessage());
+                    if (link.contains("#F*")) {
+                        MegaAPI ma = new MegaAPI();
+                        Set<String> links = new HashSet<>();
+                        links.add(link);
+                        List<String> nLinks = ma.GENERATE_N_LINKS(links);
+                        link = nLinks.getFirst();
                     }
 
-                    String data;
-
-                    if (findFirstRegex("://mega(\\.co)?\\.nz/#[^fF]", link, 0) != null || findFirstRegex("://mega(\\.co)?\\.nz/#F*", link, 0) != null || findFirstRegex("https?://[^/]+/![^!]+![0-9a-fA-F]+", link, 0) != null) {
-
-                        if (link.contains("#F*")) {
-
-                            MegaAPI ma = new MegaAPI();
-
-                            Set<String> links = new HashSet<>();
-
-                            links.add(link);
-
-                            List nlinks = ma.GENERATE_N_LINKS(links);
-
-                            link = (String) nlinks.get(0);
-                        }
-
-                        String selected_account = (String) use_mega_account_down_combobox.getSelectedItem();
-
-                        data = Bin2UrlBASE64(((selected_account != null ? selected_account : "") + "|" + link).getBytes("UTF-8"));
-
-                        stream_link = "http://localhost:1337/video/" + data;
-
-                    } else {
-
-                        error = true;
-                    }
+                    String selected_account = (String) use_mega_account_down_combobox.getSelectedItem();
+                    data = Bin2UrlBASE64(((selected_account != null ? selected_account : "") + "|" + link).getBytes(StandardCharsets.UTF_8));
+                    stream_link = "http://localhost:1337/video/" + data;
 
                 } else {
-
                     error = true;
                 }
 
-                if (error) {
+            } else {
+                error = true;
+            }
 
-                    MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Please, paste a Mega/MegaCrypter/ELC link!"), "Error", JOptionPane.ERROR_MESSAGE);
+            if (error) {
 
-                        original_link_textfield.setText("");
+                MiscTools.GUIRun(() -> {
+                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Please, paste a Mega/MegaCrypter/ELC link!"), "Error", JOptionPane.ERROR_MESSAGE);
 
-                        dance_button.setEnabled(true);
+                    original_link_textfield.setText("");
 
-                        original_link_textfield.setEnabled(true);
-                    });
+                    dance_button.setEnabled(true);
 
-                } else {
+                    original_link_textfield.setEnabled(true);
+                });
 
-                    _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
-                    copyTextToClipboard(stream_link);
-                    MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
-                        dispose();
-                        getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
-                    });
-                }
-            } catch (UnsupportedEncodingException ex) {
-                LOG.log(Level.FATAL, ex.getMessage());
+            } else {
+
+                _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
+                copyTextToClipboard(stream_link);
+                MiscTools.GUIRun(() -> {
+                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
+                    dispose();
+                    getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
+                });
             }
         });
 
@@ -366,6 +343,5 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
     private javax.swing.JComboBox<String> use_mega_account_down_combobox;
     private javax.swing.JLabel use_mega_account_down_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = LogManager.getLogger();
 
 }
