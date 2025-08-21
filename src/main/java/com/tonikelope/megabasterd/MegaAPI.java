@@ -201,7 +201,7 @@ public class MegaAPI implements Serializable {
                     statusSet.httpError.set(statusSet.httpStatus.get());
                 } else statusSet.httpError.set(0);
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, "FAILED TO CHECK DOWNLOAD URL: {} : {}", uri, ex.getMessage());
+                LOG.fatal("FAILED TO CHECK DOWNLOAD URL: {} : {}", uri, ex.getMessage());
             }
         } while (statusSet.httpError.get() == 509);
 
@@ -416,7 +416,7 @@ public class MegaAPI implements Serializable {
 
         } catch (Exception ex) {
 
-            LOG.log(Level.FATAL, "Failed to get quota! {}", ex.getMessage());
+            LOG.fatal("Failed to get quota! {}", ex.getMessage());
         }
 
         return quota;
@@ -461,7 +461,7 @@ public class MegaAPI implements Serializable {
             }
 
         } catch (IOException | MegaAPIException ex) {
-            LOG.log(Level.FATAL, "Exception captured fetching nodes! {}", ex.getMessage());
+            LOG.fatal("Exception captured fetching nodes! {}", ex.getMessage());
         }
 
     }
@@ -561,9 +561,9 @@ public class MegaAPI implements Serializable {
 
                 if (http_status != 200) {
 
-                    LOG.log(Level.WARN, "{} {}",  request, url_api.toString());
+                    LOG.warn("{} {}",  request, url_api.toString());
 
-                    LOG.log(Level.WARN, "Failed : HTTP error code: {}", http_status);
+                    LOG.warn("Failed : HTTP error code: {}", http_status);
 
                     http_error = http_status;
 
@@ -602,21 +602,21 @@ public class MegaAPI implements Serializable {
 
             } catch (SSLException ssl_ex) {
                 empty_response = true;
-                LOG.log(Level.FATAL, "SSL Error in RAW_REQUEST! {}", ssl_ex.getMessage());
+                LOG.fatal("SSL Error in RAW_REQUEST! {}", ssl_ex.getMessage());
             } catch (IOException ex) {
-                LOG.log(Level.FATAL, "IO Exception in RAW_REQUEST! {}", ex.getMessage());
+                LOG.fatal("IO Exception in RAW_REQUEST! {}", ex.getMessage());
             } finally {
                 if (con != null) con.disconnect();
             }
 
             if ((empty_response || mega_error != 0 || http_error != 0) && http_error != 509) {
 
-                LOG.log(Level.WARN, "MegaAPI ERROR {} Waiting for retry...", String.valueOf(mega_error));
+                LOG.warn("MegaAPI ERROR {} Waiting for retry...", String.valueOf(mega_error));
 
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, "Back-off sleep interrupted! {}", ex.getMessage());
+                    LOG.fatal("Back-off sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -723,7 +723,7 @@ public class MegaAPI implements Serializable {
             return aes_cbc_encrypt_pkcs7(attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Exception while encoding attributes! {}", ex.getMessage());
+            LOG.fatal("Exception while encoding attributes! {}", ex.getMessage());
         }
 
         return null;
@@ -744,7 +744,7 @@ public class MegaAPI implements Serializable {
             ret = aes_cbc_encrypt_nopadding(new_attr_byte, key, AES_ZERO_IV);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Exception encoding attribute! {}", ex.getMessage());
+            LOG.fatal("Exception encoding attribute! {}", ex.getMessage());
         }
 
         return ret;
@@ -772,7 +772,7 @@ public class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(att, HashMap.class);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Exception decoding attribute! {}", ex.getMessage());
+            LOG.fatal("Exception decoding attribute! {}", ex.getMessage());
         }
 
         return res_map;
@@ -801,7 +801,7 @@ public class MegaAPI implements Serializable {
         } catch (MegaAPIException mae) {
             throw mae;
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Could not initialize upload! {}", ex.getMessage());
+            LOG.fatal("Could not initialize upload! {}", ex.getMessage());
         }
 
         return ul_url;
@@ -879,7 +879,7 @@ public class MegaAPI implements Serializable {
         } catch (MegaAPIException mae) {
             throw mae;
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Failed to upload thumbnails! {}", ex.getMessage());
+            LOG.fatal("Failed to upload thumbnails! {}", ex.getMessage());
         }
 
         return "";
@@ -906,7 +906,7 @@ public class MegaAPI implements Serializable {
         } catch (MegaAPIException mae) {
             throw mae;
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Generic error in finishUploadFile! {}", ex.getMessage());
+            LOG.fatal("Generic error in finishUploadFile! {}", ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -959,7 +959,7 @@ public class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Could not create dir! {}", ex.getMessage());
+            LOG.fatal("Could not create dir! {}", ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -989,7 +989,7 @@ public class MegaAPI implements Serializable {
             res_map = objectMapper.readValue(res, HashMap[].class);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Failed to create dir {} inside shared dir {}! {}", name, parent_node, ex.getMessage());
+            LOG.fatal("Failed to create dir {} inside shared dir {}! {}", name, parent_node, ex.getMessage());
         }
 
         return res_map != null ? res_map[0] : null;
@@ -1021,7 +1021,7 @@ public class MegaAPI implements Serializable {
             public_link = "https://mega.nz/#!" + file_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Failed to get public file link! {}", ex.getMessage());
+            LOG.fatal("Failed to get public file link! {}", ex.getMessage());
         }
 
         return public_link;
@@ -1052,7 +1052,7 @@ public class MegaAPI implements Serializable {
             public_link = "https://mega.nz/#F!" + folder_id + "!" + Bin2UrlBASE64(node_key);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Failed to get public folder link! {}", ex.getMessage());
+            LOG.fatal("Failed to get public folder link! {}", ex.getMessage());
         }
 
         return public_link;
@@ -1091,7 +1091,7 @@ public class MegaAPI implements Serializable {
             return RAW_REQUEST(request, url_api);
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Exception sharing folder! {}", ex.getMessage());
+            LOG.fatal("Exception sharing folder! {}", ex.getMessage());
         }
 
         return null;
@@ -1104,7 +1104,7 @@ public class MegaAPI implements Serializable {
         try {
             ch = Bin2UrlBASE64(encryptKey((h + h).getBytes(StandardCharsets.UTF_8), i32a2bin(getMaster_key())));
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Failed to handle crypto auth! {}", ex.getMessage());
+            LOG.fatal("Failed to handle crypto auth! {}", ex.getMessage());
         }
 
         return ch;
@@ -1120,12 +1120,12 @@ public class MegaAPI implements Serializable {
 
         if (Files.exists(Paths.get(file_path))) {
 
-            LOG.log(Level.INFO, "MEGA FOLDER {} USING CACHED JSON FILE TREE", folder_id);
+            LOG.info("MEGA FOLDER {} USING CACHED JSON FILE TREE", folder_id);
 
             try {
                 return new String(Files.readAllBytes(Paths.get(file_path)), StandardCharsets.UTF_8);
             } catch (IOException ex) {
-                LOG.log(Level.FATAL, "IO Exception getting cached folder nodes!", ex);
+                LOG.fatal("IO Exception getting cached folder nodes!", ex);
             }
         }
 
@@ -1138,7 +1138,7 @@ public class MegaAPI implements Serializable {
         try {
             Files.write(Paths.get(file_path), res.getBytes());
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "IO Exception writing cached folder nodes!", ex);
+            LOG.fatal("IO Exception writing cached folder nodes!", ex);
         }
     }
 
@@ -1165,7 +1165,7 @@ public class MegaAPI implements Serializable {
             }
         }
 
-        LOG.log(Level.INFO, "MEGA FOLDER {} JSON FILE TREE SIZE -> {}", folder_id, MiscTools.formatBytes((long) res.length()));
+        LOG.info("MEGA FOLDER {} JSON FILE TREE SIZE -> {}", folder_id, MiscTools.formatBytes((long) res.length()));
 
         if (res != null) {
 
@@ -1242,13 +1242,13 @@ public class MegaAPI implements Serializable {
                         folder_nodes.put((String) node.get("h"), the_node);
 
                     } catch (Exception e) {
-                        LOG.log(Level.WARN, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
-                        LOG.log(Level.FATAL, "Exception while processing node: " + node, e);
+                        LOG.warn("WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                        LOG.fatal("Exception while processing node: " + node, e);
                     }
 
                 } else {
-                    LOG.log(Level.WARN, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
-                    LOG.log(Level.FATAL, "Exception while processing node: " + node, new Exception("Invalid node key format (1)"));
+                    LOG.warn("WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                    LOG.fatal("Exception while processing node: " + node, new Exception("Invalid node key format (1)"));
                 }
 
             }
@@ -1303,7 +1303,7 @@ public class MegaAPI implements Serializable {
             try {
                 nlinks.addAll(getNLinksFromFolder(folder_parts[0], folder_parts[1], entry.getValue(), (r == 0)));
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, "Exceptions iterating over links!", ex);
+                LOG.fatal("Exceptions iterating over links!", ex);
             }
 
         }
@@ -1335,7 +1335,7 @@ public class MegaAPI implements Serializable {
             }
         }
 
-        LOG.log(Level.INFO, "MEGA FOLDER {} JSON FILE TREE SIZE -> {}", folder_id, MiscTools.formatBytes((long) res.length()));
+        LOG.info("MEGA FOLDER {} JSON FILE TREE SIZE -> {}", folder_id, MiscTools.formatBytes((long) res.length()));
 
         if (res != null) {
 
@@ -1363,13 +1363,13 @@ public class MegaAPI implements Serializable {
                         }
 
                     } catch (Exception e) {
-                        LOG.log(Level.WARN, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
-                        LOG.log(Level.FATAL, "Exception while processing node: " + node, e);
+                        LOG.warn("WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                        LOG.fatal("Exception while processing node: " + node, e);
                     }
 
                 } else {
-                    LOG.log(Level.WARN, "WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
-                    LOG.log(Level.FATAL, "Exception while processing node: " + node, new Exception("Invalid node key format (2)"));
+                    LOG.warn("WARNING: node key is not valid " + (String) node.get("k") + " " + folder_key);
+                    LOG.fatal("Exception while processing node: " + node, new Exception("Invalid node key format (2)"));
                 }
 
             }
@@ -1402,7 +1402,7 @@ public class MegaAPI implements Serializable {
             }
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Failed to b64 decode with key {}! {}", key, ex.getMessage());
+            LOG.fatal("Failed to b64 decode with key {}! {}", key, ex.getMessage());
         }
 
         return null;

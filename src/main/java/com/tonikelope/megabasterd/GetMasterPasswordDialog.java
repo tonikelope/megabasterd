@@ -249,7 +249,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                     }
                 });
             } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
-                LOG.log(Level.FATAL, "Exception in password dialog pool! {}", ex.getMessage());
+                LOG.fatal("Exception in password dialog pool! {}", ex.getMessage());
             }
         });
 

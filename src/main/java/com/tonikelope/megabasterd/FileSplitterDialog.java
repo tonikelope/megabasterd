@@ -152,7 +152,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                     }
                     MiscTools.pause(2000);
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, "IOException monitoring progress!", ex);
+                    LOG.fatal("IOException monitoring progress!", ex);
                 }
             }
 
@@ -438,7 +438,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                                         try {
                                             Desktop.getDesktop().open(_output_dir);
                                         } catch (Exception ex) {
-                                            LOG.log(Level.FATAL, "Unable to open output dir! {}", ex.getMessage());
+                                            LOG.fatal("Unable to open output dir! {}", ex.getMessage());
                                         }
                                     }
 
@@ -482,7 +482,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
                     }
                 } catch (Exception ex) {
-                    LOG.log(Level.FATAL, "Generic exception in FileSplitterDialog! {}", ex.getMessage());
+                    LOG.fatal("Generic exception in FileSplitterDialog! {}", ex.getMessage());
                 }
             });
 

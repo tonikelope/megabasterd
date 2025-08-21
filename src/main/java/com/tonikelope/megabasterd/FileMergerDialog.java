@@ -98,7 +98,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                     MiscTools.pause(2000);
 
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, "IOException monitoring progress!", ex);
+                    LOG.fatal("IOException monitoring progress!", ex);
                 }
             }
 
@@ -159,7 +159,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
             Files.deleteIfExists(Paths.get(_file_name_full + ".sha1"));
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "Error deleting file parts!", ex);
+            LOG.fatal("Error deleting file parts!", ex);
         }
     }
 
@@ -442,7 +442,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                                     try {
                                         Desktop.getDesktop().open(_output_dir);
                                     } catch (Exception ex) {
-                                        LOG.log(Level.FATAL, "Cannot open output dir! {}", ex.getMessage());
+                                        LOG.fatal("Cannot open output dir! {}", ex.getMessage());
                                     }
                                 }
 
@@ -489,7 +489,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                         });
                     }
                 } catch (Exception ex) {
-                    LOG.log(Level.FATAL, "Generic exception in FileMergerDialog! {}", ex.getMessage());
+                    LOG.fatal("Generic exception in FileMergerDialog! {}", ex.getMessage());
                 }
             });
 

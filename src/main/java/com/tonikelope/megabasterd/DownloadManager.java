@@ -162,7 +162,7 @@ public class DownloadManager extends TransferenceManager {
             try {
                 deleteDownloads(urlsToDelete);
             } catch (SQLException ex) {
-                LOG.log(Level.FATAL, "Error deleting downloads!", ex);
+                LOG.fatal("Error deleting downloads!", ex);
             } 
         });
 
@@ -180,12 +180,12 @@ public class DownloadManager extends TransferenceManager {
             secureNotify();
 
         } catch (APIException ex) {
-            LOG.log(Level.INFO, "Provision failed! Retrying in separated thread...");
+            LOG.info("Provision failed! Retrying in separated thread...");
             THREAD_POOL.execute(() -> {
                 try {
                     _provision((Download) download, true);
                 } catch (APIException ex1) {
-                    LOG.log(Level.FATAL, "Provision in separate thread failed!", ex1);
+                    LOG.fatal("Provision in separate thread failed!", ex1);
                 }
                 secureNotify();
             });

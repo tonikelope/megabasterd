@@ -83,7 +83,7 @@ public class MegaCrypterAPI {
             con.getOutputStream().close();
 
             if (con.getResponseCode() != 200) {
-                LOG.log(Level.INFO, "Failed : HTTP error code : {}", con.getResponseCode());
+                LOG.info("Failed : HTTP error code : {}", con.getResponseCode());
             } else {
 
                 try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
@@ -110,7 +110,7 @@ public class MegaCrypterAPI {
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "IO Exception in _rawRequest! {}", ex.getMessage());
+            LOG.fatal("IO Exception in _rawRequest! {}", ex.getMessage());
         } finally {
             if (con != null) con.disconnect();
         }

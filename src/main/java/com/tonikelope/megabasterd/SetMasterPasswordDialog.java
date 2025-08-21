@@ -268,7 +268,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                     });
                 }
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, "Failure in ok button thread! {}", ex.getMessage());
+                LOG.fatal("Failure in ok button thread! {}", ex.getMessage());
             }
         });
     }//GEN-LAST:event_ok_buttonActionPerformed

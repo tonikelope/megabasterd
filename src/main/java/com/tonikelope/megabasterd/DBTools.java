@@ -187,7 +187,7 @@ public class DBTools {
                 return session;
             }
         } catch (SQLException ex) {
-            LOG.log(Level.FATAL, "Failed to fetch session (for {}) from DB! {}", email, ex.getMessage());
+            LOG.fatal("Failed to fetch session (for {}) from DB! {}", email, ex.getMessage());
         }
 
         return session;
@@ -355,7 +355,7 @@ public class DBTools {
         try {
             value = selectSettingValueFromDb(key);
         } catch (SQLException ex) {
-            LOG.log(Level.FATAL, "Failed to fetch setting value {}! {}", key, ex.getMessage());
+            LOG.fatal("Failed to fetch setting value {}! {}", key, ex.getMessage());
         }
 
         if (value != null) settingsCache.put(key, value);
@@ -389,7 +389,7 @@ public class DBTools {
         try {
             settings = getSettingsCacheFromDb();
         } catch (SQLException ex) {
-            LOG.log(Level.FATAL, "Unable to fetch settings from DB! {}", ex.getMessage());
+            LOG.fatal("Unable to fetch settings from DB! {}", ex.getMessage());
         }
 
         if (settings != null && settingsCache.isEmpty()) settingsCache.putAll(settings);

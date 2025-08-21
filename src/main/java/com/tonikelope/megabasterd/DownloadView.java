@@ -493,7 +493,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             try {
                 Desktop.getDesktop().open(new File(_download.getDownload_path() + "/" + _download.getFile_name()).getParentFile());
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, "Cannot open folder! {}", ex.getMessage());
+                LOG.fatal("Cannot open folder! {}", ex.getMessage());
             }
         }
 
@@ -653,7 +653,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         try {
             return (int) (MiscTools.futureRun(getSlots_spinner()::getValue).get());
         } catch (InterruptedException | ExecutionException ex) {
-            LOG.log(Level.FATAL, "Error in getSlots!", ex);
+            LOG.fatal("Error in getSlots!", ex);
         }
         return 0;
     }
@@ -662,7 +662,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         try {
             return (MiscTools.futureRun(getKeep_temp_checkbox()::isSelected).get());
         } catch (InterruptedException | ExecutionException ex) {
-            LOG.log(Level.FATAL, "Error in isKeepTempFileSelected!", ex);
+            LOG.fatal("Error in isKeepTempFileSelected!", ex);
         }
         return false;
     }

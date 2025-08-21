@@ -306,7 +306,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
+                    LOG.fatal("Sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -573,7 +573,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                         try {
                             _pause_all_lock.wait(1000);
                         } catch (InterruptedException ex) {
-                            LOG.log(Level.FATAL, "Pause wait interrupted!", ex);
+                            LOG.fatal("Pause wait interrupted!", ex);
                         }
 
                     }
@@ -848,7 +848,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                     run.run();
                                 } catch (Exception ex) {
                                     run_error = true;
-                                    LOG.log(Level.FATAL, "Transference run interrupted!", ex);
+                                    LOG.fatal("Transference run interrupted!", ex);
                                 }
                             } while (run_error);
                         }
@@ -910,7 +910,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                             }
                                         });
                                     } catch (InterruptedException ex) {
-                                        LOG.log(Level.FATAL, "Provisioning interrupted!", ex);
+                                        LOG.fatal("Provisioning interrupted!", ex);
                                         error = true;
                                         MiscTools.pause(1000);
                                     }
@@ -924,7 +924,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                 try {
                                     getTransference_preprocess_queue().wait(1000);
                                 } catch (InterruptedException ex) {
-                                    LOG.log(Level.FATAL, "Queue wait interrupted!", ex);
+                                    LOG.fatal("Queue wait interrupted!", ex);
                                 }
                             }
                         }

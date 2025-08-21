@@ -90,7 +90,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
         try {
 
-            LOG.log(Level.INFO, "StreamChunkManager: let''s do some work! Start: {}   End: {}", _start_offset, _end_offset);
+            LOG.info("StreamChunkManager: let''s do some work! Start: {}   End: {}", _start_offset, _end_offset);
 
             while (!_exit && _bytes_written < _end_offset) {
 
@@ -113,31 +113,31 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
                     secureNotifyAll();
 
-                    LOG.log(Level.INFO, "StreamChunkManager has written {} / {} ...", _bytes_written, _end_offset);
+                    LOG.info("StreamChunkManager has written {} / {} ...", _bytes_written, _end_offset);
 
                 }
 
                 if (!_exit && _bytes_written < _end_offset) {
-                    LOG.log(Level.INFO, "StreamChunkManager waiting for offset {}...", _bytes_written);
+                    LOG.info("StreamChunkManager waiting for offset {}...", _bytes_written);
                     secureWait();
                 }
             }
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Generic exception in run! {}", ex.getMessage());
+            LOG.fatal("Generic exception in run! {}", ex.getMessage());
         }
 
         try {
             _pipeos.close();
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "Error closing PipeOS! {}", ex.getMessage());
+            LOG.fatal("Error closing PipeOS! {}", ex.getMessage());
         }
 
         _exit = true;
 
         secureNotifyAll();
 
-        LOG.log(Level.INFO, "StreamChunkManager: bye bye");
+        LOG.info("StreamChunkManager: bye bye");
     }
 
     public long nextOffset() {
@@ -178,7 +178,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, "Lock wait interrupted! {}", ex.getMessage());
+                    LOG.fatal("Lock wait interrupted! {}", ex.getMessage());
                 }
             }
 

@@ -68,7 +68,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
+                    LOG.fatal("Sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -91,7 +91,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "MAC GENERATOR {} Hello!", getUpload().getFile_name());
+        LOG.info("MAC GENERATOR {} Hello!", getUpload().getFile_name());
 
         try {
 
@@ -190,7 +190,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                         file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
 
                     } catch (IllegalBlockSizeException | BadPaddingException ex) {
-                        LOG.log(Level.FATAL, "Failed to generate MAC! {}", ex.getMessage());
+                        LOG.fatal("Failed to generate MAC! {}", ex.getMessage());
                     }
 
                     chunk_id++;
@@ -219,7 +219,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
                 _upload.setFile_meta_mac(meta_mac);
 
-                LOG.log(Level.INFO, "MAC GENERATOR {} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", getUpload().getFile_name());
+                LOG.info("MAC GENERATOR {} finished MAC CALCULATION. Waiting workers to finish uploading (if any)...", getUpload().getFile_name());
 
             }
 
@@ -234,10 +234,10 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
             _upload.secureNotify();
 
-            LOG.log(Level.INFO, "MAC GENERATOR {} BYE BYE...", getUpload().getFile_name());
+            LOG.info("MAC GENERATOR {} BYE BYE...", getUpload().getFile_name());
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Generic exception in run! {}", ex.getMessage());
+            LOG.fatal("Generic exception in run! {}", ex.getMessage());
         }
 
     }

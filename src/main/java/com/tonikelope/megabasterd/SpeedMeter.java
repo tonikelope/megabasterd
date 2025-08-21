@@ -207,7 +207,7 @@ public class SpeedMeter implements Runnable {
                 Thread.sleep(SLEEP_MILLIS);
 
             } catch (InterruptedException ex) {
-                LOG.log(Level.FATAL, "Planned sleep interrupted! {}", ex.getMessage());
+                LOG.fatal("Planned sleep interrupted! {}", ex.getMessage());
             }
 
         } while (true);

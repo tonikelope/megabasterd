@@ -91,7 +91,7 @@ public final class SmartMegaProxyManager {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        LOG.log(Level.FATAL, "SmartProxyManager interrupted!", ex);
+                        LOG.fatal("SmartProxyManager interrupted!", ex);
                     }
                 }
 
@@ -173,7 +173,7 @@ public final class SmartMegaProxyManager {
             _random_select = RANDOM_SELECT;
         }
 
-        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + _ban_time + "   TIMEOUT: " + _proxy_timeout / 1000 + "   REFRESH: " + _autorefresh_time + "   FORCE: " + _force_smart_proxy + "   RANDOM: " + _random_select + "   RESET-SLOT-PROXY: " + _reset_slot_proxy);
+        LOG.info("SmartProxy BAN_TIME: " + _ban_time + "   TIMEOUT: " + _proxy_timeout / 1000 + "   REFRESH: " + _autorefresh_time + "   FORCE: " + _force_smart_proxy + "   RANDOM: " + _random_select + "   RESET-SLOT-PROXY: " + _reset_slot_proxy);
     }
 
     public synchronized int getProxyCount() {
@@ -204,12 +204,12 @@ public final class SmartMegaProxyManager {
             }
         }
 
-        LOG.log(Level.WARN, "Smart Proxy Manager: NO PROXIES AVAILABLE!! (Refreshing in " + PROXY_AUTO_REFRESH_SLEEP_TIME + " secs...)");
+        LOG.warn("Smart Proxy Manager: NO PROXIES AVAILABLE!! (Refreshing in " + PROXY_AUTO_REFRESH_SLEEP_TIME + " secs...)");
 
         try {
             Thread.sleep(PROXY_AUTO_REFRESH_SLEEP_TIME * 1000);
         } catch (InterruptedException ex) {
-            LOG.log(Level.FATAL, "Auto-refresh sleep interrupted!", ex);
+            LOG.fatal("Auto-refresh sleep interrupted!", ex);
         }
 
         refreshProxyList();
@@ -225,7 +225,7 @@ public final class SmartMegaProxyManager {
 
                 _proxy_list.remove(proxy);
 
-                LOG.log(Level.WARN, "[Smart Proxy] REMOVING PROXY {} ({})", proxy, cause);
+                LOG.warn("[Smart Proxy] REMOVING PROXY {} ({})", proxy, cause);
 
             } else {
 
@@ -235,7 +235,7 @@ public final class SmartMegaProxyManager {
 
                 _proxy_list.put(proxy, proxy_data);
 
-                LOG.log(Level.WARN, "[Smart Proxy] BLOCKING PROXY {} ({} secs) ({})", proxy, _ban_time, cause);
+                LOG.warn("[Smart Proxy] BLOCKING PROXY {} ({} secs) ({})", proxy, _ban_time, cause);
 
             }
 
@@ -375,17 +375,17 @@ public final class SmartMegaProxyManager {
                 }
 
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + getProxyCount() + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
-                LOG.log(Level.INFO, "Smart Proxy Manager: proxy list refreshed ({})", _proxy_list.size());
+                LOG.info("Smart Proxy Manager: proxy list refreshed ({})", _proxy_list.size());
             } else if (!custom_clean_list.isEmpty()) {
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + getProxyCount() + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
-                LOG.log(Level.INFO, "Smart Proxy Manager: proxy list refreshed ({})", _proxy_list.size());
+                LOG.info("Smart Proxy Manager: proxy list refreshed ({})", _proxy_list.size());
             } else {
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (0 proxies!)" + (this.isForce_smart_proxy() ? " F!" : ""));
-                LOG.log(Level.INFO, "Smart Proxy Manager: NO PROXIES");
+                LOG.info("Smart Proxy Manager: NO PROXIES");
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "IO Exception refreshing proxy list! {}", ex.getMessage());
+            LOG.fatal("IO Exception refreshing proxy list! {}", ex.getMessage());
         } finally {
             if (con != null) con.disconnect();
         }

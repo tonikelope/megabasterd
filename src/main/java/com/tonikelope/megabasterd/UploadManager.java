@@ -84,7 +84,7 @@ public class UploadManager extends TransferenceManager {
         try {
             DBTools.deleteUploads(delete_up.toArray(new String[delete_up.size()][]));
         } catch (SQLException ex) {
-            LOG.log(Level.FATAL, "Error deleting uploads!", ex);
+            LOG.fatal("Error deleting uploads!", ex);
         }
 
         secureNotify();

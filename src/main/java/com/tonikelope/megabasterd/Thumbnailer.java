@@ -138,7 +138,7 @@ public class Thumbnailer {
             return file.getAbsolutePath();
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Error creating image!", ex);
+            LOG.fatal("Error creating image!", ex);
         }
 
         return null;

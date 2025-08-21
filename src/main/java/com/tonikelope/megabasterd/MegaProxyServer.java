@@ -78,13 +78,13 @@ public class MegaProxyServer implements Runnable {
             } catch (IOException ignored) { }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "IOException in MegaProxyServer! {}", ex.getMessage());
+            LOG.fatal("IOException in MegaProxyServer! {}", ex.getMessage());
         } finally {
             if (!_serverSocket.isClosed()) {
                 try {
                     _serverSocket.close();
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, "Server socket closure failure! {}", ex.getMessage());
+                    LOG.fatal("Server socket closure failure! {}", ex.getMessage());
                 }
             }
         }
@@ -141,7 +141,7 @@ public class MegaProxyServer implements Runnable {
             try {
                 String request = readLine(_clientSocket);
 
-                LOG.log(Level.INFO, request);
+                LOG.info(request);
 
                 Matcher matcher = CONNECT_PATTERN.matcher(request);
 
@@ -163,7 +163,7 @@ public class MegaProxyServer implements Runnable {
 
                         }
 
-                        LOG.log(Level.INFO, header);
+                        LOG.info(header);
 
                     } while (!"".equals(header));
 

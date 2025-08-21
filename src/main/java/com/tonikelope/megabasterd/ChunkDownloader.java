@@ -69,7 +69,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
             try {
                 _chunk_inputstream.close();
             } catch (IOException ex) {
-                LOG.log(Level.FATAL, "Exception trying to reset chunk!", ex);
+                LOG.fatal("Exception trying to reset chunk!", ex);
             }
 
             _chunk_inputstream = null;
@@ -98,13 +98,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                 } else {
                     String verbiage = timeoutError.get() ? "TIMEOUT" : "TOO MANY CONNECTIONS";
                     _excluded_proxy_list.add(_current_smart_proxy);
-                    LOG.log(Level.WARN, "Worker [{}] PROXY {} {}", _id, _current_smart_proxy, verbiage);
+                    LOG.warn("Worker [{}] PROXY {} {}", _id, _current_smart_proxy, verbiage);
                 }
                 return Unit.INSTANCE;
             });
 
             put(FastMegaHttpClient.FMEventType.SMART_PROXY_NULL, () -> {
-                LOG.log(Level.INFO, "Worker [{}] SmartProxy getProxy returned NULL! {}", _id, _download.getFile_name());
+                LOG.info("Worker [{}] SmartProxy getProxy returned NULL! {}", _id, _download.getFile_name());
                 return Unit.INSTANCE;
             });
 
@@ -167,7 +167,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.FATAL, "Waiting interrupted! {}", ex.getMessage());
+                    LOG.fatal("Waiting interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -213,7 +213,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "Worker [{}]: let''s do some work! {}", _id, _download.getFile_name());
+        LOG.info("Worker [{}]: let''s do some work! {}", _id, _download.getFile_name());
 
         try {
             timeoutError.set(false);
@@ -258,7 +258,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                 httpError.set(0);
                 File tmp_chunk_file = null, chunk_file = null;
 
-                LOG.log(Level.INFO, "Worker [{}] is downloading chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
+                LOG.info("Worker [{}] is downloading chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
 
                 try (
                     FastMegaHttpClient<HttpGet> fastClient = new FastMegaHttpClient<>(
@@ -279,7 +279,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                         if (httpStatus.get() != 200) {
 
-                            LOG.log(Level.INFO, "Worker [{}] Failed chunk download : HTTP error code : {} {}", _id, httpStatus.get(), _download.getFile_name());
+                            LOG.info("Worker [{}] Failed chunk download : HTTP error code : {} {}", _id, httpStatus.get(), _download.getFile_name());
 
                             httpError.set(httpStatus.get());
 
@@ -333,7 +333,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                             } else {
 
-                                LOG.log(Level.INFO, "Worker [{}] has RECOVERED PREVIOUS chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
+                                LOG.info("Worker [{}] has RECOVERED PREVIOUS chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
 
                                 chunk_reads = chunk_size;
 
@@ -348,7 +348,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                             String downloadType = (_current_smart_proxy != null) ? "smartproxy" : "direct";
 
-                            LOG.log(Level.INFO, "Worker [{}] has OK DOWNLOADED ({}) chunk [{}]! {}", _id, downloadType, chunk_id, _download.getFile_name());
+                            LOG.info("Worker [{}] has OK DOWNLOADED ({}) chunk [{}]! {}", _id, downloadType, chunk_id, _download.getFile_name());
 
                             if (tmp_chunk_file != null && (!chunk_file.exists() || chunk_file.length() != chunk_size)) {
 
@@ -384,9 +384,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                     if (ex instanceof SocketTimeoutException) {
                         timeoutError.set(true);
-                        LOG.log(Level.WARN, "Worker [{}] TIMEOUT downloading chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
+                        LOG.warn("Worker [{}] TIMEOUT downloading chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
                     } else {
-                        LOG.log(Level.FATAL, "Worker [{}] ERROR downloading chunk [{}]! {}",  _id, chunk_id, _download.getFile_name(), ex);
+                        LOG.fatal("Worker [{}] ERROR downloading chunk [{}]! {}",  _id, chunk_id, _download.getFile_name(), ex);
                     }
 
                 } finally {
@@ -396,7 +396,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                         try {
                             _chunk_inputstream.close();
                         } catch (IOException ex) {
-                            LOG.log(Level.FATAL, "Exception closing stream!", ex);
+                            LOG.fatal("Exception closing stream!", ex);
                         }
                         _chunk_inputstream = null;
                     }
@@ -405,7 +405,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                         var downloadType = (_current_smart_proxy != null) ? "smartproxy" : "direct";
 
-                        LOG.log(Level.INFO, "Worker [{}] has FAILED downloading ({}) chunk [{}]! {}", _id, downloadType, chunk_id, _download.getFile_name());
+                        LOG.info("Worker [{}] has FAILED downloading ({}) chunk [{}]! {}", _id, downloadType, chunk_id, _download.getFile_name());
 
                         if (tmp_chunk_file != null && tmp_chunk_file.exists()) {
                             tmp_chunk_file.delete();
@@ -441,7 +441,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                     }
 
                     if (_reset_current_chunk) {
-                        LOG.log(Level.WARN, "Worker [{}] FORCE RESET CHUNK [{}]! {}", _id, chunk_id, _download.getFile_name());
+                        LOG.warn("Worker [{}] FORCE RESET CHUNK [{}]! {}", _id, chunk_id, _download.getFile_name());
                         _current_smart_proxy = null;
                         _reset_current_chunk = false;
                     }
@@ -456,7 +456,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
             _download.stopDownloader(error.getMessage());
 
-            LOG.log(Level.FATAL, error.getMessage());
+            LOG.fatal(error.getMessage());
 
         }
 
@@ -464,6 +464,6 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
         _download.getChunkmanager().secureNotify();
 
-        LOG.log(Level.INFO, "ChunkDownloader [{}] {}: bye bye", _id, _download.getFile_name());
+        LOG.info("ChunkDownloader [{}] {}: bye bye", _id, _download.getFile_name());
     }
 }

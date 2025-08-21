@@ -74,9 +74,9 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
             _contents = getClipboardContents();
             notifyChangeToMyObservers();
             gainOwnership(_contents);
-            LOG.log(Level.INFO, "Monitoring clipboard ON...");
+            LOG.info("Monitoring clipboard ON...");
         } else if (monitor_clipboard) {
-            LOG.log(Level.INFO, "Monitoring clipboard OFF...");
+            LOG.info("Monitoring clipboard OFF...");
         }
     }
 
@@ -98,7 +98,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
+                    LOG.fatal("Sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -145,7 +145,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    LOG.log(Level.FATAL, ex1.getMessage());
+                    LOG.fatal(ex1.getMessage());
                 }
             }
 
@@ -172,7 +172,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    LOG.log(Level.FATAL, ex1.getMessage());
+                    LOG.fatal(ex1.getMessage());
                 }
             }
 

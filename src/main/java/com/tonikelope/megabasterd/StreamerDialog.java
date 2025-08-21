@@ -221,7 +221,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
                     }
                 } catch (Exception ex) {
                     error = true;
-                    LOG.log(Level.FATAL, "Error parsing link! {}", ex.getMessage());
+                    LOG.fatal("Error parsing link! {}", ex.getMessage());
                 }
 
                 String data;

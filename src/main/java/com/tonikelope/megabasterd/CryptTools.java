@@ -491,7 +491,7 @@ public class CryptTools {
                     }
                 }
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, "Failed to decrypt ELC! {}", ex.getMessage());
+                LOG.fatal("Failed to decrypt ELC! {}", ex.getMessage());
                 JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "ELC ERROR", JOptionPane.ERROR_MESSAGE);
             } finally {
                 if (con != null) con.disconnect();
@@ -590,7 +590,7 @@ public class CryptTools {
 
         } catch (Exception ex) {
 
-            LOG.log(Level.FATAL, "Failed to decrypt DLC! {}", ex.getMessage());
+            LOG.fatal("Failed to decrypt DLC! {}", ex.getMessage());
 
             JOptionPane.showMessageDialog(main_panel.getView(), ex.getMessage(), "DLC ERROR", JOptionPane.ERROR_MESSAGE);
         } finally {

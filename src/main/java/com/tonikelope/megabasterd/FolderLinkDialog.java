@@ -576,7 +576,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             }
 
             if (root == null) {
-                LOG.log(Level.FATAL, "MEGA FOLDER ERROR (EMPTY?)");
+                LOG.fatal("MEGA FOLDER ERROR (EMPTY?)");
 
                 _mega_error = 2;
 
@@ -601,7 +601,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                         try {
                             filePattern = Pattern.compile(regexPattern);
                         } catch (PatternSyntaxException pse) {
-                            LOG.log(Level.WARN, "Invalid regex pattern", pse);
+                            LOG.warn("Invalid regex pattern", pse);
                             filePattern = Pattern.compile(".*");
                         }
                         removeNonMatchingNodes(roott, filePattern);
@@ -618,13 +618,13 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
         } catch (MegaAPIException mex) {
 
-            LOG.log(Level.FATAL, "", mex);
+            LOG.fatal("", mex);
 
             _mega_error = mex.getCode();
 
         } catch (Exception ex) {
 
-            LOG.log(Level.FATAL, "", ex);
+            LOG.fatal("", ex);
 
             _mega_error = 1;
         }

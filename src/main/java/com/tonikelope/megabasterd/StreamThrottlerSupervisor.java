@@ -107,7 +107,7 @@ public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNot
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
+                    LOG.fatal("Sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -181,7 +181,7 @@ public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNot
                 try {
                     _timer_lock.wait();
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
+                    LOG.fatal("Sleep interrupted! {}", ex.getMessage());
                 }
             }
         }

@@ -984,7 +984,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 total_file_size_label.setText("[" + formatBytes(_total_space) + "]");
             });
         } catch (InterruptedException | ExecutionException ex) {
-            LOG.log(Level.FATAL, "Error caught in _genFileList!", ex);
+            LOG.fatal("Error caught in _genFileList!", ex);
         }
 
     }

@@ -161,7 +161,7 @@ public class MiscTools {
             }
             return new HexBinaryAdapter().marshal(digest.digest()).toLowerCase().trim();
         } catch (NoSuchAlgorithmException ex) {
-            LOG.log(Level.FATAL, "Could not find algorithm!", ex);
+            LOG.fatal("Could not find algorithm!", ex);
         }
 
         return null;
@@ -182,7 +182,7 @@ public class MiscTools {
                 }
 
             } catch (IOException ex) {
-                LOG.log(Level.FATAL, "Captured IO Exception trying to log!", ex);
+                LOG.fatal("Captured IO Exception trying to log!", ex);
             }
 
         }
@@ -194,7 +194,7 @@ public class MiscTools {
         for (File f : directory.listFiles()) {
             if (f.isFile() && f.getName().startsWith("megabasterd_folder_cache_")) {
                 f.delete();
-                LOG.log(Level.INFO, "REMOVING FOLDER CACHE FILE {}", f.getAbsolutePath());
+                LOG.info("REMOVING FOLDER CACHE FILE {}", f.getAbsolutePath());
             }
         }
     }
@@ -226,7 +226,7 @@ public class MiscTools {
 
             return part_file == null && Files.probeContentType(Paths.get(filename)).startsWith("video/");
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "Captured IO Exception in isVideoFile!", ex);
+            LOG.fatal("Captured IO Exception in isVideoFile!", ex);
         }
 
         return false;
@@ -240,7 +240,7 @@ public class MiscTools {
 
             return part_file == null && Files.probeContentType(Paths.get(filename)).startsWith("image/");
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "Captured IO Exception in isImageFile!", ex);
+            LOG.fatal("Captured IO Exception in isImageFile!", ex);
         }
 
         return false;
@@ -279,7 +279,7 @@ public class MiscTools {
             ge.registerFont(font);
 
         } catch (FontFormatException | IOException ex) {
-            LOG.log(Level.FATAL, "Failed to create font {}! {}", name, ex.getMessage());
+            LOG.fatal("Failed to create font {}! {}", name, ex.getMessage());
         }
 
         return font;
@@ -320,7 +320,7 @@ public class MiscTools {
                 }
             }
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Failed to set Nimbus look! {}", ex.getMessage());
+            LOG.fatal("Failed to set Nimbus look! {}", ex.getMessage());
         }
     }
 
@@ -551,7 +551,7 @@ public class MiscTools {
             Sequencer sequencer = MidiSystem.getSequencer();
 
             if (sequencer == null) {
-                LOG.log(Level.FATAL, "MIDI Sequencer device not supported");
+                LOG.fatal("MIDI Sequencer device not supported");
                 return null;
             }
 
@@ -592,7 +592,7 @@ public class MiscTools {
             byte[] theDigest = md.digest(data.getBytes(StandardCharsets.UTF_8));
             return bin2hex(theDigest);
         } catch (NoSuchAlgorithmException ex) {
-            LOG.log(Level.FATAL, "Captured exception in HashString!", ex);
+            LOG.fatal("Captured exception in HashString!", ex);
         }
 
         return null;
@@ -636,7 +636,7 @@ public class MiscTools {
         try {
             Thread.sleep(pause);
         } catch (InterruptedException ex) {
-            LOG.log(Level.FATAL, "Interrupted while pausing!", ex);
+            LOG.fatal("Interrupted while pausing!", ex);
         }
     }
 
@@ -660,7 +660,7 @@ public class MiscTools {
             }
         } catch (Exception ex) {
 
-            LOG.log(Level.FATAL, "Exception in GUIRunAndWait!", ex);
+            LOG.fatal("Exception in GUIRunAndWait!", ex);
 
         }
 
@@ -859,7 +859,7 @@ public class MiscTools {
                             tree.setRootVisible(new_root.getChildCount() > 0);
                             tree.setEnabled(true);
                         } catch (InstantiationException | IllegalAccessException ex) {
-                            LOG.log(Level.FATAL, "Could not instantiate Tree! {}", ex.getMessage());
+                            LOG.fatal("Could not instantiate Tree! {}", ex.getMessage());
                         }
                         return true;
                     }
@@ -880,7 +880,7 @@ public class MiscTools {
             try (DirectoryStream<Path> directory = Files.newDirectoryStream(path)) {
                 return !directory.iterator().hasNext();
             } catch (IOException ex) {
-                LOG.log(Level.FATAL, "IOException checking isDirEmpty!", ex);
+                LOG.fatal("IOException checking isDirEmpty!", ex);
             }
         }
 
@@ -909,7 +909,7 @@ public class MiscTools {
 
             } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException |
                      IllegalArgumentException | InvocationTargetException ex) {
-                LOG.log(Level.FATAL, "Exception deleting tree elements! {}", ex.getMessage());
+                LOG.fatal("Exception deleting tree elements! {}", ex.getMessage());
             }
 
             for (TreePath path : paths) {
@@ -931,7 +931,7 @@ public class MiscTools {
                                     node = node_class.newInstance();
                                     ((DefaultMutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
                                 } catch (InstantiationException | IllegalAccessException ex) {
-                                    LOG.log(Level.FATAL, "Could not instantiate tree! {}", ex.getMessage());
+                                    LOG.fatal("Could not instantiate tree! {}", ex.getMessage());
                                 }
 
                                 if (parent != null) {
@@ -1139,7 +1139,7 @@ public class MiscTools {
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "IO Exception getting public IP! {}", ex.getMessage());
+            LOG.fatal("IO Exception getting public IP! {}", ex.getMessage());
         } finally {
             if (con != null) con.disconnect();
         }
@@ -1203,7 +1203,7 @@ public class MiscTools {
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "IO Exception checking new version! {}", ex.getMessage());
+            LOG.fatal("IO Exception checking new version! {}", ex.getMessage());
         } finally {
             if (con != null) con.disconnect();
         }
@@ -1214,7 +1214,7 @@ public class MiscTools {
     public static void openBrowserURL(final String url) {
         THREAD_POOL.execute(() -> {
             try {
-                LOG.log(Level.INFO, "Trying to open URL in external browser: {}", url);
+                LOG.info("Trying to open URL in external browser: {}", url);
 
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     Desktop.getDesktop().browse(new URI(url));
@@ -1226,9 +1226,9 @@ public class MiscTools {
                     p.destroy();
                     return;
                 }
-                LOG.log(Level.WARN, "Unable to open URL ({}): Unsupported platform.", url);
+                LOG.warn("Unable to open URL ({}): Unsupported platform.", url);
             } catch (Exception ex) {
-                LOG.log(Level.FATAL, "Generic exception opening URL ({}): {}", url, ex.getMessage());
+                LOG.fatal("Generic exception opening URL ({}): {}", url, ex.getMessage());
             }
         });
     }
@@ -1260,7 +1260,7 @@ public class MiscTools {
             return jarFile.getParentFile().getAbsolutePath();
 
         } catch (URISyntaxException ex) {
-            LOG.log(Level.FATAL, "Invalid URI in getCurrentJarParentPath!", ex);
+            LOG.fatal("Invalid URI in getCurrentJarParentPath!", ex);
         }
 
         return null;
@@ -1283,7 +1283,7 @@ public class MiscTools {
         try {
             Runtime.getRuntime().exec(cmd.toString());
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "Could not run command !{}", ex.getMessage());
+            LOG.fatal("Could not run command !{}", ex.getMessage());
         }
 
         System.exit(2);
@@ -1430,7 +1430,7 @@ public class MiscTools {
 
                     if (old_session_data != null) {
 
-                        LOG.log(Level.INFO, "Reutilizando sesión de MEGA guardada para {}", email);
+                        LOG.info("Reutilizando sesión de MEGA guardada para {}", email);
 
                         MegaAPI old_ma = new MegaAPI();
 

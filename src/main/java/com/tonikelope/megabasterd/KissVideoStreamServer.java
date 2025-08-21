@@ -112,7 +112,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, "Sleep interrupted!", ex);
+                    LOG.fatal("Sleep interrupted!", ex);
                 }
             }
 
@@ -185,11 +185,11 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             } catch (APIException ex) {
                 error = true;
-                LOG.log(Level.FATAL, "API Exception captured! {}", ex.getMessage());
+                LOG.fatal("API Exception captured! {}", ex.getMessage());
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.log(Level.FATAL, "Post-API error sleep interrupted! {}", ex2.getMessage());
+                    LOG.fatal("Post-API error sleep interrupted! {}", ex2.getMessage());
                 }
             }
 
@@ -224,11 +224,11 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             } catch (APIException ex) {
                 error = true;
-                LOG.log(Level.FATAL, "Captured API Exception! {}", ex.getMessage());
+                LOG.fatal("Captured API Exception! {}", ex.getMessage());
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.log(Level.FATAL, "Post-API error sleep interrupted! {}", ex2.getMessage());
+                    LOG.fatal("Post-API error sleep interrupted! {}", ex2.getMessage());
                 }
             }
 
@@ -298,7 +298,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             link = url_parts[1];
 
-            LOG.log(Level.INFO, "{} {}", link, mega_account);
+            LOG.info("{} {}", link, mega_account);
 
             HashMap<String, Object> cache_info, file_info;
 
@@ -470,10 +470,10 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
             }
         } catch (Exception ex) {
             if (!(ex instanceof IOException)) {
-                LOG.log(Level.FATAL, "Non-IO Exception in KissVideoStreamer! {}", ex.getMessage());
+                LOG.fatal("Non-IO Exception in KissVideoStreamer! {}", ex.getMessage());
             }
         } finally {
-            LOG.log(Level.INFO, "KissVideoStreamerHandle: bye bye");
+            LOG.info("KissVideoStreamerHandle: bye bye");
 
             if (chunkwriter != null) {
 

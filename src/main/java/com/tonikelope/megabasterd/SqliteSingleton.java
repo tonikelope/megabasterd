@@ -60,7 +60,7 @@ public class SqliteSingleton {
             }
 
         } catch (ClassNotFoundException | SQLException ex) {
-            LOG.log(Level.FATAL, "Exception in DB Connection! {}", ex.getMessage());
+            LOG.fatal("Exception in DB Connection! {}", ex.getMessage());
         }
 
         return conn;

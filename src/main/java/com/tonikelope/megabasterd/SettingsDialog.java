@@ -162,7 +162,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                         file_regex101_label.putClientProperty("regexUrl", "");
                         return false;
                     } catch (Exception ex) {
-                        LOG.log(Level.FATAL, "Generic exception in Regex parsing! {}", ex.getMessage());
+                        LOG.fatal("Generic exception in Regex parsing! {}", ex.getMessage());
                         file_regex101_label.setEnabled(false);
                         file_regex101_label.putClientProperty("regexUrl", "");
                         return false;
@@ -580,7 +580,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                         try {
                             pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                         } catch (Exception ex) {
-                            LOG.log(Level.FATAL, "Exception trying to setup auth! {}", ex.getMessage());
+                            LOG.fatal("Exception trying to setup auth! {}", ex.getMessage());
                         }
 
                         String[] new_row_data = {(String) pair.getKey(), pass};
@@ -597,7 +597,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                             user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                             apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                         } catch (Exception ex) {
-                            LOG.log(Level.FATAL, "Exception setting up apikey auth! {}", ex.getMessage());
+                            LOG.fatal("Exception setting up apikey auth! {}", ex.getMessage());
                         }
 
                         String[] new_row_data = {(String) pair.getKey(), user, apikey};
@@ -2503,7 +2503,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                                     user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(user), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                                     apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(apikey), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                                 } catch (Exception ex) {
-                                    LOG.log(Level.FATAL, "Error setting up api-key auth! {}", ex.getMessage());
+                                    LOG.fatal("Error setting up api-key auth! {}", ex.getMessage());
                                 }
                             }
 
@@ -2638,7 +2638,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                                     } else email_error.add(email);
                                 } catch (Exception ex) {
                                     email_error.add(email);
-                                    LOG.log(Level.FATAL, "Failed to save settings! {}", ex.getMessage());
+                                    LOG.fatal("Failed to save settings! {}", ex.getMessage());
                                 }
 
                             } else {
@@ -2652,7 +2652,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                                     try {
                                         password = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(password), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                                     } catch (Exception ex) {
-                                        LOG.log(Level.FATAL, "Failed to generate password! {}", ex.getMessage());
+                                        LOG.fatal("Failed to generate password! {}", ex.getMessage());
                                     }
                                 }
 
@@ -2723,7 +2723,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                     } catch (Exception ex) {
                                         email_error.add(email);
-                                        LOG.log(Level.FATAL, "Failed to authenticate! {}", ex.getMessage());
+                                        LOG.fatal("Failed to authenticate! {}", ex.getMessage());
                                     }
                                 }
                             }
@@ -2787,7 +2787,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
 
         } catch (Exception ex) {
-            LOG.log(Level.FATAL, "Exception captured trying to save Settings! {}", ex.getMessage());
+            LOG.fatal("Exception captured trying to save Settings! {}", ex.getMessage());
         }
     }//GEN-LAST:event_save_buttonActionPerformed
 
@@ -2878,7 +2878,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                     try {
                         pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                     } catch (Exception ex) {
-                        LOG.log(Level.FATAL, "Exception captured! {}", ex.getMessage());
+                        LOG.fatal("Exception captured! {}", ex.getMessage());
                     }
                     return new String[]{pair.getKey(), pass};
                 }).forEachOrdered(mega_model::addRow);
@@ -2889,7 +2889,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                         user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                         apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                     } catch (Exception ex) {
-                        LOG.log(Level.FATAL, "Exception captured! {}", ex.getMessage());
+                        LOG.fatal("Exception captured! {}", ex.getMessage());
                     }
                     return new String[]{pair.getKey(), user, apikey};
                 }).forEachOrdered(elc_model::addRow);
@@ -2984,7 +2984,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 setVisible(false);
 
             } catch (SQLException ex) {
-                LOG.log(Level.FATAL, "Failed to delete from DB! {}", ex.getMessage());
+                LOG.fatal("Failed to delete from DB! {}", ex.getMessage());
             }
         }
     }//GEN-LAST:event_delete_all_accounts_buttonActionPerformed
@@ -3114,7 +3114,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                     }
 
                 } catch (Exception ex) {
-                    LOG.log(Level.FATAL, "Error setting up auth! {}", ex.getMessage());
+                    LOG.fatal("Error setting up auth! {}", ex.getMessage());
                 }
             }
 
@@ -3175,7 +3175,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             try {
                 Runtime.getRuntime().exec(run_command_textbox.getText().trim());
             } catch (IOException ex) {
-                LOG.log(Level.FATAL, "Could not run command! {}", ex.getMessage());
+                LOG.fatal("Could not run command! {}", ex.getMessage());
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
             }
         }
@@ -3289,10 +3289,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                         setVisible(false);
 
                     } catch (SQLException ex) {
-                        LOG.log(Level.FATAL, "Settings export failed! {}", ex.getMessage());
+                        LOG.fatal("Settings export failed! {}", ex.getMessage());
                     }
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, "IO Exception in settings export! {}", ex.getMessage());
+                    LOG.fatal("IO Exception in settings export! {}", ex.getMessage());
                 }
             }
         }
@@ -3341,10 +3341,10 @@ public class SettingsDialog extends javax.swing.JDialog {
                         setVisible(false);
 
                     } catch (SQLException | ClassNotFoundException ex) {
-                        LOG.log(Level.FATAL, "Could not import settings! {}", ex.getMessage());
+                        LOG.fatal("Could not import settings! {}", ex.getMessage());
                     }
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, "IO Exception reading settings! {}", ex.getMessage());
+                    LOG.fatal("IO Exception reading settings! {}", ex.getMessage());
                 }
             }
         }
@@ -3407,7 +3407,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                     mega_accounts_table.setModel(model);
 
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, "IOException in showing dialog!", ex);
+                    LOG.fatal("IOException in showing dialog!", ex);
                 }
 
             }

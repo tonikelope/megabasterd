@@ -369,7 +369,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                         });
                     }
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, "IO Exception in LinkGrabberDialog! {}", ex.getMessage());
+                    LOG.fatal("IO Exception in LinkGrabberDialog! {}", ex.getMessage());
                 }
                 MiscTools.GUIRun(() -> {
                     dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));

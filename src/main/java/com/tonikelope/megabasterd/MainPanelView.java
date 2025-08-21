@@ -254,7 +254,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
-                        LOG.log(Level.INFO, "Dir {} created", parent_node);
+                        LOG.info("Dir {} created", parent_node);
 
                         String upload_folder_string = DBTools.selectSettingValue("upload_public_folder");
 
@@ -286,7 +286,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                 fr.write(dir_name + "   " + folder_link + "\n\n");
                                 fr.close();
                             } catch (IOException ex) {
-                                LOG.log(FATAL, ex.getMessage());
+                                LOG.fatal(ex.getMessage());
                             }
                         }
 
@@ -315,7 +315,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 if (!file_path.isEmpty()) {
 
-                                    LOG.log(Level.INFO, "FILE_PATH -> {}", file_path);
+                                    LOG.info("FILE_PATH -> {}", file_path);
 
                                 }
 
@@ -329,7 +329,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                     if (!d.isEmpty()) {
 
-                                        LOG.log(Level.INFO, "DIR -> {}", d);
+                                        LOG.info("DIR -> {}", d);
 
                                         if (current_node.getChildren().get(d) != null) {
 
@@ -375,13 +375,13 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                 getMain_panel().getUpload_manager().secureNotify();
 
-                                LOG.log(Level.FATAL, "Exception removing upload!", ex);
+                                LOG.fatal("Exception removing upload!", ex);
                             }
                         }
 
                     } catch (Exception ex) {
 
-                        LOG.log(Level.FATAL, "General exception caught in uploading!", ex);
+                        LOG.fatal("General exception caught in uploading!", ex);
                     }
                 };
 
@@ -1075,7 +1075,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     try {
                         urls.add(decryptMegaDownloaderLink(link));
                     } catch (Exception ex) {
-                        LOG.log(FATAL, "Could not decrypt link {}!", link, ex);
+                        LOG.fatal("Could not decrypt link {}!", link, ex);
                     }
                 });
 
@@ -1087,7 +1087,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                         urls.addAll(CryptTools.decryptELC(link, getMain_panel()));
 
                     } catch (Exception ex) {
-                        LOG.log(FATAL, "Error decrypting ELC links!", ex);
+                        LOG.fatal("Error decrypting ELC links!", ex);
                     }
                 });
 
@@ -1199,7 +1199,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                                         try {
                                                             file.createNewFile();
                                                         } catch (IOException ex) {
-                                                            LOG.log(FATAL, "Could not create file!", ex);
+                                                            LOG.fatal("Could not create file!", ex);
                                                         }
                                                     }
                                                 }
@@ -1235,7 +1235,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                             getMain_panel().getDownload_manager().secureNotify();
 
                         } catch (InterruptedException ex) {
-                            LOG.log(FATAL, ex.getMessage());
+                            LOG.fatal(ex.getMessage());
                         }
                     }
                 }
@@ -1265,7 +1265,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 try {
                     deleteMegaAccount(email);
                 } catch (SQLException ex) {
-                    LOG.log(FATAL, "Could not delete mega account!", ex);
+                    LOG.fatal("Could not delete mega account!", ex);
                 }
                 return email;
             }).map((email) -> {
@@ -1278,7 +1278,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 try {
                     deleteELCAccount(host);
                 } catch (SQLException ex) {
-                    LOG.log(FATAL, "Could not delete ELC account!", ex);
+                    LOG.fatal("Could not delete ELC account!", ex);
                 }
                 return host;
             }).forEachOrdered((host) -> {
@@ -1344,7 +1344,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                             THREAD_POOL.execute(_main_panel.getMega_proxy_server());
 
                         } catch (IOException ex) {
-                            LOG.log(FATAL, ex.getMessage());
+                            LOG.fatal(ex.getMessage());
                         }
                     }
 
@@ -1355,7 +1355,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                         try {
                             _main_panel.getMega_proxy_server().stopServer();
                         } catch (IOException ex) {
-                            LOG.log(FATAL, ex.getMessage());
+                            LOG.fatal(ex.getMessage());
                         }
                     }
 
@@ -1532,7 +1532,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         try {
             DBTools.insertSettingValue("auto_close", getAuto_close_menu().isSelected() ? "yes" : "no");
         } catch (SQLException ex) {
-            LOG.log(FATAL, ex.getMessage());
+            LOG.fatal(ex.getMessage());
         }
     }//GEN-LAST:event_auto_close_menuActionPerformed
 

@@ -122,14 +122,14 @@ public final class MainPanel {
 
             if (args.length > 1) {
                 try {
-                    LOG.log(Level.INFO, "Waiting {} seconds before start...", args[1]);
+                    LOG.info("Waiting {} seconds before start...", args[1]);
                     if (Long.parseLong(args[1]) >= 0) {
                         Thread.sleep(Long.parseLong(args[1]) * 1000);
                     } else {
                         CHECK_RUNNING = false;
                     }
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, "Pre-start sleep interrupted! {}", ex.getMessage());
+                    LOG.fatal("Pre-start sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -144,7 +144,7 @@ public final class MainPanel {
         try {
             setupSqliteTables();
         } catch (SQLException ex) {
-            LOG.log(Level.FATAL, "Failed to initialize SQL tables!", ex);
+            LOG.fatal("Failed to initialize SQL tables!", ex);
         }
 
         setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
@@ -283,7 +283,7 @@ public final class MainPanel {
                 // Register a shutdown hook to close the debug stream
                 Runtime.getRuntime().addShutdownHook(new Thread(fileOut::close));
             } catch (FileNotFoundException ex) {
-                LOG.log(Level.FATAL, "Debug file not found! {}", ex.getMessage());
+                LOG.fatal("Debug file not found! {}", ex.getMessage());
             }
         }
 
@@ -309,7 +309,7 @@ public final class MainPanel {
         try {
             trayIcon();
         } catch (AWTException ex) {
-            LOG.log(Level.FATAL, "Unable to render Tray Icon! {}", ex.getMessage());
+            LOG.fatal("Unable to render Tray Icon! {}", ex.getMessage());
         }
 
         THREAD_POOL.execute((_download_manager = new DownloadManager(this)));
@@ -328,7 +328,7 @@ public final class MainPanel {
             _streamserver = new KissVideoStreamServer(this);
             _streamserver.start(STREAMER_PORT, "/video");
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "", ex);
+            LOG.fatal("", ex);
         }
 
         _check_old_version();
@@ -389,7 +389,7 @@ public final class MainPanel {
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException ex) {
-                    LOG.log(Level.FATAL, "Planned memory sleep interrupted! {}", ex.getMessage());
+                    LOG.fatal("Planned memory sleep interrupted! {}", ex.getMessage());
                     Thread.currentThread().interrupt();
                 }
             }
@@ -514,7 +514,7 @@ public final class MainPanel {
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.FATAL, "Pre-view-existing sleep interrupted! {}", ex.getMessage());
+                LOG.fatal("Pre-view-existing sleep interrupted! {}", ex.getMessage());
             }
         }
 
@@ -751,7 +751,7 @@ public final class MainPanel {
             _mega_accounts = selectMegaAccounts();
             _elc_accounts = selectELCAccounts();
         } catch (SQLException ex) {
-            LOG.log(Level.FATAL, "Could not load Mega or ELC accounts!", ex);
+            LOG.fatal("Could not load Mega or ELC accounts!", ex);
         }
 
         _mega_account_down = DBTools.selectSettingValue("mega_account_down");
@@ -770,7 +770,7 @@ public final class MainPanel {
                 _master_pass_salt = Bin2BASE64(genRandomByteArray(CryptTools.MASTER_PASSWORD_PBKDF2_SALT_BYTE_LENGTH));
                 DBTools.insertSettingValue("master_pass_salt", _master_pass_salt);
             } catch (SQLException ex) {
-                LOG.log(Level.FATAL, "Failed to insert master salt! {}", ex.getMessage());
+                LOG.fatal("Failed to insert master salt! {}", ex.getMessage());
             }
         }
 
@@ -867,7 +867,7 @@ public final class MainPanel {
                 try {
                     Runtime.getRuntime().exec(_run_command_path);
                 } catch (IOException ex) {
-                    LOG.log(Level.FATAL, "Could not run command! {}", ex.getMessage());
+                    LOG.fatal("Could not run command! {}", ex.getMessage());
                 }
 
                 LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
@@ -924,7 +924,7 @@ public final class MainPanel {
             try {
                 DBTools.vaccum();
             } catch (SQLException ex) {
-                LOG.log(Level.FATAL, "Failed to vacuum DB! {}", ex.getMessage());
+                LOG.fatal("Failed to vacuum DB! {}", ex.getMessage());
             }
 
             if (restart) restartApplication();
@@ -938,7 +938,7 @@ public final class MainPanel {
             try {
                 getSystemTray().remove(_trayicon);
             } catch (Exception e) {
-                LOG.log(Level.FATAL, "Error removing tray icon! {}", e.getMessage());
+                LOG.fatal("Error removing tray icon! {}", e.getMessage());
             }
         }
         
@@ -949,7 +949,7 @@ public final class MainPanel {
             } else try {
                 DBTools.vaccum();
             } catch (SQLException ex) {
-                LOG.log(Level.FATAL, "Failed to vacuum DB! {}", ex.getMessage());
+                LOG.fatal("Failed to vacuum DB! {}", ex.getMessage());
             }
 
             if (restart) restartApplication();
@@ -1033,7 +1033,7 @@ public final class MainPanel {
             }
 
         } catch (IOException ex) {
-            LOG.log(Level.FATAL, "IO Exception checking old version! {}", ex.getMessage());
+            LOG.fatal("IO Exception checking old version! {}", ex.getMessage());
         }
 
     }
@@ -1118,7 +1118,7 @@ public final class MainPanel {
                                     try {
                                         DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
                                     } catch (SQLException ex) {
-                                        LOG.log(Level.FATAL, "Failed to update DB! {}", ex.getMessage());
+                                        LOG.fatal("Failed to update DB! {}", ex.getMessage());
                                     }
                                 }
                             }
@@ -1149,14 +1149,14 @@ public final class MainPanel {
                             DBTools.truncateUploadsQueue();
                             DBTools.insertUploadsQueue(uploads_queue);
                         } catch (SQLException ex) {
-                            LOG.log(Level.FATAL, "Caught SQL Exception trying to truncate!", ex);
+                            LOG.fatal("Caught SQL Exception trying to truncate!", ex);
                         }
 
                         if (wait) {
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException ex) {
-                                LOG.log(Level.FATAL, "Planned waiting sleep interrupted! {}", ex.getMessage());
+                                LOG.fatal("Planned waiting sleep interrupted! {}", ex.getMessage());
                             }
                         }
                     } while (wait);
@@ -1199,17 +1199,17 @@ public final class MainPanel {
                             });
                             clientSocket.close();
                         } catch (Exception ex1) {
-                            if (!_exit) LOG.log(Level.FATAL, "Generic exception caught [1]! {}", ex1.getMessage());
+                            if (!_exit) LOG.fatal("Generic exception caught [1]! {}", ex1.getMessage());
                         }
                     }
                     try {
                         serverSocket.close();
                     } catch (IOException e) {
-                        LOG.log(Level.FATAL, "IO Exception closing server! {}", e.getMessage());
+                        LOG.fatal("IO Exception closing server! {}", e.getMessage());
                     }
                 });
             } catch (Exception ex2) {
-                LOG.log(Level.FATAL, "Generic exception caught [2]! {}", ex2.getMessage());
+                LOG.fatal("Generic exception caught [2]! {}", ex2.getMessage());
             }
 
         }
@@ -1270,7 +1270,7 @@ public final class MainPanel {
                             }
 
                         } catch (Exception ex) {
-                            LOG.log(Level.FATAL, "Caught exception in queue iterator!", ex);
+                            LOG.fatal("Caught exception in queue iterator!", ex);
                         }
                     }
 
@@ -1308,7 +1308,7 @@ public final class MainPanel {
                                 }
 
                             } catch (Exception ex) {
-                                LOG.log(Level.FATAL, "Error in Download response iterator!", ex);
+                                LOG.fatal("Error in Download response iterator!", ex);
                             }
 
                         }
@@ -1316,7 +1316,7 @@ public final class MainPanel {
                     }
 
                 } catch (Exception ex) {
-                    LOG.log(Level.FATAL, "Error in main Download thread!", ex);
+                    LOG.fatal("Error in main Download thread!", ex);
                 }
 
                 if (downloadCount > 0) {
@@ -1481,7 +1481,7 @@ public final class MainPanel {
                             }
 
                         } catch (Exception ex) {
-                            LOG.log(Level.FATAL, "Caught exception in Upload iterator!", ex);
+                            LOG.fatal("Caught exception in Upload iterator!", ex);
                         }
                     }
 
@@ -1519,14 +1519,14 @@ public final class MainPanel {
                                 }
 
                             } catch (Exception ex) {
-                                LOG.log(Level.FATAL, "Error in Upload response iterator!", ex);
+                                LOG.fatal("Error in Upload response iterator!", ex);
                             }
                         }
 
                     }
 
                 } catch (Exception ex) {
-                    LOG.log(Level.FATAL, "Error in main Upload thread!", ex);
+                    LOG.fatal("Error in main Upload thread!", ex);
                 }
 
                 if (conta_uploads > 0) {

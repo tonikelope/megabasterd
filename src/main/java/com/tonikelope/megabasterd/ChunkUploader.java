@@ -92,7 +92,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.FATAL, "Sleep interrupted! {}", ex.getMessage());
+                    LOG.fatal("Sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -119,7 +119,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "ChunkUploader {} hello! {}", getId(), _upload.getFile_name());
+        LOG.info("ChunkUploader {} hello! {}", getId(), _upload.getFile_name());
 
         long chunk_id;
         byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
@@ -201,7 +201,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         try (QueueInputStream qis = new QueueInputStream(); QueueOutputStream qos = qis.newQueueOutputStream(); BufferedInputStream bis = new BufferedInputStream(Channels.newInputStream(f.getChannel())); CipherInputStream cis = new CipherInputStream(qis, genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset))); OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
 
-                            LOG.log(Level.INFO, "Uploading chunk {} from worker {} {}...", chunk_id, _id, _upload.getFile_name());
+                            LOG.info("Uploading chunk {} from worker {} {}...", chunk_id, _id, _upload.getFile_name());
 
                             while (!_exit && tot_bytes_up < chunk_size && (reads = bis.read(buffer)) != -1) {
 
@@ -239,7 +239,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                             if ((http_status = con.getResponseCode()) != 200) {
 
-                                LOG.log(Level.INFO, "Worker {} Failed : HTTP error code : {} {}", _id, http_status, _upload.getFile_name());
+                                LOG.info("Worker {} Failed : HTTP error code : {} {}", _id, http_status, _upload.getFile_name());
 
                             } else if (tot_bytes_up == chunk_size || reads == -1) {
 
@@ -261,10 +261,10 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 if (!httpResponse.isEmpty()) {
                                     if (MegaAPI.checkMEGAError(httpResponse) != 0) {
-                                        LOG.log(Level.WARN, "Worker {} UPLOAD FAILED! (MEGA ERROR: {}) {}", _id, MegaAPI.checkMEGAError(httpResponse), _upload.getFile_name());
+                                        LOG.warn("Worker {} UPLOAD FAILED! (MEGA ERROR: {}) {}", _id, MegaAPI.checkMEGAError(httpResponse), _upload.getFile_name());
                                         fatal_error = true;
                                     } else {
-                                        LOG.log(Level.INFO, "Worker {} Completion handler -> {} {}", _id, httpResponse, _upload.getFile_name());
+                                        LOG.info("Worker {} Completion handler -> {} {}", _id, httpResponse, _upload.getFile_name());
                                         _upload.setCompletion_handler(httpResponse);
                                         chunk_error = false;
                                     }
@@ -283,16 +283,16 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                     if (ex instanceof SocketTimeoutException) {
                         timeout = true;
-                        LOG.log(Level.FATAL, "Worker {} {} TIMEOUT reading chunk {}", _id, _upload.getFile_name(), chunk_id);
+                        LOG.fatal("Worker {} {} TIMEOUT reading chunk {}", _id, _upload.getFile_name(), chunk_id);
                     } else {
-                        LOG.log(Level.FATAL, "Worker {} {} ERROR reading chunk {}: {}", _id, _upload.getFile_name(), chunk_id, ex.getMessage());
+                        LOG.fatal("Worker {} {} ERROR reading chunk {}: {}", _id, _upload.getFile_name(), chunk_id, ex.getMessage());
                     }
 
                 } finally {
 
                     if (chunk_error) {
 
-                        LOG.log(Level.WARN, "Uploading chunk {} from worker {} FAILED! {}...", chunk_id, _id, _upload.getFile_name());
+                        LOG.warn("Uploading chunk {} from worker {} FAILED! {}...", chunk_id, _id, _upload.getFile_name());
 
                         _upload.rejectChunkId(chunk_id);
 
@@ -307,13 +307,13 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                             _upload.stopUploader("UPLOAD FAILED: FATAL ERROR");
 
-                            LOG.log(Level.FATAL, "UPLOAD FAILED: FATAL ERROR {}", _upload.getFile_name());
+                            LOG.fatal("UPLOAD FAILED: FATAL ERROR {}", _upload.getFile_name());
 
                         } else if (++errorCount == MAX_CHUNK_ERROR) {
 
                             _upload.stopUploader("UPLOAD FAILED: too many errors");
 
-                            LOG.log(Level.FATAL, "UPLOAD FAILED: too many errors {}", _upload.getFile_name());
+                            LOG.fatal("UPLOAD FAILED: too many errors {}", _upload.getFile_name());
 
                         } else if (!_exit && !_upload.isStopped() && !timeout) {
 
@@ -332,7 +332,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
                         }
 
                     } else {
-                        LOG.log(Level.INFO, "Worker {} has uploaded chunk {} {}", _id, chunk_id, _upload.getFile_name());
+                        LOG.info("Worker {} has uploaded chunk {} {}", _id, chunk_id, _upload.getFile_name());
                         errorCount = 0;
                     }
 
@@ -347,14 +347,14 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
         } catch (OutOfMemoryError | Exception error) {
             _upload.stopUploader(error.getMessage());
-            LOG.log(Level.FATAL, error.getMessage());
+            LOG.fatal(error.getMessage());
         }
 
         _upload.stopThisSlot(this);
 
         _upload.getMac_generator().secureNotify();
 
-        LOG.log(Level.INFO, "ChunkUploader [{}] {} bye bye...", _id, _upload.getFile_name());
+        LOG.info("ChunkUploader [{}] {} bye bye...", _id, _upload.getFile_name());
 
     }
 

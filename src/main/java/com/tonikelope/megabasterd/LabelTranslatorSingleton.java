@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -2257,7 +2256,7 @@ public class LabelTranslatorSingleton {
 
     private void _addTranslation(String key, String val) {
         if (_rosetta.putIfAbsent(key, val) != null) {
-            LOG.log(Level.WARN, "Rosetta: {} already exists!", key);
+            LOG.warn("Rosetta: {} already exists!", key);
         }
     }
 

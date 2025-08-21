@@ -699,7 +699,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
         try {
             return (int) (MiscTools.futureRun(getSlots_spinner()::getValue).get());
         } catch (InterruptedException | ExecutionException ex) {
-            LOG.log(Level.FATAL, "Error in getSlots!", ex);
+            LOG.fatal("Error in getSlots!", ex);
         }
         return 0;
     }

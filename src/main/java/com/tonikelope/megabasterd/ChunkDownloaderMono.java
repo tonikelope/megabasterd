@@ -44,7 +44,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "Worker [{}]: let''s do some work! {}", getId(), getDownload().getFile_name());
+        LOG.info("Worker [{}]: let''s do some work! {}", getId(), getDownload().getFile_name());
 
         HttpURLConnection con = null;
 
@@ -117,7 +117,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                     http_error = 0;
 
                     if (http_status != 200) {
-                        LOG.log(Level.INFO, "Failed : HTTP error code : {} {}", http_status, getDownload().getFile_name());
+                        LOG.info("Failed : HTTP error code : {} {}", http_status, getDownload().getFile_name());
                         http_error = http_status;
                         getDownload().rejectChunkId(chunk_id);
 
@@ -171,9 +171,9 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                     if (ex instanceof SocketTimeoutException) {
                         timeout = true;
-                        LOG.log(Level.FATAL, "TIMEOUT downloading chunk {}!", chunk_id);
+                        LOG.fatal("TIMEOUT downloading chunk {}!", chunk_id);
                     } else {
-                        LOG.log(Level.FATAL, "ERROR downloading chunk {}! {}", chunk_id, ex);
+                        LOG.fatal("ERROR downloading chunk {}! {}", chunk_id, ex);
                     }
 
                 } finally {
@@ -215,14 +215,14 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
         } catch (OutOfMemoryError | Exception error) {
             getDownload().stopDownloader(error.getMessage());
-            LOG.log(Level.FATAL, error.getMessage());
+            LOG.fatal(error.getMessage());
         }
 
         getDownload().stopThisSlot(this);
 
         getDownload().secureNotify();
 
-        LOG.log(Level.INFO, "ChunkDownloaderMONO {}: bye bye", getDownload().getFile_name());
+        LOG.info("ChunkDownloaderMONO {}: bye bye", getDownload().getFile_name());
 
     }
 }
