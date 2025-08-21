@@ -10,7 +10,7 @@
 <p align="center"><a href="https://github.com/tonikelope/megabasterd/issues/397"><b>Would you like to help by translating MegaBasterd into your favorite language?</b></a></p>
 
 
-![Screnshot](/src/main/resources/images/mbasterd_screen.png)
+![Screenshot](/src/main/resources/images/mbasterd_screen.png)
 
 
 

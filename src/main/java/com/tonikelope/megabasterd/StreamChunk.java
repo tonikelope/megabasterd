@@ -57,10 +57,8 @@ public class StreamChunk {
     }
 
     public ByteArrayOutputStream getOutputStream() throws IOException {
-
         if (!_writable) {
-
-            throw new IOException("Chunk outputstream is not available!");
+            throw new IOException("Chunk OutputStream is not available!");
         }
         return _data_os;
     }

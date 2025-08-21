@@ -279,18 +279,18 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
         change_dir_button.setText(LabelTranslatorSingleton.getInstance().translate("Selecting folder..."));
         change_dir_button.setEnabled(false);
 
-        javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        updateFonts(fileChooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
-        filechooser.setCurrentDirectory(new java.io.File(_download_path));
-        filechooser.setDialogTitle("Download folder");
-        filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
-        filechooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setCurrentDirectory(new java.io.File(_download_path));
+        fileChooser.setDialogTitle("Download folder");
+        fileChooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setAcceptAllFileFilterUsed(false);
 
-        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
-            File file = filechooser.getSelectedFile();
+            File file = fileChooser.getSelectedFile();
 
             _download_path = file.getAbsolutePath();
 

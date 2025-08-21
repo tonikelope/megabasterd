@@ -245,7 +245,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                     });
                     if (new_pass_textfield.getPassword().length > 0) {
 
-                        _new_pass = CryptTools.PBKDF2HMACSHA256(new String(new_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
+                        _new_pass = CryptTools.PBKDF2_HMAC_SHA256(new String(new_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
 
                         _new_pass_hash = Bin2BASE64(HashBin("SHA-1", _new_pass));
                     }

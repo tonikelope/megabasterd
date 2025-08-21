@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -38,7 +37,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
     private final String _mega_account;
     private final ConcurrentHashMap<Long, StreamChunk> _chunk_queue;
     private final ConcurrentHashMap<Thread, Boolean> _notified_threads;
-    private final PipedOutputStream _pipeos;
+    private final PipedOutputStream _pipeOutputStream;
     private String _url;
     private final HashMap<String, Object> _file_info;
     private final String _link;
@@ -47,13 +46,13 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
     private final KissVideoStreamServer _server;
     private volatile boolean _exit;
 
-    public StreamChunkManager(KissVideoStreamServer server, String link, HashMap<String, Object> file_info, String mega_account, PipedOutputStream pipeos, String url, long start_offset, long end_offset) {
+    public StreamChunkManager(KissVideoStreamServer server, String link, HashMap<String, Object> file_info, String mega_account, PipedOutputStream pipeOutputStream, String url, long start_offset, long end_offset) {
         _server = server;
         _link = link;
         _mega_account = mega_account;
         _file_info = file_info;
         _bytes_written = start_offset;
-        _pipeos = pipeos;
+        _pipeOutputStream = pipeOutputStream;
         _start_offset = start_offset;
         _end_offset = end_offset;
         _next_offset_required = start_offset;
@@ -106,7 +105,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
 
                     while (!_exit && (reads = is.read(buffer)) != -1) {
 
-                        _pipeos.write(buffer, 0, reads);
+                        _pipeOutputStream.write(buffer, 0, reads);
 
                         _bytes_written += reads;
                     }
@@ -128,7 +127,7 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
         }
 
         try {
-            _pipeos.close();
+            _pipeOutputStream.close();
         } catch (IOException ex) {
             LOG.fatal("Error closing PipeOS! {}", ex.getMessage());
         }

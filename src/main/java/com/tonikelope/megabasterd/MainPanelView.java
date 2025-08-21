@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,7 +47,6 @@ import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
-import static org.apache.logging.log4j.Level.FATAL;
 
 /**
  *
@@ -122,11 +120,11 @@ public final class MainPanelView extends javax.swing.JFrame {
         return global_speed_up_label;
     }
 
-    public JPanel getjPanel_scroll_down() {
+    public JPanel getJPanel_scroll_down() {
         return jPanel_scroll_down;
     }
 
-    public JPanel getjPanel_scroll_up() {
+    public JPanel getJPanel_scroll_up() {
         return jPanel_scroll_up;
     }
 
@@ -166,7 +164,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         return _main_panel;
     }
 
-    public JTabbedPane getjTabbedPane1() {
+    public JTabbedPane getJTabbedPane1() {
         return jTabbedPane1;
     }
 
@@ -489,16 +487,16 @@ public final class MainPanelView extends javax.swing.JFrame {
                 }
 
                 @Override
-                public synchronized void drop(DropTargetDropEvent dtde) {
+                public synchronized void drop(DropTargetDropEvent event) {
                     changeToNormal();
-                    dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+                    event.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 
                     List<File> files;
 
                     try {
 
-                        if (canImport(dtde.getTransferable().getTransferDataFlavors())) {
-                            files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                        if (canImport(event.getTransferable().getTransferDataFlavors())) {
+                            files = (List<File>) event.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
 
                             THREAD_POOL.execute(() -> {
                                 _file_drop_notify(files);
@@ -512,12 +510,12 @@ public final class MainPanelView extends javax.swing.JFrame {
                 }
 
                 @Override
-                public synchronized void dragEnter(DropTargetDragEvent dtde) {
+                public synchronized void dragEnter(DropTargetDragEvent event) {
                     changeToDrop();
                 }
 
                 @Override
-                public synchronized void dragExit(DropTargetEvent dtde) {
+                public synchronized void dragExit(DropTargetEvent event) {
                     changeToNormal();
                 }
 
@@ -1111,11 +1109,9 @@ public final class MainPanelView extends javax.swing.JFrame {
                     });
 
                     if (!folder_file_links.isEmpty()) {
-                        ArrayList<String> nlinks = ma.GENERATE_N_LINKS(folder_file_links);
-
+                        ArrayList<String> nLinks = ma.GENERATE_N_LINKS(folder_file_links);
                         urls.removeAll(folder_file_links);
-
-                        urls.addAll(nlinks);
+                        urls.addAll(nLinks);
                     }
 
                     getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().removeAll(folder_file_links);
@@ -1178,8 +1174,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                                     getMain_panel().getDownload_manager().secureNotify();
 
                                                 } else {
-                                                    //Directorio vacío
-                                                    String filename = dl_path + "/" + (String) folder_link.get("filename");
+                                                    String filename = dl_path + "/" + folder_link.get("filename");
 
                                                     File file = new File(filename);
 
@@ -1365,16 +1360,13 @@ public final class MainPanelView extends javax.swing.JFrame {
                 if (MainPanel.isUse_smart_proxy()) {
 
                     if (MainPanel.getProxy_manager() == null) {
-
-                        String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
-
-                        String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
-
-                        MainPanel.setProxy_manager(new SmartMegaProxyManager(url_list, _main_panel));
+                        String proxyList = DBTools.selectSettingValue("custom_proxy_list");
+                        String urlList = MiscTools.findFirstRegex("^#(http.+)$", proxyList.trim(), 1);
+                        MainPanel.setProxy_manager(new SmartMegaProxyManager(urlList, _main_panel));
                     } else {
-                        String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
-                        String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
-                        MainPanel.getProxy_manager().refreshProxyList(url_list);
+                        String proxyList = DBTools.selectSettingValue("custom_proxy_list");
+                        String urlList = MiscTools.findFirstRegex("^#(http.+)$", proxyList.trim(), 1);
+                        MainPanel.getProxy_manager().refreshProxyList(urlList);
                     }
 
                     MainPanel.getProxy_manager().refreshSmartProxySettings();

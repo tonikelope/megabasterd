@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,13 +29,12 @@ public class SpeedMeter implements Runnable {
 
     public static final double SLEEP = 3000.0;
     public static final int SLEEP_MILLIS = (int) SLEEP;
-    public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 20;
     private final JLabel _speed_label;
     private final JLabel _rem_label;
     private final TransferenceManager _trans_manager;
     private final ConcurrentHashMap<Transference, TransferenceData> _transferences;
     private long _speed_counter;
-    private long _speed_acumulator;
+    private long _speed_accumulator;
     private volatile long _max_avg_global_speed;
 
     SpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
@@ -45,12 +43,12 @@ public class SpeedMeter implements Runnable {
         _trans_manager = trans_manager;
         _transferences = new ConcurrentHashMap<>();
         _speed_counter = 0L;
-        _speed_acumulator = 0L;
+        _speed_accumulator = 0L;
         _max_avg_global_speed = 0L;
     }
 
     private long _getAvgGlobalSpeed() {
-        return Math.round((double) _speed_acumulator / _speed_counter);
+        return Math.round((double) _speed_accumulator / _speed_counter);
     }
 
     static class TransferenceData {
@@ -68,11 +66,7 @@ public class SpeedMeter implements Runnable {
     }
 
     public void detachTransference(Transference transference) {
-
-        if (_transferences.containsKey(transference)) {
-            _transferences.remove(transference);
-        }
-
+        _transferences.remove(transference);
     }
 
     private String calcRemTime(long seconds) {
@@ -182,7 +176,7 @@ public class SpeedMeter implements Runnable {
                     if (global_speed > 0) {
 
                         _speed_counter++;
-                        _speed_acumulator += global_speed;
+                        _speed_accumulator += global_speed;
 
                         long avg_global_speed = _getAvgGlobalSpeed();
 
@@ -192,7 +186,7 @@ public class SpeedMeter implements Runnable {
 
                         _speed_label.setText(formatBytes(global_speed) + "/s");
 
-                        _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ " + formatBytes(avg_global_speed) + "/s @ " + calcRemTime((long) Math.floor((global_size - global_progress) / avg_global_speed)));
+                        _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ " + formatBytes(avg_global_speed) + "/s @ " + calcRemTime((long) Math.floor((double) (global_size - global_progress) / avg_global_speed)));
 
                     } else {
                         _speed_label.setText("------");

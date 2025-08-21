@@ -80,7 +80,7 @@ import static javax.swing.JOptionPane.showOptionDialog;
 public final class MainPanel {
 
     public static final String VERSION = "8.23";
-    public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
+    public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -227,7 +227,7 @@ public final class MainPanel {
     private final HashMap<String, MegaAPI> _mega_active_accounts;
     private TrayIcon _trayicon;
     private final ClipboardSpy _clipboardspy;
-    private KissVideoStreamServer _streamserver;
+    private KissVideoStreamServer _streamServer;
     private byte[] _master_pass;
     private String _master_pass_hash;
     private String _master_pass_salt;
@@ -324,8 +324,8 @@ public final class MainPanel {
         THREAD_POOL.execute((_clipboardspy = new ClipboardSpy()));
 
         try {
-            _streamserver = new KissVideoStreamServer(this);
-            _streamserver.start(STREAMER_PORT, "/video");
+            _streamServer = new KissVideoStreamServer(this);
+            _streamServer.start(STREAMER_PORT, "/video");
         } catch (IOException ex) {
             LOG.fatal("", ex);
         }
@@ -580,8 +580,8 @@ public final class MainPanel {
         return _clipboardspy;
     }
 
-    public KissVideoStreamServer getStreamserver() {
-        return _streamserver;
+    public KissVideoStreamServer getStreamServer() {
+        return _streamServer;
     }
 
     public int getMax_dl_speed() {
@@ -878,7 +878,7 @@ public final class MainPanel {
 
         boolean exit = true;
 
-        if (!_streamserver.getWorking_threads().isEmpty()) {
+        if (!_streamServer.getWorking_threads().isEmpty()) {
 
             Object[] options = {"No",
                 LabelTranslatorSingleton.getInstance().translate("Yes")};
@@ -1327,7 +1327,7 @@ public final class MainPanel {
                     _download_manager.setSort_wait_start_queue(false);
                     getDownload_manager().secureNotify();
                     MiscTools.GUIRun(() -> {
-                        getView().getjTabbedPane1().setSelectedIndex(0);
+                        getView().getJTabbedPane1().setSelectedIndex(0);
                     });
 
                 } else {
@@ -1537,7 +1537,7 @@ public final class MainPanel {
                     _upload_manager.setSort_wait_start_queue(false);
                     getUpload_manager().secureNotify();
                     MiscTools.GUIRun(() -> {
-                        getView().getjTabbedPane1().setSelectedIndex(1);
+                        getView().getJTabbedPane1().setSelectedIndex(1);
                     });
                 } else {
                     setResume_uploads(true);

@@ -221,7 +221,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
         THREAD_POOL.execute(() -> {
             try {
-                byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
+                byte[] pass = CryptTools.PBKDF2_HMAC_SHA256(new String(current_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
                 String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
                 MiscTools.GUIRun(() -> {
                     if (!pass_hash.equals(_current_pass_hash)) {

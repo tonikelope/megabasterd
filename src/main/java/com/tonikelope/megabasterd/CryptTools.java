@@ -141,14 +141,14 @@ public class CryptTools {
         return decryptor.doFinal(data);
     }
 
-    public static byte[] aes_ecb_encrypt_nopadding(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_ecb_encrypt_noPadding(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher cryptor = CryptTools.genCrypter("AES", "AES/ECB/NoPadding", key, null);
 
         return cryptor.doFinal(data);
     }
 
-    public static byte[] aes_ecb_decrypt_nopadding(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_ecb_decrypt_noPadding(byte[] data, byte[] key) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher decryptor = CryptTools.genDecrypter("AES", "AES/ECB/NoPadding", key, null);
 
@@ -169,14 +169,14 @@ public class CryptTools {
         return decryptor.doFinal(data);
     }
 
-    public static byte[] aes_ctr_encrypt_nopadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_ctr_encrypt_noPadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher cryptor = CryptTools.genCrypter("AES", "AES/CTR/NoPadding", key, iv);
 
         return cryptor.doFinal(data);
     }
 
-    public static byte[] aes_ctr_decrypt_nopadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_ctr_decrypt_noPadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher decryptor = CryptTools.genDecrypter("AES", "AES/CTR/NoPadding", key, iv);
 
@@ -439,9 +439,9 @@ public class CryptTools {
                     throw new Exception("NO valid ELC account available!");
                 }
 
-                String postdata = "OPERATION_TYPE=D&DATA=" + new String(pass_bin, StandardCharsets.UTF_8) + "&USER=" + user + "&APIKEY=" + api_key;
+                String postData = "OPERATION_TYPE=D&DATA=" + new String(pass_bin, StandardCharsets.UTF_8) + "&USER=" + user + "&APIKEY=" + api_key;
 
-                con.getOutputStream().write(postdata.getBytes(StandardCharsets.UTF_8));
+                con.getOutputStream().write(postData.getBytes(StandardCharsets.UTF_8));
 
                 con.getOutputStream().close();
 
@@ -553,9 +553,9 @@ public class CryptTools {
 
             con.setRequestProperty("rev", dlc_rev);
 
-            String postdata = "destType=jdtc6&b=JD&srcType=dlc&data=" + dlc_id + "&v=" + dlc_rev;
+            String postData = "destType=jdtc6&b=JD&srcType=dlc&data=" + dlc_id + "&v=" + dlc_rev;
 
-            con.getOutputStream().write(postdata.getBytes(StandardCharsets.UTF_8));
+            con.getOutputStream().write(postData.getBytes(StandardCharsets.UTF_8));
 
             con.getOutputStream().close();
 
@@ -571,7 +571,7 @@ public class CryptTools {
                 enc_dlc_key = findFirstRegex("< *rc *>(.+?)< */ *rc *>", out.toString(StandardCharsets.UTF_8), 1);
             }
 
-            String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt_nopadding(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key)), StandardCharsets.UTF_8).trim();
+            String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt_noPadding(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key)), StandardCharsets.UTF_8).trim();
 
             String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt_noPadding(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key)), StandardCharsets.UTF_8).trim();
 
@@ -651,7 +651,7 @@ public class CryptTools {
         return pkey;
     }
 
-    public static byte[] PBKDF2HMACSHA256(String password, byte[] salt, int iterations, int output_length) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static byte[] PBKDF2_HMAC_SHA256(String password, byte[] salt, int iterations, int output_length) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA256");
 
@@ -660,7 +660,7 @@ public class CryptTools {
         return f.generateSecret(ks).getEncoded();
     }
 
-    public static byte[] PBKDF2HMACSHA512(String password, byte[] salt, int iterations, int output_length) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    public static byte[] PBKDF2_HMAC_SHA512(String password, byte[] salt, int iterations, int output_length) throws NoSuchAlgorithmException, InvalidKeySpecException {
 
         SecretKeyFactory f = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
 

@@ -38,6 +38,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -549,16 +550,16 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     unlock_accounts_button.setVisible(true);
 
-                    for (Object k : _main_panel.getMega_accounts().keySet()) {
+                    for (String k : _main_panel.getMega_accounts().keySet()) {
 
-                        String[] new_row_data = {(String) k, "**************************"};
+                        String[] new_row_data = {k, "**************************"};
 
                         mega_model.addRow(new_row_data);
                     }
 
-                    for (Object k : _main_panel.getElc_accounts().keySet()) {
+                    for (String k : _main_panel.getElc_accounts().keySet()) {
 
-                        String[] new_row_data = {(String) k, "**************************", "**************************"};
+                        String[] new_row_data = {k, "**************************", "**************************"};
 
                         elc_model.addRow(new_row_data);
                     }
@@ -571,9 +572,9 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     unlock_accounts_button.setVisible(false);
 
-                    for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
+                    for (Map.Entry<String, Object> pair : _main_panel.getMega_accounts().entrySet()) {
 
-                        HashMap<String, Object> data = (HashMap) pair.getValue();
+                        HashMap<String, Object> data = (HashMap<String, Object>) pair.getValue();
                         String pass = null;
 
                         try {
@@ -582,24 +583,24 @@ public class SettingsDialog extends javax.swing.JDialog {
                             LOG.fatal("Exception trying to setup auth! {}", ex.getMessage());
                         }
 
-                        String[] new_row_data = {(String) pair.getKey(), pass};
+                        String[] new_row_data = {pair.getKey(), pass};
 
                         mega_model.addRow(new_row_data);
                     }
 
-                    for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
+                    for (Map.Entry<String, Object> pair : _main_panel.getElc_accounts().entrySet()) {
 
-                        HashMap<String, Object> data = (HashMap) pair.getValue();
+                        HashMap<String, String> data = (HashMap<String, String>) pair.getValue();
                         String user = null, apikey = null;
 
                         try {
-                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
-                            apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
+                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
+                            apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                         } catch (Exception ex) {
                             LOG.fatal("Exception setting up apikey auth! {}", ex.getMessage());
                         }
 
-                        String[] new_row_data = {(String) pair.getKey(), user, apikey};
+                        String[] new_row_data = { pair.getKey(), user, apikey };
 
                         elc_model.addRow(new_row_data);
                     }
@@ -666,10 +667,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 use_mc_reverse = megacrypter_reverse.equals("yes");
 
-                if (megacrypter_reverse_p != null) {
-
-                    megacrypter_reverse_p = DBTools.selectSettingValue("megacrypter_reverse_port");
-                }
+                megacrypter_reverse_p = DBTools.selectSettingValue("megacrypter_reverse_port");
             }
 
             megacrypter_reverse_checkbox.setSelected(use_mc_reverse);
@@ -787,11 +785,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             this.font_combo.addItem(LabelTranslatorSingleton.getInstance().translate("ALTERNATIVE"));
 
-            if (font == null) {
-                this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("DEFAULT"));
-            } else {
-                this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate(font));
-            }
+            this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate(Objects.requireNonNullElse(font, "DEFAULT")));
 
             String language = DBTools.selectSettingValue("language");
 
@@ -815,23 +809,19 @@ public class SettingsDialog extends javax.swing.JDialog {
                 language = MainPanel.DEFAULT_LANGUAGE;
             }
 
-            if (language.equals("EN")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("English"));
-            } else if (language.equals("ES")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Spanish"));
-            } else if (language.equals("IT")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Italian"));
-            } else if (language.equals("TU")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Turkish"));
-            } else if (language.equals("CH")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Chinese"));
-            } else if (language.equals("VI")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Vietnamese"));
-            } else if (language.equals("GE")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("German"));
-            } else if (language.equals("HU")) {
-                this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Hungarian"));
-            }
+            String newLanguage = switch (language) {
+                case "EN" -> "English";
+                case "ES" -> "Spanish";
+                case "IT" -> "Italian";
+                case "TU" -> "Turkish";
+                case "CH" -> "Chinese";
+                case "VI" -> "Vietnamese";
+                case "GE" -> "German";
+                case "HU" -> "Hungarian";
+                default -> "English";
+            };
+
+            this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate(newLanguage));
 
             String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
 
@@ -2300,7 +2290,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 createUploadLogDir();
             }
 
-            if (custom_proxy_textarea.getText().trim().length() == 0) {
+            if (custom_proxy_textarea.getText().trim().isEmpty()) {
                 smart_proxy_checkbox.setSelected(false);
             }
 
@@ -2877,7 +2867,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                     try {
                         pass = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                     } catch (Exception ex) {
-                        LOG.fatal("Exception captured! {}", ex.getMessage());
+                        LOG.fatal("Accounts: Exception captured! {}", ex.getMessage());
                     }
                     return new String[]{pair.getKey(), pass};
                 }).forEachOrdered(mega_model::addRow);
@@ -2888,7 +2878,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                         user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                         apikey = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), StandardCharsets.UTF_8);
                     } catch (Exception ex) {
-                        LOG.fatal("Exception captured! {}", ex.getMessage());
+                        LOG.fatal("ELC Accounts: Exception captured! {}", ex.getMessage());
                     }
                     return new String[]{pair.getKey(), user, apikey};
                 }).forEachOrdered(elc_model::addRow);

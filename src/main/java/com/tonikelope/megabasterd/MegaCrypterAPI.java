@@ -21,7 +21,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
@@ -31,7 +30,7 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.Set;
 
-import static com.tonikelope.megabasterd.CryptTools.PBKDF2HMACSHA256;
+import static com.tonikelope.megabasterd.CryptTools.PBKDF2_HMAC_SHA256;
 import static com.tonikelope.megabasterd.CryptTools.aes_cbc_decrypt_pkcs7;
 import static com.tonikelope.megabasterd.CryptTools.genDecrypter;
 import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
@@ -150,7 +149,7 @@ public class MegaCrypterAPI {
         return dl_url;
     }
 
-    public static String[] getMegaFileMetadata(String link, MainPanelView panel, String reverse) throws MegaCrypterAPIException, MalformedURLException, IOException {
+    public static String[] getMegaFileMetadata(String link, MainPanelView panel, String reverse) throws MegaCrypterAPIException, IOException {
         String request = "{\"m\":\"info\", \"link\": \"" + link + "\"" + (reverse != null ? ", \"reverse\": \"" + reverse + "\"" : "") + "}";
 
         URL url_api = new URL(findFirstRegex("https?://[^/]+", link, 0) + "/api");
@@ -169,15 +168,10 @@ public class MegaCrypterAPI {
 
         String fpath = null;
 
-        Object fpath_val = res_map.get("path");
+        Object filePath_val = res_map.get("path");
 
-        if (fpath_val instanceof Boolean) {
-
-            fpath = null;
-
-        } else if (fpath_val instanceof String) {
-
-            fpath = cleanFilePath((String) fpath_val);
+        if (filePath_val instanceof String) {
+            fpath = cleanFilePath((String) filePath_val);
         }
 
         String file_size;
@@ -197,14 +191,8 @@ public class MegaCrypterAPI {
 
         Object expire_val = res_map.get("expire");
 
-        if (expire_val instanceof Boolean) {
-
-            noexpire_token = null;
-
-        } else if (expire_val instanceof String) {
-
+        if (expire_val instanceof String) {
             String[] aux = ((String) expire_val).split("#");
-
             noexpire_token = aux[1];
         }
 
@@ -255,7 +243,7 @@ public class MegaCrypterAPI {
 
                         try {
 
-                            info_key = PBKDF2HMACSHA256(password, salt, (int) Math.pow(2, iterations), 256);
+                            info_key = PBKDF2_HMAC_SHA256(password, salt, (int) Math.pow(2, iterations), 256);
 
                             decrypter = genDecrypter("AES", "AES/CBC/PKCS5Padding", info_key, iv);
 
