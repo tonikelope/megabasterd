@@ -1,5 +1,6 @@
 package com.tonikelope.megabasterd
 
+import java.io.IOException
 import java.io.InputStream
 import java.lang.System.nanoTime
 import java.util.concurrent.atomic.AtomicBoolean
@@ -14,6 +15,9 @@ open class KThrottledInputStream(
 
     private var availableBytes: Long = 0
     private var lastRefillTime: Long = nanoTime()
+
+    @Throws(IOException::class)
+    override fun close() = Unit // No-op to prevent double-closing the underlying stream
 
     override fun read(): Int {
         if (streamSupervisor.maxBytesPerSecInput > 0) {
@@ -60,6 +64,7 @@ open class KThrottledInputStream(
                 if (nanosToWait > 0) {
                     try {
                         Thread.sleep(nanosToWait / 1_000_000, (nanosToWait % 1_000_000).toInt())
+                    } catch (_: InterruptedException) {
                     } catch (_: InterruptedException) {
                         Thread.currentThread().interrupt()
                         break

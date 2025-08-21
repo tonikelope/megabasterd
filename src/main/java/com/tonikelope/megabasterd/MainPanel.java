@@ -154,9 +154,7 @@ public final class MainPanel {
 
         final MainPanel main_panel = new MainPanel();
 
-        invokeLater(() -> {
-            main_panel.getView().setVisible(true);
-        });
+        invokeLater(() -> main_panel.getView().setVisible(true));
     }
 
     public static boolean isRun_command() {
@@ -1187,7 +1185,8 @@ public final class MainPanel {
 
             app_is_running = false;
 
-            try (ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress())) {
+            try {
+                final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
                 THREAD_POOL.execute(() -> {
                     while (!_exit) {
                         try {
@@ -1197,8 +1196,8 @@ public final class MainPanel {
                                 getView().setVisible(true);
                             });
                             clientSocket.close();
-                        } catch (Exception ex1) {
-                            if (!_exit) LOG.fatal("Generic exception caught [1]! {}", ex1.getMessage());
+                        } catch (Exception exception) {
+                            if (!_exit) LOG.fatal("IO exception caught! {}", exception.getMessage());
                         }
                     }
                 });

@@ -11,6 +11,7 @@ package com.tonikelope.megabasterd;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 
@@ -46,28 +48,47 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final LinkedBlockingQueue<Transference> _transference_finished_queue;
     protected final LinkedBlockingQueue<Transference> _transference_running_list;
 
-    private final LinkedBlockingQueue<Component> removalQueue = new LinkedBlockingQueue<>(MAX_TRANSFERENCES_DISPLAYED);
-    private final LinkedBlockingQueue<Component> additionQueue = new LinkedBlockingQueue<>(MAX_TRANSFERENCES_DISPLAYED);
+    private final LinkedBlockingQueue<WrappedTransference> removalQueue = new LinkedBlockingQueue<>(MAX_TRANSFERENCES_DISPLAYED);
+    private final LinkedBlockingQueue<WrappedTransference> additionQueue = new LinkedBlockingQueue<>(MAX_TRANSFERENCES_DISPLAYED);
 
-    private final LinkedBlockingQueue<Component> removalWaitQueue = new LinkedBlockingQueue<>();
-    private final LinkedBlockingQueue<Component> additionWaitQueue = new LinkedBlockingQueue<>();
+    private static class WrappedTransference {
+        private final Transference transference;
+        private  final boolean addBackAfterRemoval;
 
-    private void safeDrainWaitingToQueue(LinkedBlockingQueue<Component> source, LinkedBlockingQueue<Component> target) {
+        public Component getComponent() {
+            return (Component) transference.getView();
+        }
+
+        public WrappedTransference(Transference transference, boolean addBackAfterRemoval) {
+            this.transference = transference;
+            this.addBackAfterRemoval = addBackAfterRemoval;
+        }
+
+        public WrappedTransference(Transference transference) {
+            this.transference = transference;
+            this.addBackAfterRemoval = false;
+        }
+    }
+
+    private final LinkedBlockingQueue<WrappedTransference> removalWaitQueue = new LinkedBlockingQueue<>();
+    private final LinkedBlockingQueue<WrappedTransference> additionWaitQueue = new LinkedBlockingQueue<>();
+
+    private void safeDrainWaitingToQueue(LinkedBlockingQueue<WrappedTransference> source, LinkedBlockingQueue<WrappedTransference> target) {
         int capacity = target.remainingCapacity();
         if (capacity <= 0) return;
 
         int sourceSize = source.size();
         int toDrain = Math.min(capacity, sourceSize);
 
-        List<Component> drained = new ArrayList<>(toDrain);
+        List<WrappedTransference> drained = new ArrayList<>(toDrain);
         source.drainTo(drained, toDrain);
         target.addAll(drained);
     }
 
-    private void flushAdditions() {
+    private void flushAdditions(AtomicBoolean changedFlag) {
         safeDrainWaitingToQueue(additionWaitQueue, additionQueue);
         if (additionQueue.isEmpty()) return;
-        MiscTools.GUIRun(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             JPanel scrollPanel = getScroll_panel();
             if (scrollPanel.getComponentCount() >= MAX_TRANSFERENCES_DISPLAYED) return;
             int toPull = Math.min(MAX_TRANSFERENCES_DISPLAYED - scrollPanel.getComponentCount(), additionQueue.size());
@@ -75,35 +96,34 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
             if (scrollPanel instanceof BatchPanel)
                 ((BatchPanel) scrollPanel).setSuspendLayout(true);
             do {
-                Component comp = additionQueue.poll();
-                if (comp != null) {
-                    scrollPanel.add(comp);
+                WrappedTransference wTrans = additionQueue.poll();
+                if (wTrans != null) {
+                    scrollPanel.add(wTrans.getComponent());
                 }
                 toPull--;
             } while (toPull > 0);
             if (scrollPanel instanceof BatchPanel)
                 ((BatchPanel) scrollPanel).setSuspendLayout(false);
-            scrollPanel.revalidate();
-            scrollPanel.repaint();
+            changedFlag.set(true);
         });
     }
 
-    private void flushRemovals() {
+    private void flushRemovals(AtomicBoolean changedFlag) {
         safeDrainWaitingToQueue(removalWaitQueue, removalQueue);
         if (removalQueue.isEmpty()) return;
-        MiscTools.GUIRun(() -> {
+        MiscTools.GUIRunAndWait(() -> {
             JPanel scrollPanel = getScroll_panel();
             if (scrollPanel instanceof BatchPanel)
                 ((BatchPanel) scrollPanel).setSuspendLayout(true);
 
-            Component comp;
-            while ((comp = removalQueue.poll()) != null) {
-                scrollPanel.remove(comp);
+            WrappedTransference wTrans;
+            while ((wTrans = removalQueue.poll()) != null) {
+                scrollPanel.remove(wTrans.getComponent());
+                if (wTrans.addBackAfterRemoval) additionWaitQueue.add(wTrans);
             }
             if (scrollPanel instanceof BatchPanel)
                 ((BatchPanel) scrollPanel).setSuspendLayout(false);
-            scrollPanel.revalidate();
-            scrollPanel.repaint();
+            changedFlag.set(true);
         });
     }
 
@@ -172,19 +192,32 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         _transference_finished_queue = new LinkedBlockingQueue<>();
         _transference_running_list = new LinkedBlockingQueue<>();
         _transference_preprocess_queue = new LinkedBlockingQueue<>();
+
         Timer uiRefreshTimer = new Timer(150, e -> {
             if (!_main_panel.getView().isVisible()) return;
             _updateView();
         });
         uiRefreshTimer.setRepeats(true);
         uiRefreshTimer.start();
+
+        Timer flushTimer = getFlushTimer();
+        flushTimer.start();
+    }
+
+    private @NotNull Timer getFlushTimer() {
+        AtomicBoolean wasEdited = new AtomicBoolean(false);
         Timer flushTimer = new Timer(800, e -> {
             if (!_main_panel.getView().isVisible()) return;
-            flushRemovals();
-            flushAdditions();
+            wasEdited.set(false);
+            flushRemovals(wasEdited);
+            flushAdditions(wasEdited);
+            if (wasEdited.get()) {
+                getScroll_panel().revalidate();
+                getScroll_panel().repaint();
+            }
         });
         flushTimer.setRepeats(true);
-        flushTimer.start();
+        return flushTimer;
     }
 
     public Boolean getSort_wait_start_queue() {
@@ -352,15 +385,15 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     }
 
-    public void flagForPanelRemoval(Transference transference) {
-        if (transference != null && transference.getView() != null) {
-            removalWaitQueue.add((Component) transference.getView());
+    public void flagForPanelRemoval(Transference transference, boolean addBackAfterRemoval) {
+        if (transference != null) {
+            removalWaitQueue.add(new WrappedTransference(transference, addBackAfterRemoval));
         }
     }
 
     public void flagForPanelAddition(Transference transference) {
-        if (transference != null && transference.getView() != null) {
-            additionWaitQueue.add((Component) transference.getView());
+        if (transference != null) {
+            additionWaitQueue.add(new WrappedTransference(transference));
         }
     }
 
@@ -370,9 +403,10 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void closeAllFinished() {
 
-        _transference_finished_queue.stream().filter((t) -> !t.isCanceled())
-                .peek(_transference_finished_queue::remove)
-                .forEachOrdered(_transference_remove_queue::add);
+        _transference_finished_queue.stream()
+            .filter((t) -> !t.isCanceled())
+            .peek(_transference_finished_queue::remove)
+            .forEachOrdered(_transference_remove_queue::add);
 
         secureNotify();
     }
@@ -426,6 +460,17 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         secureNotify();
     }
 
+    private void flushWaitStartAndFinished(ArrayList<Transference> wait_array) {
+        getTransference_waitstart_queue().clear();
+        getTransference_waitstart_queue().addAll(wait_array);
+        getTransference_waitstart_queue().forEach((t1) -> {
+            flagForPanelRemoval(t1, true);
+        });
+        getTransference_finished_queue().forEach((t1) -> {
+            flagForPanelRemoval(t1, true);
+        });
+    }
+
     public void topWaitQueue(Transference t) {
 
         synchronized (getWait_queue_lock()) {
@@ -441,9 +486,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 }
             }
 
-            getTransference_waitstart_queue().clear();
-
-            getTransference_waitstart_queue().addAll(wait_array);
+            flushWaitStartAndFinished(wait_array);
         }
 
         secureNotify();
@@ -464,9 +507,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             wait_array.add(t);
 
-            getTransference_waitstart_queue().clear();
-
-            getTransference_waitstart_queue().addAll(wait_array);
+            flushWaitStartAndFinished(wait_array);
         }
 
         secureNotify();
@@ -477,7 +518,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         synchronized (getWait_queue_lock()) {
 
-            ArrayList<Transference> wait_array = new ArrayList(getTransference_waitstart_queue());
+            ArrayList<Transference> wait_array = new ArrayList<>(getTransference_waitstart_queue());
 
             int pos = 0;
 
@@ -494,9 +535,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 Collections.swap(wait_array, pos, pos - 1);
             }
 
-            getTransference_waitstart_queue().clear();
-
-            getTransference_waitstart_queue().addAll(wait_array);
+            flushWaitStartAndFinished(wait_array);
         }
 
         secureNotify();

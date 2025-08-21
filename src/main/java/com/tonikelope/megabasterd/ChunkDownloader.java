@@ -13,14 +13,15 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
-import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.StreamClosedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.nio.ByteBuffer;
@@ -53,7 +54,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
     private volatile boolean _notified;
     private final ArrayList<String> _excluded_proxy_list = new ArrayList<>();
     private volatile boolean _reset_current_chunk;
-    private volatile InputStream _chunk_inputstream = null;
+    private volatile KThrottledInputStream _chunk_inputstream = null;
     private volatile long _509_timestamp = -1;
     private final HashMap<FastMegaHttpClient.FMEventType, Function0<Unit>> clientListenerMap;
 
@@ -66,6 +67,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
             this._reset_current_chunk = true;
 
             try {
+                LOG.info("CLOSING CHUNK INPUTSTREAM for {}!", _download.getFile_name());
                 _chunk_inputstream.close();
             } catch (IOException ex) {
                 LOG.fatal("Exception trying to reset chunk!", ex);
@@ -267,11 +269,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                         chunkDownloaderProxyConfig,
                         clientListenerMap
                     ).withProperty(FastMegaHttpClient.FMProperty.NO_CACHE);
-                    CloseableHttpResponse response = fastClient.execute()
+                    ClassicHttpResponse response = fastClient.execute()
                 ) {
-
-                    HttpEntity entity = response.getEntity();
-
                     if (!_exit && !_download.isStopped()) {
 
                         httpStatus.set(response.getCode());
@@ -290,13 +289,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                                 tmp_chunk_file = new File(_download.getChunkManager().getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + chunk_id + ".tmp");
 
-                                InputStream rawStream = entity.getContent();
+                                InputStream rawStream = response.getEntity().getContent();
 
                                 _chunk_inputstream = new KThrottledInputStream(rawStream, _download.getMain_panel().getStream_supervisor()) {
                                     @Override
                                     public void close() throws IOException {
-                                        response.close();
                                         super.close();
+                                        response.close();
                                     }
                                 };
 
@@ -328,16 +327,14 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                                             secureWait();
                                         }
                                     }
+                                } catch (StreamClosedException sce) {
+                                    LOG.warn("Worker [{}] Failed chunk download : Stream closed", _id);
+                                    chunkError.set(true);
                                 }
-
                             } else {
-
                                 LOG.info("Worker [{}] has RECOVERED PREVIOUS chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
-
                                 chunk_reads = chunk_size;
-
                                 _download.getPartialProgress().add(chunk_size);
-
                                 _download.getProgress_meter().secureNotify();
                             }
 
@@ -380,24 +377,19 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                     }
 
                 } catch (IOException | IllegalStateException ex) {
-
-                    if (ex instanceof SocketTimeoutException) {
+                    if (ex instanceof SocketTimeoutException || ex instanceof SocketException) {
                         timeoutError.set(true);
                         LOG.warn("Worker [{}] TIMEOUT downloading chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
                     } else {
                         LOG.fatal("Worker [{}] ERROR downloading chunk [{}]! {}",  _id, chunk_id, _download.getFile_name(), ex);
                     }
-
                 } finally {
-
                     if (_chunk_inputstream != null) {
-
                         try {
                             _chunk_inputstream.close();
                         } catch (IOException ex) {
                             LOG.fatal("Exception closing stream!", ex);
                         }
-                        _chunk_inputstream = null;
                     }
 
                     if (chunkError.get()) {

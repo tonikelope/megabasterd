@@ -138,7 +138,7 @@ public class DownloadManager extends TransferenceManager {
 
         for (final Transference d : downloads) {
 
-            flagForPanelRemoval(d);
+            flagForPanelRemoval(d, false);
 
             getTransference_waitstart_queue().remove(d);
             getTransference_running_list().remove(d);

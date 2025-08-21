@@ -915,7 +915,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     if (removeNoRestart != null && removeNoRestart.equals("yes")) {
                         view.printStatusOK("FILE WITH CORRECT NAME AND " + verbiage + " FOUND");
                         _status_error = null;
-                        _exit = true;
                     } else {
                         view.hideAllExceptStatus();
                         _status_error = "FILE WITH SAME NAME AND " + verbiage + " ALREADY EXISTS";
@@ -991,8 +990,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         manager.getTransference_running_list().remove(this);
         manager.getTransference_finished_queue().add(this);
-        manager.flagForPanelRemoval(this);
-        manager.flagForPanelAddition(this);
+        manager.flagForPanelRemoval(this, true);
 
         getMain_panel().getDownload_manager().secureNotify();
 

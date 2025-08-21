@@ -7,19 +7,22 @@ import org.apache.hc.client5.http.entity.DeflateInputStreamFactory
 import org.apache.hc.client5.http.entity.GZIPInputStreamFactory
 import org.apache.hc.client5.http.entity.InputStreamFactory
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder
+import org.apache.hc.client5.http.protocol.HttpClientContext
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy
-import org.apache.hc.core5.http.HttpEntity
+import org.apache.hc.core5.http.ClassicHttpResponse
 import org.apache.hc.core5.http.HttpHost
-import org.apache.hc.core5.http.io.HttpClientResponseHandler
+import org.apache.hc.core5.http.HttpStatus
 import org.apache.hc.core5.http.io.SocketConfig
 import org.apache.hc.core5.io.CloseMode
 import org.apache.hc.core5.io.ModalCloseable
 import org.apache.hc.core5.util.Timeout
 import org.apache.logging.log4j.LogManager
+import java.io.Closeable
+import java.io.IOException
+import java.io.InputStream
 import java.net.InetSocketAddress
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -102,27 +105,12 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
         val smartProxyCallback: (String?) -> Unit = { },
     )
 
+    private fun getBuiltClient() = if (::httpClient.isInitialized) httpClient else build()
+
     @Throws(Exception::class)
-    fun execute(): CloseableHttpResponse = executeOrThrow { it as CloseableHttpResponse }
-    fun executeAndEntity(): HttpEntity = executeOrThrow { response ->
-        val status = response.code
-        if (status in 200..299) {
-            val entity = response.entity
-            entity ?: throw RuntimeException("Response contains no content")
-        } else null
-    }
-
-    fun <T> execute(handler: HttpClientResponseHandler<T>): T {
-        if (!::httpClient.isInitialized) {
-            httpClient = build()
-        }
-        return httpClient.execute(request, handler)
-    }
-
-    private fun <T> executeOrThrow(handler: HttpClientResponseHandler<T?>): T {
-        if (!::httpClient.isInitialized) httpClient = build()
-        return httpClient.execute(request, handler)
-            ?: throw RuntimeException("Could not handle the response, execution returned null")
+    fun execute(): ClassicHttpResponse {
+        val client = getBuiltClient()
+        return client.executeOpen(null, request, HttpClientContext.create())
     }
 
     override fun build(): CloseableHttpClient {

@@ -15,7 +15,7 @@ import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -193,7 +193,7 @@ public class MegaAPI implements Serializable {
                     createProxyConfig(statusSet),
                     getClientListenerMap(statusSet)
                 ).withProperty(FastMegaHttpClient.FMProperty.NO_CACHE);
-                CloseableHttpResponse response = fastClient.execute()
+                ClassicHttpResponse response = fastClient.execute()
             ) {
                 statusSet.httpStatus.set(response.getCode());
                 if (statusSet.httpStatus.get() != 200) {
