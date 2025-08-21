@@ -11,7 +11,6 @@ package com.tonikelope.megabasterd;
 
 import org.apache.commons.io.input.QueueInputStream;
 import org.apache.commons.io.output.QueueOutputStream;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -160,9 +159,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                     con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                    if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                    if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                        con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                        con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                     }
                 } else {
 

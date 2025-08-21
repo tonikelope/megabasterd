@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -20,6 +19,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -145,7 +145,7 @@ public class MegaProxyServer implements Runnable {
 
                 Matcher matcher = CONNECT_PATTERN.matcher(request);
 
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(_clientSocket.getOutputStream(), "UTF-8");
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(_clientSocket.getOutputStream(), StandardCharsets.UTF_8);
 
                 if (matcher.matches()) {
 
@@ -159,7 +159,7 @@ public class MegaProxyServer implements Runnable {
 
                         if (matcher_auth.matches()) {
 
-                            proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()), "UTF-8");
+                            proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()), StandardCharsets.UTF_8);
 
                         }
 
@@ -273,7 +273,7 @@ public class MegaProxyServer implements Runnable {
                         break;
                 }
             }
-            return byteArrayOutputStream.toString("UTF-8");
+            return byteArrayOutputStream.toString(StandardCharsets.UTF_8);
         }
     }
 }

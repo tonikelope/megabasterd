@@ -11,7 +11,6 @@ package com.tonikelope.megabasterd;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -137,14 +136,14 @@ public class MegaCrypterAPI {
 
                 byte[] decrypted_url = aes_cbc_decrypt_pkcs7(BASE642Bin(dl_url), BASE642Bin(pass_hash), BASE642Bin(pass));
 
-                dl_url = new String(decrypted_url, "UTF-8");
+                dl_url = new String(decrypted_url, StandardCharsets.UTF_8);
 
             } catch (Exception ex) {
                 throw new MegaCrypterAPIException(25);
             }
         }
 
-        if (dl_url == null || "".equals(dl_url)) {
+        if (dl_url == null || dl_url.isEmpty()) {
             throw new MegaCrypterAPIException(-101);
         }
 
@@ -204,7 +203,7 @@ public class MegaCrypterAPI {
 
         } else if (expire_val instanceof String) {
 
-            String aux[] = ((String) expire_val).split("#");
+            String[] aux = ((String) expire_val).split("#");
 
             noexpire_token = aux[1];
         }
@@ -213,12 +212,7 @@ public class MegaCrypterAPI {
 
         String pass = null;
 
-        if (pass_val instanceof Boolean) {
-
-            pass = null;
-
-        } else if (pass_val instanceof String) {
-
+        if (pass_val instanceof String) {
             pass = (String) pass_val;
         }
 
@@ -247,7 +241,7 @@ public class MegaCrypterAPI {
 
             synchronized (PASS_LOCK) {
 
-                LinkedList<String> pass_list = new LinkedList(PASS_CACHE);
+                LinkedList<String> pass_list = new LinkedList<>(PASS_CACHE);
 
                 do {
                     bad_pass = true;
@@ -299,12 +293,12 @@ public class MegaCrypterAPI {
 
                     byte[] decrypted_name = decrypter.doFinal(BASE642Bin(fname));
 
-                    fname = new String(decrypted_name, "UTF-8");
+                    fname = new String(decrypted_name, StandardCharsets.UTF_8);
 
                     if (fpath != null) {
-                        byte[] decrypted_fpath = decrypter.doFinal(BASE642Bin(fpath));
+                        byte[] decryptedFilePath = decrypter.doFinal(BASE642Bin(fpath));
 
-                        fpath = new String(decrypted_fpath, "UTF-8");
+                        fpath = new String(decryptedFilePath, StandardCharsets.UTF_8);
                     }
 
                     pass = Bin2BASE64(info_key);
@@ -321,9 +315,7 @@ public class MegaCrypterAPI {
             fname = fpath + fname;
         }
 
-        String file_data[] = {fname, file_size, fkey, pass, noexpire_token};
-
-        return file_data;
+        return new String[]{fname, file_size, fkey, pass, noexpire_token};
     }
 
     private static int checkMCError(String data) {

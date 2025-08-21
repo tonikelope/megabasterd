@@ -17,7 +17,6 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpHost;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -580,9 +579,9 @@ public class MegaAPI implements Serializable {
                             byte_res.write(buffer, 0, reads);
                         }
 
-                        response = new String(byte_res.toByteArray(), StandardCharsets.UTF_8);
+                        response = byte_res.toString(StandardCharsets.UTF_8);
 
-                        if (response.length() > 0) {
+                        if (!response.isEmpty()) {
 
                             mega_error = checkMEGAError(response);
 

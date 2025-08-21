@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -335,7 +334,7 @@ public final class SmartMegaProxyManager {
                         byte_res.write(buffer, 0, reads);
                     }
 
-                    data = new String(byte_res.toByteArray(), "UTF-8");
+                    data = byte_res.toString(StandardCharsets.UTF_8);
                 }
 
                 String[] proxy_list = data.split("\n");

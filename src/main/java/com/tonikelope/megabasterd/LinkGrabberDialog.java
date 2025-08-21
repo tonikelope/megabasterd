@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,6 +21,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
@@ -340,7 +340,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
                         out.write(buffer, 0, reads);
                     }
-                    String dlc = new String(out.toByteArray(), "UTF-8");
+                    String dlc = out.toString(StandardCharsets.UTF_8);
                     Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView) getParent()).getMain_panel());
                     for (Iterator<String> i = links.iterator(); i.hasNext();) {
 
