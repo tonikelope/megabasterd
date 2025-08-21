@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -682,11 +681,11 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
         synchronized (_upload.getWorkers_lock()) {
 
-            int conta_error = 0;
+            int errorCount = 0;
 
-            conta_error = _upload.getChunkworkers().stream().filter((c) -> (c.isError_wait())).map((_item) -> 1).reduce(conta_error, Integer::sum);
+            errorCount = _upload.getChunkworkers().stream().filter(ChunkUploader::isError_wait).map((_item) -> 1).reduce(errorCount, Integer::sum);
 
-            final String status = conta_error > 0 ? "(" + String.valueOf(conta_error) + ")" : "";
+            final String status = errorCount > 0 ? "(" + errorCount + ")" : "";
             MiscTools.GUIRun(() -> {
                 slot_status_label.setForeground(Color.RED);
                 slot_status_label.setText(status);

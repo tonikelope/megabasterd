@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -48,10 +47,8 @@ public class DBTools {
         }
     }
 
-    public static synchronized void vaccum() throws SQLException {
-
+    public static synchronized void vacuum() throws SQLException {
         try (Connection conn = SqliteSingleton.getInstance().getConn(); Statement stat = conn.createStatement()) {
-
             stat.execute("VACUUM");
         }
     }

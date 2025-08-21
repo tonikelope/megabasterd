@@ -163,7 +163,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
     private String[] _getMegaFileMetadata(String link, MainPanelView panel) throws IOException {
 
         String[] file_info = null;
-        int conta_error = 0;
+        int errorCount = 0;
         boolean error;
 
         do {
@@ -184,11 +184,11 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             } catch (APIException ex) {
                 error = true;
-                LOG.fatal("API Exception captured! {}", ex.getMessage());
+                LOG.fatal("DownloadMetadata: API Exception captured! {}", ex.getMessage());
                 try {
-                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                    Thread.sleep(getWaitTimeExpBackOff(errorCount++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.fatal("Post-API error sleep interrupted! {}", ex2.getMessage());
+                    LOG.fatal("DownloadMetadata: Post-API error sleep interrupted! {}", ex2.getMessage());
                 }
             }
 
@@ -200,7 +200,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
     public String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String mega_account) throws Exception {
 
         String dl_url = null;
-        int conta_error = 0;
+        int errorCount = 0;
         boolean error;
 
         do {
@@ -223,11 +223,11 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             } catch (APIException ex) {
                 error = true;
-                LOG.fatal("Captured API Exception! {}", ex.getMessage());
+                LOG.fatal("DownloadUrl: API Exception captured! {}", ex.getMessage());
                 try {
-                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                    Thread.sleep(getWaitTimeExpBackOff(errorCount++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.fatal("Post-API error sleep interrupted! {}", ex2.getMessage());
+                    LOG.fatal("DownloadUrl: Post-API error sleep interrupted! {}", ex2.getMessage());
                 }
             }
 

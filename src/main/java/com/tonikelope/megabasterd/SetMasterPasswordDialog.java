@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -236,7 +235,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         status_label.setText(LabelTranslatorSingleton.getInstance().translate("Verifying your password, please wait..."));
 
-        final Dialog tthis = this;
+        final Dialog self = this;
 
         THREAD_POOL.execute(() -> {
             try {
@@ -252,11 +251,11 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                     }
                     _pass_ok = true;
                     MiscTools.GUIRun(() -> {
-                        tthis.setVisible(false);
+                        self.setVisible(false);
                     });
                 } else {
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         status_label.setText("");
 

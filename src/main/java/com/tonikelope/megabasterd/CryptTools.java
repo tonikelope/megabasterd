@@ -10,7 +10,6 @@
 package com.tonikelope.megabasterd;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -77,7 +76,7 @@ public class CryptTools {
     public static final int MASTER_PASSWORD_PBKDF2_ITERATIONS = 65536;
 
     public static Cipher genDecrypter(String algo, String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
-        SecretKeySpec skeySpec = new SecretKeySpec(key, algo);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, algo);
 
         Cipher decryptor = Cipher.getInstance(mode);
 
@@ -85,18 +84,18 @@ public class CryptTools {
 
             IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
-            decryptor.init(Cipher.DECRYPT_MODE, skeySpec, ivParameterSpec);
+            decryptor.init(Cipher.DECRYPT_MODE, secretKeySpec, ivParameterSpec);
 
         } else {
 
-            decryptor.init(Cipher.DECRYPT_MODE, skeySpec);
+            decryptor.init(Cipher.DECRYPT_MODE, secretKeySpec);
         }
 
         return decryptor;
     }
 
     public static Cipher genCrypter(String algo, String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
-        SecretKeySpec skeySpec = new SecretKeySpec(key, algo);
+        SecretKeySpec secretKeySpec = new SecretKeySpec(key, algo);
 
         Cipher cryptor = Cipher.getInstance(mode);
 
@@ -104,17 +103,17 @@ public class CryptTools {
 
             IvParameterSpec ivParameterSpec = new IvParameterSpec(iv);
 
-            cryptor.init(Cipher.ENCRYPT_MODE, skeySpec, ivParameterSpec);
+            cryptor.init(Cipher.ENCRYPT_MODE, secretKeySpec, ivParameterSpec);
 
         } else {
 
-            cryptor.init(Cipher.ENCRYPT_MODE, skeySpec);
+            cryptor.init(Cipher.ENCRYPT_MODE, secretKeySpec);
         }
 
         return cryptor;
     }
 
-    public static byte[] aes_cbc_encrypt_nopadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_cbc_encrypt_noPadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher cryptor = CryptTools.genCrypter("AES", "AES/CBC/NoPadding", key, iv);
 
@@ -128,7 +127,7 @@ public class CryptTools {
         return cryptor.doFinal(data);
     }
 
-    public static byte[] aes_cbc_decrypt_nopadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    public static byte[] aes_cbc_decrypt_noPadding(byte[] data, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
         Cipher decryptor = CryptTools.genDecrypter("AES", "AES/CBC/NoPadding", key, iv);
 
@@ -186,12 +185,12 @@ public class CryptTools {
 
     public static int[] aes_cbc_encrypt_ia32(int[] data, int[] key, int[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
-        return bin2i32a(CryptTools.aes_cbc_encrypt_nopadding(i32a2bin(data), i32a2bin(key), i32a2bin(iv)));
+        return bin2i32a(CryptTools.aes_cbc_encrypt_noPadding(i32a2bin(data), i32a2bin(key), i32a2bin(iv)));
     }
 
     public static int[] aes_cbc_decrypt_ia32(int[] data, int[] key, int[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
 
-        return bin2i32a(CryptTools.aes_cbc_decrypt_nopadding(i32a2bin(data), i32a2bin(key), i32a2bin(iv)));
+        return bin2i32a(CryptTools.aes_cbc_decrypt_noPadding(i32a2bin(data), i32a2bin(key), i32a2bin(iv)));
     }
 
     public static byte[] rsaDecrypt(BigInteger enc_data, BigInteger p, BigInteger q, BigInteger d) throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException {
@@ -202,9 +201,9 @@ public class CryptTools {
 
         Cipher cipher = Cipher.getInstance("RSA/ECB/NoPadding");
 
-        RSAPrivateKey privKey = (RSAPrivateKey) factory.generatePrivate(privateSpec);
+        RSAPrivateKey privateKey = (RSAPrivateKey) factory.generatePrivate(privateSpec);
 
-        cipher.init(Cipher.DECRYPT_MODE, privKey);
+        cipher.init(Cipher.DECRYPT_MODE, privateKey);
 
         byte[] enc_data_byte = enc_data.toByteArray();
 
@@ -477,7 +476,7 @@ public class CryptTools {
 
                         System.arraycopy(pass_dec_byte, 16, iv, 0, 8);
 
-                        byte[] bin_links_dec = CryptTools.aes_cbc_decrypt_nopadding(bin_links, key, iv);
+                        byte[] bin_links_dec = CryptTools.aes_cbc_decrypt_noPadding(bin_links, key, iv);
 
                         String[] links_string = (new String(bin_links_dec, StandardCharsets.UTF_8).trim()).split("\\|");
 
@@ -574,7 +573,7 @@ public class CryptTools {
 
             String dec_dlc_key = new String(CryptTools.aes_ecb_decrypt_nopadding(BASE642Bin(enc_dlc_key), hex2bin(dlc_master_key)), StandardCharsets.UTF_8).trim();
 
-            String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt_nopadding(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key)), StandardCharsets.UTF_8).trim();
+            String dec_dlc_data = new String(CryptTools.aes_cbc_decrypt_noPadding(BASE642Bin(enc_dlc_data), BASE642Bin(dec_dlc_key), BASE642Bin(dec_dlc_key)), StandardCharsets.UTF_8).trim();
 
             ArrayList<String> files = findAllRegex("< *file *>(.+?)< */ *file *>", new String(BASE642Bin(dec_dlc_data), StandardCharsets.UTF_8), 1);
 

@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -113,7 +112,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     public DownloadView(Download download) {
 
-        DownloadView tthis = this;
+        DownloadView self = this;
 
         _download = download;
 
@@ -121,9 +120,9 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
             initComponents();
 
-            updateFonts(tthis, GUI_FONT, download.getMain_panel().getZoom_factor());
+            updateFonts(self, GUI_FONT, download.getMain_panel().getZoom_factor());
 
-            translateLabels(tthis);
+            translateLabels(self);
 
             slots_spinner.setModel(new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
 
@@ -640,7 +639,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void updateSlotsStatus() {
-        int errorCount = (int)_download.getChunkworkers().stream().filter(ChunkDownloader::isError_wait).count();
+        int errorCount = (int)_download.getChunkWorkers().stream().filter(ChunkDownloader::isError_wait).count();
         final String status = errorCount > 0 ? "(" + errorCount + ")" : "";
         MiscTools.GUIRun(() -> {
             slot_status_label.setForeground(Color.RED);

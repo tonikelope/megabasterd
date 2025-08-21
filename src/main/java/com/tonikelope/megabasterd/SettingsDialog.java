@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -2558,7 +2557,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 encrypt_pass_checkbox.setEnabled(false);
 
-                final Dialog tthis = this;
+                final Dialog self = this;
 
                 THREAD_POOL.execute(() -> {
                     ArrayList<String> email_error = new ArrayList<>();
@@ -2597,7 +2596,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                         Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
 
-                                        dialog.setLocationRelativeTo(tthis);
+                                        dialog.setLocationRelativeTo(self);
 
                                         dialog.setVisible(true);
 
@@ -2670,7 +2669,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                             Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
 
-                                            dialog.setLocationRelativeTo(tthis);
+                                            dialog.setLocationRelativeTo(self);
 
                                             dialog.setVisible(true);
 
@@ -2737,7 +2736,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                             MiscTools.GUIRun(() -> {
                                 status.setText("");
 
-                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n") + final_email_error, "Mega Account Check Error", JOptionPane.ERROR_MESSAGE);
+                                JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("There were errors with some accounts (email and/or password are/is wrong). Please, check them:\n\n") + final_email_error, "Mega Account Check Error", JOptionPane.ERROR_MESSAGE);
 
                                 save_button.setEnabled(true);
 
@@ -2769,7 +2768,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                             _main_panel.getMega_accounts().keySet().stream().filter((email) -> (!new_valid_mega_accounts.contains(email))).forEachOrdered(_deleted_mega_accounts::add);
                             MiscTools.GUIRun(() -> {
                                 status.setText("");
-                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Settings successfully saved!"), LabelTranslatorSingleton.getInstance().translate("Settings saved"), JOptionPane.INFORMATION_MESSAGE);
+                                JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("Settings successfully saved!"), LabelTranslatorSingleton.getInstance().translate("Settings saved"), JOptionPane.INFORMATION_MESSAGE);
                                 _settings_ok = true;
                                 setDefaultCloseOperation(DISPOSE_ON_CLOSE);
                                 setVisible(false);
@@ -2831,12 +2830,12 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         unlock_accounts_button.setEnabled(false);
 
-        final Dialog tthis = this;
+        final Dialog self = this;
 
         MiscTools.GUIRun(() -> {
             GetMasterPasswordDialog dialog = new GetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_hash(), _main_panel.getMaster_pass_salt(), _main_panel);
 
-            dialog.setLocationRelativeTo(tthis);
+            dialog.setLocationRelativeTo(self);
 
             dialog.setVisible(true);
 
@@ -2993,12 +2992,12 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         encrypt_pass_checkbox.setEnabled(false);
 
-        final Dialog tthis = this;
+        final Dialog self = this;
 
         MiscTools.GUIRun(() -> {
             SetMasterPasswordDialog dialog = new SetMasterPasswordDialog((Frame) getParent(), true, _main_panel.getMaster_pass_salt(), _main_panel);
 
-            dialog.setLocationRelativeTo(tthis);
+            dialog.setLocationRelativeTo(self);
 
             dialog.setVisible(true);
 

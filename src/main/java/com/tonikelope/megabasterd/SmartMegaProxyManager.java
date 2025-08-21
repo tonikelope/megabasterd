@@ -53,7 +53,7 @@ public final class SmartMegaProxyManager {
     private volatile int _ban_time;
     private volatile int _proxy_timeout;
     private volatile boolean _force_smart_proxy;
-    private volatile int _autorefresh_time;
+    private volatile int _autoRefresh_time;
     private volatile long _last_refresh_timestamp;
     private volatile boolean _random_select;
     private volatile boolean _reset_slot_proxy;
@@ -75,7 +75,7 @@ public final class SmartMegaProxyManager {
     }
 
     public SmartMegaProxyManager(String proxy_list_url, MainPanel main_panel) {
-        _proxy_list_url = (proxy_list_url != null && !"".equals(proxy_list_url)) ? proxy_list_url : DEFAULT_SMART_PROXY_URL;
+        _proxy_list_url = (proxy_list_url != null && !proxy_list_url.isEmpty()) ? proxy_list_url : DEFAULT_SMART_PROXY_URL;
         _proxy_list = new ConcurrentHashMap<>();
         _main_panel = main_panel;
 
@@ -86,7 +86,7 @@ public final class SmartMegaProxyManager {
 
             while (true) {
 
-                while (System.currentTimeMillis() < _last_refresh_timestamp + _autorefresh_time * 60 * 1000) {
+                while (System.currentTimeMillis() < _last_refresh_timestamp + _autoRefresh_time * 60 * 1000) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
@@ -149,9 +149,9 @@ public final class SmartMegaProxyManager {
         String autorefresh_smart_proxy_string = DBTools.selectSettingValue("smartproxy_autorefresh_time");
 
         if (autorefresh_smart_proxy_string != null) {
-            _autorefresh_time = Integer.parseInt(autorefresh_smart_proxy_string);
+            _autoRefresh_time = Integer.parseInt(autorefresh_smart_proxy_string);
         } else {
-            _autorefresh_time = PROXY_AUTO_REFRESH_TIME;
+            _autoRefresh_time = PROXY_AUTO_REFRESH_TIME;
         }
 
         String reset_slot_proxy = DBTools.selectSettingValue("reset_slot_proxy");
@@ -172,7 +172,7 @@ public final class SmartMegaProxyManager {
             _random_select = RANDOM_SELECT;
         }
 
-        LOG.info("SmartProxy BAN_TIME: " + _ban_time + "   TIMEOUT: " + _proxy_timeout / 1000 + "   REFRESH: " + _autorefresh_time + "   FORCE: " + _force_smart_proxy + "   RANDOM: " + _random_select + "   RESET-SLOT-PROXY: " + _reset_slot_proxy);
+        LOG.info("SmartProxy BAN_TIME: " + _ban_time + "   TIMEOUT: " + _proxy_timeout / 1000 + "   REFRESH: " + _autoRefresh_time + "   FORCE: " + _force_smart_proxy + "   RANDOM: " + _random_select + "   RESET-SLOT-PROXY: " + _reset_slot_proxy);
     }
 
     public synchronized int getProxyCount() {

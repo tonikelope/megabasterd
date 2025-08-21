@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -735,7 +734,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
             final String email = selected_item;
 
-            final Dialog tthis = this;
+            final Dialog self = this;
 
             used_space_label.setForeground(new Color(102, 102, 102));
 
@@ -759,7 +758,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 MegaAPI ma = null;
                 try {
                     _quota_ok = false;
-                    ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
+                    ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, self, email);
                     Long[] quota = ma.getQuota();
                     if (isDisplayable()) {
                         if (quota != null) {

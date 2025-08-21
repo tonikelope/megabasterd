@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -201,7 +200,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
 
         original_link_textfield.setEnabled(false);
 
-        final Dialog tthis = this;
+        final Dialog self = this;
 
         THREAD_POOL.execute(() -> {
             boolean error = false;
@@ -216,7 +215,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
                     if (findFirstRegex("://enc", link, 0) != null) {
                         link = CryptTools.decryptMegaDownloaderLink(link);
                     } else if (findFirstRegex("://elc", link, 0) != null) {
-                        HashSet<String> links = CryptTools.decryptELC(link, ((MainPanelView) tthis.getParent()).getMain_panel());
+                        HashSet<String> links = CryptTools.decryptELC(link, ((MainPanelView) self.getParent()).getMain_panel());
                         link = links.iterator().next();
                     }
                 } catch (Exception ex) {
@@ -251,7 +250,7 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
             if (error) {
 
                 MiscTools.GUIRun(() -> {
-                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Please, paste a Mega/MegaCrypter/ELC link!"), "Error", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("Please, paste a Mega/MegaCrypter/ELC link!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                     original_link_textfield.setText("");
 
@@ -262,12 +261,12 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
 
             } else {
 
-                _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) tthis);
+                _mainPanelView.getMain_panel().getClipboardspy().detachObserver((ClipboardChangeObserver) self);
                 copyTextToClipboard(stream_link);
                 MiscTools.GUIRun(() -> {
-                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
+                    JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
                     dispose();
-                    getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
+                    getParent().dispatchEvent(new WindowEvent(self, WINDOW_CLOSING));
                 });
             }
         });
@@ -289,13 +288,13 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
 
                 pack();
 
-                final StreamerDialog tthis = this;
+                final StreamerDialog self = this;
 
                 THREAD_POOL.execute(() -> {
                     boolean use_account = true;
                     try {
 
-                        if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item) == null) {
+                        if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, self, _selected_item) == null) {
                             use_account = false;
                         }
 

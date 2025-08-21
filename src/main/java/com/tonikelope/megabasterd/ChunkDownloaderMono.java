@@ -51,7 +51,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
         try {
 
             String worker_url = null;
-            int http_error = 0, http_status = 0, conta_error = 0;
+            int http_error = 0, http_status = 0, errorCount = 0;
             boolean chunk_error = false, timeout = false;
             long chunk_id, bytes_downloaded = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
@@ -93,7 +93,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                             con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                            if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
                                 con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                             }
@@ -160,7 +160,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                 http_error = 0;
 
-                                conta_error = 0;
+                                errorCount = 0;
 
                             }
                         }
@@ -193,7 +193,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             setError_wait(true);
 
                             try {
-                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++conta_error) * 1000);
+                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++errorCount) * 1000);
                             } catch (InterruptedException exc) {
                             }
 

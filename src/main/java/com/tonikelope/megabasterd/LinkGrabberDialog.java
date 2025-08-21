@@ -414,13 +414,13 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
                 pack();
 
-                final LinkGrabberDialog tthis = this;
+                final LinkGrabberDialog self = this;
 
                 THREAD_POOL.execute(() -> {
                     boolean use_account = true;
                     try {
 
-                        if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item) == null) {
+                        if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, self, _selected_item) == null) {
                             use_account = false;
                         }
 

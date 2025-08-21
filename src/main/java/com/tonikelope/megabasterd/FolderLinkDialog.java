@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -109,7 +108,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             restore_button.setVisible(false);
 
-            final Dialog tthis = this;
+            final Dialog self = this;
 
             THREAD_POOL.execute(() -> {
                 _loadMegaDirTree();
@@ -128,7 +127,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else if (_mega_error == -18) {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -136,7 +135,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else if (_mega_error == -16) {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER BLOCKED/DELETED"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER BLOCKED/DELETED"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -144,7 +143,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -486,7 +485,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 node_bar.setValue(0);
             });
 
-            int conta_nodo = 0;
+            int nodeCount = 0;
 
             for (Object o : folder_nodes.values()) {
 
@@ -494,9 +493,9 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     return 1;
                 }
 
-                conta_nodo++;
+                nodeCount++;
 
-                int c = conta_nodo;
+                int c = nodeCount;
 
                 MiscTools.GUIRun(() -> {
                     node_bar.setValue(c);

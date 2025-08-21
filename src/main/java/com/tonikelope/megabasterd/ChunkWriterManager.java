@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -185,7 +184,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
             try {
 
-                while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written.get() < _file_size) {
+                while (!_exit && (!_download.isStopped() || !_download.getChunkWorkers().isEmpty()) && _bytes_written.get() < _file_size) {
 
                     if (!JOIN_CHUNKS_LOCK.isHeldByCurrentThread()) {
                         LOG.info("ChunkWriterManager: JOIN LOCK LOCKED FOR {}", _download.getFile_name());
@@ -245,12 +244,12 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
                     } while (chunk_io_error);
 
-                    if (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written.get() < _file_size) {
+                    if (!_exit && (!_download.isStopped() || !_download.getChunkWorkers().isEmpty()) && _bytes_written.get() < _file_size) {
 
                         LOG.info("ChunkWriterManager waiting for chunk [{}] {}...", (_last_chunk_id_written.get() + 1), _download.getFile_name());
 
                         if (JOIN_CHUNKS_LOCK.isHeldByCurrentThread() && JOIN_CHUNKS_LOCK.isLocked()) {
-                            LOG.info("ChunkWriterManager: JOIN LOCK RELEASED FOR {}", _download.getFile_name());
+                            LOG.info("ChunkWriterManager: Wait over! JOIN LOCK RELEASED FOR {}", _download.getFile_name());
                             JOIN_CHUNKS_LOCK.unlock();
                         }
 
@@ -260,7 +259,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
             } finally {
                 if (JOIN_CHUNKS_LOCK.isHeldByCurrentThread() && JOIN_CHUNKS_LOCK.isLocked()) {
-                    LOG.info("ChunkWriterManager: JOIN LOCK RELEASED FOR {}", _download.getFile_name());
+                    LOG.info("ChunkWriterManager: Cleanup! JOIN LOCK RELEASED FOR {}", _download.getFile_name());
                     JOIN_CHUNKS_LOCK.unlock();
                 }
             }

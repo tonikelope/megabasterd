@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -100,7 +99,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         final long numSplits = sourceSize / bytesPerSplit;
         final long remainingBytes = sourceSize % bytesPerSplit;
         int position = 0;
-        int conta_split = 1;
+        int splitCount = 1;
 
         MiscTools.GUIRunAndWait(() -> {
             jProgressBar2.setMinimum(0);
@@ -116,12 +115,12 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         try (RandomAccessFile sourceFile = new RandomAccessFile(this._files[i].getAbsolutePath(), "r"); FileChannel sourceChannel = sourceFile.getChannel()) {
 
-            for (; position < numSplits && !_exit; position++, conta_split++) {
-                _writePartToFile(i, bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
+            for (; position < numSplits && !_exit; position++, splitCount++) {
+                _writePartToFile(i, bytesPerSplit, position * bytesPerSplit, sourceChannel, splitCount, numSplits + (remainingBytes > 0 ? 1 : 0));
             }
 
             if (remainingBytes > 0 && !_exit) {
-                _writePartToFile(i, remainingBytes, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
+                _writePartToFile(i, remainingBytes, position * bytesPerSplit, sourceChannel, splitCount, numSplits + 1);
             }
         }
 
@@ -160,9 +159,9 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
     }
 
-    private void _writePartToFile(int f, long byteSize, long position, FileChannel sourceChannel, int conta_split, long num_splits) throws IOException {
+    private void _writePartToFile(int f, long byteSize, long position, FileChannel sourceChannel, int splitCount, long num_splits) throws IOException {
 
-        Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._files[f].getName() + ".part" + String.valueOf(conta_split) + "-" + String.valueOf(num_splits));
+        Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._files[f].getName() + ".part" + splitCount + "-" + num_splits);
 
         _current_part = fileName;
 
@@ -181,6 +180,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             }
         }
 
+        // TODO make an atomic operation
         _progress += byteSize;
     }
 
@@ -420,7 +420,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
             pack();
 
-            Dialog tthis = this;
+            Dialog self = this;
 
             THREAD_POOL.execute(() -> {
                 try {
@@ -432,7 +432,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
                                 MiscTools.GUIRun(() -> {
 
-                                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File/s successfully splitted!"));
+                                    JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("File/s successfully splitted!"));
 
                                     if (Desktop.isDesktopSupported()) {
                                         try {

@@ -405,7 +405,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void _file_drop_notify(List<File> files) {
 
-        final MainPanelView tthis = this;
+        final MainPanelView self = this;
 
         THREAD_POOL.execute(() -> {
             int n;
@@ -433,13 +433,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                     List<File> aux = new ArrayList<>();
                     aux.add(file);
                     return aux;
-                }).map((aux) -> new FileGrabberDialog(tthis, true, aux)).forEachOrdered((dialog) -> {
-                    _new_upload_dialog(dialog);
-                });
+                }).map((aux) -> new FileGrabberDialog(self, true, aux)).forEachOrdered(this::_new_upload_dialog);
 
             } else if (n == 1) {
 
-                final FileGrabberDialog dialog = new FileGrabberDialog(tthis, true, files);
+                final FileGrabberDialog dialog = new FileGrabberDialog(self, true, files);
 
                 _new_upload_dialog(dialog);
 
@@ -1061,17 +1059,17 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             getMain_panel().resumeDownloads();
 
-            final MainPanelView tthis = this;
+            final MainPanelView self = this;
 
             Runnable run = () -> {
 
                 String link_data = MiscTools.extractMegaLinksFromString(dialog.getLinks_textarea().getText());
 
-                Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
+                Set<String> urls = new HashSet<>(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
 
-                Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", link_data, 0));
+                Set<String> megaDownloader = new HashSet<>(findAllRegex("mega://enc[^\r\n]+", link_data, 0));
 
-                megadownloader.forEach((link) -> {
+                megaDownloader.forEach((link) -> {
                     try {
                         urls.add(decryptMegaDownloaderLink(link));
                     } catch (Exception ex) {
@@ -1079,7 +1077,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                     }
                 });
 
-                Set<String> elc = new HashSet(findAllRegex("mega://elc[^\r\n]+", link_data, 0));
+                Set<String> elc = new HashSet<>(findAllRegex("mega://elc[^\r\n]+", link_data, 0));
 
                 elc.forEach((link) -> {
                     try {
@@ -1161,7 +1159,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                                                 if (!link_warning) {
                                                     link_warning = true;
 
-                                                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd"), "Warning", JOptionPane.WARNING_MESSAGE);
+                                                    JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd"), "Warning", JOptionPane.WARNING_MESSAGE);
                                                 }
 
                                                 synchronized (getMain_panel().getDownload_manager().getWait_queue_lock()) {

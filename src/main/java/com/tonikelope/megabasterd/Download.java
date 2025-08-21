@@ -88,11 +88,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view;
-    private volatile ProgressMeter _progress_meter;
+    private final ProgressMeter _progress_meter;
     private final Object _secure_notify_lock;
     private final Object _progress_lock;
     private final Object _workers_lock;
-    private final Object _chunkid_lock;
+    private final Object _chunkId_lock;
     private final Object _dl_url_lock;
     private final Object _turbo_proxy_lock;
     private volatile boolean _notified;
@@ -103,18 +103,18 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private String _file_key;
     private Long _file_size;
     private String _file_pass;
-    private String _file_noexpire;
+    private String _file_noExpire;
     private volatile boolean _frozen;
     private final boolean _use_slots;
     private int _slots;
     private final boolean _restart;
-    private final ConcurrentSkipListSet<ChunkDownloader> _chunkworkers;
+    private final ConcurrentSkipListSet<ChunkDownloader> _chunkWorkers;
     private final ExecutorService _thread_pool;
     private volatile boolean _exit;
     private volatile boolean _pause;
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private volatile long _progress;
-    private ChunkWriterManager _chunkmanager;
+    private ChunkWriterManager _chunkManager;
     private String _last_download_url;
     private boolean _provision_ok;
     private boolean _auto_retry_on_error;
@@ -158,7 +158,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         return _status_error;
     }
 
-    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir, boolean priority) {
+    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noExpire, boolean use_slots, boolean restart, String custom_chunks_dir, boolean priority) {
 
         _priority = priority;
         _paused_workers = 0;
@@ -186,16 +186,16 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _file_key = file_key;
         _file_size = file_size;
         _file_pass = file_pass;
-        _file_noexpire = file_noexpire;
+        _file_noExpire = file_noExpire;
         _use_slots = use_slots;
         _restart = restart;
         _secure_notify_lock = new Object();
         _progress_lock = new Object();
         _workers_lock = new Object();
-        _chunkid_lock = new Object();
+        _chunkId_lock = new Object();
         _dl_url_lock = new Object();
         _turbo_proxy_lock = new Object();
-        _chunkworkers = new ConcurrentSkipListSet<>();
+        _chunkWorkers = new ConcurrentSkipListSet<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
@@ -232,16 +232,16 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _file_key = download.getFile_key();
         _file_size = download.getFile_size();
         _file_pass = download.getFile_pass();
-        _file_noexpire = download.getFile_noexpire();
+        _file_noExpire = download.getFile_noexpire();
         _use_slots = download.getMain_panel().isUse_slots_down();
         _restart = true;
         _secure_notify_lock = new Object();
         _progress_lock = new Object();
         _workers_lock = new Object();
-        _chunkid_lock = new Object();
+        _chunkId_lock = new Object();
         _dl_url_lock = new Object();
         _turbo_proxy_lock = new Object();
-        _chunkworkers = new ConcurrentSkipListSet<>();
+        _chunkWorkers = new ConcurrentSkipListSet<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
@@ -309,17 +309,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 _turbo = true;
 
                 if (!_finalizing) {
-                    Download tthis = this;
+                    Download self = this;
 
-                    MiscTools.GUIRun(() -> {
+                    MiscTools.GUIRun(() -> getView().getSpeed_label().setForeground(new Color(255, 102, 0)));
 
-                        getView().getSpeed_label().setForeground(new Color(255, 102, 0));
-
-                    });
-
-                    for (int t = getChunkworkers().size(); t <= Transference.MAX_WORKERS; t++) {
-                        ChunkDownloader c = new ChunkDownloader(t, tthis);
-                        _chunkworkers.add(c);
+                    for (int t = getChunkWorkers().size(); t <= Transference.MAX_WORKERS; t++) {
+                        ChunkDownloader c = new ChunkDownloader(t, self);
+                        _chunkWorkers.add(c);
                         _thread_pool.execute(c);
                     }
 
@@ -363,8 +359,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _pause = pause;
     }
 
-    public ChunkWriterManager getChunkmanager() {
-        return _chunkmanager;
+    public ChunkWriterManager getChunkManager() {
+        return _chunkManager;
     }
 
     public String getFile_key() {
@@ -380,8 +376,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         return _output_stream;
     }
 
-    public ArrayList<ChunkDownloader> getChunkworkers() {
-        return new ArrayList<>(_chunkworkers);
+    public ArrayList<ChunkDownloader> getChunkWorkers() {
+        return new ArrayList<>(_chunkWorkers);
     }
 
     public void setPaused_workers(int paused_workers) {
@@ -406,7 +402,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     public String getFile_noexpire() {
-        return _file_noexpire;
+        return _file_noExpire;
     }
 
     public boolean isUse_slots() {
@@ -428,7 +424,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.fatal("ProgressMeter get interrupted! {}", ex.getMessage());
+                LOG.fatal("Pre-meter-exist sleep interrupted! {}", ex.getMessage());
             }
         }
 
@@ -442,7 +438,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.fatal("Sleep interrupted! {}", ex.getMessage());
+                LOG.fatal("Pre-view-exist sleep interrupted! {}", ex.getMessage());
             }
         }
 
@@ -475,7 +471,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         if (isPause()) {
             setPause(false);
             setPaused_workers(0);
-            getChunkworkers().forEach(ChunkDownloader::secureNotify);
+            getChunkWorkers().forEach(ChunkDownloader::secureNotify);
             getView().resume();
             _main_panel.getDownload_manager().setPaused_all(false);
 
@@ -518,7 +514,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         if (isExit() || this._finalizing) return;
 
         int sl = getView().getSlots();
-        int cworkers = getChunkworkers().size();
+        int cworkers = getChunkWorkers().size();
         if (sl != cworkers) {
 
             if (sl > cworkers) {
@@ -688,14 +684,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             if (_use_slots) {
 
-                                _chunkmanager = new ChunkWriterManager(this);
-                                _thread_pool.execute(_chunkmanager);
+                                _chunkManager = new ChunkWriterManager(this);
+                                _thread_pool.execute(_chunkManager);
                                 _slots = mainPanel.getDefault_slots_down();
                                 _view.getSlots_spinner().setValue(_slots);
 
                                 for (int t = 1; t <= _slots; t++) {
                                     ChunkDownloader c = new ChunkDownloader(t, this);
-                                    _chunkworkers.add(c);
+                                    _chunkWorkers.add(c);
                                     _thread_pool.execute(c);
                                 }
 
@@ -708,7 +704,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                             } else {
 
                                 ChunkDownloaderMono c = new ChunkDownloaderMono(this);
-                                _chunkworkers.add(c);
+                                _chunkWorkers.add(c);
                                 _thread_pool.execute(c);
 
                                 MiscTools.GUIRun(() -> {
@@ -760,7 +756,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         secureWait();
 
-                        LOG.info("{} Chunkdownloaders finished!", Thread.currentThread().getName());
+                        LOG.info("{} ChunkDownloaders finished!", Thread.currentThread().getName());
 
                         meter.setExit(true);
 
@@ -784,7 +780,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         }
 
                         if (!_thread_pool.isTerminated()) {
-                            LOG.info("Closing thread pool ''mecag\u00fcen'' style...");
+                            LOG.info("Closing thread pool ''mecagüen'' style...");
                             _thread_pool.shutdownNow();
                         }
 
@@ -804,8 +800,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         if (_progress == _file_size) {
 
                             if (_file.length() != _file_size) {
-
-                                throw new IOException("El tamaño del fichero es incorrecto!");
+                                throw new IOException("The size of the file is incorrect!");
                             }
 
                             Files.move(Paths.get(_file.getAbsolutePath()), Paths.get(filename), StandardCopyOption.REPLACE_EXISTING);
@@ -964,9 +959,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 view.printStatusError(_status_error);
             }
 
-            if (getChunkmanager() != null) {
+            if (getChunkManager() != null) {
 
-                getChunkmanager().delete_chunks_temp_dir();
+                getChunkManager().delete_chunks_temp_dir();
 
                 File parent_download_dir = new File(getDownload_path() + "/" + getFile_name()).getParentFile();
 
@@ -1079,7 +1074,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         _file_pass = file_info[3];
 
-                        _file_noexpire = file_info[4];
+                        _file_noExpire = file_info[4];
                     }
 
                     String filename = _download_path + "/" + _file_name;
@@ -1221,7 +1216,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         synchronized (_workers_lock) {
 
-            if (++_paused_workers == _chunkworkers.size() && !_exit) {
+            if (++_paused_workers == _chunkWorkers.size() && !_exit) {
 
                 getView().printStatusNormal("Download paused!");
 
@@ -1255,7 +1250,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         }
 
         boolean error;
-        int conta_error = 0;
+        int errorCount = 0;
         String download_url;
 
         do {
@@ -1265,7 +1260,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
                     download_url = _ma.getMegaFileDownloadUrl(_url);
                 } else {
-                    download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire,
+                    download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noExpire,
                             _ma.getSid(), getMain_panel().getMega_proxy_server() != null ?
                                     (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" +
                                             getMain_panel().getMega_proxy_server().getPassword()).getBytes(StandardCharsets.UTF_8)) + ":" + MiscTools.getMyPublicIP()) : null);
@@ -1282,7 +1277,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             } catch (Exception ex) {
                 error = true;
                 try {
-                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                    Thread.sleep(getWaitTimeExpBackOff(errorCount++) * 1000);
                 } catch (InterruptedException ex2) {
                     LOG.fatal(ex2.getMessage());
                 }
@@ -1298,11 +1293,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             synchronized (_workers_lock) {
 
-                int chunk_id = _chunkworkers.size() + 1;
+                int chunk_id = _chunkWorkers.size() + 1;
 
                 ChunkDownloader c = new ChunkDownloader(chunk_id, this);
 
-                _chunkworkers.add(c);
+                _chunkWorkers.add(c);
 
                 try {
 
@@ -1316,11 +1311,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     public void stopLastStartedSlot() {
-        if (_exit || _chunkworkers.isEmpty()) return;
+        if (_exit || _chunkWorkers.isEmpty()) return;
 
         MiscTools.GUIRun(() -> getView().getSlots_spinner().setEnabled(false));
         ChunkDownloader downloader;
-        while((downloader = _chunkworkers.pollLast()) != null) {
+        while((downloader = _chunkWorkers.pollLast()) != null) {
             if (!downloader.isExit()) {
                 downloader.setExit(true);
                 downloader.secureNotify();
@@ -1329,7 +1324,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     public void stopThisSlot(ChunkDownloader chunkdownloader) {
-        if (!_chunkworkers.remove(chunkdownloader) || _exit) return;
+        if (!_chunkWorkers.remove(chunkdownloader) || _exit) return;
         if (_use_slots) {
             if (chunkdownloader.isChunk_exception() || getMain_panel().isExit()) {
                 _finalizing = true;
@@ -1342,7 +1337,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
             getView().updateSlotsStatus();
         }
-        if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
+        if (!_exit && isPause() && _paused_workers == _chunkWorkers.size()) {
             getView().printStatusNormal("Download paused!");
             MiscTools.GUIRun(() -> {
                 getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
@@ -1445,7 +1440,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 getView().stop("Stopping download, please wait...");
 
-                _chunkworkers.forEach(ChunkDownloader::secureNotify);
+                _chunkWorkers.forEach(ChunkDownloader::secureNotify);
 
                 secureNotify();
             }
@@ -1585,7 +1580,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     dl_url = _ma.getMegaFileDownloadUrl(link);
 
                 } else {
-                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes(StandardCharsets.UTF_8)) + ":" + MiscTools.getMyPublicIP()) : null);
+                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noExpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes(StandardCharsets.UTF_8)) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
 
             } catch (APIException ex) {
@@ -1648,7 +1643,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     public long nextChunkId() throws ChunkInvalidException {
 
-        synchronized (_chunkid_lock) {
+        synchronized (_chunkId_lock) {
 
             if (_main_panel.isExit()) {
                 throw new ChunkInvalidException(null);
@@ -1729,7 +1724,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     @Override
     public int getSlotsCount() {
-        return getChunkworkers().size();
+        return getChunkWorkers().size();
     }
 
     @Override
@@ -1782,7 +1777,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     @Override
     public int getTotWorkers() {
-        return getChunkworkers().size();
+        return getChunkWorkers().size();
     }
 
 }

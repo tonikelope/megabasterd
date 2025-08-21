@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -423,7 +422,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
             pack();
 
-            Dialog tthis = this;
+            Dialog self = this;
 
             THREAD_POOL.execute(() -> {
                 try {
@@ -436,7 +435,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                             MiscTools.GUIRun(() -> {
                                 jProgressBar2.setValue(jProgressBar2.getMaximum());
 
-                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
+                                JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
 
                                 if (Desktop.isDesktopSupported()) {
                                     try {

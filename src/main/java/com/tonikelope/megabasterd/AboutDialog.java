@@ -343,7 +343,7 @@ public class AboutDialog extends javax.swing.JDialog {
 
         pack();
 
-        final Dialog tthis = this;
+        final Dialog self = this;
 
         THREAD_POOL.execute(() -> {
             final String new_version = checkNewVersion(MEGABASTERD_URL);
@@ -351,13 +351,13 @@ public class AboutDialog extends javax.swing.JDialog {
             MiscTools.GUIRun(() -> {
                 if (new_version != null) {
 
-                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + new_version);
+                    JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("MegaBasterd NEW VERSION is available! -> ") + new_version);
 
                     mcdown_url_button.setEnabled(true);
 
                 } else {
 
-                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("You have the latest version ;)"));
+                    JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("You have the latest version ;)"));
 
                     mcdown_url_button.setEnabled(false);
                 }

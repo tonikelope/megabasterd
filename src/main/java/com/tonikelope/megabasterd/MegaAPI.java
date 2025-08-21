@@ -44,6 +44,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -52,8 +53,8 @@ import java.util.zip.GZIPInputStream;
 import static com.tonikelope.megabasterd.CryptTools.AES_ZERO_IV;
 import static com.tonikelope.megabasterd.CryptTools.MEGAPrepareMasterKey;
 import static com.tonikelope.megabasterd.CryptTools.MEGAUserHash;
-import static com.tonikelope.megabasterd.CryptTools.aes_cbc_decrypt_nopadding;
-import static com.tonikelope.megabasterd.CryptTools.aes_cbc_encrypt_nopadding;
+import static com.tonikelope.megabasterd.CryptTools.aes_cbc_decrypt_noPadding;
+import static com.tonikelope.megabasterd.CryptTools.aes_cbc_encrypt_noPadding;
 import static com.tonikelope.megabasterd.CryptTools.aes_cbc_encrypt_pkcs7;
 import static com.tonikelope.megabasterd.CryptTools.aes_ecb_decrypt_nopadding;
 import static com.tonikelope.megabasterd.CryptTools.aes_ecb_encrypt_nopadding;
@@ -135,9 +136,7 @@ public class MegaAPI implements Serializable {
         _sid = null;
         _account_version = -1;
         _req_id = genID(REQ_ID_LENGTH);
-
-        Random randomno = new Random();
-        _seqno = randomno.nextLong() & 0xffffffffL;
+        _seqno = new Random().nextLong() & 0xffffffffL;
     }
 
     private static String _current_smart_proxy = null;
@@ -469,7 +468,7 @@ public class MegaAPI implements Serializable {
 
         String response = null, current_smart_proxy = null;
 
-        int mega_error = 0, http_error = 0, conta_error = 0, http_status;
+        int mega_error = 0, http_error = 0, errorCount = 0, http_status;
 
         boolean empty_response = false, smart_proxy_socks = false;
 
@@ -613,7 +612,7 @@ public class MegaAPI implements Serializable {
                 LOG.warn("MegaAPI ERROR {} Waiting for retry...", String.valueOf(mega_error));
 
                 try {
-                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                    Thread.sleep(getWaitTimeExpBackOff(errorCount++) * 1000);
                 } catch (InterruptedException ex) {
                     LOG.fatal("Back-off sleep interrupted! {}", ex.getMessage());
                 }
@@ -733,15 +732,10 @@ public class MegaAPI implements Serializable {
         byte[] ret = null;
 
         try {
-
             byte[] attr_byte = ("MEGA" + attr).getBytes(StandardCharsets.UTF_8);
-
             int l = (int) (16 * Math.ceil((double) attr_byte.length / 16));
-
             byte[] new_attr_byte = Arrays.copyOfRange(attr_byte, 0, l);
-
-            ret = aes_cbc_encrypt_nopadding(new_attr_byte, key, AES_ZERO_IV);
-
+            ret = aes_cbc_encrypt_noPadding(new_attr_byte, key, AES_ZERO_IV);
         } catch (Exception ex) {
             LOG.fatal("Exception encoding attribute! {}", ex.getMessage());
         }
@@ -757,7 +751,7 @@ public class MegaAPI implements Serializable {
 
         try {
 
-            decrypted_at = aes_cbc_decrypt_nopadding(UrlBASE642Bin(encAttr), key, AES_ZERO_IV);
+            decrypted_at = aes_cbc_decrypt_noPadding(UrlBASE642Bin(encAttr), key, AES_ZERO_IV);
 
             String att = new String(decrypted_at, StandardCharsets.UTF_8).replaceAll("\0+$", "").replaceAll("^MEGA", "");
 
@@ -1118,11 +1112,9 @@ public class MegaAPI implements Serializable {
         String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
 
         if (Files.exists(Paths.get(file_path))) {
-
             LOG.info("MEGA FOLDER {} USING CACHED JSON FILE TREE", folder_id);
-
             try {
-                return new String(Files.readAllBytes(Paths.get(file_path)), StandardCharsets.UTF_8);
+                return Files.readString(Paths.get(file_path));
             } catch (IOException ex) {
                 LOG.fatal("IO Exception getting cached folder nodes!", ex);
             }
@@ -1143,7 +1135,7 @@ public class MegaAPI implements Serializable {
 
     public HashMap<String, Object> getFolderNodes(String folder_id, String folder_key, JProgressBar bar, boolean cache) throws Exception {
 
-        HashMap<String, Object> folder_nodes = null;
+        HashMap<String, Object> folder_nodes;
 
         String res = null;
 
@@ -1183,26 +1175,23 @@ public class MegaAPI implements Serializable {
                     bar.setValue(0);
                 });
             }
-            int conta_nodo = 0;
+            int nodeCount = 0;
 
-            for (Object o : (Iterable<? extends Object>) res_map[0].get("f")) {
+            for (Object o : (Iterable<?>) res_map[0].get("f")) {
 
-                conta_nodo++;
+                nodeCount++;
 
-                int c = conta_nodo;
+                int c = nodeCount;
 
                 if (bar != null) {
-                    MiscTools.GUIRun(() -> {
-
-                        bar.setValue(c);
-                    });
+                    MiscTools.GUIRun(() -> bar.setValue(c));
                 }
 
                 HashMap<String, Object> node = (HashMap<String, Object>) o;
 
                 String[] node_k = ((String) node.get("k")).split(":");
 
-                if (node_k.length == 2 && node_k[0] != "" && node_k[1] != "") {
+                if (node_k.length == 2 && !Objects.equals(node_k[0], "") && !Objects.equals(node_k[1], "")) {
 
                     try {
 

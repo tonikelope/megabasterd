@@ -10,7 +10,6 @@
 package com.tonikelope.megabasterd;
 
 import com.tonikelope.megabasterd.SmartMegaProxyManager.SmartProxyAuthenticator;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -355,16 +354,16 @@ public final class MainPanel {
 
         if (_use_smart_proxy) {
 
-            MainPanel tthis = this;
+            MainPanel self = this;
 
             THREAD_POOL.execute(() -> {
                 Authenticator.setDefault(new SmartProxyAuthenticator());
 
-                String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
+                String proxyList = DBTools.selectSettingValue("custom_proxy_list");
 
-                String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
+                String url_list = MiscTools.findFirstRegex("^#(http.+)$", proxyList.trim(), 1);
 
-                _proxy_manager = new SmartMegaProxyManager(url_list, tthis);
+                _proxy_manager = new SmartMegaProxyManager(url_list, self);
             });
 
         } else {
@@ -922,7 +921,7 @@ public final class MainPanel {
         MiscTools.purgeFolderCache();
         synchronized (DBTools.class) {
             try {
-                DBTools.vaccum();
+                DBTools.vacuum();
             } catch (SQLException ex) {
                 LOG.fatal("Failed to vacuum DB! {}", ex.getMessage());
             }
@@ -947,7 +946,7 @@ public final class MainPanel {
                 File db_file = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE);
                 db_file.delete();
             } else try {
-                DBTools.vaccum();
+                DBTools.vacuum();
             } catch (SQLException ex) {
                 LOG.fatal("Failed to vacuum DB! {}", ex.getMessage());
             }
@@ -1076,7 +1075,7 @@ public final class MainPanel {
                                 if (download.isPaused()) {
                                     download.pause();
                                 }
-                                if (!download.getChunkworkers().isEmpty()) {
+                                if (!download.getChunkWorkers().isEmpty()) {
                                     wait = true;
                                     MiscTools.GUIRun(() -> {
                                         download.getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
@@ -1223,7 +1222,7 @@ public final class MainPanel {
 
             MiscTools.GUIRun(() -> getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait...")));
 
-            final MainPanel tthis = this;
+            final MainPanel self = this;
 
             THREAD_POOL.execute(() -> {
                 int downloadCount = 0, tot_downloads = -1;
@@ -1255,9 +1254,9 @@ public final class MainPanel {
 
                                 MegaAPI ma = new MegaAPI();
 
-                                if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                if (email == null || !self.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(self, getView(), email)) != null) {
 
-                                    Download download = new Download(tthis, ma, url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
+                                    Download download = new Download(self, ma, url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
 
                                     getDownload_manager().getTransference_provision_queue().add(download);
 
@@ -1294,9 +1293,9 @@ public final class MainPanel {
 
                                 MegaAPI ma = new MegaAPI();
 
-                                if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                if (email == null || !self.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(self, getView(), email)) != null) {
 
-                                    Download download = new Download(tthis, ma, entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
+                                    Download download = new Download(self, ma, entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
 
                                     getDownload_manager().getTransference_provision_queue().add(download);
 
@@ -1428,24 +1427,24 @@ public final class MainPanel {
                 getView().getStatus_up_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous uploads, please wait..."));
             });
 
-            final MainPanel tthis = this;
+            final MainPanel self = this;
 
             THREAD_POOL.execute(() -> {
-                int conta_uploads = 0, tot_uploads = -1;
+                int uploadCount = 0, totalUploads = -1;
                 try {
 
                     ArrayList<String> uploads_queue = DBTools.selectUploadsQueue();
 
                     HashMap<String, HashMap<String, Object>> res = selectUploads();
 
-                    tot_uploads = res.size();
+                    totalUploads = res.size();
 
-                    Iterator uploads_queue_iterator = uploads_queue.iterator();
+                    Iterator<String> uploads_queue_iterator = uploads_queue.iterator();
 
                     while (uploads_queue_iterator.hasNext()) {
 
                         try {
-                            String filename = (String) uploads_queue_iterator.next();
+                            String filename = uploads_queue_iterator.next();
 
                             HashMap<String, Object> o = res.remove(filename);
 
@@ -1457,13 +1456,13 @@ public final class MainPanel {
 
                                     MegaAPI ma;
 
-                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(self, getView(), email)) != null) {
 
-                                        Upload upload = new Upload(tthis, ma, (String) filename, (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), false);
+                                        Upload upload = new Upload(self, ma, (String) filename, (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), false);
 
                                         getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                        conta_uploads++;
+                                        uploadCount++;
 
                                         uploads_queue_iterator.remove();
 
@@ -1473,7 +1472,7 @@ public final class MainPanel {
 
                                     deleteUpload((String) o.get("filename"), email);
 
-                                    tot_uploads--;
+                                    totalUploads--;
 
                                     uploads_queue_iterator.remove();
                                 }
@@ -1502,20 +1501,20 @@ public final class MainPanel {
 
                                     MegaAPI ma;
 
-                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(self, getView(), email)) != null) {
 
-                                        Upload upload = new Upload(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
+                                        Upload upload = new Upload(self, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
 
                                         getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                        conta_uploads++;
+                                        uploadCount++;
                                     }
 
                                 } else {
 
                                     deleteUpload((String) entry.getValue().get("filename"), email);
 
-                                    tot_uploads--;
+                                    totalUploads--;
                                 }
 
                             } catch (Exception ex) {
@@ -1529,9 +1528,9 @@ public final class MainPanel {
                     LOG.fatal("Error in main Upload thread!", ex);
                 }
 
-                if (conta_uploads > 0) {
+                if (uploadCount > 0) {
 
-                    if (conta_uploads == tot_uploads) {
+                    if (uploadCount == totalUploads) {
                         setResume_uploads(true);
                     }
 

@@ -1113,7 +1113,7 @@ public class MiscTools {
 
                 con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
                     con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                 }
@@ -1347,10 +1347,10 @@ public class MiscTools {
         if (asNumeric) {
             if (aLength > bLength && a.charAt(bLength) >= '0' && a.charAt(bLength) <= '9') // as number
             {
-                return 1;  // a has bigger size, thus b is smaller
+                return 1;  // A has bigger size, thus B is smaller
             } else if (bLength > aLength && b.charAt(aLength) >= '0' && b.charAt(aLength) <= '9') // as number
             {
-                return -1;  // b has bigger size, thus a is smaller
+                return -1;  // B has bigger size, thus A is smaller
             } else if (lastNumericCompare == 0) {
                 return aLength - bLength;
             } else {

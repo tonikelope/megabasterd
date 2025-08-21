@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -218,7 +217,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
         pack();
 
-        final Dialog tthis = this;
+        final Dialog self = this;
 
         THREAD_POOL.execute(() -> {
             try {
@@ -227,7 +226,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                 MiscTools.GUIRun(() -> {
                     if (!pass_hash.equals(_current_pass_hash)) {
 
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         status_label.setText("");
 
@@ -245,7 +244,7 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
                         _pass_ok = true;
 
-                        tthis.setVisible(false);
+                        self.setVisible(false);
                     }
                 });
             } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {

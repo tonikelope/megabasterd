@@ -10,7 +10,6 @@ import com.xuggle.xuggler.IStreamCoder;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.IVideoResampler;
 import com.xuggle.xuggler.Utils;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -42,7 +41,7 @@ public class Thumbnailer {
     private int frameCount = 0;
 
     /**
-     * Write the video frame out to a PNG file every once and a while. The files
+     * Write the video frame out to a PNG file every once in a while. The files
      * are written out to the system's temporary directory.
      *
      * @param picture the video frame which contains the time stamp.
@@ -243,9 +242,9 @@ public class Thumbnailer {
                     offset += bytesDecoded;
 
                     // Some decoders will consume data in a packet, but will not
-                    // be able to construct a full video picture yet.  Therefore
+                    // be able to construct a full video picture yet. Therefore,
                     // you should always check if you got a complete picture from
-                    // the decode.
+                    // the completed decode.
                     if (picture.isComplete()) {
                         IVideoPicture newPic = picture;
 
@@ -268,7 +267,7 @@ public class Thumbnailer {
                                     "could not decode video as BGR 24 bit data in: " + filename);
                         }
 
-                        // convert the BGR24 to an Java buffered image
+                        // convert the BGR24 to a Java buffered image
                         BufferedImage javaImage = Utils.videoPictureToImage(newPic);
 
                         // process the video frame

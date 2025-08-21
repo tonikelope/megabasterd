@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -51,7 +50,7 @@ public class DownloadManager extends TransferenceManager {
             if (!transference_running_list.isEmpty()) {
                 transference_running_list.forEach((transference) -> {
 
-                    ArrayList<ChunkDownloader> chunkWorkers = ((Download) transference).getChunkworkers();
+                    ArrayList<ChunkDownloader> chunkWorkers = ((Download) transference).getChunkWorkers();
 
                     chunkWorkers.forEach(ChunkDownloader::RESET_CURRENT_CHUNK);
 

@@ -165,7 +165,7 @@ public class MegaProxyServer implements Runnable {
 
                         LOG.info(header);
 
-                    } while (!"".equals(header));
+                    } while (!header.isEmpty());
 
                     if (proxy_auth != null && proxy_auth.matches(".*?: *?" + _password)) {
                         final Socket forwardSocket;

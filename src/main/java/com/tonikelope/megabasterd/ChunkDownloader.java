@@ -15,7 +15,6 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
 import org.apache.hc.core5.http.HttpEntity;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -225,7 +224,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
             byte[] buffer = getScaledBuffer();
 
             while (!_download.getMain_panel().isExit() && !_exit && !_download.isStopped()) {
-                if (_download.isPaused() && !_download.isStopped() && !_download.getChunkmanager().isExit()) {
+                if (_download.isPaused() && !_download.isStopped() && !_download.getChunkManager().isExit()) {
                     _download.pause_worker();
                     secureWait();
                 }
@@ -285,11 +284,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                         } else {
 
-                            chunk_file = new File(_download.getChunkmanager().getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + chunk_id);
+                            chunk_file = new File(_download.getChunkManager().getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + chunk_id);
 
                             if (!chunk_file.exists() || chunk_file.length() != chunk_size) {
 
-                                tmp_chunk_file = new File(_download.getChunkmanager().getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + chunk_id + ".tmp");
+                                tmp_chunk_file = new File(_download.getChunkManager().getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + chunk_id + ".tmp");
 
                                 InputStream rawStream = entity.getContent();
 
@@ -306,7 +305,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                                     ByteBuffer byteBuffer = ByteBuffer.allocate(buffer.length);
                                     long position = 0;
 
-                                    while (!_reset_current_chunk && !_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size) {
+                                    while (!_reset_current_chunk && !_exit && !_download.isStopped() && !_download.getChunkManager().isExit() && chunk_reads < chunk_size) {
                                         int bytesRead = _chunk_inputstream.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length));
                                         if (bytesRead == -1) break;
 
@@ -323,7 +322,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                                         _download.getPartialProgress().add((long) bytesRead);
                                         _download.getProgress_meter().secureNotify();
 
-                                        if (!_reset_current_chunk && _download.isPaused() && !_exit && !_download.isStopped() && !_download.getChunkmanager().isExit() && chunk_reads < chunk_size) {
+                                        if (!_reset_current_chunk && _download.isPaused() && !_exit && !_download.isStopped() && !_download.getChunkManager().isExit() && chunk_reads < chunk_size) {
 
                                             _download.pause_worker();
                                             secureWait();
@@ -376,7 +375,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
                             _excluded_proxy_list.clear();
 
-                            _download.getChunkmanager().secureNotify();
+                            _download.getChunkManager().secureNotify();
                         }
                     }
 
@@ -462,7 +461,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
 
         _download.stopThisSlot(this);
 
-        _download.getChunkmanager().secureNotify();
+        _download.getChunkManager().secureNotify();
 
         LOG.info("ChunkDownloader [{}] {}: bye bye", _id, _download.getFile_name());
     }

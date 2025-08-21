@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -710,7 +709,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
             if (_ul_url == null) {
 
-                int conta_error = 0;
+                int errorCount = 0;
 
                 do {
                     try {
@@ -724,7 +723,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                     }
 
                     if (_ul_url == null && !_exit) {
-                        long wait_time = MiscTools.getWaitTimeExpBackOff(++conta_error);
+                        long wait_time = MiscTools.getWaitTimeExpBackOff(++errorCount);
                         LOG.info("Uploader {} Upload URL is null, retrying in {} secs...", this.getFile_name(), wait_time);
 
                         try {
@@ -810,7 +809,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 THREAD_POOL.execute(() -> {
 
-                    //PROGRESS WATCHDOG If a upload remains more than PROGRESS_WATCHDOG_TIMEOUT seconds without receiving data, we force fatal error in order to restart it.
+                    //PROGRESS WATCHDOG If an upload remains more than PROGRESS_WATCHDOG_TIMEOUT seconds without receiving data, we force fatal error in order to restart it.
                     LOG.info("{} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
 
                     long last_progress, progress = getProgress();
@@ -885,7 +884,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                         int[] node_key = {ul_key[0] ^ ul_key[4], ul_key[1] ^ ul_key[5], ul_key[2] ^ _file_meta_mac[0], ul_key[3] ^ _file_meta_mac[1], ul_key[4], ul_key[5], _file_meta_mac[0], _file_meta_mac[1]};
 
-                        int conta_error = 0;
+                        int errorCount = 0;
 
                         do {
                             try {
@@ -900,7 +899,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                             }
 
                             if (upload_res == null && !_exit) {
-                                long wait_time = MiscTools.getWaitTimeExpBackOff(++conta_error);
+                                long wait_time = MiscTools.getWaitTimeExpBackOff(++errorCount);
                                 LOG.info("Uploader {} Finisih upload res is null, retrying in {} secs...", this.getFile_name(), wait_time);
 
                                 try {

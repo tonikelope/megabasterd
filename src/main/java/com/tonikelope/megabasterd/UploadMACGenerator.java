@@ -9,7 +9,6 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -153,14 +152,14 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                         chunk_mac[2] = file_iv[0];
                         chunk_mac[3] = file_iv[1];
 
-                        long conta_chunk = 0L;
+                        long chunkCount = 0L;
 
                         try (ByteArrayOutputStream baos = CHUNK_QUEUE.remove(chunk_offset)) {
                             chunk_bytes = baos.toByteArray();
                         }
 
                         try (ByteArrayInputStream bais = new ByteArrayInputStream(chunk_bytes)) {
-                            while (conta_chunk < chunk_size && (reads = bais.read(byte_block)) != -1) {
+                            while (chunkCount < chunk_size && (reads = bais.read(byte_block)) != -1) {
 
                                 if (reads < byte_block.length) {
                                     for (int i = reads; i < byte_block.length; i++) {
@@ -176,7 +175,7 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
 
                                 chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
 
-                                conta_chunk += reads;
+                                chunkCount += reads;
 
                                 tot += reads;
 
