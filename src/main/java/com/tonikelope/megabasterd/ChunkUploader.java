@@ -25,6 +25,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.charset.StandardCharsets;
@@ -151,7 +152,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                 String chunk_url = ChunkWriterManager.genChunkUrl(worker_url, _upload.getFile_size(), chunk_offset, chunk_size);
 
-                URL url = new URL(chunk_url);
+                URL url = URI.create(chunk_url).toURL();
 
                 HttpURLConnection con;
 

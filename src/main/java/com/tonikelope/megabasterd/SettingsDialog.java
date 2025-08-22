@@ -793,12 +793,9 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Hungarian"));
 
-            if (language == null) {
-                language = MainPanel.DEFAULT_LANGUAGE;
-            }
+            if (language == null) language = MainPanel.DEFAULT_LANGUAGE;
 
             String newLanguage = switch (language) {
-                case "EN" -> "English";
                 case "ES" -> "Spanish";
                 case "IT" -> "Italian";
                 case "TU" -> "Turkish";
@@ -3196,14 +3193,14 @@ public class SettingsDialog extends javax.swing.JDialog {
                 options[0]);
 
         if (n == 1) {
-            JFileChooser filechooser = new JFileChooser();
-            updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
-            filechooser.setCurrentDirectory(new File(_download_path));
-            filechooser.setDialogTitle("Save as");
+            JFileChooser fileChooser = new JFileChooser();
+            updateFonts(fileChooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+            fileChooser.setCurrentDirectory(new File(_download_path));
+            fileChooser.setDialogTitle("Save as");
 
-            if (filechooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 
-                File file = filechooser.getSelectedFile();
+                File file = fileChooser.getSelectedFile();
 
                 try {
 
@@ -3451,11 +3448,9 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             use_mega_account_down_combobox.removeAllItems();
 
-            if (_main_panel.getMega_accounts().size() > 0) {
+            if (!_main_panel.getMega_accounts().isEmpty()) {
 
-                _main_panel.getMega_accounts().keySet().forEach((o) -> {
-                    use_mega_account_down_combobox.addItem(o);
-                });
+                _main_panel.getMega_accounts().keySet().forEach((o) -> use_mega_account_down_combobox.addItem(o));
 
                 String use_mega_account_down = KDBTools.selectSettingValue("mega_account_down");
 

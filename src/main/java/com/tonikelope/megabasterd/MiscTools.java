@@ -984,26 +984,17 @@ public class MiscTools {
     }
 
     public static String extractStringFromClipboardContents(Transferable contents) {
-
         String ret = null;
-
         if (contents != null) {
 
             try {
-
                 Object o = contents.getTransferData(DataFlavor.stringFlavor);
-
                 if (o instanceof String) {
-
                     ret = (String) o;
                 }
-
-            } catch (Exception ex) {
-            }
+            } catch (Exception ignore) { }
         }
-
         return ret;
-
     }
 
     public static String extractMegaLinksFromString(String data) {
@@ -1025,21 +1016,12 @@ public class MiscTools {
             }
             ArrayList<String> base64_chunks = findAllRegex("[A-Za-z0-9+/_-]+=*", url_decoded, 0);
             if (!base64_chunks.isEmpty()) {
-
                 for (String chunk : base64_chunks) {
-
                     try {
-
                         String clean_data = MiscTools.newMegaLinks2Legacy(new String(Base64.getDecoder().decode(chunk)));
-
                         String decoded = MiscTools.findFirstRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
-
-                        if (decoded != null) {
-                            links.add(decoded);
-                        }
-
-                    } catch (Exception e) {
-                    };
+                        if (decoded != null) links.add(decoded);
+                    } catch (Exception ignore) { }
                 }
             }
             try {
@@ -1057,23 +1039,13 @@ public class MiscTools {
     }
 
     public static String extractFirstMegaLinkFromString(String data) {
-
         String res = "";
-
         if (data != null) {
-
             String clean_data = MiscTools.newMegaLinks2Legacy(URLDecoder.decode(data, StandardCharsets.UTF_8));
-
             ArrayList<String> links = findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
-
             links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
-
-            if (links.size() > 0) {
-
-                res = links.get(0);
-            }
+            if (!links.isEmpty()) res = links.getFirst();
         }
-
         return res;
     }
 
@@ -1084,7 +1056,7 @@ public class MiscTools {
 
         try {
 
-            URL url_api = new URL("http://whatismyip.akamai.com/");
+            URL url_api = URI.create("http://whatismyip.akamai.com/").toURL();
 
             if (MainPanel.isUse_proxy()) {
 
@@ -1132,7 +1104,7 @@ public class MiscTools {
 
         try {
 
-            mb_url = new URL(url);
+            mb_url = URI.create(url).toURL();
 
             if (MainPanel.isUse_proxy()) {
 

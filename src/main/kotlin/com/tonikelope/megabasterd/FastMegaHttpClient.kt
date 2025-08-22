@@ -107,7 +107,7 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
 
     private fun getBuiltClient() = if (::httpClient.isInitialized) httpClient else build()
 
-    @Throws(Exception::class)
+    @Throws(IOException::class)
     fun execute(): ClassicHttpResponse {
         val client = getBuiltClient()
         return client.executeOpen(null, request, HttpClientContext.create())

@@ -162,7 +162,7 @@ object KDBTools {
             while (result.next()) {
                 add(rowMapper(result))
             }
-        }
+        }.toMutableList()
     }
 
     @JvmStatic
@@ -223,7 +223,7 @@ object KDBTools {
         "downloads_queue",
         orderBy = "rowid",
         rowMapper = { getString("url") }
-    ) as ArrayList<String>
+    ).toMutableList() as ArrayList<String>
 
     @JvmStatic
     @Throws(SQLException::class)
@@ -250,7 +250,7 @@ object KDBTools {
         "uploads_queue",
         orderBy = "rowid",
         rowMapper = { getString("filename") }
-    ) as ArrayList<String>
+    ).toMutableList() as ArrayList<String>
 
     @JvmStatic
     @Throws(SQLException::class)
@@ -339,9 +339,9 @@ object KDBTools {
                 put("filepass", getString("filepass"))
                 put("filenoexpire", getString("filenoexpire"))
                 put("custom_chunks_dir", getString("custom_chunks_dir"))
-            } as HashMap<String, Any?>
+            }.toMutableMap() as HashMap<String, Any?>
         }
-    ).associate { it } as HashMap<String, HashMap<String, Any?>>
+    ).associate { it }.toMutableMap() as HashMap<String, HashMap<String, Any?>>
 
     @JvmStatic
     @Throws(SQLException::class)
@@ -422,9 +422,9 @@ object KDBTools {
                 put("folder_link", getString("folder_link"))
                 put("bytes_uploaded", getLong("bytes_uploaded"))
                 put("meta_mac", getString("meta_mac"))
-            } as HashMap<String, Any?>
+            }.toMutableMap() as HashMap<String, Any?>
         }
-    ).associate { it } as HashMap<String, HashMap<String, Any?>>
+    ).associate { it }.toMutableMap() as HashMap<String, HashMap<String, Any?>>
 
     @JvmStatic
     @Throws(SQLException::class)
@@ -436,7 +436,7 @@ object KDBTools {
         if (result.next()) buildMap<String, Any> {
             put("bytes_uploaded", result.getLong("bytes_uploaded"))
             put("meta_mac", result.getString("meta_mac"))
-        } as HashMap<String, Any>
+        }.toMutableMap() as HashMap<String, Any>
         else null
     }
 
@@ -481,7 +481,7 @@ object KDBTools {
     fun selectSettingsValues(): Map<String, Any> = readTableAsCollection(
         "settings",
         rowMapper = { getString("key") to getString("value") }
-    ).associate { it }
+    ).associate { it }.toMutableMap()
 
     @JvmStatic
     @Throws(SQLException::class)
@@ -554,9 +554,9 @@ object KDBTools {
                 put("password", getString("password"))
                 put("password_aes", getString("password_aes"))
                 put("user_hash", getString("user_hash"))
-            } as AccountSettings
+            }.toMutableMap() as AccountSettings
         }
-    ).associate { it } as AccountSet
+    ).associate { it }.toMutableMap() as AccountSet
 
     @JvmStatic
     @Throws(SQLException::class)
@@ -605,9 +605,9 @@ object KDBTools {
             getString("host") to buildMap {
                 put("user", getString("user"))
                 put("apikey", getString("apikey"))
-            } as AccountSettings
+            }.toMutableMap() as AccountSettings
         }
-    ).associate { it } as AccountSet
+    ).associate { it }.toMutableMap() as AccountSet
 
     @JvmStatic
     @Throws(SQLException::class)

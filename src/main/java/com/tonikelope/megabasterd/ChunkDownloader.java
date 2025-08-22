@@ -387,7 +387,7 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                         )
                     ) {
                         timeoutError.set(true);
-                        LOG.warn("Worker [{}] TIMEOUT downloading chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
+                        LOG.info("Worker [{}] TIMEOUT downloading chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
                     } else if (!timeoutError.get()) {
                         LOG.fatal("Worker [{}] ERROR downloading chunk [{}]! {}",  _id, chunk_id, _download.getFile_name(), ex);
                     }

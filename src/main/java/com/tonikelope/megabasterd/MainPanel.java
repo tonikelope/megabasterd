@@ -211,9 +211,9 @@ public final class MainPanel {
         return _proxy_manager;
     }
 
-    public static final ScheduledExecutorService memoryUsageScheduler = Executors.newScheduledThreadPool(1);
+    private static final ScheduledExecutorService memoryUsageScheduler = Executors.newScheduledThreadPool(1);
 
-    private CompletableFuture<MainPanelView> viewFuture = new CompletableFuture<>();
+    private final CompletableFuture<MainPanelView> viewFuture = new CompletableFuture<>();
     private final MainPanelView _view;
     private final SpeedMeter _global_dl_speed, _global_up_speed;
     private final DownloadManager _download_manager;
@@ -1153,31 +1153,39 @@ public final class MainPanel {
         }
     }
 
-    @SuppressWarnings("EmptyTryBlock")
     private boolean checkAppIsRunning() {
-        boolean app_is_running = true;
-        try (Socket ignored1 = new Socket(InetAddress.getLoopbackAddress(), WATCHDOG_PORT)) {
-            // If connection is successful, the app is running
+        boolean appIsRunning = true;
+        try {
+            Socket clientSocket = new Socket(InetAddress.getLoopbackAddress(), WATCHDOG_PORT);
+            clientSocket.close();
         } catch (Exception ex) {
-            app_is_running = false;
-            try (ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress())) {
+            appIsRunning = false;
+            try {
+                final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
                 THREAD_POOL.execute(() -> {
                     while (!_exit) {
-                        try (Socket ignored = serverSocket.accept()) {
+                        try {
+                            Socket clientSocket = serverSocket.accept();
                             MiscTools.GUIRun(() -> {
-                                getView().setExtendedState(Frame.NORMAL);
+                                getView().setExtendedState(NORMAL);
                                 getView().setVisible(true);
                             });
-                        } catch (IOException exception) {
+                            clientSocket.close();
+                        } catch (Exception exception) {
                             if (!_exit) LOG.fatal("IO exception caught while accepting client connection: {}", exception.getMessage());
                         }
+                    }
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        LOG.fatal("Could not close server socket: {}", e.getMessage());
                     }
                 });
             } catch (IOException ex2) {
                 LOG.fatal("Failed to start server socket: {}", ex2.getMessage());
             }
         }
-        return app_is_running;
+        return appIsRunning;
     }
 
     public void resumeDownloads() {

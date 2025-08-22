@@ -29,6 +29,7 @@ import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.URI;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -350,7 +351,7 @@ public class CryptTools {
 
                 byte[] pass_bin = Arrays.copyOfRange(elc_byte, 4 + bin_links_length + 2 + url_bin_length + 2, 4 + bin_links_length + 2 + url_bin_length + 2 + pass_bin_length);
 
-                URL url = new URL(new String(url_bin, StandardCharsets.UTF_8).trim());
+                URL url = URI.create(new String(url_bin, StandardCharsets.UTF_8).trim()).toURL();
 
                 if (MainPanel.isUse_proxy()) {
 
@@ -518,7 +519,7 @@ public class CryptTools {
 
         try {
 
-            URL url = new URL(dlc_url);
+            URL url = URI.create(dlc_url).toURL();
 
             if (MainPanel.isUse_proxy()) {
 

@@ -20,6 +20,7 @@ import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
 import java.net.PasswordAuthentication;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -30,6 +31,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL; 
 
@@ -59,6 +63,20 @@ public final class SmartMegaProxyManager {
     private volatile boolean _random_select;
     private volatile boolean _reset_slot_proxy;
 
+    private static ScheduledExecutorService refreshListExecutor = Executors.newScheduledThreadPool(1);
+
+    public void startRefreshingProxyList() {
+        refreshListExecutor.scheduleAtFixedRate(() -> {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime >= _last_refresh_timestamp + _autoRefresh_time * 60L * 1000L) {
+                if (MainPanel.isUse_smart_proxy()) {
+                    refreshProxyList();
+                    _last_refresh_timestamp = currentTime;
+                }
+            }
+        }, 0, _autoRefresh_time, TimeUnit.MINUTES);
+    }
+
     public boolean isRandom_select() {
         return _random_select;
     }
@@ -81,44 +99,18 @@ public final class SmartMegaProxyManager {
         _main_panel = main_panel;
 
         refreshSmartProxySettings();
-
-        THREAD_POOL.execute(() -> {
-            refreshProxyList();
-
-            while (true) {
-
-                while (System.currentTimeMillis() < _last_refresh_timestamp + _autoRefresh_time * 60 * 1000) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        LOG.fatal("SmartProxyManager interrupted!", ex);
-                    }
-                }
-
-                if (MainPanel.isUse_smart_proxy()) {
-
-                    refreshProxyList();
-                }
-            }
-        });
+        startRefreshingProxyList();
     }
 
     private synchronized int countBlockedProxies() {
-
         int i = 0;
-
-        Long current_time = System.currentTimeMillis();
-
+        long current_time = System.currentTimeMillis();
         for (String k : _proxy_list.keySet()) {
-
-            if (_proxy_list.get(k)[0] != -1 && _proxy_list.get(k)[0] > current_time - _ban_time * 1000) {
-
+            if (_proxy_list.get(k)[0] != -1 && _proxy_list.get(k)[0] > current_time - _ban_time * 1000L) {
                 i++;
             }
         }
-
         return i;
-
     }
 
     public synchronized void refreshSmartProxySettings() {
@@ -149,10 +141,24 @@ public final class SmartMegaProxyManager {
 
         String autorefresh_smart_proxy_string = KDBTools.selectSettingValue("smartproxy_autorefresh_time");
 
+        int _current_autoRefresh_time = _autoRefresh_time;
         if (autorefresh_smart_proxy_string != null) {
             _autoRefresh_time = Integer.parseInt(autorefresh_smart_proxy_string);
         } else {
             _autoRefresh_time = PROXY_AUTO_REFRESH_TIME;
+        }
+
+        if (_autoRefresh_time != _current_autoRefresh_time) {
+            refreshListExecutor.shutdownNow();
+            boolean stopped = false;
+            try {
+                stopped = refreshListExecutor.awaitTermination(1, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOG.error("Error waiting for refreshListExecutor shutdown", e);
+            }
+            if (!stopped) throw new RuntimeException("Could not stop previous refreshListExecutor");
+            refreshListExecutor = Executors.newScheduledThreadPool(1);
+            startRefreshingProxyList();
         }
 
         String reset_slot_proxy = KDBTools.selectSettingValue("reset_slot_proxy");
@@ -173,7 +179,10 @@ public final class SmartMegaProxyManager {
             _random_select = RANDOM_SELECT;
         }
 
-        LOG.info("SmartProxy BAN_TIME: " + _ban_time + "   TIMEOUT: " + _proxy_timeout / 1000 + "   REFRESH: " + _autoRefresh_time + "   FORCE: " + _force_smart_proxy + "   RANDOM: " + _random_select + "   RESET-SLOT-PROXY: " + _reset_slot_proxy);
+        LOG.info(
+            "SmartProxy BAN_TIME: {}   TIMEOUT: {}   REFRESH: {}   FORCE: {}   RANDOM: {}   RESET-SLOT-PROXY: {}",
+            _ban_time, _proxy_timeout / 1000, _autoRefresh_time, _force_smart_proxy, _random_select, _reset_slot_proxy
+        );
     }
 
     public synchronized int getProxyCount() {
@@ -316,12 +325,10 @@ public final class SmartMegaProxyManager {
 
             if (custom_clean_list.isEmpty() && _proxy_list_url != null && !"".equals(_proxy_list_url)) {
 
-                URL url = new URL(this._proxy_list_url);
+                URL url = URI.create(this._proxy_list_url).toURL();
 
                 con = (HttpURLConnection) url.openConnection();
-
                 con.setUseCaches(false);
-
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
@@ -375,7 +382,7 @@ public final class SmartMegaProxyManager {
                 }
 
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + getProxyCount() + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
-                LOG.info("Smart Proxy Manager: proxy list refreshed ({})", _proxy_list.size());
+                LOG.info("Smart Proxy Manager: Proxy list downloaded from ({}), and refreshed ({})", _proxy_list_url, _proxy_list.size());
             } else if (!custom_clean_list.isEmpty()) {
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + getProxyCount() + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
                 LOG.info("Smart Proxy Manager: proxy list refreshed ({})", _proxy_list.size());

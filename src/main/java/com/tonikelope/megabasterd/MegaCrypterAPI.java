@@ -10,6 +10,7 @@
 package com.tonikelope.megabasterd;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,6 +23,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -119,19 +121,19 @@ public class MegaCrypterAPI {
     public static String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String sid, String reverse) throws IOException, MegaCrypterAPIException {
         String request = "{\"m\":\"dl\", \"link\": \"" + link + "\"" + (noexpire_token != null ? ", \"noexpire\": \"" + noexpire_token + "\"" : "") + (sid != null ? ", \"sid\": \"" + sid + "\"" : "") + (reverse != null ? ", \"reverse\": \"" + reverse + "\"" : "") + "}";
 
-        URL url_api = new URL(findFirstRegex("https?://[^/]+", link, 0) + "/api");
+        URL url_api = URI.create(findFirstRegex("https?://[^/]+", link, 0) + "/api").toURL();
 
         String res = MegaCrypterAPI._rawRequest(request, url_api);
 
         ObjectMapper objectMapper = new ObjectMapper();
 
-        HashMap res_map = objectMapper.readValue(res, HashMap.class);
+        HashMap<String, String> res_map = objectMapper.readValue(res, new TypeReference<>() {});
 
-        String dl_url = (String) res_map.get("url");
+        String dl_url = res_map.get("url");
 
         if (pass_hash != null) {
             try {
-                String pass = (String) res_map.get("pass");
+                String pass = res_map.get("pass");
 
                 byte[] decrypted_url = aes_cbc_decrypt_pkcs7(BASE642Bin(dl_url), BASE642Bin(pass_hash), BASE642Bin(pass));
 
@@ -152,7 +154,7 @@ public class MegaCrypterAPI {
     public static String[] getMegaFileMetadata(String link, MainPanelView panel, String reverse) throws MegaCrypterAPIException, IOException {
         String request = "{\"m\":\"info\", \"link\": \"" + link + "\"" + (reverse != null ? ", \"reverse\": \"" + reverse + "\"" : "") + "}";
 
-        URL url_api = new URL(findFirstRegex("https?://[^/]+", link, 0) + "/api");
+        URL url_api = URI.create(findFirstRegex("https?://[^/]+", link, 0) + "/api").toURL();
 
         String res = MegaCrypterAPI._rawRequest(request, url_api);
 
@@ -162,16 +164,16 @@ public class MegaCrypterAPI {
 
         objectMapper.configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
 
-        HashMap res_map = objectMapper.readValue(res, HashMap.class);
+        HashMap<String, String> res_map = objectMapper.readValue(res, new TypeReference<>() {});
 
-        String fname = cleanFilename((String) res_map.get("name"));
+        String fname = cleanFilename(res_map.get("name"));
 
         String fpath = null;
 
-        Object filePath_val = res_map.get("path");
+        String filePath_val = res_map.getOrDefault("path", null);
 
-        if (filePath_val instanceof String) {
-            fpath = cleanFilePath((String) filePath_val);
+        if (filePath_val != null) {
+            fpath = cleanFilePath(filePath_val);
         }
 
         String file_size;
@@ -185,23 +187,23 @@ public class MegaCrypterAPI {
             file_size = String.valueOf(res_map.get("size"));
         }
 
-        String fkey = (String) res_map.get("key");
+        String fkey = res_map.get("key");
 
         String noexpire_token = null;
 
-        Object expire_val = res_map.get("expire");
+        String expire_val = res_map.getOrDefault("expire", null);
 
-        if (expire_val instanceof String) {
-            String[] aux = ((String) expire_val).split("#");
+        if (expire_val != null) {
+            String[] aux = (expire_val).split("#");
             noexpire_token = aux[1];
         }
 
-        Object pass_val = res_map.get("pass");
+        String pass_val = res_map.getOrDefault("pass", null);
 
         String pass = null;
 
-        if (pass_val instanceof String) {
-            pass = (String) pass_val;
+        if (pass_val != null) {
+            pass = pass_val;
         }
 
         if (pass != null) {

@@ -18,6 +18,7 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -87,7 +88,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         }
 
-                        URL url = new URL(worker_url + "/" + chunk_offset);
+                        URL url = URI.create(worker_url + "/" + chunk_offset).toURL();
 
                         if (MainPanel.isUse_proxy()) {
 
@@ -144,24 +145,15 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                                 getDownload().getProgress_meter().secureNotify();
 
                                 if (getDownload().isPaused() && !getDownload().isStopped() && chunk_reads < chunk_size) {
-
                                     getDownload().pause_worker_mono();
-
                                     secureWait();
-
                                 }
                             }
 
                             if (chunk_reads == chunk_size) {
-
                                 bytes_downloaded += chunk_reads;
-
                                 chunk_error = false;
-
-                                http_error = 0;
-
                                 errorCount = 0;
-
                             }
                         }
 
