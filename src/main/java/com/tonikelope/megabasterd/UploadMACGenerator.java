@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -95,14 +96,11 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
         try {
 
             long chunk_id = 1L, tot = 0L;
-
-            boolean mac = false;
-
+            boolean mac;
             int cbc_per = 0;
-
             int[] file_mac = new int[]{0, 0, 0, 0};
 
-            HashMap upload_progress = DBTools.selectUploadProgress(_upload.getFile_name(), _upload.getMa().getFull_email());
+            HashMap<String, Object> upload_progress = KDBTools.selectUploadProgress(_upload.getFile_name(), _upload.getMa().getFull_email());
 
             if (upload_progress != null) {
 

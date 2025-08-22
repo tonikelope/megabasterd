@@ -9,7 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -64,7 +64,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
 
         boolean monitor_clipboard = true;
 
-        String monitor_clipboard_string = DBTools.selectSettingValue("clipboardspy");
+        String monitor_clipboard_string = KDBTools.selectSettingValue("clipboardspy");
 
         if (monitor_clipboard_string != null) {
             monitor_clipboard = monitor_clipboard_string.equals("yes");

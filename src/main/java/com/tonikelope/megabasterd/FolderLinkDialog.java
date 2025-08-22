@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -583,16 +584,14 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                 root.setParent(null);
 
-                final JTree ftree = file_tree;
+                final JTree fTree = file_tree;
 
-                final MegaMutableTreeNode roott = root;
+                final MegaMutableTreeNode rootNode = root;
 
                 MiscTools.GUIRunAndWait(() -> {
-
                     node_bar.setIndeterminate(true);
-                    
-                    String useRegex = DBTools.selectSettingValue("use_file_regex");
-                    String regexPattern = DBTools.selectSettingValue("file_regex_pattern");
+                    String useRegex = KDBTools.selectSettingValue("use_file_regex");
+                    String regexPattern = KDBTools.selectSettingValue("file_regex_pattern");
                     boolean filterEnabled = "yes".equalsIgnoreCase(useRegex) && regexPattern != null && !regexPattern.isEmpty();
 
                     if (filterEnabled) {
@@ -603,14 +602,12 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                             LOG.warn("Invalid regex pattern", pse);
                             filePattern = Pattern.compile(".*");
                         }
-                        removeNonMatchingNodes(roott, filePattern);
+                        removeNonMatchingNodes(rootNode, filePattern);
                     }
 
-                    ftree.setModel(new DefaultTreeModel(roott));
-
-                    ftree.setRootVisible(roott.getChildCount() > 0);
-
-                    ftree.setEnabled(true);
+                    fTree.setModel(new DefaultTreeModel(rootNode));
+                    fTree.setRootVisible(rootNode.getChildCount() > 0);
+                    fTree.setEnabled(true);
                 });
 
             }

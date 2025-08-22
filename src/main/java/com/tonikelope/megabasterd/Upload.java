@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -30,7 +31,6 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
-import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
 import static com.tonikelope.megabasterd.MiscTools.formatBytes;
 import static com.tonikelope.megabasterd.MiscTools.i32a2bin;
 import static com.tonikelope.megabasterd.MiscTools.truncateText;
@@ -406,15 +406,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 _progress_bar_rate = Integer.MAX_VALUE / (double) _file_size;
 
-                HashMap upload_progress = DBTools.selectUploadProgress(getFile_name(), getMa().getFull_email());
+                HashMap<String, Object> upload_progress = KDBTools.selectUploadProgress(getFile_name(), getMa().getFull_email());
 
                 if (upload_progress == null) {
 
                     if (_ul_key == null) {
-
                         _ul_key = _ma.genUploadKey();
-
-                        DBTools.insertUpload(_file_name, _ma.getFull_email(), _parent_node, Bin2BASE64(i32a2bin(_ul_key)), _root_node, Bin2BASE64(_share_key), _folder_link);
+                        KDBTools.insertUpload(this);
                     }
 
                     _provision_ok = true;
@@ -554,7 +552,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         if (_provision_ok) {
             try {
-                DBTools.deleteUpload(_file_name, _ma.getFull_email());
+                KDBTools.deleteUpload(_file_name, _ma.getFull_email());
             } catch (SQLException ex) {
                 LOG.fatal("Failed to close Upload! {}", ex.getMessage());
             }
@@ -694,7 +692,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
             _thread_pool.execute(() -> {
 
-                String thumbnails_string = DBTools.selectSettingValue("thumbnails");
+                String thumbnails_string = KDBTools.selectSettingValue("thumbnails");
 
                 if ("yes".equals(thumbnails_string)) {
 
@@ -736,7 +734,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                 } while (_ul_url == null && !_exit);
 
                 if (_ul_url != null) try {
-                    DBTools.updateUploadUrl(_file_name, _ma.getFull_email(), _ul_url);
+                    KDBTools.updateUploadUrl(this);
                     _auto_retry_on_error = true;
                 } catch (SQLException ex) {
                     LOG.fatal("Failed to update Upload url! {}", ex.getMessage());
@@ -1040,13 +1038,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
         if (_status_error == null && !_canceled) {
 
             try {
-                DBTools.deleteUpload(_file_name, _ma.getFull_email());
+                KDBTools.deleteUpload(_file_name, _ma.getFull_email());
             } catch (SQLException ex) {
                 LOG.fatal("Failed to delete Upload! {}", ex.getMessage());
             }
         } else {
             try {
-                DBTools.updateUploadProgress(getFile_name(), getMa().getFull_email(), getProgress(), getTemp_mac_data() != null ? getTemp_mac_data() : null);
+                KDBTools.updateUploadProgress(getFile_name(), getMa().getFull_email(), getProgress(), getTemp_mac_data() != null ? getTemp_mac_data() : null);
             } catch (SQLException ex) {
                 LOG.fatal("Could not delete upload!", ex);
             }

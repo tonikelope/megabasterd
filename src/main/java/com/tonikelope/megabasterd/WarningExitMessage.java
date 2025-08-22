@@ -120,7 +120,7 @@ public class WarningExitMessage extends javax.swing.JDialog {
 
     private void exit_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exit_buttonActionPerformed
 
-        _main_panel.byeByeNow(_restart);
+        KMiscTools.byeByeNow(_restart, false, true);
     }//GEN-LAST:event_exit_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

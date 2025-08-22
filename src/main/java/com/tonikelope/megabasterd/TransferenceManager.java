@@ -97,7 +97,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 ((BatchPanel) scrollPanel).setSuspendLayout(true);
             do {
                 WrappedTransference wTrans = additionQueue.poll();
-                if (wTrans != null) {
+                if (wTrans != null && !wTrans.transference.isStopped() && !wTrans.transference.isClosed()) {
                     scrollPanel.add(wTrans.getComponent());
                 }
                 toPull--;

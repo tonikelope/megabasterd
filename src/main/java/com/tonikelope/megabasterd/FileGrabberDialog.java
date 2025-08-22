@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -122,7 +123,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         MiscTools.GUIRunAndWait(() -> {
             initComponents();
 
-            String upload_log_string = DBTools.selectSettingValue("upload_log");
+            String upload_log_string = KDBTools.selectSettingValue("upload_log");
 
             upload_log_checkbox.setSelected("yes".equals(upload_log_string));
 
@@ -542,9 +543,9 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
             DefaultMutableTreeNode root = new DefaultMutableTreeNode(filechooser.getSelectedFile().getParent());
 
-            String useFileRegexString = DBTools.selectSettingValue("use_file_regex");
+            String useFileRegexString = KDBTools.selectSettingValue("use_file_regex");
             boolean useFileRegex = "yes".equalsIgnoreCase(useFileRegexString);
-            String regexPattern = DBTools.selectSettingValue("file_regex_pattern");
+            String regexPattern = KDBTools.selectSettingValue("file_regex_pattern");
 
             Pattern pattern = null;
             if (useFileRegex && regexPattern != null && !regexPattern.isEmpty()) {

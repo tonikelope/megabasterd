@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -76,12 +77,12 @@ public class UploadManager extends TransferenceManager {
             increment_total_progress(-1 * u.getProgress());
 
             if (!u.isCanceled() || u.isClosed()) {
-                delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
+                delete_up.add(new String[]{ u.getFile_name(), ((Upload) u).getMa().getFull_email() });
             }
         }
 
         try {
-            DBTools.deleteUploads(delete_up.toArray(new String[delete_up.size()][]));
+            KDBTools.deleteUploads(delete_up);
         } catch (SQLException ex) {
             LOG.fatal("Error deleting uploads!", ex);
         }

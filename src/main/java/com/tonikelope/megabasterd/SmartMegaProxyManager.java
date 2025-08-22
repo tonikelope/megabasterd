@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -121,7 +122,7 @@ public final class SmartMegaProxyManager {
     }
 
     public synchronized void refreshSmartProxySettings() {
-        String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
+        String smartproxy_ban_time = KDBTools.selectSettingValue("smartproxy_ban_time");
 
         if (smartproxy_ban_time != null) {
             _ban_time = Integer.parseInt(smartproxy_ban_time);
@@ -129,7 +130,7 @@ public final class SmartMegaProxyManager {
             _ban_time = PROXY_BLOCK_TIME;
         }
 
-        String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
+        String smartproxy_timeout = KDBTools.selectSettingValue("smartproxy_timeout");
 
         if (smartproxy_timeout != null) {
             _proxy_timeout = Integer.parseInt(smartproxy_timeout) * 1000;
@@ -137,7 +138,7 @@ public final class SmartMegaProxyManager {
             _proxy_timeout = Transference.HTTP_PROXY_TIMEOUT;
         }
 
-        String force_smart_proxy_string = DBTools.selectSettingValue("force_smart_proxy");
+        String force_smart_proxy_string = KDBTools.selectSettingValue("force_smart_proxy");
 
         if (force_smart_proxy_string != null) {
 
@@ -146,7 +147,7 @@ public final class SmartMegaProxyManager {
             _force_smart_proxy = MainPanel.FORCE_SMART_PROXY;
         }
 
-        String autorefresh_smart_proxy_string = DBTools.selectSettingValue("smartproxy_autorefresh_time");
+        String autorefresh_smart_proxy_string = KDBTools.selectSettingValue("smartproxy_autorefresh_time");
 
         if (autorefresh_smart_proxy_string != null) {
             _autoRefresh_time = Integer.parseInt(autorefresh_smart_proxy_string);
@@ -154,7 +155,7 @@ public final class SmartMegaProxyManager {
             _autoRefresh_time = PROXY_AUTO_REFRESH_TIME;
         }
 
-        String reset_slot_proxy = DBTools.selectSettingValue("reset_slot_proxy");
+        String reset_slot_proxy = KDBTools.selectSettingValue("reset_slot_proxy");
 
         if (reset_slot_proxy != null) {
 
@@ -163,7 +164,7 @@ public final class SmartMegaProxyManager {
             _reset_slot_proxy = RESET_SLOT_PROXY;
         }
 
-        String random_select = DBTools.selectSettingValue("random_proxy");
+        String random_select = KDBTools.selectSettingValue("random_proxy");
 
         if (random_select != null) {
 
@@ -256,7 +257,7 @@ public final class SmartMegaProxyManager {
 
         try {
 
-            String custom_proxy_list = (_proxy_list_url == null ? DBTools.selectSettingValue("custom_proxy_list") : null);
+            String custom_proxy_list = (_proxy_list_url == null ? KDBTools.selectSettingValue("custom_proxy_list") : null);
 
             LinkedHashMap<String, Long[]> custom_clean_list = new LinkedHashMap<>();
 

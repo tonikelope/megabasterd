@@ -9,25 +9,29 @@
  */
 package com.tonikelope.megabasterd;
 
-import org.apache.logging.log4j.Level;
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
-import static com.tonikelope.megabasterd.MainPanel.VERSION;
-
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Desktop;
-import java.awt.Dialog;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.Frame;
-import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Toolkit;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiEvent;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Synthesizer;
+import javax.sound.midi.Track;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -47,7 +51,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -83,35 +86,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiEvent;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
-import javax.sound.midi.ShortMessage;
-import javax.sound.midi.Synthesizer;
-import javax.sound.midi.Track;
-import javax.swing.AbstractButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTree;
-import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.border.TitledBorder;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MainPanel.VERSION;
 
 /**
  *
@@ -1215,13 +1192,12 @@ public class MiscTools {
         THREAD_POOL.execute(() -> {
             try {
                 LOG.info("Trying to open URL in external browser: {}", url);
-
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     Desktop.getDesktop().browse(new URI(url));
                     return;
                 }
                 if (System.getProperty("os.name").toLowerCase().contains("nux")) {
-                    Process p = Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+                    Process p = KMiscTools.INSTANCE.runSystemProcess("xdg-open", url);
                     p.waitFor();
                     p.destroy();
                     return;
@@ -1267,21 +1243,20 @@ public class MiscTools {
     }
 
     public static void restartApplication() {
-
-        StringBuilder cmd = new StringBuilder();
-
-        cmd.append(System.getProperty("java.home")).append(File.separator).append("bin").append(File.separator).append("java ");
-
-        ManagementFactory.getRuntimeMXBean().getInputArguments().forEach((jvmArg) -> {
-            cmd.append(jvmArg).append(" ");
-        });
-
-        cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
-
+        StringBuilder cmd = new StringBuilder()
+            .append(System.getProperty("java.home"))
+            .append(File.separator)
+            .append("bin")
+            .append(File.separator)
+            .append("java ");
+        ManagementFactory.getRuntimeMXBean().getInputArguments().forEach((jvmArg) -> cmd.append(jvmArg).append(" "));
+        cmd.append("-cp ")
+            .append(ManagementFactory.getRuntimeMXBean().getClassPath())
+            .append(" ");
         cmd.append(MainPanel.class.getName()).append(" native 1");
 
         try {
-            Runtime.getRuntime().exec(cmd.toString());
+            KMiscTools.INSTANCE.runSystemProcess(cmd.toString());
         } catch (IOException ex) {
             LOG.fatal("Could not run command !{}", ex.getMessage());
         }
@@ -1424,13 +1399,13 @@ public class MiscTools {
 
                 try {
 
-                    HashMap<String, Object> old_session_data = DBTools.selectMegaSession(email);
+                    HashMap<String, Object> old_session_data = KDBTools.selectMegaSession(email);
 
                     boolean unserialization_error = false;
 
                     if (old_session_data != null) {
 
-                        LOG.info("Reutilizando sesión de MEGA guardada para {}", email);
+                        LOG.info("Reusing MEGA session saved for {}", email);
 
                         MegaAPI old_ma = new MegaAPI();
 
@@ -1497,11 +1472,11 @@ public class MiscTools {
 
                         if (main_panel.getMaster_pass() != null) {
 
-                            DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
+                            KDBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
 
                         } else {
 
-                            DBTools.insertMegaSession(email, bs.toByteArray(), false);
+                            KDBTools.insertMegaSession(email, bs.toByteArray(), false);
                         }
                     }
 

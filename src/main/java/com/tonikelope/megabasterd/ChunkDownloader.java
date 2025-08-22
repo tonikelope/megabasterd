@@ -14,6 +14,8 @@ import kotlin.jvm.functions.Function0;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ConnectionClosedException;
+import org.apache.hc.core5.http.NoHttpResponseException;
 import org.apache.hc.core5.http.StreamClosedException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,12 +26,14 @@ import java.io.InputStream;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
+import java.net.UnknownHostException;
 import java.nio.ByteBuffer;
 import java.nio.channels.AsynchronousFileChannel;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -377,10 +381,14 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable, 
                     }
 
                 } catch (IOException | IllegalStateException ex) {
-                    if (ex instanceof SocketTimeoutException || ex instanceof SocketException) {
+                    if (!timeoutError.get() && (
+                            ex instanceof SocketTimeoutException || ex instanceof SocketException || ex instanceof UnknownHostException ||
+                                    ex instanceof NoHttpResponseException || ex instanceof ConnectionClosedException || ex instanceof CancellationException
+                        )
+                    ) {
                         timeoutError.set(true);
                         LOG.warn("Worker [{}] TIMEOUT downloading chunk [{}]! {}", _id, chunk_id, _download.getFile_name());
-                    } else {
+                    } else if (!timeoutError.get()) {
                         LOG.fatal("Worker [{}] ERROR downloading chunk [{}]! {}",  _id, chunk_id, _download.getFile_name(), ex);
                     }
                 } finally {

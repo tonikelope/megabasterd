@@ -16,7 +16,9 @@ import kotlin.jvm.functions.Function0;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ConnectionClosedException;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.NoHttpResponseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,8 +36,11 @@ import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.MalformedURLException;
 import java.net.Proxy;
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -48,6 +53,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.GZIPInputStream;
 
@@ -199,8 +205,18 @@ public class MegaAPI implements Serializable {
                 if (statusSet.httpStatus.get() != 200) {
                     statusSet.httpError.set(statusSet.httpStatus.get());
                 } else statusSet.httpError.set(0);
-            } catch (Exception ex) {
-                LOG.fatal("FAILED TO CHECK DOWNLOAD URL: {} : {}", uri, ex.getMessage());
+            }
+            catch (Exception ex) {
+                if (ex instanceof SocketTimeoutException || ex instanceof SocketException || ex instanceof UnknownHostException ||
+                        ex instanceof NoHttpResponseException || ex instanceof ConnectionClosedException || ex instanceof CancellationException
+                ) {
+                    LOG.info("Connection error reading MEGA URL {}, deferring slightly.", ex.getMessage());
+                    try {
+                        Thread.sleep(50);
+                    } catch (InterruptedException ignored) { }
+                } else {
+                    LOG.fatal("FAILED TO CHECK DOWNLOAD URL: {} : {} - {}", uri, ex.getClass(), ex.getMessage());
+                }
             }
         } while (statusSet.httpError.get() == 509);
 

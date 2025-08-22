@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,7 +20,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import static com.tonikelope.megabasterd.DBTools.deleteDownloads;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 
 /**
@@ -156,10 +156,9 @@ public class DownloadManager extends TransferenceManager {
             }
         }
 
-        final String[] urlsToDelete = delete_down.toArray(new String[0]);
         DB_EXECUTOR.execute(() -> {
             try {
-                deleteDownloads(urlsToDelete);
+                KDBTools.deleteDownloads(delete_down);
             } catch (SQLException ex) {
                 LOG.fatal("Error deleting downloads!", ex);
             } 

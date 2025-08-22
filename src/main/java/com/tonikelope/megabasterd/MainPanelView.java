@@ -9,14 +9,11 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static com.tonikelope.megabasterd.CryptTools.*;
-import static com.tonikelope.megabasterd.DBTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-
+import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -25,7 +22,6 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.event.WindowEvent;
-import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -40,8 +36,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import javax.swing.*;
-
+import static com.tonikelope.megabasterd.CryptTools.decryptMegaDownloaderLink;
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.ICON_FILE;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MainPanel.VERSION;
+import static com.tonikelope.megabasterd.MiscTools.findAllRegex;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.genID;
+import static com.tonikelope.megabasterd.MiscTools.i32a2bin;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
+import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import static javax.swing.JOptionPane.DEFAULT_OPTION;
 import static javax.swing.JOptionPane.INFORMATION_MESSAGE;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
@@ -254,7 +260,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         LOG.info("Dir {} created", parent_node);
 
-                        String upload_folder_string = DBTools.selectSettingValue("upload_public_folder");
+                        String upload_folder_string = KDBTools.selectSettingValue("upload_public_folder");
 
                         boolean folder_share = "yes".equals(upload_folder_string);
 
@@ -530,7 +536,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
             );
 
-            String auto_close = selectSettingValue("auto_close");
+            String auto_close = KDBTools.selectSettingValue("auto_close");
 
             if (auto_close != null) {
                 getAuto_close_menu().setSelected(auto_close.equals("yes"));
@@ -1254,26 +1260,21 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         if (dialog.isSettings_ok()) {
 
-            dialog.getDeleted_mega_accounts().stream().map((email) -> {
+            dialog.getDeleted_mega_accounts().stream().peek((email) -> {
                 try {
-                    deleteMegaAccount(email);
+                    KDBTools.deleteMegaAccount(email);
                 } catch (SQLException ex) {
-                    LOG.fatal("Could not delete mega account!", ex);
+                    LOG.fatal("Could not delete mega account ({})!", email, ex);
                 }
-                return email;
-            }).map((email) -> {
-                _main_panel.getMega_accounts().remove(email);
-                return email;
-            }).forEachOrdered((email) -> {
+            }).peek((email) -> _main_panel.getMega_accounts().remove(email)).forEachOrdered((email) -> {
                 _main_panel.getMega_active_accounts().remove(email);
             });
-            dialog.getDeleted_elc_accounts().stream().map((host) -> {
+            dialog.getDeleted_elc_accounts().stream().peek((host) -> {
                 try {
-                    deleteELCAccount(host);
+                    KDBTools.deleteELCAccount(host);
                 } catch (SQLException ex) {
-                    LOG.fatal("Could not delete ELC account!", ex);
+                    LOG.fatal("Could not delete ELC account ({})!", host, ex);
                 }
-                return host;
             }).forEachOrdered((host) -> {
                 _main_panel.getElc_accounts().remove(host);
             });
@@ -1360,11 +1361,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                 if (MainPanel.isUse_smart_proxy()) {
 
                     if (MainPanel.getProxy_manager() == null) {
-                        String proxyList = DBTools.selectSettingValue("custom_proxy_list");
+                        String proxyList = KDBTools.selectSettingValue("custom_proxy_list");
                         String urlList = MiscTools.findFirstRegex("^#(http.+)$", proxyList.trim(), 1);
                         MainPanel.setProxy_manager(new SmartMegaProxyManager(urlList, _main_panel));
                     } else {
-                        String proxyList = DBTools.selectSettingValue("custom_proxy_list");
+                        String proxyList = KDBTools.selectSettingValue("custom_proxy_list");
                         String urlList = MiscTools.findFirstRegex("^#(http.+)$", proxyList.trim(), 1);
                         MainPanel.getProxy_manager().refreshProxyList(urlList);
                     }
@@ -1520,7 +1521,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     private void auto_close_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_auto_close_menuActionPerformed
         try {
-            DBTools.insertSettingValue("auto_close", getAuto_close_menu().isSelected() ? "yes" : "no");
+            KDBTools.insertOrReplaceSettingValue("auto_close", getAuto_close_menu().isSelected() ? "yes" : "no");
         } catch (SQLException ex) {
             LOG.fatal(ex.getMessage());
         }

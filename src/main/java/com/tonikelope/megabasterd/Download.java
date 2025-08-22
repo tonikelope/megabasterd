@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -53,10 +54,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static com.tonikelope.megabasterd.CryptTools.genCrypter;
 import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
-import static com.tonikelope.megabasterd.DBTools.deleteDownload;
-import static com.tonikelope.megabasterd.DBTools.insertDownload;
-import static com.tonikelope.megabasterd.DBTools.insertOrReplaceDownload;
-import static com.tonikelope.megabasterd.DBTools.selectSettingValue;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
 import static com.tonikelope.megabasterd.MiscTools.UrlBASE642Bin;
@@ -536,7 +533,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         if (_provision_ok) {
             DB_EXECUTOR.execute(() -> {
                 try {
-                    deleteDownload(_url);
+                    KDBTools.deleteDownload(_url);
                 } catch (SQLException ex) {
                     LOG.fatal("Could not delete download!", ex);
                 }
@@ -604,7 +601,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     path.mkdirs();
                 }
 
-                String verifyFile = selectSettingValue("verify_down_file");
+                String verifyFile = KDBTools.selectSettingValue("verify_down_file");
                 boolean verify_cbc_mac = verifyFile != null && verifyFile.equals("yes");
                 boolean cbcSuccess = true;
                 String verbiage = "SIZE";
@@ -816,7 +813,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             }
 
-                            String verify_file = selectSettingValue("verify_down_file");
+                            String verify_file = KDBTools.selectSettingValue("verify_down_file");
 
                             if (verify_file != null && verify_file.equals("yes")) {
                                 _checking_cbc = true;
@@ -845,7 +842,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                     _status_error = "BAD NEWS :( File is DAMAGED!";
 
-                                    String autoRestartDamagedSetting = selectSettingValue("auto_restart_damaged");
+                                    String autoRestartDamagedSetting = KDBTools.selectSettingValue("auto_restart_damaged");
 
                                     if (autoRestartDamagedSetting != null) _auto_retry_on_error = autoRestartDamagedSetting.equals("yes");
 
@@ -911,7 +908,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 } else {
 
-                    String removeNoRestart = DBTools.selectSettingValue("remove_no_restart");
+                    String removeNoRestart = KDBTools.selectSettingValue("remove_no_restart");
                     if (removeNoRestart != null && removeNoRestart.equals("yes")) {
                         view.printStatusOK("FILE WITH CORRECT NAME AND " + verbiage + " FOUND");
                         _status_error = null;
@@ -980,7 +977,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             DB_EXECUTOR.execute(() -> {
                 try {
-                    deleteDownload(_url);
+                    KDBTools.deleteDownload(_url);
                 } catch (SQLException ex) {
                     LOG.fatal("Could not delete download!", ex);
                 }
@@ -1010,9 +1007,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             THREAD_POOL.execute(() -> {
                 for (int i = 3; !_closed && i > 0; i--) {
                     final int j = i;
-                    MiscTools.GUIRun(() -> {
-                        view.getRestart_button().setText("Restart (" + j + " secs...)");
-                    });
+                    MiscTools.GUIRun(() -> view.getRestart_button().setText("Restart (" + j + " secs...)"));
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
@@ -1085,7 +1080,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     try {
 
-                        insertDownload(this);
+                        KDBTools.insertDownload(this);
 
                         _provision_ok = true;
 
@@ -1111,7 +1106,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 Future<?> f = DB_EXECUTOR.submit(() -> {
                     try {
 
-                        insertOrReplaceDownload(this);
+                        KDBTools.insertOrReplaceDownload(this);
 
                         _provision_ok = true;
 
