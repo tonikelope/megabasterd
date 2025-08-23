@@ -278,7 +278,7 @@ object KDBTools {
         if (result.next()) buildMap {
             put("email", email)
             put("ma", result.getBytes("ma"))
-            put("crypt", result.getInt("crypt"))
+            put("crypt", result.getInt("crypt") == 1)
         }.toMap<String, Any>() as HashMap<String, Any>
         else null
     }
