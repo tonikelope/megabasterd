@@ -555,11 +555,11 @@ public class MegaAPI implements Serializable {
                 }
             } catch (SSLException | ProtocolException ex) {
                 emptyResponse.set(true);
-                LOG.fatal("{} in RAW_REQUEST! {}", ex.getClass().getName(), ex.getMessage());
+                LOG.fatal("{} (Empty Response) in RAW_REQUEST! {}", ex.getClass().getName(), ex.getMessage());
             } catch (IOException ex) {
                 if (ex instanceof ConnectTimeoutException) {
                     timeoutError.set(true);
-                } else LOG.fatal("IO Exception in RAW_REQUEST! {}", ex.getMessage());
+                } else LOG.fatal("UNHANDLED {} in RAW_REQUEST! {}", ex.getClass().getName(), ex.getMessage());
             }
 
             if ((timeoutError.get() || emptyResponse.get() || megaError != 0 || httpError.get() != 0) && httpError.get() != 509) {

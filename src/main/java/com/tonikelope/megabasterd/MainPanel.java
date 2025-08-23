@@ -279,6 +279,8 @@ public final class MainPanel {
 
         LoggerContext context = (LoggerContext) LogManager.getContext(false);
         if (_debug_file) {
+            String logLocation = MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log";
+            System.setProperty("sys:logfile.location", logLocation);
             Configurator.setLevel("FileLogger", org.apache.logging.log4j.Level.INFO);
             context.getConfiguration().getAppender("FILE").start();
 
@@ -287,7 +289,7 @@ public final class MainPanel {
 
             // Log4j does not implicitly capture stdout or stderr. Gotta do it ourselves.
             try {
-                final PrintStream fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log"));
+                final PrintStream fileOut = new PrintStream(new FileOutputStream(logLocation));
                 System.setOut(fileOut);
                 System.setErr(fileOut);
                 // Register a shutdown hook to close the debug stream
