@@ -9,25 +9,31 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Dialog;
-import java.awt.HeadlessException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.HashBin;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 
 /**
  *
  * @author tonikelope
  */
 public class GetMasterPasswordDialog extends javax.swing.JDialog {
+
+    private static final Logger LOG = LogManager.getLogger(GetMasterPasswordDialog.class);
 
     private boolean _pass_ok;
 
@@ -211,16 +217,16 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
         pack();
 
-        final Dialog tthis = this;
+        final Dialog self = this;
 
         THREAD_POOL.execute(() -> {
             try {
-                byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
+                byte[] pass = CryptTools.PBKDF2_HMAC_SHA256(new String(current_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
                 String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
                 MiscTools.GUIRun(() -> {
                     if (!pass_hash.equals(_current_pass_hash)) {
 
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         status_label.setText("");
 
@@ -238,11 +244,11 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
 
                         _pass_ok = true;
 
-                        tthis.setVisible(false);
+                        self.setVisible(false);
                     }
                 });
             } catch (HeadlessException | NoSuchAlgorithmException | InvalidKeySpecException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.fatal("Exception in password dialog pool! {}", ex.getMessage());
             }
         });
 
@@ -265,5 +271,4 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox remember_checkbox;
     private javax.swing.JLabel status_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(GetMasterPasswordDialog.class.getName());
 }

@@ -9,20 +9,29 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Dialog;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.util.Arrays;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JOptionPane;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.HashBin;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 
 /**
  *
  * @author tonikelope
  */
 public class SetMasterPasswordDialog extends javax.swing.JDialog {
+
+    private static final Logger LOG = LogManager.getLogger(SetMasterPasswordDialog.class);
 
     private boolean _pass_ok;
 
@@ -104,7 +113,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         setTitle("Master password setup");
         setResizable(false);
 
-        confirm_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        confirm_pass_textfield.setFont(new java.awt.Font("Dialog", Font.PLAIN, 18)); // NOI18N
         confirm_pass_textfield.setDoubleBuffered(true);
         confirm_pass_textfield.setMargin(new java.awt.Insets(2, 2, 2, 2));
         confirm_pass_textfield.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -113,11 +122,11 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
             }
         });
 
-        confirm_pass_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        confirm_pass_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         confirm_pass_label.setText("Confirm new:");
         confirm_pass_label.setDoubleBuffered(true);
 
-        cancel_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        cancel_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         cancel_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
         cancel_button.setText("CANCEL");
         cancel_button.setDoubleBuffered(true);
@@ -127,7 +136,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
             }
         });
 
-        ok_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        ok_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         ok_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
         ok_button.setText("OK");
         ok_button.setDoubleBuffered(true);
@@ -140,20 +149,20 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
         lock_label.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/lock_medium.png"))); // NOI18N
         lock_label.setDoubleBuffered(true);
 
-        warning_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        warning_label.setFont(new java.awt.Font("Dialog", Font.PLAIN, 14)); // NOI18N
         warning_label.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
         warning_label.setText("WARNING: if you forget this password, you will have to insert all your accounts again.");
         warning_label.setDoubleBuffered(true);
 
-        new_pass_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        new_pass_label.setFont(new java.awt.Font("Dialog", Font.BOLD, 18)); // NOI18N
         new_pass_label.setText("New pass:");
         new_pass_label.setDoubleBuffered(true);
 
-        new_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        new_pass_textfield.setFont(new java.awt.Font("Dialog", Font.PLAIN, 18)); // NOI18N
         new_pass_textfield.setDoubleBuffered(true);
         new_pass_textfield.setMargin(new java.awt.Insets(2, 2, 2, 2));
 
-        status_label.setFont(new java.awt.Font("Dialog", 0, 14)); // NOI18N
+        status_label.setFont(new java.awt.Font("Dialog", Font.PLAIN, 14)); // NOI18N
         status_label.setDoubleBuffered(true);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -226,7 +235,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
 
         status_label.setText(LabelTranslatorSingleton.getInstance().translate("Verifying your password, please wait..."));
 
-        final Dialog tthis = this;
+        final Dialog self = this;
 
         THREAD_POOL.execute(() -> {
             try {
@@ -236,17 +245,17 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                     });
                     if (new_pass_textfield.getPassword().length > 0) {
 
-                        _new_pass = CryptTools.PBKDF2HMACSHA256(new String(new_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
+                        _new_pass = CryptTools.PBKDF2_HMAC_SHA256(new String(new_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
 
                         _new_pass_hash = Bin2BASE64(HashBin("SHA-1", _new_pass));
                     }
                     _pass_ok = true;
                     MiscTools.GUIRun(() -> {
-                        tthis.setVisible(false);
+                        self.setVisible(false);
                     });
                 } else {
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("Passwords does not match!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         status_label.setText("");
 
@@ -258,7 +267,7 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
                     });
                 }
             } catch (Exception ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.fatal("Failure in ok button thread! {}", ex.getMessage());
             }
         });
     }//GEN-LAST:event_ok_buttonActionPerformed
@@ -282,5 +291,4 @@ public class SetMasterPasswordDialog extends javax.swing.JDialog {
     private javax.swing.JLabel status_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(SetMasterPasswordDialog.class.getName());
 }

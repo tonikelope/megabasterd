@@ -9,30 +9,24 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.DBTools.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
 import com.tonikelope.megabasterd.SmartMegaProxyManager.SmartProxyAuthenticator;
-import static com.tonikelope.megabasterd.Transference.*;
-import java.awt.AWTException;
-import java.awt.Color;
-import static java.awt.EventQueue.invokeLater;
-import java.awt.Font;
-import static java.awt.Frame.NORMAL;
-import static java.awt.SystemTray.getSystemTray;
-import static java.awt.Toolkit.getDefaultToolkit;
-import java.awt.TrayIcon;
+import com.tonikelope.megabasterd.db.KDBTools;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.Configurator;
+
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
-import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import static java.lang.Integer.parseInt;
-import static java.lang.System.exit;
 import java.net.Authenticator;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -47,21 +41,37 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.bin2i32a;
+import static com.tonikelope.megabasterd.MiscTools.checkMegaAccountLoginAndShowMasterPassDialog;
+import static com.tonikelope.megabasterd.MiscTools.checkNewVersion;
+import static com.tonikelope.megabasterd.MiscTools.createAndRegisterFont;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.genRandomByteArray;
+import static com.tonikelope.megabasterd.MiscTools.getCurrentJarParentPath;
+import static com.tonikelope.megabasterd.MiscTools.restartApplication;
+import static com.tonikelope.megabasterd.MiscTools.setNimbusLookAndFeel;
+import static com.tonikelope.megabasterd.Transference.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
+import static com.tonikelope.megabasterd.Transference.MAX_TRANSFERENCE_SPEED_DEFAULT;
+import static java.awt.EventQueue.invokeLater;
+import static java.awt.Frame.NORMAL;
+import static java.awt.SystemTray.getSystemTray;
+import static java.awt.Toolkit.getDefaultToolkit;
+import static java.awt.event.WindowEvent.WINDOW_CLOSING;
+import static java.lang.Integer.parseInt;
 import static java.util.concurrent.Executors.newCachedThreadPool;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.QUESTION_MESSAGE;
 import static javax.swing.JOptionPane.WARNING_MESSAGE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
-import javax.swing.JPopupMenu;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 /**
  *
@@ -69,8 +79,8 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.22";
-    public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
+    public static final String VERSION = "8.23";
+    public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
     public static final int STREAMER_PORT = 1337;
@@ -80,7 +90,8 @@ public final class MainPanel {
     public static final String DEFAULT_LANGUAGE = "EN";
     public static final boolean DEFAULT_SMART_PROXY = false;
     public static final double FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT = 0.7;
-    public static Font GUI_FONT = new JLabel().getFont();
+    public static Font defaultFont = new JLabel().getFont();
+    public static Font GUI_FONT = new Font(defaultFont.getName(), defaultFont.getStyle(), defaultFont.getSize());
     public static final float ZOOM_FACTOR = 0.8f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
@@ -101,24 +112,25 @@ public final class MainPanel {
     private static Boolean _resume_uploads;
     private static Boolean _resume_downloads;
     public static volatile long LAST_EXTERNAL_COMMAND_TIMESTAMP;
-    private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
+    private static final Logger LOG = LogManager.getLogger(MainPanel.class.getName());
     private static volatile boolean CHECK_RUNNING = true;
 
-    public static void main(String args[]) {
+    public static void main(String[] args) {
+
+        System.setProperty("file.encoding", "UTF-8");
 
         if (args.length > 0) {
 
             if (args.length > 1) {
                 try {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "{0} Waiting {1} seconds before start...", new Object[]{Thread.currentThread().getName(), args[1]});
-
+                    LOG.info("Waiting {} seconds before start...", args[1]);
                     if (Long.parseLong(args[1]) >= 0) {
                         Thread.sleep(Long.parseLong(args[1]) * 1000);
                     } else {
                         CHECK_RUNNING = false;
                     }
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    LOG.fatal("Pre-start sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -131,24 +143,20 @@ public final class MainPanel {
         }
 
         try {
-
-            setupSqliteTables();
-
+            KDBTools.setupSqliteTables();
         } catch (SQLException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+            LOG.fatal("Failed to initialize SQL tables!", ex);
         }
 
-        setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
+        setNimbusLookAndFeel("yes".equals(KDBTools.selectSettingValue("dark_mode")));
 
-        if ("yes".equals(DBTools.selectSettingValue("upload_log"))) {
+        if ("yes".equals(KDBTools.selectSettingValue("upload_log"))) {
             MiscTools.createUploadLogDir();
         }
 
         final MainPanel main_panel = new MainPanel();
 
-        invokeLater(() -> {
-            main_panel.getView().setVisible(true);
-        });
+        invokeLater(() -> main_panel.getView().setVisible(true));
     }
 
     public static boolean isRun_command() {
@@ -203,7 +211,10 @@ public final class MainPanel {
         return _proxy_manager;
     }
 
-    private volatile MainPanelView _view;
+    private static final ScheduledExecutorService memoryUsageScheduler = Executors.newScheduledThreadPool(1);
+
+    private final CompletableFuture<MainPanelView> viewFuture = new CompletableFuture<>();
+    private final MainPanelView _view;
     private final SpeedMeter _global_dl_speed, _global_up_speed;
     private final DownloadManager _download_manager;
     private final UploadManager _upload_manager;
@@ -214,12 +225,12 @@ public final class MainPanel {
     private String _default_download_path;
     private boolean _use_custom_chunks_dir;
     private String _custom_chunks_dir;
-    private HashMap<String, Object> _mega_accounts;
-    private HashMap<String, Object> _elc_accounts;
+    private HashMap<String, HashMap<String, String>> _mega_accounts;
+    private HashMap<String, HashMap<String, String>> _elc_accounts;
     private final HashMap<String, MegaAPI> _mega_active_accounts;
-    private TrayIcon _trayicon;
+    private static TrayIcon _trayicon;
     private final ClipboardSpy _clipboardspy;
-    private KissVideoStreamServer _streamserver;
+    private KissVideoStreamServer _streamServer;
     private byte[] _master_pass;
     private String _master_pass_hash;
     private String _master_pass_salt;
@@ -266,22 +277,34 @@ public final class MainPanel {
 
         loadUserSettings();
 
+        LoggerContext context = (LoggerContext) LogManager.getContext(false);
         if (_debug_file) {
+            String logLocation = MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log";
+            System.setProperty("sys:logfile.location", logLocation);
+            Configurator.setLevel("FileLogger", org.apache.logging.log4j.Level.INFO);
+            context.getConfiguration().getAppender("FILE").start();
 
-            PrintStream fileOut;
+            // Because we're writing to file, we can nerf console output
+            context.getConfiguration().getAppender("CONSOLE").stop();
 
+            // Log4j does not implicitly capture stdout or stderr. Gotta do it ourselves.
             try {
-                fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log"));
-
+                final PrintStream fileOut = new PrintStream(new FileOutputStream(logLocation));
                 System.setOut(fileOut);
                 System.setErr(fileOut);
-
+                // Register a shutdown hook to close the debug stream
+                Runtime.getRuntime().addShutdownHook(new Thread(fileOut::close));
             } catch (FileNotFoundException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.fatal("Debug file not found! {}", ex.getMessage());
             }
+        } else {
+            context.getConfiguration().getAppender("FILE").stop();
+            Configurator.setLevel("FileLogger", org.apache.logging.log4j.Level.OFF);
+            // In theory this should not be necessary, CYA
+            context.getConfiguration().getAppender("CONSOLE").start();
         }
 
-        System.out.println(System.getProperty("os.name") + "" + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " " + System.getProperty("java.home"));
+        System.out.println(System.getProperty("os.name") + " " + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " " + System.getProperty("java.home"));
 
         UIManager.put("OptionPane.messageFont", GUI_FONT.deriveFont(15f * getZoom_factor()));
 
@@ -294,6 +317,7 @@ public final class MainPanel {
         UIManager.put("OptionPane.okButtonText", LabelTranslatorSingleton.getInstance().translate("OK"));
 
         _view = new MainPanelView(this);
+        viewFuture.complete(_view);
 
         if (CHECK_RUNNING && checkAppIsRunning()) {
 
@@ -303,7 +327,7 @@ public final class MainPanel {
         try {
             trayIcon();
         } catch (AWTException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("Unable to render Tray Icon! {}", ex.getMessage());
         }
 
         THREAD_POOL.execute((_download_manager = new DownloadManager(this)));
@@ -319,10 +343,10 @@ public final class MainPanel {
         THREAD_POOL.execute((_clipboardspy = new ClipboardSpy()));
 
         try {
-            _streamserver = new KissVideoStreamServer(this);
-            _streamserver.start(STREAMER_PORT, "/video");
+            _streamServer = new KissVideoStreamServer(this);
+            _streamServer.start(STREAMER_PORT, "/video");
         } catch (IOException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+            LOG.fatal("", ex);
         }
 
         _check_old_version();
@@ -349,16 +373,16 @@ public final class MainPanel {
 
         if (_use_smart_proxy) {
 
-            MainPanel tthis = this;
+            MainPanel self = this;
 
             THREAD_POOL.execute(() -> {
                 Authenticator.setDefault(new SmartProxyAuthenticator());
 
-                String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
+                String proxyList = KDBTools.selectSettingValue("custom_proxy_list");
 
-                String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
+                String url_list = MiscTools.findFirstRegex("^#(http.+)$", proxyList.trim(), 1);
 
-                _proxy_manager = new SmartMegaProxyManager(url_list, tthis);
+                _proxy_manager = new SmartMegaProxyManager(url_list, self);
             });
 
         } else {
@@ -368,31 +392,23 @@ public final class MainPanel {
         }
 
         MiscTools.GUIRun(() -> {
+
             getView().getGlobal_speed_down_label().setForeground(_limit_download_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
 
             getView().getGlobal_speed_up_label().setForeground(_limit_upload_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
         });
 
-        THREAD_POOL.execute(() -> {
+        memoryUsageScheduler.scheduleAtFixedRate(() -> {
+            if (_exit) return;
             Runtime instance = Runtime.getRuntime();
-            while (true) {
-                long used_memory = instance.totalMemory() - instance.freeMemory();
-                long max_memory = instance.maxMemory();
-                MiscTools.GUIRun(() -> {
-                    _view.getMemory_status().setText("JVM-RAM used: " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
-                });
-                try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException ex) {
-                    Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
-                }
-            }
-        });
+            long usedMemory = instance.totalMemory() - instance.freeMemory();
+            long maxMemory = instance.maxMemory();
+            String memoryFormat = "JVM-RAM used: " + MiscTools.formatBytes(usedMemory) + " / " + MiscTools.formatBytes(maxMemory);
+            MiscTools.GUIRun(() -> _view.getMemory_status().setText(memoryFormat));
+        }, 0, 2, TimeUnit.SECONDS);
 
         resumeDownloads();
-
         resumeUploads();
-
     }
 
     public static Boolean getResume_uploads() {
@@ -463,7 +479,7 @@ public final class MainPanel {
         _restart = restart;
     }
 
-    public HashMap<String, Object> getElc_accounts() {
+    public HashMap<String, HashMap<String, String>> getElc_accounts() {
         return _elc_accounts;
     }
 
@@ -505,16 +521,13 @@ public final class MainPanel {
     }
 
     public MainPanelView getView() {
-
-        while (_view == null) {
-            try {
-                Thread.sleep(250);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
-            }
+        try {
+            return viewFuture.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            LOG.fatal("Waiting for _view interrupted or failed! {}", ex.getMessage());
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Failed to get MainPanelView", ex);
         }
-
-        return _view;
     }
 
     public SpeedMeter getGlobal_dl_speed() {
@@ -561,7 +574,7 @@ public final class MainPanel {
         return _default_download_path;
     }
 
-    public HashMap<String, Object> getMega_accounts() {
+    public HashMap<String, HashMap<String, String>> getMega_accounts() {
         return _mega_accounts;
     }
 
@@ -577,8 +590,8 @@ public final class MainPanel {
         return _clipboardspy;
     }
 
-    public KissVideoStreamServer getStreamserver() {
-        return _streamserver;
+    public KissVideoStreamServer getStreamServer() {
+        return _streamServer;
     }
 
     public int getMax_dl_speed() {
@@ -603,7 +616,7 @@ public final class MainPanel {
 
     public void loadUserSettings() {
 
-        String use_custom_chunks_dir = DBTools.selectSettingValue("use_custom_chunks_dir");
+        String use_custom_chunks_dir = KDBTools.selectSettingValue("use_custom_chunks_dir");
 
         if (use_custom_chunks_dir != null) {
 
@@ -611,13 +624,13 @@ public final class MainPanel {
 
                 _use_custom_chunks_dir = true;
 
-                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+                _custom_chunks_dir = KDBTools.selectSettingValue("custom_chunks_dir");
 
             } else {
 
                 _use_custom_chunks_dir = false;
 
-                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+                _custom_chunks_dir = KDBTools.selectSettingValue("custom_chunks_dir");
             }
 
         } else {
@@ -625,7 +638,7 @@ public final class MainPanel {
             _custom_chunks_dir = null;
         }
 
-        String zoom_factor = selectSettingValue("font_zoom");
+        String zoom_factor = KDBTools.selectSettingValue("font_zoom");
 
         if (zoom_factor != null) {
             _zoom_factor = Float.parseFloat(zoom_factor) / 100;
@@ -633,12 +646,12 @@ public final class MainPanel {
             _zoom_factor = ZOOM_FACTOR;
         }
 
-        String _font = selectSettingValue("font");
+        String _font = KDBTools.selectSettingValue("font");
 
         if (_font != null) {
             if (_font.equals("DEFAULT")) {
 
-                GUI_FONT = new JLabel().getFont();
+                GUI_FONT = new Font(defaultFont.getName(), defaultFont.getStyle(), defaultFont.getSize());
 
             } else {
 
@@ -650,7 +663,7 @@ public final class MainPanel {
             GUI_FONT = createAndRegisterFont("/fonts/NotoSansCJK-Regular.ttc");
         }
 
-        String def_slots = selectSettingValue("default_slots_down");
+        String def_slots = KDBTools.selectSettingValue("default_slots_down");
 
         if (def_slots != null) {
             _default_slots_down = parseInt(def_slots);
@@ -658,7 +671,7 @@ public final class MainPanel {
             _default_slots_down = Download.WORKERS_DEFAULT;
         }
 
-        def_slots = selectSettingValue("default_slots_up");
+        def_slots = KDBTools.selectSettingValue("default_slots_up");
 
         if (def_slots != null) {
             _default_slots_up = parseInt(def_slots);
@@ -666,7 +679,7 @@ public final class MainPanel {
             _default_slots_up = Upload.WORKERS_DEFAULT;
         }
 
-        String use_slots = selectSettingValue("use_slots_down");
+        String use_slots = KDBTools.selectSettingValue("use_slots_down");
 
         if (use_slots != null) {
             _use_slots_down = use_slots.equals("yes");
@@ -674,7 +687,7 @@ public final class MainPanel {
             _use_slots_down = Download.USE_SLOTS_DEFAULT;
         }
 
-        String max_downloads = selectSettingValue("max_downloads");
+        String max_downloads = KDBTools.selectSettingValue("max_downloads");
 
         if (max_downloads != null) {
             _max_dl = parseInt(max_downloads);
@@ -682,7 +695,7 @@ public final class MainPanel {
             _max_dl = Download.SIM_TRANSFERENCES_DEFAULT;
         }
 
-        String max_uploads = selectSettingValue("max_uploads");
+        String max_uploads = KDBTools.selectSettingValue("max_uploads");
 
         if (max_uploads != null) {
             _max_ul = parseInt(max_uploads);
@@ -690,13 +703,13 @@ public final class MainPanel {
             _max_ul = Upload.SIM_TRANSFERENCES_DEFAULT;
         }
 
-        _default_download_path = selectSettingValue("default_down_dir");
+        _default_download_path = KDBTools.selectSettingValue("default_down_dir");
 
         if (_default_download_path == null) {
             _default_download_path = ".";
         }
 
-        String limit_dl_speed = selectSettingValue("limit_download_speed");
+        String limit_dl_speed = KDBTools.selectSettingValue("limit_download_speed");
 
         if (limit_dl_speed != null) {
 
@@ -707,7 +720,7 @@ public final class MainPanel {
             _limit_download_speed = LIMIT_TRANSFERENCE_SPEED_DEFAULT;
         }
 
-        String limit_ul_speed = selectSettingValue("limit_upload_speed");
+        String limit_ul_speed = KDBTools.selectSettingValue("limit_upload_speed");
 
         if (limit_ul_speed != null) {
 
@@ -718,7 +731,7 @@ public final class MainPanel {
             _limit_upload_speed = LIMIT_TRANSFERENCE_SPEED_DEFAULT;
         }
 
-        String max_download_speed = selectSettingValue("max_download_speed");
+        String max_download_speed = KDBTools.selectSettingValue("max_download_speed");
 
         if (max_download_speed != null) {
             _max_dl_speed = parseInt(max_download_speed);
@@ -726,7 +739,7 @@ public final class MainPanel {
             _max_dl_speed = MAX_TRANSFERENCE_SPEED_DEFAULT;
         }
 
-        String max_upload_speed = selectSettingValue("max_upload_speed");
+        String max_upload_speed = KDBTools.selectSettingValue("max_upload_speed");
 
         if (max_upload_speed != null) {
             _max_up_speed = parseInt(max_upload_speed);
@@ -734,7 +747,7 @@ public final class MainPanel {
             _max_up_speed = MAX_TRANSFERENCE_SPEED_DEFAULT;
         }
 
-        String init_paused_string = DBTools.selectSettingValue("start_frozen");
+        String init_paused_string = KDBTools.selectSettingValue("start_frozen");
 
         if (init_paused_string != null) {
 
@@ -744,36 +757,33 @@ public final class MainPanel {
         }
 
         try {
-            _mega_accounts = selectMegaAccounts();
-            _elc_accounts = selectELCAccounts();
+            _mega_accounts = KDBTools.selectMegaAccounts();
+            _elc_accounts = KDBTools.selectELCAccounts();
         } catch (SQLException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+            LOG.fatal("Could not load Mega or ELC accounts!", ex);
         }
 
-        _mega_account_down = DBTools.selectSettingValue("mega_account_down");
+        _mega_account_down = KDBTools.selectSettingValue("mega_account_down");
 
         String use_account;
 
-        _use_mega_account_down = ((use_account = DBTools.selectSettingValue("use_mega_account_down")) != null && use_account.equals("yes"));
+        _use_mega_account_down = ((use_account = KDBTools.selectSettingValue("use_mega_account_down")) != null && use_account.equals("yes"));
 
-        _master_pass_hash = DBTools.selectSettingValue("master_pass_hash");
+        _master_pass_hash = KDBTools.selectSettingValue("master_pass_hash");
 
-        _master_pass_salt = DBTools.selectSettingValue("master_pass_salt");
+        _master_pass_salt = KDBTools.selectSettingValue("master_pass_salt");
 
         if (_master_pass_salt == null) {
 
             try {
-
                 _master_pass_salt = Bin2BASE64(genRandomByteArray(CryptTools.MASTER_PASSWORD_PBKDF2_SALT_BYTE_LENGTH));
-
-                DBTools.insertSettingValue("master_pass_salt", _master_pass_salt);
-
+                KDBTools.insertOrReplaceSettingValue("master_pass_salt", _master_pass_salt);
             } catch (SQLException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.fatal("Failed to insert master salt! {}", ex.getMessage());
             }
         }
 
-        String use_proxy = selectSettingValue("use_proxy");
+        String use_proxy = KDBTools.selectSettingValue("use_proxy");
 
         if (use_proxy != null) {
             _use_proxy = use_proxy.equals("yes");
@@ -783,18 +793,18 @@ public final class MainPanel {
 
         if (_use_proxy) {
 
-            _proxy_host = DBTools.selectSettingValue("proxy_host");
+            _proxy_host = KDBTools.selectSettingValue("proxy_host");
 
-            String proxy_port = DBTools.selectSettingValue("proxy_port");
+            String proxy_port = KDBTools.selectSettingValue("proxy_port");
 
             _proxy_port = (proxy_port == null || proxy_port.isEmpty()) ? 8080 : Integer.parseInt(proxy_port);
 
-            _proxy_user = DBTools.selectSettingValue("proxy_user");
+            _proxy_user = KDBTools.selectSettingValue("proxy_user");
 
-            _proxy_pass = DBTools.selectSettingValue("proxy_pass");
+            _proxy_pass = KDBTools.selectSettingValue("proxy_pass");
         }
 
-        String run_command_string = DBTools.selectSettingValue("run_command");
+        String run_command_string = KDBTools.selectSettingValue("run_command");
 
         if (run_command_string != null) {
 
@@ -803,13 +813,13 @@ public final class MainPanel {
 
         String old_run_command_path = _run_command_path;
 
-        _run_command_path = DBTools.selectSettingValue("run_command_path");
+        _run_command_path = KDBTools.selectSettingValue("run_command_path");
 
         if (_run_command && old_run_command_path != null && !old_run_command_path.equals(_run_command_path)) {
             LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
         }
 
-        String use_megacrypter_reverse = selectSettingValue("megacrypter_reverse");
+        String use_megacrypter_reverse = KDBTools.selectSettingValue("megacrypter_reverse");
 
         if (use_megacrypter_reverse != null) {
             _megacrypter_reverse = use_megacrypter_reverse.equals("yes");
@@ -819,12 +829,12 @@ public final class MainPanel {
 
         if (_megacrypter_reverse) {
 
-            String reverse_port = DBTools.selectSettingValue("megacrypter_reverse_port");
+            String reverse_port = KDBTools.selectSettingValue("megacrypter_reverse_port");
 
             _megacrypter_reverse_port = (reverse_port == null || reverse_port.isEmpty()) ? DEFAULT_MEGA_PROXY_PORT : Integer.parseInt(reverse_port);
         }
 
-        String use_smart_proxy = selectSettingValue("smart_proxy");
+        String use_smart_proxy = KDBTools.selectSettingValue("smart_proxy");
 
         if (use_smart_proxy != null) {
             _use_smart_proxy = use_smart_proxy.equals("yes");
@@ -832,13 +842,13 @@ public final class MainPanel {
             _use_smart_proxy = DEFAULT_SMART_PROXY;
         }
 
-        _language = DBTools.selectSettingValue("language");
+        _language = KDBTools.selectSettingValue("language");
 
         if (_language == null) {
             _language = DEFAULT_LANGUAGE;
         }
 
-        String debug_file = selectSettingValue("debug_file");
+        String debug_file = KDBTools.selectSettingValue("debug_file");
 
         if (debug_file != null) {
             _debug_file = debug_file.equals("yes");
@@ -846,9 +856,9 @@ public final class MainPanel {
             _debug_file = false;
         }
 
-        String api_key = DBTools.selectSettingValue("mega_api_key");
+        String api_key = KDBTools.selectSettingValue("mega_api_key");
 
-        if (api_key != null && !"".equals(api_key)) {
+        if (api_key != null && !api_key.isEmpty()) {
 
             MegaAPI.API_KEY = api_key.trim();
 
@@ -862,11 +872,11 @@ public final class MainPanel {
 
         if (_run_command && (LAST_EXTERNAL_COMMAND_TIMESTAMP == -1 || LAST_EXTERNAL_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
 
-            if (_run_command_path != null && !_run_command_path.equals("")) {
+            if (_run_command_path != null && !_run_command_path.isEmpty()) {
                 try {
-                    Runtime.getRuntime().exec(_run_command_path);
+                    KMiscTools.INSTANCE.runSystemProcess(_run_command_path);
                 } catch (IOException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    LOG.fatal("Could not run command! {}", ex.getMessage());
                 }
 
                 LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
@@ -878,7 +888,7 @@ public final class MainPanel {
 
         boolean exit = true;
 
-        if (!_streamserver.getWorking_threads().isEmpty()) {
+        if (!_streamServer.getWorking_threads().isEmpty()) {
 
             Object[] options = {"No",
                 LabelTranslatorSingleton.getInstance().translate("Yes")};
@@ -917,81 +927,44 @@ public final class MainPanel {
         return exit;
     }
 
-    public void byebyenow(boolean restart) {
-
-        MiscTools.purgeFolderCache();
-
-        synchronized (DBTools.class) {
-
+    public static void removeTrayIcon() {
+        if (_trayicon != null) {
             try {
-                DBTools.vaccum();
-            } catch (SQLException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                getSystemTray().remove(_trayicon);
+            } catch (Exception e) {
+                LOG.fatal("Error removing tray icon! {}", e.getMessage());
             }
-
-            if (restart) {
-                restartApplication();
-            } else {
-                exit(0);
-            }
-
-        }
-    }
-
-    public void byebyenow(boolean restart, boolean delete_db) {
-
-        synchronized (DBTools.class) {
-
-            if (delete_db) {
-
-                File db_file = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE);
-
-                db_file.delete();
-
-            } else {
-                try {
-                    DBTools.vaccum();
-                } catch (SQLException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
-                }
-            }
-
-            if (restart) {
-                restartApplication();
-            } else {
-                exit(0);
-            }
-
         }
     }
 
     private void _check_old_version() {
-
+        final File old_version_check_file = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check");
         try {
+            if (!old_version_check_file.exists()) {
+                boolean oldVCheckFileCreated = old_version_check_file.createNewFile();
+                if (!oldVCheckFileCreated) throw new IOException("Could not create old version check file: " + old_version_check_file.getAbsolutePath());
 
-            if (!new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").exists()) {
-
-                new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/.old_version_check").createNewFile();
-
-                File directory = new File(MainPanel.MEGABASTERD_HOME_DIR);
+                final File homeDir = new File(MainPanel.MEGABASTERD_HOME_DIR);
 
                 String version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", VERSION, 1);
-
                 String version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", VERSION, 1);
 
-                String old_version_major = null;
+                String oldVersionMajor = null;
+                String oldVersionMinor = null;
+                String oldVersion = "0.0";
 
-                String old_version_minor = null;
+                final File old_backups_dir = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd_old_backups");
 
-                String old_version = "0.0";
+                if (!old_backups_dir.exists() && !old_backups_dir.mkdir())
+                    throw new IOException("Could not create old backups directory: " + old_backups_dir.getAbsolutePath());
 
-                File old_backups_dir = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd_old_backups");
-
-                if (!old_backups_dir.exists()) {
-                    old_backups_dir.mkdir();
+                File[] homeDirFiles = homeDir.listFiles();
+                if (homeDirFiles == null) {
+                    LOG.warn("Home directory is empty or not accessible: {}", homeDir.getAbsolutePath());
+                    return;
                 }
 
-                for (File file : directory.listFiles()) {
+                for (File file : homeDirFiles) {
 
                     try {
                         if (file.isDirectory() && file.canRead() && file.getName().startsWith(".megabasterd") && !file.getName().endsWith("backups")) {
@@ -1000,40 +973,38 @@ public final class MainPanel {
 
                             if (current_dir_version != null && !current_dir_version.equals(VERSION)) {
 
-                                old_version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", old_version, 1);
-                                old_version_major = findFirstRegex("[0-9]+\\.([0-9]+)$", old_version, 1);
+                                oldVersionMajor = findFirstRegex("([0-9]+)\\.[0-9]+$", oldVersion, 1);
+                                oldVersionMajor = findFirstRegex("[0-9]+\\.([0-9]+)$", oldVersion, 1);
 
                                 String current_dir_major = findFirstRegex("([0-9]+)\\.[0-9]+$", current_dir_version, 1);
                                 String current_dir_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", current_dir_version, 1);
 
-                                if (Integer.parseInt(current_dir_major) > Integer.parseInt(old_version_major) || (Integer.parseInt(current_dir_major) == Integer.parseInt(old_version_major) && Integer.parseInt(current_dir_minor) > Integer.parseInt(old_version_minor))) {
-                                    old_version = current_dir_version;
-                                    old_version_major = current_dir_major;
-                                    old_version_minor = current_dir_minor;
+                                if (Integer.parseInt(current_dir_major) > Integer.parseInt(oldVersionMajor) || (Integer.parseInt(current_dir_major) == Integer.parseInt(oldVersionMajor) && Integer.parseInt(current_dir_minor) > Integer.parseInt(oldVersionMinor))) {
+                                    oldVersion = current_dir_version;
+                                    oldVersionMajor = current_dir_major;
+                                    oldVersionMinor = current_dir_minor;
                                 }
 
                                 Files.move(Paths.get(file.getAbsolutePath()), Paths.get(old_backups_dir.getAbsolutePath() + "/" + file.getName()), StandardCopyOption.REPLACE_EXISTING);
                             }
 
                         }
-                    } catch (Exception e) {
-                    }
-
+                    } catch (Exception ignored) {}
                 }
 
-                if (!old_version.equals("0.0") && (Integer.parseInt(version_major) > Integer.parseInt(old_version_major) || (Integer.parseInt(version_major) == Integer.parseInt(old_version_major) && Integer.parseInt(version_minor) > Integer.parseInt(old_version_minor)))) {
+                if (!oldVersion.equals("0.0") && (Integer.parseInt(version_major) > Integer.parseInt(oldVersionMajor) || (Integer.parseInt(version_major) == Integer.parseInt(oldVersionMajor) && Integer.parseInt(version_minor) > Integer.parseInt(oldVersionMinor)))) {
                     Object[] options = {"No",
                         LabelTranslatorSingleton.getInstance().translate("Yes")};
 
                     int n = showOptionDialog(getView(),
-                            LabelTranslatorSingleton.getInstance().translate("An older version (" + old_version + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
+                            LabelTranslatorSingleton.getInstance().translate("An older version (" + oldVersion + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
                             LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE,
                             null,
                             options,
                             options[0]);
 
                     if (n == 1) {
-                        Files.copy(Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd_old_backups/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
+                        Files.copy(Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd_old_backups/.megabasterd" + oldVersion + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
 
                         JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
 
@@ -1043,22 +1014,21 @@ public final class MainPanel {
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("IO Exception checking old version! {}", ex.getMessage());
         }
-
     }
 
-    public void byebye(boolean restart) {
+    public void byeBye(boolean restart) {
 
-        _byebye(restart, true);
+        _byeBye(restart, true);
     }
 
-    public void byebye(boolean restart, boolean restart_warning) {
+    public void byeBye(boolean restart, boolean restart_warning) {
 
-        _byebye(restart, restart_warning);
+        _byeBye(restart, restart_warning);
     }
 
-    private void _byebye(boolean restart, boolean restart_warning) {
+    private void _byeBye(boolean restart, boolean restart_warning) {
 
         if (!_exit && checkByeBye()) {
 
@@ -1086,7 +1056,7 @@ public final class MainPanel {
                                 if (download.isPaused()) {
                                     download.pause();
                                 }
-                                if (!download.getChunkworkers().isEmpty()) {
+                                if (!download.getChunkWorkers().isEmpty()) {
                                     wait = true;
                                     MiscTools.GUIRun(() -> {
                                         download.getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
@@ -1126,9 +1096,9 @@ public final class MainPanel {
                                     });
                                 } else {
                                     try {
-                                        DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
+                                        KDBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
                                     } catch (SQLException ex) {
-                                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                        LOG.fatal("Failed to update DB! {}", ex.getMessage());
                                     }
                                 }
                             }
@@ -1153,25 +1123,24 @@ public final class MainPanel {
                         }
 
                         try {
-                            DBTools.truncateDownloadsQueue();
-                            DBTools.insertDownloadsQueue(downloads_queue);
+                            KDBTools.truncateDownloadsQueue();
+                            KDBTools.insertDownloadsQueue(downloads_queue);
 
-                            DBTools.truncateUploadsQueue();
-                            DBTools.insertUploadsQueue(uploads_queue);
+                            KDBTools.truncateUploadsQueue();
+                            KDBTools.insertUploadsQueue(uploads_queue);
                         } catch (SQLException ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                            LOG.fatal("Caught SQL Exception trying to truncate!", ex);
                         }
 
                         if (wait) {
-
                             try {
                                 Thread.sleep(1000);
                             } catch (InterruptedException ex) {
-                                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                LOG.fatal("Planned waiting sleep interrupted! {}", ex.getMessage());
                             }
                         }
                     } while (wait);
-                    byebyenow(restart);
+                    KMiscTools.byeByeNow(restart, false, true);
                 });
 
                 WarningExitMessage exit_message = new WarningExitMessage(getView(), true, this, restart);
@@ -1181,81 +1150,71 @@ public final class MainPanel {
                 exit_message.setVisible(true);
 
             } else {
-                byebyenow(restart);
+                KMiscTools.byeByeNow(restart, false, true);
             }
         }
     }
 
     private boolean checkAppIsRunning() {
-
-        boolean app_is_running = true;
-
+        boolean appIsRunning = true;
         try {
             Socket clientSocket = new Socket(InetAddress.getLoopbackAddress(), WATCHDOG_PORT);
-
             clientSocket.close();
-
         } catch (Exception ex) {
-
-            app_is_running = false;
-
+            appIsRunning = false;
             try {
-
                 final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
-
                 THREAD_POOL.execute(() -> {
-                    final ServerSocket socket = serverSocket;
-                    while (true) {
+                    while (!_exit) {
                         try {
-                            socket.accept();
+                            Socket clientSocket = serverSocket.accept();
                             MiscTools.GUIRun(() -> {
                                 getView().setExtendedState(NORMAL);
-
                                 getView().setVisible(true);
                             });
-                        } catch (Exception ex1) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex1.getMessage());
+                            clientSocket.close();
+                        } catch (Exception exception) {
+                            if (!_exit) LOG.fatal("IO exception caught while accepting client connection: {}", exception.getMessage());
                         }
                     }
+                    try {
+                        serverSocket.close();
+                    } catch (IOException e) {
+                        LOG.fatal("Could not close server socket: {}", e.getMessage());
+                    }
                 });
-            } catch (Exception ex2) {
-
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex2.getMessage());
-
+            } catch (IOException ex2) {
+                LOG.fatal("Failed to start server socket: {}", ex2.getMessage());
             }
-
         }
-
-        return app_is_running;
+        return appIsRunning;
     }
 
     public void resumeDownloads() {
 
         if (!getResume_downloads()) {
 
-            MiscTools.GUIRun(() -> {
-                getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait..."));
-            });
+            MiscTools.GUIRun(() -> getView().getStatus_down_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous downloads, please wait...")));
 
-            final MainPanel tthis = this;
+            final MainPanel self = this;
 
             THREAD_POOL.execute(() -> {
-                int conta_downloads = 0, tot_downloads = -1;
+                int downloadCount = 0, tot_downloads = -1;
                 try {
 
-                    ArrayList<String> downloads_queue = DBTools.selectDownloadsQueue();
+                    ArrayList<String> downloads_queue = KDBTools.selectDownloadsQueue();
 
-                    HashMap<String, HashMap<String, Object>> res = selectDownloads();
+                    HashMap<String, HashMap<String, Object>> res = KDBTools.selectDownloads();
 
                     tot_downloads = res.size();
 
-                    Iterator downloads_queue_iterator = downloads_queue.iterator();
+                    Iterator<String> downloads_queue_iterator = downloads_queue.iterator();
 
                     while (downloads_queue_iterator.hasNext()) {
 
                         try {
 
-                            String url = (String) downloads_queue_iterator.next();
+                            String url = downloads_queue_iterator.next();
 
                             HashMap<String, Object> o = res.remove(url);
 
@@ -1269,13 +1228,13 @@ public final class MainPanel {
 
                                 MegaAPI ma = new MegaAPI();
 
-                                if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                if (email == null || !self.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(self, getView(), email)) != null) {
 
-                                    Download download = new Download(tthis, ma, (String) url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
+                                    Download download = new Download(self, ma, url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
 
                                     getDownload_manager().getTransference_provision_queue().add(download);
 
-                                    conta_downloads++;
+                                    downloadCount++;
 
                                     downloads_queue_iterator.remove();
                                 } else {
@@ -1284,14 +1243,14 @@ public final class MainPanel {
                             }
 
                         } catch (Exception ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                            LOG.fatal("Caught exception in queue iterator!", ex);
                         }
                     }
 
-                    DBTools.truncateDownloadsQueue();
+                    KDBTools.truncateDownloadsQueue();
 
                     if (!downloads_queue.isEmpty()) {
-                        DBTools.insertDownloadsQueue(downloads_queue);
+                        KDBTools.insertDownloadsQueue(downloads_queue);
                     }
 
                     if (!res.isEmpty()) {
@@ -1308,13 +1267,13 @@ public final class MainPanel {
 
                                 MegaAPI ma = new MegaAPI();
 
-                                if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                if (email == null || !self.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(self, getView(), email)) != null) {
 
-                                    Download download = new Download(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
+                                    Download download = new Download(self, ma, entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
 
                                     getDownload_manager().getTransference_provision_queue().add(download);
 
-                                    conta_downloads++;
+                                    downloadCount++;
 
                                 } else {
 
@@ -1322,7 +1281,7 @@ public final class MainPanel {
                                 }
 
                             } catch (Exception ex) {
-                                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                                LOG.fatal("Error in Download response iterator!", ex);
                             }
 
                         }
@@ -1330,28 +1289,26 @@ public final class MainPanel {
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                    LOG.fatal("Error in main Download thread!", ex);
                 }
 
-                if (conta_downloads > 0) {
+                if (downloadCount > 0) {
 
-                    if (conta_downloads == tot_downloads) {
+                    if (downloadCount == tot_downloads) {
                         setResume_downloads(true);
                     }
 
                     _download_manager.setSort_wait_start_queue(false);
                     getDownload_manager().secureNotify();
                     MiscTools.GUIRun(() -> {
-                        getView().getjTabbedPane1().setSelectedIndex(0);
+                        getView().getJTabbedPane1().setSelectedIndex(0);
                     });
 
                 } else {
                     setResume_downloads(true);
                 }
 
-                MiscTools.GUIRun(() -> {
-                    getView().getStatus_down_label().setText("");
-                });
+                MiscTools.GUIRun(() -> getView().getStatus_down_label().setText(""));
             });
 
         }
@@ -1396,7 +1353,7 @@ public final class MainPanel {
 
                 }
 
-                byebye(false);
+                byeBye(false);
             });
 
             menu.add(closeItem);
@@ -1444,24 +1401,24 @@ public final class MainPanel {
                 getView().getStatus_up_label().setText(LabelTranslatorSingleton.getInstance().translate("Checking if there are previous uploads, please wait..."));
             });
 
-            final MainPanel tthis = this;
+            final MainPanel self = this;
 
             THREAD_POOL.execute(() -> {
-                int conta_uploads = 0, tot_uploads = -1;
+                int uploadCount = 0, totalUploads = -1;
                 try {
 
-                    ArrayList<String> uploads_queue = DBTools.selectUploadsQueue();
+                    ArrayList<String> uploads_queue = KDBTools.selectUploadsQueue();
 
-                    HashMap<String, HashMap<String, Object>> res = selectUploads();
+                    HashMap<String, HashMap<String, Object>> res = KDBTools.selectUploads();
 
-                    tot_uploads = res.size();
+                    totalUploads = res.size();
 
-                    Iterator uploads_queue_iterator = uploads_queue.iterator();
+                    Iterator<String> uploads_queue_iterator = uploads_queue.iterator();
 
                     while (uploads_queue_iterator.hasNext()) {
 
                         try {
-                            String filename = (String) uploads_queue_iterator.next();
+                            String filename = uploads_queue_iterator.next();
 
                             HashMap<String, Object> o = res.remove(filename);
 
@@ -1473,13 +1430,13 @@ public final class MainPanel {
 
                                     MegaAPI ma;
 
-                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(self, getView(), email)) != null) {
 
-                                        Upload upload = new Upload(tthis, ma, (String) filename, (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), false);
+                                        Upload upload = new Upload(self, ma, (String) filename, (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), false);
 
                                         getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                        conta_uploads++;
+                                        uploadCount++;
 
                                         uploads_queue_iterator.remove();
 
@@ -1487,9 +1444,9 @@ public final class MainPanel {
 
                                 } else {
 
-                                    deleteUpload((String) o.get("filename"), email);
+                                    KDBTools.deleteUpload((String) o.get("filename"), email);
 
-                                    tot_uploads--;
+                                    totalUploads--;
 
                                     uploads_queue_iterator.remove();
                                 }
@@ -1497,14 +1454,14 @@ public final class MainPanel {
                             }
 
                         } catch (Exception ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                            LOG.fatal("Caught exception in Upload iterator!", ex);
                         }
                     }
 
-                    DBTools.truncateUploadsQueue();
+                    KDBTools.truncateUploadsQueue();
 
                     if (!uploads_queue.isEmpty()) {
-                        DBTools.insertUploadsQueue(uploads_queue);
+                        KDBTools.insertUploadsQueue(uploads_queue);
                     }
 
                     if (!res.isEmpty()) {
@@ -1518,43 +1475,43 @@ public final class MainPanel {
 
                                     MegaAPI ma;
 
-                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
+                                    if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(self, getView(), email)) != null) {
 
-                                        Upload upload = new Upload(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
+                                        Upload upload = new Upload(self, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
 
                                         getUpload_manager().getTransference_provision_queue().add(upload);
 
-                                        conta_uploads++;
+                                        uploadCount++;
                                     }
 
                                 } else {
 
-                                    deleteUpload((String) entry.getValue().get("filename"), email);
+                                    KDBTools.deleteUpload((String) entry.getValue().get("filename"), email);
 
-                                    tot_uploads--;
+                                    totalUploads--;
                                 }
 
                             } catch (Exception ex) {
-                                Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                                LOG.fatal("Error in Upload response iterator!", ex);
                             }
                         }
 
                     }
 
                 } catch (Exception ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
+                    LOG.fatal("Error in main Upload thread!", ex);
                 }
 
-                if (conta_uploads > 0) {
+                if (uploadCount > 0) {
 
-                    if (conta_uploads == tot_uploads) {
+                    if (uploadCount == totalUploads) {
                         setResume_uploads(true);
                     }
 
                     _upload_manager.setSort_wait_start_queue(false);
                     getUpload_manager().secureNotify();
                     MiscTools.GUIRun(() -> {
-                        getView().getjTabbedPane1().setSelectedIndex(1);
+                        getView().getJTabbedPane1().setSelectedIndex(1);
                     });
                 } else {
                     setResume_uploads(true);

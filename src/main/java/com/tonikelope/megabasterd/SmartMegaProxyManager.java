@@ -9,17 +9,20 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import com.tonikelope.megabasterd.db.KDBTools;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.net.Authenticator;
 import java.net.HttpURLConnection;
 import java.net.InetAddress;
-import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
+import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -28,8 +31,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL; 
 
 /**
  *
@@ -44,7 +50,7 @@ public final class SmartMegaProxyManager {
     public static final boolean RESET_SLOT_PROXY = true;
     public static final boolean RANDOM_SELECT = true;
 
-    private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
+    private static final Logger LOG = LogManager.getLogger(SmartMegaProxyManager.class);
     private volatile String _proxy_list_url;
     private final ConcurrentHashMap<String, Long[]> _proxy_list;
     private static final HashMap<String, String> PROXY_LIST_AUTH = new HashMap<>();
@@ -52,10 +58,24 @@ public final class SmartMegaProxyManager {
     private volatile int _ban_time;
     private volatile int _proxy_timeout;
     private volatile boolean _force_smart_proxy;
-    private volatile int _autorefresh_time;
+    private volatile int _autoRefresh_time;
     private volatile long _last_refresh_timestamp;
     private volatile boolean _random_select;
     private volatile boolean _reset_slot_proxy;
+
+    private static ScheduledExecutorService refreshListExecutor = Executors.newScheduledThreadPool(1);
+
+    public void startRefreshingProxyList() {
+        refreshListExecutor.scheduleAtFixedRate(() -> {
+            long currentTime = System.currentTimeMillis();
+            if (currentTime >= _last_refresh_timestamp + _autoRefresh_time * 60L * 1000L) {
+                if (MainPanel.isUse_smart_proxy()) {
+                    refreshProxyList();
+                    _last_refresh_timestamp = currentTime;
+                }
+            }
+        }, 0, _autoRefresh_time, TimeUnit.MINUTES);
+    }
 
     public boolean isRandom_select() {
         return _random_select;
@@ -74,53 +94,27 @@ public final class SmartMegaProxyManager {
     }
 
     public SmartMegaProxyManager(String proxy_list_url, MainPanel main_panel) {
-        _proxy_list_url = (proxy_list_url != null && !"".equals(proxy_list_url)) ? proxy_list_url : DEFAULT_SMART_PROXY_URL;
+        _proxy_list_url = (proxy_list_url != null && !proxy_list_url.isEmpty()) ? proxy_list_url : DEFAULT_SMART_PROXY_URL;
         _proxy_list = new ConcurrentHashMap<>();
         _main_panel = main_panel;
 
         refreshSmartProxySettings();
-
-        THREAD_POOL.execute(() -> {
-            refreshProxyList();
-
-            while (true) {
-
-                while (System.currentTimeMillis() < _last_refresh_timestamp + _autorefresh_time * 60 * 1000) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-
-                if (MainPanel.isUse_smart_proxy()) {
-
-                    refreshProxyList();
-                }
-            }
-        });
+        startRefreshingProxyList();
     }
 
     private synchronized int countBlockedProxies() {
-
         int i = 0;
-
-        Long current_time = System.currentTimeMillis();
-
+        long current_time = System.currentTimeMillis();
         for (String k : _proxy_list.keySet()) {
-
-            if (_proxy_list.get(k)[0] != -1 && _proxy_list.get(k)[0] > current_time - _ban_time * 1000) {
-
+            if (_proxy_list.get(k)[0] != -1 && _proxy_list.get(k)[0] > current_time - _ban_time * 1000L) {
                 i++;
             }
         }
-
         return i;
-
     }
 
     public synchronized void refreshSmartProxySettings() {
-        String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
+        String smartproxy_ban_time = KDBTools.selectSettingValue("smartproxy_ban_time");
 
         if (smartproxy_ban_time != null) {
             _ban_time = Integer.parseInt(smartproxy_ban_time);
@@ -128,7 +122,7 @@ public final class SmartMegaProxyManager {
             _ban_time = PROXY_BLOCK_TIME;
         }
 
-        String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
+        String smartproxy_timeout = KDBTools.selectSettingValue("smartproxy_timeout");
 
         if (smartproxy_timeout != null) {
             _proxy_timeout = Integer.parseInt(smartproxy_timeout) * 1000;
@@ -136,7 +130,7 @@ public final class SmartMegaProxyManager {
             _proxy_timeout = Transference.HTTP_PROXY_TIMEOUT;
         }
 
-        String force_smart_proxy_string = DBTools.selectSettingValue("force_smart_proxy");
+        String force_smart_proxy_string = KDBTools.selectSettingValue("force_smart_proxy");
 
         if (force_smart_proxy_string != null) {
 
@@ -145,15 +139,29 @@ public final class SmartMegaProxyManager {
             _force_smart_proxy = MainPanel.FORCE_SMART_PROXY;
         }
 
-        String autorefresh_smart_proxy_string = DBTools.selectSettingValue("smartproxy_autorefresh_time");
+        String autorefresh_smart_proxy_string = KDBTools.selectSettingValue("smartproxy_autorefresh_time");
 
+        int _current_autoRefresh_time = _autoRefresh_time;
         if (autorefresh_smart_proxy_string != null) {
-            _autorefresh_time = Integer.parseInt(autorefresh_smart_proxy_string);
+            _autoRefresh_time = Integer.parseInt(autorefresh_smart_proxy_string);
         } else {
-            _autorefresh_time = PROXY_AUTO_REFRESH_TIME;
+            _autoRefresh_time = PROXY_AUTO_REFRESH_TIME;
         }
 
-        String reset_slot_proxy = DBTools.selectSettingValue("reset_slot_proxy");
+        if (_autoRefresh_time != _current_autoRefresh_time) {
+            refreshListExecutor.shutdownNow();
+            boolean stopped = false;
+            try {
+                stopped = refreshListExecutor.awaitTermination(1, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOG.error("Error waiting for refreshListExecutor shutdown", e);
+            }
+            if (!stopped) throw new RuntimeException("Could not stop previous refreshListExecutor");
+            refreshListExecutor = Executors.newScheduledThreadPool(1);
+            startRefreshingProxyList();
+        }
+
+        String reset_slot_proxy = KDBTools.selectSettingValue("reset_slot_proxy");
 
         if (reset_slot_proxy != null) {
 
@@ -162,7 +170,7 @@ public final class SmartMegaProxyManager {
             _reset_slot_proxy = RESET_SLOT_PROXY;
         }
 
-        String random_select = DBTools.selectSettingValue("random_proxy");
+        String random_select = KDBTools.selectSettingValue("random_proxy");
 
         if (random_select != null) {
 
@@ -171,7 +179,10 @@ public final class SmartMegaProxyManager {
             _random_select = RANDOM_SELECT;
         }
 
-        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + "   TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + "   REFRESH: " + String.valueOf(_autorefresh_time) + "   FORCE: " + String.valueOf(_force_smart_proxy) + "   RANDOM: " + String.valueOf(_random_select) + "   RESET-SLOT-PROXY: " + String.valueOf(_reset_slot_proxy));
+        LOG.info(
+            "SmartProxy BAN_TIME: {}   TIMEOUT: {}   REFRESH: {}   FORCE: {}   RANDOM: {}   RESET-SLOT-PROXY: {}",
+            _ban_time, _proxy_timeout / 1000, _autoRefresh_time, _force_smart_proxy, _random_select, _reset_slot_proxy
+        );
     }
 
     public synchronized int getProxyCount() {
@@ -181,7 +192,7 @@ public final class SmartMegaProxyManager {
 
     public synchronized String[] getProxy(ArrayList<String> excluded) {
 
-        if (_proxy_list.size() > 0) {
+        if (!_proxy_list.isEmpty()) {
 
             Set<String> keys = _proxy_list.keySet();
 
@@ -191,23 +202,23 @@ public final class SmartMegaProxyManager {
                 Collections.shuffle(keysList);
             }
 
-            Long current_time = System.currentTimeMillis();
+            long current_time = System.currentTimeMillis();
 
             for (String k : keysList) {
 
-                if ((_proxy_list.get(k)[0] == -1 || _proxy_list.get(k)[0] < current_time - _ban_time * 1000) && (excluded == null || !excluded.contains(k))) {
+                if ((_proxy_list.get(k)[0] == -1 || _proxy_list.get(k)[0] < current_time - _ban_time * 1000L) && (excluded == null || !excluded.contains(k))) {
 
                     return new String[]{k, _proxy_list.get(k)[1] == -1L ? "http" : "socks"};
                 }
             }
         }
 
-        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing in " + String.valueOf(PROXY_AUTO_REFRESH_SLEEP_TIME) + " secs...)", new Object[]{Thread.currentThread().getName()});
+        LOG.warn("Smart Proxy Manager: NO PROXIES AVAILABLE!! (Refreshing in " + PROXY_AUTO_REFRESH_SLEEP_TIME + " secs...)");
 
         try {
             Thread.sleep(PROXY_AUTO_REFRESH_SLEEP_TIME * 1000);
         } catch (InterruptedException ex) {
-            Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Auto-refresh sleep interrupted!", ex);
         }
 
         refreshProxyList();
@@ -223,7 +234,7 @@ public final class SmartMegaProxyManager {
 
                 _proxy_list.remove(proxy);
 
-                LOG.log(Level.WARNING, "[Smart Proxy] REMOVING PROXY {0} ({1})", new Object[]{proxy, cause});
+                LOG.warn("[Smart Proxy] REMOVING PROXY {} ({})", proxy, cause);
 
             } else {
 
@@ -233,25 +244,18 @@ public final class SmartMegaProxyManager {
 
                 _proxy_list.put(proxy, proxy_data);
 
-                LOG.log(Level.WARNING, "[Smart Proxy] BLOCKING PROXY {0} ({1} secs) ({2})", new Object[]{proxy, _ban_time, cause});
+                LOG.warn("[Smart Proxy] BLOCKING PROXY {} ({} secs) ({})", proxy, _ban_time, cause);
 
             }
 
-            _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount() - countBlockedProxies()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
+            _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + (getProxyCount() - countBlockedProxies()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
 
         }
     }
 
     public synchronized void refreshProxyList(String url_list) {
-        if (url_list != null) {
-            _proxy_list_url = url_list;
-        } else {
-            _proxy_list_url = null;
-        }
-
-        THREAD_POOL.execute(() -> {
-            refreshProxyList();
-        });
+        _proxy_list_url = url_list;
+        THREAD_POOL.execute(this::refreshProxyList);
     }
 
     public synchronized void refreshProxyList() {
@@ -262,7 +266,7 @@ public final class SmartMegaProxyManager {
 
         try {
 
-            String custom_proxy_list = (_proxy_list_url == null ? DBTools.selectSettingValue("custom_proxy_list") : null);
+            String custom_proxy_list = (_proxy_list_url == null ? KDBTools.selectSettingValue("custom_proxy_list") : null);
 
             LinkedHashMap<String, Long[]> custom_clean_list = new LinkedHashMap<>();
 
@@ -321,12 +325,10 @@ public final class SmartMegaProxyManager {
 
             if (custom_clean_list.isEmpty() && _proxy_list_url != null && !"".equals(_proxy_list_url)) {
 
-                URL url = new URL(this._proxy_list_url);
+                URL url = URI.create(this._proxy_list_url).toURL();
 
                 con = (HttpURLConnection) url.openConnection();
-
                 con.setUseCaches(false);
-
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
                 try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
@@ -340,7 +342,7 @@ public final class SmartMegaProxyManager {
                         byte_res.write(buffer, 0, reads);
                     }
 
-                    data = new String(byte_res.toByteArray(), "UTF-8");
+                    data = byte_res.toString(StandardCharsets.UTF_8);
                 }
 
                 String[] proxy_list = data.split("\n");
@@ -379,29 +381,20 @@ public final class SmartMegaProxyManager {
                     }
                 }
 
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
-
-                LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
-
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + getProxyCount() + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
+                LOG.info("Smart Proxy Manager: Proxy list downloaded from ({}), and refreshed ({})", _proxy_list_url, _proxy_list.size());
             } else if (!custom_clean_list.isEmpty()) {
-
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
-
-                LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
+                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + getProxyCount() + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
+                LOG.info("Smart Proxy Manager: proxy list refreshed ({})", _proxy_list.size());
             } else {
                 _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (0 proxies!)" + (this.isForce_smart_proxy() ? " F!" : ""));
-                LOG.log(Level.INFO, "{0} Smart Proxy Manager: NO PROXYS");
+                LOG.info("Smart Proxy Manager: NO PROXIES");
             }
 
-        } catch (MalformedURLException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("IO Exception refreshing proxy list! {}", ex.getMessage());
         } finally {
-            if (con != null) {
-                con.disconnect();
-            }
-
+            if (con != null) con.disconnect();
         }
 
         _last_refresh_timestamp = System.currentTimeMillis();
@@ -418,20 +411,11 @@ public final class SmartMegaProxyManager {
 
             String auth_data;
 
-            if ((auth_data = PROXY_LIST_AUTH.get(ipaddr.getHostAddress() + ":" + String.valueOf(port))) != null) {
-
-                try {
-                    String[] auth_data_parts = auth_data.split(":");
-
-                    String user = new String(MiscTools.BASE642Bin(auth_data_parts[0]), "UTF-8");
-
-                    String password = new String(MiscTools.BASE642Bin(auth_data_parts[1]), "UTF-8");
-
-                    return new PasswordAuthentication(user, password.toCharArray());
-
-                } catch (UnsupportedEncodingException ex) {
-                    Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
-                }
+            if ((auth_data = PROXY_LIST_AUTH.get(ipaddr.getHostAddress() + ":" + port)) != null) {
+                String[] auth_data_parts = auth_data.split(":");
+                String user = new String(MiscTools.BASE642Bin(auth_data_parts[0]), StandardCharsets.UTF_8);
+                String password = new String(MiscTools.BASE642Bin(auth_data_parts[1]), StandardCharsets.UTF_8);
+                return new PasswordAuthentication(user, password.toCharArray());
             }
 
             return null;

@@ -12,7 +12,6 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
 import static com.tonikelope.megabasterd.MiscTools.updateFonts;
-import java.util.logging.Logger;
 
 /**
  *
@@ -121,7 +120,7 @@ public class WarningExitMessage extends javax.swing.JDialog {
 
     private void exit_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exit_buttonActionPerformed
 
-        _main_panel.byebyenow(_restart);
+        KMiscTools.byeByeNow(_restart, false, true);
     }//GEN-LAST:event_exit_buttonActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -129,5 +128,4 @@ public class WarningExitMessage extends javax.swing.JDialog {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(WarningExitMessage.class.getName());
 }

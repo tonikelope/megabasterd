@@ -9,10 +9,12 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.db.KDBTools;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.sql.SQLException;
 import java.util.ArrayList;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
 
 /**
  *
@@ -20,13 +22,13 @@ import java.util.logging.Logger;
  */
 public class UploadManager extends TransferenceManager {
 
-    private static final Logger LOG = Logger.getLogger(UploadManager.class.getName());
+    private static final Logger LOG = LogManager.getLogger(UploadManager.class);
 
     private final Object _log_file_lock;
 
     public UploadManager(MainPanel main_panel) {
 
-        super(main_panel, main_panel.getMax_ul(), main_panel.getView().getStatus_up_label(), main_panel.getView().getjPanel_scroll_up(), main_panel.getView().getClose_all_finished_up_button(), main_panel.getView().getPause_all_up_button(), main_panel.getView().getClean_all_up_menu());
+        super(main_panel, main_panel.getMax_ul(), main_panel.getView().getStatus_up_label(), main_panel.getView().getJPanel_scroll_up(), main_panel.getView().getClose_all_finished_up_button(), main_panel.getView().getPause_all_up_button(), main_panel.getView().getClean_all_up_menu());
 
         _log_file_lock = new Object();
     }
@@ -37,9 +39,7 @@ public class UploadManager extends TransferenceManager {
 
     @Override
     public void provision(final Transference upload) {
-        MiscTools.GUIRun(() -> {
-            getScroll_panel().add(((Upload) upload).getView());
-        });
+        MiscTools.GUIRun(() -> getScroll_panel().add(((Upload) upload).getView()));
 
         ((Upload) upload).provisionIt();
 
@@ -69,9 +69,7 @@ public class UploadManager extends TransferenceManager {
             });
 
             getTransference_waitstart_queue().remove(u);
-
             getTransference_running_list().remove(u);
-
             getTransference_finished_queue().remove(u);
 
             increment_total_size(-1 * u.getFile_size());
@@ -79,14 +77,14 @@ public class UploadManager extends TransferenceManager {
             increment_total_progress(-1 * u.getProgress());
 
             if (!u.isCanceled() || u.isClosed()) {
-                delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
+                delete_up.add(new String[]{ u.getFile_name(), ((Upload) u).getMa().getFull_email() });
             }
         }
 
         try {
-            DBTools.deleteUploads(delete_up.toArray(new String[delete_up.size()][]));
+            KDBTools.deleteUploads(delete_up);
         } catch (SQLException ex) {
-            LOG.log(SEVERE, null, ex);
+            LOG.fatal("Error deleting uploads!", ex);
         }
 
         secureNotify();

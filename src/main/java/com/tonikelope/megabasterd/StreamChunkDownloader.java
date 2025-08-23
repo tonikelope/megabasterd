@@ -9,17 +9,20 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
-import java.net.URISyntaxException;
+import java.net.URI;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import static com.tonikelope.megabasterd.MainPanel.DEFAULT_BYTE_BUFFER_SIZE;
 
 /**
  *
@@ -27,15 +30,15 @@ import java.util.logging.Logger;
  */
 public class StreamChunkDownloader implements Runnable {
 
-    private static final Logger LOG = Logger.getLogger(StreamChunkDownloader.class.getName());
+    private static final Logger LOG = LogManager.getLogger(StreamChunkDownloader.class);
 
     private final int _id;
-    private final StreamChunkManager _chunkmanager;
+    private final StreamChunkManager _chunkManager;
     private volatile boolean _exit;
 
-    public StreamChunkDownloader(int id, StreamChunkManager chunkmanager) {
+    public StreamChunkDownloader(int id, StreamChunkManager chunkManager) {
         _id = id;
-        _chunkmanager = chunkmanager;
+        _chunkManager = chunkManager;
         _exit = false;
     }
 
@@ -46,13 +49,13 @@ public class StreamChunkDownloader implements Runnable {
     @Override
     public void run() {
 
-        LOG.log(Level.INFO, "{0} Worker [{1}]: let''s do some work!", new Object[]{Thread.currentThread().getName(), _id});
+        LOG.info("Worker [{}]: let''s do some work!", _id);
 
-        HttpURLConnection con = null;
+        HttpURLConnection con;
 
         try {
 
-            String url = _chunkmanager.getUrl();
+            String url = _chunkManager.getUrl();
 
             int http_error = 0;
 
@@ -75,33 +78,35 @@ public class StreamChunkDownloader implements Runnable {
                 smart_proxy_socks = smart_proxy[1].equals("socks");
             }
 
-            while (!_exit && !_chunkmanager.isExit()) {
+            while (!_exit && !_chunkManager.isExit()) {
 
-                while (!_exit && !_chunkmanager.isExit() && _chunkmanager.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
+                while (!_exit && !_chunkManager.isExit() && _chunkManager.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
 
-                    LOG.log(Level.INFO, "{0} Worker [{1}]: Chunk buffer is full. I pause myself.", new Object[]{Thread.currentThread().getName(), _id});
+                    LOG.info("Worker [{}]: Chunk buffer is full. I pause myself.", _id);
 
-                    _chunkmanager.secureWait();
+                    _chunkManager.secureWait();
                 }
 
                 if (http_error == 0) {
 
-                    offset = _chunkmanager.nextOffset();
+                    offset = _chunkManager.nextOffset();
 
                 } else if (http_error == 403) {
 
-                    url = _chunkmanager.getUrl();
+                    url = _chunkManager.getUrl();
                 }
 
                 if (offset >= 0) {
 
-                    StreamChunk chunk_stream = new StreamChunk(offset, _chunkmanager.calculateChunkSize(offset), url);
+                    StreamChunk chunk_stream = new StreamChunk(offset, _chunkManager.calculateChunkSize(offset), url);
 
-                    if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    URL chunk_url = URI.create(chunk_stream.getUrl()).toURL();
+
+                    if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy() && proxy_manager != null) {
 
                         if (current_smart_proxy != null && http_error != 0) {
 
-                            proxy_manager.blockProxy(current_smart_proxy, "HTTP " + String.valueOf(http_error));
+                            proxy_manager.blockProxy(current_smart_proxy, "HTTP " + http_error);
 
                             String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
@@ -125,42 +130,35 @@ public class StreamChunkDownloader implements Runnable {
 
                             Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
 
-                            URL chunk_url = new URL(chunk_stream.getUrl());
-
                             con = (HttpURLConnection) chunk_url.openConnection(proxy);
 
                         } else {
 
-                            URL chunk_url = new URL(chunk_stream.getUrl());
 
                             con = (HttpURLConnection) chunk_url.openConnection();
                         }
 
                     } else {
 
-                        URL chunk_url = new URL(chunk_stream.getUrl());
+
 
                         if (MainPanel.isUse_proxy()) {
 
                             con = (HttpURLConnection) chunk_url.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
-
-                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                            if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
+                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                             }
+                        } else if (current_smart_proxy != null) {
+
+                            String[] proxy_info = current_smart_proxy.split(":");
+
+                            Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
+
+                            con = (HttpURLConnection) chunk_url.openConnection(proxy);
+
                         } else {
-
-                            if (current_smart_proxy != null) {
-
-                                String[] proxy_info = current_smart_proxy.split(":");
-
-                                Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
-
-                                con = (HttpURLConnection) chunk_url.openConnection(proxy);
-
-                            } else {
-                                con = (HttpURLConnection) chunk_url.openConnection();
-                            }
+                            con = (HttpURLConnection) chunk_url.openConnection();
                         }
                     }
 
@@ -177,7 +175,7 @@ public class StreamChunkDownloader implements Runnable {
 
                     byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
-                    LOG.log(Level.INFO, "{0} Worker [{1}]: offset: {2} size: {3}", new Object[]{Thread.currentThread().getName(), _id, offset, chunk_stream.getSize()});
+                    LOG.info("Worker [{}]: offset: {} size: {}", _id, offset, chunk_stream.getSize());
 
                     http_error = 0;
 
@@ -189,7 +187,7 @@ public class StreamChunkDownloader implements Runnable {
 
                             if (http_status != 200) {
 
-                                LOG.log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
+                                LOG.info("Failed : HTTP error code : {}", http_status);
 
                                 http_error = http_status;
 
@@ -199,7 +197,7 @@ public class StreamChunkDownloader implements Runnable {
 
                                     int chunk_writes = 0;
 
-                                    while (!_exit && !_chunkmanager.isExit() && chunk_writes < chunk_stream.getSize() && (reads = is.read(buffer, 0, Math.min((int) (chunk_stream.getSize() - chunk_writes), buffer.length))) != -1) {
+                                    while (!_exit && !_chunkManager.isExit() && chunk_writes < chunk_stream.getSize() && (reads = is.read(buffer, 0, Math.min((int) (chunk_stream.getSize() - chunk_writes), buffer.length))) != -1) {
 
                                         chunk_stream.getOutputStream().write(buffer, 0, reads);
 
@@ -208,11 +206,11 @@ public class StreamChunkDownloader implements Runnable {
 
                                     if (chunk_stream.getSize() == chunk_writes) {
 
-                                        LOG.log(Level.INFO, "{0} Worker [{1}] has downloaded chunk [{2}]!", new Object[]{Thread.currentThread().getName(), _id, chunk_stream.getOffset()});
+                                        LOG.info("Worker [{}] has downloaded chunk [{}]!", _id, chunk_stream.getOffset());
 
-                                        _chunkmanager.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
+                                        _chunkManager.getChunk_queue().put(chunk_stream.getOffset(), chunk_stream);
 
-                                        _chunkmanager.secureNotifyAll();
+                                        _chunkManager.secureNotifyAll();
 
                                         current_smart_proxy = null;
 
@@ -223,26 +221,22 @@ public class StreamChunkDownloader implements Runnable {
                         }
 
                     } catch (IOException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
+                        LOG.fatal("IO Exception in run! {}", ex.getMessage());
                     } finally {
                         con.disconnect();
                     }
-
                 } else {
-
                     _exit = true;
                 }
             }
 
-        } catch (IOException | URISyntaxException | ChunkInvalidException | InterruptedException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
         } catch (OutOfMemoryError | Exception ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("Generic exception caught in run! {}", ex.getMessage());
         }
 
-        _chunkmanager.secureNotifyAll();
+        _chunkManager.secureNotifyAll();
 
-        LOG.log(Level.INFO, "{0} Worker [{1}]: bye bye", new Object[]{Thread.currentThread().getName(), _id});
+        LOG.info("Worker [{}]: bye bye", _id);
     }
 
 }

@@ -9,15 +9,18 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.DBTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
+import com.tonikelope.megabasterd.db.KDBTools;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
-import javax.swing.JOptionPane;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 
 /**
  *
@@ -25,50 +28,40 @@ import javax.swing.JOptionPane;
  */
 public class DownloadManager extends TransferenceManager {
 
-    private static final Logger LOG = Logger.getLogger(DownloadManager.class.getName());
+    private static final Logger LOG = LogManager.getLogger(DownloadManager.class);
 
+    private static final ExecutorService DB_EXECUTOR =
+    Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "DB-IO");
+        t.setDaemon(true);
+        return t;
+    });
+    
     public DownloadManager(MainPanel main_panel) {
 
-        super(main_panel, main_panel.getMax_dl(), main_panel.getView().getStatus_down_label(), main_panel.getView().getjPanel_scroll_down(), main_panel.getView().getClose_all_finished_down_button(), main_panel.getView().getPause_all_down_button(), main_panel.getView().getClean_all_down_menu());
+        super(main_panel, main_panel.getMax_dl(), main_panel.getView().getStatus_down_label(), main_panel.getView().getJPanel_scroll_down(), main_panel.getView().getClose_all_finished_down_button(), main_panel.getView().getPause_all_down_button(), main_panel.getView().getClean_all_down_menu());
     }
 
     public synchronized void forceResetAllChunks() {
         THREAD_POOL.execute(() -> {
 
-            ConcurrentLinkedQueue<Transference> transference_running_list = getMain_panel().getDownload_manager().getTransference_running_list();
+            LinkedBlockingQueue<Transference> transference_running_list = getMain_panel().getDownload_manager().getTransference_running_list();
 
             if (!transference_running_list.isEmpty()) {
                 transference_running_list.forEach((transference) -> {
 
-                    ArrayList<ChunkDownloader> chunkworkers = ((Download) transference).getChunkworkers();
+                    ArrayList<ChunkDownloader> chunkWorkers = ((Download) transference).getChunkWorkers();
 
-                    chunkworkers.forEach((worker) -> {
-                        worker.RESET_CURRENT_CHUNK();
-                    });
+                    chunkWorkers.forEach(ChunkDownloader::RESET_CURRENT_CHUNK);
 
                 });
 
-                MiscTools.GUIRun(() -> {
-                    getMain_panel().getView().getForce_chunk_reset_button().setEnabled(true);
-                });
+                MiscTools.GUIRun(() -> getMain_panel().getView().getForce_chunk_reset_button().setEnabled(true));
 
                 JOptionPane.showMessageDialog(getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("CURRENT DOWNLOAD CHUNKS RESET!"));
             }
 
         });
-    }
-
-    @Override
-    public void closeAllFinished() {
-
-        _transference_finished_queue.stream().filter((t) -> (!t.isCanceled())).map((t) -> {
-            _transference_finished_queue.remove(t);
-            return t;
-        }).forEachOrdered((t) -> {
-            _transference_remove_queue.add(t);
-        });
-
-        secureNotify();
     }
 
     public int copyAllLinksToClipboard() {
@@ -145,14 +138,10 @@ public class DownloadManager extends TransferenceManager {
 
         for (final Transference d : downloads) {
 
-            MiscTools.GUIRun(() -> {
-                getScroll_panel().remove(((Download) d).getView());
-            });
+            flagForPanelRemoval(d, false);
 
             getTransference_waitstart_queue().remove(d);
-
             getTransference_running_list().remove(d);
-
             getTransference_finished_queue().remove(d);
 
             if (((Download) d).isProvision_ok()) {
@@ -167,20 +156,20 @@ public class DownloadManager extends TransferenceManager {
             }
         }
 
-        try {
-            deleteDownloads(delete_down.toArray(new String[delete_down.size()]));
-        } catch (SQLException ex) {
-            LOG.log(SEVERE, null, ex);
-        }
+        DB_EXECUTOR.execute(() -> {
+            try {
+                KDBTools.deleteDownloads(delete_down);
+            } catch (SQLException ex) {
+                LOG.fatal("Error deleting downloads!", ex);
+            } 
+        });
 
         secureNotify();
     }
 
     @Override
     public void provision(final Transference download) {
-        MiscTools.GUIRun(() -> {
-            getScroll_panel().add(((Download) download).getView());
-        });
+        flagForPanelAddition(download);
 
         try {
 
@@ -189,19 +178,13 @@ public class DownloadManager extends TransferenceManager {
             secureNotify();
 
         } catch (APIException ex) {
-
-            LOG.log(Level.INFO, "{0} Provision failed! Retrying in separated thread...", Thread.currentThread().getName());
-
+            LOG.info("Provision failed! Retrying in separated thread...");
             THREAD_POOL.execute(() -> {
                 try {
-
                     _provision((Download) download, true);
-
                 } catch (APIException ex1) {
-
-                    LOG.log(SEVERE, null, ex1);
+                    LOG.fatal("Provision in separate thread failed!", ex1);
                 }
-
                 secureNotify();
             });
         }

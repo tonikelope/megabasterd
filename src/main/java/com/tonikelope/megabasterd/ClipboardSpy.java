@@ -9,15 +9,18 @@
  */
 package com.tonikelope.megabasterd;
 
-import static java.awt.Toolkit.getDefaultToolkit;
+import com.tonikelope.megabasterd.db.KDBTools;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.Transferable;
-import static java.lang.Thread.sleep;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
+
+import static java.awt.Toolkit.getDefaultToolkit;
+import static java.lang.Thread.sleep;
+
 
 /**
  *
@@ -25,8 +28,9 @@ import java.util.logging.Logger;
  */
 public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThreadNotifiable, ClipboardChangeObservable {
 
+    private static final Logger LOG = LogManager.getLogger(ClipboardSpy.class);
+
     private static final int SLEEP = 250;
-    private static final Logger LOG = Logger.getLogger(ClipboardSpy.class.getName());
 
     private final Clipboard _sysClip;
 
@@ -60,24 +64,19 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
 
         boolean monitor_clipboard = true;
 
-        String monitor_clipboard_string = DBTools.selectSettingValue("clipboardspy");
+        String monitor_clipboard_string = KDBTools.selectSettingValue("clipboardspy");
 
         if (monitor_clipboard_string != null) {
             monitor_clipboard = monitor_clipboard_string.equals("yes");
         }
 
         if (_enabled && monitor_clipboard) {
-
             _contents = getClipboardContents();
-
             notifyChangeToMyObservers();
-
             gainOwnership(_contents);
-
-            LOG.log(Level.INFO, "{0} Monitoring clipboard ON...", Thread.currentThread().getName());
-
+            LOG.info("Monitoring clipboard ON...");
         } else if (monitor_clipboard) {
-            LOG.log(Level.INFO, "{0} Monitoring clipboard OFF...", Thread.currentThread().getName());
+            LOG.info("Monitoring clipboard OFF...");
         }
     }
 
@@ -96,11 +95,10 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
 
         synchronized (_secure_notify_lock) {
             while (!_notified) {
-
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(SEVERE, ex.getMessage());
+                    LOG.fatal("Sleep interrupted! {}", ex.getMessage());
                 }
             }
 
@@ -147,7 +145,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    LOG.log(SEVERE, ex1.getMessage());
+                    LOG.fatal(ex1.getMessage());
                 }
             }
 
@@ -174,7 +172,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
                 try {
                     sleep(SLEEP);
                 } catch (InterruptedException ex1) {
-                    LOG.log(SEVERE, ex1.getMessage());
+                    LOG.fatal(ex1.getMessage());
                 }
             }
 
@@ -213,9 +211,7 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
     @Override
     public void notifyChangeToMyObservers() {
 
-        _observers.forEach((o) -> {
-            o.notifyClipboardChange();
-        });
+        _observers.forEach(ClipboardChangeObserver::notifyClipboardChange);
     }
 
 }

@@ -9,23 +9,26 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.CryptTools.*;
-import static com.tonikelope.megabasterd.DBTools.*;
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Color;
+import com.tonikelope.megabasterd.db.KDBTools;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.ShortBufferException;
+import javax.swing.*;
+import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import static java.lang.Integer.MAX_VALUE;
-import static java.lang.Long.valueOf;
-import static java.lang.Thread.sleep;
+import java.net.MalformedURLException;
 import java.nio.channels.FileChannel;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.FileStore;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -36,18 +39,33 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.ConcurrentSkipListSet;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
-import static java.util.concurrent.Executors.newCachedThreadPool;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.RejectedExecutionException;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
-import javax.crypto.BadPaddingException;
-import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import javax.swing.JComponent;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static com.tonikelope.megabasterd.CryptTools.genCrypter;
+import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.UrlBASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.bin2i32a;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.formatBytes;
+import static com.tonikelope.megabasterd.MiscTools.getWaitTimeExpBackOff;
+import static com.tonikelope.megabasterd.MiscTools.truncateText;
+import static java.lang.Integer.MAX_VALUE;
+import static java.lang.Long.valueOf;
+import static java.lang.Thread.sleep;
+import static java.util.concurrent.Executors.newCachedThreadPool;
 
 /**
  *
@@ -56,20 +74,22 @@ import javax.swing.JComponent;
 public class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
     public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
+    public static final boolean REMOVE_NO_RESTART_DEFAULT = false;
+    public static final boolean AUTO_RESTART_DAMAGED_DEFAULT = true;
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
     public static final boolean DEFAULT_CLIPBOARD_LINK_MONITOR = true;
     public static final int CHUNK_SIZE_MULTI = 20;
-    private static final Logger LOG = Logger.getLogger(Download.class.getName());
+    public static final Logger LOG = LogManager.getLogger(Download.class.getName());
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view;
-    private volatile ProgressMeter _progress_meter;
+    private final ProgressMeter _progress_meter;
     private final Object _secure_notify_lock;
     private final Object _progress_lock;
     private final Object _workers_lock;
-    private final Object _chunkid_lock;
+    private final Object _chunkId_lock;
     private final Object _dl_url_lock;
     private final Object _turbo_proxy_lock;
     private volatile boolean _notified;
@@ -80,18 +100,18 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private String _file_key;
     private Long _file_size;
     private String _file_pass;
-    private String _file_noexpire;
+    private String _file_noExpire;
     private volatile boolean _frozen;
     private final boolean _use_slots;
     private int _slots;
     private final boolean _restart;
-    private final ArrayList<ChunkDownloader> _chunkworkers;
+    private final ConcurrentSkipListSet<ChunkDownloader> _chunkWorkers;
     private final ExecutorService _thread_pool;
     private volatile boolean _exit;
     private volatile boolean _pause;
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private volatile long _progress;
-    private ChunkWriterManager _chunkmanager;
+    private ChunkWriterManager _chunkManager;
     private String _last_download_url;
     private boolean _provision_ok;
     private boolean _auto_retry_on_error;
@@ -112,6 +132,20 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private final Object _progress_watchdog_lock;
     private final boolean _priority;
     private volatile boolean global_cancel = false;
+    
+    private static final ScheduledExecutorService SHUTDOWN_SCHEDULER =
+    Executors.newSingleThreadScheduledExecutor(r -> {
+        Thread t = new Thread(r, "shutdown-checker");
+        t.setDaemon(true);
+        return t;
+    });
+    
+    private static final ExecutorService DB_EXECUTOR =
+    Executors.newSingleThreadExecutor(r -> {
+        Thread t = new Thread(r, "DB-IO");
+        t.setDaemon(true);
+        return t;
+    });
 
     public void setGlobal_cancel(boolean global_cancel) {
         this.global_cancel = global_cancel;
@@ -121,7 +155,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         return _status_error;
     }
 
-    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noexpire, boolean use_slots, boolean restart, String custom_chunks_dir, boolean priority) {
+    public Download(MainPanel main_panel, MegaAPI ma, String url, String download_path, String file_name, String file_key, Long file_size, String file_pass, String file_noExpire, boolean use_slots, boolean restart, String custom_chunks_dir, boolean priority) {
 
         _priority = priority;
         _paused_workers = 0;
@@ -149,20 +183,20 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _file_key = file_key;
         _file_size = file_size;
         _file_pass = file_pass;
-        _file_noexpire = file_noexpire;
+        _file_noExpire = file_noExpire;
         _use_slots = use_slots;
         _restart = restart;
         _secure_notify_lock = new Object();
         _progress_lock = new Object();
         _workers_lock = new Object();
-        _chunkid_lock = new Object();
+        _chunkId_lock = new Object();
         _dl_url_lock = new Object();
         _turbo_proxy_lock = new Object();
-        _chunkworkers = new ArrayList<>();
+        _chunkWorkers = new ConcurrentSkipListSet<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
-        _view = new DownloadView(this);
+        MiscTools.GUIRun(() -> this._view = new DownloadView(this));
         _progress_meter = new ProgressMeter(this);
         _custom_chunks_dir = custom_chunks_dir;
         _turbo = false;
@@ -195,20 +229,20 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _file_key = download.getFile_key();
         _file_size = download.getFile_size();
         _file_pass = download.getFile_pass();
-        _file_noexpire = download.getFile_noexpire();
+        _file_noExpire = download.getFile_noexpire();
         _use_slots = download.getMain_panel().isUse_slots_down();
         _restart = true;
         _secure_notify_lock = new Object();
         _progress_lock = new Object();
         _workers_lock = new Object();
-        _chunkid_lock = new Object();
+        _chunkId_lock = new Object();
         _dl_url_lock = new Object();
         _turbo_proxy_lock = new Object();
-        _chunkworkers = new ArrayList<>();
+        _chunkWorkers = new ConcurrentSkipListSet<>();
         _partialProgressQueue = new ConcurrentLinkedQueue<>();
         _rejectedChunkIds = new ConcurrentLinkedQueue<>();
         _thread_pool = newCachedThreadPool();
-        _view = new DownloadView(this);
+        MiscTools.GUIRun(() -> this._view = new DownloadView(this));
         _progress_meter = new ProgressMeter(this);
         _custom_chunks_dir = download.getCustom_chunks_dir();
         _turbo = false;
@@ -272,25 +306,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 _turbo = true;
 
                 if (!_finalizing) {
-                    Download tthis = this;
+                    Download self = this;
 
-                    MiscTools.GUIRun(() -> {
+                    MiscTools.GUIRun(() -> getView().getSpeed_label().setForeground(new Color(255, 102, 0)));
 
-                        getView().getSpeed_label().setForeground(new Color(255, 102, 0));
-
-                    });
-
-                    synchronized (_workers_lock) {
-
-                        for (int t = getChunkworkers().size(); t <= Transference.MAX_WORKERS; t++) {
-
-                            ChunkDownloader c = new ChunkDownloader(t, tthis);
-
-                            _chunkworkers.add(c);
-
-                            _thread_pool.execute(c);
-                        }
-
+                    for (int t = getChunkWorkers().size(); t <= Transference.MAX_WORKERS; t++) {
+                        ChunkDownloader c = new ChunkDownloader(t, self);
+                        _chunkWorkers.add(c);
+                        _thread_pool.execute(c);
                     }
 
                     MiscTools.GUIRun(() -> {
@@ -303,10 +326,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         }
 
-    }
-
-    public ConcurrentLinkedQueue<Long> getRejectedChunkIds() {
-        return _rejectedChunkIds;
     }
 
     public Object getWorkers_lock() {
@@ -337,8 +356,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _pause = pause;
     }
 
-    public ChunkWriterManager getChunkmanager() {
-        return _chunkmanager;
+    public ChunkWriterManager getChunkManager() {
+        return _chunkManager;
     }
 
     public String getFile_key() {
@@ -354,11 +373,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         return _output_stream;
     }
 
-    public ArrayList<ChunkDownloader> getChunkworkers() {
-
-        synchronized (_workers_lock) {
-            return _chunkworkers;
-        }
+    public ArrayList<ChunkDownloader> getChunkWorkers() {
+        return new ArrayList<>(_chunkWorkers);
     }
 
     public void setPaused_workers(int paused_workers) {
@@ -383,7 +399,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     public String getFile_noexpire() {
-        return _file_noexpire;
+        return _file_noExpire;
     }
 
     public boolean isUse_slots() {
@@ -392,10 +408,6 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     public int getSlots() {
         return _slots;
-    }
-
-    public void setLast_chunk_id_dispatched(long last_chunk_id_dispatched) {
-        _last_chunk_id_dispatched = last_chunk_id_dispatched;
     }
 
     public boolean isProvision_ok() {
@@ -409,7 +421,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.fatal("Pre-meter-exist sleep interrupted! {}", ex.getMessage());
             }
         }
 
@@ -423,7 +435,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             try {
                 Thread.sleep(250);
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.fatal("Pre-view-exist sleep interrupted! {}", ex.getMessage());
             }
         }
 
@@ -454,26 +466,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     public void pause() {
 
         if (isPause()) {
-
             setPause(false);
-
             setPaused_workers(0);
-
-            synchronized (_workers_lock) {
-
-                getChunkworkers().forEach((downloader) -> {
-                    downloader.secureNotify();
-                });
-            }
-
+            getChunkWorkers().forEach(ChunkDownloader::secureNotify);
             getView().resume();
-
             _main_panel.getDownload_manager().setPaused_all(false);
 
         } else {
-
             setPause(true);
-
             getView().pause();
         }
 
@@ -508,26 +508,19 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     @Override
     public void checkSlotsAndWorkers() {
+        if (isExit() || this._finalizing) return;
 
-        if (!isExit() && !this._finalizing) {
+        int sl = getView().getSlots();
+        int cworkers = getChunkWorkers().size();
+        if (sl != cworkers) {
 
-            synchronized (_workers_lock) {
+            if (sl > cworkers) {
 
-                int sl = getView().getSlots();
+                startSlot();
 
-                int cworkers = getChunkworkers().size();
+            } else {
 
-                if (sl != cworkers) {
-
-                    if (sl > cworkers) {
-
-                        startSlot();
-
-                    } else {
-
-                        stopLastStartedSlot();
-                    }
-                }
+                stopLastStartedSlot();
             }
         }
     }
@@ -538,11 +531,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _closed = true;
 
         if (_provision_ok) {
-            try {
-                deleteDownload(_url);
-            } catch (SQLException ex) {
-                LOG.log(SEVERE, null, ex);
-            }
+            DB_EXECUTOR.execute(() -> {
+                try {
+                    KDBTools.deleteDownload(_url);
+                } catch (SQLException ex) {
+                    LOG.fatal("Could not delete download!", ex);
+                }
+            });
         }
 
         _main_panel.getDownload_manager().getTransference_remove_queue().add(this);
@@ -563,17 +558,27 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     @Override
     public void run() {
 
+        DownloadView view = getView();
+        MainPanel mainPanel = getMain_panel();
+        DownloadManager manager = mainPanel.getDownload_manager();
+        ProgressMeter meter = getProgress_meter();
+        JComponent[] commons = new JComponent[] {
+                view.getSlots_label(),
+                view.getSlots_spinner(),
+                view.getSlot_status_label()
+        };
+
         MiscTools.GUIRun(() -> {
-            getView().getQueue_down_button().setVisible(false);
-            getView().getQueue_up_button().setVisible(false);
-            getView().getQueue_top_button().setVisible(false);
-            getView().getQueue_bottom_button().setVisible(false);
-            getView().getClose_button().setVisible(false);
-            getView().getCopy_link_button().setVisible(true);
-            getView().getOpen_folder_button().setVisible(true);
+            view.getQueue_down_button().setVisible(false);
+            view.getQueue_up_button().setVisible(false);
+            view.getQueue_top_button().setVisible(false);
+            view.getQueue_bottom_button().setVisible(false);
+            view.getClose_button().setVisible(false);
+            view.getCopy_link_button().setVisible(true);
+            view.getOpen_folder_button().setVisible(true);
         });
 
-        getView().printStatusNormal("Starting download, please wait...");
+        view.printStatusNormal("Starting download, please wait...");
 
         try {
 
@@ -596,7 +601,27 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     path.mkdirs();
                 }
 
-                if (!_file.exists() || _file.length() != _file_size) {
+                String verifyFile = KDBTools.selectSettingValue("verify_down_file");
+                boolean verify_cbc_mac = verifyFile != null && verifyFile.equals("yes");
+                boolean cbcSuccess = true;
+                String verbiage = "SIZE";
+                if (verify_cbc_mac && _file.exists()) {
+                    if (!verifyFileCBCMAC(filename)) {
+                        cbcSuccess = false;
+                        if (_file.delete()) {
+                            _status_error = "CBC MAC verification failed, file deleted!";
+                            _auto_retry_on_error = true;
+                        } else {
+                            _status_error = "CBC MAC verification failed, but file could not be deleted!";
+                            _auto_retry_on_error = false;
+                        }
+                        view.printStatusError(_status_error);
+                    } else {
+                        verbiage = "HASH";
+                    }
+                }
+
+                if (!_file.exists() || _file.length() != _file_size || !cbcSuccess) {
 
                     if (_file.exists()) {
                         _file_name = _file_name.replaceFirst("\\..*$", "_" + MiscTools.genID(8) + "_$0");
@@ -606,7 +631,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         _file = new File(filename);
                     }
 
-                    getView().printStatusNormal("Starting download (retrieving MEGA temp link), please wait...");
+                    view.printStatusNormal("Starting download (retrieving MEGA temp link), please wait...");
 
                     _last_download_url = getMegaFileDownloadUrl(_url);
 
@@ -623,15 +648,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         }
 
                         if (_file.exists()) {
-                            getView().printStatusNormal("File exists, resuming download...");
+                            view.printStatusNormal("File exists, resuming download...");
 
                             long max_size = calculateMaxTempFileSize(_file.length());
 
                             if (max_size != _file.length()) {
 
-                                LOG.log(Level.INFO, "{0} Downloader truncating mctemp file {1} -> {2} ", new Object[]{Thread.currentThread().getName(), _file.length(), max_size});
+                                LOG.info("Downloader truncating mctemp file {} -> {} ", _file.length(), max_size);
 
-                                getView().printStatusNormal("Truncating temp file...");
+                                view.printStatusNormal("Truncating temp file...");
 
                                 try (FileChannel out_truncate = new FileOutputStream(temp_filename, true).getChannel()) {
                                     out_truncate.truncate(max_size);
@@ -648,33 +673,27 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         _output_stream = new BufferedOutputStream(new FileOutputStream(_file, (_progress > 0)));
 
-                        _thread_pool.execute(getProgress_meter());
+                        _thread_pool.execute(meter);
 
-                        getMain_panel().getGlobal_dl_speed().attachTransference(this);
+                        mainPanel.getGlobal_dl_speed().attachTransference(this);
 
                         synchronized (_workers_lock) {
 
                             if (_use_slots) {
 
-                                _chunkmanager = new ChunkWriterManager(this);
-
-                                _thread_pool.execute(_chunkmanager);
-
-                                _slots = getMain_panel().getDefault_slots_down();
-
+                                _chunkManager = new ChunkWriterManager(this);
+                                _thread_pool.execute(_chunkManager);
+                                _slots = mainPanel.getDefault_slots_down();
                                 _view.getSlots_spinner().setValue(_slots);
 
                                 for (int t = 1; t <= _slots; t++) {
                                     ChunkDownloader c = new ChunkDownloader(t, this);
-
-                                    _chunkworkers.add(c);
-
+                                    _chunkWorkers.add(c);
                                     _thread_pool.execute(c);
                                 }
 
                                 MiscTools.GUIRun(() -> {
-                                    for (JComponent c : new JComponent[]{getView().getSlots_label(), getView().getSlots_spinner(), getView().getSlot_status_label()}) {
-
+                                    for (JComponent c : commons) {
                                         c.setVisible(true);
                                     }
                                 });
@@ -682,23 +701,21 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                             } else {
 
                                 ChunkDownloaderMono c = new ChunkDownloaderMono(this);
-
-                                _chunkworkers.add(c);
-
+                                _chunkWorkers.add(c);
                                 _thread_pool.execute(c);
 
                                 MiscTools.GUIRun(() -> {
-                                    for (JComponent c1 : new JComponent[]{getView().getSlots_label(), getView().getSlots_spinner(), getView().getSlot_status_label()}) {
+                                    for (JComponent c1 : commons) {
                                         c1.setVisible(false);
                                     }
                                 });
                             }
                         }
 
-                        getView().printStatusNormal(LabelTranslatorSingleton.getInstance().translate("Downloading file from mega ") + (_ma.getFull_email() != null ? "(" + _ma.getFull_email() + ")" : "") + " ...");
+                        view.printStatusNormal(LabelTranslatorSingleton.getInstance().translate("Downloading file from mega ") + (_ma.getFull_email() != null ? "(" + _ma.getFull_email() + ")" : "") + " ...");
 
                         MiscTools.GUIRun(() -> {
-                            for (JComponent c : new JComponent[]{getView().getPause_button(), getView().getProgress_pbar()}) {
+                            for (JComponent c : new JComponent[]{view.getPause_button(), view.getProgress_pbar()}) {
 
                                 c.setVisible(true);
                             }
@@ -707,7 +724,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         THREAD_POOL.execute(() -> {
 
                             //PROGRESS WATCHDOG If a download remains more than PROGRESS_WATCHDOG_TIMEOUT seconds without receiving data, we force fatal error in order to restart it.
-                            LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
+                            LOG.info("PROGRESS WATCHDOG HELLO!");
 
                             long last_progress, progress = getProgress();
 
@@ -720,7 +737,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                         progress = getProgress();
                                     } catch (InterruptedException ex) {
                                         progress = -1;
-                                        Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+                                        LOG.fatal("PROGRESS WATCHDOG INTERRUPTED", ex);
                                     }
                                 }
 
@@ -730,45 +747,48 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                 stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
                             }
 
-                            LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
+                            LOG.info("{} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
 
                         });
 
                         secureWait();
 
-                        LOG.log(Level.INFO, "{0} Chunkdownloaders finished!", Thread.currentThread().getName());
+                        LOG.info("{} ChunkDownloaders finished!", Thread.currentThread().getName());
 
-                        getProgress_meter().setExit(true);
+                        meter.setExit(true);
 
-                        getProgress_meter().secureNotify();
+                        meter.secureNotify();
 
                         try {
-
                             _thread_pool.shutdown();
+                            LOG.info("Waiting all threads to finish...");
+                            AtomicReference<ScheduledFuture<?>> checkerRef = new AtomicReference<>();
 
-                            LOG.log(Level.INFO, "{0} Waiting all threads to finish...", Thread.currentThread().getName());
+                            ScheduledFuture<?> checker = SHUTDOWN_SCHEDULER.scheduleWithFixedDelay(() -> {
+                                if (_thread_pool.isTerminated()) {
+                                    LOG.info("Worker pool fully terminated");
+                                    checkerRef.get().cancel(false);
+                                } else LOG.info("Still waiting for worker threads…");
+                            }, 0, 200, TimeUnit.MILLISECONDS);
 
-                            _thread_pool.awaitTermination(MAX_WAIT_WORKERS_SHUTDOWN, TimeUnit.SECONDS);
-
-                        } catch (InterruptedException ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
+                            checkerRef.set(checker);
+                        } catch (RejectedExecutionException ex) {
+                            LOG.fatal("Execution was rejected! {}", ex.getMessage());
                         }
 
                         if (!_thread_pool.isTerminated()) {
-
-                            LOG.log(Level.INFO, "{0} Closing thread pool ''mecag\u00fcen'' style...", Thread.currentThread().getName());
-
+                            LOG.info("Closing thread pool ''mecagüen'' style...");
                             _thread_pool.shutdownNow();
                         }
 
-                        LOG.log(Level.INFO, "{0} Downloader thread pool finished!", Thread.currentThread().getName());
+                        LOG.info("Downloader thread pool finished!");
 
-                        getMain_panel().getGlobal_dl_speed().detachTransference(this);
+                        mainPanel.getGlobal_dl_speed().detachTransference(this);
 
                         _output_stream.close();
 
                         MiscTools.GUIRun(() -> {
-                            for (JComponent c : new JComponent[]{getView().getSpeed_label(), getView().getPause_button(), getView().getStop_button(), getView().getSlots_label(), getView().getSlots_spinner(), getView().getKeep_temp_checkbox()}) {
+                            for (JComponent c : new JComponent[]{view.getSpeed_label(), view.getPause_button(), view.getStop_button(), view.getSlots_label(), view.getSlots_spinner(), view.getKeep_temp_checkbox()}) {
 
                                 c.setVisible(false);
                             }
@@ -777,8 +797,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         if (_progress == _file_size) {
 
                             if (_file.length() != _file_size) {
-
-                                throw new IOException("El tamaño del fichero es incorrecto!");
+                                throw new IOException("The size of the file is incorrect!");
                             }
 
                             Files.move(Paths.get(_file.getAbsolutePath()), Paths.get(filename), StandardCopyOption.REPLACE_EXISTING);
@@ -787,147 +806,117 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                 File temp_parent_download_dir = new File(temp_filename).getParentFile();
 
-                                while (!temp_parent_download_dir.getAbsolutePath().equals(_custom_chunks_dir) && temp_parent_download_dir.listFiles().length == 0) {
+                                while (!temp_parent_download_dir.getAbsolutePath().equals(_custom_chunks_dir) && Objects.requireNonNull(temp_parent_download_dir.listFiles()).length == 0) {
                                     temp_parent_download_dir.delete();
                                     temp_parent_download_dir = temp_parent_download_dir.getParentFile();
                                 }
 
                             }
 
-                            String verify_file = selectSettingValue("verify_down_file");
+                            String verify_file = KDBTools.selectSettingValue("verify_down_file");
 
                             if (verify_file != null && verify_file.equals("yes")) {
                                 _checking_cbc = true;
 
-                                getView().printStatusNormal("Waiting to check file integrity...");
+                                view.printStatusNormal("Waiting to check file integrity...");
 
                                 setProgress(0);
 
-                                getView().printStatusNormal("Checking file integrity, please wait...");
+                                view.printStatusNormal("Checking file integrity, please wait...");
 
                                 MiscTools.GUIRun(() -> {
-                                    getView().getStop_button().setVisible(true);
+                                    view.getStop_button().setVisible(true);
 
-                                    getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL CHECK"));
+                                    view.getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL CHECK"));
                                 });
 
-                                getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
+                                manager.getTransference_running_list().remove(this);
 
-                                getMain_panel().getDownload_manager().secureNotify();
+                                manager.secureNotify();
 
                                 if (verifyFileCBCMAC(filename)) {
-
-                                    getView().printStatusOK("File successfully downloaded! (Integrity check PASSED)");
-
+                                    view.printStatusOK("File successfully downloaded! (Integrity check PASSED)");
                                 } else if (!_exit) {
-
                                     _status_error = "BAD NEWS :( File is DAMAGED!";
-
-                                    getView().printStatusError(_status_error);
-
+                                    String autoRestartDamagedSetting = KDBTools.selectSettingValue("auto_restart_damaged");
+                                    if (autoRestartDamagedSetting != null) _auto_retry_on_error = autoRestartDamagedSetting.equals("yes");
+                                    view.printStatusError(_status_error);
                                 } else {
-
-                                    getView().printStatusOK("File successfully downloaded! (but integrity check CANCELED)");
-
+                                    view.printStatusOK("File successfully downloaded! (but integrity check CANCELED)");
                                 }
 
-                                MiscTools.GUIRun(() -> {
-                                    getView().getStop_button().setVisible(false);
-                                });
+                                MiscTools.GUIRun(() -> view.getStop_button().setVisible(false));
 
                             } else {
-
-                                getView().printStatusOK("File successfully downloaded!");
-
+                                view.printStatusOK("File successfully downloaded!");
                             }
 
                         } else if (_status_error != null) {
-
-                            getView().hideAllExceptStatus();
-
-                            getView().printStatusError(_status_error);
-
+                            view.hideAllExceptStatus();
+                            view.printStatusError(_status_error);
                         } else if (_canceled) {
-
-                            getView().hideAllExceptStatus();
-
-                            getView().printStatusNormal("Download CANCELED!");
-
+                            view.hideAllExceptStatus();
+                            view.printStatusNormal("Download CANCELED!");
                         } else {
-
-                            getView().hideAllExceptStatus();
-
+                            view.hideAllExceptStatus();
                             _status_error = "UNEXPECTED ERROR!";
-
-                            getView().printStatusError(_status_error);
+                            view.printStatusError(_status_error);
                         }
 
                     } else if (_status_error != null) {
-
-                        getView().hideAllExceptStatus();
-
-                        getView().printStatusError(_status_error != null ? _status_error : "ERROR");
-
+                        view.hideAllExceptStatus();
+                        view.printStatusError(_status_error != null ? _status_error : "ERROR");
                     } else if (_canceled) {
-
-                        getView().hideAllExceptStatus();
-
-                        getView().printStatusNormal("Download CANCELED!");
-
+                        view.hideAllExceptStatus();
+                        view.printStatusNormal("Download CANCELED!");
                     } else {
-
-                        getView().hideAllExceptStatus();
-
+                        view.hideAllExceptStatus();
                         _status_error = "UNEXPECTED ERROR!";
-
-                        getView().printStatusError(_status_error);
+                        view.printStatusError(_status_error);
                     }
 
                 } else {
-                    getView().hideAllExceptStatus();
 
-                    _status_error = "FILE WITH SAME NAME AND SIZE ALREADY EXISTS";
-
-                    _auto_retry_on_error = false;
-
-                    getView().printStatusError(_status_error);
+                    String removeNoRestart = KDBTools.selectSettingValue("remove_no_restart");
+                    if (removeNoRestart != null && removeNoRestart.equals("yes")) {
+                        view.printStatusOK("FILE WITH CORRECT NAME AND " + verbiage + " FOUND");
+                        _status_error = null;
+                    } else {
+                        view.hideAllExceptStatus();
+                        _status_error = "FILE WITH SAME NAME AND " + verbiage + " ALREADY EXISTS";
+                        _auto_retry_on_error = false;
+                        view.printStatusError(_status_error);
+                    }
                 }
-
             } else if (_status_error != null) {
-
-                getView().hideAllExceptStatus();
-
-                getView().printStatusError(_status_error);
-
+                view.hideAllExceptStatus();
+                view.printStatusError(_status_error);
             } else if (_canceled) {
-
-                getView().hideAllExceptStatus();
-
-                getView().printStatusNormal("Download CANCELED!");
-
+                view.hideAllExceptStatus();
+                view.printStatusNormal("Download CANCELED!");
             } else {
-
-                getView().hideAllExceptStatus();
-
+                view.hideAllExceptStatus();
                 _status_error = "UNEXPECTED ERROR!";
-
-                getView().printStatusError(_status_error);
+                view.printStatusError(_status_error);
             }
 
         } catch (Exception ex) {
             _status_error = "I/O ERROR " + ex.getMessage();
-
-            getView().printStatusError(_status_error);
-
-            LOG.log(Level.SEVERE, ex.getMessage());
+            view.printStatusError(_status_error);
+            LOG.fatal("Generic error in Download! {}", ex.getMessage());
         }
 
-        if (_file != null && !getView().isKeepTempFileSelected()) {
-            _file.delete();
+        if (_file != null && !view.isKeepTempFileSelected()) {
+            boolean success = _file.delete();
+            if (!success) {
+                LOG.warn("Could not delete temp file {}", _file.getAbsolutePath());
+                _status_error = "I/O ERROR " + _status_error;
+                view.printStatusError(_status_error);
+            }
 
-            if (getChunkmanager() != null) {
+            if (getChunkManager() != null) {
 
-                getChunkmanager().delete_chunks_temp_dir();
+                getChunkManager().delete_chunks_temp_dir();
 
                 File parent_download_dir = new File(getDownload_path() + "/" + getFile_name()).getParentFile();
 
@@ -938,71 +927,64 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 if (!(new File(getDownload_path() + "/" + getFile_name()).getParentFile().exists())) {
 
-                    getView().getOpen_folder_button().setEnabled(false);
+                    view.getOpen_folder_button().setEnabled(false);
                 }
             }
         }
 
         if ((_status_error == null && !_canceled) || global_cancel || !_auto_retry_on_error) {
 
-            try {
-                deleteDownload(_url);
-            } catch (SQLException ex) {
-                LOG.log(SEVERE, null, ex);
-            }
+            DB_EXECUTOR.execute(() -> {
+                try {
+                    KDBTools.deleteDownload(_url);
+                } catch (SQLException ex) {
+                    LOG.fatal("Could not delete download!", ex);
+                }
+            });
 
         }
 
-        getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
-
-        getMain_panel().getDownload_manager().getTransference_finished_queue().add(this);
-
-        MiscTools.GUIRun(() -> {
-            getMain_panel().getDownload_manager().getScroll_panel().remove(getView());
-
-            getMain_panel().getDownload_manager().getScroll_panel().add(getView());
-        });
+        manager.getTransference_running_list().remove(this);
+        manager.getTransference_finished_queue().add(this);
+        manager.flagForPanelRemoval(this, true);
 
         getMain_panel().getDownload_manager().secureNotify();
 
         MiscTools.GUIRun(() -> {
-            getView().getClose_button().setVisible(true);
+            view.getClose_button().setVisible(true);
 
             if ((_status_error != null || _canceled) && isProvision_ok() && !global_cancel) {
-
-                getView().getRestart_button().setVisible(true);
-
+                view.getRestart_button().setVisible(true);
             } else if (!global_cancel) {
-
-                getView().getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
+                view.getClose_button().setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png")));
             }
         });
+
+        manager.secureNotify();
 
         if (_status_error != null && !_canceled && _auto_retry_on_error) {
             THREAD_POOL.execute(() -> {
                 for (int i = 3; !_closed && i > 0; i--) {
                     final int j = i;
-                    MiscTools.GUIRun(() -> {
-                        getView().getRestart_button().setText("Restart (" + String.valueOf(j) + " secs...)");
-                    });
+                    MiscTools.GUIRun(() -> view.getRestart_button().setText("Restart (" + j + " secs...)"));
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        LOG.fatal("Sleep interrupted! {}", ex.getMessage());
                     }
                 }
                 if (!_closed) {
-                    LOG.log(Level.INFO, "{0} Downloader {1} AUTO RESTARTING DOWNLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
+                    LOG.info("Downloader {} AUTO RESTARTING DOWNLOAD...", getFile_name());
                     restart();
                 }
             });
         } else {
-            getMain_panel().getDownload_manager().setAll_finished(false);
+            manager.setAll_finished(false);
         }
 
         _exit = true;
 
-        if (_status_error != null && !_canceled && getMain_panel().getDownload_manager().no_transferences() && getMain_panel().getUpload_manager().no_transferences() && (!getMain_panel().getDownload_manager().getTransference_finished_queue().isEmpty() || !getMain_panel().getUpload_manager().getTransference_finished_queue().isEmpty()) && getMain_panel().getView().getAuto_close_menu().isSelected()) {
+        if (_status_error != null && !_canceled && manager.no_transferences() && mainPanel.getUpload_manager().no_transferences() && (!manager.getTransference_finished_queue().isEmpty() || !mainPanel.getUpload_manager().getTransference_finished_queue().isEmpty()) && mainPanel.getView().getAuto_close_menu().isSelected()) {
             System.exit(0);
         }
 
@@ -1010,7 +992,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             _progress_watchdog_lock.notifyAll();
         }
 
-        LOG.log(Level.INFO, "{0}{1} Downloader: bye bye", new Object[]{Thread.currentThread().getName(), _file_name});
+        LOG.info("{} Downloader: bye bye", _file_name);
     }
 
     public void provisionIt(boolean retry) throws APIException {
@@ -1044,7 +1026,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         _file_pass = file_info[3];
 
-                        _file_noexpire = file_info[4];
+                        _file_noExpire = file_info[4];
                     }
 
                     String filename = _download_path + "/" + _file_name;
@@ -1057,7 +1039,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     try {
 
-                        insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
+                        KDBTools.insertDownload(this);
 
                         _provision_ok = true;
 
@@ -1080,18 +1062,38 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 }
 
                 //Resuming single file links and new/resuming folder links
+                Future<?> f = DB_EXECUTOR.submit(() -> {
+                    try {
+
+                        KDBTools.insertOrReplaceDownload(this);
+
+                        _provision_ok = true;
+
+                    } catch (SQLException ex) {
+
+                        _status_error = "Error registering download: " + ex.getMessage();
+
+                    }
+                });
+
                 try {
 
-                    deleteDownload(_url); //If resuming
-
-                    insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
+                    f.get();
 
                     _provision_ok = true;
 
-                } catch (SQLException ex) {
+                } catch (InterruptedException ie) {
 
-                    _status_error = "Error registering download: " + ex.getMessage();
+                    Thread.currentThread().interrupt();
 
+                    _status_error = "Interrupted while registering download";
+
+                } catch (ExecutionException ee) {
+
+                    Throwable cause = ee.getCause();
+
+                    if (cause instanceof SQLException) _status_error = "DB error: " + cause.getMessage();
+                    else _status_error = "Unexpected error: " + cause;
                 }
             }
 
@@ -1166,7 +1168,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         synchronized (_workers_lock) {
 
-            if (++_paused_workers == _chunkworkers.size() && !_exit) {
+            if (++_paused_workers == _chunkWorkers.size() && !_exit) {
 
                 getView().printStatusNormal("Download paused!");
 
@@ -1191,58 +1193,50 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     }
 
     public String getDownloadUrlForWorker() {
-
-        synchronized (_dl_url_lock) {
-
-            if (_last_download_url != null && checkMegaDownloadUrl(_last_download_url)) {
-
+        try {
+            if (getMa().checkMegaDownloadUrl(_last_download_url)) {
                 return _last_download_url;
             }
+        } catch (MalformedURLException ex) {
+            LOG.fatal("MALFORMED URL: {}", ex.getMessage());
+        }
 
-            boolean error;
+        boolean error;
+        int errorCount = 0;
+        String download_url;
 
-            int conta_error = 0;
+        do {
+            error = false;
 
-            String download_url;
-
-            do {
-
-                error = false;
-
-                try {
-                    if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
-
-                        download_url = _ma.getMegaFileDownloadUrl(_url);
-
-                    } else {
-                        download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noexpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
-                    }
-
-                    if (checkMegaDownloadUrl(download_url)) {
-
-                        _last_download_url = download_url;
-
-                    } else {
-
-                        error = true;
-                    }
-
-                } catch (Exception ex) {
-
-                    error = true;
-
-                    try {
-                        Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
-                    } catch (InterruptedException ex2) {
-                        LOG.log(Level.SEVERE, ex2.getMessage());
-                    }
+            try {
+                if (findFirstRegex("://mega(\\.co)?\\.nz/", _url, 0) != null) {
+                    download_url = _ma.getMegaFileDownloadUrl(_url);
+                } else {
+                    download_url = MegaCrypterAPI.getMegaFileDownloadUrl(_url, _file_pass, _file_noExpire,
+                            _ma.getSid(), getMain_panel().getMega_proxy_server() != null ?
+                                    (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" +
+                                            getMain_panel().getMega_proxy_server().getPassword()).getBytes(StandardCharsets.UTF_8)) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
 
-            } while (error);
+                if (getMa().checkMegaDownloadUrl(download_url)) {
+                    synchronized (_dl_url_lock) {
+                        _last_download_url = download_url;
+                    }
+                } else {
+                    error = true;
+                }
 
-            return _last_download_url;
+            } catch (Exception ex) {
+                error = true;
+                try {
+                    Thread.sleep(getWaitTimeExpBackOff(errorCount++) * 1000);
+                } catch (InterruptedException ex2) {
+                    LOG.fatal(ex2.getMessage());
+                }
+            }
+        } while (error);
 
-        }
+        return _last_download_url;
     }
 
     public void startSlot() {
@@ -1251,184 +1245,132 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
             synchronized (_workers_lock) {
 
-                int chunk_id = _chunkworkers.size() + 1;
+                int chunk_id = _chunkWorkers.size() + 1;
 
                 ChunkDownloader c = new ChunkDownloader(chunk_id, this);
 
-                _chunkworkers.add(c);
+                _chunkWorkers.add(c);
 
                 try {
 
                     _thread_pool.execute(c);
 
                 } catch (java.util.concurrent.RejectedExecutionException e) {
-                    LOG.log(Level.INFO, e.getMessage());
+                    LOG.info(e.getMessage());
                 }
             }
         }
     }
 
     public void stopLastStartedSlot() {
+        if (_exit || _chunkWorkers.isEmpty()) return;
 
-        if (!_exit) {
-
-            synchronized (_workers_lock) {
-
-                if (!_chunkworkers.isEmpty()) {
-
-                    MiscTools.GUIRun(() -> {
-                        getView().getSlots_spinner().setEnabled(false);
-                    });
-
-                    int i = _chunkworkers.size() - 1;
-
-                    while (i >= 0) {
-
-                        ChunkDownloader chundownloader = _chunkworkers.get(i);
-
-                        if (!chundownloader.isExit()) {
-
-                            chundownloader.setExit(true);
-
-                            chundownloader.secureNotify();
-
-                            _view.updateSlotsStatus();
-
-                            break;
-
-                        } else {
-
-                            i--;
-                        }
-                    }
-                }
+        MiscTools.GUIRun(() -> getView().getSlots_spinner().setEnabled(false));
+        ChunkDownloader downloader;
+        while((downloader = _chunkWorkers.pollLast()) != null) {
+            if (!downloader.isExit()) {
+                downloader.setExit(true);
+                downloader.secureNotify();
             }
         }
     }
 
     public void stopThisSlot(ChunkDownloader chunkdownloader) {
-
-        synchronized (_workers_lock) {
-
-            if (_chunkworkers.remove(chunkdownloader) && !_exit) {
-
-                if (_use_slots) {
-
-                    if (chunkdownloader.isChunk_exception() || getMain_panel().isExit()) {
-
-                        _finalizing = true;
-
-                        MiscTools.GUIRun(() -> {
-                            getView().getSlots_spinner().setEnabled(false);
-
-                            getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
-                        });
-
-                    } else if (!_finalizing) {
-                        MiscTools.GUIRun(() -> {
-                            getView().getSlots_spinner().setEnabled(true);
-                        });
-                    }
-
-                    getView().updateSlotsStatus();
-                }
-
-                if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
-
-                    getView().printStatusNormal("Download paused!");
-
-                    MiscTools.GUIRun(() -> {
-                        getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
-
-                        getView().getPause_button().setEnabled(true);
-                    });
-
-                }
+        if (!_chunkWorkers.remove(chunkdownloader) || _exit) return;
+        if (_use_slots) {
+            if (chunkdownloader.isChunk_exception() || getMain_panel().isExit()) {
+                _finalizing = true;
+                MiscTools.GUIRun(() -> {
+                    getView().getSlots_spinner().setEnabled(false);
+                    getView().getSlots_spinner().setValue((int) getView().getSlots_spinner().getValue() - 1);
+                });
+            } else if (!_finalizing) {
+                MiscTools.GUIRun(() -> getView().getSlots_spinner().setEnabled(true));
             }
+            getView().updateSlotsStatus();
         }
-
+        if (!_exit && isPause() && _paused_workers == _chunkWorkers.size()) {
+            getView().printStatusNormal("Download paused!");
+            MiscTools.GUIRun(() -> {
+                getView().getPause_button().setText(LabelTranslatorSingleton.getInstance().translate("RESUME DOWNLOAD"));
+                getView().getPause_button().setEnabled(true);
+            });
+        }
     }
 
-    private boolean verifyFileCBCMAC(String filename) throws FileNotFoundException, Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+    private static byte[] intToBytes(int v) {
+        return new byte[] {
+            (byte)(v >>> 24),
+            (byte)(v >>> 16),
+            (byte)(v >>> 8),
+            (byte) v
+        };
+    }
 
-        int old_thread_priority = Thread.currentThread().getPriority();
+    private static void ecbEncryptBlock(Cipher ecb, byte[] inOut, byte[] tmp16) throws ShortBufferException, IllegalBlockSizeException, BadPaddingException {
+        int n = ecb.update(inOut, 0, 16, tmp16, 0);
+        if (n == 0) n = ecb.doFinal(inOut, 0, 16, tmp16, 0);
+        System.arraycopy(tmp16, 0, inOut, 0, 16);
+    }
 
-        int[] int_key = bin2i32a(UrlBASE642Bin(_file_key));
-        int[] iv = new int[]{int_key[4], int_key[5]};
-        int[] meta_mac = new int[]{int_key[6], int_key[7]};
-        int[] file_mac = {0, 0, 0, 0};
-        int[] cbc_iv = {0, 0, 0, 0};
+    private boolean verifyFileCBCMAC(String filename) throws IOException, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
+
+        int[] intKey = bin2i32a(UrlBASE642Bin(_file_key));
+        int[] metaMac = new int[]{intKey[6], intKey[7]};
+        byte[] fileMac = new byte[16];
+        byte[] ebcIV = new byte[16];
 
         byte[] byte_file_key = initMEGALinkKey(getFile_key());
 
-        Cipher cryptor = genCrypter("AES", "AES/CBC/NoPadding", byte_file_key, i32a2bin(cbc_iv));
+        Cipher cryptor = genCrypter("AES", "AES/ECB/NoPadding", byte_file_key, null);
 
-        try (BufferedInputStream is = new BufferedInputStream(new FileInputStream(filename))) {
+        try (BufferedInputStream is = new BufferedInputStream(Files.newInputStream(Paths.get(filename)))) {
 
-            long chunk_id = 1L;
-            long tot = 0L;
-            byte[] byte_block = new byte[16];
-            int[] int_block;
             int reads;
-            int[] chunk_mac = new int[4];
+            long chunkId = 1L, totalSize = 0L;
+            byte[] byteBlock = new byte[16], chunkMac = new byte[16], ivBytes = new byte[8];
+            System.arraycopy(intToBytes(intKey[4]), 0, ivBytes, 0, 4);
+            System.arraycopy(intToBytes(intKey[5]), 0, ivBytes, 4, 4);
 
             try {
                 while (!_exit) {
+                    long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunkId, 1);
+                    long chunk_size = ChunkWriterManager.calculateChunkSize(chunkId, this.getFile_size(), chunk_offset, 1);
+                    ChunkWriterManager.checkChunkID(chunkId, this.getFile_size(), chunk_offset);
+                    totalSize += chunk_size;
 
-                    long chunk_offset = ChunkWriterManager.calculateChunkOffset(chunk_id, 1);
+                    System.arraycopy(ivBytes, 0, chunkMac, 0, 8);
+                    System.arraycopy(ivBytes, 0, chunkMac, 8, 8);
 
-                    long chunk_size = ChunkWriterManager.calculateChunkSize(chunk_id, this.getFile_size(), chunk_offset, 1);
-
-                    ChunkWriterManager.checkChunkID(chunk_id, this.getFile_size(), chunk_offset);
-
-                    tot += chunk_size;
-
-                    chunk_mac[0] = iv[0];
-                    chunk_mac[1] = iv[1];
-                    chunk_mac[2] = iv[0];
-                    chunk_mac[3] = iv[1];
-
-                    long conta_chunk = 0L;
-
-                    while (conta_chunk < chunk_size && (reads = is.read(byte_block)) != -1) {
-
-                        if (reads < byte_block.length) {
-
-                            for (int i = reads; i < byte_block.length; i++) {
-                                byte_block[i] = 0;
-                            }
+                    long chunkCount = 0L;
+                    while (chunkCount < chunk_size && (reads = is.read(byteBlock)) != -1) {
+                        if (reads < byteBlock.length) {
+                            Arrays.fill(byteBlock, reads, byteBlock.length, (byte)0);
                         }
-
-                        int_block = bin2i32a(byte_block);
-
-                        for (int i = 0; i < chunk_mac.length; i++) {
-                            chunk_mac[i] ^= int_block[i];
+                        for (int i = 0; i < 16; i++) {
+                            chunkMac[i] ^= byteBlock[i];
                         }
-
-                        chunk_mac = bin2i32a(cryptor.doFinal(i32a2bin(chunk_mac)));
-
-                        conta_chunk += reads;
+                        ecbEncryptBlock(cryptor, chunkMac, ebcIV);
+                        chunkCount += reads;
                     }
 
-                    for (int i = 0; i < file_mac.length; i++) {
-                        file_mac[i] ^= chunk_mac[i];
+                    for (int i = 0; i < fileMac.length; i++) {
+                        fileMac[i] ^= chunkMac[i];
                     }
-
-                    file_mac = bin2i32a(cryptor.doFinal(i32a2bin(file_mac)));
-
-                    setProgress(tot);
-
-                    chunk_id++;
-
+                    ecbEncryptBlock(cryptor, fileMac, ebcIV);
+                    setProgress(totalSize);
+                    chunkId++;
                 }
 
-            } catch (ChunkInvalidException e) {
+            } catch (ChunkInvalidException | ShortBufferException ignored) { }
 
-            }
+            int[] fileMacInts = bin2i32a(fileMac);
+            int[] cbc = {
+                fileMacInts[0] ^ fileMacInts[1],
+                fileMacInts[2] ^ fileMacInts[3]
+            };
 
-            int[] cbc = {file_mac[0] ^ file_mac[1], file_mac[2] ^ file_mac[3]};
-
-            return (cbc[0] == meta_mac[0] && cbc[1] == meta_mac[1]);
+            return (cbc[0] == metaMac[0] && cbc[1] == metaMac[1]);
         }
     }
 
@@ -1450,12 +1392,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 getView().stop("Stopping download, please wait...");
 
-                synchronized (_workers_lock) {
-
-                    _chunkworkers.forEach((downloader) -> {
-                        downloader.secureNotify();
-                    });
-                }
+                _chunkWorkers.forEach(ChunkDownloader::secureNotify);
 
                 secureNotify();
             }
@@ -1503,7 +1440,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                 } else {
 
-                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8"))) : null);
+                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes(StandardCharsets.UTF_8))) : null);
                 }
 
             } catch (APIException ex) {
@@ -1595,7 +1532,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     dl_url = _ma.getMegaFileDownloadUrl(link);
 
                 } else {
-                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noexpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
+                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, _file_pass, _file_noExpire, _ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes(StandardCharsets.UTF_8)) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
 
             } catch (APIException ex) {
@@ -1658,7 +1595,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     public long nextChunkId() throws ChunkInvalidException {
 
-        synchronized (_chunkid_lock) {
+        synchronized (_chunkId_lock) {
 
             if (_main_panel.isExit()) {
                 throw new ChunkInvalidException(null);
@@ -1699,7 +1636,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(SEVERE, null, ex);
+                    LOG.fatal("Secure wait interrupted!", ex);
                 }
             }
 
@@ -1739,7 +1676,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     @Override
     public int getSlotsCount() {
-        return getChunkworkers().size();
+        return getChunkWorkers().size();
     }
 
     @Override
@@ -1792,7 +1729,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     @Override
     public int getTotWorkers() {
-        return getChunkworkers().size();
+        return getChunkWorkers().size();
     }
 
 }

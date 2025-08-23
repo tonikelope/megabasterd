@@ -9,13 +9,17 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+
 
 /**
  *
@@ -26,7 +30,7 @@ public class SqliteSingleton {
     public static final String SQLITE_FILE = "megabasterd.db";
 
     public static final int VALIDATION_TIMEOUT = 15;
-    private static final Logger LOG = Logger.getLogger(SqliteSingleton.class.getName());
+    private static final Logger LOG = LogManager.getLogger(SqliteSingleton.class);
 
     public static SqliteSingleton getInstance() {
 
@@ -35,11 +39,8 @@ public class SqliteSingleton {
     private final ConcurrentHashMap<Thread, Connection> _connections_map;
 
     private SqliteSingleton() {
-
-        _connections_map = new ConcurrentHashMap();
-
+        _connections_map = new ConcurrentHashMap<>();
         File database_path = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION);
-
         database_path.mkdirs();
     }
 
@@ -59,7 +60,7 @@ public class SqliteSingleton {
             }
 
         } catch (ClassNotFoundException | SQLException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("Exception in DB Connection! {}", ex.getMessage());
         }
 
         return conn;

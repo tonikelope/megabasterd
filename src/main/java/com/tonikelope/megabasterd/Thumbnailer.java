@@ -10,25 +10,26 @@ import com.xuggle.xuggler.IStreamCoder;
 import com.xuggle.xuggler.IVideoPicture;
 import com.xuggle.xuggler.IVideoResampler;
 import com.xuggle.xuggler.Utils;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 
 public class Thumbnailer {
 
-    public Thumbnailer() {
-    }
+    public Thumbnailer() {}
+
+    private static final Logger LOG = LogManager.getLogger(Thumbnailer.class);
 
     public static final int IMAGE_THUMB_SIZE = 250;
 
     public static final float SECONDS_BETWEEN_FRAMES_PERC = 0.03f; //Take frame video at 3% position
 
     /**
-     * The number of nano-seconds between frames.
+     * The number of nanoseconds between frames.
      */
     private long nano_seconds_between_frames;
 
@@ -37,10 +38,10 @@ public class Thumbnailer {
      */
     private long mLastPtsWrite = Global.NO_PTS;
 
-    private int conta_frames = 0;
+    private int frameCount = 0;
 
     /**
-     * Write the video frame out to a PNG file every once and a while. The files
+     * Write the video frame out to a PNG file every once in a while. The files
      * are written out to the system's temporary directory.
      *
      * @param picture the video frame which contains the time stamp.
@@ -59,7 +60,7 @@ public class Thumbnailer {
             if (picture.getPts() - mLastPtsWrite >= nano_seconds_between_frames) {
                 // Make a temorary file name
 
-                if (conta_frames == 1) {
+                if (frameCount == 1) {
 
                     File file = File.createTempFile("megabasterd_thumbnail_" + MiscTools.genID(20), ".jpg");
 
@@ -69,12 +70,12 @@ public class Thumbnailer {
                     // indicate file written
                     //double seconds = ((double) picture.getPts()) / Global.DEFAULT_PTS_PER_SECOND;
                     //System.out.printf("at elapsed time of %6.3f seconds wrote: %s\n", seconds, file);
-                    conta_frames++;
+                    frameCount++;
 
                     return file.getAbsolutePath();
                 }
 
-                conta_frames++;
+                frameCount++;
 
                 // update last write time
                 mLastPtsWrite += nano_seconds_between_frames;
@@ -136,7 +137,7 @@ public class Thumbnailer {
             return file.getAbsolutePath();
 
         } catch (Exception ex) {
-            Logger.getLogger(Thumbnailer.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Error creating image!", ex);
         }
 
         return null;
@@ -147,8 +148,6 @@ public class Thumbnailer {
      * through the file and captures video frames periodically as specified by
      * SECONDS_BETWEEN_FRAMES. The frames are written as PNG files into the
      * system's temporary directory.
-     *
-     * @param args must contain one string which represents a filename
      */
     @SuppressWarnings("deprecation")
     private String createVideoThumbnail(String filename) {
@@ -222,7 +221,7 @@ public class Thumbnailer {
 
         String frame_file = null;
 
-        while (container.readNextPacket(packet) >= 0 && conta_frames < 2) {
+        while (container.readNextPacket(packet) >= 0 && frameCount < 2) {
 
             // Now we have a packet, let's see if it belongs to our video strea
             if (packet.getStreamIndex() == videoStreamId) {
@@ -243,9 +242,9 @@ public class Thumbnailer {
                     offset += bytesDecoded;
 
                     // Some decoders will consume data in a packet, but will not
-                    // be able to construct a full video picture yet.  Therefore
+                    // be able to construct a full video picture yet. Therefore,
                     // you should always check if you got a complete picture from
-                    // the decode.
+                    // the completed decode.
                     if (picture.isComplete()) {
                         IVideoPicture newPic = picture;
 
@@ -268,7 +267,7 @@ public class Thumbnailer {
                                     "could not decode video as BGR 24 bit data in: " + filename);
                         }
 
-                        // convert the BGR24 to an Java buffered image
+                        // convert the BGR24 to a Java buffered image
                         BufferedImage javaImage = Utils.videoPictureToImage(newPic);
 
                         // process the video frame

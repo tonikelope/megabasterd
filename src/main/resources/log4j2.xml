@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns="https://logging.apache.org/xml/ns"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="
+                   https://logging.apache.org/xml/ns
+                   https://logging.apache.org/xml/ns/log4j-config-2.xsd">
+    <Appenders>
+        <Console name="CONSOLE" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SS} [%t] %-5p %c:%L - %m%n"/>
+        </Console>
+        <File name="FILE" fileName="${sys:logfile.location:-./MEGABASTERD_DEBUG.log}">
+            <PatternLayout pattern="%d{HH:mm:ss.SS} [%t] %-5p %c:%L - %m%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="WARN">
+            <AppenderRef ref="CONSOLE"/>
+        </Root>
+        <Logger name="FileLogger" level="INFO">
+            <AppenderRef ref="FILE"/>
+        </Logger>
+        <Logger name="org.apache.http" level="ERROR">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+        <Logger name="org.apache.http.wire" level="ERROR">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+        <Logger name="httpclient.wire.header" level="ERROR">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+        <Logger name="httpclient.wire.content" level="ERROR">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+        <Logger name="org.apache.hc.client5.http.headers" level="ERROR">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+        <Logger name="org.apache.hc.client5.http.wire" level="ERROR">
+            <AppenderRef ref="CONSOLE"/>
+        </Logger>
+    </Loggers>
+</Configuration>

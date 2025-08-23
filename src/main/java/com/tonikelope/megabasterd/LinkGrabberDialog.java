@@ -9,32 +9,40 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
+import java.awt.*;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JTextArea;
-import javax.swing.filechooser.FileNameExtensionFilter;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.checkMegaAccountLoginAndShowMasterPassDialog;
+import static com.tonikelope.megabasterd.MiscTools.extractMegaLinksFromString;
+import static com.tonikelope.megabasterd.MiscTools.extractStringFromClipboardContents;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.truncateText;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 
 /**
  *
  * @author tonikelope
  */
 public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardChangeObserver {
+
+    private static final Logger LOG = LogManager.getLogger(LinkGrabberDialog.class);
 
     private boolean _download;
     private String _download_path, _selected_item;
@@ -142,14 +150,14 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
         setTitle("Link Grabber");
 
         links_textarea.setColumns(20);
-        links_textarea.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        links_textarea.setFont(new java.awt.Font("Dialog", Font.PLAIN, 18)); // NOI18N
         links_textarea.setRows(5);
         links_textarea.setDoubleBuffered(true);
         links_scrollpane.setViewportView(links_textarea);
         links_textarea.addMouseListener(new ContextMenuMouseListener());
 
         dance_button.setBackground(new java.awt.Color(102, 204, 255));
-        dance_button.setFont(new java.awt.Font("Dialog", 1, 22)); // NOI18N
+        dance_button.setFont(new java.awt.Font("Dialog", Font.BOLD, 22)); // NOI18N
         dance_button.setForeground(new java.awt.Color(255, 255, 255));
         dance_button.setText("Let's dance, baby");
         dance_button.setDoubleBuffered(true);
@@ -271,18 +279,18 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
         change_dir_button.setText(LabelTranslatorSingleton.getInstance().translate("Selecting folder..."));
         change_dir_button.setEnabled(false);
 
-        javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
+        javax.swing.JFileChooser fileChooser = new javax.swing.JFileChooser();
 
-        updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        updateFonts(fileChooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
-        filechooser.setCurrentDirectory(new java.io.File(_download_path));
-        filechooser.setDialogTitle("Download folder");
-        filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
-        filechooser.setAcceptAllFileFilterUsed(false);
+        fileChooser.setCurrentDirectory(new java.io.File(_download_path));
+        fileChooser.setDialogTitle("Download folder");
+        fileChooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
+        fileChooser.setAcceptAllFileFilterUsed(false);
 
-        if (filechooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
 
-            File file = filechooser.getSelectedFile();
+            File file = fileChooser.getSelectedFile();
 
             _download_path = file.getAbsolutePath();
 
@@ -332,7 +340,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
                         out.write(buffer, 0, reads);
                     }
-                    String dlc = new String(out.toByteArray(), "UTF-8");
+                    String dlc = out.toString(StandardCharsets.UTF_8);
                     Set<String> links = CryptTools.decryptDLC(dlc, ((MainPanelView) getParent()).getMain_panel());
                     for (Iterator<String> i = links.iterator(); i.hasNext();) {
 
@@ -360,10 +368,8 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
                             }
                         });
                     }
-                } catch (FileNotFoundException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
                 } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.fatal("IO Exception in LinkGrabberDialog! {}", ex.getMessage());
                 }
                 MiscTools.GUIRun(() -> {
                     dlc_button.setText(LabelTranslatorSingleton.getInstance().translate("Load DLC container"));
@@ -408,13 +414,13 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
                 pack();
 
-                final LinkGrabberDialog tthis = this;
+                final LinkGrabberDialog self = this;
 
                 THREAD_POOL.execute(() -> {
                     boolean use_account = true;
                     try {
 
-                        if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, _selected_item) == null) {
+                        if (checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, self, _selected_item) == null) {
                             use_account = false;
                         }
 
@@ -469,6 +475,4 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
     public JCheckBox getPriority_checkbox() {
         return priority_checkbox;
     }
-
-    private static final Logger LOG = Logger.getLogger(LinkGrabberDialog.class.getName());
 }

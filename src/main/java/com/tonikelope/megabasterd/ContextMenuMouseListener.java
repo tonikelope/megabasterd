@@ -9,25 +9,20 @@
  */
 package com.tonikelope.megabasterd;
 
-import java.awt.Toolkit;
+import javax.swing.*;
+import javax.swing.text.JTextComponent;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.util.logging.Logger;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JPopupMenu;
-import javax.swing.text.JTextComponent;
 
 /**
  *
  * @author tonikelope
  */
 public class ContextMenuMouseListener extends MouseAdapter {
-
-    private static final Logger LOG = Logger.getLogger(ContextMenuMouseListener.class.getName());
 
     private final JPopupMenu _popup;
     private final Action _cutAction;

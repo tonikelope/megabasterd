@@ -9,14 +9,21 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.io.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.nio.charset.StandardCharsets;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
 
 /**
  *
@@ -27,7 +34,7 @@ import java.util.regex.Pattern;
  */
 public class MegaProxyServer implements Runnable {
 
-    private static final Logger LOG = Logger.getLogger(MegaProxyServer.class.getName());
+    private static final Logger LOG = LogManager.getLogger(MegaProxyServer.class);
 
     private final String _password;
     private final int _port;
@@ -65,23 +72,19 @@ public class MegaProxyServer implements Runnable {
             Socket socket;
 
             try {
-
                 while ((socket = _serverSocket.accept()) != null) {
                     (new Handler(socket, _password)).start();
                 }
-            } catch (IOException e) {
-
-            }
+            } catch (IOException ignored) { }
 
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("IOException in MegaProxyServer! {}", ex.getMessage());
         } finally {
-
             if (!_serverSocket.isClosed()) {
                 try {
                     _serverSocket.close();
                 } catch (IOException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    LOG.fatal("Server socket closure failure! {}", ex.getMessage());
                 }
             }
         }
@@ -138,11 +141,11 @@ public class MegaProxyServer implements Runnable {
             try {
                 String request = readLine(_clientSocket);
 
-                LOG.log(Level.INFO, request);
+                LOG.info(request);
 
                 Matcher matcher = CONNECT_PATTERN.matcher(request);
 
-                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(_clientSocket.getOutputStream(), "UTF-8");
+                OutputStreamWriter outputStreamWriter = new OutputStreamWriter(_clientSocket.getOutputStream(), StandardCharsets.UTF_8);
 
                 if (matcher.matches()) {
 
@@ -156,13 +159,13 @@ public class MegaProxyServer implements Runnable {
 
                         if (matcher_auth.matches()) {
 
-                            proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()), "UTF-8");
+                            proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()), StandardCharsets.UTF_8);
 
                         }
 
-                        LOG.log(Level.INFO, header);
+                        LOG.info(header);
 
-                    } while (!"".equals(header));
+                    } while (!header.isEmpty());
 
                     if (proxy_auth != null && proxy_auth.matches(".*?: *?" + _password)) {
                         final Socket forwardSocket;
@@ -270,7 +273,7 @@ public class MegaProxyServer implements Runnable {
                         break;
                 }
             }
-            return byteArrayOutputStream.toString("UTF-8");
+            return byteArrayOutputStream.toString(StandardCharsets.UTF_8);
         }
     }
 }

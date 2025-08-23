@@ -9,26 +9,25 @@
  */
 package com.tonikelope.megabasterd;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
 import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
 import static com.tonikelope.megabasterd.MiscTools.translateLabels;
 import static com.tonikelope.megabasterd.MiscTools.truncateText;
 import static com.tonikelope.megabasterd.MiscTools.updateFonts;
-import java.awt.Desktop;
-import java.awt.Dialog;
-import java.io.File;
-import java.io.IOException;
-import java.io.RandomAccessFile;
 import static java.lang.Integer.MAX_VALUE;
-import java.nio.channels.FileChannel;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.BorderFactory;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
 
@@ -37,6 +36,8 @@ import static javax.swing.JOptionPane.showOptionDialog;
  * @author tonikelope
  */
 public class FileSplitterDialog extends javax.swing.JDialog {
+
+    private static final Logger LOG = LogManager.getLogger(FileSplitterDialog.class);
 
     private final MainPanel _main_panel;
     private File[] _files = null;
@@ -98,7 +99,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         final long numSplits = sourceSize / bytesPerSplit;
         final long remainingBytes = sourceSize % bytesPerSplit;
         int position = 0;
-        int conta_split = 1;
+        int splitCount = 1;
 
         MiscTools.GUIRunAndWait(() -> {
             jProgressBar2.setMinimum(0);
@@ -114,12 +115,12 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
         try (RandomAccessFile sourceFile = new RandomAccessFile(this._files[i].getAbsolutePath(), "r"); FileChannel sourceChannel = sourceFile.getChannel()) {
 
-            for (; position < numSplits && !_exit; position++, conta_split++) {
-                _writePartToFile(i, bytesPerSplit, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
+            for (; position < numSplits && !_exit; position++, splitCount++) {
+                _writePartToFile(i, bytesPerSplit, position * bytesPerSplit, sourceChannel, splitCount, numSplits + (remainingBytes > 0 ? 1 : 0));
             }
 
             if (remainingBytes > 0 && !_exit) {
-                _writePartToFile(i, remainingBytes, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
+                _writePartToFile(i, remainingBytes, position * bytesPerSplit, sourceChannel, splitCount, numSplits + 1);
             }
         }
 
@@ -148,9 +149,9 @@ public class FileSplitterDialog extends javax.swing.JDialog {
                             }
                         });
                     }
-                    MiscTools.pausar(2000);
+                    MiscTools.pause(2000);
                 } catch (IOException ex) {
-                    Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.fatal("IOException monitoring progress!", ex);
                 }
             }
 
@@ -158,9 +159,9 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
     }
 
-    private void _writePartToFile(int f, long byteSize, long position, FileChannel sourceChannel, int conta_split, long num_splits) throws IOException {
+    private void _writePartToFile(int f, long byteSize, long position, FileChannel sourceChannel, int splitCount, long num_splits) throws IOException {
 
-        Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._files[f].getName() + ".part" + String.valueOf(conta_split) + "-" + String.valueOf(num_splits));
+        Path fileName = Paths.get(this._output_dir.getAbsolutePath() + "/" + this._files[f].getName() + ".part" + splitCount + "-" + num_splits);
 
         _current_part = fileName;
 
@@ -179,6 +180,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             }
         }
 
+        // TODO make an atomic operation
         _progress += byteSize;
     }
 
@@ -418,7 +420,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
             pack();
 
-            Dialog tthis = this;
+            Dialog self = this;
 
             THREAD_POOL.execute(() -> {
                 try {
@@ -430,13 +432,13 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
                                 MiscTools.GUIRun(() -> {
 
-                                    JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File/s successfully splitted!"));
+                                    JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("File/s successfully splitted!"));
 
                                     if (Desktop.isDesktopSupported()) {
                                         try {
                                             Desktop.getDesktop().open(_output_dir);
                                         } catch (Exception ex) {
-                                            Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                            LOG.fatal("Unable to open output dir! {}", ex.getMessage());
                                         }
                                     }
 
@@ -480,7 +482,7 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    LOG.fatal("Generic exception in FileSplitterDialog! {}", ex.getMessage());
                 }
             });
 
@@ -523,5 +525,4 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private javax.swing.JLabel split_size_label;
     private javax.swing.JTextField split_size_text;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(FileSplitterDialog.class.getName());
 }

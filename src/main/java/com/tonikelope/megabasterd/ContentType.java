@@ -10,7 +10,6 @@
 package com.tonikelope.megabasterd;
 
 import java.util.HashMap;
-import java.util.logging.Logger;
 
 /**
  *
@@ -18,14 +17,11 @@ import java.util.logging.Logger;
  */
 public class ContentType {
 
-    private static final Logger LOG = Logger.getLogger(ContentType.class.getName());
-
     private final HashMap<String, String> _content_type;
 
     public ContentType() {
 
-        _content_type = new HashMap();
-
+        _content_type = new HashMap<>();
         _content_type.put("mp2", "audio/x-mpeg");
         _content_type.put("mp3", "audio/x-mpeg");
         _content_type.put("mpga", "audio/x-mpeg");
@@ -43,7 +39,6 @@ public class ContentType {
         _content_type.put("ogv", "video/ogg");
         _content_type.put("asf", "video/x-ms-asf-plugin");
         _content_type.put("asx", "video/x-ms-asf-plugin");
-        _content_type.put("ogv", "video/ogg");
         _content_type.put("wmv", "video/x-ms-wmv");
         _content_type.put("wmx", "video/x-ms-wvx");
         _content_type.put("wma", "audio/x-ms-wma");

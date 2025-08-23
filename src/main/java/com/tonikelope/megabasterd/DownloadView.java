@@ -9,29 +9,28 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Color;
-import java.awt.Desktop;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
-import static java.lang.Integer.MAX_VALUE;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JLabel;
-import javax.swing.JProgressBar;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.copyTextToClipboard;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
+import static java.lang.Integer.MAX_VALUE;
 
 /**
  *
  * @author tonikelope
  */
 public class DownloadView extends javax.swing.JPanel implements TransferenceView {
+
+    private static final Logger LOG = LogManager.getLogger(DownloadView.class);
 
     private final Download _download;
 
@@ -113,7 +112,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     public DownloadView(Download download) {
 
-        DownloadView tthis = this;
+        DownloadView self = this;
 
         _download = download;
 
@@ -121,9 +120,9 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
             initComponents();
 
-            updateFonts(tthis, GUI_FONT, download.getMain_panel().getZoom_factor());
+            updateFonts(self, GUI_FONT, download.getMain_panel().getZoom_factor());
 
-            translateLabels(tthis);
+            translateLabels(self);
 
             slots_spinner.setModel(new SpinnerNumberModel(_download.getMain_panel().getDefault_slots_down(), Download.MIN_WORKERS, Download.MAX_WORKERS, 1));
 
@@ -143,10 +142,33 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         });
 
     }
+    
+    public static final int DEFAULT_ROW_HEIGHT = 264;
+    private Dimension cachedPref;
+
+    @Override
+    public Dimension getPreferredSize() {
+        if (cachedPref == null) {
+            Dimension d = super.getPreferredSize();
+            d.height = DEFAULT_ROW_HEIGHT;
+            cachedPref = d;
+        }
+        return cachedPref;
+    }
+
+    @Override
+    public Dimension getMaximumSize() {
+        return new Dimension(Integer.MAX_VALUE, DEFAULT_ROW_HEIGHT);
+    }
+
+    @Override
+    public Dimension getMinimumSize() {
+        return getPreferredSize();
+    }
 
     public void hideAllExceptStatus() {
 
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             for (JComponent c : new JComponent[]{speed_label, slots_spinner, slots_label, slot_status_label, slot_status_label, pause_button, stop_button, progress_pbar, keep_temp_checkbox}) {
 
                 c.setVisible(false);
@@ -158,6 +180,13 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
     }
+
+    private static final Font DIALOG_26_BOLD = new java.awt.Font("Dialog", Font.BOLD, 26);
+    private static final Font DIALOG_20_BOLD = new java.awt.Font("Dialog", Font.BOLD, 20);
+    private static final Font DIALOG_18_BOLD = new java.awt.Font("Dialog", Font.BOLD, 18);
+    private static final Font DIALOG_18_PLAIN = new java.awt.Font("Dialog", Font.PLAIN, 18);
+    private static final Font DIALOG_16_BOLD = new java.awt.Font("Dialog", Font.BOLD, 16);
+    private static final Font DIALOG_14_BOLD = new java.awt.Font("Dialog", Font.BOLD, 14);
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -190,16 +219,16 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         setBorder(new javax.swing.border.LineBorder(new java.awt.Color(153, 204, 255), 3, true));
 
-        status_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        status_label.setFont(DIALOG_20_BOLD);
         status_label.setForeground(new java.awt.Color(102, 102, 102));
         status_label.setText("status");
         status_label.setDoubleBuffered(true);
 
-        slots_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        slots_label.setFont(DIALOG_18_BOLD);
         slots_label.setText("Slots");
         slots_label.setDoubleBuffered(true);
 
-        slots_spinner.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        slots_spinner.setFont(DIALOG_18_PLAIN);
         slots_spinner.setToolTipText("Slots");
         slots_spinner.setDoubleBuffered(true);
         slots_spinner.addChangeListener(new javax.swing.event.ChangeListener() {
@@ -208,7 +237,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
-        speed_label.setFont(new java.awt.Font("Dialog", 1, 26)); // NOI18N
+        speed_label.setFont(DIALOG_26_BOLD);
         speed_label.setHorizontalAlignment(javax.swing.SwingConstants.LEFT);
         speed_label.setText("speed");
         speed_label.setDoubleBuffered(true);
@@ -217,7 +246,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         progress_pbar.setDoubleBuffered(true);
 
         pause_button.setBackground(new java.awt.Color(255, 153, 0));
-        pause_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        pause_button.setFont(DIALOG_16_BOLD);
         pause_button.setForeground(java.awt.Color.white);
         pause_button.setText("PAUSE DOWNLOAD");
         pause_button.setDoubleBuffered(true);
@@ -228,7 +257,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         });
 
         stop_button.setBackground(new java.awt.Color(255, 0, 0));
-        stop_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        stop_button.setFont(DIALOG_16_BOLD);
         stop_button.setForeground(java.awt.Color.white);
         stop_button.setText("CANCEL DOWNLOAD");
         stop_button.setDoubleBuffered(true);
@@ -238,17 +267,17 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
-        keep_temp_checkbox.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        keep_temp_checkbox.setFont(DIALOG_16_BOLD);
         keep_temp_checkbox.setSelected(true);
         keep_temp_checkbox.setText("Keep temp file");
         keep_temp_checkbox.setDoubleBuffered(true);
 
-        file_name_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        file_name_label.setFont(DIALOG_20_BOLD);
         file_name_label.setForeground(new java.awt.Color(0, 102, 153));
         file_name_label.setText("---");
         file_name_label.setDoubleBuffered(true);
 
-        close_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        close_button.setFont(DIALOG_16_BOLD);
         close_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-cancel-30.png"))); // NOI18N
         close_button.setText("Close");
         close_button.setDoubleBuffered(true);
@@ -258,7 +287,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
-        copy_link_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        copy_link_button.setFont(DIALOG_16_BOLD);
         copy_link_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-copy-to-clipboard-30.png"))); // NOI18N
         copy_link_button.setText("Copy link");
         copy_link_button.setDoubleBuffered(true);
@@ -268,7 +297,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
-        restart_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        restart_button.setFont(DIALOG_16_BOLD);
         restart_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-restart-30.png"))); // NOI18N
         restart_button.setText("Restart");
         restart_button.setDoubleBuffered(true);
@@ -278,12 +307,12 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
-        file_size_label.setFont(new java.awt.Font("Dialog", 1, 20)); // NOI18N
+        file_size_label.setFont(DIALOG_20_BOLD);
         file_size_label.setForeground(new java.awt.Color(0, 102, 153));
         file_size_label.setText("---");
         file_size_label.setDoubleBuffered(true);
 
-        open_folder_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        open_folder_button.setFont(DIALOG_16_BOLD);
         open_folder_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-folder-30.png"))); // NOI18N
         open_folder_button.setText("Open folder");
         open_folder_button.setDoubleBuffered(true);
@@ -297,7 +326,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         slot_status_label.setHorizontalAlignment(javax.swing.SwingConstants.RIGHT);
         slot_status_label.setDoubleBuffered(true);
 
-        queue_up_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        queue_up_button.setFont(DIALOG_18_BOLD);
         queue_up_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/arriba_1.png"))); // NOI18N
         queue_up_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -305,7 +334,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
-        queue_down_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        queue_down_button.setFont(DIALOG_18_BOLD);
         queue_down_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/abajo_1.png"))); // NOI18N
         queue_down_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -313,7 +342,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
-        queue_top_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        queue_top_button.setFont(DIALOG_14_BOLD);
         queue_top_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/arrow_up.png"))); // NOI18N
         queue_top_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -321,7 +350,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             }
         });
 
-        queue_bottom_button.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        queue_bottom_button.setFont(DIALOG_14_BOLD);
         queue_bottom_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/arrow_down.png"))); // NOI18N
         queue_bottom_button.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -372,7 +401,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
                         .addComponent(close_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(restart_button)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 135, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 253, Short.MAX_VALUE)
                         .addComponent(keep_temp_checkbox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(stop_button)))
@@ -463,7 +492,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
             try {
                 Desktop.getDesktop().open(new File(_download.getDownload_path() + "/" + _download.getFile_name()).getParentFile());
             } catch (Exception ex) {
-                LOG.log(Level.INFO, ex.getMessage());
+                LOG.fatal("Cannot open folder! {}", ex.getMessage());
             }
         }
 
@@ -476,7 +505,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         THREAD_POOL.execute(() -> {
             _download.upWaitQueue();
-            MiscTools.GUIRunAndWait(() -> {
+            MiscTools.GUIRun(() -> {
                 queue_up_button.setEnabled(true);
             });
         });
@@ -489,7 +518,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         THREAD_POOL.execute(() -> {
             _download.downWaitQueue();
-            MiscTools.GUIRunAndWait(() -> {
+            MiscTools.GUIRun(() -> {
                 queue_down_button.setEnabled(true);
             });
         });
@@ -502,7 +531,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         THREAD_POOL.execute(() -> {
             _download.topWaitQueue();
-            MiscTools.GUIRunAndWait(() -> {
+            MiscTools.GUIRun(() -> {
                 queue_top_button.setEnabled(true);
             });
         });
@@ -515,7 +544,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
         THREAD_POOL.execute(() -> {
             _download.bottomWaitQueue();
-            MiscTools.GUIRunAndWait(() -> {
+            MiscTools.GUIRun(() -> {
                 queue_bottom_button.setEnabled(true);
             });
         });
@@ -523,17 +552,12 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void pause() {
-
         printStatusNormal("Pausing download ...");
-
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
                 c.setEnabled(false);
             }
-
             for (JComponent c : new JComponent[]{stop_button, keep_temp_checkbox}) {
-
                 c.setVisible(true);
             }
         });
@@ -541,20 +565,14 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void resume() {
-
         printStatusNormal("Downloading file from mega ...");
-
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
                 c.setEnabled(true);
             }
-
             for (JComponent c : new JComponent[]{stop_button, keep_temp_checkbox}) {
-
                 c.setVisible(false);
             }
-
             pause_button.setText(LabelTranslatorSingleton.getInstance().translate("PAUSE DOWNLOAD"));
             _download.getMain_panel().getView().getPause_all_down_button().setVisible(true);
         });
@@ -563,12 +581,9 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void stop(String status) {
-
         printStatusNormal(status);
-
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             for (JComponent c : new JComponent[]{pause_button, keep_temp_checkbox, stop_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
-
                 c.setEnabled(false);
             }
         });
@@ -577,12 +592,10 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void updateSpeed(final String speed, final Boolean visible) {
-
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             if (speed != null) {
                 speed_label.setText(speed);
             }
-
             if (visible != null) {
                 speed_label.setVisible(visible);
             }
@@ -591,23 +604,17 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void updateProgressBar(final long progress, final double bar_rate) {
-
-        MiscTools.GUIRunAndWait(() -> {
-            progress_pbar.setValue((int) Math.floor(bar_rate * progress));
-        });
+        MiscTools.GUIRun(() -> progress_pbar.setValue((int) Math.floor(bar_rate * progress)));
     }
 
     @Override
     public void updateProgressBar(final int value) {
-        MiscTools.GUIRunAndWait(() -> {
-            progress_pbar.setValue(value);
-        });
+        MiscTools.GUIRun(() -> progress_pbar.setValue(value));
     }
 
     @Override
     public void printStatusError(final String message) {
-
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             status_label.setForeground(Color.red);
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
@@ -615,8 +622,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void printStatusOK(final String message) {
-
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             status_label.setForeground(new Color(0, 170, 0));
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
@@ -624,8 +630,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void printStatusNormal(final String message) {
-
-        MiscTools.GUIRunAndWait(() -> {
+        MiscTools.GUIRun(() -> {
             status_label.setForeground(new Color(102, 102, 102));
             status_label.setText(LabelTranslatorSingleton.getInstance().translate(message));
         });
@@ -634,42 +639,29 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     @Override
     public void updateSlotsStatus() {
-
-        synchronized (_download.getWorkers_lock()) {
-
-            int conta_error = 0;
-
-            conta_error = _download.getChunkworkers().stream().filter((c) -> (c.isError_wait())).map((_item) -> 1).reduce(conta_error, Integer::sum);
-
-            final String status = conta_error > 0 ? "(" + String.valueOf(conta_error) + ")" : "";
-
-            MiscTools.GUIRun(() -> {
-                slot_status_label.setForeground(Color.RED);
-                slot_status_label.setText(status);
-            });
-        }
+        int errorCount = (int)_download.getChunkWorkers().stream().filter(ChunkDownloader::isError_wait).count();
+        final String status = errorCount > 0 ? "(" + errorCount + ")" : "";
+        MiscTools.GUIRun(() -> {
+            slot_status_label.setForeground(Color.RED);
+            slot_status_label.setText(status);
+        });
     }
 
     @Override
     public int getSlots() {
         try {
-            return (int) (MiscTools.futureRun((Callable) getSlots_spinner()::getValue).get());
-        } catch (InterruptedException ex) {
-            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
-            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
+            return (int) (MiscTools.futureRun(getSlots_spinner()::getValue).get());
+        } catch (InterruptedException | ExecutionException ex) {
+            LOG.fatal("Error in getSlots!", ex);
         }
         return 0;
     }
 
     public boolean isKeepTempFileSelected() {
-
         try {
-            return (boolean) (MiscTools.futureRun((Callable) getKeep_temp_checkbox()::isSelected).get());
-        } catch (InterruptedException ex) {
-            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
-            Logger.getLogger(DownloadView.class.getName()).log(Level.SEVERE, null, ex);
+            return (MiscTools.futureRun(getKeep_temp_checkbox()::isSelected).get());
+        } catch (InterruptedException | ExecutionException ex) {
+            LOG.fatal("Error in isKeepTempFileSelected!", ex);
         }
         return false;
     }
@@ -695,6 +687,4 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
     private javax.swing.JLabel status_label;
     private javax.swing.JButton stop_button;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(DownloadView.class.getName());
-
 }

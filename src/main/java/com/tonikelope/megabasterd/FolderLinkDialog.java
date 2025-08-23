@@ -9,9 +9,14 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Dialog;
+import com.tonikelope.megabasterd.db.KDBTools;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,13 +24,18 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
-import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.cleanFilePath;
+import static com.tonikelope.megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
+import static com.tonikelope.megabasterd.MiscTools.deleteSelectedTreeItems;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.formatBytes;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 
 /**
  *
@@ -33,11 +43,13 @@ import javax.swing.tree.TreeNode;
  */
 public class FolderLinkDialog extends javax.swing.JDialog {
 
+    private static final Logger LOG = LogManager.getLogger(FolderLinkDialog.class);
+
     private final String _link;
 
     private boolean _download;
 
-    private final List<HashMap> _download_links;
+    private final List<HashMap<String, Object>> _download_links;
 
     private long _total_space;
 
@@ -53,7 +65,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
         super.dispose();
     }
 
-    public List<HashMap> getDownload_links() {
+    public List<HashMap<String, Object>> getDownload_links() {
         return Collections.unmodifiableList(_download_links);
     }
 
@@ -97,7 +109,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             restore_button.setVisible(false);
 
-            final Dialog tthis = this;
+            final Dialog self = this;
 
             THREAD_POOL.execute(() -> {
                 _loadMegaDirTree();
@@ -116,7 +128,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else if (_mega_error == -18) {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER TEMPORARILY UNAVAILABLE!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -124,7 +136,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else if (_mega_error == -16) {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER BLOCKED/DELETED"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER BLOCKED/DELETED"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -132,7 +144,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 } else {
 
                     MiscTools.GUIRun(() -> {
-                        JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("MEGA FOLDER LINK ERROR!"), "Error", JOptionPane.ERROR_MESSAGE);
 
                         setVisible(false);
                     });
@@ -474,7 +486,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 node_bar.setValue(0);
             });
 
-            int conta_nodo = 0;
+            int nodeCount = 0;
 
             for (Object o : folder_nodes.values()) {
 
@@ -482,9 +494,9 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     return 1;
                 }
 
-                conta_nodo++;
+                nodeCount++;
 
-                int c = conta_nodo;
+                int c = nodeCount;
 
                 MiscTools.GUIRun(() -> {
                     node_bar.setValue(c);
@@ -564,7 +576,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             }
 
             if (root == null) {
-                LOG.log(SEVERE, null, "MEGA FOLDER ERROR (EMPTY?)");
+                LOG.fatal("MEGA FOLDER ERROR (EMPTY?)");
 
                 _mega_error = 2;
 
@@ -572,32 +584,43 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                 root.setParent(null);
 
-                final JTree ftree = file_tree;
+                final JTree fTree = file_tree;
 
-                final MegaMutableTreeNode roott = root;
+                final MegaMutableTreeNode rootNode = root;
 
                 MiscTools.GUIRunAndWait(() -> {
-
                     node_bar.setIndeterminate(true);
+                    String useRegex = KDBTools.selectSettingValue("use_file_regex");
+                    String regexPattern = KDBTools.selectSettingValue("file_regex_pattern");
+                    boolean filterEnabled = "yes".equalsIgnoreCase(useRegex) && regexPattern != null && !regexPattern.isEmpty();
 
-                    ftree.setModel(new DefaultTreeModel(roott));
+                    if (filterEnabled) {
+                        Pattern filePattern;
+                        try {
+                            filePattern = Pattern.compile(regexPattern);
+                        } catch (PatternSyntaxException pse) {
+                            LOG.warn("Invalid regex pattern", pse);
+                            filePattern = Pattern.compile(".*");
+                        }
+                        removeNonMatchingNodes(rootNode, filePattern);
+                    }
 
-                    ftree.setRootVisible(roott != null ? roott.getChildCount() > 0 : false);
-
-                    ftree.setEnabled(true);
+                    fTree.setModel(new DefaultTreeModel(rootNode));
+                    fTree.setRootVisible(rootNode.getChildCount() > 0);
+                    fTree.setEnabled(true);
                 });
 
             }
 
         } catch (MegaAPIException mex) {
 
-            LOG.log(SEVERE, null, mex);
+            LOG.fatal("", mex);
 
             _mega_error = mex.getCode();
 
         } catch (Exception ex) {
 
-            LOG.log(SEVERE, null, ex);
+            LOG.fatal("", ex);
 
             _mega_error = 1;
         }
@@ -707,6 +730,21 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             });
         });
     }
+    
+    private void removeNonMatchingNodes(MegaMutableTreeNode node, Pattern filePattern) {
+        if (node == null) return;
+        for (int i = node.getChildCount() - 1; i >= 0; i--) {
+            MegaMutableTreeNode child = (MegaMutableTreeNode) node.getChildAt(i);
+            if (child.isLeaf()) {
+                Object nameObj = ((Map<String, Object>) child.getUserObject()).get("name");
+                String name = nameObj != null ? nameObj.toString() : "";
+                if (filePattern.matcher(name).find()) node.remove(i);
+            } else {
+                removeNonMatchingNodes(child, filePattern);
+                if (child.getChildCount() == 0) node.remove(i); // Remove empty folders
+            }
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton dance_button;
@@ -721,5 +759,4 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private javax.swing.JLabel total_space_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(FolderLinkDialog.class.getName());
 }

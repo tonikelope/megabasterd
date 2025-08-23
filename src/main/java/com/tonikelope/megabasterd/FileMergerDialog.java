@@ -9,36 +9,37 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
-import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
-import static com.tonikelope.megabasterd.MiscTools.translateLabels;
-import static com.tonikelope.megabasterd.MiscTools.truncateText;
-import static com.tonikelope.megabasterd.MiscTools.updateFonts;
-import java.awt.Desktop;
-import java.awt.Dialog;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import static java.lang.Integer.MAX_VALUE;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.truncateText;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
+import static java.lang.Integer.MAX_VALUE;
 import static javax.swing.JOptionPane.YES_NO_CANCEL_OPTION;
 import static javax.swing.JOptionPane.showOptionDialog;
-import static javax.swing.WindowConstants.DISPOSE_ON_CLOSE;
 
 /**
  *
  * @author tonikelope
  */
 public class FileMergerDialog extends javax.swing.JDialog {
+
+    private static final Logger LOG = LogManager.getLogger(FileMergerDialog.class);
 
     private final MainPanel _main_panel;
     private File _output_dir = null;
@@ -93,10 +94,10 @@ public class FileMergerDialog extends javax.swing.JDialog {
                         });
                     }
 
-                    MiscTools.pausar(2000);
+                    MiscTools.pause(2000);
 
                 } catch (IOException ex) {
-                    Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
+                    LOG.fatal("IOException monitoring progress!", ex);
                 }
             }
 
@@ -153,13 +154,11 @@ public class FileMergerDialog extends javax.swing.JDialog {
     private void _deleteParts() {
 
         try {
-            this._file_parts.stream().map((file_path) -> new File(file_path)).forEachOrdered((file) -> {
-                file.delete();
-            });
+            this._file_parts.stream().map(File::new).forEachOrdered(File::delete);
 
             Files.deleteIfExists(Paths.get(_file_name_full + ".sha1"));
         } catch (IOException ex) {
-            Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Error deleting file parts!", ex);
         }
     }
 
@@ -423,7 +422,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
             pack();
 
-            Dialog tthis = this;
+            Dialog self = this;
 
             THREAD_POOL.execute(() -> {
                 try {
@@ -436,13 +435,13 @@ public class FileMergerDialog extends javax.swing.JDialog {
                             MiscTools.GUIRun(() -> {
                                 jProgressBar2.setValue(jProgressBar2.getMaximum());
 
-                                JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
+                                JOptionPane.showMessageDialog(self, LabelTranslatorSingleton.getInstance().translate("File successfully merged!"));
 
                                 if (Desktop.isDesktopSupported()) {
                                     try {
                                         Desktop.getDesktop().open(_output_dir);
                                     } catch (Exception ex) {
-                                        Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                        LOG.fatal("Cannot open output dir! {}", ex.getMessage());
                                     }
                                 }
 
@@ -489,7 +488,7 @@ public class FileMergerDialog extends javax.swing.JDialog {
                         });
                     }
                 } catch (Exception ex) {
-                    Logger.getLogger(FileMergerDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    LOG.fatal("Generic exception in FileMergerDialog! {}", ex.getMessage());
                 }
             });
 
@@ -531,5 +530,4 @@ public class FileMergerDialog extends javax.swing.JDialog {
     private javax.swing.JButton output_button;
     private javax.swing.JLabel output_folder_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(FileMergerDialog.class.getName());
 }

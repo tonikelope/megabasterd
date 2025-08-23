@@ -9,10 +9,15 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.awt.Color;
-import java.awt.Dialog;
+import com.tonikelope.megabasterd.db.KDBTools;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.TreeNode;
+import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -26,24 +31,27 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.BorderFactory;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.TreeNode;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static com.tonikelope.megabasterd.MainPanel.GUI_FONT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.checkMegaAccountLoginAndShowMasterPassDialog;
+import static com.tonikelope.megabasterd.MiscTools.copyTextToClipboard;
+import static com.tonikelope.megabasterd.MiscTools.deleteAllExceptSelectedTreeItems;
+import static com.tonikelope.megabasterd.MiscTools.deleteSelectedTreeItems;
+import static com.tonikelope.megabasterd.MiscTools.formatBytes;
+import static com.tonikelope.megabasterd.MiscTools.sortTree;
+import static com.tonikelope.megabasterd.MiscTools.translateLabels;
+import static com.tonikelope.megabasterd.MiscTools.updateFonts;
 
 /**
  *
  * @author tonikelope
  */
 public class FileGrabberDialog extends javax.swing.JDialog {
+
+    private static final Logger LOG = LogManager.getLogger(FileGrabberDialog.class);
 
     private boolean _upload;
     private final ArrayList<File> _files;
@@ -54,7 +62,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     private boolean _inserting_mega_accounts;
     private boolean _quota_ok;
     private int _last_selected_index;
-    private List<File> _drag_drop_files;
+    private final List<File> _drag_drop_files;
 
     @Override
     public void dispose() {
@@ -115,7 +123,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         MiscTools.GUIRunAndWait(() -> {
             initComponents();
 
-            String upload_log_string = DBTools.selectSettingValue("upload_log");
+            String upload_log_string = KDBTools.selectSettingValue("upload_log");
 
             upload_log_checkbox.setSelected("yes".equals(upload_log_string));
 
@@ -136,20 +144,17 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 }
 
                 @Override
-                public synchronized void drop(DropTargetDropEvent dtde) {
+                public synchronized void drop(DropTargetDropEvent event) {
                     changeToNormal();
-                    dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+                    event.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
 
                     List<File> files;
 
                     try {
 
-                        if (canImport(dtde.getTransferable().getTransferDataFlavors())) {
-                            files = (List<File>) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-
-                            THREAD_POOL.execute(() -> {
-                                _file_drop_notify(files);
-                            });
+                        if (canImport(event.getTransferable().getTransferDataFlavors())) {
+                            files = (List<File>) event.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+                            THREAD_POOL.execute(() -> _file_drop_notify(files));
                         }
 
                     } catch (Exception ex) {
@@ -158,12 +163,12 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 }
 
                 @Override
-                public synchronized void dragEnter(DropTargetDragEvent dtde) {
+                public synchronized void dragEnter(DropTargetDragEvent event) {
                     changeToDrop();
                 }
 
                 @Override
-                public synchronized void dragExit(DropTargetEvent dtde) {
+                public synchronized void dragExit(DropTargetEvent event) {
                     changeToNormal();
                 }
 
@@ -191,23 +196,16 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 _file_drop_notify(_drag_drop_files);
             }
 
-            if (_main_panel.getMega_accounts().size() > 0) {
+            if (!_main_panel.getMega_accounts().isEmpty()) {
 
-                ArrayList<String> cuentas = new ArrayList<>();
-
-                _main_panel.getMega_accounts().keySet().forEach((o) -> {
-                    cuentas.add(o);
-                });
-
-                Collections.sort(cuentas);
+                ArrayList<String> accounts = new ArrayList<>(_main_panel.getMega_accounts().keySet());
+                Collections.sort(accounts);
 
                 MiscTools.GUIRunAndWait(() -> {
                     if (!_main_panel.getMega_active_accounts().isEmpty()) {
                         _inserting_mega_accounts = true;
 
-                        cuentas.forEach((o) -> {
-                            account_combobox.addItem(o);
-                        });
+                        accounts.forEach((o) -> account_combobox.addItem(o));
 
                         _inserting_mega_accounts = false;
 
@@ -222,7 +220,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
                     } else {
 
-                        cuentas.forEach((o) -> {
+                        accounts.forEach((o) -> {
                             account_combobox.addItem(o);
                         });
                     }
@@ -545,8 +543,21 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
             DefaultMutableTreeNode root = new DefaultMutableTreeNode(filechooser.getSelectedFile().getParent());
 
-            for (File file : files_selected) {
+            String useFileRegexString = KDBTools.selectSettingValue("use_file_regex");
+            boolean useFileRegex = "yes".equalsIgnoreCase(useFileRegexString);
+            String regexPattern = KDBTools.selectSettingValue("file_regex_pattern");
 
+            Pattern pattern = null;
+            if (useFileRegex && regexPattern != null && !regexPattern.isEmpty()) {
+                pattern = Pattern.compile(regexPattern);
+            }
+            
+            for (File file : files_selected) {
+                if (useFileRegex && pattern != null) {
+                    Matcher matcher = pattern.matcher(file.getName());
+                    if (matcher.find()) continue;
+                }
+                
                 DefaultMutableTreeNode current_file = new DefaultMutableTreeNode(file.getName() + (file.isFile() ? " [" + formatBytes(file.length()) + "]" : ""));
 
                 root.add(current_file);
@@ -724,7 +735,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
             final String email = selected_item;
 
-            final Dialog tthis = this;
+            final Dialog self = this;
 
             used_space_label.setForeground(new Color(102, 102, 102));
 
@@ -748,7 +759,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                 MegaAPI ma = null;
                 try {
                     _quota_ok = false;
-                    ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, tthis, email);
+                    ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, self, email);
                     Long[] quota = ma.getQuota();
                     if (isDisplayable()) {
                         if (quota != null) {
@@ -972,10 +983,8 @@ public class FileGrabberDialog extends javax.swing.JDialog {
             MiscTools.GUIRun(() -> {
                 total_file_size_label.setText("[" + formatBytes(_total_space) + "]");
             });
-        } catch (InterruptedException ex) {
-            Logger.getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
-            Logger.getLogger(FileGrabberDialog.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (InterruptedException | ExecutionException ex) {
+            LOG.fatal("Error caught in _genFileList!", ex);
         }
 
     }
@@ -1001,7 +1010,6 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     private javax.swing.JLabel used_space_label;
     private javax.swing.JLabel warning_label;
     // End of variables declaration//GEN-END:variables
-    private static final Logger LOG = Logger.getLogger(FileGrabberDialog.class.getName());
 
     private void _file_drop_notify(List<File> files) {
 

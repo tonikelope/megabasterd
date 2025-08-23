@@ -13,8 +13,10 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import static com.tonikelope.megabasterd.MainPanel.*;
-import static com.tonikelope.megabasterd.MiscTools.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.crypto.CipherInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -23,17 +25,22 @@ import java.io.PipedOutputStream;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.crypto.CipherInputStream;
+
+import static com.tonikelope.megabasterd.MainPanel.STREAMER_PORT;
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
+import static com.tonikelope.megabasterd.MiscTools.UrlBASE642Bin;
+import static com.tonikelope.megabasterd.MiscTools.checkMegaAccountLoginAndShowMasterPassDialog;
+import static com.tonikelope.megabasterd.MiscTools.findFirstRegex;
+import static com.tonikelope.megabasterd.MiscTools.getWaitTimeExpBackOff;
 
 /**
  *
@@ -41,10 +48,11 @@ import javax.crypto.CipherInputStream;
  */
 public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNotifiable {
 
+    private static final Logger LOG = LogManager.getLogger(KissVideoStreamServer.class);
+
     public static final int THREAD_START = 0x01;
     public static final int THREAD_STOP = 0x02;
     public static final int DEFAULT_WORKERS = 10;
-    private static final Logger LOG = Logger.getLogger(KissVideoStreamServer.class.getName());
 
     private final MainPanel _main_panel;
     private final ConcurrentHashMap<String, HashMap<String, Object>> _link_cache;
@@ -52,10 +60,11 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
     private final ContentType _ctype;
     private volatile boolean _notified;
     private final Object _secure_notify_lock;
+    private MegaAPI mega_api = new MegaAPI();
 
     public KissVideoStreamServer(MainPanel panel) {
         _main_panel = panel;
-        _link_cache = new ConcurrentHashMap();
+        _link_cache = new ConcurrentHashMap<>();
         _working_threads = new ConcurrentLinkedQueue<>();
         _ctype = new ContentType();
         _notified = false;
@@ -65,6 +74,10 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
     public MainPanel getMain_panel() {
         return _main_panel;
+    }
+
+    public MegaAPI getMega_api() {
+        return mega_api;
     }
 
     public ConcurrentHashMap<String, HashMap<String, Object>> getLink_cache() {
@@ -98,7 +111,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(SEVERE, null, ex);
+                    LOG.fatal("Sleep interrupted!", ex);
                 }
             }
 
@@ -150,7 +163,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
     private String[] _getMegaFileMetadata(String link, MainPanelView panel) throws IOException {
 
         String[] file_info = null;
-        int conta_error = 0;
+        int errorCount = 0;
         boolean error;
 
         do {
@@ -161,29 +174,22 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {
 
-                    MegaAPI ma = new MegaAPI();
-
-                    file_info = ma.getMegaFileMetadata(link);
+                    file_info = mega_api.getMegaFileMetadata(link);
 
                 } else {
 
-                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8"))) : null);
+                    file_info = MegaCrypterAPI.getMegaFileMetadata(link, panel, getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes(StandardCharsets.UTF_8))) : null);
 
                 }
 
             } catch (APIException ex) {
-
                 error = true;
-
-                LOG.log(Level.SEVERE, ex.getMessage());
-
+                LOG.fatal("DownloadMetadata: API Exception captured! {}", ex.getMessage());
                 try {
-                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                    Thread.sleep(getWaitTimeExpBackOff(errorCount++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.log(Level.SEVERE, ex2.getMessage());
-
+                    LOG.fatal("DownloadMetadata: Post-API error sleep interrupted! {}", ex2.getMessage());
                 }
-
             }
 
         } while (error);
@@ -194,7 +200,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
     public String getMegaFileDownloadUrl(String link, String pass_hash, String noexpire_token, String mega_account) throws Exception {
 
         String dl_url = null;
-        int conta_error = 0;
+        int errorCount = 0;
         boolean error;
 
         do {
@@ -203,32 +209,26 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             try {
 
-                MegaAPI ma = new MegaAPI();
-
                 if (mega_account != null) {
 
-                    ma = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, _main_panel.getView(), mega_account);
+                    mega_api = checkMegaAccountLoginAndShowMasterPassDialog(_main_panel, _main_panel.getView(), mega_account);
                 }
 
                 if (findFirstRegex("://mega(\\.co)?\\.nz/", link, 0) != null) {
-                    dl_url = ma.getMegaFileDownloadUrl(link);
+                    dl_url = mega_api.getMegaFileDownloadUrl(link);
 
                 } else {
-                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, ma.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes("UTF-8")) + ":" + MiscTools.getMyPublicIP()) : null);
+                    dl_url = MegaCrypterAPI.getMegaFileDownloadUrl(link, pass_hash, noexpire_token, mega_api.getSid(), getMain_panel().getMega_proxy_server() != null ? (getMain_panel().getMega_proxy_server().getPort() + ":" + Bin2BASE64(("megacrypter:" + getMain_panel().getMega_proxy_server().getPassword()).getBytes(StandardCharsets.UTF_8)) + ":" + MiscTools.getMyPublicIP()) : null);
                 }
 
             } catch (APIException ex) {
-
                 error = true;
-
-                LOG.log(Level.SEVERE, ex.getMessage());
-
+                LOG.fatal("DownloadUrl: API Exception captured! {}", ex.getMessage());
                 try {
-                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                    Thread.sleep(getWaitTimeExpBackOff(errorCount++) * 1000);
                 } catch (InterruptedException ex2) {
-                    LOG.log(Level.SEVERE, ex2.getMessage());
+                    LOG.fatal("DownloadUrl: Post-API error sleep interrupted! {}", ex2.getMessage());
                 }
-
             }
 
         } while (error);
@@ -287,7 +287,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             String link;
 
-            String[] url_parts = new String(UrlBASE642Bin(url_path.substring(url_path.indexOf("/video/") + 7)), "UTF-8").split("\\|");
+            String[] url_parts = new String(UrlBASE642Bin(url_path.substring(url_path.indexOf("/video/") + 7)), StandardCharsets.UTF_8).split("\\|");
 
             mega_account = url_parts[0];
 
@@ -297,9 +297,9 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             link = url_parts[1];
 
-            LOG.log(Level.INFO, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), link, mega_account});
+            LOG.info("{} {}", link, mega_account);
 
-            HashMap cache_info, file_info;
+            HashMap<String, Object> cache_info, file_info;
 
             cache_info = getLink_cache().get(link);
 
@@ -376,7 +376,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
                     temp_url = (String) file_info.get("url");
 
-                    if (!checkMegaDownloadUrl(temp_url)) {
+                    if (!mega_api.checkMegaDownloadUrl(temp_url)) {
 
                         temp_url = getMegaFileDownloadUrl(link, pass_hash, noexpire_token, mega_account);
 
@@ -468,13 +468,11 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
                 }
             }
         } catch (Exception ex) {
-
             if (!(ex instanceof IOException)) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.fatal("Non-IO Exception in KissVideoStreamer! {}", ex.getMessage());
             }
-
         } finally {
-            LOG.log(Level.INFO, "{0} KissVideoStreamerHandle: bye bye", Thread.currentThread().getName());
+            LOG.info("KissVideoStreamerHandle: bye bye");
 
             if (chunkwriter != null) {
 

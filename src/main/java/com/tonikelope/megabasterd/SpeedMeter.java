@@ -9,14 +9,15 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MiscTools.*;
-import java.util.HashMap;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.swing.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JLabel;
+
+import static com.tonikelope.megabasterd.MiscTools.formatBytes;
 
 /**
  *
@@ -24,15 +25,16 @@ import javax.swing.JLabel;
  */
 public class SpeedMeter implements Runnable {
 
-    public static final int SLEEP = 3000;
-    public static final int CHUNK_SPEED_QUEUE_MAX_SIZE = 20;
-    private static final Logger LOG = Logger.getLogger(SpeedMeter.class.getName());
+    private static final Logger LOG = LogManager.getLogger(SpeedMeter.class);
+
+    public static final double SLEEP = 3000.0;
+    public static final int SLEEP_MILLIS = (int) SLEEP;
     private final JLabel _speed_label;
     private final JLabel _rem_label;
     private final TransferenceManager _trans_manager;
-    private final ConcurrentHashMap<Transference, HashMap> _transferences;
+    private final ConcurrentHashMap<Transference, TransferenceData> _transferences;
     private long _speed_counter;
-    private long _speed_acumulator;
+    private long _speed_accumulator;
     private volatile long _max_avg_global_speed;
 
     SpeedMeter(TransferenceManager trans_manager, JLabel sp_label, JLabel rem_label) {
@@ -41,36 +43,30 @@ public class SpeedMeter implements Runnable {
         _trans_manager = trans_manager;
         _transferences = new ConcurrentHashMap<>();
         _speed_counter = 0L;
-        _speed_acumulator = 0L;
+        _speed_accumulator = 0L;
         _max_avg_global_speed = 0L;
     }
 
     private long _getAvgGlobalSpeed() {
-        return Math.round((double) _speed_acumulator / _speed_counter);
+        return Math.round((double) _speed_accumulator / _speed_counter);
+    }
+
+    static class TransferenceData {
+        long last_progress;
+        int no_data_count;
+
+        public TransferenceData(Transference transference) {
+            this.last_progress = transference.getProgress();
+            this.no_data_count = 0;
+        }
     }
 
     public void attachTransference(Transference transference) {
-
-        HashMap<String, Object> properties = new HashMap<>();
-
-        properties.put("last_progress", transference.getProgress());
-        properties.put("no_data_count", 0);
-
-        _transferences.put(transference, properties);
-
+        _transferences.put(transference, new TransferenceData(transference));
     }
 
     public void detachTransference(Transference transference) {
-
-        if (_transferences.containsKey(transference)) {
-            _transferences.remove(transference);
-        }
-
-    }
-
-    public long getMaxAvgGlobalSpeed() {
-
-        return _max_avg_global_speed;
+        _transferences.remove(transference);
     }
 
     private String calcRemTime(long seconds) {
@@ -91,11 +87,11 @@ public class SpeedMeter implements Runnable {
         return String.format("%dd %d:%02d:%02d", days, hours, minutes, secs);
     }
 
-    private long calcTransferenceSpeed(Transference transference, HashMap properties) {
+    private long calcTransferenceSpeed(Transference transference, TransferenceData properties) {
 
-        long sp, progress = transference.getProgress(), last_progress = (long) properties.get("last_progress");
+        long sp, progress = transference.getProgress(), last_progress = properties.last_progress;
 
-        int no_data_count = (int) properties.get("no_data_count");
+        int no_data_count = properties.no_data_count;
 
         if (transference.isPaused()) {
 
@@ -103,7 +99,7 @@ public class SpeedMeter implements Runnable {
 
         } else if (progress > last_progress) {
 
-            double sleep_time = ((double) SLEEP * (no_data_count + 1)) / 1000;
+            double sleep_time = (SLEEP * (no_data_count + 1)) / 1000;
 
             double current_speed = (progress - last_progress) / sleep_time;
 
@@ -126,9 +122,8 @@ public class SpeedMeter implements Runnable {
             no_data_count++;
         }
 
-        properties.put("last_progress", last_progress);
-
-        properties.put("no_data_count", no_data_count);
+        properties.last_progress = last_progress;
+        properties.no_data_count = no_data_count;
 
         _transferences.put(transference, properties);
 
@@ -155,7 +150,7 @@ public class SpeedMeter implements Runnable {
 
                     global_speed = 0L;
 
-                    for (Map.Entry<Transference, HashMap> trans_info : _transferences.entrySet()) {
+                    for (Map.Entry<Transference, TransferenceData> trans_info : _transferences.entrySet()) {
 
                         long trans_sp = calcTransferenceSpeed(trans_info.getKey(), trans_info.getValue());
 
@@ -181,7 +176,7 @@ public class SpeedMeter implements Runnable {
                     if (global_speed > 0) {
 
                         _speed_counter++;
-                        _speed_acumulator += global_speed;
+                        _speed_accumulator += global_speed;
 
                         long avg_global_speed = _getAvgGlobalSpeed();
 
@@ -191,26 +186,22 @@ public class SpeedMeter implements Runnable {
 
                         _speed_label.setText(formatBytes(global_speed) + "/s");
 
-                        _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ " + formatBytes(avg_global_speed) + "/s @ " + calcRemTime((long) Math.floor((global_size - global_progress) / avg_global_speed)));
+                        _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ " + formatBytes(avg_global_speed) + "/s @ " + calcRemTime((long) Math.floor((double) (global_size - global_progress) / avg_global_speed)));
 
                     } else {
-
                         _speed_label.setText("------");
                         _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ --d --:--:--");
-
                     }
-
                 } else if (visible) {
-
                     _speed_label.setText("");
                     _rem_label.setText("");
                     visible = false;
                 }
 
-                Thread.sleep(SLEEP);
+                Thread.sleep(SLEEP_MILLIS);
 
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                LOG.fatal("Planned sleep interrupted! {}", ex.getMessage());
             }
 
         } while (true);

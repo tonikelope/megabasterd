@@ -9,20 +9,29 @@
  */
 package com.tonikelope.megabasterd;
 
-import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
-import static com.tonikelope.megabasterd.MainPanel.VERSION;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Desktop;
-import java.awt.Dialog;
-import java.awt.Font;
-import java.awt.FontFormatException;
-import java.awt.Frame;
-import java.awt.Graphics2D;
-import java.awt.GraphicsEnvironment;
-import java.awt.Image;
-import java.awt.Toolkit;
+import com.tonikelope.megabasterd.db.KDBTools;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiEvent;
+import javax.sound.midi.MidiSystem;
+import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
+import javax.sound.midi.Sequencer;
+import javax.sound.midi.ShortMessage;
+import javax.sound.midi.Synthesizer;
+import javax.sound.midi.Track;
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreeNode;
+import javax.swing.tree.TreePath;
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -31,28 +40,25 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
-import java.net.MalformedURLException;
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLDecoder;
-import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.IntBuffer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
@@ -74,48 +80,22 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MidiEvent;
-import javax.sound.midi.MidiSystem;
-import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequence;
-import javax.sound.midi.Sequencer;
-import javax.sound.midi.ShortMessage;
-import javax.sound.midi.Synthesizer;
-import javax.sound.midi.Track;
-import javax.swing.AbstractButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTree;
-import javax.swing.SwingUtilities;
-import javax.swing.UIDefaults;
-import javax.swing.UIManager;
-import javax.swing.border.TitledBorder;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeNode;
-import javax.swing.tree.TreePath;
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.bind.annotation.adapters.HexBinaryAdapter;
+
+import static com.tonikelope.megabasterd.MainPanel.THREAD_POOL;
+import static com.tonikelope.megabasterd.MainPanel.VERSION;
 
 /**
  *
  * @author tonikelope
  */
 public class MiscTools {
+    private static final Logger LOG = LogManager.getLogger(MiscTools.class);
 
     public static final int EXP_BACKOFF_BASE = 2;
     public static final int EXP_BACKOFF_SECS_RETRY = 1;
@@ -142,7 +122,6 @@ public class MiscTools {
             }
         }
     };
-    private static final Logger LOG = Logger.getLogger(MiscTools.class.getName());
 
     public static String computeFileSHA1(File file) throws IOException {
 
@@ -159,7 +138,7 @@ public class MiscTools {
             }
             return new HexBinaryAdapter().marshal(digest.digest()).toLowerCase().trim();
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Could not find algorithm!", ex);
         }
 
         return null;
@@ -180,7 +159,7 @@ public class MiscTools {
                 }
 
             } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.fatal("Captured IO Exception trying to log!", ex);
             }
 
         }
@@ -192,7 +171,7 @@ public class MiscTools {
         for (File f : directory.listFiles()) {
             if (f.isFile() && f.getName().startsWith("megabasterd_folder_cache_")) {
                 f.delete();
-                Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "REMOVING FOLDER CACHE FILE {0}", f.getAbsolutePath());
+                LOG.info("REMOVING FOLDER CACHE FILE {}", f.getAbsolutePath());
             }
         }
     }
@@ -209,11 +188,11 @@ public class MiscTools {
         }
     }
 
-    public static String getFechaHoraActual() {
+    public static String getDateTimeActual() {
 
         String format = "dd-MM-yyyy HH:mm:ss";
 
-        return getFechaHoraActual(format);
+        return getDateTimeActual(format);
     }
 
     public static boolean isVideoFile(String filename) {
@@ -224,7 +203,7 @@ public class MiscTools {
 
             return part_file == null && Files.probeContentType(Paths.get(filename)).startsWith("video/");
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Captured IO Exception in isVideoFile!", ex);
         }
 
         return false;
@@ -238,13 +217,13 @@ public class MiscTools {
 
             return part_file == null && Files.probeContentType(Paths.get(filename)).startsWith("image/");
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Captured IO Exception in isImageFile!", ex);
         }
 
         return false;
     }
 
-    public static String getFechaHoraActual(String format) {
+    public static String getDateTimeActual(String format) {
 
         Date currentDate = new Date(System.currentTimeMillis());
 
@@ -277,7 +256,7 @@ public class MiscTools {
             ge.registerFont(font);
 
         } catch (FontFormatException | IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("Failed to create font {}! {}", name, ex.getMessage());
         }
 
         return font;
@@ -318,36 +297,51 @@ public class MiscTools {
                 }
             }
         } catch (Exception ex) {
-            java.util.logging.Logger.getLogger(MiscTools.class.getName()).log(java.util.logging.Level.SEVERE, ex.getMessage());
+            LOG.fatal("Failed to set Nimbus look! {}", ex.getMessage());
         }
     }
 
     public static int[] bin2i32a(byte[] bin) {
+        Objects.requireNonNull(bin, "bin must not be null");
+        if (bin.length == 0) return new int[0];
         int l = (int) (4 * Math.ceil((double) bin.length / 4));
-
-        IntBuffer intBuf = ByteBuffer.wrap(bin, 0, l).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
-
-        int[] array = new int[intBuf.remaining()];
-
-        intBuf.get(array);
-
-        return array;
+        byte[] data = (l == bin.length) ? bin : Arrays.copyOf(bin, l);
+        IntBuffer ib = java.nio.ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+        int[] out = new int[ib.remaining()];
+        ib.get(out);
+        return out;
     }
 
     public static byte[] i32a2bin(int[] values) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        Objects.requireNonNull(values, "values must not be null");
+        if (values.length == 0) return new byte[0];
+        byte[] out = new byte[values.length * 4];
+        i32a2bin(values, out);
+        return out;
+    }
 
-        DataOutputStream dos = new DataOutputStream(baos);
-
-        for (int i = 0; i < values.length; ++i) {
-            try {
-                dos.writeInt(values[i]);
-            } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-            }
+    public static void bin2i32a(byte[] bin, int[] out) {
+        int l = (int) (4 * Math.ceil((double) bin.length / 4));
+        byte[] data = (l == bin.length) ? bin : Arrays.copyOf(bin, l);
+        IntBuffer ib = java.nio.ByteBuffer.wrap(data).order(ByteOrder.BIG_ENDIAN).asIntBuffer();
+        int n = ib.remaining();
+        if (out == null) {
+            out = new int[ib.remaining()];
         }
+        if (out.length < n) throw new IllegalArgumentException("out too small");
+        ib.get(out, 0, n);
+    }
 
-        return baos.toByteArray();
+    public static void i32a2bin(int[] values, byte[] out) {
+        Objects.requireNonNull(values); Objects.requireNonNull(out);
+        if (out.length < values.length * 4) throw new IllegalArgumentException("out too small");
+        int j = 0;
+        for (int v : values) {
+            out[j++] = (byte) (v >>> 24);
+            out[j++] = (byte) (v >>> 16);
+            out[j++] = (byte) (v >>> 8);
+            out[j++] = (byte)  v;
+        }
     }
 
     public static BigInteger mpi2big(byte[] s) {
@@ -534,7 +528,7 @@ public class MiscTools {
             Sequencer sequencer = MidiSystem.getSequencer();
 
             if (sequencer == null) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, "MIDI Sequencer device not supported");
+                LOG.fatal("MIDI Sequencer device not supported");
                 return null;
             }
 
@@ -572,14 +566,10 @@ public class MiscTools {
     public static String HashString(String algo, String data) {
         try {
             MessageDigest md = MessageDigest.getInstance(algo);
-
-            byte[] thedigest = md.digest(data.getBytes("UTF-8"));
-
-            return bin2hex(thedigest);
+            byte[] theDigest = md.digest(data.getBytes(StandardCharsets.UTF_8));
+            return bin2hex(theDigest);
         } catch (NoSuchAlgorithmException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (UnsupportedEncodingException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Captured exception in HashString!", ex);
         }
 
         return null;
@@ -587,16 +577,14 @@ public class MiscTools {
 
     public static String HashString(String algo, byte[] data) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algo);
-
-        byte[] thedigest = md.digest(data);
-
-        return bin2hex(thedigest);
+        byte[] theDigest = md.digest(data);
+        return bin2hex(theDigest);
     }
 
-    public static byte[] HashBin(String algo, String data) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public static byte[] HashBin(String algo, String data) throws NoSuchAlgorithmException {
         MessageDigest md = MessageDigest.getInstance(algo);
 
-        return md.digest(data.getBytes("UTF-8"));
+        return md.digest(data.getBytes(StandardCharsets.UTF_8));
     }
 
     public static byte[] HashBin(String algo, byte[] data) throws NoSuchAlgorithmException {
@@ -621,13 +609,12 @@ public class MiscTools {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(data);
     }
 
-    public static void pausar(long pause) {
+    public static void pause(long pause) {
         try {
             Thread.sleep(pause);
         } catch (InterruptedException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Interrupted while pausing!", ex);
         }
-
     }
 
     public static void GUIRun(Runnable r) {
@@ -650,15 +637,15 @@ public class MiscTools {
             }
         } catch (Exception ex) {
 
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Exception in GUIRunAndWait!", ex);
 
         }
 
     }
 
-    public static FutureTask futureRun(Callable c) {
+    public static <T> FutureTask<T> futureRun(Callable<T> c) {
 
-        FutureTask f = new FutureTask(c);
+        FutureTask<T> f = new FutureTask<>(c);
 
         Thread hilo = new Thread(f);
 
@@ -842,23 +829,15 @@ public class MiscTools {
                         }
 
                     } else {
-
                         MutableTreeNode new_root;
-
                         try {
-
                             new_root = (MutableTreeNode) tree_model.getRoot().getClass().newInstance();
-
                             tree.setModel(new DefaultTreeModel(new_root));
-
                             tree.setRootVisible(new_root.getChildCount() > 0);
-
                             tree.setEnabled(true);
-
                         } catch (InstantiationException | IllegalAccessException ex) {
-                            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                            LOG.fatal("Could not instantiate Tree! {}", ex.getMessage());
                         }
-
                         return true;
                     }
                 }
@@ -878,7 +857,7 @@ public class MiscTools {
             try (DirectoryStream<Path> directory = Files.newDirectoryStream(path)) {
                 return !directory.iterator().hasNext();
             } catch (IOException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+                LOG.fatal("IOException checking isDirEmpty!", ex);
             }
         }
 
@@ -895,7 +874,7 @@ public class MiscTools {
 
         if (paths != null) {
 
-            Class node_class = tree_model.getRoot().getClass();
+            Class<?> node_class = tree_model.getRoot().getClass();
 
             Object new_root = null;
 
@@ -905,40 +884,31 @@ public class MiscTools {
 
                 ((DefaultMutableTreeNode) new_root).setUserObject(((DefaultMutableTreeNode) tree_model.getRoot()).getUserObject());
 
-            } catch (InstantiationException | IllegalAccessException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-            } catch (NoSuchMethodException | SecurityException | IllegalArgumentException | InvocationTargetException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InstantiationException | IllegalAccessException | NoSuchMethodException | SecurityException |
+                     IllegalArgumentException | InvocationTargetException ex) {
+                LOG.fatal("Exception deleting tree elements! {}", ex.getMessage());
             }
 
             for (TreePath path : paths) {
 
-                if ((MutableTreeNode) path.getLastPathComponent() != (MutableTreeNode) tree_model.getRoot()) {
+                if (path.getLastPathComponent() != tree_model.getRoot()) {
                     Object parent = new_root;
 
                     for (Object path_element : path.getPath()) {
 
-                        if ((DefaultMutableTreeNode) path_element != (DefaultMutableTreeNode) tree_model.getRoot()) {
+                        if (path_element != tree_model.getRoot()) {
 
                             if (hashmap_old.get(path_element) == null) {
 
                                 Object node = null;
 
-                                if ((DefaultMutableTreeNode) path_element == (DefaultMutableTreeNode) path.getLastPathComponent()) {
-
+                                if (path_element == path.getLastPathComponent()) {
                                     node = path_element;
-
-                                } else {
-
-                                    try {
-
-                                        node = node_class.newInstance();
-
-                                        ((DefaultMutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
-
-                                    } catch (InstantiationException | IllegalAccessException ex) {
-                                        Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-                                    }
+                                } else try {
+                                    node = node_class.newInstance();
+                                    ((DefaultMutableTreeNode) node).setUserObject(((DefaultMutableTreeNode) path_element).getUserObject());
+                                } catch (InstantiationException | IllegalAccessException ex) {
+                                    LOG.fatal("Could not instantiate tree! {}", ex.getMessage());
                                 }
 
                                 if (parent != null) {
@@ -1006,34 +976,25 @@ public class MiscTools {
 
         byte[] the_array = new byte[length];
 
-        Random randomno = new Random();
+        Random random = new Random();
 
-        randomno.nextBytes(the_array);
+        random.nextBytes(the_array);
 
         return the_array;
     }
 
     public static String extractStringFromClipboardContents(Transferable contents) {
-
         String ret = null;
-
         if (contents != null) {
 
             try {
-
                 Object o = contents.getTransferData(DataFlavor.stringFlavor);
-
                 if (o instanceof String) {
-
                     ret = (String) o;
                 }
-
-            } catch (Exception ex) {
-            }
+            } catch (Exception ignore) { }
         }
-
         return ret;
-
     }
 
     public static String extractMegaLinksFromString(String data) {
@@ -1049,31 +1010,22 @@ public class MiscTools {
             ArrayList<String> links = new ArrayList<>();
             String url_decoded;
             try {
-                url_decoded = URLDecoder.decode(data, "UTF-8");
+                url_decoded = URLDecoder.decode(data, StandardCharsets.UTF_8);
             } catch (Exception ex) {
                 url_decoded = data;
             }
             ArrayList<String> base64_chunks = findAllRegex("[A-Za-z0-9+/_-]+=*", url_decoded, 0);
             if (!base64_chunks.isEmpty()) {
-
                 for (String chunk : base64_chunks) {
-
                     try {
-
                         String clean_data = MiscTools.newMegaLinks2Legacy(new String(Base64.getDecoder().decode(chunk)));
-
                         String decoded = MiscTools.findFirstRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
-
-                        if (decoded != null) {
-                            links.add(decoded);
-                        }
-
-                    } catch (Exception e) {
-                    };
+                        if (decoded != null) links.add(decoded);
+                    } catch (Exception ignore) { }
                 }
             }
             try {
-                url_decoded = URLDecoder.decode(data, "UTF-8");
+                url_decoded = URLDecoder.decode(data, StandardCharsets.UTF_8);
             } catch (Exception ex) {
                 url_decoded = data;
             }
@@ -1087,155 +1039,14 @@ public class MiscTools {
     }
 
     public static String extractFirstMegaLinkFromString(String data) {
-
         String res = "";
-
         if (data != null) {
-
-            try {
-                String clean_data = MiscTools.newMegaLinks2Legacy(URLDecoder.decode(data, "UTF-8"));
-
-                ArrayList<String> links = findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
-
-                links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
-
-                if (links.size() > 0) {
-
-                    res = links.get(0);
-                }
-            } catch (UnsupportedEncodingException ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-            }
+            String clean_data = MiscTools.newMegaLinks2Legacy(URLDecoder.decode(data, StandardCharsets.UTF_8));
+            ArrayList<String> links = findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
+            links.addAll(findAllRegex("mega://e(n|l)c[^\r\n]+", clean_data, 0));
+            if (!links.isEmpty()) res = links.getFirst();
         }
-
         return res;
-    }
-
-    public static boolean checkMegaDownloadUrl(String string_url) {
-
-        if (string_url == null || "".equals(string_url)) {
-            return false;
-        }
-
-        HttpURLConnection con = null;
-
-        int http_status = 0, http_error = 0;
-
-        String current_smart_proxy = null;
-
-        boolean smart_proxy_socks = false;
-
-        ArrayList<String> excluded_proxy_list = new ArrayList<>();
-
-        do {
-
-            SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
-
-            if (MainPanel.isUse_smart_proxy() && proxy_manager != null && proxy_manager.isForce_smart_proxy()) {
-
-                String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-                current_smart_proxy = smart_proxy[0];
-
-                smart_proxy_socks = smart_proxy[1].equals("socks");
-
-            }
-
-            try {
-
-                URL url = new URL(string_url + "/0-0");
-
-                if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && proxy_manager != null && !MainPanel.isUse_proxy()) {
-
-                    if (current_smart_proxy != null && http_error != 0) {
-
-                        proxy_manager.blockProxy(current_smart_proxy, "HTTP " + String.valueOf(http_error));
-
-                        String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-                        current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
-
-                    } else if (current_smart_proxy == null) {
-
-                        String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-                        current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
-                    }
-
-                    if (current_smart_proxy != null) {
-
-                        String[] proxy_info = current_smart_proxy.split(":");
-
-                        Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
-
-                        con = (HttpURLConnection) url.openConnection(proxy);
-
-                    } else {
-
-                        if (MainPanel.isUse_proxy()) {
-
-                            con = (HttpURLConnection) url.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-
-                            if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
-
-                                con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
-                            }
-                        } else {
-
-                            con = (HttpURLConnection) url.openConnection();
-                        }
-                    }
-
-                } else {
-
-                    if (MainPanel.isUse_proxy()) {
-
-                        con = (HttpURLConnection) url.openConnection(new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
-
-                        if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
-
-                            con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
-                        }
-                    } else {
-
-                        con = (HttpURLConnection) url.openConnection();
-                    }
-                }
-
-                if (current_smart_proxy != null && proxy_manager != null) {
-                    con.setConnectTimeout(proxy_manager.getProxy_timeout());
-                    con.setReadTimeout(proxy_manager.getProxy_timeout() * 2);
-                }
-
-                con.setUseCaches(false);
-
-                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
-
-                http_status = con.getResponseCode();
-
-                if (http_status != 200) {
-                    http_error = http_status;
-                } else {
-                    http_error = 0;
-                }
-
-            } catch (Exception ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-            } finally {
-
-                if (con != null) {
-                    con.disconnect();
-                }
-
-            }
-
-        } while (http_error == 509);
-
-        return http_status != 403;
     }
 
     public static String getMyPublicIP() {
@@ -1245,15 +1056,15 @@ public class MiscTools {
 
         try {
 
-            URL url_api = new URL("http://whatismyip.akamai.com/");
+            URL url_api = URI.create("http://whatismyip.akamai.com/").toURL();
 
             if (MainPanel.isUse_proxy()) {
 
                 con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                 }
             } else {
 
@@ -1273,17 +1084,13 @@ public class MiscTools {
                     byte_res.write(buffer, 0, reads);
                 }
 
-                public_ip = new String(byte_res.toByteArray(), "UTF-8");
+                public_ip = byte_res.toString(StandardCharsets.UTF_8);
             }
 
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("IO Exception getting public IP! {}", ex.getMessage());
         } finally {
-            if (con != null) {
-                con.disconnect();
-            }
+            if (con != null) con.disconnect();
         }
 
         return public_ip;
@@ -1291,23 +1098,21 @@ public class MiscTools {
 
     public static String checkNewVersion(String url) {
 
-        String new_version_major = null, new_version_minor = null, current_version_major = null, current_version_minor = null;
-
+        String new_version_major, new_version_minor, current_version_major, current_version_minor;
         URL mb_url;
-
         HttpURLConnection con = null;
 
         try {
 
-            mb_url = new URL(url);
+            mb_url = URI.create(url).toURL();
 
             if (MainPanel.isUse_proxy()) {
 
                 con = (HttpURLConnection) mb_url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                if (MainPanel.getProxy_user() != null && !MainPanel.getProxy_user().isEmpty()) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes(StandardCharsets.UTF_8)));
                 }
             } else {
 
@@ -1327,7 +1132,7 @@ public class MiscTools {
                     byte_res.write(buffer, 0, reads);
                 }
 
-                String latest_version_res = new String(byte_res.toByteArray(), "UTF-8");
+                String latest_version_res = byte_res.toString(StandardCharsets.UTF_8);
 
                 String latest_version = findFirstRegex("releases\\/tag\\/v?([0-9]+\\.[0-9]+)", latest_version_res, 1);
 
@@ -1346,14 +1151,10 @@ public class MiscTools {
                 }
             }
 
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("IO Exception checking new version! {}", ex.getMessage());
         } finally {
-            if (con != null) {
-                con.disconnect();
-            }
+            if (con != null) con.disconnect();
         }
 
         return null;
@@ -1362,21 +1163,20 @@ public class MiscTools {
     public static void openBrowserURL(final String url) {
         THREAD_POOL.execute(() -> {
             try {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Trying to open URL in external browser: {0}", url);
-
+                LOG.info("Trying to open URL in external browser: {}", url);
                 if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Desktop.Action.BROWSE)) {
                     Desktop.getDesktop().browse(new URI(url));
                     return;
                 }
                 if (System.getProperty("os.name").toLowerCase().contains("nux")) {
-                    Process p = Runtime.getRuntime().exec(new String[]{"xdg-open", url});
+                    Process p = KMiscTools.INSTANCE.runSystemProcess("xdg-open", url);
                     p.waitFor();
                     p.destroy();
                     return;
                 }
-                Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "Unable to open URL: Unsupported platform.", url);
+                LOG.warn("Unable to open URL ({}): Unsupported platform.", url);
             } catch (Exception ex) {
-                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+                LOG.fatal("Generic exception opening URL ({}): {}", url, ex.getMessage());
             }
         });
     }
@@ -1408,30 +1208,29 @@ public class MiscTools {
             return jarFile.getParentFile().getAbsolutePath();
 
         } catch (URISyntaxException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
+            LOG.fatal("Invalid URI in getCurrentJarParentPath!", ex);
         }
 
         return null;
     }
 
     public static void restartApplication() {
-
-        StringBuilder cmd = new StringBuilder();
-
-        cmd.append(System.getProperty("java.home")).append(File.separator).append("bin").append(File.separator).append("java ");
-
-        ManagementFactory.getRuntimeMXBean().getInputArguments().forEach((jvmArg) -> {
-            cmd.append(jvmArg).append(" ");
-        });
-
-        cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
-
+        StringBuilder cmd = new StringBuilder()
+            .append(System.getProperty("java.home"))
+            .append(File.separator)
+            .append("bin")
+            .append(File.separator)
+            .append("java ");
+        ManagementFactory.getRuntimeMXBean().getInputArguments().forEach((jvmArg) -> cmd.append(jvmArg).append(" "));
+        cmd.append("-cp ")
+            .append(ManagementFactory.getRuntimeMXBean().getClassPath())
+            .append(" ");
         cmd.append(MainPanel.class.getName()).append(" native 1");
 
         try {
-            Runtime.getRuntime().exec(cmd.toString());
+            KMiscTools.INSTANCE.runSystemProcess(cmd.toString());
         } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            LOG.fatal("Could not run command !{}", ex.getMessage());
         }
 
         System.exit(2);
@@ -1495,10 +1294,10 @@ public class MiscTools {
         if (asNumeric) {
             if (aLength > bLength && a.charAt(bLength) >= '0' && a.charAt(bLength) <= '9') // as number
             {
-                return 1;  // a has bigger size, thus b is smaller
+                return 1;  // A has bigger size, thus B is smaller
             } else if (bLength > aLength && b.charAt(aLength) >= '0' && b.charAt(aLength) <= '9') // as number
             {
-                return -1;  // b has bigger size, thus a is smaller
+                return -1;  // B has bigger size, thus A is smaller
             } else if (lastNumericCompare == 0) {
                 return aLength - bLength;
             } else {
@@ -1572,13 +1371,13 @@ public class MiscTools {
 
                 try {
 
-                    HashMap<String, Object> old_session_data = DBTools.selectMegaSession(email);
+                    HashMap<String, Object> old_session_data = KDBTools.selectMegaSession(email);
 
                     boolean unserialization_error = false;
 
                     if (old_session_data != null) {
 
-                        Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "Reutilizando sesión de MEGA guardada para {0}", email);
+                        LOG.info("Reusing MEGA session saved for {}", email);
 
                         MegaAPI old_ma = new MegaAPI();
 
@@ -1645,11 +1444,11 @@ public class MiscTools {
 
                         if (main_panel.getMaster_pass() != null) {
 
-                            DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
+                            KDBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
 
                         } else {
 
-                            DBTools.insertMegaSession(email, bs.toByteArray(), false);
+                            KDBTools.insertMegaSession(email, bs.toByteArray(), false);
                         }
                     }
 

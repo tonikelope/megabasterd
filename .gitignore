@@ -128,3 +128,17 @@ $RECYCLE.BIN/
 
 #MegaBasterd DB
 *.db
+
+# Gradle output
+.gradle/
+build/*
+run/
+# Gradle wrapper
+gradle-wrapper.jar
+
+#Kotlin
+.kotlin
+
+# Profiler
+.profileconfig.json
+profile.jfr
