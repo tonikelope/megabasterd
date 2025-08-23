@@ -835,74 +835,43 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                                 manager.secureNotify();
 
                                 if (verifyFileCBCMAC(filename)) {
-
                                     view.printStatusOK("File successfully downloaded! (Integrity check PASSED)");
-
                                 } else if (!_exit) {
-
                                     _status_error = "BAD NEWS :( File is DAMAGED!";
-
                                     String autoRestartDamagedSetting = KDBTools.selectSettingValue("auto_restart_damaged");
-
                                     if (autoRestartDamagedSetting != null) _auto_retry_on_error = autoRestartDamagedSetting.equals("yes");
-
                                     view.printStatusError(_status_error);
-
                                 } else {
-
                                     view.printStatusOK("File successfully downloaded! (but integrity check CANCELED)");
-
                                 }
 
-                                MiscTools.GUIRun(() -> {
-                                    view.getStop_button().setVisible(false);
-                                });
+                                MiscTools.GUIRun(() -> view.getStop_button().setVisible(false));
 
                             } else {
-
                                 view.printStatusOK("File successfully downloaded!");
-
                             }
 
                         } else if (_status_error != null) {
-
                             view.hideAllExceptStatus();
-
                             view.printStatusError(_status_error);
-
                         } else if (_canceled) {
-
                             view.hideAllExceptStatus();
-
                             view.printStatusNormal("Download CANCELED!");
-
                         } else {
-
                             view.hideAllExceptStatus();
-
                             _status_error = "UNEXPECTED ERROR!";
-
                             view.printStatusError(_status_error);
                         }
 
                     } else if (_status_error != null) {
-
                         view.hideAllExceptStatus();
-
                         view.printStatusError(_status_error != null ? _status_error : "ERROR");
-
                     } else if (_canceled) {
-
                         view.hideAllExceptStatus();
-
                         view.printStatusNormal("Download CANCELED!");
-
                     } else {
-
                         view.hideAllExceptStatus();
-
                         _status_error = "UNEXPECTED ERROR!";
-
                         view.printStatusError(_status_error);
                     }
 
@@ -919,25 +888,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         view.printStatusError(_status_error);
                     }
                 }
-
             } else if (_status_error != null) {
-
                 view.hideAllExceptStatus();
-
                 view.printStatusError(_status_error);
-
             } else if (_canceled) {
-
                 view.hideAllExceptStatus();
-
                 view.printStatusNormal("Download CANCELED!");
-
             } else {
-
                 view.hideAllExceptStatus();
-
                 _status_error = "UNEXPECTED ERROR!";
-
                 view.printStatusError(_status_error);
             }
 

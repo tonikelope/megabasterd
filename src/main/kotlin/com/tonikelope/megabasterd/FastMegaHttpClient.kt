@@ -14,15 +14,12 @@ import org.apache.hc.client5.http.protocol.HttpClientContext
 import org.apache.hc.client5.http.ssl.DefaultClientTlsStrategy
 import org.apache.hc.core5.http.ClassicHttpResponse
 import org.apache.hc.core5.http.HttpHost
-import org.apache.hc.core5.http.HttpStatus
 import org.apache.hc.core5.http.io.SocketConfig
 import org.apache.hc.core5.io.CloseMode
 import org.apache.hc.core5.io.ModalCloseable
 import org.apache.hc.core5.util.Timeout
 import org.apache.logging.log4j.LogManager
-import java.io.Closeable
 import java.io.IOException
-import java.io.InputStream
 import java.net.InetSocketAddress
 import java.net.URI
 import java.nio.charset.StandardCharsets
@@ -35,9 +32,6 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
     private val megaProxyConfig: MegaHttpProxyConfiguration = MegaHttpProxyConfiguration(),
     private val eventListeners: Map<FMEventType, () -> Unit> = mutableMapOf(),
 ) : HttpClientBuilder(), ModalCloseable {
-
-    // TODO Setup logging of requests and responses for debugging purposes
-
     private lateinit var connectionManager: PoolingHttpClientConnectionManager
     private var isSharedManager: Boolean = true
     private lateinit var httpClient: CloseableHttpClient
@@ -48,6 +42,8 @@ class FastMegaHttpClient<T : HttpUriRequestBase>(
 
     companion object {
         @JvmStatic
+        @Suppress("unused")
+        // TODO Setup logging of requests and responses for debugging purposes
         private val LOG = LogManager.getLogger(FastMegaHttpClient::class.java)
 
         @JvmStatic

@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
+import org.apache.hc.client5.http.ConnectTimeoutException;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.config.RequestConfig;
@@ -507,13 +508,14 @@ public class MegaAPI implements Serializable {
     private String RAW_REQUEST(String requestBody, URI apiUri) throws MegaAPIException {
         String megaResponse = null;
         int megaError, errorCount = 0, httpStatus;
-        final AtomicBoolean emptyResponse = new AtomicBoolean(false);
+        final AtomicBoolean emptyResponse = new AtomicBoolean(false), timeoutError = new AtomicBoolean(false);
         final AtomicInteger httpError = new AtomicInteger(0);
 
         do {
             httpError.set(0);
             megaError = 0;
             emptyResponse.set(false);
+            timeoutError.set(false);
             try (
                 FastMegaHttpClient<HttpPost> fastClient = new FastMegaHttpClient<>(
                     apiUri,
@@ -555,77 +557,13 @@ public class MegaAPI implements Serializable {
                 emptyResponse.set(true);
                 LOG.fatal("{} in RAW_REQUEST! {}", ex.getClass().getName(), ex.getMessage());
             } catch (IOException ex) {
-                LOG.fatal("IO Exception in RAW_REQUEST! {}", ex.getMessage());
+                if (ex instanceof ConnectTimeoutException) {
+                    timeoutError.set(true);
+                } else LOG.fatal("IO Exception in RAW_REQUEST! {}", ex.getMessage());
             }
 
-            /*try {
-
-                con.setRequestProperty("Content-type", "text/plain;charset=UTF-8");
-                con.setRequestProperty("Accept-Encoding", "gzip");
-                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
-                con.setUseCaches(false);
-
-                con.setRequestMethod("POST");
-                con.setDoOutput(true);
-                con.getOutputStream().write(requestBody.getBytes(StandardCharsets.UTF_8));
-                con.getOutputStream().close();
-
-                httpStatus = con.getResponseCode();
-
-                if (httpStatus != 200) {
-
-                    LOG.warn("{} {}",  requestBody, apiUri.toString());
-
-                    LOG.warn("Failed : HTTP error code: {}", httpStatus);
-
-                    http_error = httpStatus;
-
-                } else {
-
-                    try (InputStream is = "gzip".equals(con.getContentEncoding()) ? new GZIPInputStream(con.getInputStream()) : con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-
-                        int reads;
-
-                        while ((reads = is.read(buffer)) != -1) {
-
-                            byte_res.write(buffer, 0, reads);
-                        }
-
-                        megaResponse = byte_res.toString(StandardCharsets.UTF_8);
-
-                        if (!megaResponse.isEmpty()) {
-
-                            megaError = checkMEGAError(megaResponse);
-
-                            if (megaError != 0 && !Arrays.asList(MEGA_ERROR_NO_EXCEPTION_CODES).contains(megaError)) {
-
-                                throw new MegaAPIException(megaError);
-
-                            }
-
-                        } else {
-
-                            empty_response = true;
-                        }
-                    }
-
-                }
-
-            } catch (SSLException ssl_ex) {
-                empty_response = true;
-                LOG.fatal("SSL Error in RAW_REQUEST! {}", ssl_ex.getMessage());
-            } catch (IOException ex) {
-                LOG.fatal("IO Exception in RAW_REQUEST! {}", ex.getMessage());
-            } finally {
-                if (con != null) con.disconnect();
-            }*/
-
-            if ((emptyResponse.get() || megaError != 0 || httpError.get() != 0) && httpError.get() != 509) {
-
+            if ((timeoutError.get() || emptyResponse.get() || megaError != 0 || httpError.get() != 0) && httpError.get() != 509) {
                 LOG.warn("MegaAPI ERROR {} Waiting for retry...", String.valueOf(megaError));
-
                 try {
                     Thread.sleep(getWaitTimeExpBackOff(errorCount++) * 1000);
                 } catch (InterruptedException ex) {
