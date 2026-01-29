@@ -46,6 +46,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.StringTokenizer;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
@@ -94,6 +95,7 @@ public final class MainPanel {
     private static boolean _use_smart_proxy;
     private static boolean _run_command;
     private static String _run_command_path;
+    private static boolean _run_command_log;
     private static String _font;
     private static SmartMegaProxyManager _proxy_manager;
     private static String _language;
@@ -267,6 +269,7 @@ public final class MainPanel {
         loadUserSettings();
 
         if (_debug_file) {
+            _run_command_log = true;
 
             PrintStream fileOut;
 
@@ -864,9 +867,27 @@ public final class MainPanel {
 
             if (_run_command_path != null && !_run_command_path.equals("")) {
                 try {
-                    Runtime.getRuntime().exec(_run_command_path);
-                } catch (IOException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    StringTokenizer st = new StringTokenizer(_run_command_path);
+                    String[] cmdarray = new String[st.countTokens()];
+                    for (int i = 0; st.hasMoreTokens(); i++)
+                        cmdarray[i] = st.nextToken();
+
+                    ProcessBuilder pb;
+
+                    if (_run_command_log) {
+                        File externalCmdLog = new File(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_EXTERNAL_CMD.log");
+                        pb = new ProcessBuilder(cmdarray)
+                                .redirectOutput(ProcessBuilder.Redirect.appendTo(externalCmdLog))
+                                .redirectError(ProcessBuilder.Redirect.appendTo(externalCmdLog));
+                    } else {
+                        pb = new ProcessBuilder(cmdarray);
+                    }
+                    Process pr = pb.start();
+
+                    pr.waitFor();
+                    pr.destroy();
+                } catch (IOException | InterruptedException ex) {
+                    LOG.log(Level.SEVERE, ex.getMessage());
                 }
 
                 LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
