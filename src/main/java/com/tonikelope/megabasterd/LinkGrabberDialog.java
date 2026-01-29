@@ -460,9 +460,18 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
     public void notifyClipboardChange() {
 
         MiscTools.GUIRun(() -> {
-            String current_text = links_textarea.getText();
+            String stringFromClipboard = extractStringFromClipboardContents(_clipboardspy.getContents());
+            String extractedMegaLinks = extractMegaLinksFromString(stringFromClipboard);
+            if (!extractedMegaLinks.isEmpty()){
+                Set<String> link_set = new LinkedHashSet<>();
+                final String REGEX_ONE_OR_MORE_NEWLINE = "\\n+";
+                Arrays.stream(links_textarea.getText().split(REGEX_ONE_OR_MORE_NEWLINE))
+                                .filter(s->!s.isEmpty())
+                                        .forEach(link_set::add);
+                Collections.addAll(link_set, extractedMegaLinks.split(REGEX_ONE_OR_MORE_NEWLINE));
 
-            links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
+                links_textarea.setText(String.join("\n\n", link_set));
+            }
         });
     }
 
