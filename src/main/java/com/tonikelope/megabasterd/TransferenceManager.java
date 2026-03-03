@@ -525,6 +525,15 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
         });
 
+        _paused_all = true;
+
+        MiscTools.GUIRun(() -> {
+
+            _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("RESUME ALL"));
+            _pause_all_button.setEnabled(true);
+
+        });
+
         secureNotify();
 
         THREAD_POOL.execute(() -> {
@@ -555,15 +564,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                 }
 
             } while (running);
-
-            _paused_all = true;
-
-            MiscTools.GUIRun(() -> {
-
-                _pause_all_button.setText(LabelTranslatorSingleton.getInstance().translate("RESUME ALL"));
-                _pause_all_button.setEnabled(true);
-
-            });
 
             secureNotify();
 

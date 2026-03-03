@@ -562,7 +562,7 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
         printStatusNormal("Pausing upload ...");
 
         MiscTools.GUIRunAndWait(() -> {
-            for (JComponent c : new JComponent[]{pause_button, speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
+            for (JComponent c : new JComponent[]{speed_label, slots_label, slots_spinner, progress_pbar, file_name_label, file_size_label}) {
 
                 c.setEnabled(false);
             }
@@ -571,6 +571,9 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
                 c.setVisible(true);
             }
+
+            pause_button.setText(LabelTranslatorSingleton.getInstance().translate("RESUME UPLOAD"));
+            pause_button.setEnabled(true);
         });
     }
 
