@@ -41,7 +41,6 @@ public class FileSplitterDialog extends javax.swing.JDialog {
     private final MainPanel _main_panel;
     private File[] _files = null;
     private File _output_dir = null;
-    private volatile String _sha1 = null;
     private volatile long _progress = 0L;
     private volatile Path _current_part = null;
     private volatile int _current_file = 0;
@@ -86,17 +85,6 @@ public class FileSplitterDialog extends javax.swing.JDialog {
 
     private boolean _splitFile(int i) throws IOException {
 
-        _sha1 = "";
-
-        THREAD_POOL.execute(() -> {
-
-            try {
-                _sha1 = MiscTools.computeFileSHA1(new File(_files[i].getAbsolutePath()));
-            } catch (IOException ex) {
-                Logger.getLogger(FileSplitterDialog.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        });
-
         this._progress = 0L;
 
         int mBperSplit = Integer.parseInt(this.split_size_text.getText());
@@ -133,20 +121,6 @@ public class FileSplitterDialog extends javax.swing.JDialog {
             if (remainingBytes > 0 && !_exit) {
                 _writePartToFile(i, remainingBytes, position * bytesPerSplit, sourceChannel, conta_split, numSplits + (remainingBytes > 0 ? 1 : 0));
             }
-        }
-
-        while ("".equals(_sha1)) {
-            MiscTools.GUIRunAndWait(() -> {
-
-                split_button.setText(LabelTranslatorSingleton.getInstance().translate("GENERATING SHA1, please wait..."));
-
-            });
-
-            MiscTools.pausar(1000);
-        }
-
-        if (_sha1 != null) {
-            Files.writeString(Paths.get(this._files[i].getAbsolutePath() + ".sha1"), _sha1);
         }
 
         return true;
@@ -195,9 +169,13 @@ public class FileSplitterDialog extends javax.swing.JDialog {
         monitorProgress(f, byteSize);
 
         if (!_exit) {
+            long dest_bytes_copied = Files.exists(fileName) ? Files.size(fileName) : 0;
+
             try (RandomAccessFile toFile = new RandomAccessFile(fileName.toFile(), "rw"); FileChannel toChannel = toFile.getChannel()) {
-                sourceChannel.position(position);
-                toChannel.transferFrom(sourceChannel, 0, byteSize);
+                while (dest_bytes_copied < byteSize) {
+                    sourceChannel.position(position + dest_bytes_copied);
+                    dest_bytes_copied += toChannel.transferFrom(sourceChannel, dest_bytes_copied, byteSize - dest_bytes_copied);
+                }
             }
         }
 
