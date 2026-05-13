@@ -61,12 +61,11 @@ public class UploadManager extends TransferenceManager {
     public void remove(Transference[] uploads) {
 
         ArrayList<String[]> delete_up = new ArrayList<>();
+        final java.util.ArrayList<UploadView> views_to_remove = new java.util.ArrayList<>();
 
         for (final Transference u : uploads) {
 
-            MiscTools.GUIRun(() -> {
-                getScroll_panel().remove(((Upload) u).getView());
-            });
+            views_to_remove.add(((Upload) u).getView());
 
             getTransference_waitstart_queue().remove(u);
 
@@ -80,6 +79,14 @@ public class UploadManager extends TransferenceManager {
                 delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
             }
         }
+
+        MiscTools.GUIRun(() -> {
+            for (UploadView v : views_to_remove) {
+                getScroll_panel().remove(v);
+            }
+            getScroll_panel().revalidate();
+            getScroll_panel().repaint();
+        });
 
         try {
             DBTools.deleteUploads(delete_up.toArray(new String[delete_up.size()][]));

@@ -350,6 +350,32 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         secureNotify();
     }
 
+    private void _reorderScrollPanel() {
+
+        ArrayList<Transference> desired = new ArrayList<>(getTransference_waitstart_queue());
+        desired.addAll(getTransference_finished_queue());
+
+        MiscTools.GUIRun(() -> {
+            Component panel = (Component) getScroll_panel();
+            if (panel == null) {
+                return;
+            }
+            int z = 0;
+            for (Transference t : desired) {
+                Component view = (Component) t.getView();
+                if (view != null && view.getParent() == getScroll_panel() && z < getScroll_panel().getComponentCount()) {
+                    try {
+                        getScroll_panel().setComponentZOrder(view, z);
+                    } catch (IllegalArgumentException ignore) {
+                    }
+                    z++;
+                }
+            }
+            getScroll_panel().revalidate();
+            getScroll_panel().repaint();
+        });
+    }
+
     public void topWaitQueue(Transference t) {
 
         synchronized (getWait_queue_lock()) {
@@ -369,18 +395,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             getTransference_waitstart_queue().addAll(wait_array);
 
-            getTransference_waitstart_queue().forEach((t1) -> {
-                MiscTools.GUIRun(() -> {
-                    getScroll_panel().remove((Component) t1.getView());
-                    getScroll_panel().add((Component) t1.getView());
-                });
-            });
-            getTransference_finished_queue().forEach((t1) -> {
-                MiscTools.GUIRun(() -> {
-                    getScroll_panel().remove((Component) t1.getView());
-                    getScroll_panel().add((Component) t1.getView());
-                });
-            });
+            _reorderScrollPanel();
         }
 
         secureNotify();
@@ -405,18 +420,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             getTransference_waitstart_queue().addAll(wait_array);
 
-            getTransference_waitstart_queue().forEach((t1) -> {
-                MiscTools.GUIRun(() -> {
-                    getScroll_panel().remove((Component) t1.getView());
-                    getScroll_panel().add((Component) t1.getView());
-                });
-            });
-            getTransference_finished_queue().forEach((t1) -> {
-                MiscTools.GUIRun(() -> {
-                    getScroll_panel().remove((Component) t1.getView());
-                    getScroll_panel().add((Component) t1.getView());
-                });
-            });
+            _reorderScrollPanel();
         }
 
         secureNotify();
@@ -448,18 +452,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             getTransference_waitstart_queue().addAll(wait_array);
 
-            getTransference_waitstart_queue().forEach((t1) -> {
-                MiscTools.GUIRun(() -> {
-                    getScroll_panel().remove((Component) t1.getView());
-                    getScroll_panel().add((Component) t1.getView());
-                });
-            });
-            getTransference_finished_queue().forEach((t1) -> {
-                MiscTools.GUIRun(() -> {
-                    getScroll_panel().remove((Component) t1.getView());
-                    getScroll_panel().add((Component) t1.getView());
-                });
-            });
+            _reorderScrollPanel();
         }
 
         secureNotify();
@@ -491,18 +484,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             getTransference_waitstart_queue().addAll(wait_array);
 
-            getTransference_waitstart_queue().forEach((t1) -> {
-                MiscTools.GUIRun(() -> {
-                    getScroll_panel().remove((Component) t1.getView());
-                    getScroll_panel().add((Component) t1.getView());
-                });
-            });
-            getTransference_finished_queue().forEach((t2) -> {
-                MiscTools.GUIRun(() -> {
-                    getScroll_panel().remove((Component) t2.getView());
-                    getScroll_panel().add((Component) t2.getView());
-                });
-            });
+            _reorderScrollPanel();
         }
 
         secureNotify();
@@ -685,9 +667,14 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             _main_panel.getView().getUnfreeze_transferences_button().setVisible(_main_panel.getDownload_manager().hasFrozenTransferences() || _main_panel.getUpload_manager().hasFrozenTransferences());
 
-            _main_panel.getView().revalidate();
-
-            _main_panel.getView().repaint();
+            // Don't full-frame revalidate/repaint here: a single transfer
+            // queue change shouldn't relayout every row in every tab. Each
+            // mutating helper (topWaitQueue, bottomWaitQueue, remove, ...)
+            // is responsible for revalidating only its own scroll panel.
+            if (getScroll_panel() != null) {
+                getScroll_panel().revalidate();
+                getScroll_panel().repaint();
+            }
         });
     }
 
@@ -885,21 +872,9 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                         getTransference_waitstart_aux_queue().clear();
 
-                        getTransference_waitstart_queue().forEach((t) -> {
-                            MiscTools.GUIRun(() -> {
-                                getScroll_panel().remove((Component) t.getView());
-                                getScroll_panel().add((Component) t.getView());
-                            });
-                        });
-
                         sortTransferenceQueue(getTransference_finished_queue());
 
-                        getTransference_finished_queue().forEach((t) -> {
-                            MiscTools.GUIRun(() -> {
-                                getScroll_panel().remove((Component) t.getView());
-                                getScroll_panel().add((Component) t.getView());
-                            });
-                        });
+                        _reorderScrollPanel();
 
                     }
 

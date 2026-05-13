@@ -141,12 +141,11 @@ public class DownloadManager extends TransferenceManager {
     public void remove(Transference[] downloads) {
 
         ArrayList<String> delete_down = new ArrayList<>();
+        final java.util.ArrayList<DownloadView> views_to_remove = new java.util.ArrayList<>();
 
         for (final Transference d : downloads) {
 
-            MiscTools.GUIRun(() -> {
-                getScroll_panel().remove(((Download) d).getView());
-            });
+            views_to_remove.add(((Download) d).getView());
 
             getTransference_waitstart_queue().remove(d);
 
@@ -163,6 +162,14 @@ public class DownloadManager extends TransferenceManager {
                 }
             }
         }
+
+        MiscTools.GUIRun(() -> {
+            for (DownloadView v : views_to_remove) {
+                getScroll_panel().remove(v);
+            }
+            getScroll_panel().revalidate();
+            getScroll_panel().repaint();
+        });
 
         try {
             deleteDownloads(delete_down.toArray(new String[delete_down.size()]));
