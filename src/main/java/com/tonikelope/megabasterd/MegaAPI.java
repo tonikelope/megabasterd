@@ -1196,8 +1196,31 @@ public class MegaAPI implements Serializable {
         return System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + safe_id;
     }
 
+    public static final long FOLDER_CACHE_MAX_AGE_MS = 24L * 60L * 60L * 1000L;
+
     public boolean existsCachedFolderNodes(String folder_id) {
-        return Files.exists(Paths.get(_folderCachePath(folder_id)));
+
+        java.nio.file.Path p = Paths.get(_folderCachePath(folder_id));
+
+        if (!Files.exists(p)) {
+            return false;
+        }
+
+        try {
+            long age = System.currentTimeMillis() - Files.getLastModifiedTime(p).toMillis();
+            if (age > FOLDER_CACHE_MAX_AGE_MS) {
+                LOG.log(Level.INFO, "Folder cache for {0} is stale ({1}h old), invalidating", new Object[]{folder_id, age / 3600000L});
+                try {
+                    Files.deleteIfExists(p);
+                } catch (IOException ignore) {
+                }
+                return false;
+            }
+        } catch (IOException ex) {
+            return false;
+        }
+
+        return true;
     }
 
     private String getCachedFolderNodes(String folder_id) {

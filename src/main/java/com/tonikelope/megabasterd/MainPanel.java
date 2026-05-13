@@ -144,6 +144,8 @@ public final class MainPanel {
             MiscTools.createUploadLogDir();
         }
 
+        MiscTools.purgeOrphanThumbnails();
+
         final MainPanel main_panel = new MainPanel();
 
         invokeLater(() -> {

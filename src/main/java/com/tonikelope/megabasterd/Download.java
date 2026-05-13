@@ -945,6 +945,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     LOG.log(Level.FINE, "Closing output stream on exit: {0}", close_ex.getMessage());
                 }
             }
+
+            try {
+                getMain_panel().getGlobal_dl_speed().detachTransference(this);
+            } catch (Exception ignore) {
+            }
         }
 
         if (_file != null && !getView().isKeepTempFileSelected()) {

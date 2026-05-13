@@ -1151,6 +1151,15 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
             _progress_watchdog_lock.notifyAll();
         }
 
+        // Defensive: if run() bailed out before the in-flow detach at the
+        // success path, drop the SpeedMeter reference so the failed upload
+        // does not pin the Transference (and its entire graph) until app
+        // exit.
+        try {
+            getMain_panel().getGlobal_up_speed().detachTransference(this);
+        } catch (Exception ignore) {
+        }
+
         LOG.log(Level.INFO, "{0} Uploader {1} BYE BYE", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
     }
 

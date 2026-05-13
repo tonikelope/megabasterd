@@ -189,10 +189,39 @@ public class MiscTools {
     public static void purgeFolderCache() {
         File directory = new File(System.getProperty("java.io.tmpdir"));
 
-        for (File f : directory.listFiles()) {
+        File[] entries = directory.listFiles();
+        if (entries == null) {
+            return;
+        }
+
+        for (File f : entries) {
             if (f.isFile() && f.getName().startsWith("megabasterd_folder_cache_")) {
                 f.delete();
                 Logger.getLogger(MiscTools.class.getName()).log(Level.INFO, "REMOVING FOLDER CACHE FILE {0}", f.getAbsolutePath());
+            }
+        }
+    }
+
+    public static void purgeOrphanThumbnails() {
+
+        // Thumbnails are normally consumed by Upload.run within seconds and
+        // then deleted, but if MegaBasterd crashed or was force-killed
+        // mid-upload they orphan in java.io.tmpdir. Sweep on startup so the
+        // tmpdir doesn't fill over time.
+        File directory = new File(System.getProperty("java.io.tmpdir"));
+
+        File[] entries = directory.listFiles();
+        if (entries == null) {
+            return;
+        }
+
+        long cutoff = System.currentTimeMillis() - 60L * 60L * 1000L; // 1h grace
+
+        for (File f : entries) {
+            if (f.isFile() && f.getName().startsWith("megabasterd_thumbnail_") && f.lastModified() < cutoff) {
+                if (f.delete()) {
+                    Logger.getLogger(MiscTools.class.getName()).log(Level.FINE, "REMOVING ORPHAN THUMBNAIL {0}", f.getAbsolutePath());
+                }
             }
         }
     }
