@@ -50,9 +50,8 @@ public class DownloadManager extends TransferenceManager {
 
                 MiscTools.GUIRun(() -> {
                     getMain_panel().getView().getForce_chunk_reset_button().setEnabled(true);
+                    JOptionPane.showMessageDialog(getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("CURRENT DOWNLOAD CHUNKS RESET!"));
                 });
-
-                JOptionPane.showMessageDialog(getMain_panel().getView(), LabelTranslatorSingleton.getInstance().translate("CURRENT DOWNLOAD CHUNKS RESET!"));
             }
 
         });

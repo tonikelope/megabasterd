@@ -2430,16 +2430,24 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                     if (!_main_panel.getMega_active_accounts().containsKey(email) && ma.check2FA(email)) {
 
-                                        Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
+                                        final String[] code_holder = {null};
+                                        final boolean[] cancelled = {false};
+                                        final String f_email = email;
+                                        MiscTools.GUIRunAndWait(() -> {
+                                            Get2FACode dialog = new Get2FACode((Frame) getParent(), true, f_email, _main_panel);
+                                            dialog.setLocationRelativeTo(tthis);
+                                            dialog.setVisible(true);
+                                            if (dialog.isCode_ok()) {
+                                                code_holder[0] = dialog.getPin_code();
+                                            } else {
+                                                cancelled[0] = true;
+                                            }
+                                        });
 
-                                        dialog.setLocationRelativeTo(tthis);
-
-                                        dialog.setVisible(true);
-
-                                        if (dialog.isCode_ok()) {
-                                            pincode = dialog.getPin_code();
-                                        } else {
+                                        if (cancelled[0]) {
                                             error_2FA = true;
+                                        } else {
+                                            pincode = code_holder[0];
                                         }
                                     }
 
@@ -2517,16 +2525,24 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                         if (!_main_panel.getMega_active_accounts().containsKey(email) && ma.check2FA(email)) {
 
-                                            Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
+                                            final String[] code_holder = {null};
+                                            final boolean[] cancelled = {false};
+                                            final String f_email = email;
+                                            MiscTools.GUIRunAndWait(() -> {
+                                                Get2FACode dialog = new Get2FACode((Frame) getParent(), true, f_email, _main_panel);
+                                                dialog.setLocationRelativeTo(tthis);
+                                                dialog.setVisible(true);
+                                                if (dialog.isCode_ok()) {
+                                                    code_holder[0] = dialog.getPin_code();
+                                                } else {
+                                                    cancelled[0] = true;
+                                                }
+                                            });
 
-                                            dialog.setLocationRelativeTo(tthis);
-
-                                            dialog.setVisible(true);
-
-                                            if (dialog.isCode_ok()) {
-                                                pincode = dialog.getPin_code();
-                                            } else {
+                                            if (cancelled[0]) {
                                                 error_2FA = true;
+                                            } else {
+                                                pincode = code_holder[0];
                                             }
                                         }
 

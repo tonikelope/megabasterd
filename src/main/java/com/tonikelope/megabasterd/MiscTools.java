@@ -678,23 +678,41 @@ public class MiscTools {
 
     }
 
+    public static final boolean STRICT_EDT_CHECKS = Boolean.getBoolean("megabasterd.strict_edt");
+
+    private static Runnable _wrapEdtCheck(Runnable r) {
+        if (!STRICT_EDT_CHECKS) {
+            return r;
+        }
+        return () -> {
+            if (!SwingUtilities.isEventDispatchThread()) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "GUIRun body executed off-EDT", new IllegalStateException());
+            }
+            r.run();
+        };
+    }
+
     public static void GUIRun(Runnable r) {
 
+        Runnable runnable = _wrapEdtCheck(r);
+
         if (!SwingUtilities.isEventDispatchThread()) {
-            SwingUtilities.invokeLater(r);
+            SwingUtilities.invokeLater(runnable);
         } else {
-            r.run();
+            runnable.run();
         }
 
     }
 
     public static void GUIRunAndWait(Runnable r) {
 
+        Runnable runnable = _wrapEdtCheck(r);
+
         try {
             if (!SwingUtilities.isEventDispatchThread()) {
-                SwingUtilities.invokeAndWait(r);
+                SwingUtilities.invokeAndWait(runnable);
             } else {
-                r.run();
+                runnable.run();
             }
         } catch (Exception ex) {
 

@@ -663,7 +663,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                 _slots = getMain_panel().getDefault_slots_down();
 
-                                _view.getSlots_spinner().setValue(_slots);
+                                final int initial_slots = _slots;
+                                MiscTools.GUIRun(() -> _view.getSlots_spinner().setValue(initial_slots));
 
                                 for (int t = 1; t <= _slots; t++) {
                                     ChunkDownloader c = new ChunkDownloader(t, this);

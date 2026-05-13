@@ -137,23 +137,29 @@ public class SpeedMeter implements Runnable {
 
     @Override
     public void run() {
-        long global_speed, global_progress, global_size;
-        boolean visible = false;
+        final boolean[] visible_state = {false};
 
-        _speed_label.setVisible(true);
-        _rem_label.setVisible(true);
-        _speed_label.setText("");
-        _rem_label.setText("");
+        GUIRun(() -> {
+            _speed_label.setVisible(true);
+            _rem_label.setVisible(true);
+            _speed_label.setText("");
+            _rem_label.setText("");
+        });
 
         do {
 
             try {
 
+                final java.util.LinkedHashMap<TransferenceView, String> per_row_text = new java.util.LinkedHashMap<>();
+                final String[] new_speed_label = {null};
+                final String[] new_rem_label = {null};
+                final boolean[] clear_both = {false};
+
                 if (!_transferences.isEmpty()) {
 
-                    visible = true;
+                    visible_state[0] = true;
 
-                    global_speed = 0L;
+                    long global_speed = 0L;
 
                     for (Map.Entry<Transference, HashMap> trans_info : _transferences.entrySet()) {
 
@@ -163,20 +169,16 @@ public class SpeedMeter implements Runnable {
                             global_speed += trans_sp;
                         }
 
-                        if (trans_sp > 0) {
+                        TransferenceView view = trans_info.getKey().getView();
 
-                            trans_info.getKey().getView().updateSpeed(formatBytes(trans_sp) + "/s", true);
-
-                        } else {
-
-                            trans_info.getKey().getView().updateSpeed("------", true);
-
+                        if (view != null) {
+                            per_row_text.put(view, trans_sp > 0 ? (formatBytes(trans_sp) + "/s") : "------");
                         }
                     }
 
-                    global_size = _trans_manager.get_total_size();
+                    long global_size = _trans_manager.get_total_size();
 
-                    global_progress = _trans_manager.get_total_progress();
+                    long global_progress = _trans_manager.get_total_progress();
 
                     if (global_speed > 0) {
 
@@ -189,28 +191,46 @@ public class SpeedMeter implements Runnable {
                             _max_avg_global_speed = avg_global_speed;
                         }
 
-                        _speed_label.setText(formatBytes(global_speed) + "/s");
+                        new_speed_label[0] = formatBytes(global_speed) + "/s";
 
-                        _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ " + formatBytes(avg_global_speed) + "/s @ " + calcRemTime((long) Math.floor((global_size - global_progress) / avg_global_speed)));
+                        new_rem_label[0] = formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ " + formatBytes(avg_global_speed) + "/s @ " + calcRemTime(avg_global_speed > 0 ? (long) Math.floor((global_size - global_progress) / (double) avg_global_speed) : 0);
 
                     } else {
 
-                        _speed_label.setText("------");
-                        _rem_label.setText(formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ --d --:--:--");
+                        new_speed_label[0] = "------";
+                        new_rem_label[0] = formatBytes(global_progress) + "/" + formatBytes(global_size) + " @ --d --:--:--";
 
                     }
 
-                } else if (visible) {
+                } else if (visible_state[0]) {
 
-                    _speed_label.setText("");
-                    _rem_label.setText("");
-                    visible = false;
+                    clear_both[0] = true;
+                    visible_state[0] = false;
                 }
+
+                GUIRun(() -> {
+                    for (Map.Entry<TransferenceView, String> e : per_row_text.entrySet()) {
+                        e.getKey().updateSpeed(e.getValue(), true);
+                    }
+                    if (clear_both[0]) {
+                        _speed_label.setText("");
+                        _rem_label.setText("");
+                    } else {
+                        if (new_speed_label[0] != null && !new_speed_label[0].equals(_speed_label.getText())) {
+                            _speed_label.setText(new_speed_label[0]);
+                        }
+                        if (new_rem_label[0] != null && !new_rem_label[0].equals(_rem_label.getText())) {
+                            _rem_label.setText(new_rem_label[0]);
+                        }
+                    }
+                });
 
                 Thread.sleep(SLEEP);
 
             } catch (InterruptedException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
+                Thread.currentThread().interrupt();
+                LOG.log(Level.FINE, "SpeedMeter interrupted");
+                return;
             }
 
         } while (true);

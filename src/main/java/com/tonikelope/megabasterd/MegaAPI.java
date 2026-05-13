@@ -1497,7 +1497,12 @@ public class MegaAPI implements Serializable {
             int r = -1;
 
             if (existsCachedFolderNodes(folder_parts[0])) {
-                r = JOptionPane.showConfirmDialog(MainPanelView.getINSTANCE(), "Do you want to use FOLDER [" + folder_parts[0] + "] CACHED VERSION?\n\n(It could speed up the loading of very large folders)", "FOLDER CACHE", JOptionPane.YES_NO_OPTION);
+                final int[] rr = {-1};
+                final String fid = folder_parts[0];
+                MiscTools.GUIRunAndWait(() -> {
+                    rr[0] = JOptionPane.showConfirmDialog(MainPanelView.getINSTANCE(), "Do you want to use FOLDER [" + fid + "] CACHED VERSION?\n\n(It could speed up the loading of very large folders)", "FOLDER CACHE", JOptionPane.YES_NO_OPTION);
+                });
+                r = rr[0];
             }
 
             try {

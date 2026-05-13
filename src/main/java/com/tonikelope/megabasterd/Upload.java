@@ -804,7 +804,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                     _slots = getMain_panel().getDefault_slots_up();
 
-                    _view.getSlots_spinner().setValue(_slots);
+                    final int initial_slots = _slots;
+                    MiscTools.GUIRun(() -> _view.getSlots_spinner().setValue(initial_slots));
 
                     for (int t = 1; t <= _slots; t++) {
                         ChunkUploader c = new ChunkUploader(t, this);
