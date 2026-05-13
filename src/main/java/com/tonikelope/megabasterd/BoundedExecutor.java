@@ -10,7 +10,6 @@
 package com.tonikelope.megabasterd;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.Semaphore;
 
 /**
@@ -31,6 +30,7 @@ public class BoundedExecutor {
             throws InterruptedException {
 
         semaphore.acquire();
+        boolean submitted = false;
         try {
             exec.execute(new Runnable() {
                 public void run() {
@@ -41,10 +41,11 @@ public class BoundedExecutor {
                     }
                 }
             });
-        } catch (RejectedExecutionException e) {
-
-            semaphore.release();
-
+            submitted = true;
+        } finally {
+            if (!submitted) {
+                semaphore.release();
+            }
         }
 
     }

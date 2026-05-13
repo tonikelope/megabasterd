@@ -51,7 +51,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private volatile String _thumbnail_file = "";
     private volatile boolean _exit;
     private volatile boolean _frozen;
-    private int _slots;
+    private volatile int _slots;
     private final Object _secure_notify_lock;
     private final Object _workers_lock;
     private final Object _chunkid_lock;
@@ -59,28 +59,28 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private volatile long _progress;
     private byte[] _byte_file_iv;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
-    private long _last_chunk_id_dispatched;
+    private volatile long _last_chunk_id_dispatched;
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private final ExecutorService _thread_pool;
     private volatile int[] _file_meta_mac;
-    private String _fid;
+    private volatile String _fid;
     private volatile boolean _notified;
     private volatile String _completion_handler;
-    private int _paused_workers;
-    private Double _progress_bar_rate;
+    private volatile int _paused_workers;
+    private volatile Double _progress_bar_rate;
     private volatile boolean _pause;
     private final ArrayList<ChunkUploader> _chunkworkers;
-    private long _file_size;
-    private UploadMACGenerator _mac_generator;
+    private volatile long _file_size;
+    private volatile UploadMACGenerator _mac_generator;
     private boolean _create_dir;
-    private boolean _provision_ok;
+    private volatile boolean _provision_ok;
     private boolean _auto_retry_on_error;
-    private String _file_link;
+    private volatile String _file_link;
     private final MegaAPI _ma;
     private final String _file_name;
     private final String _parent_node;
     private int[] _ul_key;
-    private String _ul_url;
+    private volatile String _ul_url;
     private final String _root_node;
     private final byte[] _share_key;
     private final String _folder_link;
@@ -254,7 +254,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     public ArrayList<ChunkUploader> getChunkworkers() {
 
         synchronized (_workers_lock) {
-            return _chunkworkers;
+            return new ArrayList<>(_chunkworkers);
         }
 
     }
@@ -1207,7 +1207,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                     });
                 }
 
-                if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
+                if (!_exit && isPause() && _paused_workers >= _chunkworkers.size()) {
 
                     getView().printStatusNormal("Upload paused!");
 

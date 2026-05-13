@@ -76,14 +76,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private final String _url;
     private final String _download_path;
     private final String _custom_chunks_dir;
-    private String _file_name;
-    private String _file_key;
-    private Long _file_size;
-    private String _file_pass;
-    private String _file_noexpire;
+    private volatile String _file_name;
+    private volatile String _file_key;
+    private volatile Long _file_size;
+    private volatile String _file_pass;
+    private volatile String _file_noexpire;
     private volatile boolean _frozen;
     private final boolean _use_slots;
-    private int _slots;
+    private volatile int _slots;
     private final boolean _restart;
     private final ArrayList<ChunkDownloader> _chunkworkers;
     private final ExecutorService _thread_pool;
@@ -91,19 +91,19 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile boolean _pause;
     private final ConcurrentLinkedQueue<Long> _partialProgressQueue;
     private volatile long _progress;
-    private ChunkWriterManager _chunkmanager;
-    private String _last_download_url;
-    private boolean _provision_ok;
+    private volatile ChunkWriterManager _chunkmanager;
+    private volatile String _last_download_url;
+    private volatile boolean _provision_ok;
     private boolean _auto_retry_on_error;
-    private int _paused_workers;
+    private volatile int _paused_workers;
     private File _file;
     private boolean _checking_cbc;
     private boolean _retrying_request;
-    private Double _progress_bar_rate;
+    private volatile Double _progress_bar_rate;
     private OutputStream _output_stream;
     private String _status_error;
     private final ConcurrentLinkedQueue<Long> _rejectedChunkIds;
-    private long _last_chunk_id_dispatched;
+    private volatile long _last_chunk_id_dispatched;
     private final MegaAPI _ma;
     private volatile boolean _canceled;
     private volatile boolean _turbo;
@@ -358,7 +358,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     public ArrayList<ChunkDownloader> getChunkworkers() {
 
         synchronized (_workers_lock) {
-            return _chunkworkers;
+            return new ArrayList<>(_chunkworkers);
         }
     }
 
@@ -1184,7 +1184,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         synchronized (_workers_lock) {
 
-            if (++_paused_workers == _chunkworkers.size() && !_exit) {
+            if (++_paused_workers >= _chunkworkers.size() && !_exit) {
 
                 getView().printStatusNormal("Download paused!");
 
@@ -1351,7 +1351,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     getView().updateSlotsStatus();
                 }
 
-                if (!_exit && isPause() && _paused_workers == _chunkworkers.size()) {
+                if (!_exit && isPause() && _paused_workers >= _chunkworkers.size()) {
 
                     getView().printStatusNormal("Download paused!");
 

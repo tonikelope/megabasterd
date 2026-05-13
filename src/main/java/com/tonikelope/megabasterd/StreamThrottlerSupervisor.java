@@ -24,7 +24,7 @@ public class StreamThrottlerSupervisor implements Runnable, SecureMultiThreadNot
 
     private static final Logger LOG = Logger.getLogger(StreamThrottlerSupervisor.class.getName());
 
-    private ConcurrentLinkedQueue<Integer> _input_slice_queue, _output_slice_queue;
+    private volatile ConcurrentLinkedQueue<Integer> _input_slice_queue, _output_slice_queue;
 
     private final int _slice_size;
 

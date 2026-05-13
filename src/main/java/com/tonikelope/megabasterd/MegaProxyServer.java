@@ -38,9 +38,9 @@ public class MegaProxyServer implements Runnable {
 
     private final String _password;
     private final int _port;
-    private ServerSocket _serverSocket;
+    private volatile ServerSocket _serverSocket;
     private final MainPanel _main_panel;
-    private ExecutorService _handler_pool;
+    private volatile ExecutorService _handler_pool;
 
     public MegaProxyServer(MainPanel main_panel, String password, int port) {
 
