@@ -108,6 +108,67 @@ public class CryptTools {
         return true;
     }
 
+    // Prefix identifying a password-change-detection hash (HMAC-SHA256 over
+    // password using a per-account random salt). Stored in the legacy
+    // mega_accounts.password column to retire the cleartext password while
+    // preserving "did the user change their MEGA password" detection in
+    // the Settings dialog.
+    public static final String PASSWORD_HASH_TAG = "H1$";
+
+    // Sentinel value that the Settings dialog puts in the password cell
+    // of an existing MEGA account whose stored password is in hash form
+    // (cleartext was never persisted). Save handler treats this exact
+    // value as "user did not edit the cell" and skips the re-login path.
+    public static final String PASSWORD_UNCHANGED_SENTINEL = "···";
+
+    public static String hashPassword(String password) throws Exception {
+
+        byte[] salt = new byte[16];
+        new java.security.SecureRandom().nextBytes(salt);
+
+        return hashPasswordWithSalt(password, salt);
+    }
+
+    public static String hashPasswordWithSalt(String password, byte[] salt) throws Exception {
+
+        javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
+        mac.init(new javax.crypto.spec.SecretKeySpec(salt, "HmacSHA256"));
+        byte[] digest = mac.doFinal(password.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+        return PASSWORD_HASH_TAG
+                + java.util.Base64.getEncoder().encodeToString(salt) + "$"
+                + java.util.Base64.getEncoder().encodeToString(digest);
+    }
+
+    public static boolean verifyPasswordHash(String stored, String candidate) {
+
+        if (stored == null || candidate == null || !stored.startsWith(PASSWORD_HASH_TAG)) {
+            return false;
+        }
+
+        try {
+            String[] parts = stored.substring(PASSWORD_HASH_TAG.length()).split("\\$");
+            if (parts.length != 2) {
+                return false;
+            }
+            byte[] salt = java.util.Base64.getDecoder().decode(parts[0]);
+            byte[] expected = java.util.Base64.getDecoder().decode(parts[1]);
+
+            javax.crypto.Mac mac = javax.crypto.Mac.getInstance("HmacSHA256");
+            mac.init(new javax.crypto.spec.SecretKeySpec(salt, "HmacSHA256"));
+            byte[] candidate_digest = mac.doFinal(candidate.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+
+            return java.security.MessageDigest.isEqual(expected, candidate_digest);
+
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public static boolean isHashedPassword(String stored) {
+        return stored != null && stored.startsWith(PASSWORD_HASH_TAG);
+    }
+
     public static Cipher genDecrypter(String algo, String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
         SecretKeySpec skeySpec = new SecretKeySpec(key, algo);
 

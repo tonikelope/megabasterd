@@ -508,16 +508,20 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                         HashMap<String, Object> data = (HashMap) pair.getValue();
 
-                        String pass = null;
+                        String stored = (String) data.get("password");
+                        String pass;
 
-                        try {
-
-                            pass = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass()), "UTF-8");
-
-                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
-                        } catch (Exception ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
+                        if (CryptTools.isHashedPassword(stored)) {
+                            pass = CryptTools.PASSWORD_UNCHANGED_SENTINEL;
+                        } else {
+                            pass = null;
+                            try {
+                                pass = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(stored), _main_panel.getMaster_pass()), "UTF-8");
+                            } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                                LOG.log(Level.SEVERE, ex.getMessage());
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, ex.getMessage());
+                            }
                         }
 
                         String[] new_row_data = {(String) pair.getKey(), pass};
@@ -566,7 +570,10 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     HashMap<String, Object> data = (HashMap) pair.getValue();
 
-                    String[] new_row_data = {(String) pair.getKey(), (String) data.get("password")};
+                    String stored = (String) data.get("password");
+                    String shown = CryptTools.isHashedPassword(stored) ? CryptTools.PASSWORD_UNCHANGED_SENTINEL : stored;
+
+                    String[] new_row_data = {(String) pair.getKey(), shown};
 
                     mega_model.addRow(new_row_data);
                 }
@@ -2472,11 +2479,15 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                             _main_panel.getMega_active_accounts().put(email, ma);
 
-                                            String password = pass, password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
+                                            // The MEGA login password is no longer persisted in cleartext.
+                                            // Store only a per-account HMAC of it, used solely to detect
+                                            // whether the user changed the password (password_aes + user_hash
+                                            // are enough to actually re-login without the cleartext).
+                                            String password = CryptTools.hashPassword(pass);
+                                            String password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes()));
+                                            String user_hash = ma.getUser_hash();
 
                                             if (_main_panel.getMaster_pass_hash() != null) {
-
-                                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(pass.getBytes("UTF-8"), _main_panel.getMaster_pass()));
 
                                                 password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass()));
 
@@ -2500,20 +2511,33 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                 HashMap<String, Object> mega_account_data = (HashMap) _main_panel.getMega_accounts().get(email);
 
-                                String password = (String) mega_account_data.get("password");
+                                String stored_password = (String) mega_account_data.get("password");
 
-                                if (_main_panel.getMaster_pass() != null) {
+                                boolean password_changed;
 
-                                    try {
+                                if (CryptTools.PASSWORD_UNCHANGED_SENTINEL.equals(pass)) {
+                                    // The dialog placed this sentinel because the stored
+                                    // password is in hash form (no cleartext kept). Treat
+                                    // an unedited cell as "no change".
+                                    password_changed = false;
+                                } else if (CryptTools.isHashedPassword(stored_password)) {
 
-                                        password = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(password), _main_panel.getMaster_pass()), "UTF-8");
+                                    password_changed = !CryptTools.verifyPasswordHash(stored_password, pass);
 
-                                    } catch (Exception ex) {
-                                        LOG.log(Level.SEVERE, ex.getMessage());
+                                } else {
+                                    // Legacy cleartext (optionally encrypted with master pass).
+                                    String legacy_password = stored_password;
+                                    if (_main_panel.getMaster_pass() != null && legacy_password != null) {
+                                        try {
+                                            legacy_password = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(legacy_password), _main_panel.getMaster_pass()), "UTF-8");
+                                        } catch (Exception ex) {
+                                            LOG.log(Level.SEVERE, ex.getMessage());
+                                        }
                                     }
+                                    password_changed = legacy_password == null || !legacy_password.equals(pass);
                                 }
 
-                                if (!password.equals(pass)) {
+                                if (password_changed) {
 
                                     ma = new MegaAPI();
 
@@ -2567,20 +2591,18 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                                                 _main_panel.getMega_active_accounts().put(email, ma);
 
-                                                password = pass;
+                                                String new_password = CryptTools.hashPassword(pass);
 
                                                 String password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
 
                                                 if (_main_panel.getMaster_pass() != null) {
-
-                                                    password = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(pass.getBytes("UTF-8"), _main_panel.getMaster_pass()));
 
                                                     password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass()));
 
                                                     user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass()));
                                                 }
 
-                                                DBTools.insertMegaAccount(email, password, password_aes, user_hash);
+                                                DBTools.insertMegaAccount(email, new_password, password_aes, user_hash);
                                             }
                                         } else {
                                             email_error.add(email);
@@ -2747,15 +2769,19 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 _main_panel.getMega_accounts().entrySet().stream().map((pair) -> {
                     HashMap<String, Object> data = (HashMap) pair.getValue();
-                    String pass = null;
-                    try {
-
-                        pass = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass()), "UTF-8");
-
-                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
+                    String stored = (String) data.get("password");
+                    String pass;
+                    if (CryptTools.isHashedPassword(stored)) {
+                        pass = CryptTools.PASSWORD_UNCHANGED_SENTINEL;
+                    } else {
+                        pass = null;
+                        try {
+                            pass = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(stored), _main_panel.getMaster_pass()), "UTF-8");
+                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
+                            LOG.log(Level.SEVERE, ex.getMessage());
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, ex.getMessage());
+                        }
                     }
                     String[] new_row_data = {(String) pair.getKey(), pass};
                     return new_row_data;
@@ -2932,9 +2958,25 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                         email = (String) pair.getKey();
 
-                        if (old_master_pass_hash != null) {
+                        String stored_password = (String) data.get("password");
 
-                            password = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("password")), old_master_pass), "UTF-8");
+                        if (CryptTools.isHashedPassword(stored_password)) {
+                            // New format: HMAC, not encrypted with master pass.
+                            // Pass through unchanged; master pass rotation doesn't affect it.
+                            password = stored_password;
+                        } else if (old_master_pass_hash != null) {
+                            // Legacy: decrypt cleartext from old master, then upgrade to
+                            // hash format (don't re-encrypt the cleartext with the new
+                            // master pass -- we no longer persist cleartext at all).
+                            String cleartext = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(stored_password), old_master_pass), "UTF-8");
+                            password = CryptTools.hashPassword(cleartext);
+                        } else {
+                            // Legacy: cleartext on disk (no old master pass). Upgrade
+                            // to hash format too.
+                            password = CryptTools.hashPassword(stored_password);
+                        }
+
+                        if (old_master_pass_hash != null) {
 
                             password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("password_aes")), old_master_pass));
 
@@ -2942,16 +2984,12 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                         } else {
 
-                            password = (String) data.get("password");
-
                             password_aes = (String) data.get("password_aes");
 
                             user_hash = (String) data.get("user_hash");
                         }
 
                         if (_main_panel.getMaster_pass() != null) {
-
-                            password = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(password.getBytes("UTF-8"), _main_panel.getMaster_pass()));
 
                             password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(BASE642Bin(password_aes), _main_panel.getMaster_pass()));
 
