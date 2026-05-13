@@ -62,7 +62,9 @@ public class UploadMACGenerator implements Runnable, SecureSingleThreadNotifiabl
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
                     _exit = true;
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    Thread.currentThread().interrupt();
+                    LOG.log(Level.FINE, "secureWait interrupted");
+                    return;
                 }
             }
 

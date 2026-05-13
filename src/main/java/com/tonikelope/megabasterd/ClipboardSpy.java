@@ -100,7 +100,9 @@ public class ClipboardSpy implements Runnable, ClipboardOwner, SecureSingleThrea
                 try {
                     _secure_notify_lock.wait(1000);
                 } catch (InterruptedException ex) {
-                    LOG.log(SEVERE, ex.getMessage());
+                    Thread.currentThread().interrupt();
+                    LOG.log(Level.FINE, "secureWait interrupted");
+                    return;
                 }
             }
 
