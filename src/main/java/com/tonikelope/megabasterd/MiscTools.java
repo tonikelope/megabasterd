@@ -763,11 +763,15 @@ public class MiscTools {
 
         String[] units = {"B", "KB", "MB", "GB", "TB"};
 
-        bytes = Math.max(bytes, 0L);
+        if (bytes == null) {
+            return "0 B";
+        }
 
-        int pow = Math.min((int) ((bytes > 0L ? Math.log(bytes) : 0) / Math.log(1024)), units.length - 1);
+        long b = Math.max(bytes, 0L);
 
-        Double bytes_double = (double) bytes / (1L << (10 * pow));
+        int pow = Math.min((int) ((b > 0L ? Math.log(b) : 0) / Math.log(1024)), units.length - 1);
+
+        double bytes_double = (double) b / (1L << (10 * pow));
 
         DecimalFormat df = new DecimalFormat("#.##");
 

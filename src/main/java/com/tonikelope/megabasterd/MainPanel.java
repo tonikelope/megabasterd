@@ -1186,47 +1186,80 @@ public final class MainPanel {
         }
     }
 
+    private static java.io.RandomAccessFile _single_instance_raf;
+    private static java.nio.channels.FileLock _single_instance_lock;
+
     private boolean checkAppIsRunning() {
 
-        boolean app_is_running = true;
-
+        // First, try to obtain an exclusive file lock on a per-user
+        // sentinel file. This is the canonical Java single-instance
+        // pattern and is immune to "some other process already bound
+        // port 1338" (see GH #717).
         try {
-            Socket clientSocket = new Socket(InetAddress.getLoopbackAddress(), WATCHDOG_PORT);
+            File lock_file = new File(MEGABASTERD_HOME_DIR + "/.megabasterd" + VERSION + "/.megabasterd.lock");
+            lock_file.getParentFile().mkdirs();
+            _single_instance_raf = new java.io.RandomAccessFile(lock_file, "rw");
+            _single_instance_lock = _single_instance_raf.getChannel().tryLock();
 
-            clientSocket.close();
-
+            if (_single_instance_lock == null) {
+                // Another MegaBasterd instance already holds the lock.
+                // Try to ping its watchdog so it pops to the foreground;
+                // if that fails because the port is taken by something
+                // else, no harm done -- still return "running".
+                _pingWatchdog();
+                try {
+                    _single_instance_raf.close();
+                } catch (IOException ignore) {
+                }
+                return true;
+            }
         } catch (Exception ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING, "Single-instance file lock failed: {0}", ex.getMessage());
+            // Fall through to start a watchdog listener if we can.
+        }
 
-            app_is_running = false;
-
+        // We are the only running instance. Spin up a watchdog listener
+        // so future invocations can ask us to come to the foreground.
+        // Try the configured port first, then a few alternates so a
+        // foreign process holding 1338 doesn't break us.
+        for (int port = WATCHDOG_PORT; port < WATCHDOG_PORT + 10; port++) {
             try {
-
-                final ServerSocket serverSocket = new ServerSocket(WATCHDOG_PORT, 0, InetAddress.getLoopbackAddress());
+                final ServerSocket serverSocket = new ServerSocket(port, 0, InetAddress.getLoopbackAddress());
 
                 THREAD_POOL.execute(() -> {
-                    final ServerSocket socket = serverSocket;
-                    while (true) {
+                    while (!serverSocket.isClosed()) {
                         try {
-                            socket.accept();
-                            MiscTools.GUIRun(() -> {
-                                getView().setExtendedState(NORMAL);
-
-                                getView().setVisible(true);
-                            });
-                        } catch (Exception ex1) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex1.getMessage());
+                            try (Socket peer = serverSocket.accept()) {
+                                MiscTools.GUIRun(() -> {
+                                    getView().setExtendedState(NORMAL);
+                                    getView().setVisible(true);
+                                });
+                            }
+                        } catch (IOException ex1) {
+                            if (!serverSocket.isClosed()) {
+                                Logger.getLogger(MainPanel.class.getName()).log(Level.FINE, ex1.getMessage());
+                            }
+                            return;
                         }
                     }
                 });
-            } catch (Exception ex2) {
-
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex2.getMessage());
-
+                break;
+            } catch (Exception ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.FINE, "Watchdog port {0} busy, trying next", port);
             }
-
         }
 
-        return app_is_running;
+        return false;
+    }
+
+    private void _pingWatchdog() {
+        for (int port = WATCHDOG_PORT; port < WATCHDOG_PORT + 10; port++) {
+            try (Socket clientSocket = new Socket(InetAddress.getLoopbackAddress(), port)) {
+                return;
+            } catch (Exception ex) {
+                // try next port
+            }
+        }
     }
 
     public void resumeDownloads() {

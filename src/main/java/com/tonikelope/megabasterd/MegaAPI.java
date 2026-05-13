@@ -64,6 +64,7 @@ public class MegaAPI implements Serializable {
     public static final Integer[] MEGA_ERROR_NO_EXCEPTION_CODES = {-1, -3};
     public static final int PBKDF2_ITERATIONS = 100000;
     public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
+    public static final int MAX_RAW_REQUEST_RETRIES = 30;
     private static final Logger LOG = Logger.getLogger(MegaAPI.class.getName());
 
     public static int checkMEGAError(String data) {
@@ -568,7 +569,12 @@ public class MegaAPI implements Serializable {
 
             }
 
-        } while (http_error == 500 || empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()));
+        } while ((http_error == 500 || empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()))
+                && conta_error < MAX_RAW_REQUEST_RETRIES);
+
+        if (response == null && (http_error != 0 || empty_response || mega_error != 0)) {
+            LOG.log(Level.WARNING, "{0} RAW_REQUEST giving up after {1} retries (http_error={2} mega_error={3})", new Object[]{Thread.currentThread().getName(), conta_error, http_error, mega_error});
+        }
 
         return response;
 

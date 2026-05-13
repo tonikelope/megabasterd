@@ -238,7 +238,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
     public long calculateLastWrittenChunk(long temp_file_size) {
         if (temp_file_size > 3584 * 1024) {
-            return 7 + (long) Math.floor((float) (temp_file_size - 3584 * 1024) / (1024 * 1024 * (this.isUse_slots() ? Download.CHUNK_SIZE_MULTI : 1)));
+            return 7 + (long) Math.floor((double) (temp_file_size - 3584 * 1024) / (1024 * 1024 * (this.isUse_slots() ? Download.CHUNK_SIZE_MULTI : 1)));
         } else {
             long i = 0, tot = 0;
 
