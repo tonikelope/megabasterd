@@ -553,12 +553,13 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         _closed = true;
 
-        if (_provision_ok) {
-            try {
-                DBTools.deleteUpload(_file_name, _ma.getFull_email());
-            } catch (SQLException ex) {
-                LOG.log(Level.SEVERE, ex.getMessage());
-            }
+        // Always delete from DB when the user closes the row -- same fix as
+        // Download.close(). Failed-to-provision uploads stuck in the uploads
+        // table forever otherwise. See #699.
+        try {
+            DBTools.deleteUpload(_file_name, _ma.getFull_email());
+        } catch (SQLException ex) {
+            LOG.log(Level.SEVERE, ex.getMessage());
         }
         _main_panel.getUpload_manager().getTransference_remove_queue().add(this);
 

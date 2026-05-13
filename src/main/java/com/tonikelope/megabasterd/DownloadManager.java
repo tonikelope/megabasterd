@@ -156,11 +156,15 @@ public class DownloadManager extends TransferenceManager {
             if (((Download) d).isProvision_ok()) {
 
                 ((Download) d).finalizeTotals();
-
-                if (!d.isCanceled() || d.isClosed()) {
-                    delete_down.add(((Download) d).getUrl());
-                }
             }
+
+            // Always remove the DB row when the user removes the transfer.
+            // The previous "!d.isCanceled() || d.isClosed()" gate AND the
+            // outer "if provision_ok" check let cancelled-but-not-closed and
+            // failed-to-provision downloads survive in the downloads table,
+            // so they kept being resurrected on every restart via
+            // resumeDownloads -> selectDownloads. Closes #699.
+            delete_down.add(((Download) d).getUrl());
         }
 
         MiscTools.GUIRun(() -> {

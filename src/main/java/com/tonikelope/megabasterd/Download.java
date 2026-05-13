@@ -538,12 +538,16 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         _closed = true;
 
-        if (_provision_ok) {
-            try {
-                deleteDownload(_url);
-            } catch (SQLException ex) {
-                LOG.log(SEVERE, null, ex);
-            }
+        // Always delete from DB when the user closes the row, regardless of
+        // whether the download ever successfully provisioned. Previously this
+        // was gated on _provision_ok, so a download that failed at provision
+        // (expired link, deleted file on MEGA, ...) stayed in the downloads
+        // table forever and got resurrected on every restart via
+        // resumeDownloads -> selectDownloads. Closes #699.
+        try {
+            deleteDownload(_url);
+        } catch (SQLException ex) {
+            LOG.log(SEVERE, null, ex);
         }
 
         _main_panel.getDownload_manager().getTransference_remove_queue().add(this);

@@ -75,9 +75,10 @@ public class UploadManager extends TransferenceManager {
 
             ((Upload) u).finalizeTotals();
 
-            if (!u.isCanceled() || u.isClosed()) {
-                delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
-            }
+            // Always remove the DB row. Same fix as DownloadManager.remove --
+            // cancelled-but-not-closed uploads kept getting resurrected on
+            // restart. See #699.
+            delete_up.add(new String[]{u.getFile_name(), ((Upload) u).getMa().getFull_email()});
         }
 
         MiscTools.GUIRun(() -> {

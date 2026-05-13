@@ -682,7 +682,12 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     private String _genStatus() {
 
-        int pre = _transference_preprocess_global_queue.size();
+        // Both preprocess queues count for "still in progress": _global_queue
+        // holds the user-level link/file items, _preprocess_queue holds the
+        // worker Runnables. Status bar (line ~642) checks both; this used
+        // to only check _global_queue, so the "all finished" notification
+        // fired while a preprocess Runnable was still pending. Closes #434.
+        int pre = _transference_preprocess_global_queue.size() + _transference_preprocess_queue.size();
 
         int prov = _transference_provision_queue.size();
 
