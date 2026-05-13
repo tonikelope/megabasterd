@@ -3102,7 +3102,15 @@ public class SettingsDialog extends javax.swing.JDialog {
         if (run_command_textbox.getText() != null && !"".equals(run_command_textbox.getText().trim())) {
 
             try {
-                Runtime.getRuntime().exec(run_command_textbox.getText().trim());
+                String cmd = run_command_textbox.getText().trim();
+                java.io.File f = new java.io.File(cmd);
+                java.util.List<String> argv;
+                if (f.exists()) {
+                    argv = java.util.Collections.singletonList(cmd);
+                } else {
+                    argv = java.util.Arrays.asList(cmd.split("\\s+"));
+                }
+                new ProcessBuilder(argv).inheritIO().start();
             } catch (IOException ex) {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
                 JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);

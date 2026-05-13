@@ -176,16 +176,28 @@ public class StreamChunkManager implements Runnable, SecureMultiThreadNotifiable
                 _notified_threads.put(current_thread, false);
             }
 
-            while (!_notified_threads.get(current_thread)) {
+            try {
+                while (!_notified_threads.get(current_thread)) {
 
-                try {
-                    _secure_notify_lock.wait(1000);
-                } catch (InterruptedException ex) {
-                    LOG.log(Level.SEVERE, ex.getMessage());
+                    try {
+                        _secure_notify_lock.wait(1000);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        LOG.log(Level.FINE, "secureWait interrupted");
+                        return;
+                    }
+                }
+
+                _notified_threads.put(current_thread, false);
+            } finally {
+                // Drop the entry if this thread is no longer alive (cached
+                // thread pool workers expire after 60s idle) so the map
+                // doesn't accumulate dead-Thread keys forever in long
+                // streaming sessions.
+                if (_exit || !current_thread.isAlive()) {
+                    _notified_threads.remove(current_thread);
                 }
             }
-
-            _notified_threads.put(current_thread, false);
         }
     }
 

@@ -760,9 +760,7 @@ public class MiscTools {
 
         FutureTask f = new FutureTask(c);
 
-        Thread hilo = new Thread(f);
-
-        hilo.start();
+        THREAD_POOL.execute(f);
 
         return f;
     }
@@ -1567,20 +1565,21 @@ public class MiscTools {
 
     public static void restartApplication() {
 
-        StringBuilder cmd = new StringBuilder();
+        java.util.List<String> argv = new java.util.ArrayList<>();
 
-        cmd.append(System.getProperty("java.home")).append(File.separator).append("bin").append(File.separator).append("java ");
+        argv.add(System.getProperty("java.home") + File.separator + "bin" + File.separator + "java");
 
-        ManagementFactory.getRuntimeMXBean().getInputArguments().forEach((jvmArg) -> {
-            cmd.append(jvmArg).append(" ");
-        });
+        argv.addAll(ManagementFactory.getRuntimeMXBean().getInputArguments());
 
-        cmd.append("-cp ").append(ManagementFactory.getRuntimeMXBean().getClassPath()).append(" ");
+        argv.add("-cp");
+        argv.add(ManagementFactory.getRuntimeMXBean().getClassPath());
 
-        cmd.append(MainPanel.class.getName()).append(" native 1");
+        argv.add(MainPanel.class.getName());
+        argv.add("native");
+        argv.add("1");
 
         try {
-            Runtime.getRuntime().exec(cmd.toString());
+            new ProcessBuilder(argv).inheritIO().start();
         } catch (IOException ex) {
             Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
         }

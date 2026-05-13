@@ -323,7 +323,7 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
         OutputStream os;
 
-        CipherInputStream cis;
+        CipherInputStream cis = null;
 
         String httpmethod = xchg.getRequestMethod();
 
@@ -530,7 +530,10 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
             if (chunkwriter != null) {
 
-                pipeout.close();
+                try {
+                    pipeout.close();
+                } catch (IOException ignore) {
+                }
 
                 chunkworkers.forEach((d) -> {
                     d.setExit(true);
@@ -539,6 +542,20 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
                 chunkwriter.setExit(true);
 
                 chunkwriter.secureNotifyAll();
+            }
+
+            if (cis != null) {
+                try {
+                    cis.close();
+                } catch (IOException ignore) {
+                }
+            }
+
+            if (pipein != null) {
+                try {
+                    pipein.close();
+                } catch (IOException ignore) {
+                }
             }
 
             xchg.close();

@@ -84,7 +84,25 @@ public final class MainPanel {
     public static final float ZOOM_FACTOR = 0.8f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
-    public static final ExecutorService THREAD_POOL = newCachedThreadPool();
+    public static final ExecutorService THREAD_POOL = newCachedThreadPool(_megabasterdDaemonThreadFactory());
+
+    private static java.util.concurrent.ThreadFactory _megabasterdDaemonThreadFactory() {
+        return new java.util.concurrent.ThreadFactory() {
+            private final java.util.concurrent.atomic.AtomicLong counter = new java.util.concurrent.atomic.AtomicLong(1);
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, "MegaBasterd-Worker-" + counter.getAndIncrement());
+                // Daemon so the JVM can exit cleanly via System.exit even if a
+                // pool worker is still parked in secureWait. Non-daemon used to
+                // keep the JVM alive on shutdown when one of the long-running
+                // background loops (smart proxy refresh, memory monitor,
+                // watchdog accept) missed the _exit flag.
+                t.setDaemon(true);
+                return t;
+            }
+        };
+    }
     public static volatile String MEGABASTERD_HOME_DIR = System.getProperty("user.home");
     private static String _proxy_host;
     private static int _proxy_port;
@@ -866,7 +884,22 @@ public final class MainPanel {
 
             if (_run_command_path != null && !_run_command_path.equals("")) {
                 try {
-                    Runtime.getRuntime().exec(_run_command_path);
+                    String cmd = _run_command_path;
+                    java.io.File f = new java.io.File(cmd);
+                    java.util.List<String> argv;
+                    if (f.exists()) {
+                        // Treat the whole setting as a single binary path; this
+                        // makes "C:\Program Files\foo\bar.exe" work without the
+                        // old whitespace-split bug. If you need args, wrap in a
+                        // .bat/.sh script.
+                        argv = java.util.Collections.singletonList(cmd);
+                    } else {
+                        // Backwards-compat: command isn't a real file, fall back
+                        // to legacy whitespace-token splitting so existing
+                        // "command arg1 arg2" configs keep working.
+                        argv = java.util.Arrays.asList(cmd.trim().split("\\s+"));
+                    }
+                    new ProcessBuilder(argv).inheritIO().start();
                 } catch (IOException ex) {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
                 }
