@@ -77,7 +77,8 @@ public class MegaCrypterAPI {
             con.getOutputStream().close();
 
             if (con.getResponseCode() != 200) {
-                Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), con.getResponseCode()});
+                Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.WARNING, "{0} MegaCrypter HTTP {1} url={2}",
+                        new Object[]{Thread.currentThread().getName(), con.getResponseCode(), url_api.toString()});
 
                 MiscTools.drainAndCloseErrorStream(con);
 
@@ -109,7 +110,8 @@ public class MegaCrypterAPI {
             }
 
         } catch (IOException ex) {
-            Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE, ex.getMessage());
+            Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.SEVERE,
+                    Thread.currentThread().getName() + " MegaCrypter IOException url=" + url_api, ex);
         } finally {
 
             if (con != null) {

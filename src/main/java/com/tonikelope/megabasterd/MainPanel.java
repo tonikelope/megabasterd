@@ -288,16 +288,43 @@ public final class MainPanel {
 
         if (_debug_file) {
 
-            PrintStream fileOut;
-
             try {
-                fileOut = new PrintStream(new FileOutputStream(MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log"));
+                String debug_path = MainPanel.MEGABASTERD_HOME_DIR + "/MEGABASTERD_DEBUG.log";
 
+                // 1) Redirect System.out / System.err so plain println / e.printStackTrace
+                //    output also lands in the debug file.
+                PrintStream fileOut = new PrintStream(new FileOutputStream(debug_path, true), true, "UTF-8");
                 System.setOut(fileOut);
                 System.setErr(fileOut);
 
-            } catch (FileNotFoundException ex) {
-                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                // 2) Install a java.util.logging FileHandler on the root logger.
+                //    Without this, JUL keeps writing to the ConsoleHandler that
+                //    cached System.err at JUL-init time -- which happened well
+                //    before the System.setErr() above. Result: pre-this-fix,
+                //    "Debug file" in Settings appeared to do nothing because
+                //    every LOG.log(...) call went to the original stderr (i.e.,
+                //    discarded on javaw / Windows).
+                java.util.logging.FileHandler fh = new java.util.logging.FileHandler(debug_path, true);
+                fh.setEncoding("UTF-8");
+                fh.setLevel(Level.ALL);
+                fh.setFormatter(new java.util.logging.SimpleFormatter());
+
+                java.util.logging.Logger root = java.util.logging.Logger.getLogger("");
+                root.setLevel(Level.ALL);
+                root.addHandler(fh);
+
+                // Lower the ConsoleHandler level so important stuff still shows
+                // on stdout for users running from a terminal.
+                for (java.util.logging.Handler h : root.getHandlers()) {
+                    if (h instanceof java.util.logging.ConsoleHandler) {
+                        h.setLevel(Level.INFO);
+                    }
+                }
+
+                Logger.getLogger(MainPanel.class.getName()).log(Level.INFO, "Debug log started -> {0}", debug_path);
+
+            } catch (IOException ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, "Failed to install debug log handler", ex);
             }
         }
 
