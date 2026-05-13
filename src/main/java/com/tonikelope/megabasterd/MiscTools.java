@@ -248,7 +248,7 @@ public class MiscTools {
 
         Date currentDate = new Date(System.currentTimeMillis());
 
-        DateFormat df = new SimpleDateFormat(format);
+        DateFormat df = new SimpleDateFormat(format, java.util.Locale.ROOT);
 
         return df.format(currentDate);
     }
@@ -1058,14 +1058,54 @@ public class MiscTools {
         return (text.length() > max_length) ? text.replaceAll("^(.{1," + (max_length / 2) + "}).*?(.{1," + (max_length / 2) + "})$", "$1" + separator + "$2") : text;
     }
 
+    private static final boolean IS_WINDOWS = System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("win");
+
+    private static final java.util.regex.Pattern WIN_RESERVED_NAMES = java.util.regex.Pattern.compile(
+            "^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\\.|$)", java.util.regex.Pattern.CASE_INSENSITIVE);
+
+    public static boolean isWindowsOS() {
+        return IS_WINDOWS;
+    }
+
     public static String cleanFilename(String filename) {
 
-        return (System.getProperty("os.name").toLowerCase().contains("win") ? filename.replaceAll("[<>:\"/\\\\\\|\\?\\*\t]+", "") : filename).replaceAll("\\" + File.separator, "").replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim();
+        String cleaned = (IS_WINDOWS ? filename.replaceAll("[<>:\"/\\\\\\|\\?\\*\t]+", "") : filename)
+                .replaceAll("\\" + File.separator, "")
+                .replaceAll("\\.\\.+", "__")
+                .replaceAll("[\\x00-\\x1F]", "")
+                .trim();
+
+        if (IS_WINDOWS) {
+            // Windows reserved names: CON, PRN, AUX, NUL, COM1..COM9, LPT1..LPT9.
+            // Forbidden as bare name or as basename even with extension.
+            if (WIN_RESERVED_NAMES.matcher(cleaned).find()) {
+                cleaned = "_" + cleaned;
+            }
+            // Trailing dots and spaces are illegal on Windows.
+            while (cleaned.endsWith(".") || cleaned.endsWith(" ")) {
+                cleaned = cleaned.substring(0, cleaned.length() - 1);
+            }
+        }
+
+        // Bound filename to 250 bytes-ish to leave room within the typical
+        // 255 char filename limit and the 260 char Windows MAX_PATH.
+        if (cleaned.length() > 250) {
+            int dot = cleaned.lastIndexOf('.');
+            String ext = (dot >= 0 && dot > cleaned.length() - 16) ? cleaned.substring(dot) : "";
+            String base = (dot >= 0 && dot > cleaned.length() - 16) ? cleaned.substring(0, dot) : cleaned;
+            int keep = 250 - ext.length();
+            if (keep < 1) {
+                keep = 1;
+            }
+            cleaned = base.substring(0, Math.min(base.length(), keep)) + ext;
+        }
+
+        return cleaned;
     }
 
     public static String cleanFilePath(String path) {
 
-        return !path.equals(".") ? ((System.getProperty("os.name").toLowerCase().contains("win") ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\" + File.separator, "\\" + File.separator).replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim()) : path;
+        return !path.equals(".") ? ((IS_WINDOWS ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\" + File.separator, "\\" + File.separator).replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim()) : path;
     }
 
     public static byte[] genRandomByteArray(int length) {
@@ -1124,7 +1164,7 @@ public class MiscTools {
 
                     try {
 
-                        String clean_data = MiscTools.newMegaLinks2Legacy(new String(Base64.getDecoder().decode(chunk)));
+                        String clean_data = MiscTools.newMegaLinks2Legacy(new String(Base64.getDecoder().decode(chunk), java.nio.charset.StandardCharsets.UTF_8));
 
                         String decoded = MiscTools.findFirstRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", clean_data, 0);
 
@@ -1433,7 +1473,7 @@ public class MiscTools {
                     Desktop.getDesktop().browse(new URI(url));
                     return;
                 }
-                if (System.getProperty("os.name").toLowerCase().contains("nux")) {
+                if (System.getProperty("os.name", "").toLowerCase(java.util.Locale.ROOT).contains("nux")) {
                     Process p = Runtime.getRuntime().exec(new String[]{"xdg-open", url});
                     p.waitFor();
                     p.destroy();
@@ -1516,8 +1556,8 @@ public class MiscTools {
         }
 
         if (ignoreCase) {
-            a = a.toLowerCase();
-            b = b.toLowerCase();
+            a = a.toLowerCase(java.util.Locale.ROOT);
+            b = b.toLowerCase(java.util.Locale.ROOT);
         }
         int aLength = a.length();
         int bLength = b.length();

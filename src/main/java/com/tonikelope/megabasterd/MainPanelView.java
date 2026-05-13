@@ -281,14 +281,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                             File upload_log = new File(MiscTools.UPLOAD_LOGS_DIR + "/megabasterd_upload_" + parent_node + ".log");
                             upload_log.createNewFile();
 
-                            FileWriter fr;
-                            try {
-                                fr = new FileWriter(upload_log, true);
+                            try (java.io.OutputStreamWriter fr = new java.io.OutputStreamWriter(new java.io.FileOutputStream(upload_log, true), java.nio.charset.StandardCharsets.UTF_8)) {
                                 fr.write("***** MegaBasterd UPLOAD LOG FILE *****\n\n");
                                 fr.write(MiscTools.getFechaHoraActual() + "\n\n");
                                 fr.write(ma.getEmail() + "\n\n");
                                 fr.write(dir_name + "   " + folder_link + "\n\n");
-                                fr.close();
                             } catch (IOException ex) {
                                 Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
                             }

@@ -998,11 +998,8 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                     if (upload_log.exists()) {
 
-                                        FileWriter fr;
-                                        try {
-                                            fr = new FileWriter(upload_log, true);
+                                        try (java.io.OutputStreamWriter fr = new java.io.OutputStreamWriter(new java.io.FileOutputStream(upload_log, true), java.nio.charset.StandardCharsets.UTF_8)) {
                                             fr.write("[" + MiscTools.getFechaHoraActual() + "] " + _file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
-                                            fr.close();
                                         } catch (IOException ex) {
                                             Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
                                         }
