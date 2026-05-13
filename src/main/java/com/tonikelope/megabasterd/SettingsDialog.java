@@ -3410,11 +3410,29 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
 
+                    int skipped = 0;
                     for (String line : result) {
 
-                        String email = MiscTools.findFirstRegex("^[^#]+", line, 0).trim();
-                        String pass = MiscTools.findFirstRegex("^[^#]+#(.+)$", line, 1);
+                        // Skip lines that aren't in EMAIL#PASS format (comments,
+                        // garbage, accidental blank-ish rows). Previously these
+                        // produced null-pass entries that NPE'd the save loop.
+                        // See #645.
+                        int sep = line.indexOf('#');
+                        if (sep <= 0 || sep >= line.length() - 1) {
+                            skipped++;
+                            continue;
+                        }
+                        String email = line.substring(0, sep).trim();
+                        String pass = line.substring(sep + 1).trim();
+                        if (email.isEmpty() || pass.isEmpty()) {
+                            skipped++;
+                            continue;
+                        }
                         model.addRow(new Object[]{email, pass});
+                    }
+
+                    if (skipped > 0) {
+                        Logger.getLogger(SettingsDialog.class.getName()).log(Level.WARNING, "Account import: skipped {0} malformed line(s) (expected EMAIL#PASS per line)", skipped);
                     }
 
                     mega_accounts_table.setModel(model);
