@@ -84,7 +84,7 @@ public class Thumbnailer {
                 return null;
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            Logger.getLogger(Thumbnailer.class.getName()).log(Level.SEVERE, null, e);
         }
 
         return null;

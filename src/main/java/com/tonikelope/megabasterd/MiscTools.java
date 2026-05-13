@@ -542,16 +542,21 @@ public class MiscTools {
 
             Font new_font = font.deriveFont(old_font.getStyle(), Math.round(old_font.getSize() * zoom_factor));
 
-            boolean error;
-
-            do {
+            // Cap retries: setFont should not throw, but if it does (headless
+            // contexts have surfaced odd cases) we don't want to spin the EDT
+            // forever as the old "do { ... } while (error)" with no bound did.
+            int attempts = 0;
+            while (true) {
                 try {
                     component.setFont(new_font);
-                    error = false;
+                    break;
                 } catch (Exception ex) {
-                    error = true;
+                    if (++attempts >= 3) {
+                        Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "setFont failed after {0} attempts: {1}", new Object[]{attempts, ex.getMessage()});
+                        break;
+                    }
                 }
-            } while (error);
+            }
 
         }
     }
@@ -632,7 +637,7 @@ public class MiscTools {
             sequencer.start();
             return sequencer;
         } catch (MidiUnavailableException | InvalidMidiDataException | IOException ex) {
-            ex.printStackTrace();
+            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, null, ex);
         }
         return null;
     }
@@ -1469,6 +1474,12 @@ public class MiscTools {
 
                 String latest_version = findFirstRegex("releases\\/tag\\/v?([0-9]+\\.[0-9]+)", latest_version_res, 1);
 
+                if (latest_version == null) {
+                    // GitHub page format changed; bail without crashing.
+                    Logger.getLogger(MiscTools.class.getName()).log(Level.FINE, "checkNewVersion: could not extract latest tag from response");
+                    return null;
+                }
+
                 new_version_major = findFirstRegex("([0-9]+)\\.[0-9]+", latest_version, 1);
 
                 new_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)", latest_version, 1);
@@ -1477,7 +1488,9 @@ public class MiscTools {
 
                 current_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", VERSION, 1);
 
-                if (new_version_major != null && (Integer.parseInt(current_version_major) < Integer.parseInt(new_version_major) || (Integer.parseInt(current_version_major) == Integer.parseInt(new_version_major) && Integer.parseInt(current_version_minor) < Integer.parseInt(new_version_minor)))) {
+                if (new_version_major != null && new_version_minor != null && current_version_major != null && current_version_minor != null
+                        && (Integer.parseInt(current_version_major) < Integer.parseInt(new_version_major)
+                        || (Integer.parseInt(current_version_major) == Integer.parseInt(new_version_major) && Integer.parseInt(current_version_minor) < Integer.parseInt(new_version_minor)))) {
 
                     return new_version_major + "." + new_version_minor;
 
