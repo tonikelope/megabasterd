@@ -232,8 +232,6 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 }
                             }
-
-                            _upload.getMac_generator().CHUNK_QUEUE.put(chunk_offset, chunk_mac);
                         }
 
                         if (!_exit) {
@@ -274,10 +272,14 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                         _upload.setCompletion_handler(httpresponse);
 
+                                        _upload.getMac_generator().CHUNK_QUEUE.put(chunk_offset, chunk_mac);
+
                                         chunk_error = false;
                                     }
 
                                 } else if (_upload.getProgress() != _upload.getFile_size() || _upload.getCompletion_handler() != null) {
+
+                                    _upload.getMac_generator().CHUNK_QUEUE.put(chunk_offset, chunk_mac);
 
                                     chunk_error = false;
                                 }
