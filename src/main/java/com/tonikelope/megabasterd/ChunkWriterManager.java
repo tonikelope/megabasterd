@@ -19,7 +19,6 @@ import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.locks.ReentrantLock;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
@@ -32,8 +31,6 @@ import javax.crypto.NoSuchPaddingException;
 public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiable {
 
     private static final Logger LOG = Logger.getLogger(ChunkWriterManager.class.getName());
-
-    private static final ReentrantLock JOIN_CHUNKS_LOCK = new ReentrantLock();
 
     public static long calculateChunkOffset(long chunk_id, int size_multi) {
         long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
@@ -187,11 +184,6 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
-                    if (!JOIN_CHUNKS_LOCK.isHeldByCurrentThread()) {
-                        LOG.log(Level.INFO, "{0} ChunkWriterManager: JOIN LOCK LOCKED FOR {1}", new Object[]{Thread.currentThread().getName(), _download.getFile_name()});
-                        JOIN_CHUNKS_LOCK.lock();
-                    }
-
                     if (!download_finished && _download.getProgress() == _file_size) {
 
                         finishDownload();
@@ -251,20 +243,13 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
                         LOG.log(Level.INFO, "{0} ChunkWriterManager waiting for chunk [{1}] {2}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written + 1, _download.getFile_name()});
 
-                        if (JOIN_CHUNKS_LOCK.isHeldByCurrentThread() && JOIN_CHUNKS_LOCK.isLocked()) {
-                            LOG.log(Level.INFO, "{0} ChunkWriterManager: JOIN LOCK RELEASED FOR {1}", new Object[]{Thread.currentThread().getName(), _download.getFile_name()});
-                            JOIN_CHUNKS_LOCK.unlock();
-                        }
-
                         secureWait();
                     }
                 }
 
-            } finally {
-                if (JOIN_CHUNKS_LOCK.isHeldByCurrentThread() && JOIN_CHUNKS_LOCK.isLocked()) {
-                    LOG.log(Level.INFO, "{0} ChunkWriterManager: JOIN LOCK RELEASED FOR {1}", new Object[]{Thread.currentThread().getName(), _download.getFile_name()});
-                    JOIN_CHUNKS_LOCK.unlock();
-                }
+            } catch (RuntimeException ex) {
+                LOG.log(Level.SEVERE, "{0} ChunkWriterManager unexpected error {1}", new Object[]{Thread.currentThread().getName(), ex.getMessage()});
+                throw ex;
             }
 
             if (_bytes_written == _file_size && MiscTools.isDirEmpty(Paths.get(getChunks_dir()))) {

@@ -109,6 +109,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile boolean _turbo;
     private volatile boolean _closed;
     private volatile boolean _finalizing;
+    private boolean _totals_finalized;
     private final Object _progress_watchdog_lock;
     private final boolean _priority;
     private volatile boolean global_cancel = false;
@@ -1720,11 +1721,19 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         synchronized (_progress_lock) {
 
+            if (_totals_finalized) {
+                return;
+            }
+
             long old_progress = _progress;
 
             _progress = progress;
 
             getMain_panel().getDownload_manager().increment_total_progress(_progress - old_progress);
+
+            if (_file_size == null || _file_size <= 0) {
+                return;
+            }
 
             int old_percent_progress = (int) Math.floor(((double) old_progress / _file_size) * 100);
 
@@ -1737,6 +1746,24 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             if (new_percent_progress > old_percent_progress) {
                 getView().updateProgressBar(_progress, _progress_bar_rate);
             }
+        }
+    }
+
+    public void finalizeTotals() {
+
+        synchronized (_progress_lock) {
+
+            if (_totals_finalized) {
+                return;
+            }
+
+            _totals_finalized = true;
+
+            if (_file_size != null) {
+                getMain_panel().getDownload_manager().increment_total_size(-_file_size);
+            }
+
+            getMain_panel().getDownload_manager().increment_total_progress(-_progress);
         }
     }
 

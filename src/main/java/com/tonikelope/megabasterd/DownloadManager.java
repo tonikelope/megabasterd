@@ -157,9 +157,7 @@ public class DownloadManager extends TransferenceManager {
 
             if (((Download) d).isProvision_ok()) {
 
-                increment_total_size(-1 * d.getFile_size());
-
-                increment_total_progress(-1 * d.getProgress());
+                ((Download) d).finalizeTotals();
 
                 if (!d.isCanceled() || d.isClosed()) {
                     delete_down.add(((Download) d).getUrl());

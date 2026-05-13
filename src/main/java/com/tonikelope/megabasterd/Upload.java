@@ -87,6 +87,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private boolean _restart;
     private volatile boolean _closed;
     private volatile boolean _canceled;
+    private boolean _totals_finalized;
     private volatile String _temp_mac_data;
     private final boolean _priority;
     private final Object _progress_watchdog_lock;
@@ -1276,11 +1277,19 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         synchronized (_progress_lock) {
 
+            if (_totals_finalized) {
+                return;
+            }
+
             long old_progress = _progress;
 
             _progress = progress;
 
             getMain_panel().getUpload_manager().increment_total_progress(_progress - old_progress);
+
+            if (_file_size <= 0) {
+                return;
+            }
 
             int old_percent_progress = (int) Math.floor(((double) old_progress / _file_size) * 100);
 
@@ -1294,6 +1303,22 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 getView().updateProgressBar(_progress, _progress_bar_rate);
             }
+        }
+    }
+
+    public void finalizeTotals() {
+
+        synchronized (_progress_lock) {
+
+            if (_totals_finalized) {
+                return;
+            }
+
+            _totals_finalized = true;
+
+            getMain_panel().getUpload_manager().increment_total_size(-_file_size);
+
+            getMain_panel().getUpload_manager().increment_total_progress(-_progress);
         }
     }
 
