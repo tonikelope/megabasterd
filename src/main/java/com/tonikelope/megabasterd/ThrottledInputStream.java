@@ -161,6 +161,16 @@ public class ThrottledInputStream extends InputStream {
         _rawStream.reset();
     }
 
+    @Override
+    public void close() throws IOException {
+
+        try {
+            _stream_finish = true;
+        } finally {
+            _rawStream.close();
+        }
+    }
+
     private void throttle(int req_slice_size) throws IOException {
 
         _slice_size = null;

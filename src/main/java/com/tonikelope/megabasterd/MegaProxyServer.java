@@ -14,6 +14,10 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -30,10 +34,13 @@ public class MegaProxyServer implements Runnable {
 
     private static final Logger LOG = Logger.getLogger(MegaProxyServer.class.getName());
 
+    private static final int MAX_PROXY_THREADS = 64;
+
     private final String _password;
     private final int _port;
     private ServerSocket _serverSocket;
     private final MainPanel _main_panel;
+    private ExecutorService _handler_pool;
 
     public MegaProxyServer(MainPanel main_panel, String password, int port) {
 
@@ -41,6 +48,19 @@ public class MegaProxyServer implements Runnable {
         _password = password;
         _port = port;
 
+    }
+
+    private static ThreadFactory _daemonFactory(final String name_prefix) {
+        return new ThreadFactory() {
+            private final AtomicInteger counter = new AtomicInteger(1);
+
+            @Override
+            public Thread newThread(Runnable r) {
+                Thread t = new Thread(r, name_prefix + counter.getAndIncrement());
+                t.setDaemon(true);
+                return t;
+            }
+        };
     }
 
     public String getPassword() {
@@ -56,10 +76,16 @@ public class MegaProxyServer implements Runnable {
         if (_serverSocket != null) {
             _serverSocket.close();
         }
+
+        if (_handler_pool != null) {
+            _handler_pool.shutdownNow();
+        }
     }
 
     @Override
     public void run() {
+
+        _handler_pool = Executors.newFixedThreadPool(MAX_PROXY_THREADS, _daemonFactory("MegaProxyHandler-"));
 
         try {
 
@@ -71,7 +97,16 @@ public class MegaProxyServer implements Runnable {
 
                 while ((socket = _serverSocket.accept()) != null) {
                     socket.setSoTimeout(30000);
-                    (new Handler(socket, _password)).start();
+                    final Handler handler = new Handler(socket, _password, _handler_pool);
+                    try {
+                        _handler_pool.execute(handler);
+                    } catch (java.util.concurrent.RejectedExecutionException rex) {
+                        LOG.log(Level.WARNING, "MegaProxyServer rejected connection (pool saturated)");
+                        try {
+                            socket.close();
+                        } catch (IOException ignore) {
+                        }
+                    }
                 }
             } catch (IOException e) {
                 LOG.log(Level.FINE, "MegaProxyServer accept loop ended: {0}", e.getMessage());
@@ -88,10 +123,14 @@ public class MegaProxyServer implements Runnable {
                     LOG.log(Level.SEVERE, ex.getMessage());
                 }
             }
+
+            if (_handler_pool != null) {
+                _handler_pool.shutdownNow();
+            }
         }
     }
 
-    public static class Handler extends Thread {
+    public static class Handler implements Runnable {
 
         public static final Pattern CONNECT_PATTERN = Pattern.compile("CONNECT (.*mega(?:\\.co)?\\.nz):(443) HTTP/(1\\.[01])", Pattern.CASE_INSENSITIVE);
         public static final Pattern AUTH_PATTERN = Pattern.compile("Proxy-Authorization: Basic +(.+)", Pattern.CASE_INSENSITIVE);
@@ -131,10 +170,12 @@ public class MegaProxyServer implements Runnable {
         private final Socket _clientSocket;
         private boolean _previousWasR = false;
         private final String _password;
+        private final ExecutorService _pool;
 
-        public Handler(Socket clientSocket, String password) {
+        public Handler(Socket clientSocket, String password, ExecutorService pool) {
             _clientSocket = clientSocket;
             _password = password;
+            _pool = pool;
         }
 
         private boolean _checkProxyAuth(String proxy_auth) {
@@ -204,13 +245,12 @@ public class MegaProxyServer implements Runnable {
                             outputStreamWriter.write("\r\n");
                             outputStreamWriter.flush();
 
-                            Thread remoteToClient = new Thread() {
+                            java.util.concurrent.Future<?> remoteToClient = _pool.submit(new Runnable() {
                                 @Override
                                 public void run() {
                                     forwardData(forwardSocket, _clientSocket);
                                 }
-                            };
-                            remoteToClient.start();
+                            });
                             try {
                                 if (_previousWasR) {
                                     int read = _clientSocket.getInputStream().read();
@@ -232,8 +272,8 @@ public class MegaProxyServer implements Runnable {
                                 }
                             } finally {
                                 try {
-                                    remoteToClient.join();
-                                } catch (InterruptedException e) {
+                                    remoteToClient.get();
+                                } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
 
                                 }
                             }

@@ -91,4 +91,18 @@ public class ThrottledOutputStream extends OutputStream {
         }
     }
 
+    @Override
+    public void flush() throws IOException {
+        _rawStream.flush();
+    }
+
+    @Override
+    public void close() throws IOException {
+        try {
+            _rawStream.flush();
+        } finally {
+            _rawStream.close();
+        }
+    }
+
 }

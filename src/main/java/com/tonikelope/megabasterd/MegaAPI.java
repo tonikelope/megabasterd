@@ -880,39 +880,54 @@ public class MegaAPI implements Serializable {
 
                 URL url = new URL(u);
 
-                HttpURLConnection con;
+                HttpURLConnection con = null;
 
-                con = (HttpURLConnection) url.openConnection();
+                try {
 
-                con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
+                    con = (HttpURLConnection) url.openConnection();
 
-                con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
+                    con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
 
-                con.setRequestMethod("POST");
+                    con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
 
-                con.setDoOutput(true);
+                    con.setRequestMethod("POST");
 
-                con.setUseCaches(false);
+                    con.setDoOutput(true);
 
-                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
+                    con.setUseCaches(false);
 
-                byte[] buffer = new byte[8192];
+                    con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                int reads;
+                    byte[] buffer = new byte[8192];
 
-                try (OutputStream out = new ThrottledOutputStream(con.getOutputStream(), upload.getMain_panel().getStream_supervisor())) {
+                    int reads;
 
-                    out.write(file_bytes[h]);
-                }
+                    try (OutputStream out = new ThrottledOutputStream(con.getOutputStream(), upload.getMain_panel().getStream_supervisor())) {
 
-                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                    while ((reads = is.read(buffer)) != -1) {
-                        byte_res.write(buffer, 0, reads);
+                        out.write(file_bytes[h]);
                     }
 
-                    hash[h] = MiscTools.Bin2UrlBASE64(byte_res.toByteArray());
+                    int status = con.getResponseCode();
 
+                    if (status != 200) {
+                        MiscTools.drainAndCloseErrorStream(con);
+                        throw new IOException("Thumbnail upload failed: HTTP " + status);
+                    }
+
+                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                        while ((reads = is.read(buffer)) != -1) {
+                            byte_res.write(buffer, 0, reads);
+                        }
+
+                        hash[h] = MiscTools.Bin2UrlBASE64(byte_res.toByteArray());
+
+                    }
+
+                } finally {
+                    if (con != null) {
+                        con.disconnect();
+                    }
                 }
 
                 h++;

@@ -63,6 +63,8 @@ public class Thumbnailer {
 
                     File file = File.createTempFile("megabasterd_thumbnail_" + MiscTools.genID(20), ".jpg");
 
+                    file.deleteOnExit();
+
                     // write out JPG
                     ImageIO.write(image, "jpg", file);
 
@@ -131,6 +133,8 @@ public class Thumbnailer {
 
             File file = File.createTempFile("megabasterd_thumbnail_" + MiscTools.genID(20), ".png");
 
+            file.deleteOnExit();
+
             ImageIO.write(newImage, "png", file);
 
             return file.getAbsolutePath();
@@ -163,142 +167,147 @@ public class Thumbnailer {
 
         // create a Xuggler container object
         IContainer container = IContainer.make();
-
-        // open up the container
-        if (container.open(filename, IContainer.Type.READ, null) < 0) {
-            throw new IllegalArgumentException("could not open file: " + filename);
-        }
-
-        nano_seconds_between_frames = (long) (Global.DEFAULT_PTS_PER_SECOND * Math.round((float) SECONDS_BETWEEN_FRAMES_PERC * container.getDuration() / 1000000));
-
-        // query how many streams the call to open found
-        int numStreams = container.getNumStreams();
-
-        // and iterate through the streams to find the first video stream
-        int videoStreamId = -1;
         IStreamCoder videoCoder = null;
-        for (int i = 0; i < numStreams; i++) {
-            // find the stream object
-
-            IStream stream = container.getStream(i);
-
-            // get the pre-configured decoder that can decode this stream;
-            IStreamCoder coder = stream.getStreamCoder();
-
-            if (coder.getCodecType() == ICodec.Type.CODEC_TYPE_VIDEO) {
-                videoStreamId = i;
-                videoCoder = coder;
-                break;
-            }
-        }
-
-        if (videoStreamId == -1) {
-            throw new RuntimeException("could not find video stream in container: " + filename);
-        }
-
-        // Now we have found the video stream in this file.  Let's open up
-        // our decoder so it can do work
-        if (videoCoder.open() < 0) {
-            throw new RuntimeException(
-                    "could not open video decoder for container: " + filename);
-        }
-
         IVideoResampler resampler = null;
-        if (videoCoder.getPixelType() != IPixelFormat.Type.BGR24) {
-            // if this stream is not in BGR24, we're going to need to
-            // convert it.  The VideoResampler does that for us.
+        IPacket packet = null;
 
-            resampler = IVideoResampler.make(
-                    videoCoder.getWidth(), videoCoder.getHeight(), IPixelFormat.Type.BGR24,
-                    videoCoder.getWidth(), videoCoder.getHeight(), videoCoder.getPixelType());
-            if (resampler == null) {
-                throw new RuntimeException(
-                        "could not create color space resampler for: " + filename);
+        try {
+
+            // open up the container
+            if (container.open(filename, IContainer.Type.READ, null) < 0) {
+                throw new IllegalArgumentException("could not open file: " + filename);
             }
-        }
 
-        // Now, we start walking through the container looking at each packet.
-        IPacket packet = IPacket.make();
+            nano_seconds_between_frames = (long) (Global.DEFAULT_PTS_PER_SECOND * Math.round((float) SECONDS_BETWEEN_FRAMES_PERC * container.getDuration() / 1000000));
 
-        String frame_file = null;
+            // query how many streams the call to open found
+            int numStreams = container.getNumStreams();
 
-        while (container.readNextPacket(packet) >= 0 && conta_frames < 2) {
+            // and iterate through the streams to find the first video stream
+            int videoStreamId = -1;
+            for (int i = 0; i < numStreams; i++) {
 
-            // Now we have a packet, let's see if it belongs to our video strea
-            if (packet.getStreamIndex() == videoStreamId) {
-                // We allocate a new picture to get the data out of Xuggle
+                IStream stream = container.getStream(i);
 
-                IVideoPicture picture = IVideoPicture.make(videoCoder.getPixelType(),
-                        videoCoder.getWidth(), videoCoder.getHeight());
+                IStreamCoder coder = stream.getStreamCoder();
 
-                int offset = 0;
+                if (coder.getCodecType() == ICodec.Type.CODEC_TYPE_VIDEO) {
+                    videoStreamId = i;
+                    videoCoder = coder;
+                    break;
+                }
+            }
 
-                while (offset < packet.getSize()) {
-                    // Now, we decode the video, checking for any errors.
+            if (videoStreamId == -1) {
+                throw new RuntimeException("could not find video stream in container: " + filename);
+            }
 
-                    int bytesDecoded = videoCoder.decodeVideo(picture, packet, offset);
-                    if (bytesDecoded < 0) {
-                        throw new RuntimeException("got error decoding video in: " + filename);
-                    }
-                    offset += bytesDecoded;
+            if (videoCoder.open() < 0) {
+                throw new RuntimeException(
+                        "could not open video decoder for container: " + filename);
+            }
 
-                    // Some decoders will consume data in a packet, but will not
-                    // be able to construct a full video picture yet.  Therefore
-                    // you should always check if you got a complete picture from
-                    // the decode.
-                    if (picture.isComplete()) {
-                        IVideoPicture newPic = picture;
+            if (videoCoder.getPixelType() != IPixelFormat.Type.BGR24) {
 
-                        // If the resampler is not null, it means we didn't get the
-                        // video in BGR24 format and need to convert it into BGR24
-                        // format.
-                        if (resampler != null) {
-                            // we must resample
-                            newPic = IVideoPicture.make(
-                                    resampler.getOutputPixelFormat(), picture.getWidth(),
-                                    picture.getHeight());
-                            if (resampler.resample(newPic, picture) < 0) {
-                                throw new RuntimeException(
-                                        "could not resample video from: " + filename);
+                resampler = IVideoResampler.make(
+                        videoCoder.getWidth(), videoCoder.getHeight(), IPixelFormat.Type.BGR24,
+                        videoCoder.getWidth(), videoCoder.getHeight(), videoCoder.getPixelType());
+                if (resampler == null) {
+                    throw new RuntimeException(
+                            "could not create color space resampler for: " + filename);
+                }
+            }
+
+            packet = IPacket.make();
+
+            String frame_file = null;
+
+            while (container.readNextPacket(packet) >= 0 && conta_frames < 2) {
+
+                if (packet.getStreamIndex() == videoStreamId) {
+
+                    IVideoPicture picture = IVideoPicture.make(videoCoder.getPixelType(),
+                            videoCoder.getWidth(), videoCoder.getHeight());
+
+                    IVideoPicture newPic = null;
+
+                    try {
+
+                        int offset = 0;
+
+                        while (offset < packet.getSize()) {
+
+                            int bytesDecoded = videoCoder.decodeVideo(picture, packet, offset);
+                            if (bytesDecoded < 0) {
+                                throw new RuntimeException("got error decoding video in: " + filename);
+                            }
+                            offset += bytesDecoded;
+
+                            if (picture.isComplete()) {
+                                newPic = picture;
+
+                                if (resampler != null) {
+                                    newPic = IVideoPicture.make(
+                                            resampler.getOutputPixelFormat(), picture.getWidth(),
+                                            picture.getHeight());
+                                    if (resampler.resample(newPic, picture) < 0) {
+                                        throw new RuntimeException(
+                                                "could not resample video from: " + filename);
+                                    }
+                                }
+
+                                if (newPic.getPixelType() != IPixelFormat.Type.BGR24) {
+                                    throw new RuntimeException(
+                                            "could not decode video as BGR 24 bit data in: " + filename);
+                                }
+
+                                BufferedImage javaImage = Utils.videoPictureToImage(newPic);
+
+                                frame_file = processFrame(newPic, javaImage);
                             }
                         }
 
-                        if (newPic.getPixelType() != IPixelFormat.Type.BGR24) {
-                            throw new RuntimeException(
-                                    "could not decode video as BGR 24 bit data in: " + filename);
+                    } finally {
+                        if (newPic != null && newPic != picture) {
+                            newPic.delete();
                         }
-
-                        // convert the BGR24 to an Java buffered image
-                        BufferedImage javaImage = Utils.videoPictureToImage(newPic);
-
-                        // process the video frame
-                        frame_file = processFrame(newPic, javaImage);
-
+                        picture.delete();
                     }
-
                 }
-            } else {
-                // This packet isn't part of our video stream, so we just
-                // silently drop it.
-                do {
-                } while (false);
+
             }
 
-        }
+            return frame_file;
 
-        // Technically since we're exiting anyway, these will be cleaned up
-        // by the garbage collector... but because we're nice people and
-        // want to be invited places for Christmas, we're going to show how
-        // to clean up.
-        if (videoCoder != null) {
-            videoCoder.close();
-            videoCoder = null;
-        }
-        if (container != null) {
-            container.close();
-            container = null;
-        }
+        } finally {
 
-        return frame_file;
+            if (packet != null) {
+                try {
+                    packet.delete();
+                } catch (Throwable ignore) {
+                }
+            }
+
+            if (resampler != null) {
+                try {
+                    resampler.delete();
+                } catch (Throwable ignore) {
+                }
+            }
+
+            if (videoCoder != null) {
+                try {
+                    videoCoder.close();
+                } catch (Throwable ignore) {
+                }
+            }
+
+            if (container != null) {
+                try {
+                    container.close();
+                } catch (Throwable ignore) {
+                }
+            }
+        }
     }
 }

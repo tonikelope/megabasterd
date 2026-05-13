@@ -118,15 +118,27 @@ public class FileMergerDialog extends javax.swing.JDialog {
                     break;
                 }
 
-                RandomAccessFile rfile = new RandomAccessFile(file_path, "r");
+                try (RandomAccessFile rfile = new RandomAccessFile(file_path, "r")) {
 
-                targetChannel.transferFrom(rfile.getChannel(), this._progress, rfile.length());
+                    long remaining = rfile.length();
+                    long source_offset = 0L;
 
-                _progress += rfile.length();
+                    while (remaining > 0) {
+                        long transferred = targetChannel.transferFrom(rfile.getChannel().position(source_offset), this._progress, remaining);
 
-                MiscTools.GUIRun(() -> {
-                    jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _file_size) * _progress));
-                });
+                        if (transferred <= 0) {
+                            break;
+                        }
+
+                        remaining -= transferred;
+                        source_offset += transferred;
+                        _progress += transferred;
+
+                        MiscTools.GUIRun(() -> {
+                            jProgressBar2.setValue((int) Math.floor((MAX_VALUE / (double) _file_size) * _progress));
+                        });
+                    }
+                }
             }
         }
 
