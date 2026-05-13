@@ -600,7 +600,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 if (!_file.exists() || _file.length() != _file_size) {
 
                     if (_file.exists()) {
-                        _file_name = _file_name.replaceFirst("\\..*$", "_" + MiscTools.genID(8) + "_$0");
+                        String suffix = "_" + MiscTools.genID(8);
+                        int dot = _file_name.lastIndexOf('.');
+                        if (dot > 0 && dot > _file_name.length() - 16) {
+                            _file_name = _file_name.substring(0, dot) + suffix + _file_name.substring(dot);
+                        } else {
+                            _file_name = _file_name + suffix;
+                        }
 
                         filename = _download_path + "/" + _file_name;
 

@@ -460,9 +460,40 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
     public void notifyClipboardChange() {
 
         MiscTools.GUIRun(() -> {
-            String current_text = links_textarea.getText();
+            String new_text = extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents()));
 
-            links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents())));
+            if (new_text == null || new_text.isEmpty()) {
+                return;
+            }
+
+            // Dedupe against links already shown in the textarea so the
+            // clipboard monitor doesn't keep re-appending the same link
+            // every time the user re-copies it. Closes #715.
+            String current_text = links_textarea.getText();
+            java.util.LinkedHashSet<String> existing = new java.util.LinkedHashSet<>();
+            for (String line : current_text.split("\\R+")) {
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty()) {
+                    existing.add(trimmed);
+                }
+            }
+
+            StringBuilder to_add = new StringBuilder();
+            for (String line : new_text.split("\\R+")) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || existing.contains(trimmed)) {
+                    continue;
+                }
+                existing.add(trimmed);
+                if (to_add.length() > 0) {
+                    to_add.append("\n");
+                }
+                to_add.append(trimmed);
+            }
+
+            if (to_add.length() > 0) {
+                links_textarea.append((current_text.length() > 0 ? "\n\n" : "") + to_add.toString());
+            }
         });
     }
 
