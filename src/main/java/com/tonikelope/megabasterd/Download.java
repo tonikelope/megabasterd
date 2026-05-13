@@ -55,7 +55,7 @@ import javax.swing.JComponent;
  */
 public class Download implements Transference, Runnable, SecureSingleThreadNotifiable {
 
-    public static final boolean VERIFY_CBC_MAC_DEFAULT = false;
+    public static final boolean VERIFY_CBC_MAC_DEFAULT = true;
     public static final boolean USE_SLOTS_DEFAULT = true;
     public static final int WORKERS_DEFAULT = 6;
     public static final boolean USE_MEGA_ACCOUNT_DOWN = false;
@@ -796,7 +796,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                             String verify_file = selectSettingValue("verify_down_file");
 
-                            if (verify_file != null && verify_file.equals("yes")) {
+                            boolean do_verify = (verify_file == null) ? VERIFY_CBC_MAC_DEFAULT : verify_file.equals("yes");
+
+                            if (do_verify) {
                                 _checking_cbc = true;
 
                                 getView().printStatusNormal("Waiting to check file integrity...");
@@ -821,7 +823,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                 } else if (!_exit) {
 
-                                    _status_error = "BAD NEWS :( File is DAMAGED!";
+                                    _status_error = "BAD NEWS :( File is DAMAGED! (deleted)";
+
+                                    try {
+                                        java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(filename));
+                                    } catch (IOException del_ex) {
+                                        LOG.log(Level.SEVERE, "Failed to delete corrupted file {0}: {1}", new Object[]{filename, del_ex.getMessage()});
+                                    }
 
                                     getView().printStatusError(_status_error);
 

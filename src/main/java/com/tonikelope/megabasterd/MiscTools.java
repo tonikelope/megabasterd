@@ -61,6 +61,7 @@ import java.nio.file.Paths;
 import java.security.CodeSource;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -74,7 +75,6 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
@@ -376,20 +376,20 @@ public class MiscTools {
         return bimage;
     }
 
+    private static final SecureRandom SECURE_RANDOM = new SecureRandom();
+
     public static String genID(int length) {
 
         String pos = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
 
-        String res = "";
-
-        Random randomno = new Random();
+        StringBuilder res = new StringBuilder(length);
 
         for (int i = 0; i < length; i++) {
 
-            res += pos.charAt(randomno.nextInt(pos.length()));
+            res.append(pos.charAt(SECURE_RANDOM.nextInt(pos.length())));
         }
 
-        return res;
+        return res.toString();
     }
 
     public static byte[] long2bytearray(long val) {
@@ -1033,9 +1033,7 @@ public class MiscTools {
 
         byte[] the_array = new byte[length];
 
-        Random randomno = new Random();
-
-        randomno.nextBytes(the_array);
+        SECURE_RANDOM.nextBytes(the_array);
 
         return the_array;
     }

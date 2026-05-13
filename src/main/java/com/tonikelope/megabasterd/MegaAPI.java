@@ -123,6 +123,22 @@ public class MegaAPI implements Serializable {
         return String.valueOf(_seqno++);
     }
 
+    private static String _redactUrl(String url) {
+        if (url == null) {
+            return null;
+        }
+        return url.replaceAll("(?i)([?&](sid|sek)=)[^&]+", "$1[REDACTED]");
+    }
+
+    private static String _redactSensitive(String body) {
+        if (body == null) {
+            return null;
+        }
+        return body
+                .replaceAll("(?i)\"uh\"\\s*:\\s*\"[^\"]+\"", "\"uh\":\"[REDACTED]\"")
+                .replaceAll("(?i)\"mfa\"\\s*:\\s*\"[^\"]+\"", "\"mfa\":\"[REDACTED]\"");
+    }
+
     public int getAccount_version() {
         return _account_version;
     }
@@ -476,7 +492,7 @@ public class MegaAPI implements Serializable {
 
                 if (http_status != 200) {
 
-                    LOG.log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), request, url_api.toString()});
+                    LOG.log(Level.WARNING, "{0} {1} {2}", new Object[]{Thread.currentThread().getName(), _redactSensitive(request), _redactUrl(url_api.toString())});
 
                     LOG.log(Level.WARNING, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), http_status});
 
@@ -1147,20 +1163,25 @@ public class MegaAPI implements Serializable {
         return ch;
     }
 
+    private static String _folderCachePath(String folder_id) {
+        String safe_id = HashString("sha1", folder_id == null ? "" : folder_id);
+        return System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + safe_id;
+    }
+
     public boolean existsCachedFolderNodes(String folder_id) {
-        return Files.exists(Paths.get(System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id));
+        return Files.exists(Paths.get(_folderCachePath(folder_id)));
     }
 
     private String getCachedFolderNodes(String folder_id) {
 
-        String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
+        String file_path = _folderCachePath(folder_id);
 
         if (Files.exists(Paths.get(file_path))) {
 
             LOG.log(Level.INFO, "MEGA FOLDER {0} USING CACHED JSON FILE TREE", new Object[]{folder_id});
 
             try {
-                return new String(Files.readAllBytes(Paths.get(file_path)), "UTF-8");
+                return new String(Files.readAllBytes(Paths.get(file_path)), java.nio.charset.StandardCharsets.UTF_8);
             } catch (IOException ex) {
                 Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -1170,10 +1191,16 @@ public class MegaAPI implements Serializable {
     }
 
     private void writeCachedFolderNodes(String folder_id, String res) {
-        String file_path = System.getProperty("java.io.tmpdir") + File.separator + "megabasterd_folder_cache_" + folder_id;
+        String file_path = _folderCachePath(folder_id);
 
         try {
-            Files.write(Paths.get(file_path), res.getBytes());
+            java.nio.file.Path tmp = Paths.get(file_path + ".tmp");
+            Files.write(tmp, res.getBytes(java.nio.charset.StandardCharsets.UTF_8));
+            try {
+                Files.move(tmp, Paths.get(file_path), java.nio.file.StandardCopyOption.REPLACE_EXISTING, java.nio.file.StandardCopyOption.ATOMIC_MOVE);
+            } catch (java.nio.file.AtomicMoveNotSupportedException ex) {
+                Files.move(tmp, Paths.get(file_path), java.nio.file.StandardCopyOption.REPLACE_EXISTING);
+            }
         } catch (IOException ex) {
             Logger.getLogger(MegaAPI.class.getName()).log(Level.SEVERE, null, ex);
         }

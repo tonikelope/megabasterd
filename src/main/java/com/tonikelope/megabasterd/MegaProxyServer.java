@@ -11,6 +11,7 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.*;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -52,7 +53,9 @@ public class MegaProxyServer implements Runnable {
 
     public synchronized void stopServer() throws IOException {
 
-        _serverSocket.close();
+        if (_serverSocket != null) {
+            _serverSocket.close();
+        }
     }
 
     @Override
@@ -60,24 +63,25 @@ public class MegaProxyServer implements Runnable {
 
         try {
 
-            _serverSocket = new ServerSocket(_port);
+            _serverSocket = new ServerSocket(_port, 50, InetAddress.getLoopbackAddress());
 
             Socket socket;
 
             try {
 
                 while ((socket = _serverSocket.accept()) != null) {
+                    socket.setSoTimeout(30000);
                     (new Handler(socket, _password)).start();
                 }
             } catch (IOException e) {
-
+                LOG.log(Level.FINE, "MegaProxyServer accept loop ended: {0}", e.getMessage());
             }
 
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, ex.getMessage());
         } finally {
 
-            if (!_serverSocket.isClosed()) {
+            if (_serverSocket != null && !_serverSocket.isClosed()) {
                 try {
                     _serverSocket.close();
                 } catch (IOException ex) {
@@ -133,12 +137,25 @@ public class MegaProxyServer implements Runnable {
             _password = password;
         }
 
+        private boolean _checkProxyAuth(String proxy_auth) {
+
+            int sep = proxy_auth.indexOf(':');
+            if (sep < 0) {
+                return false;
+            }
+
+            byte[] expected = _password.getBytes(java.nio.charset.StandardCharsets.UTF_8);
+            byte[] given = proxy_auth.substring(sep + 1).trim().getBytes(java.nio.charset.StandardCharsets.UTF_8);
+
+            return java.security.MessageDigest.isEqual(expected, given);
+        }
+
         @Override
         public void run() {
             try {
                 String request = readLine(_clientSocket);
 
-                LOG.log(Level.INFO, request);
+                LOG.log(Level.FINE, request);
 
                 Matcher matcher = CONNECT_PATTERN.matcher(request);
 
@@ -158,13 +175,16 @@ public class MegaProxyServer implements Runnable {
 
                             proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()), "UTF-8");
 
-                        }
+                            LOG.log(Level.FINE, "Proxy-Authorization: [REDACTED]");
 
-                        LOG.log(Level.INFO, header);
+                        } else {
+
+                            LOG.log(Level.FINE, header);
+                        }
 
                     } while (!"".equals(header));
 
-                    if (proxy_auth != null && proxy_auth.matches(".*?: *?" + _password)) {
+                    if (proxy_auth != null && _checkProxyAuth(proxy_auth)) {
                         final Socket forwardSocket;
 
                         try {
