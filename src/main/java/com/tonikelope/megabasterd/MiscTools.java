@@ -1653,9 +1653,9 @@ public class MiscTools {
 
                             pdialog.dispose();
 
-                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) account_info.get("password_aes")), main_panel.getMaster_pass()));
 
-                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) account_info.get("user_hash")), main_panel.getMaster_pass()));
 
                         } else {
 
@@ -1666,9 +1666,9 @@ public class MiscTools {
 
                     } else {
 
-                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("password_aes")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                        password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) account_info.get("password_aes")), main_panel.getMaster_pass()));
 
-                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin((String) account_info.get("user_hash")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                        user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) account_info.get("user_hash")), main_panel.getMaster_pass()));
 
                     }
 
@@ -1693,7 +1693,7 @@ public class MiscTools {
 
                         if ((boolean) old_session_data.get("crypt")) {
 
-                            ByteArrayInputStream bs = new ByteArrayInputStream(CryptTools.aes_cbc_decrypt_pkcs7((byte[]) old_session_data.get("ma"), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV));
+                            ByteArrayInputStream bs = new ByteArrayInputStream(CryptTools.aes_cbc_decrypt_at_rest((byte[]) old_session_data.get("ma"), main_panel.getMaster_pass()));
 
                             try (ObjectInputStream is = new ObjectInputStream(bs)) {
 
@@ -1754,7 +1754,7 @@ public class MiscTools {
 
                         if (main_panel.getMaster_pass() != null) {
 
-                            DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_pkcs7(bs.toByteArray(), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), true);
+                            DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_at_rest(bs.toByteArray(), main_panel.getMaster_pass()), true);
 
                         } else {
 

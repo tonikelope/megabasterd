@@ -60,7 +60,53 @@ public class CryptTools {
     public static final int MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH = 256;
 
     public static final int MASTER_PASSWORD_PBKDF2_ITERATIONS = 65536;
+
+    // 4-byte tag identifying a blob encrypted with a random per-record IV.
+    // Old at-rest blobs were AES-CBC with a fixed all-zero IV; new ones are
+    // [MAGIC][16-byte IV][ciphertext]. Decryption auto-detects.
+    private static final byte[] AT_REST_MAGIC = {0x4D, 0x42, 0x32, 0x00}; // "MB2\0"
+
     private static final Logger LOG = Logger.getLogger(CryptTools.class.getName());
+
+    public static byte[] aes_cbc_encrypt_at_rest(byte[] data, byte[] key) throws Exception {
+
+        byte[] iv = new byte[16];
+        new java.security.SecureRandom().nextBytes(iv);
+
+        byte[] ct = aes_cbc_encrypt_pkcs7(data, key, iv);
+
+        byte[] out = new byte[AT_REST_MAGIC.length + iv.length + ct.length];
+        System.arraycopy(AT_REST_MAGIC, 0, out, 0, AT_REST_MAGIC.length);
+        System.arraycopy(iv, 0, out, AT_REST_MAGIC.length, iv.length);
+        System.arraycopy(ct, 0, out, AT_REST_MAGIC.length + iv.length, ct.length);
+        return out;
+    }
+
+    public static byte[] aes_cbc_decrypt_at_rest(byte[] blob, byte[] key) throws Exception {
+
+        if (blob != null && blob.length >= AT_REST_MAGIC.length + 16 && _startsWith(blob, AT_REST_MAGIC)) {
+
+            byte[] iv = java.util.Arrays.copyOfRange(blob, AT_REST_MAGIC.length, AT_REST_MAGIC.length + 16);
+            byte[] ct = java.util.Arrays.copyOfRange(blob, AT_REST_MAGIC.length + 16, blob.length);
+            return aes_cbc_decrypt_pkcs7(ct, key, iv);
+        }
+
+        // Legacy blob (pre-2026 audit fix): fixed zero IV.
+        return aes_cbc_decrypt_pkcs7(blob, key, AES_ZERO_IV);
+    }
+
+    private static boolean _startsWith(byte[] data, byte[] prefix) {
+
+        if (data == null || prefix == null || data.length < prefix.length) {
+            return false;
+        }
+        for (int i = 0; i < prefix.length; i++) {
+            if (data[i] != prefix[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 
     public static Cipher genDecrypter(String algo, String mode, byte[] key, byte[] iv) throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
         SecretKeySpec skeySpec = new SecretKeySpec(key, algo);
@@ -395,9 +441,9 @@ public class CryptTools {
 
                                 dialog.dispose();
 
-                                user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+                                user = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass()), "UTF-8");
 
-                                api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+                                api_key = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass()), "UTF-8");
 
                                 if (!remember_master_pass) {
 
@@ -413,9 +459,9 @@ public class CryptTools {
 
                         } else {
 
-                            user = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+                            user = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(elc_account_data.get("user")), main_panel.getMaster_pass()), "UTF-8");
 
-                            api_key = new String(CryptTools.aes_cbc_decrypt_pkcs7(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass(), CryptTools.AES_ZERO_IV), "UTF-8");
+                            api_key = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(elc_account_data.get("apikey")), main_panel.getMaster_pass()), "UTF-8");
 
                         }
 
