@@ -121,6 +121,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         http_error = http_status;
 
+                        MiscTools.drainAndCloseErrorStream(con);
+
                         getDownload().rejectChunkId(chunk_id);
 
                         if (!isExit() && http_error != 403) {

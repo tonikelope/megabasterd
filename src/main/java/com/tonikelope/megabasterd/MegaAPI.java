@@ -123,6 +123,7 @@ public class MegaAPI implements Serializable {
         return String.valueOf(_seqno++);
     }
 
+
     private static String _redactUrl(String url) {
         if (url == null) {
             return null;
@@ -498,6 +499,8 @@ public class MegaAPI implements Serializable {
 
                     http_error = http_status;
 
+                    MiscTools.drainAndCloseErrorStream(con);
+
                 } else {
 
                     try (InputStream is = "gzip".equals(con.getContentEncoding()) ? new GZIPInputStream(con.getInputStream()) : con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
@@ -543,7 +546,11 @@ public class MegaAPI implements Serializable {
 
             } finally {
 
-                if (con != null) {
+                // Do not call con.disconnect() on the happy path -- it
+                // forcibly closes the TCP/TLS socket and defeats keepalive.
+                // Only disconnect on errors so the pool can reuse the
+                // connection for the next request.
+                if (con != null && (http_error != 0 || empty_response || mega_error != 0)) {
                     con.disconnect();
                 }
 

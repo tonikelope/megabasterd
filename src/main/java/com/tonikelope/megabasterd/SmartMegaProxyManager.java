@@ -311,24 +311,39 @@ public final class SmartMegaProxyManager {
 
                 URL url = new URL(this._proxy_list_url);
 
+                if (!"https".equalsIgnoreCase(url.getProtocol())) {
+                    LOG.log(Level.WARNING, "Smart proxy list URL is not HTTPS ({0}); response is unauthenticated and could be MITM'd", url.toString());
+                }
+
                 con = (HttpURLConnection) url.openConnection();
 
                 con.setUseCaches(false);
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+                if (con.getResponseCode() != 200) {
 
-                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+                    LOG.log(Level.WARNING, "Smart proxy list fetch failed: HTTP {0}", con.getResponseCode());
 
-                    int reads;
+                    MiscTools.drainAndCloseErrorStream(con);
 
-                    while ((reads = is.read(buffer)) != -1) {
+                    data = "";
 
-                        byte_res.write(buffer, 0, reads);
+                } else {
+
+                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                        int reads;
+
+                        while ((reads = is.read(buffer)) != -1) {
+
+                            byte_res.write(buffer, 0, reads);
+                        }
+
+                        data = new String(byte_res.toByteArray(), "UTF-8");
                     }
-
-                    data = new String(byte_res.toByteArray(), "UTF-8");
                 }
 
                 String[] proxy_list = data.split("\n");

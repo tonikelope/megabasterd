@@ -300,6 +300,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             http_error = http_status;
 
+                            MiscTools.drainAndCloseErrorStream(con);
+
                         } else {
 
                             chunk_file = new File(_download.getChunkmanager().getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + chunk_id);

@@ -79,6 +79,8 @@ public class MegaCrypterAPI {
             if (con.getResponseCode() != 200) {
                 Logger.getLogger(MegaCrypterAPI.class.getName()).log(Level.INFO, "{0} Failed : HTTP error code : {1}", new Object[]{Thread.currentThread().getName(), con.getResponseCode()});
 
+                MiscTools.drainAndCloseErrorStream(con);
+
             } else {
 
                 try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {

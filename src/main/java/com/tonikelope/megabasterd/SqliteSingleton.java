@@ -10,10 +10,12 @@
 package com.tonikelope.megabasterd;
 
 import java.io.File;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,11 +34,11 @@ public class SqliteSingleton {
 
         return LazyHolder.INSTANCE;
     }
-    private final ConcurrentHashMap<Thread, Connection> _connections_map;
+    private final Object _conn_lock = new Object();
+    private Connection _real_conn;
+    private Connection _proxy_conn;
 
     private SqliteSingleton() {
-
-        _connections_map = new ConcurrentHashMap();
 
         File database_path = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION);
 
@@ -45,24 +47,74 @@ public class SqliteSingleton {
 
     public Connection getConn() {
 
-        Connection conn = null;
+        synchronized (_conn_lock) {
 
-        try {
+            try {
 
-            if (!_connections_map.containsKey(Thread.currentThread()) || !(conn = _connections_map.get(Thread.currentThread())).isValid(VALIDATION_TIMEOUT)) {
+                if (_real_conn == null || !_real_conn.isValid(VALIDATION_TIMEOUT)) {
 
-                Class.forName("org.sqlite.JDBC");
+                    Class.forName("org.sqlite.JDBC");
 
-                conn = DriverManager.getConnection("jdbc:sqlite:" + MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SQLITE_FILE + "?journal_mode=WAL&synchronous=OFF&journal_size_limit=500");
+                    if (_real_conn != null) {
+                        try {
+                            _real_conn.close();
+                        } catch (SQLException ignore) {
+                        }
+                    }
 
-                _connections_map.put(Thread.currentThread(), conn);
+                    _real_conn = DriverManager.getConnection("jdbc:sqlite:" + MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SQLITE_FILE + "?journal_mode=WAL&synchronous=OFF&journal_size_limit=500");
+
+                    _proxy_conn = _wrap(_real_conn);
+                }
+
+            } catch (ClassNotFoundException | SQLException ex) {
+                LOG.log(Level.SEVERE, ex.getMessage());
             }
 
-        } catch (ClassNotFoundException | SQLException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            return _proxy_conn;
         }
+    }
 
-        return conn;
+    public void shutdown() {
+
+        synchronized (_conn_lock) {
+
+            if (_real_conn != null) {
+
+                try {
+                    _real_conn.close();
+                } catch (SQLException ex) {
+                    LOG.log(Level.SEVERE, ex.getMessage());
+                }
+
+                _real_conn = null;
+                _proxy_conn = null;
+            }
+        }
+    }
+
+    private static Connection _wrap(final Connection real) {
+
+        return (Connection) Proxy.newProxyInstance(
+                Connection.class.getClassLoader(),
+                new Class<?>[]{Connection.class},
+                new InvocationHandler() {
+                    @Override
+                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                        switch (method.getName()) {
+                            case "close":
+                                return null;
+                            case "isClosed":
+                                return real.isClosed();
+                            default:
+                                try {
+                                    return method.invoke(real, args);
+                                } catch (java.lang.reflect.InvocationTargetException ite) {
+                                    throw ite.getCause();
+                                }
+                        }
+                    }
+                });
     }
 
     private static class LazyHolder {

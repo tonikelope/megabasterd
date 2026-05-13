@@ -193,6 +193,8 @@ public class StreamChunkDownloader implements Runnable {
 
                                 http_error = http_status;
 
+                                MiscTools.drainAndCloseErrorStream(con);
+
                             } else {
 
                                 try (InputStream is = con.getInputStream()) {

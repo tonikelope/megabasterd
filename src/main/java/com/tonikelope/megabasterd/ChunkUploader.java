@@ -240,6 +240,8 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 LOG.log(Level.INFO, "{0} Worker {1} Failed : HTTP error code : {2} {3}", new Object[]{Thread.currentThread().getName(), _id, http_status, _upload.getFile_name()});
 
+                                MiscTools.drainAndCloseErrorStream(con);
+
                             } else if (tot_bytes_up == chunk_size || reads == -1) {
 
                                 if (_upload.getProgress() == _upload.getFile_size()) {

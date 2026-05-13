@@ -415,6 +415,27 @@ public class MiscTools {
         return l;
     }
 
+    public static void drainAndCloseErrorStream(HttpURLConnection con) {
+
+        if (con == null) {
+            return;
+        }
+
+        InputStream es = con.getErrorStream();
+
+        if (es == null) {
+            return;
+        }
+
+        try (InputStream toDrain = es) {
+            byte[] buf = new byte[4096];
+            while (toDrain.read(buf) != -1) {
+                // discard
+            }
+        } catch (IOException ignore) {
+        }
+    }
+
     public static int parseIntOr(String value, int fallback) {
 
         if (value == null) {
@@ -1244,6 +1265,7 @@ public class MiscTools {
 
                 if (http_status != 200) {
                     http_error = http_status;
+                    drainAndCloseErrorStream(con);
                 } else {
                     http_error = 0;
                 }
