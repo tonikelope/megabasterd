@@ -787,7 +787,7 @@ public final class MainPanel {
 
             String proxy_port = DBTools.selectSettingValue("proxy_port");
 
-            _proxy_port = (proxy_port == null || proxy_port.isEmpty()) ? 8080 : Integer.parseInt(proxy_port);
+            _proxy_port = MiscTools.parseIntOr(proxy_port, 8080);
 
             _proxy_user = DBTools.selectSettingValue("proxy_user");
 
@@ -821,7 +821,7 @@ public final class MainPanel {
 
             String reverse_port = DBTools.selectSettingValue("megacrypter_reverse_port");
 
-            _megacrypter_reverse_port = (reverse_port == null || reverse_port.isEmpty()) ? DEFAULT_MEGA_PROXY_PORT : Integer.parseInt(reverse_port);
+            _megacrypter_reverse_port = MiscTools.parseIntOr(reverse_port, DEFAULT_MEGA_PROXY_PORT);
         }
 
         String use_smart_proxy = selectSettingValue("smart_proxy");
@@ -979,9 +979,9 @@ public final class MainPanel {
 
                 String version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", VERSION, 1);
 
-                String old_version_major = null;
+                String old_version_major = "0";
 
-                String old_version_minor = null;
+                String old_version_minor = "0";
 
                 String old_version = "0.0";
 
@@ -1001,7 +1001,7 @@ public final class MainPanel {
                             if (current_dir_version != null && !current_dir_version.equals(VERSION)) {
 
                                 old_version_major = findFirstRegex("([0-9]+)\\.[0-9]+$", old_version, 1);
-                                old_version_major = findFirstRegex("[0-9]+\\.([0-9]+)$", old_version, 1);
+                                old_version_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", old_version, 1);
 
                                 String current_dir_major = findFirstRegex("([0-9]+)\\.[0-9]+$", current_dir_version, 1);
                                 String current_dir_minor = findFirstRegex("[0-9]+\\.([0-9]+)$", current_dir_version, 1);

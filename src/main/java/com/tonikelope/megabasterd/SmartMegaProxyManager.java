@@ -122,19 +122,11 @@ public final class SmartMegaProxyManager {
     public synchronized void refreshSmartProxySettings() {
         String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
 
-        if (smartproxy_ban_time != null) {
-            _ban_time = Integer.parseInt(smartproxy_ban_time);
-        } else {
-            _ban_time = PROXY_BLOCK_TIME;
-        }
+        _ban_time = MiscTools.parseIntOr(smartproxy_ban_time, PROXY_BLOCK_TIME);
 
         String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
 
-        if (smartproxy_timeout != null) {
-            _proxy_timeout = Integer.parseInt(smartproxy_timeout) * 1000;
-        } else {
-            _proxy_timeout = Transference.HTTP_PROXY_TIMEOUT;
-        }
+        _proxy_timeout = MiscTools.parseIntOr(smartproxy_timeout, Transference.HTTP_PROXY_TIMEOUT / 1000) * 1000;
 
         String force_smart_proxy_string = DBTools.selectSettingValue("force_smart_proxy");
 
@@ -147,11 +139,7 @@ public final class SmartMegaProxyManager {
 
         String autorefresh_smart_proxy_string = DBTools.selectSettingValue("smartproxy_autorefresh_time");
 
-        if (autorefresh_smart_proxy_string != null) {
-            _autorefresh_time = Integer.parseInt(autorefresh_smart_proxy_string);
-        } else {
-            _autorefresh_time = PROXY_AUTO_REFRESH_TIME;
-        }
+        _autorefresh_time = MiscTools.parseIntOr(autorefresh_smart_proxy_string, PROXY_AUTO_REFRESH_TIME);
 
         String reset_slot_proxy = DBTools.selectSettingValue("reset_slot_proxy");
 

@@ -408,12 +408,39 @@ public class MiscTools {
 
         long l = 0;
 
-        for (int i = 0; i <= 7; i++) {
-            l += val[i];
-            l <<= 8;
+        for (int i = 0; i < 8; i++) {
+            l = (l << 8) | (val[i] & 0xFFL);
         }
 
         return l;
+    }
+
+    public static int parseIntOr(String value, int fallback) {
+
+        if (value == null) {
+            return fallback;
+        }
+
+        try {
+            return Integer.parseInt(value.trim());
+        } catch (NumberFormatException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "Bad integer setting {0}, using fallback {1}", new Object[]{value, fallback});
+            return fallback;
+        }
+    }
+
+    public static long parseLongOr(String value, long fallback) {
+
+        if (value == null) {
+            return fallback;
+        }
+
+        try {
+            return Long.parseLong(value.trim());
+        } catch (NumberFormatException ex) {
+            Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING, "Bad long setting {0}, using fallback {1}", new Object[]{value, fallback});
+            return fallback;
+        }
     }
 
     public static String findFirstRegex(String regex, String data, int group) {
