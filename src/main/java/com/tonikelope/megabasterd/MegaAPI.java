@@ -572,8 +572,16 @@ public class MegaAPI implements Serializable {
         } while ((http_error == 500 || empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()))
                 && conta_error < MAX_RAW_REQUEST_RETRIES);
 
-        if (response == null && (http_error != 0 || empty_response || mega_error != 0)) {
-            LOG.log(Level.WARNING, "{0} RAW_REQUEST giving up after {1} retries (http_error={2} mega_error={3})", new Object[]{Thread.currentThread().getName(), conta_error, http_error, mega_error});
+        if (response == null) {
+            // The retry loop only covered 500 / empty / mega_error /
+            // 509-with-smart-proxy. Anything else (402 quota/suspended,
+            // 403 forbidden, 404 not found, ...) used to fall through here
+            // returning null and the caller would NPE on objectMapper.readValue.
+            // Surface as a MegaAPIException so the existing catch (Exception)
+            // path in the UI gets a usable error.
+            LOG.log(Level.WARNING, "{0} RAW_REQUEST giving up (http_error={1} mega_error={2} retries={3})", new Object[]{Thread.currentThread().getName(), http_error, mega_error, conta_error});
+            int code = mega_error != 0 ? mega_error : -http_error;
+            throw new MegaAPIException(code != 0 ? code : -1, "MEGA API request failed (HTTP " + http_error + ")");
         }
 
         return response;

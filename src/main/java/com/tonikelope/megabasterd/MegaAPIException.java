@@ -23,4 +23,9 @@ public class MegaAPIException extends APIException {
         super(code, "MEGA API ERROR: " + String.valueOf(code));
         _code = code;
     }
+
+    public MegaAPIException(int code, String message) {
+        super(code, message);
+        _code = code;
+    }
 }
