@@ -991,6 +991,31 @@ public final class MainPanel {
                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
             }
 
+            // Close the shared SQLite connection cleanly so the WAL is
+            // checkpointed before process exit / restart. Without this the
+            // -wal / -shm sidecar files can linger and a restart can race
+            // a still-held file handle (worst on Windows).
+            try {
+                SqliteSingleton.getInstance().shutdown();
+            } catch (Exception ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING, "SqliteSingleton shutdown: {0}", ex.getMessage());
+            }
+
+            // Release the single-instance file lock so a restart can re-acquire
+            // it immediately (Windows file-sharing semantics can otherwise delay
+            // the new instance and make the user see "click restart, nothing
+            // happens").
+            try {
+                if (_single_instance_lock != null) {
+                    _single_instance_lock.release();
+                }
+                if (_single_instance_raf != null) {
+                    _single_instance_raf.close();
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.FINE, "Releasing single-instance lock: {0}", ex.getMessage());
+            }
+
             if (restart) {
                 restartApplication();
             } else {
@@ -1006,6 +1031,14 @@ public final class MainPanel {
 
             if (delete_db) {
 
+                // Close the connection before deleting the file to avoid
+                // a Windows-shared-handle race.
+                try {
+                    SqliteSingleton.getInstance().shutdown();
+                } catch (Exception ex) {
+                    Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING, "SqliteSingleton shutdown: {0}", ex.getMessage());
+                }
+
                 File db_file = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE);
 
                 db_file.delete();
@@ -1015,6 +1048,12 @@ public final class MainPanel {
                     DBTools.vaccum();
                 } catch (SQLException ex) {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                }
+
+                try {
+                    SqliteSingleton.getInstance().shutdown();
+                } catch (Exception ex) {
+                    Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING, "SqliteSingleton shutdown: {0}", ex.getMessage());
                 }
             }
 

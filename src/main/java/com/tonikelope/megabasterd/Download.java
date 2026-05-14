@@ -1089,9 +1089,20 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         _file_name = _file_name.replaceFirst("\\..*$", "_" + MiscTools.genID(8) + "_$0");
                     }
 
+                    if (_closed) {
+                        // User clicked Close while we were still provisioning.
+                        // Don't re-insert the row we're about to delete.
+                        return;
+                    }
+
                     try {
 
-                        insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
+                        // Use returning-name variant: if insertDownload had to
+                        // pick a different filename to dodge UNIQUE(path,filename),
+                        // we MUST adopt that name -- otherwise the DB row and the
+                        // file we'll write to disk disagree and a sibling download
+                        // with the same display name clobbers the same .mctemp.
+                        _file_name = DBTools.insertDownloadReturningName(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
 
                         _provision_ok = true;
 
@@ -1113,12 +1124,17 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     _file_name = _file_name.replaceFirst("\\..*$", "_" + MiscTools.genID(8) + "_$0");
                 }
 
+                if (_closed) {
+                    // User clicked Close while we were still provisioning.
+                    return;
+                }
+
                 //Resuming single file links and new/resuming folder links
                 try {
 
                     deleteDownload(_url); //If resuming
 
-                    insertDownload(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
+                    _file_name = DBTools.insertDownloadReturningName(_url, _ma.getFull_email(), _download_path, _file_name, _file_key, _file_size, _file_pass, _file_noexpire, _custom_chunks_dir);
 
                     _provision_ok = true;
 

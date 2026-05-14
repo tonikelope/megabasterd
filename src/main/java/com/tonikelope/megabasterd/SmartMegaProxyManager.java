@@ -47,7 +47,13 @@ public final class SmartMegaProxyManager {
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
     private final ConcurrentHashMap<String, Long[]> _proxy_list;
-    private static final HashMap<String, String> PROXY_LIST_AUTH = new HashMap<>();
+    // ConcurrentHashMap (not HashMap): the Authenticator.getPasswordAuthentication
+    // callback at SmartProxyAuthenticator.getPasswordAuthentication() runs on
+    // arbitrary JDK HTTP/SOCKS connection threads, with no shared monitor with
+    // refreshProxyList() which clears+repopulates this map. Plain HashMap under
+    // concurrent structural mutation (clear+put) can NPE on resize and stall
+    // the connection thread.
+    private static final java.util.concurrent.ConcurrentHashMap<String, String> PROXY_LIST_AUTH = new java.util.concurrent.ConcurrentHashMap<>();
     private final MainPanel _main_panel;
     private volatile int _ban_time;
     private volatile int _proxy_timeout;

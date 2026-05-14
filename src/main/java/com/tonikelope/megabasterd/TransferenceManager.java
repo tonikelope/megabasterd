@@ -907,15 +907,27 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                 transference = getTransference_waitstart_aux_queue().peek();
                             }
 
-                            if (transference != null && !transference.isFrozen()) {
-
-                                getTransference_waitstart_queue().remove(transference);
-
-                                getTransference_waitstart_aux_queue().remove(transference);
-
-                                start(transference);
-
+                            if (transference == null) {
+                                // Both queues raced empty since the outer check; nothing to do.
+                                break;
                             }
+
+                            if (transference.isFrozen()) {
+                                // Head is frozen and we can't dequeue it (would lose state).
+                                // Without this break the outer `while` spins forever holding +
+                                // releasing _transference_queue_sort_lock thousands of times per
+                                // second, pinning a thread at 100% CPU and blocking the
+                                // provisioning task that also wants this lock. secureWait at
+                                // the bottom of run() will re-trigger us when the user
+                                // unfreezes.
+                                break;
+                            }
+
+                            getTransference_waitstart_queue().remove(transference);
+
+                            getTransference_waitstart_aux_queue().remove(transference);
+
+                            start(transference);
                         }
                     }
 

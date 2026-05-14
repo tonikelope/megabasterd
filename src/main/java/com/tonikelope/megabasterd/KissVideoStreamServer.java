@@ -469,6 +469,17 @@ public class KissVideoStreamServer implements HttpHandler, SecureSingleThreadNot
 
                     ranges = _parseRangeHeader(range_header);
 
+                    // Resolve RFC 7233 suffix range "bytes=-N" -> last N bytes.
+                    // _parseRangeHeader leaves ranges[0] = -1 in that case.
+                    if (ranges[0] < 0 && ranges[1] >= 0) {
+                        long suffix_len = Math.min(ranges[1], file_size);
+                        ranges[0] = file_size - suffix_len;
+                        ranges[1] = file_size - 1;
+                    } else if (ranges[0] < 0) {
+                        // Both -1 (parser error) -> treat as full content.
+                        ranges[0] = 0;
+                    }
+
                     sync_bytes = (int) ranges[0] % 16;
 
                     if (ranges[1] >= 0 && ranges[1] >= ranges[0]) {

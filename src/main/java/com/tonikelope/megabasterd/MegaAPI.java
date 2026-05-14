@@ -616,13 +616,15 @@ public class MegaAPI implements Serializable {
             // back-pressure), 500 internal, 503 service unavailable, empty
             // response, mega_error, and 509-with-smart-proxy. Anything else
             // (403 forbidden, 404 not found, persistent 402 past the cap, ...)
-            // falls through. Surface as a MegaAPIException so the existing
-            // catch (Exception) path gets a usable error instead of NPE on
-            // objectMapper.readValue(null).
+            // falls through. Surface as a MegaAPIException.
             LOG.log(Level.WARNING, "{0} RAW_REQUEST giving up: http={1} mega_error={2} retries={3} url={4}",
                     new Object[]{_ctx(), http_error, mega_error, conta_error, _redactUrl(url_api.toString())});
-            int code = mega_error != 0 ? mega_error : -http_error;
-            throw new MegaAPIException(code != 0 ? code : -1, "MEGA API request failed (HTTP " + http_error + ", account=" + (_full_email != null ? _full_email : "(pre-login)") + ")");
+            // Keep the exception code in the MEGA-protocol space (mega_error
+            // when set, else -1). Smuggling HTTP-status as a negative
+            // MEGA code (e.g. -402) collided with real MEGA codes and
+            // confused callers that match against FATAL_API_ERROR_CODES.
+            int code = mega_error != 0 ? mega_error : -1;
+            throw new MegaAPIException(code, "MEGA API request failed (HTTP " + http_error + ", account=" + (_full_email != null ? _full_email : "(pre-login)") + ")");
         }
 
         return response;

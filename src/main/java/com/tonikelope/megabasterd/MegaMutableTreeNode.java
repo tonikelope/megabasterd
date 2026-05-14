@@ -51,7 +51,11 @@ public class MegaMutableTreeNode extends DefaultMutableTreeNode {
 
     public MegaMutableTreeNode(Object o) {
         super(o);
-        this.mega_node_size = (long) ((HashMap<String, Object>) o).get("size");
+        // Folder nodes (type 1) returned by MegaAPI.getFolderNodes may not
+        // carry a "size" entry; treat missing as 0 instead of NPE'ing on the
+        // auto-unboxing cast. Folder-tree loading depends on this.
+        Object size_raw = (o instanceof HashMap) ? ((HashMap<String, Object>) o).get("size") : null;
+        this.mega_node_size = (size_raw instanceof Number) ? ((Number) size_raw).longValue() : 0L;
     }
 
     @Override

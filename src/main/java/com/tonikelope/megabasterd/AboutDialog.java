@@ -440,9 +440,12 @@ public class AboutDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_formWindowOpened
 
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
-        // TODO add your handling code here:
+        // _midi may be null if midiLoopPlay returned null (headless / no MIDI
+        // provider / unsupported audio device). Guard against NPE.
         THREAD_POOL.execute(() -> {
-            _midi.stop();
+            if (_midi != null) {
+                _midi.stop();
+            }
         });
         dispose();
     }//GEN-LAST:event_formWindowClosing

@@ -189,11 +189,20 @@ public class DBTools {
     }
 
     public static synchronized void insertDownload(String url, String email, String path, String filename, String filekey, Long size, String filepass, String filenoexpire, String custom_chunks_dir) throws SQLException {
+        // Wrapper kept for callers that don't care about the chosen filename.
+        insertDownloadReturningName(url, email, path, filename, filekey, size, filepass, filenoexpire, custom_chunks_dir);
+    }
 
-        // On UNIQUE(path, filename) collisions (two MEGA files with the
-        // same display name being downloaded to the same dir), retry a
-        // few times with a random suffix appended to the filename rather
-        // than aborting the whole download. Closes #719.
+    /**
+     * Variant that returns the filename actually persisted to DB. When the
+     * UNIQUE(path, filename) constraint trips (two MEGA files with the same
+     * display name to the same dir), retries up to 50 times appending a
+     * random suffix. Caller MUST use the returned name when computing the
+     * on-disk path -- otherwise the DB row and the file written to disk
+     * disagree and two concurrent downloads clobber the same .mctemp. #719.
+     */
+    public static synchronized String insertDownloadReturningName(String url, String email, String path, String filename, String filekey, Long size, String filepass, String filenoexpire, String custom_chunks_dir) throws SQLException {
+
         SQLException last_ex = null;
 
         for (int attempt = 0; attempt < 50; attempt++) {
@@ -213,7 +222,7 @@ public class DBTools {
                 ps.setString(9, custom_chunks_dir);
 
                 ps.executeUpdate();
-                return;
+                return candidate_name;
 
             } catch (SQLException ex) {
                 last_ex = ex;
@@ -225,7 +234,7 @@ public class DBTools {
             }
         }
 
-        throw last_ex;
+        throw last_ex != null ? last_ex : new SQLException("insertDownload exhausted retries");
     }
 
     private static String _appendSuffix(String filename, String suffix) {

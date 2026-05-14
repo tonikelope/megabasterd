@@ -245,12 +245,18 @@ public class MegaProxyServer implements Runnable {
                             outputStreamWriter.write("\r\n");
                             outputStreamWriter.flush();
 
-                            java.util.concurrent.Future<?> remoteToClient = _pool.submit(new Runnable() {
-                                @Override
-                                public void run() {
-                                    forwardData(forwardSocket, _clientSocket);
-                                }
-                            });
+                            // Dedicated daemon thread for the remote->client direction.
+                            // Previously this submitted to _pool and blocked .get() on it;
+                            // with a bounded pool (64 threads) that meant each Handler
+                            // occupied 2 pool slots and saturated at 32 concurrent
+                            // connections -- and beyond that, every new connection
+                            // deadlocked because the Handler held one slot, queued its
+                            // remoteToClient, and blocked waiting for a slot that would
+                            // never come free until SO_TIMEOUT fired.
+                            final Thread remoteToClient = new Thread(() -> forwardData(forwardSocket, _clientSocket),
+                                    "MegaProxyHandler-remote-" + _clientSocket.getRemoteSocketAddress());
+                            remoteToClient.setDaemon(true);
+                            remoteToClient.start();
                             try {
                                 if (_previousWasR) {
                                     int read = _clientSocket.getInputStream().read();
@@ -272,9 +278,9 @@ public class MegaProxyServer implements Runnable {
                                 }
                             } finally {
                                 try {
-                                    remoteToClient.get();
-                                } catch (InterruptedException | java.util.concurrent.ExecutionException e) {
-
+                                    remoteToClient.join();
+                                } catch (InterruptedException ie) {
+                                    Thread.currentThread().interrupt();
                                 }
                             }
                         } finally {

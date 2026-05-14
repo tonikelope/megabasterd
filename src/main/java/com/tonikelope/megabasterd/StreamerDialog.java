@@ -278,7 +278,11 @@ public class StreamerDialog extends javax.swing.JDialog implements ClipboardChan
                     MiscTools.GUIRun(() -> {
                         JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("Streaming link was copied to clipboard!\nRemember to keep MegaBasterd running in background while playing content."));
                         dispose();
-                        getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
+                        // Removed: getParent().dispatchEvent(new WindowEvent(tthis, WINDOW_CLOSING));
+                        // That dispatched a WINDOW_CLOSING event to the MAIN panel (the dialog's
+                        // parent), which would run the main window's window-closing handler
+                        // (tray-hide / byebye prompt). dispose() above is sufficient to close
+                        // this dialog.
                     });
                 }
             } catch (UnsupportedEncodingException ex) {

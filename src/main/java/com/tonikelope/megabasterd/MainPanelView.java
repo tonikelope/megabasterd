@@ -393,6 +393,7 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
 
         } catch (Exception ex) {
+            Logger.getLogger(MainPanelView.class.getName()).log(java.util.logging.Level.SEVERE, "Upload setup failed", ex);
         }
 
         if (!dialog.isRemember_master_pass()) {
