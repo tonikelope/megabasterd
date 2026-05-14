@@ -231,7 +231,15 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
                                 LOG.log(Level.INFO, "{0} ChunkWriterManager has written to disk chunk [{1}] {2} {3} {4}...", new Object[]{Thread.currentThread().getName(), _last_chunk_id_written, _bytes_written, _download.calculateLastWrittenChunk(_bytes_written), _download.getFile_name()});
 
-                                chunk_file.delete();
+                                if (!chunk_file.delete()) {
+                                    // Not fatal: _last_chunk_id_written has
+                                    // already advanced so the next loop iteration
+                                    // looks at .chunk{N+1} and won't re-read this
+                                    // file. The orphan will linger on disk but
+                                    // the output stream is correct.
+                                    LOG.log(Level.WARNING, "{0} ChunkWriterManager failed to delete consumed chunk file {1}",
+                                            new Object[]{Thread.currentThread().getName(), chunk_file});
+                                }
 
                                 chunk_file = new File(getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
                             }

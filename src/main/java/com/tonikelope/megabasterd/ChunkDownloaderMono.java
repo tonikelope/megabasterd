@@ -34,6 +34,15 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
     public static final int READ_TIMEOUT_RETRY = 3;
 
+    /**
+     * Safety cap for the in-memory chunk buffer. mono-slot chunks are
+     * <= 1 MiB by design (calculateChunkSize uses size_multi=1) so any
+     * value above a few MiB is essentially unreachable. We keep the cap
+     * generous to leave headroom for future tweaks while still refusing
+     * pathological sizes that would OOM the JVM.
+     */
+    private static final int MAX_CHUNK_BUFFER_BYTES = 8 * 1024 * 1024;
+
     public ChunkDownloaderMono(Download download) {
         super(1, download);
     }
@@ -53,7 +62,6 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             long chunk_id, bytes_downloaded = getDownload().getProgress();
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
             byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
-            byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
             CipherInputStream cis = null;
 
@@ -142,10 +150,28 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         if (!isExit() && !getDownload().isStopped() && cis != null) {
 
+                            // Buffer the whole chunk in memory before touching the
+                            // output_stream. Writing directly while reading meant
+                            // that a mid-chunk network failure left partial bytes
+                            // in the final file -- the retry then wrote correct
+                            // bytes one offset later and every subsequent chunk
+                            // landed shifted, corrupting the file (the
+                            // _file.length() != _file_size check in Download.java
+                            // catches it as a visible I/O ERROR, but the file is
+                            // still trashed). Buffering means a failed chunk is
+                            // simply discarded; nothing reaches the output file
+                            // until chunk_reads == chunk_size.
+                            if (chunk_size > MAX_CHUNK_BUFFER_BYTES) {
+                                LOG.log(Level.SEVERE, "Mono chunk {0} size {1} exceeds buffer cap {2} -- aborting",
+                                        new Object[]{chunk_id, chunk_size, MAX_CHUNK_BUFFER_BYTES});
+                                throw new IOException("Mono chunk size exceeds in-memory buffer cap");
+                            }
+
+                            byte[] chunk_buffer = new byte[(int) chunk_size];
                             int reads = 0;
 
-                            while (!getDownload().isStopped() && chunk_reads < chunk_size && (reads = cis.read(buffer, 0, Math.min((int) (chunk_size - chunk_reads), buffer.length))) != -1) {
-                                getDownload().getOutput_stream().write(buffer, 0, reads);
+                            while (!getDownload().isStopped() && chunk_reads < chunk_size
+                                    && (reads = cis.read(chunk_buffer, (int) chunk_reads, (int) (chunk_size - chunk_reads))) != -1) {
 
                                 chunk_reads += reads;
 
@@ -163,6 +189,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                             }
 
                             if (chunk_reads == chunk_size) {
+
+                                // Atomic commit to the output stream: either the
+                                // whole chunk lands or none of it does.
+                                getDownload().getOutput_stream().write(chunk_buffer, 0, (int) chunk_size);
 
                                 bytes_downloaded += chunk_reads;
 

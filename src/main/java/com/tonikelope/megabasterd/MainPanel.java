@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.26";
+    public static final String VERSION = "8.27";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -160,6 +160,23 @@ public final class MainPanel {
 
         if ("yes".equals(DBTools.selectSettingValue("upload_log"))) {
             MiscTools.createUploadLogDir();
+        }
+
+        // 8.27 migration: users who upgraded from pre-afb3936 builds (when
+        // VERIFY_CBC_MAC_DEFAULT was false) have "verify_down_file" = "no"
+        // persisted in their settings DB from any time they opened Settings
+        // and clicked Apply. Without this fix-up the 8.25 default-on never
+        // applied to them and corrupted downloads slipped through silently.
+        // Run once per install and remember it with a sentinel key.
+        try {
+            if (DBTools.selectSettingValue("verify_down_file_migrated_v827") == null) {
+                if ("no".equals(DBTools.selectSettingValue("verify_down_file"))) {
+                    DBTools.insertSettingValue("verify_down_file", "yes");
+                }
+                DBTools.insertSettingValue("verify_down_file_migrated_v827", "yes");
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, "verify_down_file migration failed", ex);
         }
 
         MiscTools.purgeOrphanThumbnails();
