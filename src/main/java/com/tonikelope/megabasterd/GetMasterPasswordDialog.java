@@ -218,7 +218,11 @@ public class GetMasterPasswordDialog extends javax.swing.JDialog {
                 byte[] pass = CryptTools.PBKDF2HMACSHA256(new String(current_pass_textfield.getPassword()), BASE642Bin(_salt), CryptTools.MASTER_PASSWORD_PBKDF2_ITERATIONS, CryptTools.MASTER_PASSWORD_PBKDF2_OUTPUT_BIT_LENGTH);
                 String pass_hash = Bin2BASE64(HashBin("SHA-1", pass));
                 MiscTools.GUIRun(() -> {
-                    if (!pass_hash.equals(_current_pass_hash)) {
+                    // Constant-time compare; short-circuit String.equals leaks
+                    // hash bytes via timing oracle.
+                    if (!java.security.MessageDigest.isEqual(
+                            pass_hash.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                            _current_pass_hash == null ? new byte[0] : _current_pass_hash.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
 
                         JOptionPane.showMessageDialog(tthis, LabelTranslatorSingleton.getInstance().translate("BAD PASSWORD!"), "Error", JOptionPane.ERROR_MESSAGE);
 

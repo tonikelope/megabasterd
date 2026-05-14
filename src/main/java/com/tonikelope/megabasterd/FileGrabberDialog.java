@@ -908,7 +908,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
                     root.add(current_file);
 
-                } else if (file.isDirectory() && file.canRead() && file.listFiles().length > 0) {
+                } else if (file.isDirectory() && file.canRead() && file.listFiles() != null && file.listFiles().length > 0) {
 
                     if (files == null || files.length > 1) {
 

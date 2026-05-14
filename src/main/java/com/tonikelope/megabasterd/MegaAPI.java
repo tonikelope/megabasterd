@@ -59,7 +59,7 @@ public class MegaAPI implements Serializable {
     }
 
     public static final String API_URL = "https://g.api.mega.co.nz";
-    public static String API_KEY = null;
+    public static volatile String API_KEY = null;
     // Fallback application key when the user hasn't configured one. This is
     // the public app key shipped in MEGAcmd (meganz/MEGAcmd src/megacmd.cpp).
     // The official MEGA SDK comment says "Applications using the MEGA API must

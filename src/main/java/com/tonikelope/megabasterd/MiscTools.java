@@ -791,9 +791,16 @@ public class MiscTools {
 
     }
 
-    public static String formatBytes(Long bytes) {
+    private static final String[] FORMAT_BYTES_UNITS = {"B", "KB", "MB", "GB", "TB"};
 
-        String[] units = {"B", "KB", "MB", "GB", "TB"};
+    // DecimalFormat is not thread-safe but is allocated on hot paths (every
+    // SpeedMeter tick × every row, every memory-monitor tick, every JTree
+    // cell paint). Cache one per thread. Locale.ROOT for consistent
+    // "1.5 MB" across locales (was "1,5 MB" on Spanish/German systems).
+    private static final ThreadLocal<DecimalFormat> FORMAT_BYTES_DF = ThreadLocal.withInitial(
+            () -> new DecimalFormat("#.##", java.text.DecimalFormatSymbols.getInstance(java.util.Locale.ROOT)));
+
+    public static String formatBytes(Long bytes) {
 
         if (bytes == null) {
             return "0 B";
@@ -801,13 +808,11 @@ public class MiscTools {
 
         long b = Math.max(bytes, 0L);
 
-        int pow = Math.min((int) ((b > 0L ? Math.log(b) : 0) / Math.log(1024)), units.length - 1);
+        int pow = Math.min((int) ((b > 0L ? Math.log(b) : 0) / Math.log(1024)), FORMAT_BYTES_UNITS.length - 1);
 
         double bytes_double = (double) b / (1L << (10 * pow));
 
-        DecimalFormat df = new DecimalFormat("#.##");
-
-        return df.format(bytes_double) + ' ' + units[pow];
+        return FORMAT_BYTES_DF.get().format(bytes_double) + ' ' + FORMAT_BYTES_UNITS[pow];
     }
 
     public static MegaMutableTreeNode calculateTreeFolderSizes(MegaMutableTreeNode node) {

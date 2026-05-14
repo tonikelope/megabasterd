@@ -669,14 +669,15 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
             _main_panel.getView().getUnfreeze_transferences_button().setVisible(_main_panel.getDownload_manager().hasFrozenTransferences() || _main_panel.getUpload_manager().hasFrozenTransferences());
 
-            // Don't full-frame revalidate/repaint here: a single transfer
-            // queue change shouldn't relayout every row in every tab. Each
-            // mutating helper (topWaitQueue, bottomWaitQueue, remove, ...)
-            // is responsible for revalidating only its own scroll panel.
-            if (getScroll_panel() != null) {
-                getScroll_panel().revalidate();
-                getScroll_panel().repaint();
-            }
+            // Do NOT revalidate+repaint the scroll panel here. _updateView fires
+            // on every secureNotify -- which means every chunk completion, every
+            // provision, every progress tick. With N rows in BoxLayout, a full
+            // revalidate is O(N) layout work; aggregated this was the dominant
+            // EDT cost. The mutating helpers (topWaitQueue, bottomWaitQueue,
+            // remove, provision, _reorderScrollPanel) already revalidate the
+            // scroll panel themselves when they actually change child layout;
+            // _updateView only changes the status labels and toolbar buttons,
+            // which don't need a viewport relayout.
         });
     }
 

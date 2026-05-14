@@ -1022,7 +1022,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        LOG.log(Level.SEVERE, ex.getMessage());
                     }
                 }
                 if (!_closed) {

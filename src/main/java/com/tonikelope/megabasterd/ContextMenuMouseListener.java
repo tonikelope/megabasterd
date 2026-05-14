@@ -104,7 +104,9 @@ public class ContextMenuMouseListener extends MouseAdapter {
 
     @Override
     public void mouseClicked(MouseEvent e) {
-        if (e.getModifiers() == InputEvent.BUTTON3_MASK) {
+        // Use the modern AWT API; the old getModifiers() == BUTTON3_MASK is
+        // deprecated since Java 9 AND fails when modifier keys are held.
+        if (javax.swing.SwingUtilities.isRightMouseButton(e)) {
             if (!(e.getSource() instanceof JTextComponent)) {
 
                 return;

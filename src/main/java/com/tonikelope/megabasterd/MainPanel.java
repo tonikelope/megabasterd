@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.24";
+    public static final String VERSION = "8.25";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -114,7 +114,7 @@ public final class MainPanel {
     private static String _run_command_path;
     private static String _font;
     private static SmartMegaProxyManager _proxy_manager;
-    private static String _language;
+    private static volatile String _language;
     private static String _new_version;
     private static Boolean _resume_uploads;
     private static Boolean _resume_downloads;
@@ -422,16 +422,23 @@ public final class MainPanel {
 
         THREAD_POOL.execute(() -> {
             Runtime instance = Runtime.getRuntime();
-            while (true) {
+            String last_text = null;
+            while (!_exit) {
                 long used_memory = instance.totalMemory() - instance.freeMemory();
                 long max_memory = instance.maxMemory();
-                MiscTools.GUIRun(() -> {
-                    _view.getMemory_status().setText("JVM-RAM used: " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory));
-                });
+                String text = "JVM-RAM used: " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory);
+                // Skip setText if the rendered string is unchanged -- the EDT
+                // doesn't need a repaint event for "same value".
+                if (!text.equals(last_text)) {
+                    last_text = text;
+                    final String t = text;
+                    MiscTools.GUIRun(() -> _view.getMemory_status().setText(t));
+                }
                 try {
                     Thread.sleep(2000);
                 } catch (InterruptedException ex) {
-                    Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
+                    Thread.currentThread().interrupt();
+                    return;
                 }
             }
         });

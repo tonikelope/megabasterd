@@ -108,9 +108,11 @@ public class FileMergerDialog extends javax.swing.JDialog {
 
         try (RandomAccessFile targetFile = new RandomAccessFile(_file_name_full, "rw")) {
 
-            FileChannel targetChannel = targetFile.getChannel();
+            // Truncate any pre-existing output so a re-merge after a crash
+            // doesn't leave stale tail bytes past the new content.
+            targetFile.setLength(0);
 
-            monitorProgress(Paths.get(_file_name));
+            FileChannel targetChannel = targetFile.getChannel();
 
             for (String file_path : this._file_parts) {
 

@@ -854,7 +854,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                 progress = getProgress();
                             } catch (InterruptedException ex) {
                                 progress = -1;
-                                Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+                                LOG.log(Level.SEVERE, null, ex);
                             }
                         }
 

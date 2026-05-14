@@ -199,7 +199,22 @@ public class Get2FACode extends javax.swing.JDialog {
 
     private void current_code_textfieldKeyTyped(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_current_code_textfieldKeyTyped
 
-        if (current_code_textfield.getText().length() == MAX_CODE_LENGTH || (!Character.isDigit(evt.getKeyChar()) && evt.getKeyCode() != KeyEvent.VK_BACK_SPACE && evt.getKeyCode() != KeyEvent.VK_DELETE)) {
+        // In keyTyped, evt.getKeyCode() is always VK_UNDEFINED -- BACK_SPACE
+        // and DELETE check by keyCode here is dead, and the BS/Delete chars
+        // are reported as keyChar 0x08 / 0x7F by AWT. Only consume non-digit
+        // typed chars; leave editing keys alone. Also only block on full
+        // length if the new char would extend the text (i.e. it's a digit).
+        char ch = evt.getKeyChar();
+        boolean isDigit = Character.isDigit(ch);
+        boolean isEditing = ch == '\b' || ch == 0x7F;
+        if (isEditing) {
+            return; // allow backspace / delete
+        }
+        if (!isDigit) {
+            evt.consume();
+            return;
+        }
+        if (current_code_textfield.getText().length() >= MAX_CODE_LENGTH) {
             evt.consume();
         }
     }//GEN-LAST:event_current_code_textfieldKeyTyped
