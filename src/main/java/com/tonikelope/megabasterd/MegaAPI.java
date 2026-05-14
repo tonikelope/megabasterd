@@ -240,28 +240,95 @@ public class MegaAPI implements Serializable {
 
         HashMap[] res_map = objectMapper.readValue(res, HashMap[].class);
 
+        // Defensive parsing: historically these three fields (k, privk, csid)
+        // were always present in the `us` response. Recent MEGA accounts that
+        // have only ever been touched via the official SDK (MEGAcmd/MEGAsync)
+        // sometimes come back without one or more of them, or with the
+        // master key embedded in a signed `keys` blob instead of plain `k`.
+        // Without these explicit checks, the legacy code below explodes with
+        // an opaque NPE inside UrlBASE642Bin / decryptKey and the user has no
+        // way to know which field was missing. Surface the shape of the
+        // response (redacted) so the cause is diagnosable from the log.
         String k = (String) res_map[0].get("k");
-
         String privk = (String) res_map[0].get("privk");
+        String csid = (String) res_map[0].get("csid");
+
+        if (k == null || privk == null || csid == null) {
+            LOG.log(Level.SEVERE, "{0} `us` response is missing required field(s). Response shape: {1}",
+                    new Object[]{_ctx(), _describeLoginResponse(res_map[0])});
+
+            if (k == null && res_map[0].get("keys") != null) {
+                // Account v3: master key is wrapped inside a signed Ed25519/Cu25519
+                // `keys` blob, not exposed as plain `k`. The legacy reverse-engineered
+                // path here can't decode it; only the official SDK can. This is a
+                // strong candidate for the "cuentas que solo logean tras pasar por
+                // MEGAcmd" bug.
+                throw new MegaAPIException(-1001, "MEGA returned a `keys` blob (account v3) but no plain `k` field. "
+                        + "This account format is not supported by MegaBasterd's legacy login path. "
+                        + "Workaround: log in once via MEGAcmd or MEGAsync, then try again.");
+            }
+
+            if (k == null) {
+                throw new MegaAPIException(-1002, "MEGA `us` response is missing `k` (encrypted master key). Account may not be fully bootstrapped on the server side.");
+            }
+            if (privk == null) {
+                throw new MegaAPIException(-1003, "MEGA `us` response is missing `privk` (encrypted RSA private key). Account RSA keypair may not be published yet.");
+            }
+            if (csid == null) {
+                throw new MegaAPIException(-1004, "MEGA `us` response is missing `csid` (encrypted session id). Session establishment failed.");
+            }
+        }
 
         _master_key = bin2i32a(decryptKey(UrlBASE642Bin(k), i32a2bin(_password_aes)));
 
-        String csid = (String) res_map[0].get("csid");
+        int[] enc_rsa_priv_key = bin2i32a(UrlBASE642Bin(privk));
 
-        if (csid != null) {
+        byte[] privk_byte = decryptKey(i32a2bin(enc_rsa_priv_key), i32a2bin(_master_key));
 
-            int[] enc_rsa_priv_key = bin2i32a(UrlBASE642Bin(privk));
+        _rsa_priv_key = _extractRSAPrivKey(privk_byte);
 
-            byte[] privk_byte = decryptKey(i32a2bin(enc_rsa_priv_key), i32a2bin(_master_key));
+        byte[] raw_sid = rsaDecrypt(mpi2big(UrlBASE642Bin(csid)), _rsa_priv_key[0], _rsa_priv_key[1], _rsa_priv_key[2]);
 
-            _rsa_priv_key = _extractRSAPrivKey(privk_byte);
-
-            byte[] raw_sid = rsaDecrypt(mpi2big(UrlBASE642Bin(csid)), _rsa_priv_key[0], _rsa_priv_key[1], _rsa_priv_key[2]);
-
-            _sid = Bin2UrlBASE64(Arrays.copyOfRange(raw_sid, 0, 43));
-        }
+        _sid = Bin2UrlBASE64(Arrays.copyOfRange(raw_sid, 0, 43));
 
         fetchNodes();
+    }
+
+    /**
+     * Build a redacted summary of a login response so we can diagnose why a
+     * login failed without leaking the encrypted key material itself.
+     * Reports which keys are present and their lengths. Used only on the
+     * error path of _realLogin().
+     */
+    private static String _describeLoginResponse(HashMap response) {
+        if (response == null) {
+            return "(null response)";
+        }
+        StringBuilder sb = new StringBuilder("{");
+        boolean first = true;
+        // Iterate in insertion order so the log is stable across runs.
+        for (Object keyObj : response.keySet()) {
+            if (!first) {
+                sb.append(", ");
+            }
+            first = false;
+            String key = String.valueOf(keyObj);
+            Object val = response.get(keyObj);
+            if (val == null) {
+                sb.append(key).append("=null");
+            } else if (val instanceof String) {
+                // Don't leak the value, just its length. Long strings here
+                // are all encrypted blobs (k, privk, csid, keys, pubk, ...).
+                sb.append(key).append("=str(").append(((String) val).length()).append(")");
+            } else if (val instanceof Number) {
+                // Scalars like `v` (account version) are safe to log verbatim.
+                sb.append(key).append("=").append(val);
+            } else {
+                sb.append(key).append("=").append(val.getClass().getSimpleName());
+            }
+        }
+        sb.append("}");
+        return sb.toString();
     }
 
     private void _readAccountVersionAndSalt() throws Exception {
@@ -444,6 +511,17 @@ public class MegaAPI implements Serializable {
 
         boolean empty_response = false, smart_proxy_socks = false;
 
+        // X-Hashcash state for MEGA's anti-bot proof-of-work challenge.
+        // When MEGA responds 402 with an X-Hashcash header, we solve the
+        // challenge and re-send the exact same POST with X-Hashcash set
+        // to the solution. See HashcashSolver and meganz/sdk's
+        // src/hashcash.cpp. Without this, accounts that MEGA decides to
+        // challenge (heuristic on IP/UA/account state) fail to log in
+        // unless a real SDK client (MEGAcmd, MEGAsync) has recently
+        // touched the same IP and "warmed" the rate-limiter.
+        String pending_hashcash_header = null;
+        boolean hashcash_just_solved = false;
+
         HttpsURLConnection con = null;
 
         ArrayList<String> excluded_proxy_list = new ArrayList<>();
@@ -517,6 +595,15 @@ public class MegaAPI implements Serializable {
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
+                // If we just solved a hashcash challenge in the previous
+                // iteration, attach the solution. MEGA will only honor it
+                // on the immediate retry; we clear it after sending so
+                // subsequent unrelated retries don't keep sending stale
+                // solutions.
+                if (pending_hashcash_header != null) {
+                    con.setRequestProperty("X-Hashcash", pending_hashcash_header);
+                }
+
                 con.setUseCaches(false);
 
                 con.setRequestMethod("POST");
@@ -529,6 +616,8 @@ public class MegaAPI implements Serializable {
 
                 http_status = con.getResponseCode();
 
+                hashcash_just_solved = false;
+
                 if (http_status != 200) {
 
                     LOG.log(Level.WARNING, "{0} request body: {1}  url: {2}", new Object[]{_ctx(), _redactSensitive(request), _redactUrl(url_api.toString())});
@@ -536,6 +625,28 @@ public class MegaAPI implements Serializable {
                     LOG.log(Level.WARNING, "{0} HTTP error: {1}", new Object[]{_ctx(), http_status});
 
                     http_error = http_status;
+
+                    // 402 with X-Hashcash means MEGA wants proof-of-work
+                    // before processing this request. Solve it now and
+                    // queue the solution for the next iteration. If the
+                    // previous request already carried a solution (i.e.
+                    // we just retried with hashcash and STILL got 402),
+                    // clear the pending header so we don't keep replaying
+                    // a wrong/stale solution -- MEGA will issue a fresh
+                    // challenge.
+                    if (http_status == 402) {
+                        String challenge = con.getHeaderField("X-Hashcash");
+                        pending_hashcash_header = null;
+                        if (challenge != null && !challenge.isEmpty()) {
+                            try {
+                                pending_hashcash_header = HashcashSolver.buildSolutionHeader(challenge);
+                                hashcash_just_solved = true;
+                                LOG.log(Level.INFO, "{0} solved X-Hashcash challenge, retrying immediately", _ctx());
+                            } catch (Exception hc_ex) {
+                                LOG.log(Level.WARNING, _ctx() + " failed to solve X-Hashcash challenge", hc_ex);
+                            }
+                        }
+                    }
 
                     MiscTools.drainAndCloseErrorStream(con);
 
@@ -596,16 +707,24 @@ public class MegaAPI implements Serializable {
 
             if ((empty_response || mega_error != 0 || http_error != 0) && http_error != 509) {
 
-                LOG.log(Level.WARNING, "{0} retry #{1} (http={2} mega_error={3} empty={4})  waiting backoff...",
-                        new Object[]{_ctx(), conta_error + 1, http_error, mega_error, empty_response});
+                if (hashcash_just_solved) {
+                    // We resolved the proof-of-work challenge inline. Retry
+                    // immediately without exponential backoff -- MEGA is
+                    // waiting for us, not throttling us. Also do not bump
+                    // conta_error: a successfully-solved challenge is not
+                    // a failed attempt.
+                    LOG.log(Level.INFO, "{0} retrying with X-Hashcash solution (no backoff)", _ctx());
+                } else {
+                    LOG.log(Level.WARNING, "{0} retry #{1} (http={2} mega_error={3} empty={4})  waiting backoff...",
+                            new Object[]{_ctx(), conta_error + 1, http_error, mega_error, empty_response});
 
-                try {
-                    Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
-                } catch (InterruptedException ex) {
-                    Thread.currentThread().interrupt();
-                    LOG.log(Level.FINE, "{0} retry sleep interrupted", _ctx());
+                    try {
+                        Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        LOG.log(Level.FINE, "{0} retry sleep interrupted", _ctx());
+                    }
                 }
-
             }
 
         } while ((http_error == 402 || http_error == 500 || http_error == 503 || empty_response || mega_error != 0 || (http_error == 509 && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()))
