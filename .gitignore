@@ -16,6 +16,8 @@ buildNumber.properties
 
 !/.mvn/wrapper/maven-wrapper.jar
 
+.claude/
+
 # Compiled class file
 *.class
 
