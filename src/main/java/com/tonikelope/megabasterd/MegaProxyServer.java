@@ -215,9 +215,16 @@ public class MegaProxyServer implements Runnable {
 
                         if (matcher_auth.matches()) {
 
-                            proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()), "UTF-8");
-
-                            LOG.log(Level.FINE, "Proxy-Authorization: [REDACTED]");
+                            try {
+                                proxy_auth = new String(BASE642Bin(matcher_auth.group(1).trim()), "UTF-8");
+                                LOG.log(Level.FINE, "Proxy-Authorization: [REDACTED]");
+                            } catch (IllegalArgumentException bad_b64) {
+                                // Malformed base64 -- treat as missing auth so the
+                                // 403 path triggers below. Don't let an unchecked
+                                // exception escape this Runnable and into the pool's
+                                // uncaught-exception handler.
+                                LOG.log(Level.FINE, "Bad base64 in Proxy-Authorization header");
+                            }
 
                         } else {
 
@@ -322,11 +329,23 @@ public class MegaProxyServer implements Runnable {
             }
         }
 
+        // Defensive cap on header line length. Without it, a misbehaving (or
+        // malicious -- though loopback-only limits the threat surface) peer
+        // could feed an unbounded stream of non-newline bytes and slowly
+        // grow our ByteArrayOutputStream until OOM. 8 KiB is well above any
+        // realistic CONNECT request or Proxy-Authorization header.
+        private static final int MAX_HEADER_LINE_LEN = 8192;
+
         private String readLine(Socket socket) throws IOException {
+            InputStream in = socket.getInputStream();
             ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
             int next;
+            int count = 0;
             readerLoop:
-            while ((next = socket.getInputStream().read()) != -1) {
+            while ((next = in.read()) != -1) {
+                if (++count > MAX_HEADER_LINE_LEN) {
+                    throw new IOException("Header line exceeds " + MAX_HEADER_LINE_LEN + " bytes");
+                }
                 if (_previousWasR && next == '\n') {
                     _previousWasR = false;
                     continue;

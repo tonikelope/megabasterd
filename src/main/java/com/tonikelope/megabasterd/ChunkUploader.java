@@ -24,9 +24,6 @@ import java.net.URL;
 import java.nio.channels.Channels;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.CipherInputStream;
-import org.apache.commons.io.input.QueueInputStream;
-import org.apache.commons.io.output.QueueOutputStream;
 
 /**
  *
@@ -203,7 +200,15 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                         ByteArrayOutputStream chunk_mac = new ByteArrayOutputStream();
 
-                        try (RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r"); QueueInputStream qis = new QueueInputStream(); QueueOutputStream qos = qis.newQueueOutputStream(); BufferedInputStream bis = new BufferedInputStream(Channels.newInputStream(_seek(f, chunk_offset).getChannel())); CipherInputStream cis = new CipherInputStream(qis, genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset))); OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
+                        // Drop the QueueInputStream/QueueOutputStream/CipherInputStream
+                        // pipeline -- it routed every plaintext byte through a
+                        // BlockingQueue<Integer> and read every encrypted byte one at
+                        // a time via cis.read(). For AES-CTR/NoPadding there's nothing
+                        // to buffer: cipher.update(in, off, len, out, 0) returns
+                        // exactly len bytes. Bulk update is dramatically faster.
+                        javax.crypto.Cipher encrypter = genCrypter("AES", "AES/CTR/NoPadding", _upload.getByte_file_key(), forwardMEGALinkKeyIV(_upload.getByte_file_iv(), chunk_offset));
+
+                        try (RandomAccessFile f = new RandomAccessFile(_upload.getFile_name(), "r"); BufferedInputStream bis = new BufferedInputStream(Channels.newInputStream(_seek(f, chunk_offset).getChannel())); OutputStream out = new ThrottledOutputStream(con.getOutputStream(), _upload.getMain_panel().getStream_supervisor())) {
 
                             LOG.log(Level.INFO, "{0} Uploading chunk {1} from worker {2} {3}...", new Object[]{Thread.currentThread().getName(), chunk_id, _id, _upload.getFile_name()});
 
@@ -211,15 +216,9 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 chunk_mac.write(buffer, 0, reads);
 
-                                for (int i = 0; i < reads; i++) {
-                                    qos.write(buffer[i]);
-                                }
+                                int n = encrypter.update(buffer, 0, reads, buffer_enc, 0);
 
-                                for (int i = 0; i < reads; i++) {
-                                    buffer_enc[i] = (byte) cis.read();
-                                }
-
-                                out.write(buffer_enc, 0, reads);
+                                out.write(buffer_enc, 0, n);
 
                                 _upload.getPartialProgress().add((long) reads);
 
@@ -245,7 +244,7 @@ public class ChunkUploader implements Runnable, SecureSingleThreadNotifiable {
 
                                 MiscTools.drainAndCloseErrorStream(con);
 
-                            } else if (tot_bytes_up == chunk_size || reads == -1) {
+                            } else if (tot_bytes_up == chunk_size) {
 
                                 if (_upload.getProgress() == _upload.getFile_size()) {
                                     _upload.getView().printStatusWarning("Waiting for completion handler ... ***DO NOT EXIT MEGABASTERD NOW***");

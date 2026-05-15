@@ -89,17 +89,21 @@ public final class SmartMegaProxyManager {
         THREAD_POOL.execute(() -> {
             refreshProxyList();
 
-            while (true) {
+            // Honour MainPanel.isExit() so the auto-refresh thread terminates
+            // cleanly on shutdown instead of spinning until JVM kills the
+            // daemon. Also restore the interrupt flag on InterruptedException.
+            while (!_main_panel.isExit()) {
 
-                while (System.currentTimeMillis() < _last_refresh_timestamp + _autorefresh_time * 60L * 1000L) {
+                while (!_main_panel.isExit() && System.currentTimeMillis() < _last_refresh_timestamp + _autorefresh_time * 60L * 1000L) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
-                        Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
+                        Thread.currentThread().interrupt();
+                        return;
                     }
                 }
 
-                if (MainPanel.isUse_smart_proxy()) {
+                if (!_main_panel.isExit() && MainPanel.isUse_smart_proxy()) {
 
                     refreshProxyList();
                 }
