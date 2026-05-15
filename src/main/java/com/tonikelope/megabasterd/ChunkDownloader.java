@@ -283,6 +283,22 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
+                // Force a fresh TCP/TLS socket per chunk and explicitly opt
+                // out of Java's KeepAliveCache reuse for this connection. With
+                // N parallel ChunkDownloader threads to the same gfs host,
+                // the cache can hand the same idle socket to two workers in
+                // sequence; if either worker's previous response wasn't drained
+                // exactly to the byte (e.g. the "recovered previous chunk"
+                // path completes getResponseCode() but never touches
+                // getInputStream()), the next request reads its response
+                // through a socket that still has leftover bytes in either
+                // the JDK buffer or the TLS layer. With Connection: close
+                // the server tears down after each chunk and Java does not
+                // pool the socket -- isolating each worker's HTTP exchange.
+                // Closes the multi-slot intermittent corruption pattern in
+                // #749 / #740 / #672 / #746.
+                con.setRequestProperty("Connection", "close");
+
                 long chunk_reads = 0;
 
                 chunk_error = true;
@@ -319,7 +335,20 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                 _chunk_inputstream = new ThrottledInputStream(con.getInputStream(), _download.getMain_panel().getStream_supervisor());
 
-                                try (OutputStream tmp_chunk_file_os = new BufferedOutputStream(new FileOutputStream(tmp_chunk_file))) {
+                                // Stream directly to .chunk{N}.tmp with a small
+                                // reusable buffer. Memory footprint is bounded
+                                // by buffer.length (16 KiB) per slot regardless
+                                // of chunk_size or slot count. The previous
+                                // in-memory buffering of the full chunk turned
+                                // out to be unnecessary once Connection: close
+                                // (above) removed the socket-pool cross-talk
+                                // between workers -- which was the real root
+                                // cause of #749 / #740 / #672 / #746. The
+                                // post-write fsync + size guards further down
+                                // close the residual write-rename race.
+                                FileOutputStream tmp_chunk_file_fos = new FileOutputStream(tmp_chunk_file);
+
+                                try (OutputStream tmp_chunk_file_os = new BufferedOutputStream(tmp_chunk_file_fos)) {
 
                                     int reads = 0;
 
@@ -345,6 +374,14 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                                     }
 
+                                    // Only fsync if we believe the chunk is
+                                    // complete. Partial chunks are about to be
+                                    // deleted by the failure path anyway, so
+                                    // the fsync would just slow down retries.
+                                    if (chunk_reads == chunk_size) {
+                                        tmp_chunk_file_os.flush();
+                                        tmp_chunk_file_fos.getFD().sync();
+                                    }
                                 }
 
                             } else {
@@ -366,7 +403,27 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             boolean rename_failed = false;
 
-                            if (tmp_chunk_file != null && chunk_file != null && (!chunk_file.exists() || chunk_file.length() != chunk_size)) {
+                            // Verify the on-disk size of the tmp file actually
+                            // matches what we counted in chunk_reads. close() of
+                            // the BufferedOutputStream should have flushed all
+                            // bytes, but if anything went sideways (disk full,
+                            // truncated flush, AV interception, partial write
+                            // returned by the OS), promoting this tmp file to
+                            // .chunk{N} would feed ChunkWriterManager a short
+                            // chunk, shifting every subsequent chunk's CTR-IV
+                            // offset and breaking the file's CBC-MAC at the end.
+                            // This is the producer-side guard that matches the
+                            // consumer-side size check in ChunkWriterManager (#749).
+                            if (tmp_chunk_file != null) {
+                                long tmp_size = tmp_chunk_file.length();
+                                if (tmp_size != chunk_size) {
+                                    LOG.log(Level.WARNING, "{0} Worker [{1}] chunk [{2}] tmp file size mismatch: on-disk={3} expected={4} -- requeueing chunk",
+                                            new Object[]{Thread.currentThread().getName(), _id, chunk_id, tmp_size, chunk_size});
+                                    rename_failed = true;
+                                }
+                            }
+
+                            if (!rename_failed && tmp_chunk_file != null && chunk_file != null && (!chunk_file.exists() || chunk_file.length() != chunk_size)) {
 
                                 if (chunk_file.exists() && !chunk_file.delete()) {
                                     LOG.log(Level.WARNING, "{0} Worker [{1}] failed to delete pre-existing chunk file {2}",
@@ -382,6 +439,28 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                     LOG.log(Level.WARNING, "{0} Worker [{1}] failed to rename {2} -> {3}; requeueing chunk",
                                             new Object[]{Thread.currentThread().getName(), _id, tmp_chunk_file, chunk_file});
                                     rename_failed = true;
+                                } else if (chunk_file.length() != chunk_size) {
+                                    // Post-rename sanity check. On NTFS rename
+                                    // is supposed to be atomic and preserve the
+                                    // source's content, but on network drives /
+                                    // ReFS / sketchy mount points we've seen
+                                    // size mismatches survive. If we trusted
+                                    // this and notified the writer, CTR-IV
+                                    // would drift exactly as if the producer
+                                    // had silently truncated.
+                                    LOG.log(Level.WARNING, "{0} Worker [{1}] chunk [{2}] post-rename size mismatch: on-disk={3} expected={4} -- requeueing chunk",
+                                            new Object[]{Thread.currentThread().getName(), _id, chunk_id, chunk_file.length(), chunk_size});
+                                    rename_failed = true;
+                                    // Evict the bad file so the next attempt at
+                                    // this chunk_id doesn't see it and either
+                                    // accept it as "recovered previous chunk"
+                                    // (size check at line ~316 would still trip,
+                                    // but defence in depth) or trip our writer-
+                                    // side size check.
+                                    if (!chunk_file.delete()) {
+                                        LOG.log(Level.WARNING, "{0} Worker [{1}] could not delete bad post-rename chunk file {2}",
+                                                new Object[]{Thread.currentThread().getName(), _id, chunk_file});
+                                    }
                                 }
                             }
 

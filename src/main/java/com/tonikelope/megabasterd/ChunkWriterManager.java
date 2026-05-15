@@ -203,7 +203,8 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
                         try {
 
-                            File chunk_file = new File(getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+                            long next_chunk_id = _last_chunk_id_written + 1;
+                            File chunk_file = new File(getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + String.valueOf(next_chunk_id));
 
                             while (chunk_file.exists() && chunk_file.canRead() && chunk_file.canWrite() && chunk_file.length() > 0) {
 
@@ -211,6 +212,63 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
                                     finishDownload();
                                     download_finished = true;
+                                }
+
+                                // Snapshot the file length ONCE per iteration so the
+                                // size we feed into CTR-IV advancement matches the
+                                // size we'll consume from the file. Reading length()
+                                // twice (here and again after the cipher loop) opened
+                                // a window where a truncated / partially-written chunk
+                                // would advance _bytes_written by a wrong amount,
+                                // shifting every subsequent chunk's CTR counter and
+                                // breaking the CBC-MAC at the very end (#749).
+                                long disk_chunk_size = chunk_file.length();
+
+                                // Validate the on-disk chunk against the size MEGA's
+                                // protocol mandates for this chunk_id + file_size +
+                                // offset. ChunkDownloader writes ".tmp" and renames
+                                // when chunk_reads == chunk_size, so a mismatch here
+                                // means the file was truncated / corrupted between
+                                // rename and consume (handle leak, AV interception,
+                                // partial flush, ...). Treat as a missing chunk:
+                                // delete the bad bytes and wait for ChunkDownloader
+                                // to re-download via the rejected-id path.
+                                long chunk_offset = calculateChunkOffset(next_chunk_id, Download.CHUNK_SIZE_MULTI);
+                                long expected_chunk_size = calculateChunkSize(next_chunk_id, _file_size, chunk_offset, Download.CHUNK_SIZE_MULTI);
+
+                                if (disk_chunk_size != expected_chunk_size) {
+                                    LOG.log(Level.WARNING, "{0} ChunkWriterManager BAD chunk [{1}] on disk: size={2} expected={3} -- deleting and waiting for re-download {4}",
+                                            new Object[]{Thread.currentThread().getName(), next_chunk_id, disk_chunk_size, expected_chunk_size, _download.getFile_name()});
+
+                                    if (!chunk_file.delete()) {
+                                        LOG.log(Level.SEVERE, "{0} ChunkWriterManager could NOT delete bad chunk file {1} -- aborting download to avoid silent corruption",
+                                                new Object[]{Thread.currentThread().getName(), chunk_file});
+                                        _download.stopDownloader("Corrupt chunk file could not be evicted: " + chunk_file.getName());
+                                        _exit = true;
+                                        return;
+                                    }
+
+                                    // The chunk was already produced + counted in
+                                    // _partialProgressQueue, so undo the progress
+                                    // contribution before requeueing. Without this
+                                    // the UI's progress would overshoot the file
+                                    // size on retry.
+                                    _download.getPartialProgress().add(-disk_chunk_size);
+                                    _download.getProgress_meter().secureNotify();
+
+                                    _download.rejectChunkId(next_chunk_id);
+
+                                    // Wake any worker queued on a slot so the
+                                    // rejected id gets picked up promptly.
+                                    // getChunkworkers() already returns a defensive
+                                    // copy under _workers_lock so iteration is safe.
+                                    _download.getChunkworkers().forEach(SecureSingleThreadNotifiable::secureNotify);
+
+                                    // Break out of the inner while; the outer
+                                    // do/while will re-check the next chunk slot
+                                    // and we'll wait on secureWait until the
+                                    // re-downloaded chunk lands.
+                                    break;
                                 }
 
                                 byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
@@ -234,7 +292,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
                                     return;
                                 }
 
-                                _bytes_written += chunk_file.length();
+                                _bytes_written += disk_chunk_size;
 
                                 _last_chunk_id_written++;
 
@@ -250,7 +308,8 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
                                             new Object[]{Thread.currentThread().getName(), chunk_file});
                                 }
 
-                                chunk_file = new File(getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + String.valueOf(_last_chunk_id_written + 1));
+                                next_chunk_id = _last_chunk_id_written + 1;
+                                chunk_file = new File(getChunks_dir() + "/" + MiscTools.HashString("sha1", _download.getUrl()) + ".chunk" + String.valueOf(next_chunk_id));
                             }
 
                         } catch (IOException ex) {
