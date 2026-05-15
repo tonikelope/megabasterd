@@ -110,6 +110,62 @@ public class SettingsDialog extends javax.swing.JDialog {
         }
     }
 
+    /**
+     * 2FA + login + persist for one MEGA account row. Used by the save loop
+     * for both brand-new accounts and existing accounts whose stored
+     * password differs from what the user typed in the table.
+     *
+     * <p>Short-circuits if the account already has an active session in
+     * {@link MainPanel#getMega_active_accounts()}. This preserves the
+     * legacy behaviour where an active session means "the user already
+     * authenticated via some other path; don't re-prompt".
+     *
+     * @return true if the account is now persisted (or was already active),
+     *     false on login failure or 2FA cancellation
+     */
+    private boolean _loginAndPersistMegaAccount(String email, String plaintextPass, Dialog ownerDialog) {
+
+        if (_main_panel.getMega_active_accounts().containsKey(email)) {
+            return true;
+        }
+
+        MegaAPI ma = new MegaAPI();
+
+        try {
+            String pincode = null;
+
+            if (ma.check2FA(email)) {
+
+                final String[] code_holder = {null};
+                final boolean[] cancelled = {false};
+
+                MiscTools.GUIRunAndWait(() -> {
+                    Get2FACode dialog = new Get2FACode((Frame) getParent(), true, email, _main_panel);
+                    dialog.setLocationRelativeTo(ownerDialog);
+                    dialog.setVisible(true);
+                    if (dialog.isCode_ok()) {
+                        code_holder[0] = dialog.getPin_code();
+                    } else {
+                        cancelled[0] = true;
+                    }
+                });
+
+                if (cancelled[0]) {
+                    return false;
+                }
+                pincode = code_holder[0];
+            }
+
+            ma.login(email, plaintextPass, pincode);
+            _account_store.persistMegaLogin(email, plaintextPass, ma);
+            return true;
+
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "MEGA login/persist for {0}: {1}", new Object[]{email, ex.getMessage()});
+            return false;
+        }
+    }
+
     public SettingsDialog(MainPanelView parent, boolean modal) {
 
         super(parent, modal);
@@ -2370,183 +2426,24 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                             new_valid_mega_accounts.add(email);
 
-                            MegaAPI ma;
-
-                            if (_main_panel.getMega_accounts().get(email) == null) {
-
-                                ma = new MegaAPI();
-
-                                try {
-
-                                    String pincode = null;
-
-                                    boolean error_2FA = false;
-
-                                    if (!_main_panel.getMega_active_accounts().containsKey(email) && ma.check2FA(email)) {
-
-                                        final String[] code_holder = {null};
-                                        final boolean[] cancelled = {false};
-                                        final String f_email = email;
-                                        MiscTools.GUIRunAndWait(() -> {
-                                            Get2FACode dialog = new Get2FACode((Frame) getParent(), true, f_email, _main_panel);
-                                            dialog.setLocationRelativeTo(tthis);
-                                            dialog.setVisible(true);
-                                            if (dialog.isCode_ok()) {
-                                                code_holder[0] = dialog.getPin_code();
-                                            } else {
-                                                cancelled[0] = true;
-                                            }
-                                        });
-
-                                        if (cancelled[0]) {
-                                            error_2FA = true;
-                                        } else {
-                                            pincode = code_holder[0];
-                                        }
-                                    }
-
-                                    if (!error_2FA) {
-                                        if (!_main_panel.getMega_active_accounts().containsKey(email)) {
-                                            ma.login(email, pass, pincode);
-
-                                            ByteArrayOutputStream bs = new ByteArrayOutputStream();
-
-                                            try (ObjectOutputStream os = new ObjectOutputStream(bs)) {
-                                                os.writeObject(ma);
-                                            }
-
-                                            if (_main_panel.getMaster_pass() != null) {
-
-                                                DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_at_rest(bs.toByteArray(), _main_panel.getMaster_pass()), true);
-
-                                            } else {
-
-                                                DBTools.insertMegaSession(email, bs.toByteArray(), false);
-                                            }
-
-                                            _main_panel.getMega_active_accounts().put(email, ma);
-
-                                            String password = pass, password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
-
-                                            if (_main_panel.getMaster_pass_hash() != null) {
-
-                                                password = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(pass.getBytes("UTF-8"), _main_panel.getMaster_pass()));
-
-                                                password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass()));
-
-                                                user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass()));
-                                            }
-
-                                            DBTools.insertMegaAccount(email, password, password_aes, user_hash);
-                                        }
-
-                                    } else {
-                                        email_error.add(email);
-                                    }
-
-                                } catch (Exception ex) {
-
-                                    email_error.add(email);
-                                    LOG.log(Level.SEVERE, ex.getMessage());
-                                }
-
+                            // Decide if this row needs (re-)login: new
+                            // account, or existing account whose stored
+                            // password differs from the user-entered one.
+                            boolean needs_login;
+                            if (!_main_panel.getMega_accounts().containsKey(email)) {
+                                needs_login = true;
                             } else {
-
-                                HashMap<String, Object> mega_account_data = (HashMap) _main_panel.getMega_accounts().get(email);
-
-                                String password = (String) mega_account_data.get("password");
-
-                                if (_main_panel.getMaster_pass() != null) {
-
-                                    try {
-
-                                        password = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(password), _main_panel.getMaster_pass()), "UTF-8");
-
-                                    } catch (Exception ex) {
-                                        LOG.log(Level.SEVERE, ex.getMessage());
-                                    }
+                                try {
+                                    String stored = _account_store.getMegaPassword(email);
+                                    needs_login = stored == null || !stored.equals(pass);
+                                } catch (Exception ex) {
+                                    LOG.log(Level.SEVERE, "Reading stored password for {0}: {1}", new Object[]{email, ex.getMessage()});
+                                    needs_login = true;
                                 }
+                            }
 
-                                if (!password.equals(pass)) {
-
-                                    ma = new MegaAPI();
-
-                                    try {
-
-                                        String pincode = null;
-
-                                        boolean error_2FA = false;
-
-                                        if (!_main_panel.getMega_active_accounts().containsKey(email) && ma.check2FA(email)) {
-
-                                            final String[] code_holder = {null};
-                                            final boolean[] cancelled = {false};
-                                            final String f_email = email;
-                                            MiscTools.GUIRunAndWait(() -> {
-                                                Get2FACode dialog = new Get2FACode((Frame) getParent(), true, f_email, _main_panel);
-                                                dialog.setLocationRelativeTo(tthis);
-                                                dialog.setVisible(true);
-                                                if (dialog.isCode_ok()) {
-                                                    code_holder[0] = dialog.getPin_code();
-                                                } else {
-                                                    cancelled[0] = true;
-                                                }
-                                            });
-
-                                            if (cancelled[0]) {
-                                                error_2FA = true;
-                                            } else {
-                                                pincode = code_holder[0];
-                                            }
-                                        }
-
-                                        if (!error_2FA) {
-                                            if (!_main_panel.getMega_active_accounts().containsKey(email)) {
-                                                ma.login(email, pass, pincode);
-
-                                                ByteArrayOutputStream bs = new ByteArrayOutputStream();
-
-                                                try (ObjectOutputStream os = new ObjectOutputStream(bs)) {
-                                                    os.writeObject(ma);
-                                                }
-
-                                                if (_main_panel.getMaster_pass() != null) {
-
-                                                    DBTools.insertMegaSession(email, CryptTools.aes_cbc_encrypt_at_rest(bs.toByteArray(), _main_panel.getMaster_pass()), true);
-
-                                                } else {
-
-                                                    DBTools.insertMegaSession(email, bs.toByteArray(), false);
-                                                }
-
-                                                _main_panel.getMega_active_accounts().put(email, ma);
-
-                                                password = pass;
-
-                                                String password_aes = Bin2BASE64(i32a2bin(ma.getPassword_aes())), user_hash = ma.getUser_hash();
-
-                                                if (_main_panel.getMaster_pass() != null) {
-
-                                                    password = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(pass.getBytes("UTF-8"), _main_panel.getMaster_pass()));
-
-                                                    password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(i32a2bin(ma.getPassword_aes()), _main_panel.getMaster_pass()));
-
-                                                    user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(UrlBASE642Bin(ma.getUser_hash()), _main_panel.getMaster_pass()));
-                                                }
-
-                                                DBTools.insertMegaAccount(email, password, password_aes, user_hash);
-                                            }
-                                        } else {
-                                            email_error.add(email);
-                                        }
-
-                                    } catch (Exception ex) {
-
-                                        email_error.add(email);
-                                        LOG.log(Level.SEVERE, ex.getMessage());
-
-                                    }
-                                }
+                            if (needs_login && !_loginAndPersistMegaAccount(email, pass, tthis)) {
+                                email_error.add(email);
                             }
                         }
                     }
@@ -2845,84 +2742,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     insertSettingValue("master_pass_hash", _main_panel.getMaster_pass_hash());
 
-                    for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
-
-                        HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                        String email, password, password_aes, user_hash;
-
-                        email = (String) pair.getKey();
-
-                        if (old_master_pass_hash != null) {
-
-                            password = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("password")), old_master_pass), "UTF-8");
-
-                            password_aes = Bin2BASE64(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("password_aes")), old_master_pass));
-
-                            user_hash = Bin2BASE64(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("user_hash")), old_master_pass));
-
-                        } else {
-
-                            password = (String) data.get("password");
-
-                            password_aes = (String) data.get("password_aes");
-
-                            user_hash = (String) data.get("user_hash");
-                        }
-
-                        if (_main_panel.getMaster_pass() != null) {
-
-                            password = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(password.getBytes("UTF-8"), _main_panel.getMaster_pass()));
-
-                            password_aes = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(BASE642Bin(password_aes), _main_panel.getMaster_pass()));
-
-                            user_hash = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(BASE642Bin(user_hash.replace('-', '+').replace('_', '/')), _main_panel.getMaster_pass()));
-                        }
-
-                        data.put("password", password);
-
-                        data.put("password_aes", password_aes);
-
-                        data.put("user_hash", user_hash);
-
-                        DBTools.insertMegaAccount(email, password, password_aes, user_hash);
-                    }
-
-                    for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
-
-                        HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                        String host, user, apikey;
-
-                        host = (String) pair.getKey();
-
-                        if (old_master_pass_hash != null) {
-
-                            user = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("user")), old_master_pass), "UTF-8");
-
-                            apikey = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("apikey")), old_master_pass), "UTF-8");
-
-                        } else {
-
-                            user = (String) data.get("user");
-
-                            apikey = (String) data.get("apikey");
-
-                        }
-
-                        if (_main_panel.getMaster_pass() != null) {
-
-                            user = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(user.getBytes("UTF-8"), _main_panel.getMaster_pass()));
-
-                            apikey = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(apikey.getBytes("UTF-8"), _main_panel.getMaster_pass()));
-                        }
-
-                        data.put("user", user);
-
-                        data.put("apikey", apikey);
-
-                        DBTools.insertELCAccount(host, user, apikey);
-                    }
+                    _account_store.migrateMasterPass(old_master_pass, old_master_pass_hash);
 
                 } catch (Exception ex) {
                     LOG.log(Level.SEVERE, ex.getMessage());
