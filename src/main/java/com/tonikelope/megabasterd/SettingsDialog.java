@@ -72,6 +72,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private final Set<String> _deleted_mega_accounts;
     private final Set<String> _deleted_elc_accounts;
     private final MainPanel _main_panel;
+    private final AccountStore _account_store;
     private boolean _remember_master_pass;
     private volatile boolean _exit = false;
 
@@ -91,11 +92,31 @@ public class SettingsDialog extends javax.swing.JDialog {
         return _remember_master_pass;
     }
 
+    /**
+     * Fill the MEGA / ELC table models from AccountStore.listMegaPlaintext /
+     * listElcPlaintext. Must NOT be called when the store is locked --
+     * callers are responsible for taking the placeholder-row branch instead.
+     */
+    private void _populateAccountTablesFromStore(DefaultTableModel mega_model, DefaultTableModel elc_model) {
+        try {
+            for (Map.Entry<String, String> e : _account_store.listMegaPlaintext().entrySet()) {
+                mega_model.addRow(new String[]{e.getKey(), e.getValue()});
+            }
+            for (Map.Entry<String, String[]> e : _account_store.listElcPlaintext().entrySet()) {
+                elc_model.addRow(new String[]{e.getKey(), e.getValue()[0], e.getValue()[1]});
+            }
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "Populating account tables from store: {0}", ex.getMessage());
+        }
+    }
+
     public SettingsDialog(MainPanelView parent, boolean modal) {
 
         super(parent, modal);
 
         _main_panel = parent.getMain_panel();
+
+        _account_store = new AccountStore(_main_panel);
 
         _remember_master_pass = true;
 
@@ -504,53 +525,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     unlock_accounts_button.setVisible(false);
 
-                    for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
-
-                        HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                        String pass = null;
-
-                        try {
-
-                            pass = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass()), "UTF-8");
-
-                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
-                        } catch (Exception ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
-                        }
-
-                        String[] new_row_data = {(String) pair.getKey(), pass};
-
-                        mega_model.addRow(new_row_data);
-                    }
-
-                    for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
-
-                        HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                        String user = null, apikey = null;
-
-                        try {
-
-                            user = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass()), "UTF-8");
-
-                            apikey = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass()), "UTF-8");
-
-                        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
-                        } catch (Exception ex) {
-                            LOG.log(Level.SEVERE, ex.getMessage());
-                        }
-
-                        String[] new_row_data = {(String) pair.getKey(), user, apikey};
-
-                        elc_model.addRow(new_row_data);
-                    }
-
-                    mega_model = (DefaultTableModel) mega_accounts_table.getModel();
-
-                    elc_model = (DefaultTableModel) elc_accounts_table.getModel();
+                    _populateAccountTablesFromStore(mega_model, elc_model);
 
                     remove_mega_account_button.setEnabled(mega_model.getRowCount() > 0);
 
@@ -562,23 +537,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 unlock_accounts_button.setVisible(false);
 
-                for (Map.Entry pair : _main_panel.getMega_accounts().entrySet()) {
-
-                    HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                    String[] new_row_data = {(String) pair.getKey(), (String) data.get("password")};
-
-                    mega_model.addRow(new_row_data);
-                }
-
-                for (Map.Entry pair : _main_panel.getElc_accounts().entrySet()) {
-
-                    HashMap<String, Object> data = (HashMap) pair.getValue();
-
-                    String[] new_row_data = {(String) pair.getKey(), (String) data.get("user"), (String) data.get("apikey")};
-
-                    elc_model.addRow(new_row_data);
-                }
+                _populateAccountTablesFromStore(mega_model, elc_model);
 
                 remove_mega_account_button.setEnabled((mega_model.getRowCount() > 0));
 
@@ -859,6 +818,8 @@ public class SettingsDialog extends javax.swing.JDialog {
         add_elc_account_button = new javax.swing.JButton();
         jLabel1 = new javax.swing.JLabel();
         import_mega_button = new javax.swing.JButton();
+        export_mega_button = new javax.swing.JButton();
+        export_elc_button = new javax.swing.JButton();
         advanced_scrollpane = new javax.swing.JScrollPane();
         advanced_panel = new javax.swing.JPanel();
         proxy_panel = new javax.swing.JPanel();
@@ -1587,6 +1548,24 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
+        export_mega_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        export_mega_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-import-30.png"))); // NOI18N
+        export_mega_button.setText("EXPORT ACCOUNTS (FILE)");
+        export_mega_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                export_mega_buttonActionPerformed(evt);
+            }
+        });
+
+        export_elc_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        export_elc_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-import-30.png"))); // NOI18N
+        export_elc_button.setText("EXPORT ELC (FILE)");
+        export_elc_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                export_elc_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout accounts_panelLayout = new javax.swing.GroupLayout(accounts_panel);
         accounts_panel.setLayout(accounts_panelLayout);
         accounts_panelLayout.setHorizontalGroup(
@@ -1604,6 +1583,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                     .addGroup(accounts_panelLayout.createSequentialGroup()
                         .addComponent(remove_mega_account_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(export_mega_button)
+                        .addGap(18, 18, 18)
                         .addComponent(import_mega_button)
                         .addGap(18, 18, 18)
                         .addComponent(add_mega_account_button))
@@ -1611,6 +1592,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                     .addGroup(accounts_panelLayout.createSequentialGroup()
                         .addComponent(remove_elc_account_button)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(export_elc_button)
+                        .addGap(18, 18, 18)
                         .addComponent(add_elc_account_button))
                     .addGroup(accounts_panelLayout.createSequentialGroup()
                         .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1638,7 +1621,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_mega_account_button)
                     .addComponent(add_mega_account_button)
-                    .addComponent(import_mega_button))
+                    .addComponent(import_mega_button)
+                    .addComponent(export_mega_button))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(elc_accounts_label)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1646,7 +1630,8 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(accounts_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(remove_elc_account_button)
-                    .addComponent(add_elc_account_button))
+                    .addComponent(add_elc_account_button)
+                    .addComponent(export_elc_button))
                 .addContainerGap())
         );
 
@@ -2310,53 +2295,22 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                     if (!host_table.isEmpty() && !user_table.isEmpty() && !apikey_table.isEmpty()) {
 
-                        if (_main_panel.getElc_accounts().get(host_table) == null) {
+                        // Compare against existing plaintext credentials (if any) and
+                        // persist only when the row is new or has actually changed.
+                        // AccountStore handles the encrypt-at-rest step so this loop
+                        // doesn't have to know about master_pass.
+                        String[] existing = null;
+                        try {
+                            existing = _account_store.getElcCredentials(host_table);
+                        } catch (Exception ex) {
+                            LOG.log(Level.SEVERE, "Reading ELC credentials for {0}: {1}", new Object[]{host_table, ex.getMessage()});
+                        }
 
-                            if (_main_panel.getMaster_pass_hash() != null) {
-
-                                user_table = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(user_table.getBytes("UTF-8"), _main_panel.getMaster_pass()));
-
-                                apikey_table = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(apikey_table.getBytes("UTF-8"), _main_panel.getMaster_pass()));
-                            }
-
-                            DBTools.insertELCAccount(host_table, user_table, apikey_table);
-
-                        } else {
-
-                            HashMap<String, Object> elc_account_data = (HashMap) _main_panel.getElc_accounts().get(host_table);
-
-                            String user = (String) elc_account_data.get("user");
-
-                            String apikey = (String) elc_account_data.get("apikey");
-
-                            if (_main_panel.getMaster_pass() != null) {
-
-                                try {
-
-                                    user = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(user), _main_panel.getMaster_pass()), "UTF-8");
-
-                                    apikey = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin(apikey), _main_panel.getMaster_pass()), "UTF-8");
-
-                                } catch (Exception ex) {
-                                    LOG.log(Level.SEVERE, ex.getMessage());
-                                }
-                            }
-
-                            if (!user.equals(user_table) || !apikey.equals(apikey_table)) {
-
-                                user = user_table;
-
-                                apikey = apikey_table;
-
-                                if (_main_panel.getMaster_pass() != null) {
-
-                                    user = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(user_table.getBytes("UTF-8"), _main_panel.getMaster_pass()));
-
-                                    apikey = Bin2BASE64(CryptTools.aes_cbc_encrypt_at_rest(apikey_table.getBytes("UTF-8"), _main_panel.getMaster_pass()));
-
-                                }
-
-                                DBTools.insertELCAccount(host_table, user, apikey);
+                        if (existing == null || !existing[0].equals(user_table) || !existing[1].equals(apikey_table)) {
+                            try {
+                                _account_store.persistElcAccount(host_table, user_table, apikey_table);
+                            } catch (Exception ex) {
+                                LOG.log(Level.SEVERE, "Persisting ELC account {0}: {1}", new Object[]{host_table, ex.getMessage()});
                             }
                         }
                     }
@@ -2657,9 +2611,11 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         } catch (SQLException ex) {
             LOG.log(Level.SEVERE, ex.getMessage());
-        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
         } catch (Exception ex) {
+            // The crypto multicatch (NoSuchAlgorithm, BadPadding, ...) that
+            // used to live here became unreachable after the ELC save loop
+            // moved to AccountStore (which surfaces those via Exception).
+            // Generic catch keeps coverage.
             LOG.log(Level.SEVERE, ex.getMessage());
         }
     }//GEN-LAST:event_save_buttonActionPerformed
@@ -2745,42 +2701,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 delete_all_accounts_button.setEnabled(true);
 
-                _main_panel.getMega_accounts().entrySet().stream().map((pair) -> {
-                    HashMap<String, Object> data = (HashMap) pair.getValue();
-                    String pass = null;
-                    try {
-
-                        pass = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("password")), _main_panel.getMaster_pass()), "UTF-8");
-
-                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    }
-                    String[] new_row_data = {(String) pair.getKey(), pass};
-                    return new_row_data;
-                }).forEachOrdered((new_row_data) -> {
-                    mega_model.addRow(new_row_data);
-                });
-                _main_panel.getElc_accounts().entrySet().stream().map((pair) -> {
-                    HashMap<String, Object> data = (HashMap) pair.getValue();
-                    String user = null, apikey = null;
-                    try {
-
-                        user = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("user")), _main_panel.getMaster_pass()), "UTF-8");
-
-                        apikey = new String(CryptTools.aes_cbc_decrypt_at_rest(BASE642Bin((String) data.get("apikey")), _main_panel.getMaster_pass()), "UTF-8");
-
-                    } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException | IllegalBlockSizeException | BadPaddingException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    } catch (Exception ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
-                    }
-                    String[] new_row_data = {(String) pair.getKey(), user, apikey};
-                    return new_row_data;
-                }).forEachOrdered((new_row_data) -> {
-                    elc_model.addRow(new_row_data);
-                });
+                _populateAccountTablesFromStore(mega_model, elc_model);
 
                 mega_accounts_table.setAutoCreateRowSorter(true);
                 DefaultRowSorter sorter_mega = ((DefaultRowSorter) mega_accounts_table.getRowSorter());
@@ -3448,6 +3369,95 @@ public class SettingsDialog extends javax.swing.JDialog {
         }
     }//GEN-LAST:event_import_mega_buttonActionPerformed
 
+    private void export_mega_buttonActionPerformed(java.awt.event.ActionEvent evt) {
+        _exportAccounts(true);
+    }
+
+    private void export_elc_buttonActionPerformed(java.awt.event.ActionEvent evt) {
+        _exportAccounts(false);
+    }
+
+    /**
+     * Shared backend for the two export buttons. Refuses to run if the store
+     * is locked (we can't decrypt). Shows a plaintext-warning confirmation
+     * before opening the file chooser. Writes UTF-8.
+     */
+    private void _exportAccounts(boolean mega) {
+        if (_account_store.isLocked()) {
+            JOptionPane.showMessageDialog(this,
+                    LabelTranslatorSingleton.getInstance().translate("MEGA ACCOUNTS ARE LOCKED"),
+                    "ERROR", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        List<String> lines;
+        try {
+            lines = mega ? _account_store.exportMegaLines() : _account_store.exportElcLines();
+        } catch (Exception ex) {
+            LOG.log(Level.SEVERE, "Building export lines: {0}", ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Export failed: " + ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (lines.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    LabelTranslatorSingleton.getInstance().translate("There are no accounts to export."),
+                    LabelTranslatorSingleton.getInstance().translate("Export accounts"),
+                    JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        Object[] options = {"No", LabelTranslatorSingleton.getInstance().translate("Yes")};
+        int n = showOptionDialog(this,
+                LabelTranslatorSingleton.getInstance().translate(
+                        "The exported file will contain your credentials in PLAIN TEXT. Anyone with access to the file can use your accounts.\n\nContinue?"),
+                LabelTranslatorSingleton.getInstance().translate("Export accounts"),
+                YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+        if (n != 1) {
+            return;
+        }
+
+        javax.swing.JFileChooser fc = new javax.swing.JFileChooser();
+        updateFonts(fc, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
+        fc.setDialogTitle(LabelTranslatorSingleton.getInstance().translate("Export accounts"));
+        fc.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
+        fc.addChoosableFileFilter(new FileNameExtensionFilter("TXT", "txt"));
+        fc.setAcceptAllFileFilterUsed(false);
+
+        String today = new java.text.SimpleDateFormat("yyyy-MM-dd").format(new java.util.Date());
+        fc.setSelectedFile(new File("megabasterd_" + (mega ? "mega" : "elc") + "_accounts_" + today + ".txt"));
+
+        if (fc.showSaveDialog(this) != JFileChooser.APPROVE_OPTION) {
+            return;
+        }
+
+        File out = fc.getSelectedFile();
+        if (!out.getName().toLowerCase().endsWith(".txt")) {
+            out = new File(out.getParentFile(), out.getName() + ".txt");
+        }
+        if (out.exists()) {
+            int overwrite = showOptionDialog(this,
+                    LabelTranslatorSingleton.getInstance().translate("File already exists. Overwrite?"),
+                    LabelTranslatorSingleton.getInstance().translate("Export accounts"),
+                    YES_NO_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+            if (overwrite != 1) {
+                return;
+            }
+        }
+
+        try {
+            Files.write(out.toPath(), lines, java.nio.charset.StandardCharsets.UTF_8);
+            JOptionPane.showMessageDialog(this,
+                    LabelTranslatorSingleton.getInstance().translate("Exported ") + lines.size()
+                            + LabelTranslatorSingleton.getInstance().translate(" account(s) to ") + out.getAbsolutePath(),
+                    LabelTranslatorSingleton.getInstance().translate("Export accounts"),
+                    JOptionPane.INFORMATION_MESSAGE);
+        } catch (IOException ex) {
+            LOG.log(Level.SEVERE, "Writing export file: {0}", ex.getMessage());
+            JOptionPane.showMessageDialog(this, "Export failed: " + ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     private void upload_public_folder_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_upload_public_folder_checkboxActionPerformed
         // TODO add your handling code here:
         if (this.upload_public_folder_checkbox.isSelected()) {
@@ -3515,6 +3525,8 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JComboBox<String> font_combo;
     private javax.swing.JLabel font_label;
     private javax.swing.JCheckBox force_smart_proxy_checkbox;
+    private javax.swing.JButton export_mega_button;
+    private javax.swing.JButton export_elc_button;
     private javax.swing.JButton import_mega_button;
     private javax.swing.JButton import_settings_button;
     private javax.swing.JButton jButton1;
