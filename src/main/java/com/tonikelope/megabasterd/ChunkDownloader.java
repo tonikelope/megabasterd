@@ -49,12 +49,17 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     public void RESET_CURRENT_CHUNK() {
 
-        if (_chunk_inputstream != null) {
+        // Cache to a local var to avoid TOCTOU: the worker thread can null
+        // _chunk_inputstream between our null-check and our close(), which
+        // would NPE since the catch only handles IOException.
+        InputStream s = _chunk_inputstream;
+
+        if (s != null) {
 
             this._reset_current_chunk = true;
 
             try {
-                _chunk_inputstream.close();
+                s.close();
             } catch (IOException ex) {
                 Logger.getLogger(ChunkDownloader.class.getName()).log(Level.SEVERE, null, ex);
             }

@@ -1249,6 +1249,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 return _last_download_url;
             }
 
+            // Cap the worker-url refetch loop. Without this, a permanently
+            // broken MEGA link / network outage kept this synchronized block
+            // spinning forever -- and every other worker queued on
+            // _dl_url_lock, so the user could not close the download even
+            // after clicking Stop. 32 retries with exp backoff gives ~tens
+            // of minutes before giving up, which is more than enough for
+            // any transient hiccup.
+            final int MAX_URL_RETRY = 32;
+
             boolean error;
 
             int conta_error = 0;
@@ -1256,6 +1265,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             String download_url;
 
             do {
+
+                if (_exit || _main_panel.isExit()) {
+                    return _last_download_url;
+                }
 
                 error = false;
 
@@ -1281,10 +1294,17 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     error = true;
 
+                    if (++conta_error >= MAX_URL_RETRY) {
+                        LOG.log(Level.SEVERE, "{0} getDownloadUrlForWorker giving up after {1} retries: {2}",
+                                new Object[]{Thread.currentThread().getName(), conta_error, ex.getMessage()});
+                        return null;
+                    }
+
                     try {
-                        Thread.sleep(getWaitTimeExpBackOff(conta_error++) * 1000);
+                        Thread.sleep(getWaitTimeExpBackOff(conta_error) * 1000);
                     } catch (InterruptedException ex2) {
-                        LOG.log(Level.SEVERE, ex2.getMessage());
+                        Thread.currentThread().interrupt();
+                        return _last_download_url;
                     }
                 }
 

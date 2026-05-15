@@ -222,7 +222,16 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
                                         _download.getOutput_stream().write(buffer, 0, reads);
                                     }
                                 } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidKeyException | InvalidAlgorithmParameterException ex) {
-                                    LOG.log(Level.SEVERE, ex.getMessage());
+                                    // AES init failure is not transient; swallowing it and
+                                    // advancing _bytes_written would punch a hole in the output
+                                    // file (subsequent chunks would decrypt at the wrong offset
+                                    // and the CBC-MAC check would catch it as DAMAGED, but only
+                                    // after wasting the whole download). Abort hard instead.
+                                    LOG.log(Level.SEVERE, "{0} ChunkWriterManager AES init failed, aborting download: {1}",
+                                            new Object[]{Thread.currentThread().getName(), ex.getMessage()});
+                                    _download.stopDownloader("AES init failed: " + ex.getMessage());
+                                    _exit = true;
+                                    return;
                                 }
 
                                 _bytes_written += chunk_file.length();

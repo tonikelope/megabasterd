@@ -91,7 +91,7 @@ public final class SmartMegaProxyManager {
 
             while (true) {
 
-                while (System.currentTimeMillis() < _last_refresh_timestamp + _autorefresh_time * 60 * 1000) {
+                while (System.currentTimeMillis() < _last_refresh_timestamp + _autorefresh_time * 60L * 1000L) {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
@@ -115,7 +115,7 @@ public final class SmartMegaProxyManager {
 
         for (String k : _proxy_list.keySet()) {
 
-            if (_proxy_list.get(k)[0] != -1 && _proxy_list.get(k)[0] > current_time - _ban_time * 1000) {
+            if (_proxy_list.get(k)[0] != -1 && _proxy_list.get(k)[0] > current_time - _ban_time * 1000L) {
 
                 i++;
             }
@@ -175,38 +175,57 @@ public final class SmartMegaProxyManager {
 
     public synchronized String[] getProxy(ArrayList<String> excluded) {
 
-        if (_proxy_list.size() > 0) {
+        // Iterative refresh loop with a cap. Was recursive: every call that
+        // found all proxies excluded slept 30s then recursed -- with an
+        // ever-growing excluded list (workers keep adding failed proxies),
+        // a permanently-bad list could deepen the stack indefinitely and
+        // eventually StackOverflowError. 5 attempts == ~2.5 min, plenty for
+        // a refresh to pull a usable proxy.
+        final int MAX_REFRESH_ATTEMPTS = 5;
 
-            Set<String> keys = _proxy_list.keySet();
+        for (int attempt = 0; attempt < MAX_REFRESH_ATTEMPTS; attempt++) {
 
-            List<String> keysList = new ArrayList<>(keys);
+            if (_proxy_list.size() > 0) {
 
-            if (isRandom_select()) {
-                Collections.shuffle(keysList);
-            }
+                Set<String> keys = _proxy_list.keySet();
 
-            Long current_time = System.currentTimeMillis();
+                List<String> keysList = new ArrayList<>(keys);
 
-            for (String k : keysList) {
+                if (isRandom_select()) {
+                    Collections.shuffle(keysList);
+                }
 
-                if ((_proxy_list.get(k)[0] == -1 || _proxy_list.get(k)[0] < current_time - _ban_time * 1000) && (excluded == null || !excluded.contains(k))) {
+                Long current_time = System.currentTimeMillis();
 
-                    return new String[]{k, _proxy_list.get(k)[1] == -1L ? "http" : "socks"};
+                for (String k : keysList) {
+
+                    Long[] entry = _proxy_list.get(k);
+
+                    if (entry == null) {
+                        continue;
+                    }
+
+                    if ((entry[0] == -1 || entry[0] < current_time - _ban_time * 1000L) && (excluded == null || !excluded.contains(k))) {
+
+                        return new String[]{k, entry[1] == -1L ? "http" : "socks"};
+                    }
                 }
             }
+
+            LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing in {1} secs, attempt {2}/{3})",
+                    new Object[]{Thread.currentThread().getName(), PROXY_AUTO_REFRESH_SLEEP_TIME, attempt + 1, MAX_REFRESH_ATTEMPTS});
+
+            try {
+                Thread.sleep(PROXY_AUTO_REFRESH_SLEEP_TIME * 1000L);
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return null;
+            }
+
+            refreshProxyList();
         }
 
-        LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing in " + String.valueOf(PROXY_AUTO_REFRESH_SLEEP_TIME) + " secs...)", new Object[]{Thread.currentThread().getName()});
-
-        try {
-            Thread.sleep(PROXY_AUTO_REFRESH_SLEEP_TIME * 1000);
-        } catch (InterruptedException ex) {
-            Logger.getLogger(SmartMegaProxyManager.class.getName()).log(Level.SEVERE, null, ex);
-        }
-
-        refreshProxyList();
-
-        return getProxyCount() > 0 ? getProxy(excluded) : null;
+        return null;
     }
 
     public synchronized void blockProxy(String proxy, String cause) {

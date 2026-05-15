@@ -12,6 +12,7 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.*;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -229,7 +230,13 @@ public class MegaProxyServer implements Runnable {
                         final Socket forwardSocket;
 
                         try {
-                            forwardSocket = new Socket(matcher.group(1), Integer.parseInt(matcher.group(2)));
+                            // Bounded connect + read timeouts so a stalled MEGA
+                            // server can't pin a handler thread until the kernel
+                            // gives up (~minutes). With 64 handlers in the pool,
+                            // a few stalls would saturate the proxy.
+                            forwardSocket = new Socket();
+                            forwardSocket.connect(new InetSocketAddress(matcher.group(1), Integer.parseInt(matcher.group(2))), 30000);
+                            forwardSocket.setSoTimeout(30000);
 
                         } catch (IOException | NumberFormatException e) {
 
