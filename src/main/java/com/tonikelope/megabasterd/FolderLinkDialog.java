@@ -102,6 +102,13 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             THREAD_POOL.execute(() -> {
                 _loadMegaDirTree();
 
+                // If the user closed the dialog while the tree was loading,
+                // dispose() has already nulled the tree model -- skip the
+                // rest to avoid a silent NPE inside _genDownloadLiks.
+                if (exit) {
+                    return;
+                }
+
                 if (_mega_error == 0) {
 
                     _genDownloadLiks();
