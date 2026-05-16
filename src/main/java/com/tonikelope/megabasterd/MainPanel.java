@@ -424,7 +424,7 @@ public final class MainPanel {
             }
         }
 
-        System.out.println(System.getProperty("os.name") + "" + System.getProperty("java.vm.name") + " " + System.getProperty("java.version") + " " + System.getProperty("java.home"));
+        LOG.log(Level.INFO, "Runtime: {0} {1} {2} {3}", new Object[]{System.getProperty("os.name"), System.getProperty("java.vm.name"), System.getProperty("java.version"), System.getProperty("java.home")});
 
         UIManager.put("OptionPane.messageFont", GUI_FONT.deriveFont(15f * getZoom_factor()));
 
@@ -485,20 +485,20 @@ public final class MainPanel {
                 javax.swing.JScrollPane debug_scroll = new javax.swing.JScrollPane(debug_area);
                 debug_scroll.getViewport().setBackground(new java.awt.Color(30, 30, 30));
 
-                javax.swing.JButton clear_btn = new javax.swing.JButton("Clear");
-                clear_btn.setToolTipText("Clear the DEBUG LOG tab.");
+                javax.swing.JButton clear_btn = new javax.swing.JButton(I18n.tr("ui.debuglog.clear_button"));
+                clear_btn.setToolTipText(I18n.tr("ui.tooltip.clear_debug_log"));
                 clear_btn.addActionListener((evt) -> {
                     int ans = javax.swing.JOptionPane.showConfirmDialog(_view,
-                            "Clear the DEBUG LOG buffer? Existing entries will be lost from the tab.",
-                            "Clear debug log", javax.swing.JOptionPane.YES_NO_OPTION,
+                            I18n.tr("ui.confirm.clear_debug_log.message"),
+                            I18n.tr("ui.confirm.clear_debug_log.title"), javax.swing.JOptionPane.YES_NO_OPTION,
                             javax.swing.JOptionPane.WARNING_MESSAGE);
                     if (ans == javax.swing.JOptionPane.YES_OPTION) {
                         debug_area.setText("");
                     }
                 });
 
-                javax.swing.JButton copy_btn = new javax.swing.JButton("Copy all");
-                copy_btn.setToolTipText("Copy the entire DEBUG LOG buffer to the clipboard.");
+                javax.swing.JButton copy_btn = new javax.swing.JButton(I18n.tr("ui.debuglog.copy_button"));
+                copy_btn.setToolTipText(I18n.tr("ui.tooltip.copy_debug_log"));
                 copy_btn.addActionListener((evt) -> {
                     try {
                         java.awt.Toolkit.getDefaultToolkit().getSystemClipboard()
@@ -507,11 +507,11 @@ public final class MainPanel {
                     }
                 });
 
-                javax.swing.JButton save_btn = new javax.swing.JButton("Save to file...");
-                save_btn.setToolTipText("Write the current DEBUG LOG buffer to a file on disk.");
+                javax.swing.JButton save_btn = new javax.swing.JButton(I18n.tr("ui.debuglog.save_button"));
+                save_btn.setToolTipText(I18n.tr("ui.tooltip.save_debug_log"));
                 save_btn.addActionListener((evt) -> {
                     javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
-                    chooser.setDialogTitle("Save DEBUG LOG to file");
+                    chooser.setDialogTitle(I18n.tr("ui.debuglog.save_dialog_title"));
                     String stamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
                     chooser.setSelectedFile(new java.io.File("megabasterd_debug_" + stamp + ".log"));
                     if (chooser.showSaveDialog(_view) == javax.swing.JFileChooser.APPROVE_OPTION) {
@@ -521,8 +521,8 @@ public final class MainPanel {
                             w.write(debug_area.getText());
                         } catch (Exception ex) {
                             javax.swing.JOptionPane.showMessageDialog(_view,
-                                    "Could not save log: " + ex.getMessage(),
-                                    "Save failed", javax.swing.JOptionPane.ERROR_MESSAGE);
+                                    I18n.tr("ui.err.save_log.message", ex.getMessage()),
+                                    I18n.tr("ui.err.save_log.title"), javax.swing.JOptionPane.ERROR_MESSAGE);
                         }
                     }
                 });

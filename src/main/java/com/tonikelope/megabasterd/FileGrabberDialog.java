@@ -523,7 +523,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
         updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
-        filechooser.setDialogTitle("Add files");
+        filechooser.setDialogTitle(I18n.tr("ui.filechooser.add_files"));
 
         filechooser.setAcceptAllFileFilterUsed(false);
 
@@ -625,7 +625,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
         updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.2));
 
-        filechooser.setDialogTitle("Add directory");
+        filechooser.setDialogTitle(I18n.tr("ui.filechooser.add_directory"));
 
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
 

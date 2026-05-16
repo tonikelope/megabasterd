@@ -1092,7 +1092,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 for (int i = 3; !_closed && i > 0; i--) {
                     final int j = i;
                     MiscTools.GUIRun(() -> {
-                        getView().getRestart_button().setText("Restart (" + String.valueOf(j) + " secs...)");
+                        getView().getRestart_button().setText(I18n.tr("ui.dynamic.restart_countdown", j));
                     });
                     try {
                         Thread.sleep(1000);
@@ -1696,9 +1696,9 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     for (long i = getWaitTimeExpBackOff(retry++); i > 0 && !_exit; i--) {
                         if (error_code == -18) {
-                            getView().printStatusError(LabelTranslatorSingleton.getInstance().translate("File temporarily unavailable! (Retrying in ") + i + LabelTranslatorSingleton.getInstance().translate(" secs...)"));
+                            getView().printStatusError(I18n.tr("ui.dynamic.retry_file_unavailable", i));
                         } else {
-                            getView().printStatusError("Mega/MC APIException error " + ex.getMessage() + LabelTranslatorSingleton.getInstance().translate(" (Retrying in ") + i + LabelTranslatorSingleton.getInstance().translate(" secs...)"));
+                            getView().printStatusError(I18n.tr("ui.dynamic.retry_api_error", ex.getMessage(), i));
                         }
 
                         try {

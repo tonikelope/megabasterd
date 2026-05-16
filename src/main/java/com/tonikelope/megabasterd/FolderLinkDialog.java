@@ -415,7 +415,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     private void formWindowClosing(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowClosing
         // TODO add your handling code here:
 
-        if (working && JOptionPane.showConfirmDialog(this, "EXIT?") == 0) {
+        if (working && JOptionPane.showConfirmDialog(this, I18n.tr("ui.confirm.exit_question")) == 0) {
             dispose();
             exit = true;
         } else if (!working) {
@@ -450,7 +450,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             int r = -1;
 
             if (ma.existsCachedFolderNodes(folder_id)) {
-                r = JOptionPane.showConfirmDialog(this, "Do you want to use FOLDER CACHED VERSION?\n\n(It could speed up the loading of very large folders)", "FOLDER CACHE", JOptionPane.YES_NO_OPTION);
+                r = JOptionPane.showConfirmDialog(this, I18n.tr("ui.confirm.folder_cache.message"), I18n.tr("ui.confirm.folder_cache.title"), JOptionPane.YES_NO_OPTION);
 
             }
 

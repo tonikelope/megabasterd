@@ -1134,7 +1134,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                 for (int i = 3; !_closed && i > 0; i--) {
                     final int j = i;
                     MiscTools.GUIRun(() -> {
-                        getView().getRestart_button().setText("Restart (" + String.valueOf(j) + " secs...)");
+                        getView().getRestart_button().setText(I18n.tr("ui.dynamic.restart_countdown", j));
                     });
                     try {
                         Thread.sleep(1000);

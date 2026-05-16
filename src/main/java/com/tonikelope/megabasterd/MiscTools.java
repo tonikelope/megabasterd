@@ -563,50 +563,62 @@ public class MiscTools {
 
     public static void translateLabels(final Component component) {
 
-        if (component != null) {
+        if (component == null) {
+            return;
+        }
 
-            if (component instanceof javax.swing.JLabel) {
+        // Tooltips live on every JComponent regardless of subtype; translate
+        // them up-front so JSpinner / JTextField / JComboBox tooltips are also
+        // covered (previously only JLabel/JButton/JCheckBox text was).
+        if (component instanceof JComponent) {
+            JComponent jc = (JComponent) component;
+            String tip = jc.getToolTipText();
+            if (tip != null && !tip.isEmpty()) {
+                jc.setToolTipText(LabelTranslatorSingleton.getInstance().translate(tip));
+            }
+        }
 
-                ((JLabel) component).setText(LabelTranslatorSingleton.getInstance().translate(((JLabel) component).getText()));
+        if (component instanceof javax.swing.JLabel) {
 
-            } else if (component instanceof javax.swing.JButton) {
+            ((JLabel) component).setText(LabelTranslatorSingleton.getInstance().translate(((JLabel) component).getText()));
 
-                ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
+        } else if (component instanceof javax.swing.JButton) {
 
-            } else if (component instanceof javax.swing.JCheckBox) {
+            ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
 
-                ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
+        } else if (component instanceof javax.swing.JCheckBox) {
 
-            } else if ((component instanceof JMenuItem) && !(component instanceof JMenu)) {
+            ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
 
-                ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
+        } else if ((component instanceof JMenuItem) && !(component instanceof JMenu)) {
 
-            } else if (component instanceof JMenu) {
+            ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
 
-                for (Component child : ((JMenu) component).getMenuComponents()) {
-                    if (child instanceof JMenuItem) {
-                        translateLabels(child);
-                    }
+        } else if (component instanceof JMenu) {
+
+            for (Component child : ((JMenu) component).getMenuComponents()) {
+                if (child instanceof JMenuItem) {
+                    translateLabels(child);
                 }
+            }
 
-                ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
+            ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
 
-            } else if (component instanceof Container) {
+        } else if (component instanceof Container) {
 
-                for (Component child : ((Container) component).getComponents()) {
-                    if (child instanceof Container) {
+            for (Component child : ((Container) component).getComponents()) {
+                if (child instanceof Container) {
 
-                        translateLabels(child);
-                    }
+                    translateLabels(child);
                 }
+            }
 
-                if ((component instanceof JPanel) && (((JComponent) component).getBorder() instanceof TitledBorder)) {
-                    ((TitledBorder) ((JComponent) component).getBorder()).setTitle(LabelTranslatorSingleton.getInstance().translate(((TitledBorder) ((JComponent) component).getBorder()).getTitle()));
-                }
+            if ((component instanceof JPanel) && (((JComponent) component).getBorder() instanceof TitledBorder)) {
+                ((TitledBorder) ((JComponent) component).getBorder()).setTitle(LabelTranslatorSingleton.getInstance().translate(((TitledBorder) ((JComponent) component).getBorder()).getTitle()));
+            }
 
-                if (component instanceof JDialog) {
-                    ((Dialog) component).setTitle(LabelTranslatorSingleton.getInstance().translate(((Dialog) component).getTitle()));
-                }
+            if (component instanceof JDialog) {
+                ((Dialog) component).setTitle(LabelTranslatorSingleton.getInstance().translate(((Dialog) component).getTitle()));
             }
         }
     }
@@ -1885,7 +1897,7 @@ public class MiscTools {
                 } catch (MegaAPIException exception) {
 
                     if (exception.getCode() == -6) {
-                        JOptionPane.showMessageDialog(container.getParent(), LabelTranslatorSingleton.getInstance().translate("You've tried to login too many times. Wait an hour."), "Error", JOptionPane.ERROR_MESSAGE);
+                        JOptionPane.showMessageDialog(container.getParent(), LabelTranslatorSingleton.getInstance().translate("You've tried to login too many times. Wait an hour."), I18n.tr("ui.error_title"), JOptionPane.ERROR_MESSAGE);
                     }
 
                     throw exception;

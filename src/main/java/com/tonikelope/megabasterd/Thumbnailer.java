@@ -68,9 +68,6 @@ public class Thumbnailer {
                     // write out JPG
                     ImageIO.write(image, "jpg", file);
 
-                    // indicate file written
-                    //double seconds = ((double) picture.getPts()) / Global.DEFAULT_PTS_PER_SECOND;
-                    //System.out.printf("at elapsed time of %6.3f seconds wrote: %s\n", seconds, file);
                     conta_frames++;
 
                     return file.getAbsolutePath();

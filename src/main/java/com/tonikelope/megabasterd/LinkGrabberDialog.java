@@ -276,7 +276,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
         updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
-        filechooser.setDialogTitle("Download folder");
+        filechooser.setDialogTitle(I18n.tr("ui.filechooser.download_folder"));
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         filechooser.setAcceptAllFileFilterUsed(false);
 
@@ -312,7 +312,7 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
         updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
-        filechooser.setDialogTitle("Select DLC container");
+        filechooser.setDialogTitle(I18n.tr("ui.filechooser.select_dlc"));
 
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.FILES_ONLY);
 
