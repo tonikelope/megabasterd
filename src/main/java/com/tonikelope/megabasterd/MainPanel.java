@@ -1201,105 +1201,177 @@ public final class MainPanel {
 
             if (!_download_manager.getTransference_running_list().isEmpty() || !_upload_manager.getTransference_running_list().isEmpty() || !_download_manager.getTransference_waitstart_queue().isEmpty() || !_upload_manager.getTransference_waitstart_queue().isEmpty()) {
 
+                // Hard cap on the graceful drain. Without this the dialog can sit
+                // indefinitely waiting for workers that are blocked inside a 60s
+                // HTTP read timeout (or repeatedly on consecutive 509 backoffs);
+                // the user ends up clicking EXIT NOW anyway. After this much wall
+                // time we just call byebyenow ourselves -- the queue has already
+                // been persisted upfront, so nothing is lost. (#751)
+                final long SHUTDOWN_HARD_TIMEOUT_MS = 30_000L;
+
+                final WarningExitMessage exit_message = new WarningExitMessage(getView(), true, this, restart);
+
                 THREAD_POOL.execute(() -> {
-                    boolean wait;
-                    do {
-                        wait = false;
-                        if (!_download_manager.getTransference_running_list().isEmpty()) {
-                            for (Transference trans : _download_manager.getTransference_running_list()) {
-                                Download download = (Download) trans;
-                                if (download.isPaused()) {
-                                    download.pause();
-                                }
-                                if (!download.getChunkworkers().isEmpty()) {
-                                    wait = true;
-                                    MiscTools.GUIRun(() -> {
-                                        download.getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
-                                        download.getView().getSlots_spinner().setEnabled(false);
-                                        download.getView().getPause_button().setEnabled(false);
-                                        download.getView().getCopy_link_button().setEnabled(false);
-                                        download.getView().getOpen_folder_button().setEnabled(false);
-                                        download.getView().getFile_size_label().setEnabled(false);
-                                        download.getView().getFile_name_label().setEnabled(false);
-                                        download.getView().getSpeed_label().setEnabled(false);
-                                        download.getView().getSlots_label().setEnabled(false);
-                                        download.getView().getProgress_pbar().setEnabled(false);
-                                    });
-                                }
-                            }
-                        }
-                        if (!_upload_manager.getTransference_running_list().isEmpty()) {
-                            for (Transference trans : _upload_manager.getTransference_running_list()) {
-                                Upload upload = (Upload) trans;
-                                upload.getMac_generator().secureNotify();
-                                if (upload.isPaused()) {
-                                    upload.pause();
-                                }
-                                if (!upload.getChunkworkers().isEmpty()) {
-                                    wait = true;
-                                    MiscTools.GUIRun(() -> {
-                                        upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
-                                        upload.getView().getSlots_spinner().setEnabled(false);
-                                        upload.getView().getPause_button().setEnabled(false);
-                                        upload.getView().getFolder_link_button().setEnabled(false);
-                                        upload.getView().getFile_link_button().setEnabled(false);
-                                        upload.getView().getFile_size_label().setEnabled(false);
-                                        upload.getView().getFile_name_label().setEnabled(false);
-                                        upload.getView().getSpeed_label().setEnabled(false);
-                                        upload.getView().getSlots_label().setEnabled(false);
-                                        upload.getView().getProgress_pbar().setEnabled(false);
-                                    });
-                                } else {
-                                    try {
-                                        DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
-                                    } catch (SQLException ex) {
-                                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
-                                    }
-                                }
-                            }
-                        }
 
-                        ArrayList<String> downloads_queue = new ArrayList<>(), uploads_queue = new ArrayList<>();
+                    final long start = System.currentTimeMillis();
 
-                        for (Transference t : _download_manager.getTransference_running_list()) {
-                            downloads_queue.add(((Download) t).getUrl());
-                        }
+                    // -------------------------------------------------------------
+                    // 1) Snapshot the queue UPFRONT and persist it once.
+                    //    The previous code rebuilt this snapshot every iteration
+                    //    of the drain loop, which meant a download that exited
+                    //    between two iterations dropped out of the persisted set
+                    //    (its URL never made it to download_queue). Doing it once
+                    //    here -- before any transference has had a chance to exit
+                    //    -- guarantees the full resume set survives across the
+                    //    app restart. (#751)
+                    // -------------------------------------------------------------
+                    ArrayList<String> downloads_queue = new ArrayList<>();
+                    for (Transference t : _download_manager.getTransference_running_list()) {
+                        downloads_queue.add(((Download) t).getUrl());
+                    }
+                    for (Transference t : _download_manager.getTransference_waitstart_queue()) {
+                        downloads_queue.add(((Download) t).getUrl());
+                    }
 
-                        for (Transference t : _download_manager.getTransference_waitstart_queue()) {
-                            downloads_queue.add(((Download) t).getUrl());
-                        }
+                    ArrayList<String> uploads_queue = new ArrayList<>();
+                    for (Transference t : _upload_manager.getTransference_running_list()) {
+                        uploads_queue.add(t.getFile_name());
+                    }
+                    for (Transference t : _upload_manager.getTransference_waitstart_queue()) {
+                        uploads_queue.add(t.getFile_name());
+                    }
 
-                        for (Transference t : _upload_manager.getTransference_running_list()) {
-                            uploads_queue.add(t.getFile_name());
-                        }
-
-                        for (Transference t : _upload_manager.getTransference_waitstart_queue()) {
-                            uploads_queue.add(t.getFile_name());
-                        }
-
+                    // Save per-upload progress (mac data) up front too, so a
+                    // resume picks up close to the byte that was being chunked
+                    // when the user clicked exit.
+                    for (Transference t : _upload_manager.getTransference_running_list()) {
+                        Upload upload = (Upload) t;
                         try {
-                            DBTools.truncateDownloadsQueue();
-                            DBTools.insertDownloadsQueue(downloads_queue);
-
-                            DBTools.truncateUploadsQueue();
-                            DBTools.insertUploadsQueue(uploads_queue);
+                            DBTools.updateUploadProgress(upload.getFile_name(), upload.getMa().getFull_email(), upload.getProgress(), upload.getTemp_mac_data() != null ? upload.getTemp_mac_data() : null);
                         } catch (SQLException ex) {
-                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        }
+                    }
+
+                    boolean db_ok = true;
+                    try {
+                        DBTools.truncateDownloadsQueue();
+                        DBTools.insertDownloadsQueue(downloads_queue);
+                        DBTools.truncateUploadsQueue();
+                        DBTools.insertUploadsQueue(uploads_queue);
+                    } catch (SQLException ex) {
+                        db_ok = false;
+                        Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    exit_message.setDbSaved(db_ok);
+
+                    // -------------------------------------------------------------
+                    // 2) Wake every worker and cut in-flight I/O.
+                    //    ChunkDownloader.RESET_CURRENT_CHUNK() closes the current
+                    //    chunk InputStream, which forces any blocking read() /
+                    //    getResponseCode() to throw IOException promptly instead
+                    //    of waiting out the 60s HTTP_READ_TIMEOUT. The worker's
+                    //    outer-loop then sees main_panel.isExit() == true and
+                    //    exits. Without this, the drain loop could legitimately
+                    //    sit for ~60s per stuck worker. (#751)
+                    // -------------------------------------------------------------
+                    for (Transference trans : _download_manager.getTransference_running_list()) {
+                        Download download = (Download) trans;
+                        if (download.isPaused()) {
+                            download.pause();
+                        }
+                        MiscTools.GUIRun(() -> {
+                            download.getView().printStatusNormal("Stopping download safely before exit MegaBasterd, please wait...");
+                            download.getView().getSlots_spinner().setEnabled(false);
+                            download.getView().getPause_button().setEnabled(false);
+                            download.getView().getCopy_link_button().setEnabled(false);
+                            download.getView().getOpen_folder_button().setEnabled(false);
+                            download.getView().getFile_size_label().setEnabled(false);
+                            download.getView().getFile_name_label().setEnabled(false);
+                            download.getView().getSpeed_label().setEnabled(false);
+                            download.getView().getSlots_label().setEnabled(false);
+                            download.getView().getProgress_pbar().setEnabled(false);
+                        });
+                        for (ChunkDownloader cd : download.getChunkworkers()) {
+                            try {
+                                cd.RESET_CURRENT_CHUNK();
+                            } catch (Exception ignore) {
+                            }
+                            cd.secureNotify();
+                        }
+                    }
+                    for (Transference trans : _upload_manager.getTransference_running_list()) {
+                        Upload upload = (Upload) trans;
+                        if (upload.getMac_generator() != null) {
+                            upload.getMac_generator().secureNotify();
+                        }
+                        if (upload.isPaused()) {
+                            upload.pause();
+                        }
+                        MiscTools.GUIRun(() -> {
+                            upload.getView().printStatusNormal("Stopping upload safely before exit MegaBasterd, please wait...");
+                            upload.getView().getSlots_spinner().setEnabled(false);
+                            upload.getView().getPause_button().setEnabled(false);
+                            upload.getView().getFolder_link_button().setEnabled(false);
+                            upload.getView().getFile_link_button().setEnabled(false);
+                            upload.getView().getFile_size_label().setEnabled(false);
+                            upload.getView().getFile_name_label().setEnabled(false);
+                            upload.getView().getSpeed_label().setEnabled(false);
+                            upload.getView().getSlots_label().setEnabled(false);
+                            upload.getView().getProgress_pbar().setEnabled(false);
+                        });
+                        for (ChunkUploader cu : upload.getChunkworkers()) {
+                            cu.secureNotify();
+                        }
+                    }
+
+                    // -------------------------------------------------------------
+                    // 3) Drain loop with live status push and hard timeout.
+                    // -------------------------------------------------------------
+                    boolean wait;
+                    boolean timed_out = false;
+                    do {
+                        int dl_count = 0, dl_workers = 0, ul_count = 0, ul_workers = 0;
+
+                        for (Transference trans : _download_manager.getTransference_running_list()) {
+                            Download download = (Download) trans;
+                            dl_count++;
+                            dl_workers += download.getChunkworkers().size();
+                        }
+                        for (Transference trans : _upload_manager.getTransference_running_list()) {
+                            Upload upload = (Upload) trans;
+                            ul_count++;
+                            ul_workers += upload.getChunkworkers().size();
+                        }
+
+                        wait = (dl_workers > 0 || ul_workers > 0);
+
+                        long elapsed = System.currentTimeMillis() - start;
+                        exit_message.updateStatus(dl_count, dl_workers, ul_count, ul_workers, elapsed, SHUTDOWN_HARD_TIMEOUT_MS);
+
+                        if (elapsed >= SHUTDOWN_HARD_TIMEOUT_MS) {
+                            timed_out = true;
+                            break;
                         }
 
                         if (wait) {
-
                             try {
-                                Thread.sleep(1000);
+                                Thread.sleep(500);
                             } catch (InterruptedException ex) {
+                                Thread.currentThread().interrupt();
                                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+                                break;
                             }
                         }
                     } while (wait);
+
+                    if (timed_out) {
+                        Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING,
+                                "Shutdown drain hit {0}ms hard timeout -- forcing exit", SHUTDOWN_HARD_TIMEOUT_MS);
+                    }
+
                     byebyenow(restart);
                 });
-
-                WarningExitMessage exit_message = new WarningExitMessage(getView(), true, this, restart);
 
                 exit_message.setLocationRelativeTo(getView());
 

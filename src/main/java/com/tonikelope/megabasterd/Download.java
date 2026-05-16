@@ -739,6 +739,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                             } while (!isExit() && !_thread_pool.isShutdown() && progress < getFile_size() && (isPaused() || progress > last_progress));
 
                             if (!isExit() && !_thread_pool.isShutdown() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
+                                // Flag for auto-restart so the download re-arms itself a few seconds
+                                // after the watchdog fires. The most common cause of a stale-progress
+                                // timeout is MEGA HTTP 509 (bandwidth quota) -- the user often clears
+                                // it by switching IP (VPN). Without auto-retry the download stays in
+                                // FATAL ERROR until the user manually clicks Restart on every row
+                                // (or restarts the whole app to re-provision from the queue). (#751)
+                                _auto_retry_on_error = true;
                                 stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
                             }
 

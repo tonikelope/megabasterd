@@ -522,15 +522,30 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit && !_download.isStopped() && !timeout && _current_smart_proxy == null && http_error != 509 && http_error != 403 && http_error != 503) {
+                        // Apply exp backoff when there is no proxy-switch fallback.
+                        // Previously 509 was excluded from this path, which left
+                        // workers tight-looping on MEGA bandwidth-quota responses
+                        // (no Thread.sleep at all) -- hammering MEGA, burning CPU,
+                        // and making the app freeze on exit because the loop only
+                        // checks main_panel.isExit() between full HTTP roundtrips.
+                        // Now 509 also backs off (with smart_proxy off it is the
+                        // only place the worker can yield). Sleeping in 1s slices
+                        // lets the worker notice main_panel.isExit() within ~1s
+                        // during shutdown instead of waiting out the full backoff. (#751)
+                        if (!_exit && !_download.isStopped() && !timeout && _current_smart_proxy == null && http_error != 403) {
 
                             _error_wait = true;
 
                             _download.getView().updateSlotsStatus();
 
-                            try {
-                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++conta_error) * 1000);
-                            } catch (InterruptedException exc) {
+                            long wait_secs = MiscTools.getWaitTimeExpBackOff(++conta_error);
+                            for (long i = 0; i < wait_secs && !_exit && !_download.isStopped() && !_download.getMain_panel().isExit(); i++) {
+                                try {
+                                    Thread.sleep(1000);
+                                } catch (InterruptedException exc) {
+                                    Thread.currentThread().interrupt();
+                                    break;
+                                }
                             }
 
                             _error_wait = false;
