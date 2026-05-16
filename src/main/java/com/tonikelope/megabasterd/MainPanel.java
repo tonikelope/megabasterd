@@ -357,6 +357,13 @@ public final class MainPanel {
 
         _resume_downloads = false;
 
+        // Capture java.util.logging records into an in-memory queue so the
+        // "DEBUG LOG" tab built below (after the view is up) can show them.
+        // Done BEFORE loadUserSettings so early init records are not lost.
+        // We do NOT touch System.out / System.err and we do NOT raise the
+        // root level -- the existing filter still applies. (#751 / D)
+        DebugLogBus.installJULHandler();
+
         loadUserSettings();
 
         if (_debug_file) {
@@ -442,6 +449,95 @@ public final class MainPanel {
             Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING,
                     "Could not wire quota-recovery menu: {0}", ex.getMessage());
         }
+
+        // "DEBUG LOG" tab. Everything inside GUIRunAndWait so it runs on the
+        // EDT; addTab on a JTabbedPane after the view is realised has to be
+        // EDT-safe. DebugLogBus.installJULHandler() ran above, so the queue
+        // has been buffering since startup -- bind() will start a Timer that
+        // drains the queue into the textarea every 300 ms, batched. (#751 / D)
+        MiscTools.GUIRunAndWait(() -> {
+            try {
+                javax.swing.JTextArea debug_area = new javax.swing.JTextArea();
+                debug_area.setEditable(false);
+                debug_area.setLineWrap(false);
+                debug_area.setBackground(new java.awt.Color(30, 30, 30));
+                debug_area.setForeground(new java.awt.Color(220, 220, 220));
+                debug_area.setCaretColor(new java.awt.Color(220, 220, 220));
+                debug_area.setSelectionColor(new java.awt.Color(70, 90, 130));
+                debug_area.setFont(new java.awt.Font(java.awt.Font.MONOSPACED, java.awt.Font.PLAIN, 12));
+
+                javax.swing.JScrollPane debug_scroll = new javax.swing.JScrollPane(debug_area);
+                debug_scroll.getViewport().setBackground(new java.awt.Color(30, 30, 30));
+
+                javax.swing.JButton clear_btn = new javax.swing.JButton("Clear");
+                clear_btn.setToolTipText("Clear the DEBUG LOG tab.");
+                clear_btn.addActionListener((evt) -> {
+                    int ans = javax.swing.JOptionPane.showConfirmDialog(_view,
+                            "Clear the DEBUG LOG buffer? Existing entries will be lost from the tab.",
+                            "Clear debug log", javax.swing.JOptionPane.YES_NO_OPTION,
+                            javax.swing.JOptionPane.WARNING_MESSAGE);
+                    if (ans == javax.swing.JOptionPane.YES_OPTION) {
+                        debug_area.setText("");
+                    }
+                });
+
+                javax.swing.JButton copy_btn = new javax.swing.JButton("Copy all");
+                copy_btn.setToolTipText("Copy the entire DEBUG LOG buffer to the clipboard.");
+                copy_btn.addActionListener((evt) -> {
+                    try {
+                        java.awt.Toolkit.getDefaultToolkit().getSystemClipboard()
+                                .setContents(new java.awt.datatransfer.StringSelection(debug_area.getText()), null);
+                    } catch (Exception ignore) {
+                    }
+                });
+
+                javax.swing.JButton save_btn = new javax.swing.JButton("Save to file...");
+                save_btn.setToolTipText("Write the current DEBUG LOG buffer to a file on disk.");
+                save_btn.addActionListener((evt) -> {
+                    javax.swing.JFileChooser chooser = new javax.swing.JFileChooser();
+                    chooser.setDialogTitle("Save DEBUG LOG to file");
+                    String stamp = new java.text.SimpleDateFormat("yyyyMMdd_HHmmss").format(new java.util.Date());
+                    chooser.setSelectedFile(new java.io.File("megabasterd_debug_" + stamp + ".log"));
+                    if (chooser.showSaveDialog(_view) == javax.swing.JFileChooser.APPROVE_OPTION) {
+                        java.io.File target = chooser.getSelectedFile();
+                        try (java.io.OutputStreamWriter w = new java.io.OutputStreamWriter(
+                                new java.io.FileOutputStream(target), java.nio.charset.StandardCharsets.UTF_8)) {
+                            w.write(debug_area.getText());
+                        } catch (Exception ex) {
+                            javax.swing.JOptionPane.showMessageDialog(_view,
+                                    "Could not save log: " + ex.getMessage(),
+                                    "Save failed", javax.swing.JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                });
+
+                javax.swing.JPanel toolbar = new javax.swing.JPanel(
+                        new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 6, 4));
+                toolbar.add(save_btn);
+                toolbar.add(copy_btn);
+                toolbar.add(clear_btn);
+
+                javax.swing.JPanel debug_panel = new javax.swing.JPanel(new java.awt.BorderLayout());
+                debug_panel.add(toolbar, java.awt.BorderLayout.NORTH);
+                debug_panel.add(debug_scroll, java.awt.BorderLayout.CENTER);
+
+                _view.getjTabbedPane1().addTab("DEBUG LOG",
+                        new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png")),
+                        debug_panel);
+
+                // Deliberately NOT calling MiscTools.updateFonts on the
+                // textarea: the recursive font derive would replace the
+                // monospaced 12pt with a proportional family scaled by
+                // zoom_factor, which makes stack traces unreadable. The
+                // toolbar buttons use the platform default which is good
+                // enough.
+
+                DebugLogBus.bind(debug_area);
+            } catch (Exception ex) {
+                Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING,
+                        "Could not wire DEBUG LOG tab: {0}", ex.getMessage());
+            }
+        });
 
         if (CHECK_RUNNING && checkAppIsRunning()) {
 
