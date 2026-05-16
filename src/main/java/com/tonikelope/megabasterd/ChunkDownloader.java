@@ -194,7 +194,13 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _last_http_error = http_status;
         _in_509_backoff = (http_status == 509);
 
-        if (http_status == 509 && _ip_at_first_509 == null) {
+        // User-disable hook for the IP-change-aware retry. Default ON.
+        // Niche use case is a NAT-behind-NAT setup where public-IP
+        // detection mis-triggers. (#751 / C1)
+        String auto_resume_setting = com.tonikelope.megabasterd.DBTools.selectSettingValue("auto_resume_ip_change");
+        boolean ip_change_enabled = (auto_resume_setting == null || auto_resume_setting.equals("yes"));
+
+        if (http_status == 509 && _ip_at_first_509 == null && ip_change_enabled) {
             String ip0 = MainPanel.getCachedPublicIp();
             if (ip0 != null) {
                 _ip_at_first_509 = ip0;

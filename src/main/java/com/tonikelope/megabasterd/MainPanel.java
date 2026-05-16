@@ -416,6 +416,24 @@ public final class MainPanel {
 
         _view = new MainPanelView(this);
 
+        // Wire up the quota-recovery settings dialog into the Edit menu.
+        // Done programmatically (not via NetBeans form) so we don't have
+        // to edit MainPanelView.form to surface three new settings. (#751 / C1)
+        try {
+            javax.swing.JMenuItem quota_menu = new javax.swing.JMenuItem("Quota recovery & SmartProxy (509)");
+            quota_menu.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 18));
+            quota_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png")));
+            quota_menu.addActionListener((evt) -> {
+                QuotaRecoverySettingsDialog d = new QuotaRecoverySettingsDialog(_view, true, this);
+                d.setLocationRelativeTo(_view);
+                d.setVisible(true);
+            });
+            _view.getEdit_menu().add(quota_menu);
+        } catch (Exception ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING,
+                    "Could not wire quota-recovery menu: {0}", ex.getMessage());
+        }
+
         if (CHECK_RUNNING && checkAppIsRunning()) {
 
             System.exit(0);
