@@ -408,6 +408,15 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             ((JSpinner.DefaultEditor) auto_refresh_proxy_time_spinner.getEditor()).getTextField().setEditable(true);
 
+            // Explicit cross-reference tooltip: users have confused this
+            // spinner with the post-509 SmartProxy window in the Quota
+            // Recovery dialog (Edit menu), since both look like "time
+            // before something happens to the proxy". Spell out the
+            // difference here. (#753)
+            String refresh_tip = I18n.tr("settings.smartproxy.refresh.tooltip");
+            jLabel8.setToolTipText(refresh_tip);
+            auto_refresh_proxy_time_spinner.setToolTipText(refresh_tip);
+
             String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
 
             int smartproxy_ban_time_int = PROXY_BLOCK_TIME;
@@ -1101,7 +1110,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         jLabel7.setText("Forces the use of smart proxy even if we still have direct bandwidth available (useful to test proxies)");
 
         jLabel8.setFont(new java.awt.Font("Noto Sans", 1, 16)); // NOI18N
-        jLabel8.setText("Proxy list refresh (minutes):");
+        jLabel8.setText("Re-download proxy list every (minutes):");
 
         auto_refresh_proxy_time_spinner.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
         auto_refresh_proxy_time_spinner.setModel(new javax.swing.SpinnerNumberModel(60, 1, null, 1));

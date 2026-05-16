@@ -1395,17 +1395,12 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                 if (MainPanel.isUse_smart_proxy()) {
 
+                    // #URL extraction is now done inside SmartMegaProxyManager
+                    // itself so multiple sources can be aggregated. (#753)
                     if (MainPanel.getProxy_manager() == null) {
-
-                        String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
-
-                        String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
-
-                        MainPanel.setProxy_manager(new SmartMegaProxyManager(url_list, _main_panel));
+                        MainPanel.setProxy_manager(new SmartMegaProxyManager(_main_panel));
                     } else {
-                        String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
-                        String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
-                        MainPanel.getProxy_manager().refreshProxyList(url_list);
+                        MainPanel.THREAD_POOL.execute(() -> MainPanel.getProxy_manager().refreshProxyList());
                     }
 
                     MainPanel.getProxy_manager().refreshSmartProxySettings();
