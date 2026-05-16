@@ -1815,7 +1815,15 @@ public class MegaAPI implements Serializable {
 
         HashMap<String, ArrayList<String>> map = new HashMap<>();
 
+        // Track which #F* links failed to convert so the caller can decide
+        // whether to drop them or report them to the user instead of silently
+        // losing the input (previously: if the regex didn't match, folder_id /
+        // folder_key / file_id were all null and the link got buried under the
+        // sentinel "null:null" key, which then failed at getFolderNodes time
+        // and yielded an empty nlinks list -- the caller's removeAll() then
+        // wiped the original #F* link with nothing to replace it).
         ArrayList<String> nlinks = new ArrayList<>();
+        ArrayList<String> malformed_originals = new ArrayList<>();
 
         for (String link : links) {
 
@@ -1825,22 +1833,27 @@ public class MegaAPI implements Serializable {
 
             String file_id = findFirstRegex("#F\\*([^!]+)", link, 1);
 
-            if (!map.containsKey(folder_id + ":" + folder_key)) {
-
-                ArrayList<String> lista = new ArrayList<>();
-
-                lista.add(file_id);
-
-                map.put(folder_id + ":" + folder_key, lista);
-
-            } else {
-
-                map.get(folder_id + ":" + folder_key).add(file_id);
-
+            if (folder_id == null || folder_key == null || file_id == null) {
+                LOG.log(Level.WARNING, "#F* link did not match expected shape, skipping: {0}", link);
+                malformed_originals.add(link);
+                continue;
             }
+
+            map.computeIfAbsent(folder_id + ":" + folder_key, k -> new ArrayList<>()).add(file_id);
         }
 
+        // If the user is closing the app mid-batch, skip the cache-prompt
+        // loop entirely -- the surviving #F* originals are preserved via
+        // malformed_originals + the caller's preprocess_global_queue, so
+        // they'll be picked up on the next launch.
+        MainPanel main_panel = MainPanelView.getINSTANCE() != null ? MainPanelView.getINSTANCE().getMain_panel() : null;
+        boolean exiting = main_panel != null && main_panel.isExit();
+
         for (Map.Entry<String, ArrayList<String>> entry : map.entrySet()) {
+
+            if (exiting) {
+                break;
+            }
 
             String[] folder_parts = entry.getKey().split(":");
 
@@ -1863,6 +1876,11 @@ public class MegaAPI implements Serializable {
 
         }
 
+        // Echo back malformed originals so the caller's
+        // urls.removeAll(folder_file_links); urls.addAll(nlinks)
+        // pattern does not silently destroy them.
+        nlinks.addAll(malformed_originals);
+
         return nlinks;
 
     }
@@ -1881,12 +1899,20 @@ public class MegaAPI implements Serializable {
 
                 if (node != null && node.get("key") != null) {
                     nlinks.add("https://mega.nz/#N!" + file_id + "!" + (String) node.get("key") + "###n=" + folder_id);
+                } else {
+                    // Silently dropping a file id the user explicitly pasted
+                    // (because MEGA didn't return it, e.g. the file was
+                    // deleted or the folder key didn't unwrap it) is the
+                    // exact thing that makes folder-link downloads "look
+                    // like nothing happened". Surface it.
+                    LOG.log(Level.WARNING, "MEGA folder {0}: file id {1} not present or has no key, dropped",
+                            new Object[]{folder_id, file_id});
                 }
             }
 
         } else {
 
-            throw new Exception();
+            throw new Exception("getFolderNodes returned null for folder " + folder_id);
         }
 
         return nlinks;
