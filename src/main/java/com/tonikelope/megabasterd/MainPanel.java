@@ -419,9 +419,14 @@ public final class MainPanel {
         // Wire up the quota-recovery settings dialog into the Edit menu.
         // Done programmatically (not via NetBeans form) so we don't have
         // to edit MainPanelView.form to surface three new settings. (#751 / C1)
+        //
+        // updateFonts must run AFTER the item is added so the new entry
+        // gets GUI_FONT scaled by the current zoom_factor like the rest of
+        // the menu. Without it the entry sat at hardcoded "Dialog 18" while
+        // the sibling items had been scaled by zoom_factor (e.g. * 0.8),
+        // so the new entry looked larger than the others.
         try {
             javax.swing.JMenuItem quota_menu = new javax.swing.JMenuItem("Quota recovery & SmartProxy (509)");
-            quota_menu.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 18));
             quota_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png")));
             quota_menu.addActionListener((evt) -> {
                 QuotaRecoverySettingsDialog d = new QuotaRecoverySettingsDialog(_view, true, this);
@@ -429,6 +434,7 @@ public final class MainPanel {
                 d.setVisible(true);
             });
             _view.getEdit_menu().add(quota_menu);
+            MiscTools.updateFonts(quota_menu, GUI_FONT, getZoom_factor());
         } catch (Exception ex) {
             Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING,
                     "Could not wire quota-recovery menu: {0}", ex.getMessage());
