@@ -254,13 +254,33 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     MegaAPI ma = getMain_panel().getMega_active_accounts().get(mega_account);
 
+                    // Uploads require an authenticated MegaAPI (genFolderKey
+                    // / createDir / shareFolder all dereference _master_key
+                    // and _root_id). If the selected account vanished from
+                    // the active map (race with SettingsDialog) we used to
+                    // NPE silently inside the outer catch and the user saw
+                    // nothing happen.
+                    if (ma == null) {
+                        LOG.log(SEVERE, "Upload aborted: account ''{0}'' is not in mega_active_accounts (logged out / removed?)", mega_account);
+                        MiscTools.GUIRun(() -> {
+                            JOptionPane.showMessageDialog(MainPanelView.this,
+                                    LabelTranslatorSingleton.getInstance().translate("Upload aborted: the selected MEGA account is not available."),
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        });
+                        for (File f : dialog.getFiles()) {
+                            getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
+                        }
+                        getMain_panel().getUpload_manager().secureNotify();
+                        return;
+                    }
+
                     try {
 
                         byte[] parent_key = ma.genFolderKey();
 
                         byte[] share_key = ma.genShareKey();
 
-                        String root_name = dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10);
+                        String root_name = (dir_name != null && !dir_name.isEmpty()) ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10);
 
                         HashMap<String, Object> res = ma.createDir(root_name, ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
 
@@ -329,7 +349,24 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         for (File f : dialog.getFiles()) {
 
-                            String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
+                            if (getMain_panel().isExit()) {
+                                // App is shutting down; leave the remaining
+                                // files in preprocess_global_queue so the new
+                                // _byebye snapshot can persist them (today
+                                // limited to filename only -- TODO: extend
+                                // resumeUploads to reconstruct the parent
+                                // tree from those filenames).
+                                break;
+                            }
+
+                            // getParentFile returns null for files at a drive
+                            // root (e.g. "Z:\file.txt"). The original code
+                            // NPE'd and the outer catch silently dropped the
+                            // file. Treat it as a base-path relative file
+                            // instead.
+                            File parent = f.getParentFile();
+                            String parent_abs = parent != null ? parent.getAbsolutePath() : (base_path != null ? base_path : "");
+                            String file_path = parent_abs.replace(base_path, "");
 
                             try {
 
