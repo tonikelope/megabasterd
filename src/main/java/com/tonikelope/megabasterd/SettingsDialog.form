@@ -724,7 +724,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Noto Sans" size="16" style="1"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Proxy list refresh (minutes):"/>
+                        <Property name="text" type="java.lang.String" value="Re-download proxy list every (minutes):"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JSpinner" name="auto_refresh_proxy_time_spinner">
