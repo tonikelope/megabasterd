@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -246,6 +247,24 @@ public final class SmartMegaProxyManager {
     public synchronized int getProxyCount() {
 
         return _proxy_list.size();
+    }
+
+    /**
+     * Returns a snapshot of every proxy in the pool, regardless of ban
+     * state, as {@code {address, "http"|"socks"}} pairs in pool order.
+     * Used by the test dialog to enumerate the pool exhaustively --
+     * {@link #getProxy(ArrayList)} cannot be used for that because it
+     * filters banned entries and ban-recovers via timeout, so a test
+     * could never observe a currently-banned proxy. (#753 audit)
+     */
+    public synchronized java.util.List<String[]> getProxySnapshot() {
+        java.util.List<String[]> snapshot = new ArrayList<>(_proxy_list.size());
+        for (Map.Entry<String, Long[]> e : _proxy_list.entrySet()) {
+            Long[] meta = e.getValue();
+            boolean socks = meta != null && meta[1] != null && meta[1].longValue() != -1L;
+            snapshot.add(new String[]{e.getKey(), socks ? "socks" : "http"});
+        }
+        return snapshot;
     }
 
     public synchronized String[] getProxy(ArrayList<String> excluded) {

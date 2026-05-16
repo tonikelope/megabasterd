@@ -357,44 +357,35 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                     return;
                 }
 
-                // The manager exposes neither the raw list nor a direct
-                // iterator (kept private to avoid concurrent-mod hazards).
-                // We probe by repeatedly asking getProxy() with an
-                // ever-growing exclusion list; this hits the same code
-                // path real workers use. Cap raised from 256 to 4096 to
-                // accommodate the multi-URL aggregation added in commit 2
-                // -- with two or three public lists merged, pools easily
-                // top 1000 entries.
-                ArrayList<String> excluded = new ArrayList<>();
-                LinkedHashMap<String, Boolean> results = new LinkedHashMap<>();
-
-                int safety_cap = 4096;
-                while (safety_cap-- > 0) {
-                    String[] entry;
-                    try {
-                        entry = pm.getProxy(excluded);
-                    } catch (Exception ex) {
-                        appendOutput(I18n.tr("ui.quota.test.getproxy_threw", ex.getMessage()) + "\n");
-                        break;
-                    }
-                    if (entry == null || entry[0] == null) {
-                        break;
-                    }
-                    String addr = entry[0];
-                    if (results.containsKey(addr)) {
-                        // getProxy rotated back -- list exhausted.
-                        break;
-                    }
-                    excluded.add(addr);
-                    results.put(addr, null);
+                // Snapshot the whole pool through a dedicated accessor.
+                // The previous approach drained getProxy() with an
+                // ever-growing exclusion list, which (a) hid currently-banned
+                // proxies from the user (getProxy filters them out, so a
+                // recently-failed proxy was invisible to the test) and
+                // (b) needed an arbitrary safety_cap that silently truncated
+                // pools larger than the cap. (#753 audit)
+                List<String[]> snapshot;
+                try {
+                    snapshot = pm.getProxySnapshot();
+                } catch (Exception ex) {
+                    appendOutput(I18n.tr("ui.quota.test.getproxy_threw", ex.getMessage()) + "\n");
+                    return;
                 }
 
-                if (results.isEmpty()) {
+                if (snapshot.isEmpty()) {
                     appendOutput(I18n.tr("ui.quota.test.no_proxies") + "\n");
                     return;
                 }
 
-                List<String> addrs = new ArrayList<>(results.keySet());
+                LinkedHashMap<String, Boolean> results = new LinkedHashMap<>();
+                List<String> addrs = new ArrayList<>(snapshot.size());
+                for (String[] entry : snapshot) {
+                    if (entry == null || entry[0] == null || results.containsKey(entry[0])) {
+                        continue;
+                    }
+                    results.put(entry[0], null);
+                    addrs.add(entry[0]);
+                }
                 appendOutput(I18n.tr("ui.quota.test.testing_count", addrs.size(), batch_size) + "\n");
                 appendOutput("--------------------------------------------------------------\n");
 
