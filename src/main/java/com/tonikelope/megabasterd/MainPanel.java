@@ -614,11 +614,9 @@ public final class MainPanel {
             THREAD_POOL.execute(() -> {
                 Authenticator.setDefault(new SmartProxyAuthenticator());
 
-                String lista_proxy = DBTools.selectSettingValue("custom_proxy_list");
-
-                String url_list = MiscTools.findFirstRegex("^#(http.+)$", lista_proxy.trim(), 1);
-
-                _proxy_manager = new SmartMegaProxyManager(url_list, tthis);
+                // #URL extraction is now done inside SmartMegaProxyManager
+                // itself so multiple sources can be aggregated. (#753)
+                _proxy_manager = new SmartMegaProxyManager(tthis);
             });
 
         } else {
