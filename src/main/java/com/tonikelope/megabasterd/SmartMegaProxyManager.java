@@ -348,6 +348,104 @@ public final class SmartMegaProxyManager {
         });
     }
 
+    /**
+     * Parses a single proxy line into {@code into_list}/{@code into_auth}.
+     * Accepts the historical syntax ({@code [*]IP:PORT[@user_b64:password_b64]})
+     * AND scheme-prefixed forms ({@code http://}, {@code https://},
+     * {@code socks://}, {@code socks4://}, {@code socks4a://}, {@code socks5://}),
+     * which were previously rejected as malformed. (#753)
+     * <p>
+     * Note: authentication is only supported in the legacy
+     * {@code IP:PORT@b64user:b64pass} trailer form. A standard
+     * {@code http://user:pass@host:port} URL is NOT decoded — write
+     * {@code http://host:port@b64user:b64pass} (or the bare equivalent) to
+     * supply credentials.
+     *
+     * @param raw       raw line (will be trimmed; blank lines silently ignored)
+     * @param source    "custom" or "URL" — only used in the warning log
+     * @param into_list destination for {@code IP:PORT -> {ban_ts, type}} entries
+     * @param into_auth destination for {@code IP:PORT -> b64user:b64pass} pairs
+     */
+    private static void parseProxyEntry(String raw, String source,
+            java.util.Map<String, Long[]> into_list,
+            java.util.Map<String, String> into_auth) {
+
+        if (raw == null) {
+            return;
+        }
+        String line = raw.trim();
+        if (line.isEmpty()) {
+            return;
+        }
+
+        // Lines that start with '#' identify a remote proxy-list URL embedded
+        // in custom_proxy_list. They are extracted elsewhere; silently skip
+        // them here instead of logging them as malformed entries.
+        if (line.startsWith("#")) {
+            return;
+        }
+
+        boolean socks = false;
+
+        // Strip the historical "*" SOCKS marker first; it can also precede a
+        // scheme prefix in case a user mixed conventions.
+        if (line.startsWith("*")) {
+            socks = true;
+            line = line.substring(1).trim();
+        }
+
+        // Recognise scheme prefixes case-insensitively. All SOCKS variants
+        // collapse to JDK Proxy.Type.SOCKS. HTTPS proxies also use the
+        // HTTP CONNECT method on the JDK side, so they map to
+        // Proxy.Type.HTTP.
+        String lower = line.toLowerCase();
+        if (lower.startsWith("http://")) {
+            line = line.substring(7);
+        } else if (lower.startsWith("https://")) {
+            line = line.substring(8);
+        } else if (lower.startsWith("socks5://")) {
+            socks = true;
+            line = line.substring(9);
+        } else if (lower.startsWith("socks4a://")) {
+            socks = true;
+            line = line.substring(10);
+        } else if (lower.startsWith("socks4://")) {
+            socks = true;
+            line = line.substring(9);
+        } else if (lower.startsWith("socks://")) {
+            socks = true;
+            line = line.substring(8);
+        }
+
+        // Drop any trailing path/query the scheme may have brought along
+        // (e.g. "http://1.2.3.4:8080/" or "http://host:port/list.txt").
+        int slash = line.indexOf('/');
+        if (slash >= 0) {
+            line = line.substring(0, slash);
+        }
+        line = line.trim();
+
+        if (line.contains("@")) {
+            String[] proxy_parts = line.split("@");
+            // Defensive: a stray '@' (e.g. user@pass@host:port) would expose
+            // proxy_parts[1] as the wrong value; require exactly 2 parts AND
+            // a valid host:port shape on the first half. (#751)
+            if (proxy_parts.length == 2 && proxy_parts[0].matches(".+?:[0-9]{1,5}")) {
+                into_auth.put(proxy_parts[0], proxy_parts[1]);
+                into_list.put(proxy_parts[0], new Long[]{-1L, socks ? 1L : -1L});
+            } else {
+                LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed {0} entry: {1}", new Object[]{source, raw});
+            }
+            return;
+        }
+
+        if (line.matches(".+?:[0-9]{1,5}")) {
+            into_list.put(line, new Long[]{-1L, socks ? 1L : -1L});
+        } else {
+            LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed {0} entry: {1}", new Object[]{source, raw});
+        }
+    }
+
     public synchronized void refreshProxyList() {
 
         HttpURLConnection con = null;
@@ -364,45 +462,8 @@ public final class SmartMegaProxyManager {
 
                 ArrayList<String> custom_list = new ArrayList<>(Arrays.asList(custom_proxy_list.split("\\r?\\n")));
 
-                if (!custom_list.isEmpty()) {
-
-                    for (String proxy : custom_list) {
-
-                        boolean socks = false;
-
-                        if (proxy.trim().startsWith("*")) {
-                            socks = true;
-
-                            proxy = proxy.trim().substring(1);
-                        }
-
-                        if (proxy.trim().contains("@")) {
-
-                            String[] proxy_parts = proxy.trim().split("@");
-
-                            // Defensive: a stray '@' (e.g. user@pass@host:port)
-                            // would expose proxy_parts[1] as the wrong value
-                            // before the audit; we now require exactly 2 parts
-                            // AND a valid host:port shape on the first half. (#751)
-                            if (proxy_parts.length == 2 && proxy_parts[0].matches(".+?:[0-9]{1,5}")) {
-                                custom_clean_list_auth.put(proxy_parts[0], proxy_parts[1]);
-
-                                Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
-
-                                custom_clean_list.put(proxy_parts[0], proxy_data);
-                            } else {
-                                LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed custom entry: {0}", proxy);
-                            }
-
-                        } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-
-                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
-
-                            custom_clean_list.put(proxy.trim(), proxy_data);
-                        } else if (!proxy.trim().isEmpty()) {
-                            LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed custom entry: {0}", proxy);
-                        }
-                    }
+                for (String proxy : custom_list) {
+                    parseProxyEntry(proxy, "custom", custom_clean_list, custom_clean_list_auth);
                 }
 
                 if (!custom_clean_list.isEmpty()) {
@@ -492,30 +553,7 @@ public final class SmartMegaProxyManager {
                 HashMap<String, String> new_auth = new HashMap<>();
 
                 for (String proxy : data.split("\n")) {
-
-                    boolean socks = false;
-
-                    if (proxy.trim().startsWith("*")) {
-                        socks = true;
-                        proxy = proxy.trim().substring(1);
-                    }
-
-                    if (proxy.trim().contains("@")) {
-
-                        String[] proxy_parts = proxy.trim().split("@");
-
-                        if (proxy_parts.length == 2 && proxy_parts[0].matches(".+?:[0-9]{1,5}")) {
-                            new_auth.put(proxy_parts[0], proxy_parts[1]);
-                            new_list.put(proxy_parts[0], new Long[]{-1L, socks ? 1L : -1L});
-                        } else {
-                            LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed URL entry: {0}", proxy);
-                        }
-
-                    } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                        new_list.put(proxy.trim(), new Long[]{-1L, socks ? 1L : -1L});
-                    } else if (!proxy.trim().isEmpty()) {
-                        LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed URL entry: {0}", proxy);
-                    }
+                    parseProxyEntry(proxy, "URL", new_list, new_auth);
                 }
 
                 if (new_list.isEmpty()) {
