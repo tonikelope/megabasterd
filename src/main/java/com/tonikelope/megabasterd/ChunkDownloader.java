@@ -45,6 +45,38 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private volatile InputStream _chunk_inputstream = null;
     private volatile long _509_timestamp = -1;
 
+    /**
+     * Last HTTP status code this worker saw on its most recent chunk attempt.
+     * Exposed so Download (watchdog) and DownloadView (status label) can tell
+     * "stalled because of 509 quota" from "stalled because of network". (#751)
+     */
+    private volatile int _last_http_error = 0;
+
+    /**
+     * True while this worker is in the exp-backoff sleep after a 509
+     * (bandwidth quota) specifically. Used by Download.run()'s watchdog to
+     * choose the shorter quota-stall timeout instead of the generic 600 s,
+     * and by DownloadView to show "Quota reached -- retrying in Xs". (#751)
+     */
+    private volatile boolean _in_509_backoff = false;
+
+    /**
+     * Public IP captured the first time this worker hit a 509 during the
+     * current burst. While in 509 backoff we periodically compare
+     * MainPanel.getCachedPublicIp() against this value; a change means
+     * the user activated a VPN / switched IP and we should cut the
+     * backoff short and retry immediately rather than waiting out the
+     * full exp-backoff or the 10 min watchdog. (#751)
+     */
+    private volatile String _ip_at_first_509 = null;
+
+    /**
+     * Seconds remaining in the current 509 backoff (decreases from
+     * wait_secs to 0 inside the sleep loop). Used by DownloadView to
+     * render "retrying in Xs" without having to peek into the loop. (#751)
+     */
+    private volatile int _backoff_seconds_remaining = 0;
+
     private String _current_smart_proxy;
 
     public void RESET_CURRENT_CHUNK() {
@@ -112,6 +144,22 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     public void setError_wait(boolean error_wait) {
         _error_wait = error_wait;
+    }
+
+    public int getLast_http_error() {
+        return _last_http_error;
+    }
+
+    public boolean isIn_509_backoff() {
+        return _in_509_backoff;
+    }
+
+    public int getBackoff_seconds_remaining() {
+        return _backoff_seconds_remaining;
+    }
+
+    public String getIp_at_first_509() {
+        return _ip_at_first_509;
     }
 
     @Override
@@ -511,6 +559,12 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             http_error = 0;
 
+                            // Clear the 509-burst state captured by the
+                            // IP-change-aware backoff so a future 509 starts
+                            // a fresh detection window. (#751)
+                            _ip_at_first_509 = null;
+                            _last_http_error = 0;
+
                             if (_current_smart_proxy != null && _509_timestamp != -1) {
 
                                 _509_timestamp = -1;
@@ -575,11 +629,31 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         // during shutdown instead of waiting out the full backoff. (#751)
                         if (!_exit && !_download.isStopped() && !timeout && _current_smart_proxy == null && http_error != 403) {
 
+                            // Track for B3 (watchdog) and B5 (per-row status).
+                            _last_http_error = http_error;
+                            _in_509_backoff = (http_error == 509);
+
+                            // Snapshot current public IP the FIRST time this
+                            // worker hits 509 in the current burst. We'll
+                            // periodically re-check during the sleep and cut
+                            // the backoff short if the user activated a VPN
+                            // / changed IP. (#751)
+                            if (http_error == 509 && _ip_at_first_509 == null) {
+                                String ip0 = MainPanel.getCachedPublicIp();
+                                if (ip0 != null) {
+                                    _ip_at_first_509 = ip0;
+                                    LOG.log(Level.INFO, "{0} Worker [{1}] 509 -- captured IP {2} for change detection",
+                                            new Object[]{Thread.currentThread().getName(), _id, ip0});
+                                }
+                            }
+
                             _error_wait = true;
 
                             _download.getView().updateSlotsStatus();
 
                             long wait_secs = MiscTools.getWaitTimeExpBackOff(++conta_error);
+                            _backoff_seconds_remaining = (int) wait_secs;
+
                             for (long i = 0; i < wait_secs && !_exit && !_download.isStopped() && !_download.getMain_panel().isExit(); i++) {
                                 try {
                                     Thread.sleep(1000);
@@ -587,7 +661,38 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                                     Thread.currentThread().interrupt();
                                     break;
                                 }
+                                _backoff_seconds_remaining = (int) (wait_secs - i - 1);
+
+                                // Refresh the slot status label every second
+                                // while in 509 backoff so the "509 Xs"
+                                // countdown is live; for non-quota backoffs
+                                // refresh every 5 s (less noise on the EDT). (#751)
+                                if (_in_509_backoff || i % 5 == 4) {
+                                    _download.getView().updateSlotsStatus();
+                                }
+
+                                // Every 30 s while in 509 backoff, re-check
+                                // public IP. If the user has switched VPN /
+                                // their IP has changed since we hit the
+                                // quota, cut the backoff short and retry the
+                                // chunk immediately -- the new IP is almost
+                                // certainly NOT quota-limited yet, so we
+                                // recover in seconds instead of minutes. (#751)
+                                if (_in_509_backoff && _ip_at_first_509 != null
+                                        && i > 0 && (i + 1) % 30 == 0) {
+                                    String now_ip = MainPanel.getCachedPublicIp();
+                                    if (now_ip != null && !now_ip.equals(_ip_at_first_509)) {
+                                        LOG.log(Level.INFO, "{0} Worker [{1}] public IP changed {2} -> {3}; breaking 509 backoff and retrying immediately",
+                                                new Object[]{Thread.currentThread().getName(), _id, _ip_at_first_509, now_ip});
+                                        _ip_at_first_509 = null;
+                                        conta_error = 0;
+                                        break;
+                                    }
+                                }
                             }
+
+                            _backoff_seconds_remaining = 0;
+                            _in_509_backoff = false;
 
                             _error_wait = false;
 

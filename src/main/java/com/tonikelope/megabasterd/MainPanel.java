@@ -119,6 +119,63 @@ public final class MainPanel {
     private static Boolean _resume_uploads;
     private static Boolean _resume_downloads;
     public static volatile long LAST_EXTERNAL_COMMAND_TIMESTAMP;
+
+    /**
+     * Shared cached public IP for the 509-recovery / VPN-aware retry path.
+     * Workers call getCachedPublicIp() during 509 backoff to notice that the
+     * user changed their public IP (e.g. activated a VPN). Without a cache,
+     * N parallel workers all hitting the public-IP services every backoff
+     * slice would (a) burn budget on those services and (b) potentially
+     * desync because each worker would get a fresh fetch with its own
+     * timing. One cache, one fetcher at a time, TTL 30 s. (#751)
+     */
+    private static volatile String _cached_public_ip = null;
+    private static volatile long _cached_public_ip_ts = 0L;
+    private static final Object _public_ip_lock = new Object();
+    private static final long PUBLIC_IP_CACHE_TTL_MS = 30_000L;
+
+    /**
+     * Returns the most recent public IPv4 we've seen, refreshing via
+     * MiscTools.getMyPublicIP() (which rotates HTTPS sources) at most once
+     * per {@link #PUBLIC_IP_CACHE_TTL_MS}. Returns null if no fetch has
+     * ever succeeded; otherwise returns the previously-cached value when
+     * the current fetch attempt fails (treating it as "no IP change
+     * detected" rather than poisoning callers with null). Safe to call
+     * concurrently from any worker thread. (#751)
+     */
+    public static String getCachedPublicIp() {
+        long now = System.currentTimeMillis();
+        if (_cached_public_ip != null && now - _cached_public_ip_ts < PUBLIC_IP_CACHE_TTL_MS) {
+            return _cached_public_ip;
+        }
+        synchronized (_public_ip_lock) {
+            // Recheck after lock: another thread may have refreshed while
+            // we were waiting.
+            now = System.currentTimeMillis();
+            if (_cached_public_ip != null && now - _cached_public_ip_ts < PUBLIC_IP_CACHE_TTL_MS) {
+                return _cached_public_ip;
+            }
+            String fresh = MiscTools.getMyPublicIP();
+            if (fresh != null) {
+                _cached_public_ip = fresh;
+            }
+            // Always advance the timestamp -- otherwise consecutive failed
+            // fetches would hammer the IP services on every backoff slice.
+            _cached_public_ip_ts = System.currentTimeMillis();
+            return _cached_public_ip;
+        }
+    }
+
+    /**
+     * Force-invalidate the public-IP cache so the next getCachedPublicIp()
+     * call will trigger a fresh fetch. Used by the 509 path after running
+     * the user's external command (which may have switched VPN), so we
+     * don't keep returning the pre-VPN IP and miss the change. (#751)
+     */
+    public static void invalidatePublicIpCache() {
+        _cached_public_ip_ts = 0L;
+    }
+
     private static final Logger LOG = Logger.getLogger(MainPanel.class.getName());
     private static volatile boolean CHECK_RUNNING = true;
 
