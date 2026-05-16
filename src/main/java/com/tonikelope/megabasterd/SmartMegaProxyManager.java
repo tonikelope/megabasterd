@@ -20,6 +20,7 @@ import java.net.InetAddress;
 import java.net.MalformedURLException;
 import java.net.PasswordAuthentication;
 import java.net.URL;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -300,6 +301,65 @@ public final class SmartMegaProxyManager {
         }
 
         return null;
+    }
+
+    /**
+     * Rewrites the {@code custom_proxy_list} DB setting so that the only
+     * inline proxy entries are those whose addresses appear in
+     * {@code working_addrs}. Lines starting with {@code #} (remote URL
+     * sources) and blank separator lines are preserved verbatim, so a
+     * user who relies on auto-refreshed lists can prune dead entries
+     * without losing the URL sources that feed them. The SOCKS marker
+     * and any auth trailer are looked up from live state so each saved
+     * line round-trips through {@link #parseProxyEntry} unchanged. After
+     * writing, kicks an async refresh so the live pool matches the new
+     * textarea immediately. (#753)
+     *
+     * @param working_addrs addresses (IP:PORT) to keep, in the desired
+     *                      output order
+     * @return number of inline entries written
+     * @throws SQLException if the DB write fails
+     */
+    public synchronized int saveWorkingProxiesToCustomList(java.util.Collection<String> working_addrs) throws SQLException {
+
+        String current = DBTools.selectSettingValue("custom_proxy_list");
+        StringBuilder sb = new StringBuilder();
+        if (current != null) {
+            for (String line : current.split("\\r?\\n")) {
+                String trimmed = line.trim();
+                if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+                    sb.append(line).append('\n');
+                }
+            }
+        }
+
+        int written = 0;
+        for (String addr : working_addrs) {
+            Long[] entry = _proxy_list.get(addr);
+            // Entry shape: {ban_ts, type} where type == -1L for HTTP and
+            // 1L for SOCKS. An entry missing from the live map is still
+            // saved (as HTTP, no auth) -- it was working a moment ago,
+            // and over-writing is safer than dropping it silently.
+            boolean socks = entry != null && entry[1] != null && entry[1] != -1L;
+            String auth = PROXY_LIST_AUTH.get(addr);
+            if (socks) {
+                sb.append('*');
+            }
+            sb.append(addr);
+            if (auth != null) {
+                sb.append('@').append(auth);
+            }
+            sb.append('\n');
+            written++;
+        }
+
+        DBTools.insertSettingValue("custom_proxy_list", sb.toString());
+
+        // Refresh asynchronously so the caller (Swing EDT in practice)
+        // returns immediately.
+        MainPanel.THREAD_POOL.execute(this::refreshProxyList);
+
+        return written;
     }
 
     public synchronized void blockProxy(String proxy, String cause) {

@@ -37,6 +37,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -69,6 +70,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
     private JTextArea _proxy_test_output;
     private JButton _test_proxy_button;
     private JSpinner _batch_size_spinner;
+    private JButton _save_working_button;
 
     private JButton _save_button;
     private JButton _cancel_button;
@@ -77,6 +79,13 @@ public class QuotaRecoverySettingsDialog extends JDialog {
     // disposed mid-test; without this the JVM would wait for every 3s TCP
     // connect to complete before exiting. (#753)
     private volatile ExecutorService _probe_executor;
+
+    // Addresses that passed the most recent test, in submission order.
+    // Drives the "Save working proxies to custom list" action: any
+    // working entry here is round-tripped back into custom_proxy_list
+    // with its SOCKS marker / auth trailer preserved (looked up from
+    // the live manager state at save time). (#753)
+    private final List<String> _last_working_addrs = new ArrayList<>();
 
     public QuotaRecoverySettingsDialog(java.awt.Frame parent, boolean modal, MainPanel main_panel) {
         super(parent, modal);
@@ -173,6 +182,12 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         ((JSpinner.DefaultEditor) _batch_size_spinner.getEditor()).getTextField().setEditable(true);
         ((JSpinner.DefaultEditor) _batch_size_spinner.getEditor()).getTextField().setColumns(3);
         test_btn_panel.add(_batch_size_spinner);
+
+        _save_working_button = new JButton(I18n.tr("ui.quota.save_working_button"));
+        _save_working_button.setToolTipText(I18n.tr("ui.quota.save_working.tooltip"));
+        _save_working_button.setEnabled(false);
+        _save_working_button.addActionListener(e -> saveWorkingProxies());
+        test_btn_panel.add(_save_working_button);
 
         test_row.add(test_btn_panel, BorderLayout.NORTH);
 
@@ -323,6 +338,8 @@ public class QuotaRecoverySettingsDialog extends JDialog {
     private void testProxyList() {
         _test_proxy_button.setEnabled(false);
         _batch_size_spinner.setEnabled(false);
+        _save_working_button.setEnabled(false);
+        _last_working_addrs.clear();
         _proxy_test_output.setText(I18n.tr("ui.quota.test.loading") + "\n");
 
         final int batch_size = (Integer) _batch_size_spinner.getValue();
@@ -466,6 +483,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                         appendOutput(I18n.tr("ui.quota.test.row_ok", padded_addr, r.dt_ms) + "\n");
                         ok++;
                         results.put(addr, true);
+                        _last_working_addrs.add(addr);
                     } else {
                         appendOutput(I18n.tr("ui.quota.test.row_fail", padded_addr, r.fail_class, r.dt_ms) + "\n");
                         fail++;
@@ -487,9 +505,53 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                 MiscTools.GUIRun(() -> {
                     _test_proxy_button.setEnabled(true);
                     _batch_size_spinner.setEnabled(true);
+                    _save_working_button.setEnabled(!_last_working_addrs.isEmpty());
                 });
             }
         }, "QuotaRecoverySettings-ProxyTest").start();
+    }
+
+    /**
+     * Writes the proxies that passed the most recent test back into
+     * the {@code custom_proxy_list} DB setting, replacing whatever inline
+     * IP:PORT entries were there. Lines starting with {@code #} (remote
+     * URL sources) and blank lines are preserved verbatim. Auth trailers
+     * and SOCKS markers come from live manager state, so a round-trip
+     * through the parser produces an equivalent entry. (#753)
+     */
+    private void saveWorkingProxies() {
+        if (_last_working_addrs.isEmpty()) {
+            return;
+        }
+        SmartMegaProxyManager pm = MainPanel.getProxy_manager();
+        if (pm == null) {
+            appendOutput(I18n.tr("ui.quota.test.smartproxy_not_initialised") + "\n");
+            return;
+        }
+
+        int ans = JOptionPane.showConfirmDialog(this,
+                I18n.tr("ui.quota.save_working.confirm", _last_working_addrs.size()),
+                I18n.tr("ui.quota.save_working.title"),
+                JOptionPane.OK_CANCEL_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+        if (ans != JOptionPane.OK_OPTION) {
+            return;
+        }
+
+        _save_working_button.setEnabled(false);
+        final List<String> snapshot = new ArrayList<>(_last_working_addrs);
+
+        new Thread(() -> {
+            try {
+                int written = pm.saveWorkingProxiesToCustomList(snapshot);
+                appendOutput(I18n.tr("ui.quota.save_working.done", written) + "\n");
+            } catch (SQLException ex) {
+                LOG.log(Level.WARNING, "Save working proxies failed: {0}", ex.getMessage());
+                appendOutput(I18n.tr("ui.quota.save_working.error", ex.getMessage()) + "\n");
+            } finally {
+                MiscTools.GUIRun(() -> _save_working_button.setEnabled(!_last_working_addrs.isEmpty()));
+            }
+        }, "QuotaRecoverySettings-SaveWorking").start();
     }
 
     private static ProbeResult probe(String host, int port) {
