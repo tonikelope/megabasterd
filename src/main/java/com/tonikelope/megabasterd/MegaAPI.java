@@ -151,14 +151,24 @@ public class MegaAPI implements Serializable {
     }
 
     /**
-     * Standard query parameters that MEGA's API expects on every /cs request:
-     * &v=3 protocol version (the MEGA SDK appends this) &ak=... application key
-     * (user-configured if set, else MEGAcmd's public key as fallback so we look
-     * like a known client rather than an anonymous reverse-engineered bot)
-     * &lang=es user language (optional, included if set)
+     * Standard query parameters that MEGA's API expects on every /cs request.
+     * Was {@code &v=3 &ak=... &lang=...}; the {@code &v=3} part has been
+     * DROPPED. With v=3 MEGA's `p` (put/createDir) endpoint returns the
+     * new-protocol async shape {@code [<request_completion_token>, []]}
+     * instead of the legacy synchronous {@code [{node_object}]} that
+     * MegaBasterd's createDir was written for. The async shape expects the
+     * caller to subsequently poll the {@code sc} action-packet channel for
+     * the actual node data -- MegaBasterd has no plumbing for that, so the
+     * upload silently produced an "Upload aborted" with an opaque Jackson
+     * error in the DEBUG LOG (raw body
+     * {@code [["!Q|am'a", []]]}). The commit that added v=3 (2ec9de2 in
+     * master) claimed no behavioural change; in practice it broke uploads
+     * for any account that goes through the createDir path. Keeping
+     * &ak= (which fixes MEGA's 402 throttling of unknown clients) and
+     * &lang= (which is optional).
      */
     private static String _apiStdParams() {
-        StringBuilder sb = new StringBuilder("&v=3");
+        StringBuilder sb = new StringBuilder();
         String ak = (API_KEY != null && !API_KEY.isEmpty()) ? API_KEY : DEFAULT_APP_KEY;
         sb.append("&ak=").append(ak);
         String lang = MainPanel.getLanguage();
