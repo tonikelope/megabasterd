@@ -1668,9 +1668,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
                     // Surface a friendly explanation popup. Dedup'd so two
-                    // downloads hitting the same -16 / -8 don't pop twice. (#751 / D)
+                    // downloads hitting the same -16 / -8 don't pop twice.
+                    // Source.LINK so -9 / -16 etc. get the link-context copy
+                    // ("file deleted / blocked") instead of the
+                    // account-context one ("account doesn't exist"). (#751 / D)
                     MegaErrorMessages.showPopup(getMain_panel().getView(), error_code, link,
-                            "while fetching MEGA file metadata");
+                            "while fetching MEGA file metadata",
+                            MegaErrorMessages.Source.LINK);
 
                     stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 
@@ -1762,9 +1766,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
                     // Surface a friendly explanation popup. Dedup'd so two
-                    // downloads hitting the same -16 / -8 don't pop twice. (#751 / D)
+                    // downloads hitting the same -16 / -8 don't pop twice.
+                    // Source.LINK so -9 / -16 etc. get the link-context copy
+                    // ("file deleted / blocked") instead of the
+                    // account-context one ("account doesn't exist"). (#751 / D)
                     MegaErrorMessages.showPopup(getMain_panel().getView(), error_code, link,
-                            "while fetching MEGA file metadata");
+                            "while fetching MEGA file metadata",
+                            MegaErrorMessages.Source.LINK);
 
                     stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 

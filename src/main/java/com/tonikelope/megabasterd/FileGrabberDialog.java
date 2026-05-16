@@ -793,7 +793,8 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                             final String err_email = (ma != null && ma.getFull_email() != null) ? ma.getFull_email() : email;
                             if (err_code != 0) {
                                 MegaErrorMessages.showPopup(this, err_code, err_email,
-                                        "while checking account quota");
+                                        "while checking account quota",
+                                        MegaErrorMessages.Source.ACCOUNT);
                             }
                             MiscTools.GUIRun(() -> {
                                 account_combobox.setEnabled(true);
@@ -840,7 +841,8 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                     final String err_email = (ma != null && ma.getFull_email() != null) ? ma.getFull_email() : email;
                     if (err_code_final != 0) {
                         MegaErrorMessages.showPopup(this, err_code_final, err_email,
-                                "while logging in / checking account");
+                                "while logging in / checking account",
+                                MegaErrorMessages.Source.ACCOUNT);
                     }
                     MiscTools.GUIRun(() -> {
                         account_combobox.setEnabled(true);
