@@ -699,15 +699,13 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             proxy_pass_textfield.setText(DBTools.selectSettingValue("proxy_pass"));
 
-            boolean debug_file = false;
-
-            String debug_file_val = DBTools.selectSettingValue("debug_file");
-
-            if (debug_file_val != null) {
-                debug_file = (debug_file_val.equals("yes"));
-            }
-
-            debug_file_checkbox.setSelected(debug_file);
+            // The "Save debug info to file" setting has been retired: the
+            // DEBUG LOG tab in the main panel captures everything live and
+            // its "Save to file..." button replaces the toggle. We hide the
+            // generated controls instead of removing them so we don't have
+            // to edit SettingsDialog.form. Any stale DB value is ignored.
+            debug_file_checkbox.setVisible(false);
+            debug_file_path.setVisible(false);
 
             String font = DBTools.selectSettingValue("font");
 
@@ -2286,16 +2284,10 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             String proxy_pass = new String(proxy_pass_textfield.getPassword());
 
-            String old_debug_file = DBTools.selectSettingValue("debug_file");
+            // "debug_file" setting retired (replaced by DEBUG LOG tab); don't
+            // persist a value any more and don't include it in the
+            // restart-required check.
 
-            if (old_debug_file == null) {
-
-                old_debug_file = "no";
-            }
-
-            String debug_file = debug_file_checkbox.isSelected() ? "yes" : "no";
-
-            settings.put("debug_file", debug_file);
             settings.put("use_proxy", use_proxy ? "yes" : "no");
             settings.put("proxy_host", proxy_host);
             settings.put("proxy_port", proxy_port);
@@ -2305,8 +2297,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             insertSettingsValues(settings);
 
-            if (!debug_file.equals(old_debug_file)
-                    || !font.equals(old_font)
+            if (!font.equals(old_font)
                     || !language.equals(old_language)
                     || !zoom.equals(old_zoom)
                     || use_proxy != old_use_proxy

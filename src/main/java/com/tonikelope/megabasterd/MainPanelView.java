@@ -264,6 +264,21 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         HashMap<String, Object> res = ma.createDir(root_name, ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
 
+                        if (res == null) {
+                            // createDir already logged the cause (wrapped MEGA
+                            // error like -9, or Jackson exception). Surface a
+                            // friendly popup so the user sees what happened
+                            // instead of a silent failure + NPE on
+                            // `res.get("f")` on the next line.
+                            int code = ma.getLastApiErrorCode();
+                            MegaErrorMessages.showPopup(MainPanelView.this,
+                                    code != 0 ? code : -5,
+                                    ma.getFull_email() != null ? ma.getFull_email() : mega_account,
+                                    "while creating the upload folder on MEGA",
+                                    MegaErrorMessages.Source.ACCOUNT);
+                            return;
+                        }
+
                         String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 
                         LOG.log(Level.INFO, "{0} Dir {1} created", new Object[]{Thread.currentThread().getName(), parent_node});

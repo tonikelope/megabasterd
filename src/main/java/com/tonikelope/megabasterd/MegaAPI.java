@@ -1226,6 +1226,20 @@ public class MegaAPI implements Serializable {
 
             String res = RAW_REQUEST(request, url_api);
 
+            // Handle the per-target wrapped error shape `[[-N]]` that MEGA can
+            // return for "p" requests (e.g. parent node was deleted between
+            // login and createDir). checkMEGAError in RAW_REQUEST only matches
+            // top-level `-N` / `[-N]`, so a `[[-9]]` slipped through to Jackson
+            // and exploded with a MismatchedInputException + visible stack
+            // trace, surfacing as a confusing "uploads fail" symptom.
+            int wrapped = _checkWrappedMEGAError(res);
+            if (wrapped != 0) {
+                _last_api_error_code = wrapped;
+                LOG.log(Level.WARNING, "{0} createDir: MEGA returned wrapped error {1}",
+                        new Object[]{_ctx(), wrapped});
+                return null;
+            }
+
             ObjectMapper objectMapper = new ObjectMapper();
 
             res_map = objectMapper.readValue(res, HashMap[].class);
@@ -1236,6 +1250,27 @@ public class MegaAPI implements Serializable {
 
         return res_map != null ? res_map[0] : null;
 
+    }
+
+    /**
+     * Returns N (negative) if the response is a doubly-wrapped per-target
+     * error like {@code [[-9]]}, else 0. Centralised so other "p"-style
+     * callers (createDirInsideAnotherSharedDir, finishUploadFile, etc.) can
+     * apply the same guard without duplicating the regex. (#751 follow-up)
+     */
+    static int _checkWrappedMEGAError(String data) {
+        if (data == null) {
+            return 0;
+        }
+        String m = findFirstRegex("^\\[\\s*\\[\\s*(\\-[0-9]+)\\s*\\]\\s*\\]$", data, 1);
+        if (m == null) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(m);
+        } catch (NumberFormatException ex) {
+            return 0;
+        }
     }
 
     public HashMap<String, Object> createDirInsideAnotherSharedDir(String name, String parent_node, byte[] node_key, byte[] master_key, String root_node, byte[] share_key) {
