@@ -377,7 +377,15 @@ public class MegaAPI implements Serializable {
 
     public boolean check2FA(String email) throws Exception {
 
-        String request = "[{\"a\":\"mfag\",\"e\":\"" + email + "\"}]";
+        // Strip MegaBasterd's local-only "#alias" suffix before talking to
+        // MEGA. The mfag endpoint rejects "bob@mail.com#whatever" as an
+        // unknown user (-9), which propagated up as MegaAPIException and
+        // failed the save/edit of any aliased account. login() and
+        // fastLogin() already do this split; check2FA had been missing it
+        // since 5.81 (2019). See issue #737.
+        String[] email_split = email.split(" *# *");
+
+        String request = "[{\"a\":\"mfag\",\"e\":\"" + email_split[0] + "\"}]";
 
         URL url_api = new URL(API_URL + "/cs?id=" + _nextSeqno() + _apiStdParams());
 
