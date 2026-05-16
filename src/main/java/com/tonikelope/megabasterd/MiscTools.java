@@ -98,6 +98,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
@@ -1095,6 +1096,96 @@ public class MiscTools {
         }
 
         return false;
+    }
+
+    /**
+     * Mount a right-click context menu on the JTree used by FolderLinkDialog
+     * and FileGrabberDialog. Replaces the Ctrl+click + "REMOVE THIS" button
+     * workflow: right-click on a node directly to remove it, with multi-
+     * selection still honoured if the user clicked on an already-selected
+     * node (standard Swing/OS convention).
+     *
+     * @param tree the JTree to instrument
+     * @param onChange callback fired after a Remove / Keep-only action so the
+     *                 caller can recalculate folder sizes, regenerate the
+     *                 download/file list, refresh button states, etc. May be
+     *                 null if the caller doesn't need any post-mutation work.
+     */
+    public static void attachTreeContextMenu(final JTree tree, final Runnable onChange) {
+
+        final JPopupMenu menu = new JPopupMenu();
+
+        final JMenuItem remove_item = new JMenuItem(I18n.tr("ui.tree.context.remove"));
+        remove_item.addActionListener(e -> {
+            if (deleteSelectedTreeItems(tree) && onChange != null) {
+                onChange.run();
+            }
+        });
+
+        final JMenuItem keep_only_item = new JMenuItem(I18n.tr("ui.tree.context.keep_only"));
+        keep_only_item.addActionListener(e -> {
+            if (deleteAllExceptSelectedTreeItems(tree) && onChange != null) {
+                onChange.run();
+            }
+        });
+
+        menu.add(remove_item);
+        menu.add(keep_only_item);
+        menu.addSeparator();
+
+        final JMenuItem expand_all_item = new JMenuItem(I18n.tr("ui.tree.context.expand_all"));
+        expand_all_item.addActionListener(e -> {
+            for (int i = 0; i < tree.getRowCount(); i++) {
+                tree.expandRow(i);
+            }
+        });
+
+        final JMenuItem collapse_all_item = new JMenuItem(I18n.tr("ui.tree.context.collapse_all"));
+        collapse_all_item.addActionListener(e -> {
+            for (int i = tree.getRowCount() - 1; i >= 0; i--) {
+                tree.collapseRow(i);
+            }
+        });
+
+        menu.add(expand_all_item);
+        menu.add(collapse_all_item);
+
+        tree.addMouseListener(new java.awt.event.MouseAdapter() {
+
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                maybeShow(e);
+            }
+
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+                maybeShow(e);
+            }
+
+            private void maybeShow(java.awt.event.MouseEvent e) {
+                if (!e.isPopupTrigger() || !tree.isEnabled()) {
+                    return;
+                }
+
+                final TreePath row_path = tree.getPathForLocation(e.getX(), e.getY());
+
+                // If the user right-clicked on a node that isn't currently in
+                // the selection, replace the selection with that node so the
+                // action affects what was actually clicked. If the click landed
+                // on a node that *is* in the selection, leave the selection
+                // alone so multi-select still works (matches every other
+                // OS-native tree widget).
+                if (row_path != null && !tree.isPathSelected(row_path)) {
+                    tree.setSelectionPath(row_path);
+                }
+
+                final boolean has_selection = tree.getSelectionPaths() != null && tree.getSelectionPaths().length > 0;
+                remove_item.setEnabled(has_selection);
+                keep_only_item.setEnabled(has_selection);
+
+                menu.show(tree, e.getX(), e.getY());
+            }
+        });
     }
 
     public static String truncateText(String text, int max_length) {

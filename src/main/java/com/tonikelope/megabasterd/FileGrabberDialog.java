@@ -115,6 +115,13 @@ public class FileGrabberDialog extends javax.swing.JDialog {
         MiscTools.GUIRunAndWait(() -> {
             initComponents();
 
+            // Right-click context menu on the file tree: Remove / Keep only
+            // this / Expand all / Collapse all. Mounted once at construction
+            // time; the listener stays valid across every add_files /
+            // add_folder reload because we don't recreate the JTree instance,
+            // we just swap its model.
+            MiscTools.attachTreeContextMenu(file_tree, this::_afterTreeMutation);
+
             String upload_log_string = DBTools.selectSettingValue("upload_log");
 
             upload_log_checkbox.setSelected("yes".equals(upload_log_string));
@@ -879,41 +886,41 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     private void skip_rest_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_rest_buttonActionPerformed
 
         if (deleteAllExceptSelectedTreeItems(file_tree)) {
-
-            _genFileList();
-
-            warning_label.setEnabled(true);
-            dance_button.setEnabled(true);
-            total_file_size_label.setEnabled(true);
-            skip_button.setEnabled(true);
-            skip_rest_button.setEnabled(true);
-            dir_name_textfield.setEnabled(true);
-            dir_name_label.setEnabled(true);
+            _afterTreeMutation();
         }
     }//GEN-LAST:event_skip_rest_buttonActionPerformed
 
     private void skip_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_skip_buttonActionPerformed
 
         if (deleteSelectedTreeItems(file_tree)) {
-
-            _genFileList();
-
-            boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
-
-            warning_label.setEnabled(root_childs);
-            dance_button.setEnabled(root_childs);
-            total_file_size_label.setEnabled(root_childs);
-            skip_button.setEnabled(root_childs);
-            skip_rest_button.setEnabled(root_childs);
-            dir_name_textfield.setEnabled(root_childs);
-            dir_name_label.setEnabled(root_childs);
-
-            if (!root_childs) {
-
-                dir_name_textfield.setText("");
-            }
+            _afterTreeMutation();
         }
     }//GEN-LAST:event_skip_buttonActionPerformed
+
+    /**
+     * Post-mutation refresh shared by the REMOVE THIS / REMOVE ALL EXCEPT THIS
+     * buttons and the right-click context menu. Regenerates the file list and
+     * keeps the action controls in sync with whether anything is left in the
+     * tree (so removing every node also clears the dir_name field).
+     */
+    private void _afterTreeMutation() {
+
+        _genFileList();
+
+        boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
+
+        warning_label.setEnabled(root_childs);
+        dance_button.setEnabled(root_childs);
+        total_file_size_label.setEnabled(root_childs);
+        skip_button.setEnabled(root_childs);
+        skip_rest_button.setEnabled(root_childs);
+        dir_name_textfield.setEnabled(root_childs);
+        dir_name_label.setEnabled(root_childs);
+
+        if (!root_childs) {
+            dir_name_textfield.setText("");
+        }
+    }
 
     private void copy_email_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_email_buttonActionPerformed
         // TODO add your handling code here:
