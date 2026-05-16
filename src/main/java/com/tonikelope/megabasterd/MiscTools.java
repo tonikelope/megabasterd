@@ -1122,9 +1122,14 @@ public class MiscTools {
 
     public static String cleanFilename(String filename) {
 
+        // Collapse runs of 2+ dots to a single dot rather than replacing with
+        // "__": the old behaviour destroyed the extension on names like
+        // "1. Hello World..mp4" (-> "1. Hello World__mp4", no extension).
+        // After slash stripping there is no path-traversal risk from "..",
+        // and "." inside a filename is just a literal character.
         String cleaned = (IS_WINDOWS ? filename.replaceAll("[<>:\"/\\\\\\|\\?\\*\t]+", "") : filename)
                 .replaceAll("\\" + File.separator, "")
-                .replaceAll("\\.\\.+", "__")
+                .replaceAll("\\.{2,}", ".")
                 .replaceAll("[\\x00-\\x1F]", "")
                 .trim();
 
@@ -1158,7 +1163,10 @@ public class MiscTools {
 
     public static String cleanFilePath(String path) {
 
-        return !path.equals(".") ? ((IS_WINDOWS ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\" + File.separator, "\\" + File.separator).replaceAll("\\.\\.+", "__").replaceAll("[\\x00-\\x1F]", "").trim()) : path;
+        // See cleanFilename for the dot-collapse rationale. Slashes are kept
+        // here (this is a relative path), and collapsing "../foo" to "./foo"
+        // still resolves harmlessly inside the download base directory.
+        return !path.equals(".") ? ((IS_WINDOWS ? path.replaceAll("[<>:\"\\|\\?\\*\t]+", "") : path).replaceAll(" +\\" + File.separator, "\\" + File.separator).replaceAll("\\.{2,}", ".").replaceAll("[\\x00-\\x1F]", "").trim()) : path;
     }
 
     public static byte[] genRandomByteArray(int length) {
