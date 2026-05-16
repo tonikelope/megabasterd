@@ -395,6 +395,16 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         _provision_ok = false;
 
+        if (_closed || _main_panel.isExit()) {
+            // User closed this upload row, or is shutting the whole app
+            // down. Don't insert a DB row we're about to either delete
+            // (_closed) or race the SqliteSingleton shutdown for
+            // (isExit -- byebyenow closes the connection after the
+            // snapshot). The transient transference will end up in the
+            // finished_queue when isProvision_ok returns false.
+            return;
+        }
+
         if (!the_file.exists()) {
 
             _status_error = "ERROR: FILE NOT FOUND";
@@ -431,7 +441,17 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                 }
 
             } catch (SQLException ex) {
+                _status_error = "Error registering upload: " + ex.getMessage();
                 LOG.log(Level.SEVERE, ex.getMessage());
+            } catch (RuntimeException ex) {
+                // genUploadKey can NPE if the MA isn't logged in; any
+                // unexpected runtime exception used to bubble out of
+                // provisionIt back to UploadManager.provision, which had
+                // no catch, and the upload got stuck in the BoundedExecutor
+                // task with no aux_queue / finished_queue placement -- UI
+                // showed "Provisioning..." forever.
+                _status_error = "PROVISION FAILED: " + ex.getClass().getSimpleName() + (ex.getMessage() != null ? ": " + ex.getMessage() : "");
+                LOG.log(Level.SEVERE, _status_error, ex);
             }
         }
 
