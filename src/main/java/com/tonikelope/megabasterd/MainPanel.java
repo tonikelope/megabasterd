@@ -37,6 +37,7 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.sql.SQLException;
@@ -1353,7 +1354,43 @@ public final class MainPanel {
                             options[0]);
 
                     if (n == 1) {
-                        Files.copy(Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd_old_backups/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE), Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE), StandardCopyOption.REPLACE_EXISTING);
+                        // The MB boot path has already opened the new (empty)
+                        // megabasterd.db dozens of times via DBTools, so a WAL
+                        // and -shm sidecar exist next to it. Naively copying
+                        // just the .db file leaves those sidecars in place,
+                        // and on next boot SQLite may replay the empty-DB WAL
+                        // on top of the imported DB and silently discard the
+                        // import. Worse, on Windows the open connection can
+                        // also block the REPLACE_EXISTING copy itself, and
+                        // the resulting IOException used to be swallowed
+                        // without telling the user.
+                        Path source_db = Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd_old_backups/.megabasterd" + old_version + "/" + SqliteSingleton.SQLITE_FILE);
+                        Path new_dir = Paths.get(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION);
+                        Path target_db = new_dir.resolve(SqliteSingleton.SQLITE_FILE);
+                        Path target_wal = new_dir.resolve(SqliteSingleton.SQLITE_FILE + "-wal");
+                        Path target_shm = new_dir.resolve(SqliteSingleton.SQLITE_FILE + "-shm");
+
+                        try {
+                            // Checkpoint + close the open connection to the
+                            // empty DB so the file is unlocked (Windows) and
+                            // the WAL has nothing live in it.
+                            SqliteSingleton.getInstance().shutdown();
+
+                            // Belt-and-braces: drop the now-orphaned WAL/-shm
+                            // so SQLite cannot try to replay them on the
+                            // imported DB at next boot.
+                            Files.deleteIfExists(target_wal);
+                            Files.deleteIfExists(target_shm);
+
+                            Files.copy(source_db, target_db, StandardCopyOption.REPLACE_EXISTING);
+
+                        } catch (IOException copy_ex) {
+                            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, "Settings import failed: {0}", copy_ex.getMessage());
+                            JOptionPane.showMessageDialog(getView(),
+                                    LabelTranslatorSingleton.getInstance().translate("Could not import the previous-version settings.") + "\n\n" + copy_ex.getMessage(),
+                                    LabelTranslatorSingleton.getInstance().translate("Import failed"), JOptionPane.ERROR_MESSAGE);
+                            return;
+                        }
 
                         JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);
 
