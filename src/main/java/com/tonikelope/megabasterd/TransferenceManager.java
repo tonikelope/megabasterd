@@ -754,11 +754,20 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
                 THREAD_POOL.execute(() -> {
 
-                    while (!getTransference_preprocess_queue().isEmpty()) {
+                    while (!getTransference_preprocess_queue().isEmpty() && !_main_panel.isExit()) {
                         Runnable run = getTransference_preprocess_queue().poll();
 
                         if (run != null) {
 
+                            // Bounded retry: the previous unbounded do/while
+                            // would re-run the same Runnable forever on any
+                            // persistent failure (NPE from a malformed link,
+                            // ClassCastException, etc.), pinning a worker at
+                            // 100% CPU and flooding the log. Cap at 3 attempts
+                            // with a small backoff so transient hiccups are
+                            // still retried but a wedged Runnable can't lock
+                            // the whole preprocess phase.
+                            int attempts = 0;
                             boolean run_error;
 
                             do {
@@ -768,9 +777,22 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
                                     run.run();
                                 } catch (Exception ex) {
                                     run_error = true;
-                                    LOG.log(SEVERE, null, ex);
+                                    attempts++;
+                                    LOG.log(SEVERE, "Preprocess Runnable failed (attempt " + attempts + "/3)", ex);
+                                    if (run_error && attempts < 3) {
+                                        try {
+                                            Thread.sleep(500L);
+                                        } catch (InterruptedException ie) {
+                                            Thread.currentThread().interrupt();
+                                            run_error = false;
+                                        }
+                                    }
                                 }
-                            } while (run_error);
+                            } while (run_error && attempts < 3 && !_main_panel.isExit());
+
+                            if (run_error) {
+                                LOG.log(SEVERE, "Preprocess Runnable still failing after 3 attempts -- dropping it.");
+                            }
                         }
                     }
 
