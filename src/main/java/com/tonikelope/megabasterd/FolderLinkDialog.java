@@ -548,6 +548,15 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                         current_node = parent_node;
 
+                        // Keep current_id in sync with current_node while we
+                        // climb -- otherwise the subfolder-detection branch
+                        // below keeps comparing subfolder_id against the id
+                        // of the original leaf and can only ever match when
+                        // the outer iteration starts on the subfolder node
+                        // itself. That happens to work today thanks to
+                        // HashMap iterating every node, but it's fragile.
+                        current_id = (String) parent_hashmap_node.get("h");
+
                     } else if (subfolder_id != null && subfolder_id.equals(current_id)) {
 
                         root = current_node;
@@ -605,7 +614,10 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             LOG.log(SEVERE, null, mex);
 
-            _mega_error = mex.getCode();
+            // _mega_error == 0 is the success sentinel for the caller; coerce
+            // a hypothetical zero MEGA code to 1 so any thrown exception is
+            // always treated as failure.
+            _mega_error = mex.getCode() != 0 ? mex.getCode() : 1;
 
         } catch (Exception ex) {
 
