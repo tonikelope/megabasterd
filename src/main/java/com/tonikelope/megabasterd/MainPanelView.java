@@ -254,13 +254,33 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     MegaAPI ma = getMain_panel().getMega_active_accounts().get(mega_account);
 
+                    // Uploads require an authenticated MegaAPI (genFolderKey
+                    // / createDir / shareFolder all dereference _master_key
+                    // and _root_id). If the selected account vanished from
+                    // the active map (race with SettingsDialog) we used to
+                    // NPE silently inside the outer catch and the user saw
+                    // nothing happen.
+                    if (ma == null) {
+                        LOG.log(SEVERE, "Upload aborted: account ''{0}'' is not in mega_active_accounts (logged out / removed?)", mega_account);
+                        MiscTools.GUIRun(() -> {
+                            JOptionPane.showMessageDialog(MainPanelView.this,
+                                    LabelTranslatorSingleton.getInstance().translate("Upload aborted: the selected MEGA account is not available."),
+                                    "Error", JOptionPane.ERROR_MESSAGE);
+                        });
+                        for (File f : dialog.getFiles()) {
+                            getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
+                        }
+                        getMain_panel().getUpload_manager().secureNotify();
+                        return;
+                    }
+
                     try {
 
                         byte[] parent_key = ma.genFolderKey();
 
                         byte[] share_key = ma.genShareKey();
 
-                        String root_name = dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10);
+                        String root_name = (dir_name != null && !dir_name.isEmpty()) ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10);
 
                         HashMap<String, Object> res = ma.createDir(root_name, ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
 
@@ -329,7 +349,24 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         for (File f : dialog.getFiles()) {
 
-                            String file_path = f.getParentFile().getAbsolutePath().replace(base_path, "");
+                            if (getMain_panel().isExit()) {
+                                // App is shutting down; leave the remaining
+                                // files in preprocess_global_queue so the new
+                                // _byebye snapshot can persist them (today
+                                // limited to filename only -- TODO: extend
+                                // resumeUploads to reconstruct the parent
+                                // tree from those filenames).
+                                break;
+                            }
+
+                            // getParentFile returns null for files at a drive
+                            // root (e.g. "Z:\file.txt"). The original code
+                            // NPE'd and the outer catch silently dropped the
+                            // file. Treat it as a base-path relative file
+                            // instead.
+                            File parent = f.getParentFile();
+                            String parent_abs = parent != null ? parent.getAbsolutePath() : (base_path != null ? base_path : "");
+                            String file_path = parent_abs.replace(base_path, "");
 
                             try {
 
@@ -1062,13 +1099,17 @@ public final class MainPanelView extends javax.swing.JFrame {
         if (getMain_panel().isUse_mega_account_down()) {
             final String mega_account = (String) dialog.getUse_mega_account_down_combobox().getSelectedItem();
 
-            if ("".equals(mega_account)) {
+            if ("".equals(mega_account) || mega_account == null) {
 
                 ma = new MegaAPI();
 
             } else {
 
-                ma = getMain_panel().getMega_active_accounts().get(mega_account);
+                // The selected account may have been removed by a concurrent
+                // SettingsDialog edit, leaving get() == null; fall back to an
+                // anonymous MegaAPI rather than NPEing downstream.
+                MegaAPI selected = getMain_panel().getMega_active_accounts().get(mega_account);
+                ma = selected != null ? selected : new MegaAPI();
             }
 
         } else {
@@ -1155,10 +1196,26 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     for (String url : urls) {
 
+                        // Respect global app exit so the user closing the app
+                        // mid-batch doesn't keep spawning Downloads behind the
+                        // shutdown drain. Anything still in `urls` at this
+                        // point will be persisted by _byebye's snapshot of
+                        // _transference_preprocess_global_queue.
+                        if (getMain_panel().isExit()) {
+                            break;
+                        }
+
                         try {
 
                             link_warning = false;
 
+                            // URLDecoder.decode throws IllegalArgumentException
+                            // (not UnsupportedEncodingException) on malformed
+                            // %-escapes. Without the catch-all below a single
+                            // dodgy URL bubbled out of the for-loop, killed
+                            // the preprocess Runnable, and tripped the now-
+                            // bounded retry in TransferenceManager. Keep going
+                            // with the rest of the batch instead.
                             url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
 
                             Download download;
@@ -1263,6 +1320,15 @@ public final class MainPanelView extends javax.swing.JFrame {
                             LOG.log(Level.SEVERE, ex.getMessage());
                         } catch (InterruptedException ex) {
                             Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        } catch (RuntimeException ex) {
+                            // Last-resort: malformed URL escapes
+                            // (IllegalArgumentException), NPE from a regex that
+                            // didn't match, ClassCastException on folder_link
+                            // type, etc. -- log this URL and move on instead of
+                            // killing the rest of the batch.
+                            LOG.log(Level.SEVERE, "Skipping URL after unexpected error: " + url, ex);
+                            getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().remove(url);
+                            getMain_panel().getDownload_manager().secureNotify();
                         }
 
                     }

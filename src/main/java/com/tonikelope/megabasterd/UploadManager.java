@@ -41,7 +41,17 @@ public class UploadManager extends TransferenceManager {
             getScroll_panel().add(((Upload) upload).getView());
         });
 
-        ((Upload) upload).provisionIt();
+        try {
+            ((Upload) upload).provisionIt();
+        } catch (RuntimeException ex) {
+            // Belt-and-braces: provisionIt now catches its own runtime
+            // exceptions, but if a future change adds a code path that
+            // throws, we must NOT leave the BoundedExecutor task without
+            // routing the transference to either aux_queue or
+            // finished_queue -- otherwise the UI shows a perpetual
+            // "Provisioning..." with no way to recover.
+            LOG.log(SEVERE, "Upload provisionIt threw -- routing to finished_queue", ex);
+        }
 
         if (((Upload) upload).isProvision_ok()) {
 

@@ -1455,21 +1455,62 @@ public final class MainPanel {
                     //    -- guarantees the full resume set survives across the
                     //    app restart. (#751)
                     // -------------------------------------------------------------
-                    ArrayList<String> downloads_queue = new ArrayList<>();
+                    // Capture every download URL still in flight, in priority
+                    // order. Previously this only covered running_list +
+                    // waitstart_queue: anything mid-provisioning, anything in
+                    // the aux flush queue, and any URL the new-download
+                    // Runnable had pasted but not yet converted to a Download
+                    // was lost silently on exit. Now we union all four
+                    // download-side sources so a user who exits mid-batch
+                    // recovers the full set on next launch.
+                    java.util.LinkedHashSet<String> downloads_set = new java.util.LinkedHashSet<>();
                     for (Transference t : _download_manager.getTransference_running_list()) {
-                        downloads_queue.add(((Download) t).getUrl());
+                        downloads_set.add(((Download) t).getUrl());
                     }
                     for (Transference t : _download_manager.getTransference_waitstart_queue()) {
-                        downloads_queue.add(((Download) t).getUrl());
+                        downloads_set.add(((Download) t).getUrl());
                     }
+                    for (Transference t : _download_manager.getTransference_waitstart_aux_queue()) {
+                        downloads_set.add(((Download) t).getUrl());
+                    }
+                    for (Transference t : _download_manager.getTransference_provision_queue()) {
+                        downloads_set.add(((Download) t).getUrl());
+                    }
+                    // _transference_preprocess_global_queue carries Strings on
+                    // the download side (raw URLs the user pasted that have
+                    // not yet been converted to Download objects); the upload
+                    // side stores File objects so we filter by type.
+                    for (Object o : _download_manager.getTransference_preprocess_global_queue()) {
+                        if (o instanceof String) {
+                            downloads_set.add((String) o);
+                        }
+                    }
+                    ArrayList<String> downloads_queue = new ArrayList<>(downloads_set);
 
-                    ArrayList<String> uploads_queue = new ArrayList<>();
+                    // Same widening as the download side: capture every
+                    // upload in flight, in priority order, so a mid-batch
+                    // exit doesn't drop the aux flush queue or anything
+                    // mid-provisioning. preprocess_global_queue on the
+                    // upload side carries File objects (not Upload objects),
+                    // so we capture their absolute path as the file_name --
+                    // resumeUploads will only re-create them if their DB row
+                    // already exists (which only happens after provisionIt
+                    // ran), so the preprocess_global File entries serve as
+                    // a debugging trail rather than full recovery.
+                    java.util.LinkedHashSet<String> uploads_set = new java.util.LinkedHashSet<>();
                     for (Transference t : _upload_manager.getTransference_running_list()) {
-                        uploads_queue.add(t.getFile_name());
+                        uploads_set.add(t.getFile_name());
                     }
                     for (Transference t : _upload_manager.getTransference_waitstart_queue()) {
-                        uploads_queue.add(t.getFile_name());
+                        uploads_set.add(t.getFile_name());
                     }
+                    for (Transference t : _upload_manager.getTransference_waitstart_aux_queue()) {
+                        uploads_set.add(t.getFile_name());
+                    }
+                    for (Transference t : _upload_manager.getTransference_provision_queue()) {
+                        uploads_set.add(t.getFile_name());
+                    }
+                    ArrayList<String> uploads_queue = new ArrayList<>(uploads_set);
 
                     // Save per-upload progress (mac data) up front too, so a
                     // resume picks up close to the byte that was being chunked
@@ -1741,6 +1782,18 @@ public final class MainPanel {
                                 } else {
                                     tot_downloads--;
                                 }
+                            } else {
+                                // URL is in downloads_queue but has no row in
+                                // `downloads` -- it was in provision_queue /
+                                // preprocess_global_queue at shutdown and
+                                // never reached insertDownloadReturningName.
+                                // Build a metadata-less Download against the
+                                // default download path so the user gets it
+                                // back instead of seeing it vanish.
+                                Download download = new Download(tthis, new MegaAPI(), url, _default_download_path, null, null, null, null, null, _use_slots_down, false, null, false);
+                                getDownload_manager().getTransference_provision_queue().add(download);
+                                conta_downloads++;
+                                downloads_queue_iterator.remove();
                             }
 
                         } catch (Exception ex) {
