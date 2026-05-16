@@ -1182,9 +1182,12 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         _file_name = _file_name.replaceFirst("\\..*$", "_" + MiscTools.genID(8) + "_$0");
                     }
 
-                    if (_closed) {
-                        // User clicked Close while we were still provisioning.
-                        // Don't re-insert the row we're about to delete.
+                    if (_closed || _main_panel.isExit()) {
+                        // User clicked Close on this row, or is shutting the
+                        // whole app down. Don't insert a DB row we're about to
+                        // either delete (_closed) or race the SqliteSingleton
+                        // shutdown for (_main_panel.isExit() -- byebyenow
+                        // closes the connection right after the snapshot).
                         return;
                     }
 
@@ -1217,8 +1220,8 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                     _file_name = _file_name.replaceFirst("\\..*$", "_" + MiscTools.genID(8) + "_$0");
                 }
 
-                if (_closed) {
-                    // User clicked Close while we were still provisioning.
+                if (_closed || _main_panel.isExit()) {
+                    // See comment above.
                     return;
                 }
 
