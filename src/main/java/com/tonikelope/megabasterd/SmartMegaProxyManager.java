@@ -141,6 +141,20 @@ public final class SmartMegaProxyManager {
         });
     }
 
+    private static int clampWithWarn(String key, int value, int min, int max) {
+        if (value < min) {
+            LOG.log(Level.WARNING, "[SmartProxy] setting {0}={1} is below the supported minimum {2}; clamping. Values that low make the recovery path effectively unusable.",
+                    new Object[]{key, value, min});
+            return min;
+        }
+        if (value > max) {
+            LOG.log(Level.WARNING, "[SmartProxy] setting {0}={1} is above the supported maximum {2}; clamping.",
+                    new Object[]{key, value, max});
+            return max;
+        }
+        return value;
+    }
+
     private synchronized int countBlockedProxies() {
 
         int i = 0;
@@ -162,11 +176,23 @@ public final class SmartMegaProxyManager {
     public synchronized void refreshSmartProxySettings() {
         String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
 
-        _ban_time = MiscTools.parseIntOr(smartproxy_ban_time, PROXY_BLOCK_TIME);
+        // Clamp ban_time to [10, 3600] s. Below 10 s a banned proxy is
+        // unblocked before the worker that banned it has finished retrying
+        // somewhere else, so the pool churns the same bad entries; above
+        // 1 h the proxy is effectively dead and should just be removed
+        // from the list manually. (#752)
+        int requested_ban = MiscTools.parseIntOr(smartproxy_ban_time, PROXY_BLOCK_TIME);
+        _ban_time = clampWithWarn("smartproxy_ban_time", requested_ban, 10, 3600);
 
         String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
 
-        _proxy_timeout = MiscTools.parseIntOr(smartproxy_timeout, Transference.HTTP_PROXY_TIMEOUT / 1000) * 1000;
+        // Clamp proxy_timeout to [3, 120] s. Below 3 s most real-world
+        // public proxies cannot complete a TCP+TLS handshake, so every
+        // attempt times out and the worker burns through the list without
+        // ever connecting. Stored and reported in seconds; converted to
+        // ms below for the JDK URLConnection setters. (#752)
+        int requested_timeout = MiscTools.parseIntOr(smartproxy_timeout, Transference.HTTP_PROXY_TIMEOUT / 1000);
+        _proxy_timeout = clampWithWarn("smartproxy_timeout", requested_timeout, 3, 120) * 1000;
 
         String force_smart_proxy_string = DBTools.selectSettingValue("force_smart_proxy");
 
