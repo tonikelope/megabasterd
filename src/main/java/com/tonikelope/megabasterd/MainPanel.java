@@ -1487,13 +1487,30 @@ public final class MainPanel {
                     }
                     ArrayList<String> downloads_queue = new ArrayList<>(downloads_set);
 
-                    ArrayList<String> uploads_queue = new ArrayList<>();
+                    // Same widening as the download side: capture every
+                    // upload in flight, in priority order, so a mid-batch
+                    // exit doesn't drop the aux flush queue or anything
+                    // mid-provisioning. preprocess_global_queue on the
+                    // upload side carries File objects (not Upload objects),
+                    // so we capture their absolute path as the file_name --
+                    // resumeUploads will only re-create them if their DB row
+                    // already exists (which only happens after provisionIt
+                    // ran), so the preprocess_global File entries serve as
+                    // a debugging trail rather than full recovery.
+                    java.util.LinkedHashSet<String> uploads_set = new java.util.LinkedHashSet<>();
                     for (Transference t : _upload_manager.getTransference_running_list()) {
-                        uploads_queue.add(t.getFile_name());
+                        uploads_set.add(t.getFile_name());
                     }
                     for (Transference t : _upload_manager.getTransference_waitstart_queue()) {
-                        uploads_queue.add(t.getFile_name());
+                        uploads_set.add(t.getFile_name());
                     }
+                    for (Transference t : _upload_manager.getTransference_waitstart_aux_queue()) {
+                        uploads_set.add(t.getFile_name());
+                    }
+                    for (Transference t : _upload_manager.getTransference_provision_queue()) {
+                        uploads_set.add(t.getFile_name());
+                    }
+                    ArrayList<String> uploads_queue = new ArrayList<>(uploads_set);
 
                     // Save per-upload progress (mac data) up front too, so a
                     // resume picks up close to the byte that was being chunked
