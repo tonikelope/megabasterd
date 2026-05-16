@@ -211,19 +211,34 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             LOG.log(Level.WARNING, "{0} Worker [{1}] PROXY {2} TOO MANY CONNECTIONS", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
                         }
 
+                        // getProxy() returns null when every proxy is excluded
+                        // or banned and the refresh-retry loop exhausted itself.
+                        // Previously we indexed [0]/[1] unconditionally and NPE'd
+                        // the worker -- exactly during a 509 storm, when smart
+                        // proxy is supposed to bail us out. Null now means
+                        // "fall back to direct for this chunk" (the path below
+                        // already handles _current_smart_proxy == null). (#751)
                         String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
-                        _current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
+                        if (smart_proxy != null) {
+                            _current_smart_proxy = smart_proxy[0];
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
+                        } else {
+                            LOG.log(Level.WARNING, "{0} Worker [{1}] SmartProxy exhausted (every proxy excluded/banned) -- falling back to direct", new Object[]{Thread.currentThread().getName(), _id});
+                            _current_smart_proxy = null;
+                        }
 
                     } else if (_current_smart_proxy == null) {
 
                         String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
-                        _current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
+                        if (smart_proxy != null) {
+                            _current_smart_proxy = smart_proxy[0];
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
+                        } else {
+                            LOG.log(Level.WARNING, "{0} Worker [{1}] SmartProxy exhausted (no usable proxy) -- falling back to direct", new Object[]{Thread.currentThread().getName(), _id});
+                            _current_smart_proxy = null;
+                        }
 
                     }
 
@@ -233,13 +248,39 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             getDownload().enableTurboMode();
                         }
 
+                        // Parse the proxy entry defensively. Was a raw
+                        // Integer.parseInt(proxy_info[1]) which threw
+                        // NumberFormatException -- killing the worker -- on any
+                        // garbage entry that slipped through the regex (or any
+                        // future format change in the remote-fetched list).
+                        // Treat malformed entries as banned + skip to direct
+                        // fallback for this chunk; getProxy() will avoid the
+                        // bad entry next round. (#751)
                         String[] proxy_info = _current_smart_proxy.split(":");
+                        int proxy_port = -1;
+                        if (proxy_info.length == 2) {
+                            try {
+                                int p = Integer.parseInt(proxy_info[1]);
+                                if (p >= 1 && p <= 65535) {
+                                    proxy_port = p;
+                                }
+                            } catch (NumberFormatException ignore) {
+                            }
+                        }
 
-                        Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
-
-                        URL url = new URL(chunk_url);
-
-                        con = (HttpURLConnection) url.openConnection(proxy);
+                        if (proxy_port < 0) {
+                            LOG.log(Level.WARNING, "{0} Worker [{1}] malformed smart proxy entry {2} -- banning + direct fallback",
+                                    new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
+                            proxy_manager.blockProxy(_current_smart_proxy, "Malformed entry");
+                            _excluded_proxy_list.add(_current_smart_proxy);
+                            _current_smart_proxy = null;
+                            URL url = new URL(chunk_url);
+                            con = (HttpURLConnection) url.openConnection();
+                        } else {
+                            Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], proxy_port));
+                            URL url = new URL(chunk_url);
+                            con = (HttpURLConnection) url.openConnection(proxy);
+                        }
 
                     } else {
 
