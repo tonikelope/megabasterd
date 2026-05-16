@@ -83,36 +83,30 @@ public class QuotaRecoverySettingsDialog extends JDialog {
     private void initComponents() {
 
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setTitle("Quota recovery & SmartProxy");
+        setTitle(I18n.tr("ui.quota.title"));
 
         JPanel content = new JPanel(new BorderLayout(10, 10));
         content.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         // --- Top: numeric / boolean settings (GridBag for tidy alignment) ---
         JPanel settings_panel = new JPanel(new GridBagLayout());
-        settings_panel.setBorder(BorderFactory.createTitledBorder("Recovery behaviour"));
+        settings_panel.setBorder(BorderFactory.createTitledBorder(I18n.tr("ui.quota.recovery_panel_title")));
 
         GridBagConstraints g = new GridBagConstraints();
         g.insets = new Insets(4, 6, 4, 6);
         g.anchor = GridBagConstraints.WEST;
         g.fill = GridBagConstraints.HORIZONTAL;
 
-        _auto_resume_ip_checkbox = new JCheckBox("Auto-resume downloads on IP change (VPN)");
-        _auto_resume_ip_checkbox.setToolTipText("<html>When enabled, ChunkDownloader workers in 509 backoff<br>"
-                + "re-check the public IP every 30 s and break out of the backoff<br>"
-                + "immediately if the IP changed -- e.g. you activated a VPN.<br>"
-                + "Disable only if your network has unstable IP detection.</html>");
+        _auto_resume_ip_checkbox = new JCheckBox(I18n.tr("ui.quota.auto_resume_ip"));
+        _auto_resume_ip_checkbox.setToolTipText(I18n.tr("ui.quota.auto_resume_ip.tooltip"));
         g.gridx = 0;
         g.gridy = 0;
         g.gridwidth = 2;
         settings_panel.add(_auto_resume_ip_checkbox, g);
         g.gridwidth = 1;
 
-        JLabel l1 = new JLabel("Quota stall watchdog timeout (s):");
-        l1.setToolTipText("<html>When at least one worker is in 509 backoff and no<br>"
-                + "chunk has landed for this many seconds, the watchdog flags<br>"
-                + "the download for auto-retry. Lower = recover faster after a<br>"
-                + "real quota; higher = tolerate brief 509 hiccups. (30 .. 3600)</html>");
+        JLabel l1 = new JLabel(I18n.tr("ui.quota.stall_timeout_label"));
+        l1.setToolTipText(I18n.tr("ui.quota.stall_timeout.tooltip"));
         g.gridx = 0;
         g.gridy = 1;
         settings_panel.add(l1, g);
@@ -122,11 +116,8 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         g.gridy = 1;
         settings_panel.add(_quota_stall_spinner, g);
 
-        JLabel l2 = new JLabel("SmartProxy 509 recheck window (s):");
-        l2.setToolTipText("<html>How long after a 509 the SmartProxy logic stays armed<br>"
-                + "for this download even if individual chunks succeed.<br>"
-                + "MEGA's bandwidth quotas reset on a window the user can't<br>"
-                + "observe directly; was hardcoded to 3600 s before. (60 .. 86400)</html>");
+        JLabel l2 = new JLabel(I18n.tr("ui.quota.recheck_window_label"));
+        l2.setToolTipText(I18n.tr("ui.quota.recheck_window.tooltip"));
         g.gridx = 0;
         g.gridy = 2;
         settings_panel.add(l2, g);
@@ -140,24 +131,22 @@ public class QuotaRecoverySettingsDialog extends JDialog {
 
         // --- Middle: live IP + proxy test ---
         JPanel diag_panel = new JPanel(new BorderLayout(8, 8));
-        diag_panel.setBorder(BorderFactory.createTitledBorder("Diagnostics"));
+        diag_panel.setBorder(BorderFactory.createTitledBorder(I18n.tr("ui.quota.diagnostics_panel_title")));
 
         JPanel ip_row = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 4));
-        ip_row.add(new JLabel("Current public IP:"));
-        _current_ip_label = new JLabel("(checking...)");
+        ip_row.add(new JLabel(I18n.tr("ui.quota.current_ip_label")));
+        _current_ip_label = new JLabel(I18n.tr("ui.quota.ip_checking"));
         _current_ip_label.setFont(new Font(Font.MONOSPACED, Font.BOLD, 14));
         ip_row.add(_current_ip_label);
-        _refresh_ip_button = new JButton("Refresh");
+        _refresh_ip_button = new JButton(I18n.tr("ui.quota.refresh_ip_button"));
         _refresh_ip_button.addActionListener(e -> refreshPublicIp());
         ip_row.add(_refresh_ip_button);
         diag_panel.add(ip_row, BorderLayout.NORTH);
 
         JPanel test_row = new JPanel(new BorderLayout(0, 4));
         JPanel test_btn_panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
-        _test_proxy_button = new JButton("Test SmartProxy list");
-        _test_proxy_button.setToolTipText("<html>Parse the configured SmartProxy list (or remote URL)<br>"
-                + "and attempt a 3 s TCP connect to each entry. Reports which<br>"
-                + "are reachable. Does not actually proxy a MEGA request.</html>");
+        _test_proxy_button = new JButton(I18n.tr("ui.quota.test_proxy_button"));
+        _test_proxy_button.setToolTipText(I18n.tr("ui.quota.test_proxy.tooltip"));
         _test_proxy_button.addActionListener(e -> testProxyList());
         test_btn_panel.add(_test_proxy_button);
         test_row.add(test_btn_panel, BorderLayout.NORTH);
@@ -174,7 +163,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         content.add(diag_panel, BorderLayout.CENTER);
 
         // --- Bottom: Save / Cancel ---
-        _save_button = new JButton("Save");
+        _save_button = new JButton(I18n.tr("ui.quota.save_button"));
         _save_button.setBackground(new Color(60, 140, 60));
         _save_button.setForeground(Color.WHITE);
         _save_button.addActionListener(e -> {
@@ -182,15 +171,14 @@ public class QuotaRecoverySettingsDialog extends JDialog {
             dispose();
         });
 
-        _cancel_button = new JButton("Cancel");
+        _cancel_button = new JButton(I18n.tr("ui.quota.cancel_button"));
         _cancel_button.addActionListener(e -> dispose());
 
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         footer.add(_cancel_button);
         footer.add(_save_button);
 
-        JLabel help = new JLabel("<html><i>These settings only affect HTTP 509 (MEGA bandwidth quota) recovery; "
-                + "the main SmartProxy list itself lives in Settings &rarr; SmartProxy.</i></html>");
+        JLabel help = new JLabel(I18n.tr("ui.quota.help"));
         help.setForeground(new Color(110, 110, 110));
         help.setHorizontalAlignment(SwingConstants.CENTER);
         help.setBorder(BorderFactory.createEmptyBorder(8, 4, 0, 4));
@@ -265,7 +253,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
 
     private void refreshPublicIp() {
         MiscTools.GUIRun(() -> {
-            _current_ip_label.setText("(checking...)");
+            _current_ip_label.setText(I18n.tr("ui.quota.ip_checking"));
             _refresh_ip_button.setEnabled(false);
         });
 
@@ -275,7 +263,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         String ip = MainPanel.getCachedPublicIp();
 
         MiscTools.GUIRun(() -> {
-            _current_ip_label.setText(ip != null ? ip : "(unavailable)");
+            _current_ip_label.setText(ip != null ? ip : I18n.tr("ui.quota.ip_unavailable"));
             _refresh_ip_button.setEnabled(true);
         });
     }
@@ -288,7 +276,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
      */
     private void testProxyList() {
         _test_proxy_button.setEnabled(false);
-        _proxy_test_output.setText("Loading proxy list...\n");
+        _proxy_test_output.setText(I18n.tr("ui.quota.test.loading") + "\n");
 
         new Thread(() -> {
             try {
@@ -298,7 +286,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                 // hasn't refreshed yet, force one.
                 SmartMegaProxyManager pm = MainPanel.getProxy_manager();
                 if (pm == null) {
-                    appendOutput("[ERROR] SmartProxy is not initialised. Enable it in Settings -> SmartProxy first.\n");
+                    appendOutput(I18n.tr("ui.quota.test.smartproxy_not_initialised") + "\n");
                     return;
                 }
 
@@ -316,7 +304,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                     try {
                         entry = pm.getProxy(excluded);
                     } catch (Exception ex) {
-                        appendOutput("[ERROR] getProxy threw: " + ex.getMessage() + "\n");
+                        appendOutput(I18n.tr("ui.quota.test.getproxy_threw", ex.getMessage()) + "\n");
                         break;
                     }
                     if (entry == null || entry[0] == null) {
@@ -332,18 +320,22 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                 }
 
                 if (results.isEmpty()) {
-                    appendOutput("[INFO] No proxies in the live SmartProxy pool (list may be empty, stale, or all banned).\n");
+                    appendOutput(I18n.tr("ui.quota.test.no_proxies") + "\n");
                     return;
                 }
 
-                appendOutput("Testing " + results.size() + " proxy entries (3 s TCP connect timeout each)...\n");
+                appendOutput(I18n.tr("ui.quota.test.testing_count", results.size()) + "\n");
                 appendOutput("--------------------------------------------------------------\n");
 
                 int ok = 0, fail = 0;
                 for (String addr : new ArrayList<>(results.keySet())) {
+                    // Pre-pad the address to 32 chars so the per-row output
+                    // stays column-aligned regardless of locale; the i18n
+                    // key only carries the trailing label + placeholders.
+                    String padded_addr = String.format("%-32s", addr);
                     String[] parts = addr.split(":");
                     if (parts.length != 2) {
-                        appendOutput(String.format("  %-32s  [SKIP] malformed%n", addr));
+                        appendOutput(I18n.tr("ui.quota.test.row_skip_malformed", padded_addr) + "\n");
                         fail++;
                         results.put(addr, false);
                         continue;
@@ -355,7 +347,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                             throw new NumberFormatException("range");
                         }
                     } catch (NumberFormatException ex) {
-                        appendOutput(String.format("  %-32s  [SKIP] bad port (%s)%n", addr, parts[1]));
+                        appendOutput(I18n.tr("ui.quota.test.row_skip_bad_port", padded_addr, parts[1]) + "\n");
                         fail++;
                         results.put(addr, false);
                         continue;
@@ -365,18 +357,18 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                     try (Socket s = new Socket()) {
                         s.connect(new InetSocketAddress(parts[0], port), 3000);
                         long dt = System.currentTimeMillis() - t0;
-                        appendOutput(String.format("  %-32s  [OK]   %d ms%n", addr, dt));
+                        appendOutput(I18n.tr("ui.quota.test.row_ok", padded_addr, dt) + "\n");
                         ok++;
                         results.put(addr, true);
                     } catch (Exception ex) {
                         long dt = System.currentTimeMillis() - t0;
-                        appendOutput(String.format("  %-32s  [FAIL] %s (%d ms)%n", addr, ex.getClass().getSimpleName(), dt));
+                        appendOutput(I18n.tr("ui.quota.test.row_fail", padded_addr, ex.getClass().getSimpleName(), dt) + "\n");
                         fail++;
                         results.put(addr, false);
                     }
                 }
                 appendOutput("--------------------------------------------------------------\n");
-                appendOutput("Summary: " + ok + " reachable, " + fail + " failed.\n");
+                appendOutput(I18n.tr("ui.quota.test.summary", ok, fail) + "\n");
             } finally {
                 MiscTools.GUIRun(() -> _test_proxy_button.setEnabled(true));
             }

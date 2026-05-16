@@ -451,7 +451,7 @@ public final class MainPanel {
         // made updateFonts derive from the Swing default JMenuItem font
         // (~12 pt), leaving the new item visibly smaller than the rest.
         try {
-            javax.swing.JMenuItem quota_menu = new javax.swing.JMenuItem("Quota recovery & SmartProxy (509)");
+            javax.swing.JMenuItem quota_menu = new javax.swing.JMenuItem(I18n.tr("ui.menu.quota_recovery"));
             quota_menu.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 18));
             quota_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png")));
             quota_menu.addActionListener((evt) -> {
