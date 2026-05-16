@@ -435,6 +435,7 @@ public final class SmartMegaProxyManager {
         }
 
         boolean socks = false;
+        boolean had_scheme = false;
 
         // Strip the historical "*" SOCKS marker first; it can also precede a
         // scheme prefix in case a user mixed conventions.
@@ -450,43 +451,83 @@ public final class SmartMegaProxyManager {
         String lower = line.toLowerCase();
         if (lower.startsWith("http://")) {
             line = line.substring(7);
+            had_scheme = true;
         } else if (lower.startsWith("https://")) {
             line = line.substring(8);
+            had_scheme = true;
         } else if (lower.startsWith("socks5://")) {
             socks = true;
             line = line.substring(9);
+            had_scheme = true;
         } else if (lower.startsWith("socks4a://")) {
             socks = true;
             line = line.substring(10);
+            had_scheme = true;
         } else if (lower.startsWith("socks4://")) {
             socks = true;
             line = line.substring(9);
+            had_scheme = true;
         } else if (lower.startsWith("socks://")) {
             socks = true;
             line = line.substring(8);
+            had_scheme = true;
         }
-
-        // Drop any trailing path/query the scheme may have brought along
-        // (e.g. "http://1.2.3.4:8080/" or "http://host:port/list.txt").
-        int slash = line.indexOf('/');
-        if (slash >= 0) {
-            line = line.substring(0, slash);
-        }
-        line = line.trim();
 
         if (line.contains("@")) {
             String[] proxy_parts = line.split("@");
-            // Defensive: a stray '@' (e.g. user@pass@host:port) would expose
-            // proxy_parts[1] as the wrong value; require exactly 2 parts AND
-            // a valid host:port shape on the first half. (#751)
-            if (proxy_parts.length == 2 && proxy_parts[0].matches(".+?:[0-9]{1,5}")) {
-                into_auth.put(proxy_parts[0], proxy_parts[1]);
-                into_list.put(proxy_parts[0], new Long[]{-1L, socks ? 1L : -1L});
-            } else {
+            if (proxy_parts.length != 2) {
+                // Stray '@' (e.g. user@pass@host:port): can't disambiguate
+                // which half is the host:port, so reject. (#751)
                 LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed {0} entry: {1}", new Object[]{source, raw});
+                return;
             }
+            // The host:port half may carry a trailing path the scheme brought
+            // along (e.g. http://host:port/foo@auth). Strip from that half
+            // only -- the auth half is base64(user):base64(pass), and the
+            // base64 alphabet includes '/', so a global path-strip would
+            // silently corrupt legitimate auth values (#753 audit).
+            String hostport = proxy_parts[0];
+            int slash = hostport.indexOf('/');
+            if (slash >= 0) {
+                hostport = hostport.substring(0, slash);
+            }
+            hostport = hostport.trim();
+
+            if (!hostport.matches(".+?:[0-9]{1,5}")) {
+                LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed {0} entry: {1}", new Object[]{source, raw});
+                return;
+            }
+
+            // Disambiguation guard: a URL-style "user:pass@host:port"
+            // credential where pass is numeric (e.g. "user:1234") would
+            // ALSO match the legacy "host:port@b64u:b64p" shape on parts[0]
+            // and lead us to store "user:1234" as the host. When the line
+            // had a scheme prefix AND parts[1] itself looks like host:port
+            // (whereas a real base64 trailer has no internal port-shaped
+            // segment), it's almost certainly URL-style auth -- reject
+            // with a pointed log instead of silently misparsing. (#753 audit)
+            if (had_scheme && proxy_parts[1].matches(".+?:[0-9]{1,5}")) {
+                LOG.log(Level.WARNING, "[Smart Proxy] skipping {0} entry with URL-style user:pass@host:port credential (not supported -- use IP:PORT@b64user:b64pass form instead): {1}",
+                        new Object[]{source, raw});
+                return;
+            }
+
+            into_auth.put(hostport, proxy_parts[1]);
+            into_list.put(hostport, new Long[]{-1L, socks ? 1L : -1L});
             return;
         }
+
+        // No auth trailer: drop any trailing path the scheme may have
+        // brought along (e.g. http://1.2.3.4:8080/list.txt). Bare lines
+        // without a scheme are not allowed to have a path -- the legacy
+        // parser rejected them via the strict regex.
+        if (had_scheme) {
+            int slash = line.indexOf('/');
+            if (slash >= 0) {
+                line = line.substring(0, slash);
+            }
+        }
+        line = line.trim();
 
         if (line.matches(".+?:[0-9]{1,5}")) {
             into_list.put(line, new Long[]{-1L, socks ? 1L : -1L});
