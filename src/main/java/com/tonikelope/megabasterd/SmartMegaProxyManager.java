@@ -43,6 +43,15 @@ public final class SmartMegaProxyManager {
     public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 30;
     public static final boolean RESET_SLOT_PROXY = true;
     public static final boolean RANDOM_SELECT = true;
+    /**
+     * Default for the post-509 window during which SmartProxy stays active
+     * for the affected download even after a successful chunk. Was the
+     * hard-coded {@code ChunkDownloader.SMART_PROXY_RECHECK_509_TIME = 3600};
+     * now overridable via DB setting "smart_proxy_509_recheck_window" so a
+     * user whose VPN clears quota in seconds isn't forced into a 1-hour
+     * proxy-mode window. (#751 / C4)
+     */
+    public static final int RECHECK_509_WINDOW_DEFAULT = 3600;
 
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
@@ -62,6 +71,7 @@ public final class SmartMegaProxyManager {
     private volatile long _last_refresh_timestamp;
     private volatile boolean _random_select;
     private volatile boolean _reset_slot_proxy;
+    private volatile int _recheck_509_window;
 
     public boolean isRandom_select() {
         return _random_select;
@@ -69,6 +79,16 @@ public final class SmartMegaProxyManager {
 
     public boolean isReset_slot_proxy() {
         return _reset_slot_proxy;
+    }
+
+    /**
+     * Window (seconds) after a 509 during which SmartProxy stays "armed"
+     * for affected downloads, even after individual chunks succeed.
+     * Configurable via DB setting "smart_proxy_509_recheck_window".
+     * Defaults to {@link #RECHECK_509_WINDOW_DEFAULT} (3600 s). (#751 / C4)
+     */
+    public int getRecheck_509_window() {
+        return _recheck_509_window;
     }
 
     public int getProxy_timeout() {
@@ -179,7 +199,20 @@ public final class SmartMegaProxyManager {
             _random_select = RANDOM_SELECT;
         }
 
-        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + "   TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + "   REFRESH: " + String.valueOf(_autorefresh_time) + "   FORCE: " + String.valueOf(_force_smart_proxy) + "   RANDOM: " + String.valueOf(_random_select) + "   RESET-SLOT-PROXY: " + String.valueOf(_reset_slot_proxy));
+        String recheck_setting = DBTools.selectSettingValue("smart_proxy_509_recheck_window");
+
+        int recheck = MiscTools.parseIntOr(recheck_setting, RECHECK_509_WINDOW_DEFAULT);
+        // Clamp to a sane range: anything below 60 s is pointless (a refresh
+        // would arrive sooner than that), anything above 24 h is just
+        // "permanent" which is what FORCE proxy mode already expresses.
+        if (recheck < 60) {
+            recheck = 60;
+        } else if (recheck > 86_400) {
+            recheck = 86_400;
+        }
+        _recheck_509_window = recheck;
+
+        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + "   TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + "   REFRESH: " + String.valueOf(_autorefresh_time) + "   FORCE: " + String.valueOf(_force_smart_proxy) + "   RANDOM: " + String.valueOf(_random_select) + "   RESET-SLOT-PROXY: " + String.valueOf(_reset_slot_proxy) + "   RECHECK-509: " + String.valueOf(_recheck_509_window));
     }
 
     public synchronized int getProxyCount() {

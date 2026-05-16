@@ -82,6 +82,16 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile String _file_pass;
     private volatile String _file_noexpire;
     private volatile boolean _frozen;
+    /**
+     * Wall-clock millis of the most recent HTTP 509 seen by ANY worker
+     * of this download. Hoisted out of per-worker state so a single
+     * worker hitting 509 flips SmartProxy mode for all other workers of
+     * the same download (the previous per-worker design meant 7 of 8
+     * workers would keep direct-hammering MEGA after worker A had
+     * already switched to a proxy). -1 == no 509 seen this download.
+     * (#751 / C4)
+     */
+    private volatile long _509_burst_timestamp = -1;
     private final boolean _use_slots;
     private volatile int _slots;
     private final boolean _restart;
@@ -1909,6 +1919,25 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     @Override
     public boolean isFrozen() {
         return this._frozen;
+    }
+
+    /**
+     * Shared 509-burst timestamp for all workers of this download. See
+     * the field comment above. Reads + writes are unsynchronized
+     * volatile -- a race that lets two workers each set the timestamp
+     * to slightly different "now" values is fine (we only care that
+     * SOMEONE saw 509 recently). (#751 / C4)
+     */
+    public long get509BurstTimestamp() {
+        return _509_burst_timestamp;
+    }
+
+    public void set509BurstTimestamp(long ts) {
+        _509_burst_timestamp = ts;
+    }
+
+    public void reset509BurstTimestamp() {
+        _509_burst_timestamp = -1;
     }
 
     @Override
