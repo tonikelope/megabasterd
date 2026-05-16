@@ -1062,13 +1062,17 @@ public final class MainPanelView extends javax.swing.JFrame {
         if (getMain_panel().isUse_mega_account_down()) {
             final String mega_account = (String) dialog.getUse_mega_account_down_combobox().getSelectedItem();
 
-            if ("".equals(mega_account)) {
+            if ("".equals(mega_account) || mega_account == null) {
 
                 ma = new MegaAPI();
 
             } else {
 
-                ma = getMain_panel().getMega_active_accounts().get(mega_account);
+                // The selected account may have been removed by a concurrent
+                // SettingsDialog edit, leaving get() == null; fall back to an
+                // anonymous MegaAPI rather than NPEing downstream.
+                MegaAPI selected = getMain_panel().getMega_active_accounts().get(mega_account);
+                ma = selected != null ? selected : new MegaAPI();
             }
 
         } else {
@@ -1155,10 +1159,26 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     for (String url : urls) {
 
+                        // Respect global app exit so the user closing the app
+                        // mid-batch doesn't keep spawning Downloads behind the
+                        // shutdown drain. Anything still in `urls` at this
+                        // point will be persisted by _byebye's snapshot of
+                        // _transference_preprocess_global_queue.
+                        if (getMain_panel().isExit()) {
+                            break;
+                        }
+
                         try {
 
                             link_warning = false;
 
+                            // URLDecoder.decode throws IllegalArgumentException
+                            // (not UnsupportedEncodingException) on malformed
+                            // %-escapes. Without the catch-all below a single
+                            // dodgy URL bubbled out of the for-loop, killed
+                            // the preprocess Runnable, and tripped the now-
+                            // bounded retry in TransferenceManager. Keep going
+                            // with the rest of the batch instead.
                             url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
 
                             Download download;
@@ -1263,6 +1283,15 @@ public final class MainPanelView extends javax.swing.JFrame {
                             LOG.log(Level.SEVERE, ex.getMessage());
                         } catch (InterruptedException ex) {
                             Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, ex.getMessage());
+                        } catch (RuntimeException ex) {
+                            // Last-resort: malformed URL escapes
+                            // (IllegalArgumentException), NPE from a regex that
+                            // didn't match, ClassCastException on folder_link
+                            // type, etc. -- log this URL and move on instead of
+                            // killing the rest of the batch.
+                            LOG.log(Level.SEVERE, "Skipping URL after unexpected error: " + url, ex);
+                            getMain_panel().getDownload_manager().getTransference_preprocess_global_queue().remove(url);
+                            getMain_panel().getDownload_manager().secureNotify();
                         }
 
                     }
