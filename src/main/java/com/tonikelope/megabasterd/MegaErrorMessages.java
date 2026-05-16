@@ -289,6 +289,22 @@ public final class MegaErrorMessages {
         }
     }
 
+    /**
+     * Whether this code is worth interrupting the user with a popup, or if it
+     * should just be logged. Mirrors {@link Transference#FATAL_API_ERROR_CODES}
+     * -- any code outside that set is treated as transient (server overload,
+     * temporary failure, rate limit, ...) and the popup is suppressed. The
+     * caller is still free to surface a row-level status string. (#751 / D)
+     */
+    public static boolean isFatalForPopup(int code) {
+        for (Integer fatal : Transference.FATAL_API_ERROR_CODES) {
+            if (fatal == code) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public static boolean isAccountBlocked(int code) {
         return code == -16;
     }
@@ -413,6 +429,18 @@ public final class MegaErrorMessages {
      * (notably -8, -9, -11, -14, -16).
      */
     public static void showPopup(Component parent, int code, String identity, String context, Source source) {
+        // Popups are reserved for FATAL_API_ERROR_CODES. Transient codes (-3,
+        // -5 EFAILED, -18 ETEMPUNAVAIL, ...) are handled automatically by the
+        // retry/backoff machinery; popping a dialog for them is just noise.
+        // Anything not in the fatal set is logged and dropped.
+        if (!isFatalForPopup(code)) {
+            java.util.logging.Logger.getLogger(MegaErrorMessages.class.getName())
+                    .log(java.util.logging.Level.FINE,
+                            "Suppressing non-fatal MEGA popup: code={0} identity={1} context={2}",
+                            new Object[]{code, identity, context});
+            return;
+        }
+
         // Dedup also keys on source: showing two popups for the same code on
         // the same identity but from different operations would be noise.
         String dedup_key = code + "|" + source + "|" + (identity == null ? "" : identity);

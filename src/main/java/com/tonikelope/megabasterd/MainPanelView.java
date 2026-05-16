@@ -266,16 +266,20 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                         if (res == null) {
                             // createDir already logged the cause (wrapped MEGA
-                            // error like -9, or Jackson exception). Surface a
-                            // friendly popup so the user sees what happened
-                            // instead of a silent failure + NPE on
-                            // `res.get("f")` on the next line.
+                            // error or unsupported response shape) to the
+                            // DEBUG LOG tab. Only escalate to a popup if MEGA
+                            // returned a FATAL error code we recognise --
+                            // otherwise the popup would just say "EFAILED"
+                            // which is meaningless. Avoid the NPE on the next
+                            // line either way.
                             int code = ma.getLastApiErrorCode();
-                            MegaErrorMessages.showPopup(MainPanelView.this,
-                                    code != 0 ? code : -5,
-                                    ma.getFull_email() != null ? ma.getFull_email() : mega_account,
-                                    "while creating the upload folder on MEGA",
-                                    MegaErrorMessages.Source.ACCOUNT);
+                            if (code != 0) {
+                                MegaErrorMessages.showPopup(MainPanelView.this, code,
+                                        ma.getFull_email() != null ? ma.getFull_email() : mega_account,
+                                        "while creating the upload folder on MEGA",
+                                        MegaErrorMessages.Source.ACCOUNT);
+                            }
+                            LOG.log(Level.WARNING, "{0} Upload aborted -- createDir returned null (see DEBUG LOG tab for raw MEGA response)", Thread.currentThread().getName());
                             return;
                         }
 

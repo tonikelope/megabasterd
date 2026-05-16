@@ -1242,14 +1242,48 @@ public class MegaAPI implements Serializable {
 
             ObjectMapper objectMapper = new ObjectMapper();
 
-            res_map = objectMapper.readValue(res, HashMap[].class);
+            try {
+                res_map = objectMapper.readValue(res, HashMap[].class);
+            } catch (com.fasterxml.jackson.databind.exc.MismatchedInputException jex) {
+                // MEGA returned something that doesn't fit `[{...}]`. Common
+                // case: the per-target wrapped shape `[[{...}]]` (Jackson 2.18
+                // refuses to coerce that into HashMap[], where 2.15 used to
+                // muddle through with a partial result). Try unwrapping one
+                // level via JsonNode before giving up.
+                LOG.log(Level.WARNING, "{0} createDir: HashMap[] parse rejected, attempting one-level unwrap. Raw body (truncated): {1}",
+                        new Object[]{_ctx(), _truncateForLog(res, 500)});
+                try {
+                    com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(res);
+                    if (root.isArray() && root.size() > 0 && root.get(0).isArray()) {
+                        com.fasterxml.jackson.databind.JsonNode inner = root.get(0);
+                        res_map = objectMapper.treeToValue(inner, HashMap[].class);
+                        LOG.log(Level.INFO, "{0} createDir: unwrapped one extra MEGA array layer successfully", _ctx());
+                    } else {
+                        LOG.log(Level.SEVERE, "{0} createDir: unsupported response shape; raw body (truncated): {1}",
+                                new Object[]{_ctx(), _truncateForLog(res, 500)});
+                    }
+                } catch (Exception ex2) {
+                    LOG.log(Level.SEVERE, "{0} createDir: unwrap attempt also failed: {1}; raw body (truncated): {2}",
+                            new Object[]{_ctx(), ex2.getMessage(), _truncateForLog(res, 500)});
+                }
+            }
 
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, _ctx(), ex);
         }
 
-        return res_map != null ? res_map[0] : null;
+        return res_map != null && res_map.length > 0 ? res_map[0] : null;
 
+    }
+
+    private static String _truncateForLog(String s, int max) {
+        if (s == null) {
+            return "(null)";
+        }
+        if (s.length() <= max) {
+            return s;
+        }
+        return s.substring(0, max) + "...(" + (s.length() - max) + " more chars)";
     }
 
     /**
