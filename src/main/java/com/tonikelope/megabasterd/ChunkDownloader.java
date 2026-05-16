@@ -39,6 +39,59 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
      */
     public static final int SMART_PROXY_RECHECK_509_TIME = SmartMegaProxyManager.RECHECK_509_WINDOW_DEFAULT;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
+
+    /**
+     * Debug toggle to simulate MEGA HTTP 509 (bandwidth quota) responses
+     * without burning real quota. Enabled via the JVM property
+     * {@code -Dmb.debug.force509=N}:
+     * <ul>
+     *   <li>{@code N > 0} forces the next N successful direct-IP chunk
+     *       responses to be reported as 509 (then disarms automatically).</li>
+     *   <li>{@code N = -1} forces every direct response forever until the
+     *       JVM restarts.</li>
+     *   <li>{@code N = 0} (the default, property absent) is a no-op.</li>
+     * </ul>
+     * Only direct connections are intercepted; SmartProxy-routed traffic
+     * always sees the real MEGA response. That mirrors the "my IP is
+     * already in 509 but the proxy IP isn't" scenario from issue #752 and
+     * lets the SmartProxy recovery path be exercised end-to-end.
+     */
+    private static final java.util.concurrent.atomic.AtomicLong DEBUG_FORCE_509_REMAINING;
+
+    static {
+        long n = 0;
+        String prop = System.getProperty("mb.debug.force509");
+        if (prop != null) {
+            try {
+                n = Long.parseLong(prop.trim());
+            } catch (NumberFormatException ignore) {
+            }
+        }
+        DEBUG_FORCE_509_REMAINING = new java.util.concurrent.atomic.AtomicLong(n);
+        if (n != 0) {
+            LOG.log(Level.WARNING, "DEBUG: ChunkDownloader will force HTTP 509 on direct requests ({0}). DO NOT USE IN PRODUCTION.",
+                    n < 0 ? "always-on" : ("first " + n + " responses"));
+        }
+    }
+
+    private static boolean consumeForced509() {
+        while (true) {
+            long cur = DEBUG_FORCE_509_REMAINING.get();
+            if (cur == 0) {
+                return false;
+            }
+            if (cur < 0) {
+                return true;
+            }
+            if (DEBUG_FORCE_509_REMAINING.compareAndSet(cur, cur - 1)) {
+                if (cur == 1) {
+                    LOG.log(Level.WARNING, "DEBUG: force-509 budget exhausted; subsequent direct responses will be real");
+                }
+                return true;
+            }
+        }
+    }
+
     private final int _id;
     private final Download _download;
     private volatile boolean _exit;
@@ -498,6 +551,16 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     if (!_exit && !_download.isStopped()) {
 
                         http_status = con.getResponseCode();
+
+                        if (http_status == 200 && _current_smart_proxy == null && consumeForced509()) {
+                            LOG.log(Level.WARNING, "{0} Worker [{1}] DEBUG: overriding HTTP 200 with synthetic 509 for chunk [{2}]",
+                                    new Object[]{Thread.currentThread().getName(), _id, chunk_id});
+                            http_status = 509;
+                            try {
+                                con.disconnect();
+                            } catch (Exception ignore) {
+                            }
+                        }
 
                         if (http_status != 200) {
 
