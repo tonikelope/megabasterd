@@ -104,6 +104,14 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile String _last_download_url;
     private volatile boolean _provision_ok;
     private boolean _auto_retry_on_error;
+    /**
+     * MEGA API error code of the most recent FATAL failure, or 0 if none.
+     * The cleanup-path auto-restart uses this to pick an error-specific
+     * countdown (currently: -17 EOVERQUOTA gets {@link
+     * Transference#RESTART_COUNTDOWN_SECS_OVERQUOTA}, everything else gets
+     * {@link Transference#RESTART_COUNTDOWN_SECS}). (#752)
+     */
+    private volatile int _last_fatal_api_error_code;
     private volatile int _paused_workers;
     private File _file;
     private boolean _checking_cbc;
@@ -1088,8 +1096,18 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         });
 
         if (_status_error != null && !_canceled && _auto_retry_on_error) {
+            // MEGA's -17 (EOVERQUOTA) quota window is on the order of tens
+            // of minutes. Retrying every 3 s does not help the quota clear
+            // and just hammers the API; use a longer countdown so the user
+            // sees a meaningful "waiting for quota window" pause but a
+            // VPN/IP change still recovers within a minute. Every other
+            // FATAL_WITH_RETRY code (only -4 right now) keeps the historical
+            // 3 s pace because it clears in seconds. (#752)
+            final int countdown_secs = (_last_fatal_api_error_code == -17)
+                    ? RESTART_COUNTDOWN_SECS_OVERQUOTA
+                    : RESTART_COUNTDOWN_SECS;
             THREAD_POOL.execute(() -> {
-                for (int i = 3; !_closed && i > 0; i--) {
+                for (int i = countdown_secs; !_closed && i > 0; i--) {
                     final int j = i;
                     MiscTools.GUIRun(() -> {
                         getView().getRestart_button().setText(I18n.tr("ui.dynamic.restart_countdown", j));
@@ -1666,6 +1684,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
+                    _last_fatal_api_error_code = error_code;
 
                     // Surface a friendly explanation popup. Dedup'd so two
                     // downloads hitting the same -16 / -8 don't pop twice.
@@ -1764,6 +1783,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
+                    _last_fatal_api_error_code = error_code;
 
                     // Surface a friendly explanation popup. Dedup'd so two
                     // downloads hitting the same -16 / -8 don't pop twice.
