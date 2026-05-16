@@ -572,28 +572,63 @@ public class MegaAPI implements Serializable {
 
                         proxy_manager.blockProxy(current_smart_proxy, "HTTP " + String.valueOf(http_error));
 
+                        // getProxy() returns null when every proxy is banned /
+                        // excluded and the refresh-retry loop is exhausted.
+                        // Indexing [0]/[1] unconditionally NPEs the RAW_REQUEST
+                        // -- exactly during a 509 storm, which is when SmartProxy
+                        // is supposed to save us. Same defensive pattern as
+                        // ChunkDownloader.java:362+. (#752)
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-                        current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
+                        if (smart_proxy != null) {
+                            current_smart_proxy = smart_proxy[0];
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
+                        } else {
+                            LOG.log(Level.WARNING, "{0} SmartProxy exhausted (every proxy excluded/banned) -- falling back to direct for this /cs retry", _ctx());
+                            current_smart_proxy = null;
+                        }
 
                     } else if (current_smart_proxy == null) {
 
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
-
-                        current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
+                        if (smart_proxy != null) {
+                            current_smart_proxy = smart_proxy[0];
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
+                        } else {
+                            LOG.log(Level.WARNING, "{0} SmartProxy exhausted (no usable proxy) -- falling back to direct for this /cs retry", _ctx());
+                            current_smart_proxy = null;
+                        }
                     }
 
                     if (current_smart_proxy != null) {
 
+                        // Parse the proxy entry defensively. A garbage entry
+                        // would otherwise throw NumberFormatException out of
+                        // the try/catch (only IOException/SSLException are
+                        // caught) and kill the RAW_REQUEST. Treat malformed
+                        // as banned + direct fallback for this retry. Mirrors
+                        // ChunkDownloader.java:400+. (#752)
                         String[] proxy_info = current_smart_proxy.split(":");
+                        int proxy_port = -1;
+                        if (proxy_info.length == 2) {
+                            try {
+                                int p = Integer.parseInt(proxy_info[1]);
+                                if (p >= 1 && p <= 65535) {
+                                    proxy_port = p;
+                                }
+                            } catch (NumberFormatException ignore) {
+                            }
+                        }
 
-                        Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
-
-                        con = (HttpsURLConnection) url_api.openConnection(proxy);
+                        if (proxy_port < 0) {
+                            LOG.log(Level.WARNING, "{0} malformed smart proxy entry {1} -- banning + direct fallback", new Object[]{_ctx(), current_smart_proxy});
+                            proxy_manager.blockProxy(current_smart_proxy, "Malformed entry");
+                            excluded_proxy_list.add(current_smart_proxy);
+                            current_smart_proxy = null;
+                            con = (HttpsURLConnection) url_api.openConnection();
+                        } else {
+                            Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], proxy_port));
+                            con = (HttpsURLConnection) url_api.openConnection(proxy);
+                        }
 
                     } else {
 
