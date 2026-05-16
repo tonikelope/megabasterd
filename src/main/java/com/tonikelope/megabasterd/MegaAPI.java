@@ -107,6 +107,25 @@ public class MegaAPI implements Serializable {
 
     private int _account_version;
 
+    /**
+     * Most recent MEGA API error code observed by RAW_REQUEST for this
+     * MegaAPI instance. Lets callers that swallowed the exception (e.g.
+     * {@link #getQuota()} returns null on failure) still surface a
+     * descriptive popup via {@link MegaErrorMessages#showPopup}. 0 means
+     * "no error since reset". Transient codes
+     * ({@link #MEGA_ERROR_NO_EXCEPTION_CODES}) are also stored so
+     * diagnostics show what just happened. (#751 / D)
+     */
+    private transient volatile int _last_api_error_code = 0;
+
+    public int getLastApiErrorCode() {
+        return _last_api_error_code;
+    }
+
+    public void resetLastApiErrorCode() {
+        _last_api_error_code = 0;
+    }
+
     private String _salt;
 
     public MegaAPI() {
@@ -668,6 +687,13 @@ public class MegaAPI implements Serializable {
                         if (response.length() > 0) {
 
                             mega_error = checkMEGAError(response);
+
+                            if (mega_error != 0) {
+                                // Stash for callers that swallow the exception
+                                // (e.g. getQuota returns null on failure) so a
+                                // UI hook can pop a friendly description. (#751 / D)
+                                _last_api_error_code = mega_error;
+                            }
 
                             if (mega_error != 0 && !Arrays.asList(MEGA_ERROR_NO_EXCEPTION_CODES).contains(mega_error)) {
 

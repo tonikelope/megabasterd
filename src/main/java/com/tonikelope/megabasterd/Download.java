@@ -1668,6 +1668,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
+                    // Surface a friendly explanation popup. Dedup'd so two
+                    // downloads hitting the same -16 / -8 don't pop twice. (#751 / D)
+                    MegaErrorMessages.showPopup(getMain_panel().getView(), error_code, link,
+                            "while fetching MEGA file metadata");
+
                     stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 
                 } else {
@@ -1756,6 +1761,11 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
+
+                    // Surface a friendly explanation popup. Dedup'd so two
+                    // downloads hitting the same -16 / -8 don't pop twice. (#751 / D)
+                    MegaErrorMessages.showPopup(getMain_panel().getView(), error_code, link,
+                            "while fetching MEGA file metadata");
 
                     stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 

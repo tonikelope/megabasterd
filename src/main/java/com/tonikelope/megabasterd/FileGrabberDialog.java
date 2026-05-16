@@ -785,13 +785,27 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                                 }
                             });
                         } else {
+                            // getQuota returned null -- ma.getLastApiErrorCode()
+                            // tells us WHY. Pop a friendly explanation so the
+                            // user knows whether to retry, re-login, switch
+                            // account, or contact MEGA. (#751 / D)
+                            final int err_code = (ma != null) ? ma.getLastApiErrorCode() : 0;
+                            final String err_email = (ma != null && ma.getFull_email() != null) ? ma.getFull_email() : email;
+                            if (err_code != 0) {
+                                MegaErrorMessages.showPopup(this, err_code, err_email,
+                                        "while checking account quota");
+                            }
                             MiscTools.GUIRun(() -> {
                                 account_combobox.setEnabled(true);
                                 account_label.setEnabled(true);
                                 account_combobox.setSelectedIndex(-1);
                                 copy_email_button.setEnabled(true);
                                 used_space_label.setForeground(Color.red);
-                                used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+                                if (err_code != 0) {
+                                    used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota") + ": MEGA " + err_code + " (" + MegaErrorMessages.getShortName(err_code) + ")");
+                                } else {
+                                    used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+                                }
                                 used_space_label.setEnabled(true);
                                 _last_selected_index = account_combobox.getSelectedIndex();
                                 dance_button.setEnabled(false);
@@ -810,13 +824,35 @@ public class FileGrabberDialog extends javax.swing.JDialog {
                         }
                     }
                 } catch (Exception ex) {
+                    // If the failure is itself a MegaAPIException, surface
+                    // a friendly popup; fastLogin / fetchNodes can throw -15
+                    // (dead session), -16 (blocked), etc. (#751 / D)
+                    int err_code = 0;
+                    if (ex instanceof APIException) {
+                        err_code = ((APIException) ex).getCode();
+                    } else if (ma != null) {
+                        err_code = ma.getLastApiErrorCode();
+                    }
+                    if (err_code == 0) {
+                        err_code = MegaErrorMessages.parseCodeFromMessage(ex.getMessage());
+                    }
+                    final int err_code_final = err_code;
+                    final String err_email = (ma != null && ma.getFull_email() != null) ? ma.getFull_email() : email;
+                    if (err_code_final != 0) {
+                        MegaErrorMessages.showPopup(this, err_code_final, err_email,
+                                "while logging in / checking account");
+                    }
                     MiscTools.GUIRun(() -> {
                         account_combobox.setEnabled(true);
                         account_label.setEnabled(true);
                         account_combobox.setSelectedIndex(-1);
                         copy_email_button.setEnabled(true);
                         used_space_label.setForeground(Color.red);
-                        used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+                        if (err_code_final != 0) {
+                            used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota") + ": MEGA " + err_code_final + " (" + MegaErrorMessages.getShortName(err_code_final) + ")");
+                        } else {
+                            used_space_label.setText(LabelTranslatorSingleton.getInstance().translate("ERROR checking account quota!"));
+                        }
                         used_space_label.setEnabled(true);
                         _last_selected_index = account_combobox.getSelectedIndex();
                         dance_button.setEnabled(false);

@@ -732,6 +732,11 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                         Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
 
                         if (Arrays.asList(FATAL_API_ERROR_CODES).contains(ex.getCode())) {
+                            // Friendly popup before we mark the upload fatal --
+                            // user needs to know the account/quota cause. (#751 / D)
+                            MegaErrorMessages.showPopup(getMain_panel().getView(), ex.getCode(),
+                                    _ma.getFull_email() != null ? _ma.getFull_email() : _file_name,
+                                    "while requesting upload URL");
                             stopUploader(ex.getMessage());
                             _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(ex.getCode());
                         }
