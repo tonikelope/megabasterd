@@ -457,8 +457,14 @@ public class FolderLinkDialog extends javax.swing.JDialog {
             int r = -1;
 
             if (ma.existsCachedFolderNodes(folder_id)) {
-                r = JOptionPane.showConfirmDialog(this, I18n.tr("ui.confirm.folder_cache.message"), I18n.tr("ui.confirm.folder_cache.title"), JOptionPane.YES_NO_OPTION);
-
+                // JOptionPane must run on the EDT; calling it from the
+                // THREAD_POOL worker that runs _loadMegaDirTree mixed Swing
+                // state across threads.
+                final int[] rr = {-1};
+                MiscTools.GUIRunAndWait(() -> {
+                    rr[0] = JOptionPane.showConfirmDialog(this, I18n.tr("ui.confirm.folder_cache.message"), I18n.tr("ui.confirm.folder_cache.title"), JOptionPane.YES_NO_OPTION);
+                });
+                r = rr[0];
             }
 
             if (r == 0) {
