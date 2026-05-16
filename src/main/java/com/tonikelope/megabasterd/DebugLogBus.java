@@ -80,25 +80,34 @@ public final class DebugLogBus {
     private static volatile Handler INSTALLED_HANDLER = null;
     private static volatile Timer DRAIN_TIMER = null;
 
+    private static final Object ENQUEUE_LOCK = new Object();
+
     /**
      * Push a pre-formatted log line into the queue. Safe to call from any
      * thread. Drops the oldest entry if the queue is already at capacity --
      * we prefer to lose history than to OOM.
+     *
+     * The poll-then-add critical section is synchronized so concurrent
+     * publishers can't both observe "size below cap" and both add, drifting
+     * the queue past QUEUE_MAX by N (N = number of threads). The lock is
+     * held only for the few ns of the bookkeeping; actual log production
+     * remains lock-free.
      */
     public static void enqueue(String line) {
         if (line == null || line.isEmpty()) {
             return;
         }
-        // Bounded queue: drop oldest before adding.
-        while (PENDING_SIZE.get() >= QUEUE_MAX) {
-            if (PENDING.pollFirst() != null) {
-                PENDING_SIZE.decrementAndGet();
-            } else {
-                break;
+        synchronized (ENQUEUE_LOCK) {
+            while (PENDING_SIZE.get() >= QUEUE_MAX) {
+                if (PENDING.pollFirst() != null) {
+                    PENDING_SIZE.decrementAndGet();
+                } else {
+                    break;
+                }
             }
+            PENDING.add(line);
+            PENDING_SIZE.incrementAndGet();
         }
-        PENDING.add(line);
-        PENDING_SIZE.incrementAndGet();
     }
 
     /**

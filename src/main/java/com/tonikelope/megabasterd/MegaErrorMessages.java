@@ -484,18 +484,26 @@ public final class MegaErrorMessages {
             JButton copy_button = new JButton("Copy to clipboard");
             copy_button.setToolTipText("<html>Copy a markdown-formatted version of this error<br>"
                     + "to the clipboard so you can paste it into a GitHub issue.</html>");
+            // Holder so the revert Timer can be cancelled if the user closes
+            // the dialog before it fires. Without this the Timer keeps a
+            // reference to the now-disposed JButton until the timer thread
+            // fires, leaking the dialog tree until then.
+            final Timer[] revert_holder = new Timer[1];
             copy_button.addActionListener(e -> {
                 try {
                     Toolkit.getDefaultToolkit().getSystemClipboard()
                             .setContents(new StringSelection(plain), null);
                     copy_button.setText("Copied to clipboard");
                     copy_button.setForeground(new Color(0, 128, 0));
-                    // Revert the label so the user can re-copy if they want.
+                    if (revert_holder[0] != null) {
+                        revert_holder[0].stop();
+                    }
                     Timer revert = new Timer(1800, ev -> {
                         copy_button.setText("Copy to clipboard");
                         copy_button.setForeground(null);
                     });
                     revert.setRepeats(false);
+                    revert_holder[0] = revert;
                     revert.start();
                 } catch (Exception ex) {
                     copy_button.setText("Copy failed");
@@ -519,6 +527,18 @@ public final class MegaErrorMessages {
                     e -> dialog.dispose(),
                     KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
                     JComponent.WHEN_IN_FOCUSED_WINDOW);
+
+            // Cancel any pending revert timer when the dialog closes -- the
+            // Timer holds a reference to the now-disposed JButton.
+            dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowClosed(java.awt.event.WindowEvent ev) {
+                    if (revert_holder[0] != null) {
+                        revert_holder[0].stop();
+                        revert_holder[0] = null;
+                    }
+                }
+            });
 
             dialog.pack();
             // Keep the dialog from rendering ridiculously narrow on minimal

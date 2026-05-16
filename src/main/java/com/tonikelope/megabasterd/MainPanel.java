@@ -68,7 +68,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.34";
+    public static final String VERSION = "8.35";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -130,7 +130,7 @@ public final class MainPanel {
      */
     private static volatile String _cached_public_ip = null;
     private static volatile long _cached_public_ip_ts = 0L;
-    private static final Object _public_ip_lock = new Object();
+    private static final java.util.concurrent.locks.ReentrantLock _public_ip_lock = new java.util.concurrent.locks.ReentrantLock();
     private static final long PUBLIC_IP_CACHE_TTL_MS = 30_000L;
 
     /**
@@ -147,22 +147,37 @@ public final class MainPanel {
         if (_cached_public_ip != null && now - _cached_public_ip_ts < PUBLIC_IP_CACHE_TTL_MS) {
             return _cached_public_ip;
         }
-        synchronized (_public_ip_lock) {
-            // Recheck after lock: another thread may have refreshed while
-            // we were waiting.
-            now = System.currentTimeMillis();
-            if (_cached_public_ip != null && now - _cached_public_ip_ts < PUBLIC_IP_CACHE_TTL_MS) {
+        // tryLock instead of synchronized: under heavy 509 backoff multiple
+        // workers will all hit this path nearly simultaneously. The first
+        // one performs the (potentially-slow) HTTPS fetch; the rest must
+        // NOT block waiting on its lock -- they should just return the
+        // previous cached value and move on. Otherwise N workers can pile
+        // up behind a single 20 s fetch and stall the download. (#751)
+        if (_public_ip_lock.tryLock()) {
+            try {
+                now = System.currentTimeMillis();
+                if (_cached_public_ip != null && now - _cached_public_ip_ts < PUBLIC_IP_CACHE_TTL_MS) {
+                    return _cached_public_ip;
+                }
+                String fresh = MiscTools.getMyPublicIP();
+                if (fresh != null) {
+                    _cached_public_ip = fresh;
+                }
+                // Always advance the timestamp -- otherwise consecutive
+                // failed fetches would hammer the IP services on every
+                // backoff slice.
+                _cached_public_ip_ts = System.currentTimeMillis();
                 return _cached_public_ip;
+            } finally {
+                _public_ip_lock.unlock();
             }
-            String fresh = MiscTools.getMyPublicIP();
-            if (fresh != null) {
-                _cached_public_ip = fresh;
-            }
-            // Always advance the timestamp -- otherwise consecutive failed
-            // fetches would hammer the IP services on every backoff slice.
-            _cached_public_ip_ts = System.currentTimeMillis();
-            return _cached_public_ip;
         }
+        // Could not grab the lock: another thread is mid-fetch. Don't wait,
+        // just return whatever we have cached (may be stale or null). The
+        // IP-change detector in ChunkDownloader is conservative and only
+        // breaks the backoff when it sees a CHANGE -- a stale read just
+        // means "no change detected this tick", which is a safe default.
+        return _cached_public_ip;
     }
 
     /**

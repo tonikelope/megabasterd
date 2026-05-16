@@ -1402,8 +1402,13 @@ public class MiscTools {
         "https://checkip.amazonaws.com/"
     };
 
-    private static final int PUBLIC_IP_CONNECT_TIMEOUT_MS = 5_000;
-    private static final int PUBLIC_IP_READ_TIMEOUT_MS = 5_000;
+    // Tight timeouts: under worst case (all 5 sources hang to read-timeout)
+    // total wall time = 5 sources * (connect + read) = 5 * 4s = 20s. The
+    // MainPanel.getCachedPublicIp lock is held during this call so we want
+    // it bounded enough that contended workers don't pile up. Five sources
+    // is enough redundancy that a 2s read window covers any responsive endpoint.
+    private static final int PUBLIC_IP_CONNECT_TIMEOUT_MS = 2_000;
+    private static final int PUBLIC_IP_READ_TIMEOUT_MS = 2_000;
 
     /**
      * Bounded-validate the response body of one of the IPv4 services. They
