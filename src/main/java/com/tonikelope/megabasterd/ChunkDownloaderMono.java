@@ -13,13 +13,13 @@ import static com.tonikelope.megabasterd.CryptTools.forwardMEGALinkKeyIV;
 import static com.tonikelope.megabasterd.CryptTools.genDecrypter;
 import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
 import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKeyIV;
-import static com.tonikelope.megabasterd.MainPanel.*;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
@@ -35,16 +35,34 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     public static final int READ_TIMEOUT_RETRY = 3;
 
     /**
-     * Safety cap for the in-memory chunk buffer. mono-slot chunks are
-     * <= 1 MiB by design (calculateChunkSize uses size_multi=1) so any
-     * value above a few MiB is essentially unreachable. We keep the cap
-     * generous to leave headroom for future tweaks while still refusing
-     * pathological sizes that would OOM the JVM.
+     * Safety cap for the in-memory chunk buffer. mono-slot chunks are <= 1 MiB
+     * by design (calculateChunkSize uses size_multi=1) so any value above a few
+     * MiB is essentially unreachable. We keep the cap generous to leave
+     * headroom for future tweaks while still refusing pathological sizes that
+     * would OOM the JVM.
      */
     private static final int MAX_CHUNK_BUFFER_BYTES = 8 * 1024 * 1024;
 
     public ChunkDownloaderMono(Download download) {
         super(1, download);
+    }
+
+    /**
+     * Defensive port parse for smart-proxy entries; -1 means the entry is
+     * malformed and should be banned. See ChunkDownloader.run() for the same
+     * guard on the multi-slot path. (#751 / C3)
+     */
+    private static int parseProxyPort(String proxy) {
+        String[] parts = proxy.split(":");
+        if (parts.length != 2) {
+            return -1;
+        }
+        try {
+            int p = Integer.parseInt(parts[1]);
+            return (p >= 1 && p <= 65535) ? p : -1;
+        } catch (NumberFormatException ex) {
+            return -1;
+        }
     }
 
     @Override
@@ -64,6 +82,16 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
 
             CipherInputStream cis = null;
+
+            // SmartProxy support for mono-slot (streaming) downloads. Previously
+            // ChunkDownloaderMono had no smart_proxy fallback at all, so a 509
+            // on a stream had no recovery path other than the (now also added)
+            // VPN-aware exp-backoff. With this in place a stream can rotate
+            // through the same proxy pool the multi-slot path uses. (#751 / C3)
+            SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
+            ArrayList<String> excluded_proxy_list = new ArrayList<>();
+            String current_smart_proxy = null;
+            boolean smart_proxy_socks = false;
 
             while (!getDownload().getMain_panel().isExit() && !isExit() && !getDownload().isStopped()) {
 
@@ -94,7 +122,65 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         URL url = new URL(worker_url + "/" + chunk_offset);
 
-                        if (MainPanel.isUse_proxy()) {
+                        boolean smart_proxy_path = MainPanel.isUse_smart_proxy()
+                                && proxy_manager != null
+                                && (proxy_manager.isForce_smart_proxy() || current_smart_proxy != null || http_error == 509)
+                                && !MainPanel.isUse_proxy();
+
+                        if (smart_proxy_path) {
+
+                            // Refresh / rotate the current proxy on chunk_error,
+                            // pick one for the first time when current is null.
+                            // Mirror the multi-slot policy: blockProxy on
+                            // non-429 errors, soft-exclude on 429 / timeout. (#751 / C3)
+                            if (current_smart_proxy != null && chunk_error) {
+
+                                if (!timeout && http_error != 429) {
+                                    proxy_manager.blockProxy(current_smart_proxy, timeout ? "TIMEOUT!" : "HTTP " + String.valueOf(http_error));
+                                } else {
+                                    excluded_proxy_list.add(current_smart_proxy);
+                                }
+
+                                String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                                if (smart_proxy != null) {
+                                    current_smart_proxy = smart_proxy[0];
+                                    smart_proxy_socks = smart_proxy[1].equals("socks");
+                                } else {
+                                    LOG.log(Level.WARNING, "{0} Mono Worker SmartProxy exhausted -- falling back to direct", Thread.currentThread().getName());
+                                    current_smart_proxy = null;
+                                }
+
+                            } else if (current_smart_proxy == null) {
+
+                                String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
+                                if (smart_proxy != null) {
+                                    current_smart_proxy = smart_proxy[0];
+                                    smart_proxy_socks = smart_proxy[1].equals("socks");
+                                } else {
+                                    LOG.log(Level.WARNING, "{0} Mono Worker SmartProxy: no proxies available -- falling back to direct", Thread.currentThread().getName());
+                                    current_smart_proxy = null;
+                                }
+                            }
+
+                            if (current_smart_proxy != null) {
+                                int proxy_port = parseProxyPort(current_smart_proxy);
+                                if (proxy_port < 0) {
+                                    LOG.log(Level.WARNING, "{0} Mono Worker malformed smart proxy entry {1} -- banning + direct fallback",
+                                            new Object[]{Thread.currentThread().getName(), current_smart_proxy});
+                                    proxy_manager.blockProxy(current_smart_proxy, "Malformed entry");
+                                    excluded_proxy_list.add(current_smart_proxy);
+                                    current_smart_proxy = null;
+                                    con = (HttpURLConnection) url.openConnection();
+                                } else {
+                                    String[] proxy_info = current_smart_proxy.split(":");
+                                    Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], proxy_port));
+                                    con = (HttpURLConnection) url.openConnection(proxy);
+                                }
+                            } else {
+                                con = (HttpURLConnection) url.openConnection();
+                            }
+
+                        } else if (MainPanel.isUse_proxy()) {
 
                             con = (HttpURLConnection) url.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
@@ -105,6 +191,14 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                         } else {
 
                             con = (HttpURLConnection) url.openConnection();
+                        }
+
+                        if (current_smart_proxy != null && proxy_manager != null) {
+                            con.setConnectTimeout(proxy_manager.getProxy_timeout());
+                            con.setReadTimeout(proxy_manager.getProxy_timeout() * 2);
+                        } else {
+                            con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
+                            con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
                         }
 
                         con.setUseCaches(false);
@@ -202,6 +296,16 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                                 conta_error = 0;
 
+                                // Clear 509-burst state so a future 509 starts a
+                                // fresh IP-change detection window. (#751)
+                                _ip_at_first_509 = null;
+                                _last_http_error = 0;
+
+                                // Successful chunk: also clear the per-burst
+                                // proxy exclusion list, mirroring the multi-slot
+                                // path's _excluded_proxy_list.clear().
+                                excluded_proxy_list.clear();
+
                             }
                         }
 
@@ -230,14 +334,14 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
                         if (!isExit() && !getDownload().isStopped() && !timeout && http_error != 403) {
 
-                            setError_wait(true);
-
-                            try {
-                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++conta_error) * 1000);
-                            } catch (InterruptedException exc) {
+                            // Shared exp-backoff helper from ChunkDownloader: 1 s
+                            // slices, IP-change detection, slot-status countdown.
+                            // (#751 / C3 -- mono now benefits from same VPN-aware
+                            // recovery as multi-slot.)
+                            boolean ip_changed = sleepWithIpAwareBackoff(++conta_error, http_error);
+                            if (ip_changed) {
+                                conta_error = 0;
                             }
-
-                            setError_wait(false);
                         }
 
                         if (con != null) {

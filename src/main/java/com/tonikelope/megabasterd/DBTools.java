@@ -196,10 +196,10 @@ public class DBTools {
     /**
      * Variant that returns the filename actually persisted to DB. When the
      * UNIQUE(path, filename) constraint trips (two MEGA files with the same
-     * display name to the same dir), retries up to 50 times appending a
-     * random suffix. Caller MUST use the returned name when computing the
-     * on-disk path -- otherwise the DB row and the file written to disk
-     * disagree and two concurrent downloads clobber the same .mctemp. #719.
+     * display name to the same dir), retries up to 50 times appending a random
+     * suffix. Caller MUST use the returned name when computing the on-disk path
+     * -- otherwise the DB row and the file written to disk disagree and two
+     * concurrent downloads clobber the same .mctemp. #719.
      */
     public static synchronized String insertDownloadReturningName(String url, String email, String path, String filename, String filekey, Long size, String filepass, String filenoexpire, String custom_chunks_dir) throws SQLException {
 

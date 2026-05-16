@@ -27,20 +27,19 @@ import java.util.Map;
  * Single source of truth for MEGA / ELC account encryption + persistence.
  *
  * Centralises the master-pass / AES-CBC-at-rest dance that was previously
- * duplicated in 6+ places across SettingsDialog (load on dialog open,
- * decrypt on unlock, encrypt on save, encrypt on add-from-import, encrypt
- * on update, ...). Every duplication was a chance for the
- * "if master_pass_hash != null { encrypt } else { plaintext }" pattern
- * to drift; bugs #645, #699, #719 all touched this surface.
+ * duplicated in 6+ places across SettingsDialog (load on dialog open, decrypt
+ * on unlock, encrypt on save, encrypt on add-from-import, encrypt on update,
+ * ...). Every duplication was a chance for the "if master_pass_hash != null {
+ * encrypt } else { plaintext }" pattern to drift; bugs #645, #699, #719 all
+ * touched this surface.
  *
  * Callers never deal with the encrypt/decrypt step directly: they pass
- * plaintext to persist*() and receive plaintext from list*() / get*().
- * The store handles the rest based on MainPanel.getMaster_pass_hash() /
+ * plaintext to persist*() and receive plaintext from list*() / get*(). The
+ * store handles the rest based on MainPanel.getMaster_pass_hash() /
  * MainPanel.getMaster_pass().
  *
- * Thread-safety: read methods are safe to call concurrently with each
- * other; write methods serialise through the underlying DBTools
- * synchronized statics.
+ * Thread-safety: read methods are safe to call concurrently with each other;
+ * write methods serialise through the underlying DBTools synchronized statics.
  */
 public final class AccountStore {
 
@@ -50,7 +49,9 @@ public final class AccountStore {
         this._main_panel = main_panel;
     }
 
-    /** True if a master pass has been configured (DB has master_pass_hash). */
+    /**
+     * True if a master pass has been configured (DB has master_pass_hash).
+     */
     public boolean isEncrypted() {
         return _main_panel.getMaster_pass_hash() != null;
     }
@@ -64,9 +65,9 @@ public final class AccountStore {
     }
 
     // ===================== MEGA accounts =====================
-
     /**
      * Returns plaintext password for one MEGA account, or null if missing.
+     *
      * @throws IllegalStateException if the store is locked
      */
     public String getMegaPassword(String email) throws Exception {
@@ -85,6 +86,7 @@ public final class AccountStore {
     /**
      * Returns an email -> plaintext-password map for every persisted MEGA
      * account. Insertion order matches MainPanel.getMega_accounts().
+     *
      * @throws IllegalStateException if the store is locked
      */
     public LinkedHashMap<String, String> listMegaPlaintext() throws Exception {
@@ -112,9 +114,9 @@ public final class AccountStore {
     }
 
     // ===================== ELC accounts =====================
-
     /**
      * Returns plaintext {user, apikey} for one ELC host, or null if missing.
+     *
      * @throws IllegalStateException if the store is locked
      */
     public String[] getElcCredentials(String host) throws Exception {
@@ -137,6 +139,7 @@ public final class AccountStore {
     /**
      * Returns host -> {plaintext-user, plaintext-apikey} for every persisted
      * ELC account.
+     *
      * @throws IllegalStateException if the store is locked
      */
     public LinkedHashMap<String, String[]> listElcPlaintext() throws Exception {
@@ -178,40 +181,37 @@ public final class AccountStore {
     }
 
     // ===================== MEGA login persistence =====================
-
     /**
-     * Called after a successful {@link MegaAPI#login}. Handles every
-     * follow-up step that used to be inlined in SettingsDialog's save loop:
+     * Called after a successful {@link MegaAPI#login}. Handles every follow-up
+     * step that used to be inlined in SettingsDialog's save loop:
      *
      * <ul>
-     *   <li>serialise the {@code MegaAPI} to a session blob;</li>
-     *   <li>encrypt the blob with the configured master pass (if any) and
-     *       insert the {@code mega_sessions} row;</li>
-     *   <li>build the {@code password / password_aes / user_hash} values in
-     *       the historical on-disk storage format and insert the
-     *       {@code mega_accounts} row;</li>
-     *   <li>update the in-memory caches (
-     *       {@link MainPanel#getMega_active_accounts()} and
-     *       {@link MainPanel#getMega_accounts()}) so subsequent reads see
-     *       the new state.</li>
+     * <li>serialise the {@code MegaAPI} to a session blob;</li>
+     * <li>encrypt the blob with the configured master pass (if any) and insert
+     * the {@code mega_sessions} row;</li>
+     * <li>build the {@code password / password_aes / user_hash} values in the
+     * historical on-disk storage format and insert the {@code mega_accounts}
+     * row;</li>
+     * <li>update the in-memory caches (
+     * {@link MainPanel#getMega_active_accounts()} and
+     * {@link MainPanel#getMega_accounts()}) so subsequent reads see the new
+     * state.</li>
      * </ul>
      *
      * <b>Historical storage quirk preserved:</b> when no master pass is
-     * configured, {@code password_aes} is stored as the regular-base64
-     * encoding of the raw int[]-to-byte[] conversion, and {@code user_hash}
-     * is stored as the URL-safe base64 string MegaAPI returned. When a
-     * master pass is configured, both fields are stored as the regular-
-     * base64 encoding of their AES-CBC-at-rest ciphertext. The
-     * migration logic in {@link #migrateMasterPass} relies on this
-     * asymmetry.
+     * configured, {@code password_aes} is stored as the regular-base64 encoding
+     * of the raw int[]-to-byte[] conversion, and {@code user_hash} is stored as
+     * the URL-safe base64 string MegaAPI returned. When a master pass is
+     * configured, both fields are stored as the regular- base64 encoding of
+     * their AES-CBC-at-rest ciphertext. The migration logic in
+     * {@link #migrateMasterPass} relies on this asymmetry.
      *
      * @param email account email (assumed already validated by caller)
-     * @param plaintextPassword raw user-entered password; the store
-     *     encrypts at-rest as needed and never expects an already-encrypted
-     *     value here
-     * @param loggedInMa a {@code MegaAPI} instance that has just returned
-     *     from a successful {@code login(...)}; its {@code getPassword_aes()}
-     *     and {@code getUser_hash()} accessors must be ready to read
+     * @param plaintextPassword raw user-entered password; the store encrypts
+     * at-rest as needed and never expects an already-encrypted value here
+     * @param loggedInMa a {@code MegaAPI} instance that has just returned from
+     * a successful {@code login(...)}; its {@code getPassword_aes()} and
+     * {@code getUser_hash()} accessors must be ready to read
      */
     public void persistMegaLogin(String email, String plaintextPassword, MegaAPI loggedInMa) throws Exception {
 
@@ -262,31 +262,33 @@ public final class AccountStore {
     }
 
     // ===================== Master-pass migration =====================
-
     /**
      * Re-encrypts every persisted MEGA + ELC account when the master pass
      * changes (enabling, disabling, or rotating).
      *
-     * <p>Caller protocol:
+     * <p>
+     * Caller protocol:
      * <ol>
-     *   <li>Update {@link MainPanel#setMaster_pass_hash} and
-     *       {@link MainPanel#setMaster_pass} to the NEW values (or to
-     *       {@code null/null} when disabling encryption).</li>
-     *   <li>Truncate {@code mega_sessions} (sessions are not re-encrypted;
-     *       they get refetched on next use).</li>
-     *   <li>Call this method, passing the OLD master pass bytes (may be
-     *       {@code null} if encryption was previously off) and the OLD
-     *       hash (used only as a "was encryption on?" flag).</li>
+     * <li>Update {@link MainPanel#setMaster_pass_hash} and
+     * {@link MainPanel#setMaster_pass} to the NEW values (or to
+     * {@code null/null} when disabling encryption).</li>
+     * <li>Truncate {@code mega_sessions} (sessions are not re-encrypted; they
+     * get refetched on next use).</li>
+     * <li>Call this method, passing the OLD master pass bytes (may be
+     * {@code null} if encryption was previously off) and the OLD hash (used
+     * only as a "was encryption on?" flag).</li>
      * </ol>
      *
-     * <p>For each account, the stored fields are decrypted with the old
-     * master pass (or taken verbatim when there was no old master pass)
-     * and then re-encrypted with the new master pass (or stored verbatim
-     * when disabling encryption). The in-memory caches are updated so
-     * subsequent reads see the migrated values.
+     * <p>
+     * For each account, the stored fields are decrypted with the old master
+     * pass (or taken verbatim when there was no old master pass) and then
+     * re-encrypted with the new master pass (or stored verbatim when disabling
+     * encryption). The in-memory caches are updated so subsequent reads see the
+     * migrated values.
      *
-     * <p>The {@code password_aes} / {@code user_hash} storage-format
-     * quirks documented on {@link #persistMegaLogin} are preserved.
+     * <p>
+     * The {@code password_aes} / {@code user_hash} storage-format quirks
+     * documented on {@link #persistMegaLogin} are preserved.
      */
     public void migrateMasterPass(byte[] oldMasterPass, String oldMasterPassHash) throws Exception {
 
@@ -375,10 +377,10 @@ public final class AccountStore {
     }
 
     // ===================== Export =====================
-
     /**
-     * Returns a list of EMAIL#PASSWORD lines matching the import format,
-     * one per persisted MEGA account. Plaintext.
+     * Returns a list of EMAIL#PASSWORD lines matching the import format, one
+     * per persisted MEGA account. Plaintext.
+     *
      * @throws IllegalStateException if the store is locked
      */
     public List<String> exportMegaLines() throws Exception {
@@ -396,8 +398,9 @@ public final class AccountStore {
     }
 
     /**
-     * Returns a list of HOST#USER#APIKEY lines, one per persisted ELC
-     * account. Plaintext.
+     * Returns a list of HOST#USER#APIKEY lines, one per persisted ELC account.
+     * Plaintext.
+     *
      * @throws IllegalStateException if the store is locked
      */
     public List<String> exportElcLines() throws Exception {
@@ -411,7 +414,6 @@ public final class AccountStore {
     }
 
     // ===================== Internal: encryption =====================
-
     /**
      * Encrypts to base64-of-AES-at-rest if a master pass is configured,
      * otherwise passes the plaintext through unchanged. The master-pass-hash
@@ -428,8 +430,8 @@ public final class AccountStore {
     }
 
     /**
-     * Inverse of encryptIfNeeded. Treats a stored value as ciphertext only
-     * when a master pass is configured; otherwise returns it untouched.
+     * Inverse of encryptIfNeeded. Treats a stored value as ciphertext only when
+     * a master pass is configured; otherwise returns it untouched.
      */
     private String decryptIfNeeded(String stored) throws Exception {
         if (stored == null || !isEncrypted()) {

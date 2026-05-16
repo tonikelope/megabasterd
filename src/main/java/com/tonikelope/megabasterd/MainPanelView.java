@@ -23,7 +23,6 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -79,6 +78,15 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public JMenuItem getMerge_file_menu() {
         return merge_file_menu;
+    }
+
+    /**
+     * Exposes the Edit menu so MainPanel can append items programmatically
+     * without touching the NetBeans-generated form (e.g. the
+     * QuotaRecoverySettingsDialog launcher added in #751 / C1).
+     */
+    public javax.swing.JMenu getEdit_menu() {
+        return edit_menu;
     }
 
     public JMenuItem getSplit_file_menu() {
@@ -255,6 +263,25 @@ public final class MainPanelView extends javax.swing.JFrame {
                         String root_name = dir_name != null ? dir_name : dialog.getFiles().get(0).getName() + "_" + genID(10);
 
                         HashMap<String, Object> res = ma.createDir(root_name, ma.getRoot_id(), parent_key, i32a2bin(ma.getMaster_key()));
+
+                        if (res == null) {
+                            // createDir already logged the cause (wrapped MEGA
+                            // error or unsupported response shape) to the
+                            // DEBUG LOG tab. Only escalate to a popup if MEGA
+                            // returned a FATAL error code we recognise --
+                            // otherwise the popup would just say "EFAILED"
+                            // which is meaningless. Avoid the NPE on the next
+                            // line either way.
+                            int code = ma.getLastApiErrorCode();
+                            if (code != 0) {
+                                MegaErrorMessages.showPopup(MainPanelView.this, code,
+                                        ma.getFull_email() != null ? ma.getFull_email() : mega_account,
+                                        "while creating the upload folder on MEGA",
+                                        MegaErrorMessages.Source.ACCOUNT);
+                            }
+                            LOG.log(Level.WARNING, "{0} Upload aborted -- createDir returned null (see DEBUG LOG tab for raw MEGA response)", Thread.currentThread().getName());
+                            return;
+                        }
 
                         String parent_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
 

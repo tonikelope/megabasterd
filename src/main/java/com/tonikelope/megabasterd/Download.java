@@ -82,6 +82,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private volatile String _file_pass;
     private volatile String _file_noexpire;
     private volatile boolean _frozen;
+    /**
+     * Wall-clock millis of the most recent HTTP 509 seen by ANY worker of this
+     * download. Hoisted out of per-worker state so a single worker hitting 509
+     * flips SmartProxy mode for all other workers of the same download (the
+     * previous per-worker design meant 7 of 8 workers would keep
+     * direct-hammering MEGA after worker A had already switched to a proxy). -1
+     * == no 509 seen this download. (#751 / C4)
+     */
+    private volatile long _509_burst_timestamp = -1;
     private final boolean _use_slots;
     private volatile int _slots;
     private final boolean _restart;
@@ -718,28 +727,94 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         THREAD_POOL.execute(() -> {
 
-                            //PROGRESS WATCHDOG If a download remains more than PROGRESS_WATCHDOG_TIMEOUT seconds without receiving data, we force fatal error in order to restart it.
+                            // PROGRESS WATCHDOG. Slices its wait into 10 s chunks
+                            // so it can pick the right stall-timeout based on
+                            // live worker state: when at least one chunk worker
+                            // is in 509 backoff, use the shorter
+                            // QUOTA_STALL_TIMEOUT_DEFAULT (default 180 s) instead
+                            // of the generic 600 s. Quota stalls almost always
+                            // clear within a minute once the user activates a
+                            // VPN; making them wait 10 min for the auto-retry
+                            // path is a bad default. (#751)
                             LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG HELLO!", Thread.currentThread().getName());
 
-                            long last_progress, progress = getProgress();
+                            final long generic_timeout_ms = PROGRESS_WATCHDOG_TIMEOUT * 1000L;
+                            String quota_stall_setting = selectSettingValue("quota_stall_timeout");
+                            int quota_stall_secs = QUOTA_STALL_TIMEOUT_DEFAULT;
+                            if (quota_stall_setting != null) {
+                                try {
+                                    int v = Integer.parseInt(quota_stall_setting);
+                                    if (v >= 30 && v <= 3600) {
+                                        quota_stall_secs = v;
+                                    }
+                                } catch (NumberFormatException ignore) {
+                                }
+                            }
+                            final long quota_timeout_ms = quota_stall_secs * 1000L;
 
-                            do {
-                                last_progress = progress;
+                            long last_progress = getProgress();
+                            long stall_started_ms = System.currentTimeMillis();
+                            String triggered_reason = null;
+
+                            while (!isExit() && !_thread_pool.isShutdown() && getProgress() < getFile_size()) {
 
                                 synchronized (_progress_watchdog_lock) {
                                     try {
-                                        _progress_watchdog_lock.wait(PROGRESS_WATCHDOG_TIMEOUT * 1000);
-                                        progress = getProgress();
+                                        _progress_watchdog_lock.wait(10_000L);
                                     } catch (InterruptedException ex) {
-                                        progress = -1;
-                                        Logger.getLogger(Download.class.getName()).log(Level.SEVERE, null, ex);
+                                        Thread.currentThread().interrupt();
+                                        Logger.getLogger(Download.class.getName()).log(Level.FINE, "watchdog wait interrupted");
+                                        break;
                                     }
                                 }
 
-                            } while (!isExit() && !_thread_pool.isShutdown() && progress < getFile_size() && (isPaused() || progress > last_progress));
+                                if (isPaused()) {
+                                    // Don't accumulate stall time while paused.
+                                    stall_started_ms = System.currentTimeMillis();
+                                    last_progress = getProgress();
+                                    continue;
+                                }
 
-                            if (!isExit() && !_thread_pool.isShutdown() && _status_error == null && progress < getFile_size() && progress <= last_progress) {
-                                stopDownloader("PROGRESS WATCHDOG TIMEOUT!");
+                                long current_progress = getProgress();
+                                if (current_progress > last_progress) {
+                                    stall_started_ms = System.currentTimeMillis();
+                                    last_progress = current_progress;
+                                    continue;
+                                }
+
+                                // No progress this slice. Pick the timeout.
+                                boolean any_509 = false;
+                                synchronized (_workers_lock) {
+                                    for (ChunkDownloader cd : _chunkworkers) {
+                                        if (cd.isIn_509_backoff()) {
+                                            any_509 = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                long timeout_ms = any_509 ? quota_timeout_ms : generic_timeout_ms;
+                                long stalled_ms = System.currentTimeMillis() - stall_started_ms;
+
+                                if (stalled_ms >= timeout_ms) {
+                                    if (any_509) {
+                                        triggered_reason = "QUOTA STALL TIMEOUT (no progress for " + (stalled_ms / 1000) + "s on 509)";
+                                    } else {
+                                        triggered_reason = "PROGRESS WATCHDOG TIMEOUT!";
+                                    }
+                                    break;
+                                }
+                            }
+
+                            if (triggered_reason != null && !isExit() && !_thread_pool.isShutdown() && _status_error == null && getProgress() < getFile_size()) {
+                                // Flag for auto-restart so the download re-arms itself a few seconds
+                                // after the watchdog fires. The most common cause of a stale-progress
+                                // timeout is MEGA HTTP 509 (bandwidth quota) -- the user often clears
+                                // it by switching IP (VPN). Without auto-retry the download stays in
+                                // FATAL ERROR until the user manually clicks Restart on every row
+                                // (or restarts the whole app to re-provision from the queue). (#751)
+                                _auto_retry_on_error = true;
+                                stopDownloader(triggered_reason);
                             }
 
                             LOG.log(Level.INFO, "{0} PROGRESS WATCHDOG BYE BYE!", Thread.currentThread().getName());
@@ -1592,6 +1667,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
 
+                    // Surface a friendly explanation popup. Dedup'd so two
+                    // downloads hitting the same -16 / -8 don't pop twice.
+                    // Source.LINK so -9 / -16 etc. get the link-context copy
+                    // ("file deleted / blocked") instead of the
+                    // account-context one ("account doesn't exist"). (#751 / D)
+                    MegaErrorMessages.showPopup(getMain_panel().getView(), error_code, link,
+                            "while fetching MEGA file metadata",
+                            MegaErrorMessages.Source.LINK);
+
                     stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 
                 } else {
@@ -1680,6 +1764,15 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                 if (Arrays.asList(FATAL_API_ERROR_CODES).contains(error_code)) {
 
                     _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(error_code);
+
+                    // Surface a friendly explanation popup. Dedup'd so two
+                    // downloads hitting the same -16 / -8 don't pop twice.
+                    // Source.LINK so -9 / -16 etc. get the link-context copy
+                    // ("file deleted / blocked") instead of the
+                    // account-context one ("account doesn't exist"). (#751 / D)
+                    MegaErrorMessages.showPopup(getMain_panel().getView(), error_code, link,
+                            "while fetching MEGA file metadata",
+                            MegaErrorMessages.Source.LINK);
 
                     stopDownloader(error_code == -16 ? _status_error : ex.getMessage() + " " + truncateText(link, 80));
 
@@ -1843,6 +1936,24 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     @Override
     public boolean isFrozen() {
         return this._frozen;
+    }
+
+    /**
+     * Shared 509-burst timestamp for all workers of this download. See the
+     * field comment above. Reads + writes are unsynchronized volatile -- a race
+     * that lets two workers each set the timestamp to slightly different "now"
+     * values is fine (we only care that SOMEONE saw 509 recently). (#751 / C4)
+     */
+    public long get509BurstTimestamp() {
+        return _509_burst_timestamp;
+    }
+
+    public void set509BurstTimestamp(long ts) {
+        _509_burst_timestamp = ts;
+    }
+
+    public void reset509BurstTimestamp() {
+        _509_burst_timestamp = -1;
     }
 
     @Override

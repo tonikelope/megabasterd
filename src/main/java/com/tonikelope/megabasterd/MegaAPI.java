@@ -107,6 +107,24 @@ public class MegaAPI implements Serializable {
 
     private int _account_version;
 
+    /**
+     * Most recent MEGA API error code observed by RAW_REQUEST for this MegaAPI
+     * instance. Lets callers that swallowed the exception (e.g.
+     * {@link #getQuota()} returns null on failure) still surface a descriptive
+     * popup via {@link MegaErrorMessages#showPopup}. 0 means "no error since
+     * reset". Transient codes ({@link #MEGA_ERROR_NO_EXCEPTION_CODES}) are also
+     * stored so diagnostics show what just happened. (#751 / D)
+     */
+    private transient volatile int _last_api_error_code = 0;
+
+    public int getLastApiErrorCode() {
+        return _last_api_error_code;
+    }
+
+    public void resetLastApiErrorCode() {
+        _last_api_error_code = 0;
+    }
+
     private String _salt;
 
     public MegaAPI() {
@@ -133,15 +151,24 @@ public class MegaAPI implements Serializable {
     }
 
     /**
-     * Standard query parameters that MEGA's API expects on every /cs request:
-     *   &v=3       protocol version (the MEGA SDK appends this)
-     *   &ak=...    application key (user-configured if set, else MEGAcmd's
-     *              public key as fallback so we look like a known client
-     *              rather than an anonymous reverse-engineered bot)
-     *   &lang=es   user language (optional, included if set)
+     * Standard query parameters that MEGA's API expects on every /cs request.
+     * Was {@code &v=3 &ak=... &lang=...}; the {@code &v=3} part has been
+     * DROPPED. With v=3 MEGA's `p` (put/createDir) endpoint returns the
+     * new-protocol async shape {@code [<request_completion_token>, []]}
+     * instead of the legacy synchronous {@code [{node_object}]} that
+     * MegaBasterd's createDir was written for. The async shape expects the
+     * caller to subsequently poll the {@code sc} action-packet channel for
+     * the actual node data -- MegaBasterd has no plumbing for that, so the
+     * upload silently produced an "Upload aborted" with an opaque Jackson
+     * error in the DEBUG LOG (raw body
+     * {@code [["!Q|am'a", []]]}). The commit that added v=3 (2ec9de2 in
+     * master) claimed no behavioural change; in practice it broke uploads
+     * for any account that goes through the createDir path. Keeping
+     * &ak= (which fixes MEGA's 402 throttling of unknown clients) and
+     * &lang= (which is optional).
      */
     private static String _apiStdParams() {
-        StringBuilder sb = new StringBuilder("&v=3");
+        StringBuilder sb = new StringBuilder();
         String ak = (API_KEY != null && !API_KEY.isEmpty()) ? API_KEY : DEFAULT_APP_KEY;
         sb.append("&ak=").append(ak);
         String lang = MainPanel.getLanguage();
@@ -152,15 +179,14 @@ public class MegaAPI implements Serializable {
     }
 
     /**
-     * Context tag for log lines. Includes the thread name and the account
-     * email if known (login() sets _full_email; before login this is null).
-     * Used so that bug reports with multiple accounts can be diagnosed.
+     * Context tag for log lines. Includes the thread name and the account email
+     * if known (login() sets _full_email; before login this is null). Used so
+     * that bug reports with multiple accounts can be diagnosed.
      */
     private String _ctx() {
         String who = _full_email != null ? _full_email : (_email != null ? _email : "(pre-login)");
         return Thread.currentThread().getName() + " account=" + who;
     }
-
 
     private static String _redactUrl(String url) {
         if (url == null) {
@@ -296,9 +322,9 @@ public class MegaAPI implements Serializable {
 
     /**
      * Build a redacted summary of a login response so we can diagnose why a
-     * login failed without leaking the encrypted key material itself.
-     * Reports which keys are present and their lengths. Used only on the
-     * error path of _realLogin().
+     * login failed without leaking the encrypted key material itself. Reports
+     * which keys are present and their lengths. Used only on the error path of
+     * _realLogin().
      */
     private static String _describeLoginResponse(HashMap response) {
         if (response == null) {
@@ -668,6 +694,13 @@ public class MegaAPI implements Serializable {
                         if (response.length() > 0) {
 
                             mega_error = checkMEGAError(response);
+
+                            if (mega_error != 0) {
+                                // Stash for callers that swallow the exception
+                                // (e.g. getQuota returns null on failure) so a
+                                // UI hook can pop a friendly description. (#751 / D)
+                                _last_api_error_code = mega_error;
+                            }
 
                             if (mega_error != 0 && !Arrays.asList(MEGA_ERROR_NO_EXCEPTION_CODES).contains(mega_error)) {
 
@@ -1203,16 +1236,85 @@ public class MegaAPI implements Serializable {
 
             String res = RAW_REQUEST(request, url_api);
 
+            // Handle the per-target wrapped error shape `[[-N]]` that MEGA can
+            // return for "p" requests (e.g. parent node was deleted between
+            // login and createDir). checkMEGAError in RAW_REQUEST only matches
+            // top-level `-N` / `[-N]`, so a `[[-9]]` slipped through to Jackson
+            // and exploded with a MismatchedInputException + visible stack
+            // trace, surfacing as a confusing "uploads fail" symptom.
+            int wrapped = _checkWrappedMEGAError(res);
+            if (wrapped != 0) {
+                _last_api_error_code = wrapped;
+                LOG.log(Level.WARNING, "{0} createDir: MEGA returned wrapped error {1}",
+                        new Object[]{_ctx(), wrapped});
+                return null;
+            }
+
             ObjectMapper objectMapper = new ObjectMapper();
 
-            res_map = objectMapper.readValue(res, HashMap[].class);
+            try {
+                res_map = objectMapper.readValue(res, HashMap[].class);
+            } catch (com.fasterxml.jackson.databind.exc.MismatchedInputException jex) {
+                // MEGA returned something that doesn't fit `[{...}]`. Common
+                // case: the per-target wrapped shape `[[{...}]]` (Jackson 2.18
+                // refuses to coerce that into HashMap[], where 2.15 used to
+                // muddle through with a partial result). Try unwrapping one
+                // level via JsonNode before giving up.
+                LOG.log(Level.WARNING, "{0} createDir: HashMap[] parse rejected, attempting one-level unwrap. Raw body (truncated): {1}",
+                        new Object[]{_ctx(), _truncateForLog(res, 500)});
+                try {
+                    com.fasterxml.jackson.databind.JsonNode root = objectMapper.readTree(res);
+                    if (root.isArray() && root.size() > 0 && root.get(0).isArray()) {
+                        com.fasterxml.jackson.databind.JsonNode inner = root.get(0);
+                        res_map = objectMapper.treeToValue(inner, HashMap[].class);
+                        LOG.log(Level.INFO, "{0} createDir: unwrapped one extra MEGA array layer successfully", _ctx());
+                    } else {
+                        LOG.log(Level.SEVERE, "{0} createDir: unsupported response shape; raw body (truncated): {1}",
+                                new Object[]{_ctx(), _truncateForLog(res, 500)});
+                    }
+                } catch (Exception ex2) {
+                    LOG.log(Level.SEVERE, "{0} createDir: unwrap attempt also failed: {1}; raw body (truncated): {2}",
+                            new Object[]{_ctx(), ex2.getMessage(), _truncateForLog(res, 500)});
+                }
+            }
 
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, _ctx(), ex);
         }
 
-        return res_map != null ? res_map[0] : null;
+        return res_map != null && res_map.length > 0 ? res_map[0] : null;
 
+    }
+
+    private static String _truncateForLog(String s, int max) {
+        if (s == null) {
+            return "(null)";
+        }
+        if (s.length() <= max) {
+            return s;
+        }
+        return s.substring(0, max) + "...(" + (s.length() - max) + " more chars)";
+    }
+
+    /**
+     * Returns N (negative) if the response is a doubly-wrapped per-target
+     * error like {@code [[-9]]}, else 0. Centralised so other "p"-style
+     * callers (createDirInsideAnotherSharedDir, finishUploadFile, etc.) can
+     * apply the same guard without duplicating the regex. (#751 follow-up)
+     */
+    static int _checkWrappedMEGAError(String data) {
+        if (data == null) {
+            return 0;
+        }
+        String m = findFirstRegex("^\\[\\s*\\[\\s*(\\-[0-9]+)\\s*\\]\\s*\\]$", data, 1);
+        if (m == null) {
+            return 0;
+        }
+        try {
+            return Integer.parseInt(m);
+        } catch (NumberFormatException ex) {
+            return 0;
+        }
     }
 
     public HashMap<String, Object> createDirInsideAnotherSharedDir(String name, String parent_node, byte[] node_key, byte[] master_key, String root_node, byte[] share_key) {

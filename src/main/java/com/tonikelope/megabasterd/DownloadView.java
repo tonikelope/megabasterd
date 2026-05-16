@@ -638,14 +638,65 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
         synchronized (_download.getWorkers_lock()) {
 
             int conta_error = 0;
+            int in_509 = 0;
+            int min_remaining = Integer.MAX_VALUE;
+            String ip_at_509 = null;
+            int total_workers = _download.getChunkworkers().size();
 
-            conta_error = _download.getChunkworkers().stream().filter((c) -> (c.isError_wait())).map((_item) -> 1).reduce(conta_error, Integer::sum);
+            for (ChunkDownloader c : _download.getChunkworkers()) {
+                if (c.isError_wait()) {
+                    conta_error++;
+                }
+                if (c.isIn_509_backoff()) {
+                    in_509++;
+                    int r = c.getBackoff_seconds_remaining();
+                    if (r > 0 && r < min_remaining) {
+                        min_remaining = r;
+                    }
+                    if (ip_at_509 == null) {
+                        ip_at_509 = c.getIp_at_first_509();
+                    }
+                }
+            }
 
-            final String status = conta_error > 0 ? "(" + String.valueOf(conta_error) + ")" : "";
+            // Distinguish "stalled on MEGA quota" (509) from generic error
+            // backoff so the user can tell whether activating a VPN will
+            // help. Orange "509 Xs" overlays the slot badge; the tooltip
+            // names the captured IP so the user can verify their VPN took
+            // effect. (#751)
+            final String status;
+            final Color color;
+            final String tooltip;
+
+            if (in_509 > 0) {
+                int remaining = (min_remaining == Integer.MAX_VALUE) ? 0 : min_remaining;
+                status = "509 " + (remaining > 0 ? remaining + "s" : "...");
+                color = new Color(204, 102, 0);
+                StringBuilder tb = new StringBuilder("<html><b>MEGA bandwidth quota reached (HTTP 509)</b><br>");
+                tb.append(in_509).append(" of ").append(total_workers).append(" workers in quota backoff<br>");
+                if (ip_at_509 != null) {
+                    tb.append("Captured IP at quota hit: <code>").append(ip_at_509).append("</code><br>");
+                }
+                tb.append("Will retry immediately if your public IP changes (VPN).<br>");
+                if (remaining > 0) {
+                    tb.append("Otherwise auto-retry in ~").append(remaining).append(" s.");
+                }
+                tb.append("</html>");
+                tooltip = tb.toString();
+            } else if (conta_error > 0) {
+                status = "(" + conta_error + ")";
+                color = Color.RED;
+                tooltip = conta_error + " worker(s) in error backoff";
+            } else {
+                status = "";
+                color = Color.RED;
+                tooltip = null;
+            }
 
             MiscTools.GUIRun(() -> {
-                slot_status_label.setForeground(Color.RED);
+                slot_status_label.setForeground(color);
                 slot_status_label.setText(status);
+                slot_status_label.setToolTipText(tooltip);
             });
         }
     }

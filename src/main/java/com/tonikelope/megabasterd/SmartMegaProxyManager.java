@@ -43,6 +43,15 @@ public final class SmartMegaProxyManager {
     public static final int PROXY_AUTO_REFRESH_SLEEP_TIME = 30;
     public static final boolean RESET_SLOT_PROXY = true;
     public static final boolean RANDOM_SELECT = true;
+    /**
+     * Default for the post-509 window during which SmartProxy stays active for
+     * the affected download even after a successful chunk. Was the hard-coded
+     * {@code ChunkDownloader.SMART_PROXY_RECHECK_509_TIME = 3600}; now
+     * overridable via DB setting "smart_proxy_509_recheck_window" so a user
+     * whose VPN clears quota in seconds isn't forced into a 1-hour proxy-mode
+     * window. (#751 / C4)
+     */
+    public static final int RECHECK_509_WINDOW_DEFAULT = 3600;
 
     private static final Logger LOG = Logger.getLogger(SmartMegaProxyManager.class.getName());
     private volatile String _proxy_list_url;
@@ -62,6 +71,7 @@ public final class SmartMegaProxyManager {
     private volatile long _last_refresh_timestamp;
     private volatile boolean _random_select;
     private volatile boolean _reset_slot_proxy;
+    private volatile int _recheck_509_window;
 
     public boolean isRandom_select() {
         return _random_select;
@@ -69,6 +79,16 @@ public final class SmartMegaProxyManager {
 
     public boolean isReset_slot_proxy() {
         return _reset_slot_proxy;
+    }
+
+    /**
+     * Window (seconds) after a 509 during which SmartProxy stays "armed" for
+     * affected downloads, even after individual chunks succeed. Configurable
+     * via DB setting "smart_proxy_509_recheck_window". Defaults to
+     * {@link #RECHECK_509_WINDOW_DEFAULT} (3600 s). (#751 / C4)
+     */
+    public int getRecheck_509_window() {
+        return _recheck_509_window;
     }
 
     public int getProxy_timeout() {
@@ -83,6 +103,16 @@ public final class SmartMegaProxyManager {
         _proxy_list_url = (proxy_list_url != null && !"".equals(proxy_list_url)) ? proxy_list_url : DEFAULT_SMART_PROXY_URL;
         _proxy_list = new ConcurrentHashMap<>();
         _main_panel = main_panel;
+
+        // ChunkDownloader.java:200 silently disables SmartProxy when a static
+        // HTTP proxy is also configured (`&& !MainPanel.isUse_proxy()`). The
+        // user often doesn't realise this and assumes SmartProxy is still
+        // protecting them from 509. Surface it loudly at startup. (#751)
+        if (MainPanel.isUse_proxy()) {
+            LOG.log(Level.WARNING, "[SmartProxy] Static HTTP proxy is ALSO enabled in settings; "
+                    + "SmartProxy will be IGNORED by ChunkDownloader (static proxy takes priority). "
+                    + "Disable the static HTTP proxy if you want SmartProxy to handle 509.");
+        }
 
         refreshSmartProxySettings();
 
@@ -169,7 +199,20 @@ public final class SmartMegaProxyManager {
             _random_select = RANDOM_SELECT;
         }
 
-        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + "   TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + "   REFRESH: " + String.valueOf(_autorefresh_time) + "   FORCE: " + String.valueOf(_force_smart_proxy) + "   RANDOM: " + String.valueOf(_random_select) + "   RESET-SLOT-PROXY: " + String.valueOf(_reset_slot_proxy));
+        String recheck_setting = DBTools.selectSettingValue("smart_proxy_509_recheck_window");
+
+        int recheck = MiscTools.parseIntOr(recheck_setting, RECHECK_509_WINDOW_DEFAULT);
+        // Clamp to a sane range: anything below 60 s is pointless (a refresh
+        // would arrive sooner than that), anything above 24 h is just
+        // "permanent" which is what FORCE proxy mode already expresses.
+        if (recheck < 60) {
+            recheck = 60;
+        } else if (recheck > 86_400) {
+            recheck = 86_400;
+        }
+        _recheck_509_window = recheck;
+
+        LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + "   TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + "   REFRESH: " + String.valueOf(_autorefresh_time) + "   FORCE: " + String.valueOf(_force_smart_proxy) + "   RANDOM: " + String.valueOf(_random_select) + "   RESET-SLOT-PROXY: " + String.valueOf(_reset_slot_proxy) + "   RECHECK-509: " + String.valueOf(_recheck_509_window));
     }
 
     public synchronized int getProxyCount() {
@@ -234,6 +277,15 @@ public final class SmartMegaProxyManager {
 
     public synchronized void blockProxy(String proxy, String cause) {
 
+        // All mutators (blockProxy, refreshProxyList, getProxy) are synchronized
+        // on `this`, so the get-mutate sequence below is atomic w.r.t. other
+        // map operations -- the ConcurrentHashMap is belt-and-braces. The
+        // previous code also did a redundant put() back of the same array
+        // reference; that's a no-op since proxy_data was already in the map.
+        // Use computeIfPresent to express the atomic mutate-in-place clearly,
+        // and to safely no-op if the entry was concurrently removed (e.g.,
+        // by a refreshProxyList() that's running on the same monitor in some
+        // future refactor where this method is no longer synchronized). (#751)
         if (_proxy_list.containsKey(proxy)) {
 
             if (this._ban_time == 0) {
@@ -244,11 +296,10 @@ public final class SmartMegaProxyManager {
 
             } else {
 
-                Long[] proxy_data = _proxy_list.get(proxy);
-
-                proxy_data[0] = System.currentTimeMillis();
-
-                _proxy_list.put(proxy, proxy_data);
+                _proxy_list.computeIfPresent(proxy, (k, proxy_data) -> {
+                    proxy_data[0] = System.currentTimeMillis();
+                    return proxy_data;
+                });
 
                 LOG.log(Level.WARNING, "[Smart Proxy] BLOCKING PROXY {0} ({1} secs) ({2})", new Object[]{proxy, _ban_time, cause});
 
@@ -272,8 +323,6 @@ public final class SmartMegaProxyManager {
     }
 
     public synchronized void refreshProxyList() {
-
-        String data;
 
         HttpURLConnection con = null;
 
@@ -305,17 +354,27 @@ public final class SmartMegaProxyManager {
 
                             String[] proxy_parts = proxy.trim().split("@");
 
-                            custom_clean_list_auth.put(proxy_parts[0], proxy_parts[1]);
+                            // Defensive: a stray '@' (e.g. user@pass@host:port)
+                            // would expose proxy_parts[1] as the wrong value
+                            // before the audit; we now require exactly 2 parts
+                            // AND a valid host:port shape on the first half. (#751)
+                            if (proxy_parts.length == 2 && proxy_parts[0].matches(".+?:[0-9]{1,5}")) {
+                                custom_clean_list_auth.put(proxy_parts[0], proxy_parts[1]);
 
-                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
+                                Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
 
-                            custom_clean_list.put(proxy_parts[0], proxy_data);
+                                custom_clean_list.put(proxy_parts[0], proxy_data);
+                            } else {
+                                LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed custom entry: {0}", proxy);
+                            }
 
                         } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
 
                             Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
 
-                            custom_clean_list.put(proxy, proxy_data);
+                            custom_clean_list.put(proxy.trim(), proxy_data);
+                        } else if (!proxy.trim().isEmpty()) {
+                            LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed custom entry: {0}", proxy);
                         }
                     }
                 }
@@ -338,6 +397,13 @@ public final class SmartMegaProxyManager {
 
             if (custom_clean_list.isEmpty() && _proxy_list_url != null && !"".equals(_proxy_list_url)) {
 
+                if (custom_proxy_list != null && !custom_proxy_list.trim().isEmpty()) {
+                    // Custom list is non-empty but parsed to zero usable entries
+                    // -- before falling back to the URL, surface that so the user
+                    // knows their custom list is being ignored. (#751)
+                    LOG.log(Level.WARNING, "[Smart Proxy] custom proxy list contained no parseable entries; falling back to URL fetch");
+                }
+
                 URL url = new URL(this._proxy_list_url);
 
                 if (!"https".equalsIgnoreCase(url.getProtocol())) {
@@ -350,70 +416,101 @@ public final class SmartMegaProxyManager {
 
                 con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                if (con.getResponseCode() != 200) {
+                // Bound the fetch. Without timeouts a hung proxy-list URL holds
+                // the SmartMegaProxyManager monitor (synchronized method) and
+                // blocks every getProxy() / blockProxy() call across all
+                // workers -- exactly the wrong time to stall, since we're
+                // already in 509 recovery. (#751)
+                con.setConnectTimeout(15_000);
+                con.setReadTimeout(30_000);
 
-                    LOG.log(Level.WARNING, "Smart proxy list fetch failed: HTTP {0}", con.getResponseCode());
+                int http_status = con.getResponseCode();
+
+                if (http_status != 200) {
+
+                    // PRESERVE the previous proxy list. Was: data = "" + split
+                    // + clear() -- a transient 4xx/5xx wiped the list silently,
+                    // leaving workers in 509 recovery with zero proxies. The
+                    // status label below makes the staleness visible. (#751)
+                    LOG.log(Level.WARNING, "Smart proxy list fetch failed: HTTP {0} -- preserving previous list ({1} entries)",
+                            new Object[]{http_status, _proxy_list.size()});
 
                     MiscTools.drainAndCloseErrorStream(con);
 
-                    data = "";
+                    _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + " stale)" + (this.isForce_smart_proxy() ? " F!" : ""));
+
+                    return;
+                }
+
+                String data;
+                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                    int reads;
+
+                    while ((reads = is.read(buffer)) != -1) {
+
+                        byte_res.write(buffer, 0, reads);
+                    }
+
+                    data = new String(byte_res.toByteArray(), "UTF-8");
+                }
+
+                // Parse into a temporary map FIRST. Only swap into _proxy_list
+                // if the new list has at least one usable entry. Was: clear()
+                // + populate during parse, so an empty / garbage body wiped
+                // the previous list before we knew whether the new one was
+                // viable. (#751)
+                LinkedHashMap<String, Long[]> new_list = new LinkedHashMap<>();
+                HashMap<String, String> new_auth = new HashMap<>();
+
+                for (String proxy : data.split("\n")) {
+
+                    boolean socks = false;
+
+                    if (proxy.trim().startsWith("*")) {
+                        socks = true;
+                        proxy = proxy.trim().substring(1);
+                    }
+
+                    if (proxy.trim().contains("@")) {
+
+                        String[] proxy_parts = proxy.trim().split("@");
+
+                        if (proxy_parts.length == 2 && proxy_parts[0].matches(".+?:[0-9]{1,5}")) {
+                            new_auth.put(proxy_parts[0], proxy_parts[1]);
+                            new_list.put(proxy_parts[0], new Long[]{-1L, socks ? 1L : -1L});
+                        } else {
+                            LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed URL entry: {0}", proxy);
+                        }
+
+                    } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
+                        new_list.put(proxy.trim(), new Long[]{-1L, socks ? 1L : -1L});
+                    } else if (!proxy.trim().isEmpty()) {
+                        LOG.log(Level.WARNING, "[Smart Proxy] skipping malformed URL entry: {0}", proxy);
+                    }
+                }
+
+                if (new_list.isEmpty()) {
+
+                    LOG.log(Level.WARNING, "Smart proxy list fetch returned 0 usable entries -- preserving previous list ({0} entries)",
+                            _proxy_list.size());
+
+                    _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + " stale)" + (this.isForce_smart_proxy() ? " F!" : ""));
 
                 } else {
 
-                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                        byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-
-                        int reads;
-
-                        while ((reads = is.read(buffer)) != -1) {
-
-                            byte_res.write(buffer, 0, reads);
-                        }
-
-                        data = new String(byte_res.toByteArray(), "UTF-8");
-                    }
-                }
-
-                String[] proxy_list = data.split("\n");
-
-                if (proxy_list.length > 0) {
-
                     _proxy_list.clear();
+                    _proxy_list.putAll(new_list);
 
                     PROXY_LIST_AUTH.clear();
+                    PROXY_LIST_AUTH.putAll(new_auth);
 
-                    for (String proxy : proxy_list) {
+                    _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
 
-                        boolean socks = false;
-
-                        if (proxy.trim().startsWith("*")) {
-                            socks = true;
-
-                            proxy = proxy.trim().substring(1);
-                        }
-
-                        if (proxy.trim().contains("@")) {
-
-                            String[] proxy_parts = proxy.trim().split("@");
-
-                            PROXY_LIST_AUTH.put(proxy_parts[0], proxy_parts[1]);
-
-                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
-
-                            _proxy_list.put(proxy_parts[0], proxy_data);
-
-                        } else if (proxy.trim().matches(".+?:[0-9]{1,5}")) {
-                            Long[] proxy_data = new Long[]{-1L, socks ? 1L : -1L};
-                            _proxy_list.put(proxy, proxy_data);
-                        }
-
-                    }
+                    LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
                 }
-
-                _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + ")" + (this.isForce_smart_proxy() ? " F!" : ""));
-
-                LOG.log(Level.INFO, "{0} Smart Proxy Manager: proxy list refreshed ({1})", new Object[]{Thread.currentThread().getName(), _proxy_list.size()});
 
             } else if (!custom_clean_list.isEmpty()) {
 
@@ -426,9 +523,11 @@ public final class SmartMegaProxyManager {
             }
 
         } catch (MalformedURLException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.SEVERE, "Smart proxy list URL is malformed: {0}", ex.getMessage());
         } catch (IOException ex) {
-            LOG.log(Level.SEVERE, ex.getMessage());
+            LOG.log(Level.WARNING, "Smart proxy list fetch threw -- preserving previous list ({0} entries): {1}",
+                    new Object[]{_proxy_list.size(), ex.getMessage()});
+            _main_panel.getView().updateSmartProxyStatus("SmartProxy: ON (" + String.valueOf(getProxyCount()) + " stale)" + (this.isForce_smart_proxy() ? " F!" : ""));
         } finally {
             if (con != null) {
                 con.disconnect();

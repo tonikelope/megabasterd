@@ -12,8 +12,6 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.awt.Dialog;
-import java.awt.event.WindowEvent;
-import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.HashSet;

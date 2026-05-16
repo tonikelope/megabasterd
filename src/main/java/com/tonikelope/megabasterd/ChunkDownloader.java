@@ -31,7 +31,13 @@ import java.util.logging.Logger;
  */
 public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
-    public static final int SMART_PROXY_RECHECK_509_TIME = 3600;
+    /**
+     * Legacy hard-coded post-509 SmartProxy window. Now lives in
+     * SmartMegaProxyManager as a configurable; this constant is kept as the
+     * ultimate fallback when no proxy manager is wired (e.g. very early
+     * startup) so the original semantics hold. (#751 / C4)
+     */
+    public static final int SMART_PROXY_RECHECK_509_TIME = SmartMegaProxyManager.RECHECK_509_WINDOW_DEFAULT;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
     private final int _id;
     private final Download _download;
@@ -43,7 +49,40 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     private final ArrayList<String> _excluded_proxy_list;
     private volatile boolean _reset_current_chunk;
     private volatile InputStream _chunk_inputstream = null;
-    private volatile long _509_timestamp = -1;
+
+    /**
+     * Last HTTP status code this worker saw on its most recent chunk attempt.
+     * Exposed so Download (watchdog) and DownloadView (status label) can tell
+     * "stalled because of 509 quota" from "stalled because of network".
+     * Protected so the ChunkDownloaderMono subclass can clear it on chunk
+     * success. (#751)
+     */
+    protected volatile int _last_http_error = 0;
+
+    /**
+     * True while this worker is in the exp-backoff sleep after a 509 (bandwidth
+     * quota) specifically. Used by Download.run()'s watchdog to choose the
+     * shorter quota-stall timeout instead of the generic 600 s, and by
+     * DownloadView to show "Quota reached -- retrying in Xs". (#751)
+     */
+    protected volatile boolean _in_509_backoff = false;
+
+    /**
+     * Public IP captured the first time this worker hit a 509 during the
+     * current burst. While in 509 backoff we periodically compare
+     * MainPanel.getCachedPublicIp() against this value; a change means the user
+     * activated a VPN / switched IP and we should cut the backoff short and
+     * retry immediately rather than waiting out the full exp-backoff or the 10
+     * min watchdog. Protected so mono can clear it on chunk success. (#751)
+     */
+    protected volatile String _ip_at_first_509 = null;
+
+    /**
+     * Seconds remaining in the current 509 backoff (decreases from wait_secs to
+     * 0 inside the sleep loop). Used by DownloadView to render "retrying in Xs"
+     * without having to peek into the loop. (#751)
+     */
+    protected volatile int _backoff_seconds_remaining = 0;
 
     private String _current_smart_proxy;
 
@@ -114,6 +153,99 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
         _error_wait = error_wait;
     }
 
+    public int getLast_http_error() {
+        return _last_http_error;
+    }
+
+    public boolean isIn_509_backoff() {
+        return _in_509_backoff;
+    }
+
+    public int getBackoff_seconds_remaining() {
+        return _backoff_seconds_remaining;
+    }
+
+    public String getIp_at_first_509() {
+        return _ip_at_first_509;
+    }
+
+    /**
+     * Sleeps an exp-backoff window in 1 s slices, while: - capturing the public
+     * IP the first time http_status == 509 in a burst, then re-checking every
+     * 30 s and breaking out early if the IP changed (user activated a VPN); -
+     * updating the slot status label each second so the "509 Xs" countdown is
+     * live in the UI; - respecting MainPanel.isExit() so shutdown isn't blocked
+     * for the full backoff window.
+     *
+     * Returns true if the sleep terminated early because the public IP changed
+     * -- the caller should reset its conta_error counter so the next backoff
+     * starts from scratch instead of resuming an exp curve that no longer
+     * applies. Returns false on normal completion, shutdown, or interruption.
+     *
+     * Protected so ChunkDownloaderMono (which also wants the same VPN-aware
+     * behaviour) can share the implementation. (#751)
+     */
+    protected boolean sleepWithIpAwareBackoff(int conta_error_count, int http_status) {
+
+        _last_http_error = http_status;
+        _in_509_backoff = (http_status == 509);
+
+        // User-disable hook for the IP-change-aware retry. Default ON.
+        // Niche use case is a NAT-behind-NAT setup where public-IP
+        // detection mis-triggers. (#751 / C1)
+        String auto_resume_setting = com.tonikelope.megabasterd.DBTools.selectSettingValue("auto_resume_ip_change");
+        boolean ip_change_enabled = (auto_resume_setting == null || auto_resume_setting.equals("yes"));
+
+        if (http_status == 509 && _ip_at_first_509 == null && ip_change_enabled) {
+            String ip0 = MainPanel.getCachedPublicIp();
+            if (ip0 != null) {
+                _ip_at_first_509 = ip0;
+                LOG.log(Level.INFO, "{0} Worker [{1}] 509 -- captured IP {2} for change detection",
+                        new Object[]{Thread.currentThread().getName(), _id, ip0});
+            }
+        }
+
+        _error_wait = true;
+        _download.getView().updateSlotsStatus();
+
+        long wait_secs = MiscTools.getWaitTimeExpBackOff(conta_error_count);
+        _backoff_seconds_remaining = (int) wait_secs;
+
+        boolean broke_for_ip_change = false;
+
+        for (long i = 0; i < wait_secs && !_exit && !_download.isStopped() && !_download.getMain_panel().isExit(); i++) {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException exc) {
+                Thread.currentThread().interrupt();
+                break;
+            }
+            _backoff_seconds_remaining = (int) (wait_secs - i - 1);
+
+            if (_in_509_backoff || i % 5 == 4) {
+                _download.getView().updateSlotsStatus();
+            }
+
+            if (_in_509_backoff && _ip_at_first_509 != null && i > 0 && (i + 1) % 30 == 0) {
+                String now_ip = MainPanel.getCachedPublicIp();
+                if (now_ip != null && !now_ip.equals(_ip_at_first_509)) {
+                    LOG.log(Level.INFO, "{0} Worker [{1}] public IP changed {2} -> {3}; breaking 509 backoff and retrying immediately",
+                            new Object[]{Thread.currentThread().getName(), _id, _ip_at_first_509, now_ip});
+                    _ip_at_first_509 = null;
+                    broke_for_ip_change = true;
+                    break;
+                }
+            }
+        }
+
+        _backoff_seconds_remaining = 0;
+        _in_509_backoff = false;
+        _error_wait = false;
+        _download.getView().updateSlotsStatus();
+
+        return broke_for_ip_change;
+    }
+
     @Override
     public void secureNotify() {
         synchronized (_secure_notify_lock) {
@@ -172,8 +304,16 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     secureWait();
                 }
 
-                if (http_error == 509 && (_509_timestamp == -1 || _509_timestamp + SMART_PROXY_RECHECK_509_TIME * 1000 < System.currentTimeMillis())) {
-                    _509_timestamp = System.currentTimeMillis();
+                long recheck_window_ms = (proxy_manager != null ? proxy_manager.getRecheck_509_window() : SMART_PROXY_RECHECK_509_TIME) * 1000L;
+
+                // Stamp the SHARED 509 timestamp at Download level so every
+                // worker of the same download switches to SmartProxy mode in
+                // lockstep. Was per-worker (`_509_timestamp`) which meant 7
+                // of 8 slots kept hammering MEGA direct after slot 1 had
+                // already switched. (#751 / C4)
+                long download_509_ts = _download.get509BurstTimestamp();
+                if (http_error == 509 && (download_509_ts == -1 || download_509_ts + recheck_window_ms < System.currentTimeMillis())) {
+                    _download.set509BurstTimestamp(System.currentTimeMillis());
                 }
 
                 if (worker_url == null || http_error == 403) {
@@ -197,7 +337,8 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                     MainPanel.LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
                 }
 
-                if (MainPanel.isUse_smart_proxy() && ((proxy_manager != null && proxy_manager.isForce_smart_proxy()) || _current_smart_proxy != null || http_error == 509 || (_509_timestamp != -1 && _509_timestamp + SMART_PROXY_RECHECK_509_TIME * 1000 > System.currentTimeMillis())) && !MainPanel.isUse_proxy()) {
+                long dl_509_ts_check = _download.get509BurstTimestamp();
+                if (MainPanel.isUse_smart_proxy() && ((proxy_manager != null && proxy_manager.isForce_smart_proxy()) || _current_smart_proxy != null || http_error == 509 || (dl_509_ts_check != -1 && dl_509_ts_check + recheck_window_ms > System.currentTimeMillis())) && !MainPanel.isUse_proxy()) {
 
                     if (_current_smart_proxy != null && chunk_error) {
 
@@ -211,19 +352,34 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             LOG.log(Level.WARNING, "{0} Worker [{1}] PROXY {2} TOO MANY CONNECTIONS", new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
                         }
 
+                        // getProxy() returns null when every proxy is excluded
+                        // or banned and the refresh-retry loop exhausted itself.
+                        // Previously we indexed [0]/[1] unconditionally and NPE'd
+                        // the worker -- exactly during a 509 storm, when smart
+                        // proxy is supposed to bail us out. Null now means
+                        // "fall back to direct for this chunk" (the path below
+                        // already handles _current_smart_proxy == null). (#751)
                         String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
-                        _current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
+                        if (smart_proxy != null) {
+                            _current_smart_proxy = smart_proxy[0];
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
+                        } else {
+                            LOG.log(Level.WARNING, "{0} Worker [{1}] SmartProxy exhausted (every proxy excluded/banned) -- falling back to direct", new Object[]{Thread.currentThread().getName(), _id});
+                            _current_smart_proxy = null;
+                        }
 
                     } else if (_current_smart_proxy == null) {
 
                         String[] smart_proxy = proxy_manager.getProxy(_excluded_proxy_list);
 
-                        _current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
+                        if (smart_proxy != null) {
+                            _current_smart_proxy = smart_proxy[0];
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
+                        } else {
+                            LOG.log(Level.WARNING, "{0} Worker [{1}] SmartProxy exhausted (no usable proxy) -- falling back to direct", new Object[]{Thread.currentThread().getName(), _id});
+                            _current_smart_proxy = null;
+                        }
 
                     }
 
@@ -233,13 +389,39 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             getDownload().enableTurboMode();
                         }
 
+                        // Parse the proxy entry defensively. Was a raw
+                        // Integer.parseInt(proxy_info[1]) which threw
+                        // NumberFormatException -- killing the worker -- on any
+                        // garbage entry that slipped through the regex (or any
+                        // future format change in the remote-fetched list).
+                        // Treat malformed entries as banned + skip to direct
+                        // fallback for this chunk; getProxy() will avoid the
+                        // bad entry next round. (#751)
                         String[] proxy_info = _current_smart_proxy.split(":");
+                        int proxy_port = -1;
+                        if (proxy_info.length == 2) {
+                            try {
+                                int p = Integer.parseInt(proxy_info[1]);
+                                if (p >= 1 && p <= 65535) {
+                                    proxy_port = p;
+                                }
+                            } catch (NumberFormatException ignore) {
+                            }
+                        }
 
-                        Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], Integer.parseInt(proxy_info[1])));
-
-                        URL url = new URL(chunk_url);
-
-                        con = (HttpURLConnection) url.openConnection(proxy);
+                        if (proxy_port < 0) {
+                            LOG.log(Level.WARNING, "{0} Worker [{1}] malformed smart proxy entry {2} -- banning + direct fallback",
+                                    new Object[]{Thread.currentThread().getName(), _id, _current_smart_proxy});
+                            proxy_manager.blockProxy(_current_smart_proxy, "Malformed entry");
+                            _excluded_proxy_list.add(_current_smart_proxy);
+                            _current_smart_proxy = null;
+                            URL url = new URL(chunk_url);
+                            con = (HttpURLConnection) url.openConnection();
+                        } else {
+                            Proxy proxy = new Proxy(smart_proxy_socks ? Proxy.Type.SOCKS : Proxy.Type.HTTP, new InetSocketAddress(proxy_info[0], proxy_port));
+                            URL url = new URL(chunk_url);
+                            con = (HttpURLConnection) url.openConnection(proxy);
+                        }
 
                     } else {
 
@@ -470,9 +652,18 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
                             http_error = 0;
 
-                            if (_current_smart_proxy != null && _509_timestamp != -1) {
+                            // Clear the 509-burst state captured by the
+                            // IP-change-aware backoff so a future 509 starts
+                            // a fresh detection window. (#751)
+                            _ip_at_first_509 = null;
+                            _last_http_error = 0;
 
-                                _509_timestamp = -1;
+                            if (_current_smart_proxy != null && _download.get509BurstTimestamp() != -1) {
+
+                                // Reset the SHARED timestamp so the rest of
+                                // the workers also exit "post-509 armed" mode
+                                // on this download. (#751 / C4)
+                                _download.reset509BurstTimestamp();
 
                                 if (_download.isTurbo()) {
                                     _download.disableTurboMode();
@@ -522,20 +713,20 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                             _download.getProgress_meter().secureNotify();
                         }
 
-                        if (!_exit && !_download.isStopped() && !timeout && _current_smart_proxy == null && http_error != 509 && http_error != 403 && http_error != 503) {
+                        // Apply exp backoff when there is no proxy-switch fallback.
+                        // Previously 509 was excluded from this path, which left
+                        // workers tight-looping on MEGA bandwidth-quota responses
+                        // (no Thread.sleep at all) -- hammering MEGA, burning CPU,
+                        // and making the app freeze on exit because the loop only
+                        // checks main_panel.isExit() between full HTTP roundtrips.
+                        // Now 509 also backs off (via the IP-change-aware helper
+                        // shared with the mono path). (#751)
+                        if (!_exit && !_download.isStopped() && !timeout && _current_smart_proxy == null && http_error != 403) {
 
-                            _error_wait = true;
-
-                            _download.getView().updateSlotsStatus();
-
-                            try {
-                                Thread.sleep(MiscTools.getWaitTimeExpBackOff(++conta_error) * 1000);
-                            } catch (InterruptedException exc) {
+                            boolean ip_changed = sleepWithIpAwareBackoff(++conta_error, http_error);
+                            if (ip_changed) {
+                                conta_error = 0;
                             }
-
-                            _error_wait = false;
-
-                            _download.getView().updateSlotsStatus();
 
                         } else if (http_error == 503 && _current_smart_proxy == null && !_download.isTurbo()) {
                             setExit(true);

@@ -1384,55 +1384,127 @@ public class MiscTools {
         return http_status != 403;
     }
 
+    /**
+     * Endpoints that return the caller's public IPv4 as plain text in the
+     * response body. Rotated through in order until one returns a valid IP. All
+     * HTTPS so a hostile network on the path can't spoof the response and
+     * mislead the 509-recovery logic into believing the IP changed (or didn't).
+     * The previous single source ("http://whatismyip.akamai.com/") was plain
+     * HTTP and a single point of failure -- if akamai's box was unreachable or
+     * an MITM rewrote the response, the IP-aware retry would mis-trigger.
+     * (#751)
+     */
+    private static final String[] PUBLIC_IP_SOURCES = new String[]{
+        "https://api.ipify.org/",
+        "https://ifconfig.me/ip",
+        "https://icanhazip.com/",
+        "https://ipv4.icanhazip.com/",
+        "https://checkip.amazonaws.com/"
+    };
+
+    // Tight timeouts: under worst case (all 5 sources hang to read-timeout)
+    // total wall time = 5 sources * (connect + read) = 5 * 4s = 20s. The
+    // MainPanel.getCachedPublicIp lock is held during this call so we want
+    // it bounded enough that contended workers don't pile up. Five sources
+    // is enough redundancy that a 2s read window covers any responsive endpoint.
+    private static final int PUBLIC_IP_CONNECT_TIMEOUT_MS = 2_000;
+    private static final int PUBLIC_IP_READ_TIMEOUT_MS = 2_000;
+
+    /**
+     * Bounded-validate the response body of one of the IPv4 services. They
+     * sometimes append a trailing newline or extra whitespace; trim and then
+     * verify dotted-quad shape. Reject anything that doesn't look like an IP so
+     * we don't poison the cache with HTML error pages.
+     */
+    private static String parsePublicIpResponse(String body) {
+        if (body == null) {
+            return null;
+        }
+        String trimmed = body.trim();
+        // Bound the input to avoid pathological regex on a giant body.
+        if (trimmed.length() > 64) {
+            return null;
+        }
+        if (trimmed.matches("\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}")) {
+            return trimmed;
+        }
+        return null;
+    }
+
     public static String getMyPublicIP() {
 
-        String public_ip = null;
-        HttpURLConnection con = null;
+        for (String source : PUBLIC_IP_SOURCES) {
+            HttpURLConnection con = null;
 
-        try {
+            try {
 
-            URL url_api = new URL("http://whatismyip.akamai.com/");
+                URL url_api = new URL(source);
 
-            if (MainPanel.isUse_proxy()) {
+                if (MainPanel.isUse_proxy()) {
 
-                con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
+                    con = (HttpURLConnection) url_api.openConnection(new Proxy(Proxy.Type.HTTP, new InetSocketAddress(MainPanel.getProxy_host(), MainPanel.getProxy_port())));
 
-                if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
+                    if (MainPanel.getProxy_user() != null && !"".equals(MainPanel.getProxy_user())) {
 
-                    con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
-                }
-            } else {
+                        con.setRequestProperty("Proxy-Authorization", "Basic " + MiscTools.Bin2BASE64((MainPanel.getProxy_user() + ":" + MainPanel.getProxy_pass()).getBytes("UTF-8")));
+                    }
+                } else {
 
-                con = (HttpURLConnection) url_api.openConnection();
-            }
-
-            con.setUseCaches(false);
-
-            try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
-
-                int reads;
-
-                while ((reads = is.read(buffer)) != -1) {
-
-                    byte_res.write(buffer, 0, reads);
+                    con = (HttpURLConnection) url_api.openConnection();
                 }
 
-                public_ip = new String(byte_res.toByteArray(), "UTF-8");
-            }
+                con.setUseCaches(false);
+                con.setConnectTimeout(PUBLIC_IP_CONNECT_TIMEOUT_MS);
+                con.setReadTimeout(PUBLIC_IP_READ_TIMEOUT_MS);
+                con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-        } catch (MalformedURLException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-        } catch (IOException ex) {
-            Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-        } finally {
-            if (con != null) {
-                con.disconnect();
+                int status = con.getResponseCode();
+                if (status != 200) {
+                    Logger.getLogger(MiscTools.class.getName()).log(Level.FINE,
+                            "Public IP source {0} returned HTTP {1}", new Object[]{source, status});
+                    drainAndCloseErrorStream(con);
+                    continue;
+                }
+
+                String body;
+                try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                    byte[] buffer = new byte[MainPanel.DEFAULT_BYTE_BUFFER_SIZE];
+
+                    int reads;
+
+                    while ((reads = is.read(buffer)) != -1) {
+
+                        byte_res.write(buffer, 0, reads);
+                    }
+
+                    body = new String(byte_res.toByteArray(), "UTF-8");
+                }
+
+                String parsed = parsePublicIpResponse(body);
+                if (parsed != null) {
+                    return parsed;
+                }
+
+                Logger.getLogger(MiscTools.class.getName()).log(Level.FINE,
+                        "Public IP source {0} returned unparseable body (len={1})",
+                        new Object[]{source, body.length()});
+
+            } catch (MalformedURLException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            } catch (IOException ex) {
+                Logger.getLogger(MiscTools.class.getName()).log(Level.FINE,
+                        "Public IP source {0} failed: {1}", new Object[]{source, ex.getMessage()});
+            } finally {
+                if (con != null) {
+                    con.disconnect();
+                }
             }
         }
 
-        return public_ip;
+        Logger.getLogger(MiscTools.class.getName()).log(Level.WARNING,
+                "All {0} public IP sources failed", PUBLIC_IP_SOURCES.length);
+        return null;
     }
 
     public static String checkNewVersion(String url) {

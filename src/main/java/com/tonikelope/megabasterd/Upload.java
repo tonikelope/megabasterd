@@ -13,7 +13,6 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.Transference.PROGRESS_WATCHDOG_TIMEOUT;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import static java.lang.Integer.MAX_VALUE;
 import java.nio.file.Files;
@@ -732,6 +731,14 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                         Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
 
                         if (Arrays.asList(FATAL_API_ERROR_CODES).contains(ex.getCode())) {
+                            // Friendly popup before we mark the upload fatal --
+                            // user needs to know the account/quota cause.
+                            // Source.ACCOUNT so -9 / -14 / -16 get the
+                            // account-context copy. (#751 / D)
+                            MegaErrorMessages.showPopup(getMain_panel().getView(), ex.getCode(),
+                                    _ma.getFull_email() != null ? _ma.getFull_email() : _file_name,
+                                    "while requesting upload URL",
+                                    MegaErrorMessages.Source.ACCOUNT);
                             stopUploader(ex.getMessage());
                             _auto_retry_on_error = Arrays.asList(FATAL_API_ERROR_CODES_WITH_RETRY).contains(ex.getCode());
                         }
