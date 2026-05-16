@@ -1672,6 +1672,12 @@ public class MegaAPI implements Serializable {
                 }
 
                 folder_nodes.put((String) node.get("h"), the_node);
+            } else {
+                // Silent skip turned the folder dialog into a partial/empty
+                // tree with no clue why; surface a WARNING so users hitting
+                // odd "missing files" cases have something to report.
+                LOG.log(Level.WARNING, "MEGA FOLDER {0}: node {1} dropped (no segment of k=''{2}'' decrypted ''a'')",
+                        new Object[]{folder_id, node.get("h"), full_k});
             }
         }
 
