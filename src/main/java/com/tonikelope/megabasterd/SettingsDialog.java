@@ -1089,7 +1089,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         custom_proxy_list_label.setOpaque(true);
 
         rec_smart_proxy_label.setFont(new java.awt.Font("Dialog", 2, 16)); // NOI18N
-        rec_smart_proxy_label.setText("Note1: enable it in order to mitigate bandwidth limit. (Multislot is required) ");
+        rec_smart_proxy_label.setText("Note1: enable it in order to mitigate bandwidth limit. (Multislot is required)");
 
         proxy_timeout_spinner.setFont(new java.awt.Font("Noto Sans", 0, 16)); // NOI18N
         proxy_timeout_spinner.setModel(new javax.swing.SpinnerNumberModel(10, 1, null, 1));
@@ -1861,7 +1861,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         });
 
         debug_file_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
-        debug_file_checkbox.setText("Save debug info to file -> ");
+        debug_file_checkbox.setText("Save debug info to file ->");
 
         jButton1.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         jButton1.setForeground(new java.awt.Color(255, 0, 0));
@@ -2403,7 +2403,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                         MiscTools.GUIRun(() -> {
 
-                            status.setText(LabelTranslatorSingleton.getInstance().translate("Checking your MEGA accounts, please wait... ") + email + " (" + String.valueOf(j + 1) + "/" + String.valueOf(model_row_count) + ")");
+                            status.setText(I18n.tr("ui.dynamic.checking_account_progress", email, j + 1, model_row_count));
 
                         });
 
@@ -2801,7 +2801,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 new ProcessBuilder(argv).inheritIO().start();
             } catch (IOException ex) {
                 Logger.getLogger(MiscTools.class.getName()).log(Level.SEVERE, ex.getMessage());
-                JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, ex.getMessage(), I18n.tr("ui.error_title"), JOptionPane.ERROR_MESSAGE);
             }
         }
     }//GEN-LAST:event_run_command_test_buttonActionPerformed
@@ -2832,7 +2832,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
-        filechooser.setDialogTitle("Temporary chunks directory");
+        filechooser.setDialogTitle(I18n.tr("ui.filechooser.temp_chunks_dir"));
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         filechooser.setAcceptAllFileFilterUsed(false);
 
@@ -2883,7 +2883,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             JFileChooser filechooser = new JFileChooser();
             updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
             filechooser.setCurrentDirectory(new File(_download_path));
-            filechooser.setDialogTitle("Save as");
+            filechooser.setDialogTitle(I18n.tr("ui.filechooser.save_as"));
 
             if (filechooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
 
@@ -3111,7 +3111,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         if (!unlock_accounts_button.isVisible() || !unlock_accounts_button.isEnabled()) {
 
-            JOptionPane.showMessageDialog(this, LabelTranslatorSingleton.getInstance().translate("EMAIL1#PASS1\nEMAIL2#PASS2"), "TXT FILE FORMAT", JOptionPane.INFORMATION_MESSAGE);
+            JOptionPane.showMessageDialog(this, "EMAIL1#PASS1\nEMAIL2#PASS2", LabelTranslatorSingleton.getInstance().translate("TXT FILE FORMAT"), JOptionPane.INFORMATION_MESSAGE);
 
             javax.swing.JFileChooser filechooser = new javax.swing.JFileChooser();
 
@@ -3191,7 +3191,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         if (_account_store.isLocked()) {
             JOptionPane.showMessageDialog(this,
                     LabelTranslatorSingleton.getInstance().translate("MEGA ACCOUNTS ARE LOCKED"),
-                    "ERROR", JOptionPane.ERROR_MESSAGE);
+                    I18n.tr("ui.error_title"), JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -3200,7 +3200,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             lines = mega ? _account_store.exportMegaLines() : _account_store.exportElcLines();
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, "Building export lines: {0}", ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Export failed: " + ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, I18n.tr("ui.err.export_failed.message", ex.getMessage()), I18n.tr("ui.err.export_failed.title"), JOptionPane.ERROR_MESSAGE);
             return;
         }
 
@@ -3253,13 +3253,12 @@ public class SettingsDialog extends javax.swing.JDialog {
         try {
             Files.write(out.toPath(), lines, java.nio.charset.StandardCharsets.UTF_8);
             JOptionPane.showMessageDialog(this,
-                    LabelTranslatorSingleton.getInstance().translate("Exported ") + lines.size()
-                    + LabelTranslatorSingleton.getInstance().translate(" account(s) to ") + out.getAbsolutePath(),
+                    I18n.tr("ui.export.success", lines.size(), out.getAbsolutePath()),
                     LabelTranslatorSingleton.getInstance().translate("Export accounts"),
                     JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException ex) {
             LOG.log(Level.SEVERE, "Writing export file: {0}", ex.getMessage());
-            JOptionPane.showMessageDialog(this, "Export failed: " + ex.getMessage(), "ERROR", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, I18n.tr("ui.err.export_failed.message", ex.getMessage()), I18n.tr("ui.err.export_failed.title"), JOptionPane.ERROR_MESSAGE);
         }
     }
 

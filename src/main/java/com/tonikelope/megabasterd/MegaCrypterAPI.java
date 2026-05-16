@@ -266,7 +266,7 @@ public class MegaCrypterAPI {
                         final String[] entered = {null};
                         try {
                             MiscTools.GUIRunAndWait(() -> {
-                                entered[0] = JOptionPane.showInputDialog(panel, "Enter password for MegaCrypter link:");
+                                entered[0] = JOptionPane.showInputDialog(panel, I18n.tr("ui.input.megacrypter_password"));
                             });
                         } catch (Exception ex) {
                             // ignore

@@ -690,7 +690,7 @@
                         <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                           <Font name="Dialog" size="16" style="2"/>
                         </Property>
-                        <Property name="text" type="java.lang.String" value="Note1: enable it in order to mitigate bandwidth limit. (Multislot is required) "/>
+                        <Property name="text" type="java.lang.String" value="Note1: enable it in order to mitigate bandwidth limit. (Multislot is required)"/>
                       </Properties>
                     </Component>
                     <Component class="javax.swing.JSpinner" name="proxy_timeout_spinner">
@@ -1737,7 +1737,7 @@
                     <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
                       <Font name="Dialog" size="18" style="1"/>
                     </Property>
-                    <Property name="text" type="java.lang.String" value="Save debug info to file -&gt; "/>
+                    <Property name="text" type="java.lang.String" value="Save debug info to file -&gt;"/>
                   </Properties>
                 </Component>
                 <Container class="javax.swing.JPanel" name="jPanel1">

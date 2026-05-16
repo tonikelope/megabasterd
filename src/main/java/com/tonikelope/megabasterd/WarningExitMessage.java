@@ -163,12 +163,12 @@ public class WarningExitMessage extends javax.swing.JDialog {
         final long remaining_ms = Math.max(0, timeout_ms - elapsed_ms);
 
         MiscTools.GUIRun(() -> {
-            _remaining_label.setText("Transferences remaining: " + total_transfers + "   (" + total_workers + " workers)");
-            _downloads_label.setText("↓ Downloads: " + dl_count + "   (" + dl_workers + " workers)");
-            _uploads_label.setText("↑ Uploads: " + ul_count + "   (" + ul_workers + " workers)");
+            _remaining_label.setText(I18n.tr("ui.dynamic.transferences_remaining", total_transfers, total_workers));
+            _downloads_label.setText(I18n.tr("ui.dynamic.downloads_summary", dl_count, dl_workers));
+            _uploads_label.setText(I18n.tr("ui.dynamic.uploads_summary", ul_count, ul_workers));
             _progress_bar.setValue(pct);
-            _progress_bar.setString(pct + "% drained");
-            _timer_label.setText("Elapsed: " + (elapsed_ms / 1000) + "s   |   Force-exit in " + (remaining_ms / 1000) + "s");
+            _progress_bar.setString(I18n.tr("ui.dynamic.drained_percent", pct));
+            _timer_label.setText(I18n.tr("ui.dynamic.force_exit_timer", elapsed_ms / 1000, remaining_ms / 1000));
         });
     }
 
