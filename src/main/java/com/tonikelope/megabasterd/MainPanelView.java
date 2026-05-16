@@ -318,22 +318,14 @@ public final class MainPanelView extends javax.swing.JFrame {
                             }
                         }
 
-                        if (folder_share) {
-                            res = ma.createDirInsideAnotherSharedDir(root_name, parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()), parent_node, share_key);
-                        } else {
-                            res = ma.createDir(root_name, parent_node, ma.genFolderKey(), i32a2bin(ma.getMaster_key()));
-
-                        }
-
-                        String file_paths_2_node = (String) ((Map) ((List) res.get("f")).get(0)).get("h");
-
+                        // Files are uploaded directly into parent_node (the
+                        // root folder we just created). The historical inner
+                        // sentinel folder used to be literally named
+                        // "MEGABASTERD"; commit 52d5ae6 (8.14, 2023) replaced
+                        // that literal with root_name, which silently turned
+                        // every upload into MEGA/root_name/root_name/<files>.
+                        // See issue #736.
                         MegaDirNode file_paths = new MegaDirNode(parent_node);
-
-                        MegaDirNode file_paths_2 = new MegaDirNode(file_paths_2_node);
-
-                        file_paths.getChildren().put(root_name, file_paths_2);
-
-                        file_paths = file_paths_2;
 
                         for (File f : dialog.getFiles()) {
 
