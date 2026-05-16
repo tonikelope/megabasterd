@@ -25,6 +25,11 @@ import java.net.Socket;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.BorderFactory;
@@ -63,9 +68,15 @@ public class QuotaRecoverySettingsDialog extends JDialog {
 
     private JTextArea _proxy_test_output;
     private JButton _test_proxy_button;
+    private JSpinner _batch_size_spinner;
 
     private JButton _save_button;
     private JButton _cancel_button;
+
+    // Held so we can shut the probe pool down cleanly when the dialog is
+    // disposed mid-test; without this the JVM would wait for every 3s TCP
+    // connect to complete before exiting. (#753)
+    private volatile ExecutorService _probe_executor;
 
     public QuotaRecoverySettingsDialog(java.awt.Frame parent, boolean modal, MainPanel main_panel) {
         super(parent, modal);
@@ -149,6 +160,20 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         _test_proxy_button.setToolTipText(I18n.tr("ui.quota.test_proxy.tooltip"));
         _test_proxy_button.addActionListener(e -> testProxyList());
         test_btn_panel.add(_test_proxy_button);
+
+        JLabel batch_label = new JLabel(I18n.tr("ui.quota.batch_size_label"));
+        batch_label.setToolTipText(I18n.tr("ui.quota.batch_size.tooltip"));
+        test_btn_panel.add(batch_label);
+        // Default to 20 concurrent TCP probes. Most home networks
+        // handle this easily; aggressive users with fat lists can crank
+        // it up to 100. Below 1 makes no sense; above 100 starts to
+        // hit the JVM's default file-descriptor budget on Linux.
+        _batch_size_spinner = new JSpinner(new SpinnerNumberModel(20, 1, 100, 1));
+        _batch_size_spinner.setToolTipText(I18n.tr("ui.quota.batch_size.tooltip"));
+        ((JSpinner.DefaultEditor) _batch_size_spinner.getEditor()).getTextField().setEditable(true);
+        ((JSpinner.DefaultEditor) _batch_size_spinner.getEditor()).getTextField().setColumns(3);
+        test_btn_panel.add(_batch_size_spinner);
+
         test_row.add(test_btn_panel, BorderLayout.NORTH);
 
         _proxy_test_output = new JTextArea(8, 50);
@@ -269,16 +294,41 @@ public class QuotaRecoverySettingsDialog extends JDialog {
     }
 
     /**
+     * Result of probing one proxy address. {@code ok} reflects the TCP
+     * connect success; {@code dt_ms} is wall time for the probe (useful
+     * for spotting slow-but-reachable proxies). On failure {@code fail_class}
+     * carries the simple class name of the thrown exception.
+     */
+    private static final class ProbeResult {
+        final boolean ok;
+        final long dt_ms;
+        final String fail_class;
+        ProbeResult(boolean ok, long dt_ms, String fail_class) {
+            this.ok = ok;
+            this.dt_ms = dt_ms;
+            this.fail_class = fail_class;
+        }
+    }
+
+    /**
      * Parses the configured SmartProxy list (custom or URL-fetched) and
-     * attempts a 3 s TCP connect to each entry. Writes the results into the
-     * output text area. Runs on a worker thread; the test button is disabled
-     * for the duration.
+     * attempts a 3 s TCP connect to each entry. The probes run on a
+     * fixed-size thread pool whose size is taken from the batch-size
+     * spinner (1..100, default 20), so a 300-entry list finishes in
+     * ~45 s instead of the ~15 min the sequential version took. Output
+     * is printed in submission order to keep the report readable.
+     * Runs on a worker thread; the test button is disabled for the
+     * duration. (#753)
      */
     private void testProxyList() {
         _test_proxy_button.setEnabled(false);
+        _batch_size_spinner.setEnabled(false);
         _proxy_test_output.setText(I18n.tr("ui.quota.test.loading") + "\n");
 
+        final int batch_size = (Integer) _batch_size_spinner.getValue();
+
         new Thread(() -> {
+            ExecutorService exec = null;
             try {
                 // Grab whatever's currently in the live proxy manager. That
                 // accounts for both the custom-list and URL-fetched paths
@@ -294,11 +344,14 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                 // iterator (kept private to avoid concurrent-mod hazards).
                 // We probe by repeatedly asking getProxy() with an
                 // ever-growing exclusion list; this hits the same code
-                // path real workers use.
+                // path real workers use. Cap raised from 256 to 4096 to
+                // accommodate the multi-URL aggregation added in commit 2
+                // -- with two or three public lists merged, pools easily
+                // top 1000 entries.
                 ArrayList<String> excluded = new ArrayList<>();
                 LinkedHashMap<String, Boolean> results = new LinkedHashMap<>();
 
-                int safety_cap = 256;
+                int safety_cap = 4096;
                 while (safety_cap-- > 0) {
                     String[] entry;
                     try {
@@ -324,45 +377,97 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                     return;
                 }
 
-                appendOutput(I18n.tr("ui.quota.test.testing_count", results.size()) + "\n");
+                List<String> addrs = new ArrayList<>(results.keySet());
+                appendOutput(I18n.tr("ui.quota.test.testing_count", addrs.size(), batch_size) + "\n");
                 appendOutput("--------------------------------------------------------------\n");
 
-                int ok = 0, fail = 0;
-                for (String addr : new ArrayList<>(results.keySet())) {
-                    // Pre-pad the address to 32 chars so the per-row output
-                    // stays column-aligned regardless of locale; the i18n
-                    // key only carries the trailing label + placeholders.
-                    String padded_addr = String.format("%-32s", addr);
+                exec = Executors.newFixedThreadPool(batch_size, r -> {
+                    Thread t = new Thread(r, "QuotaRecoverySettings-Probe");
+                    t.setDaemon(true);
+                    return t;
+                });
+                _probe_executor = exec;
+
+                // Pre-classify malformed entries on the spawning thread so
+                // we don't waste a probe worker on them, and keep their
+                // skip lines in stable order with the rest of the report.
+                // skip_reason[i] != null => never enqueued, print skip line
+                // at slot i; futures[i] holds the probe Future otherwise.
+                List<Future<ProbeResult>> futures = new ArrayList<>(addrs.size());
+                List<String> skip_reason = new ArrayList<>(addrs.size());
+
+                for (String addr : addrs) {
                     String[] parts = addr.split(":");
+                    String why = null;
+                    int port = -1;
                     if (parts.length != 2) {
-                        appendOutput(I18n.tr("ui.quota.test.row_skip_malformed", padded_addr) + "\n");
-                        fail++;
-                        results.put(addr, false);
-                        continue;
-                    }
-                    int port;
-                    try {
-                        port = Integer.parseInt(parts[1]);
-                        if (port < 1 || port > 65535) {
-                            throw new NumberFormatException("range");
+                        why = "malformed";
+                    } else {
+                        try {
+                            port = Integer.parseInt(parts[1]);
+                            if (port < 1 || port > 65535) {
+                                why = "bad_port:" + parts[1];
+                            }
+                        } catch (NumberFormatException ex) {
+                            why = "bad_port:" + parts[1];
                         }
-                    } catch (NumberFormatException ex) {
-                        appendOutput(I18n.tr("ui.quota.test.row_skip_bad_port", padded_addr, parts[1]) + "\n");
+                    }
+                    if (why != null) {
+                        futures.add(null);
+                        skip_reason.add(why);
+                    } else {
+                        final String host = parts[0];
+                        final int p = port;
+                        futures.add(exec.submit(() -> probe(host, p)));
+                        skip_reason.add(null);
+                    }
+                }
+
+                int ok = 0, fail = 0;
+                for (int i = 0; i < futures.size(); i++) {
+                    String addr = addrs.get(i);
+                    String padded_addr = String.format("%-32s", addr);
+                    Future<ProbeResult> f = futures.get(i);
+
+                    if (f == null) {
+                        String why = skip_reason.get(i);
+                        if (why.equals("malformed")) {
+                            appendOutput(I18n.tr("ui.quota.test.row_skip_malformed", padded_addr) + "\n");
+                        } else {
+                            // why = "bad_port:NNN"
+                            appendOutput(I18n.tr("ui.quota.test.row_skip_bad_port", padded_addr, why.substring("bad_port:".length())) + "\n");
+                        }
                         fail++;
                         results.put(addr, false);
                         continue;
                     }
 
-                    long t0 = System.currentTimeMillis();
-                    try (Socket s = new Socket()) {
-                        s.connect(new InetSocketAddress(parts[0], port), 3000);
-                        long dt = System.currentTimeMillis() - t0;
-                        appendOutput(I18n.tr("ui.quota.test.row_ok", padded_addr, dt) + "\n");
+                    ProbeResult r;
+                    try {
+                        r = f.get();
+                    } catch (java.util.concurrent.CancellationException ex) {
+                        appendOutput(I18n.tr("ui.quota.test.cancelled") + "\n");
+                        return;
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                        appendOutput(I18n.tr("ui.quota.test.cancelled") + "\n");
+                        return;
+                    } catch (java.util.concurrent.ExecutionException ex) {
+                        // The probe lambda catches its own exceptions and
+                        // returns a failed ProbeResult, so reaching this
+                        // branch means something genuinely odd happened.
+                        String cause = ex.getCause() == null ? ex.getClass().getSimpleName() : ex.getCause().getClass().getSimpleName();
+                        appendOutput(I18n.tr("ui.quota.test.row_fail", padded_addr, cause, 0L) + "\n");
+                        fail++;
+                        results.put(addr, false);
+                        continue;
+                    }
+                    if (r.ok) {
+                        appendOutput(I18n.tr("ui.quota.test.row_ok", padded_addr, r.dt_ms) + "\n");
                         ok++;
                         results.put(addr, true);
-                    } catch (Exception ex) {
-                        long dt = System.currentTimeMillis() - t0;
-                        appendOutput(I18n.tr("ui.quota.test.row_fail", padded_addr, ex.getClass().getSimpleName(), dt) + "\n");
+                    } else {
+                        appendOutput(I18n.tr("ui.quota.test.row_fail", padded_addr, r.fail_class, r.dt_ms) + "\n");
                         fail++;
                         results.put(addr, false);
                     }
@@ -370,9 +475,31 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                 appendOutput("--------------------------------------------------------------\n");
                 appendOutput(I18n.tr("ui.quota.test.summary", ok, fail) + "\n");
             } finally {
-                MiscTools.GUIRun(() -> _test_proxy_button.setEnabled(true));
+                if (exec != null) {
+                    exec.shutdownNow();
+                    try {
+                        exec.awaitTermination(2, TimeUnit.SECONDS);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
+                _probe_executor = null;
+                MiscTools.GUIRun(() -> {
+                    _test_proxy_button.setEnabled(true);
+                    _batch_size_spinner.setEnabled(true);
+                });
             }
         }, "QuotaRecoverySettings-ProxyTest").start();
+    }
+
+    private static ProbeResult probe(String host, int port) {
+        long t0 = System.currentTimeMillis();
+        try (Socket s = new Socket()) {
+            s.connect(new InetSocketAddress(host, port), 3000);
+            return new ProbeResult(true, System.currentTimeMillis() - t0, null);
+        } catch (Exception ex) {
+            return new ProbeResult(false, System.currentTimeMillis() - t0, ex.getClass().getSimpleName());
+        }
     }
 
     private void appendOutput(String s) {
@@ -380,5 +507,17 @@ public class QuotaRecoverySettingsDialog extends JDialog {
             _proxy_test_output.append(s);
             _proxy_test_output.setCaretPosition(_proxy_test_output.getDocument().getLength());
         });
+    }
+
+    @Override
+    public void dispose() {
+        // If the user closes the dialog while a test is running, kill the
+        // probe pool so the JVM doesn't wait up to 3 s per outstanding
+        // connect attempt. (#753)
+        ExecutorService exec = _probe_executor;
+        if (exec != null) {
+            exec.shutdownNow();
+        }
+        super.dispose();
     }
 }
