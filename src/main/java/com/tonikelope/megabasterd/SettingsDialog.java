@@ -18,7 +18,6 @@ import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -28,9 +27,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -43,9 +39,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import javax.swing.DefaultRowSorter;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
@@ -94,8 +87,8 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     /**
      * Fill the MEGA / ELC table models from AccountStore.listMegaPlaintext /
-     * listElcPlaintext. Must NOT be called when the store is locked --
-     * callers are responsible for taking the placeholder-row branch instead.
+     * listElcPlaintext. Must NOT be called when the store is locked -- callers
+     * are responsible for taking the placeholder-row branch instead.
      */
     private void _populateAccountTablesFromStore(DefaultTableModel mega_model, DefaultTableModel elc_model) {
         try {
@@ -111,17 +104,18 @@ public class SettingsDialog extends javax.swing.JDialog {
     }
 
     /**
-     * 2FA + login + persist for one MEGA account row. Used by the save loop
-     * for both brand-new accounts and existing accounts whose stored
-     * password differs from what the user typed in the table.
+     * 2FA + login + persist for one MEGA account row. Used by the save loop for
+     * both brand-new accounts and existing accounts whose stored password
+     * differs from what the user typed in the table.
      *
-     * <p>Short-circuits if the account already has an active session in
-     * {@link MainPanel#getMega_active_accounts()}. This preserves the
-     * legacy behaviour where an active session means "the user already
-     * authenticated via some other path; don't re-prompt".
+     * <p>
+     * Short-circuits if the account already has an active session in
+     * {@link MainPanel#getMega_active_accounts()}. This preserves the legacy
+     * behaviour where an active session means "the user already authenticated
+     * via some other path; don't re-prompt".
      *
      * @return true if the account is now persisted (or was already active),
-     *     false on login failure or 2FA cancellation
+     * false on login failure or 2FA cancellation
      */
     private boolean _loginAndPersistMegaAccount(String email, String plaintextPass, Dialog ownerDialog) {
 
@@ -3198,9 +3192,9 @@ public class SettingsDialog extends javax.swing.JDialog {
     }
 
     /**
-     * Shared backend for the two export buttons. Refuses to run if the store
-     * is locked (we can't decrypt). Shows a plaintext-warning confirmation
-     * before opening the file chooser. Writes UTF-8.
+     * Shared backend for the two export buttons. Refuses to run if the store is
+     * locked (we can't decrypt). Shows a plaintext-warning confirmation before
+     * opening the file chooser. Writes UTF-8.
      */
     private void _exportAccounts(boolean mega) {
         if (_account_store.isLocked()) {
@@ -3269,7 +3263,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             Files.write(out.toPath(), lines, java.nio.charset.StandardCharsets.UTF_8);
             JOptionPane.showMessageDialog(this,
                     LabelTranslatorSingleton.getInstance().translate("Exported ") + lines.size()
-                            + LabelTranslatorSingleton.getInstance().translate(" account(s) to ") + out.getAbsolutePath(),
+                    + LabelTranslatorSingleton.getInstance().translate(" account(s) to ") + out.getAbsolutePath(),
                     LabelTranslatorSingleton.getInstance().translate("Export accounts"),
                     JOptionPane.INFORMATION_MESSAGE);
         } catch (IOException ex) {

@@ -21,30 +21,31 @@ import java.util.logging.Logger;
 /**
  * Solver for MEGA's X-Hashcash anti-bot proof-of-work challenge.
  *
- * Since 2024 MEGA's /cs endpoint may respond to a login (or other) request
- * with HTTP 402 "Payment Required" plus an X-Hashcash header like:
+ * Since 2024 MEGA's /cs endpoint may respond to a login (or other) request with
+ * HTTP 402 "Payment Required" plus an X-Hashcash header like:
  *
- *   X-Hashcash: 1:192:1778778076:VEZuswYJ22eveR5NVuFepExSEAuQCxQTnlvRpQkW9IR0D03EGZD3DvD3tfOAVArD
- *               ^v ^e ^ts        ^token (64 chars b64url = 48 bytes)
+ * X-Hashcash:
+ * 1:192:1778778076:VEZuswYJ22eveR5NVuFepExSEAuQCxQTnlvRpQkW9IR0D03EGZD3DvD3tfOAVArD
+ * ^v ^e ^ts ^token (64 chars b64url = 48 bytes)
  *
- * The client must find a 32-bit nonce whose SHA-256 satisfies a threshold,
- * then re-send the same POST with header:
+ * The client must find a 32-bit nonce whose SHA-256 satisfies a threshold, then
+ * re-send the same POST with header:
  *
- *   X-Hashcash: 1:<token>:<base64-of-nonce-bytes-big-endian>
+ * X-Hashcash: 1:<token>:<base64-of-nonce-bytes-big-endian>
  *
  * Algorithm taken verbatim from the official MEGA SDK
  * (https://github.com/meganz/sdk, src/hashcash.cpp).
  *
- * Layout of the message fed to SHA-256 (kBufSize = 12,582,916 bytes):
- *   [4 bytes nonce big-endian] [token (48 bytes)] [token] [token] ... 262144 copies
+ * Layout of the message fed to SHA-256 (kBufSize = 12,582,916 bytes): [4 bytes
+ * nonce big-endian] [token (48 bytes)] [token] [token] ... 262144 copies
  *
  * Threshold = (((easiness & 63) << 1) + 1) << ((easiness >> 6) * 7 + 3)
- * Condition: first 4 bytes of SHA-256(message), read as big-endian uint32,
- *            must be <= threshold.
+ * Condition: first 4 bytes of SHA-256(message), read as big-endian uint32, must
+ * be <= threshold.
  *
  * For easiness=192 the threshold is 0x01000000 so we expect ~256 hashes on
- * average. Each hash processes ~12 MB so a single solve runs in roughly
- * 1-3 seconds on a desktop CPU with multi-threading.
+ * average. Each hash processes ~12 MB so a single solve runs in roughly 1-3
+ * seconds on a desktop CPU with multi-threading.
  *
  * @author tonikelope
  */
@@ -74,10 +75,10 @@ public final class HashcashSolver {
      * proof-of-work, and return the value that should be sent back in the
      * X-Hashcash request header on the retried POST:
      *
-     *   "1:&lt;token&gt;:&lt;nonce-base64&gt;"
+     * "1:&lt;token&gt;:&lt;nonce-base64&gt;"
      *
-     * Note: the SDK only requires {version=1, easiness, token}. The
-     * timestamp field is informational and is NOT mixed into the hash.
+     * Note: the SDK only requires {version=1, easiness, token}. The timestamp
+     * field is informational and is NOT mixed into the hash.
      *
      * @throws IllegalArgumentException if the header is malformed.
      * @throws Exception if SHA-256 is unavailable or the solve times out.

@@ -44,8 +44,8 @@ public class StreamChunkDownloader implements Runnable {
     }
 
     /**
-     * Returns the port number for a "host:port" smart-proxy entry, or -1 if
-     * the entry is malformed (no colon, non-numeric port, or out of range).
+     * Returns the port number for a "host:port" smart-proxy entry, or -1 if the
+     * entry is malformed (no colon, non-numeric port, or out of range).
      * Centralises the defensive parse so both the smart-proxy branch and the
      * fallback path in run() can use the same guard. (#751)
      */

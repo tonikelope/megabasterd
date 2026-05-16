@@ -13,7 +13,6 @@ import static com.tonikelope.megabasterd.CryptTools.forwardMEGALinkKeyIV;
 import static com.tonikelope.megabasterd.CryptTools.genDecrypter;
 import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKey;
 import static com.tonikelope.megabasterd.CryptTools.initMEGALinkKeyIV;
-import static com.tonikelope.megabasterd.MainPanel.*;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.InetSocketAddress;
@@ -36,11 +35,11 @@ public class ChunkDownloaderMono extends ChunkDownloader {
     public static final int READ_TIMEOUT_RETRY = 3;
 
     /**
-     * Safety cap for the in-memory chunk buffer. mono-slot chunks are
-     * <= 1 MiB by design (calculateChunkSize uses size_multi=1) so any
-     * value above a few MiB is essentially unreachable. We keep the cap
-     * generous to leave headroom for future tweaks while still refusing
-     * pathological sizes that would OOM the JVM.
+     * Safety cap for the in-memory chunk buffer. mono-slot chunks are <= 1 MiB
+     * by design (calculateChunkSize uses size_multi=1) so any value above a few
+     * MiB is essentially unreachable. We keep the cap generous to leave
+     * headroom for future tweaks while still refusing pathological sizes that
+     * would OOM the JVM.
      */
     private static final int MAX_CHUNK_BUFFER_BYTES = 8 * 1024 * 1024;
 
@@ -50,8 +49,8 @@ public class ChunkDownloaderMono extends ChunkDownloader {
 
     /**
      * Defensive port parse for smart-proxy entries; -1 means the entry is
-     * malformed and should be banned. See ChunkDownloader.run() for the
-     * same guard on the multi-slot path. (#751 / C3)
+     * malformed and should be banned. See ChunkDownloader.run() for the same
+     * guard on the multi-slot path. (#751 / C3)
      */
     private static int parseProxyPort(String proxy) {
         String[] parts = proxy.split(":");

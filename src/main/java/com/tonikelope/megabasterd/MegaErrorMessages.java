@@ -16,10 +16,10 @@ import javax.swing.JOptionPane;
 /**
  * Human-friendly mapping of MEGA API error codes to short name + meaning +
  * suggested action, plus a JOptionPane helper that pops a dialog explaining
- * what the user is looking at. Previously these errors surfaced as raw
- * "FATAL ERROR! MEGA API ERROR: -16" strings on row status labels (or
- * silently as a null quota) and the user had no idea whether the cause was
- * MegaBasterd, the link, the account, or MEGA's server.
+ * what the user is looking at. Previously these errors surfaced as raw "FATAL
+ * ERROR! MEGA API ERROR: -16" strings on row status labels (or silently as a
+ * null quota) and the user had no idea whether the cause was MegaBasterd, the
+ * link, the account, or MEGA's server.
  *
  * The mapping follows the codes documented at
  * https://github.com/meganz/sdk/blob/master/include/mega/error.h .
@@ -32,9 +32,9 @@ public final class MegaErrorMessages {
     }
 
     /**
-     * Dedup window: never show the same (code, identity) popup more than
-     * once every 60 s. Avoids spamming the user when a refresh loop or a
-     * worker is retrying.
+     * Dedup window: never show the same (code, identity) popup more than once
+     * every 60 s. Avoids spamming the user when a refresh loop or a worker is
+     * retrying.
      */
     private static final long POPUP_DEDUP_WINDOW_MS = 60_000L;
     private static final ConcurrentHashMap<String, Long> LAST_POPUP_TS = new ConcurrentHashMap<>();
@@ -232,8 +232,8 @@ public final class MegaErrorMessages {
     }
 
     /**
-     * Build the HTML body for the popup. Public so callers that want to log
-     * the human-friendly text (instead of showing a dialog) can reuse it.
+     * Build the HTML body for the popup. Public so callers that want to log the
+     * human-friendly text (instead of showing a dialog) can reuse it.
      */
     public static String buildPopupHtml(int code, String identity, String context) {
         StringBuilder sb = new StringBuilder("<html><div style='width: 460px'>");
@@ -266,16 +266,16 @@ public final class MegaErrorMessages {
     }
 
     /**
-     * Show a JOptionPane explaining a MEGA API error code. Deduplicates so
-     * the same (code, identity) doesn't pop twice within
+     * Show a JOptionPane explaining a MEGA API error code. Deduplicates so the
+     * same (code, identity) doesn't pop twice within
      * {@link #POPUP_DEDUP_WINDOW_MS}. Always invoked on the EDT.
      *
      * @param parent Dialog parent (may be null).
      * @param code MEGA API error code (negative).
-     * @param identity Account email / link / file name this error applies
-     * to. Shown in italics under the title.
-     * @param context Free-text context to display in small grey. E.g.
-     * "while checking account quota" or "during chunk upload".
+     * @param identity Account email / link / file name this error applies to.
+     * Shown in italics under the title.
+     * @param context Free-text context to display in small grey. E.g. "while
+     * checking account quota" or "during chunk upload".
      */
     public static void showPopup(Component parent, int code, String identity, String context) {
         String dedup_key = code + "|" + (identity == null ? "" : identity);
@@ -298,9 +298,9 @@ public final class MegaErrorMessages {
 
     /**
      * Convenience: extract the numeric code from a MegaAPIException message
-     * (which is always shaped "MEGA API ERROR: -N" or "MEGA API ERROR: -N
-     * extra info..."). Returns 0 if it can't parse. Useful when callers
-     * caught a generic Exception and only kept its message.
+     * (which is always shaped "MEGA API ERROR: -N" or "MEGA API ERROR: -N extra
+     * info..."). Returns 0 if it can't parse. Useful when callers caught a
+     * generic Exception and only kept its message.
      */
     public static int parseCodeFromMessage(String message) {
         if (message == null) {

@@ -34,43 +34,35 @@ import java.util.zip.GZIPInputStream;
 import javax.net.ssl.HttpsURLConnection;
 
 /**
- * Standalone forensic login tool. For each account in a txt file, replays
- * the full MegaBasterd login flow at the HTTP level and dumps everything
- * that came back: request body (redacted), URL (redacted), HTTP status,
- * response headers, response body (redacted), parsed JSON with the shape
- * and field lengths, derivation method used, timings. One JSON file per
- * account, so you can diff a working account against a failing one and
- * see exactly what's different in MEGA's response.
+ * Standalone forensic login tool. For each account in a txt file, replays the
+ * full MegaBasterd login flow at the HTTP level and dumps everything that came
+ * back: request body (redacted), URL (redacted), HTTP status, response headers,
+ * response body (redacted), parsed JSON with the shape and field lengths,
+ * derivation method used, timings. One JSON file per account, so you can diff a
+ * working account against a failing one and see exactly what's different in
+ * MEGA's response.
  *
- * The tool does NOT decrypt anything past the response — its job is to
- * capture what came back, not to validate the session. It also does not
- * touch MegaBasterd's production login path, so a failure in here never
- * affects the GUI.
+ * The tool does NOT decrypt anything past the response — its job is to capture
+ * what came back, not to validate the session. It also does not touch
+ * MegaBasterd's production login path, so a failure in here never affects the
+ * GUI.
  *
- * Run:
- *   java -cp MegaBasterd-8.25-jar-with-dependencies.jar \
- *        com.tonikelope.megabasterd.LoginDiagnostic accounts.txt [outdir]
+ * Run: java -cp MegaBasterd-8.25-jar-with-dependencies.jar \
+ * com.tonikelope.megabasterd.LoginDiagnostic accounts.txt [outdir]
  *
- * accounts.txt:
- *   # comments
- *   user@example.com:password
- *   user@example.com:password:123456
+ * accounts.txt: # comments user@example.com:password
+ * user@example.com:password:123456
  *
- * Output:
- *   outdir/summary.txt                   one line per account
- *   outdir/01-u***r@example.com.json     full capture for account #1
- *   outdir/02-...
+ * Output: outdir/summary.txt one line per account
+ * outdir/01-u***r@example.com.json full capture for account #1 outdir/02-...
  *
- * Redaction rules:
- *   - password: never recorded, anywhere.
- *   - mfa (pincode) in request body: "[REDACTED]".
- *   - uh (user_hash) in request body: "[REDACTED-len-N]".
- *   - sid in URL: "[REDACTED]".
- *   - sensitive blobs in response (k, privk, csid, keys, pubk, sek, kc,
- *     pubkc, sigPubkCu25519, sigPubkEd25519): replaced with
- *     "[REDACTED-len-N-sha8-XXXXXXXX]". sha8 lets you spot when two
- *     accounts have an identical blob (would be a bug).
- *   - everything else (v, ach, flags, mcsm, ts, ...): kept verbatim.
+ * Redaction rules: - password: never recorded, anywhere. - mfa (pincode) in
+ * request body: "[REDACTED]". - uh (user_hash) in request body:
+ * "[REDACTED-len-N]". - sid in URL: "[REDACTED]". - sensitive blobs in response
+ * (k, privk, csid, keys, pubk, sek, kc, pubkc, sigPubkCu25519, sigPubkEd25519):
+ * replaced with "[REDACTED-len-N-sha8-XXXXXXXX]". sha8 lets you spot when two
+ * accounts have an identical blob (would be a bug). - everything else (v, ach,
+ * flags, mcsm, ts, ...): kept verbatim.
  *
  * Emails are also partially redacted in the report (u***r@dominio.com).
  *
@@ -85,9 +77,9 @@ public final class LoginDiagnostic {
 
     /**
      * Response fields whose values are encrypted blobs or session material.
-     * Recorded as "[REDACTED-len-N-sha8-XXXXXXXX]" so they cannot leak
-     * anything useful but their length and identity (sha8) survive for
-     * comparison between accounts.
+     * Recorded as "[REDACTED-len-N-sha8-XXXXXXXX]" so they cannot leak anything
+     * useful but their length and identity (sha8) survive for comparison
+     * between accounts.
      */
     private static final Set<String> SENSITIVE_RESPONSE_KEYS = new HashSet<>(Arrays.asList(
             "k", "privk", "csid", "keys", "pubk", "sek", "kc", "pubkc",
@@ -242,12 +234,11 @@ public final class LoginDiagnostic {
     }
 
     /**
-     * Capture every step of the login flow for one account. Returns a map
-     * that JSON-serializes cleanly and contains: request bodies (redacted),
-     * URLs (redacted), HTTP statuses, response headers, response bodies
-     * (redacted), parsed JSON of the response (with sensitive blobs
-     * replaced), key-derivation method used, timings, and a final
-     * diagnosis hint.
+     * Capture every step of the login flow for one account. Returns a map that
+     * JSON-serializes cleanly and contains: request bodies (redacted), URLs
+     * (redacted), HTTP statuses, response headers, response bodies (redacted),
+     * parsed JSON of the response (with sensitive blobs replaced),
+     * key-derivation method used, timings, and a final diagnosis hint.
      */
     private static Map<String, Object> captureAccount(String email, String password, String pincode) {
         Map<String, Object> r = new LinkedHashMap<>();
@@ -353,10 +344,10 @@ public final class LoginDiagnostic {
 
     /**
      * Issue a single HTTP POST and capture everything we can see about the
-     * request and the response, with sensitive material redacted. If the
-     * server responds 402 with an X-Hashcash header we solve the
-     * proof-of-work and transparently retry the same POST once, recording
-     * both attempts so the report shows the hashcash interaction.
+     * request and the response, with sensitive material redacted. If the server
+     * responds 402 with an X-Hashcash header we solve the proof-of-work and
+     * transparently retry the same POST once, recording both attempts so the
+     * report shows the hashcash interaction.
      */
     private static Map<String, Object> doHttpRequest(String label, String url, String body, String userHashToRedact) {
         return doHttpRequest(label, url, body, userHashToRedact, null);
@@ -537,9 +528,9 @@ public final class LoginDiagnostic {
     }
 
     /**
-     * Look at what came back from us0 and us, and offer a one-line hint
-     * about whether MegaBasterd's legacy login path would have produced a
-     * SID. Categories match the MegaAPIException codes added in _realLogin.
+     * Look at what came back from us0 and us, and offer a one-line hint about
+     * whether MegaBasterd's legacy login path would have produced a SID.
+     * Categories match the MegaAPIException codes added in _realLogin.
      */
     private static Map<String, Object> diagnose(Map<String, Object> step1, Map<String, Object> step3) {
         Map<String, Object> d = new LinkedHashMap<>();
@@ -595,7 +586,6 @@ public final class LoginDiagnostic {
     }
 
     // -------- redaction & helpers --------
-
     private static String redactEmail(String email) {
         if (email == null) {
             return "(null)";
@@ -670,8 +660,8 @@ public final class LoginDiagnostic {
     }
 
     /**
-     * Summarize keys present at the top level of the response so it's
-     * trivial to scan a summary.txt and spot field-level differences.
+     * Summarize keys present at the top level of the response so it's trivial
+     * to scan a summary.txt and spot field-level differences.
      */
     private static Map<String, Object> summarizeFields(Object parsed) {
         Map<String, Object> out = new LinkedHashMap<>();
@@ -757,7 +747,6 @@ public final class LoginDiagnostic {
 
     // -------- helpers replicated from MegaAPI (kept private; this tool
     // -------- runs without MainPanel.* state initialized) --------
-
     private static synchronized String nextSeqno() {
         return String.valueOf(seqno++);
     }

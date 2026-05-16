@@ -1386,12 +1386,13 @@ public class MiscTools {
 
     /**
      * Endpoints that return the caller's public IPv4 as plain text in the
-     * response body. Rotated through in order until one returns a valid IP.
-     * All HTTPS so a hostile network on the path can't spoof the response and
+     * response body. Rotated through in order until one returns a valid IP. All
+     * HTTPS so a hostile network on the path can't spoof the response and
      * mislead the 509-recovery logic into believing the IP changed (or didn't).
      * The previous single source ("http://whatismyip.akamai.com/") was plain
      * HTTP and a single point of failure -- if akamai's box was unreachable or
-     * an MITM rewrote the response, the IP-aware retry would mis-trigger. (#751)
+     * an MITM rewrote the response, the IP-aware retry would mis-trigger.
+     * (#751)
      */
     private static final String[] PUBLIC_IP_SOURCES = new String[]{
         "https://api.ipify.org/",
@@ -1407,8 +1408,8 @@ public class MiscTools {
     /**
      * Bounded-validate the response body of one of the IPv4 services. They
      * sometimes append a trailing newline or extra whitespace; trim and then
-     * verify dotted-quad shape. Reject anything that doesn't look like an IP
-     * so we don't poison the cache with HTML error pages.
+     * verify dotted-quad shape. Reject anything that doesn't look like an IP so
+     * we don't poison the cache with HTML error pages.
      */
     private static String parsePublicIpResponse(String body) {
         if (body == null) {

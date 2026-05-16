@@ -10,7 +10,6 @@
 package com.tonikelope.megabasterd;
 
 import java.util.logging.Level;
-import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
 
 /**

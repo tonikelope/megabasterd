@@ -44,12 +44,12 @@ public final class SmartMegaProxyManager {
     public static final boolean RESET_SLOT_PROXY = true;
     public static final boolean RANDOM_SELECT = true;
     /**
-     * Default for the post-509 window during which SmartProxy stays active
-     * for the affected download even after a successful chunk. Was the
-     * hard-coded {@code ChunkDownloader.SMART_PROXY_RECHECK_509_TIME = 3600};
-     * now overridable via DB setting "smart_proxy_509_recheck_window" so a
-     * user whose VPN clears quota in seconds isn't forced into a 1-hour
-     * proxy-mode window. (#751 / C4)
+     * Default for the post-509 window during which SmartProxy stays active for
+     * the affected download even after a successful chunk. Was the hard-coded
+     * {@code ChunkDownloader.SMART_PROXY_RECHECK_509_TIME = 3600}; now
+     * overridable via DB setting "smart_proxy_509_recheck_window" so a user
+     * whose VPN clears quota in seconds isn't forced into a 1-hour proxy-mode
+     * window. (#751 / C4)
      */
     public static final int RECHECK_509_WINDOW_DEFAULT = 3600;
 
@@ -82,10 +82,10 @@ public final class SmartMegaProxyManager {
     }
 
     /**
-     * Window (seconds) after a 509 during which SmartProxy stays "armed"
-     * for affected downloads, even after individual chunks succeed.
-     * Configurable via DB setting "smart_proxy_509_recheck_window".
-     * Defaults to {@link #RECHECK_509_WINDOW_DEFAULT} (3600 s). (#751 / C4)
+     * Window (seconds) after a 509 during which SmartProxy stays "armed" for
+     * affected downloads, even after individual chunks succeed. Configurable
+     * via DB setting "smart_proxy_509_recheck_window". Defaults to
+     * {@link #RECHECK_509_WINDOW_DEFAULT} (3600 s). (#751 / C4)
      */
     public int getRecheck_509_window() {
         return _recheck_509_window;

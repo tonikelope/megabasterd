@@ -26,14 +26,14 @@ public interface Transference {
     int SIM_TRANSFERENCES_DEFAULT = 4;
     int PROGRESS_WATCHDOG_TIMEOUT = 600;
     /**
-     * Shorter watchdog timeout used when the stall is specifically because
-     * MEGA returned HTTP 509 (bandwidth quota). The generic 600 s wait is
-     * far too long for a quota stall: the user often clears it within a
-     * minute by activating a VPN, and the IP-change-aware backoff (see
-     * ChunkDownloader.B2) usually breaks out long before this fires. But
-     * when the user has no VPN script and SmartProxy is disabled, this
-     * lets the watchdog flag the download as auto-retryable in 3 min
-     * instead of 10. Configurable via setting "quota_stall_timeout". (#751)
+     * Shorter watchdog timeout used when the stall is specifically because MEGA
+     * returned HTTP 509 (bandwidth quota). The generic 600 s wait is far too
+     * long for a quota stall: the user often clears it within a minute by
+     * activating a VPN, and the IP-change-aware backoff (see
+     * ChunkDownloader.B2) usually breaks out long before this fires. But when
+     * the user has no VPN script and SmartProxy is disabled, this lets the
+     * watchdog flag the download as auto-retryable in 3 min instead of 10.
+     * Configurable via setting "quota_stall_timeout". (#751)
      */
     int QUOTA_STALL_TIMEOUT_DEFAULT = 180;
     boolean LIMIT_TRANSFERENCE_SPEED_DEFAULT = false;

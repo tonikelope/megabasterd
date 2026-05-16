@@ -99,22 +99,22 @@ public class SqliteSingleton {
                 Connection.class.getClassLoader(),
                 new Class<?>[]{Connection.class},
                 new InvocationHandler() {
-                    @Override
-                    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                        switch (method.getName()) {
-                            case "close":
-                                return null;
-                            case "isClosed":
-                                return real.isClosed();
-                            default:
-                                try {
-                                    return method.invoke(real, args);
-                                } catch (java.lang.reflect.InvocationTargetException ite) {
-                                    throw ite.getCause();
-                                }
+            @Override
+            public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                switch (method.getName()) {
+                    case "close":
+                        return null;
+                    case "isClosed":
+                        return real.isClosed();
+                    default:
+                        try {
+                            return method.invoke(real, args);
+                        } catch (java.lang.reflect.InvocationTargetException ite) {
+                            throw ite.getCause();
                         }
-                    }
-                });
+                }
+            }
+        });
     }
 
     private static class LazyHolder {

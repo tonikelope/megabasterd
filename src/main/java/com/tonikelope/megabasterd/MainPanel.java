@@ -27,7 +27,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -123,11 +122,11 @@ public final class MainPanel {
     /**
      * Shared cached public IP for the 509-recovery / VPN-aware retry path.
      * Workers call getCachedPublicIp() during 509 backoff to notice that the
-     * user changed their public IP (e.g. activated a VPN). Without a cache,
-     * N parallel workers all hitting the public-IP services every backoff
-     * slice would (a) burn budget on those services and (b) potentially
-     * desync because each worker would get a fresh fetch with its own
-     * timing. One cache, one fetcher at a time, TTL 30 s. (#751)
+     * user changed their public IP (e.g. activated a VPN). Without a cache, N
+     * parallel workers all hitting the public-IP services every backoff slice
+     * would (a) burn budget on those services and (b) potentially desync
+     * because each worker would get a fresh fetch with its own timing. One
+     * cache, one fetcher at a time, TTL 30 s. (#751)
      */
     private static volatile String _cached_public_ip = null;
     private static volatile long _cached_public_ip_ts = 0L;
@@ -136,12 +135,12 @@ public final class MainPanel {
 
     /**
      * Returns the most recent public IPv4 we've seen, refreshing via
-     * MiscTools.getMyPublicIP() (which rotates HTTPS sources) at most once
-     * per {@link #PUBLIC_IP_CACHE_TTL_MS}. Returns null if no fetch has
-     * ever succeeded; otherwise returns the previously-cached value when
-     * the current fetch attempt fails (treating it as "no IP change
-     * detected" rather than poisoning callers with null). Safe to call
-     * concurrently from any worker thread. (#751)
+     * MiscTools.getMyPublicIP() (which rotates HTTPS sources) at most once per
+     * {@link #PUBLIC_IP_CACHE_TTL_MS}. Returns null if no fetch has ever
+     * succeeded; otherwise returns the previously-cached value when the current
+     * fetch attempt fails (treating it as "no IP change detected" rather than
+     * poisoning callers with null). Safe to call concurrently from any worker
+     * thread. (#751)
      */
     public static String getCachedPublicIp() {
         long now = System.currentTimeMillis();
@@ -167,10 +166,10 @@ public final class MainPanel {
     }
 
     /**
-     * Force-invalidate the public-IP cache so the next getCachedPublicIp()
-     * call will trigger a fresh fetch. Used by the 509 path after running
-     * the user's external command (which may have switched VPN), so we
-     * don't keep returning the pre-VPN IP and miss the change. (#751)
+     * Force-invalidate the public-IP cache so the next getCachedPublicIp() call
+     * will trigger a fresh fetch. Used by the 509 path after running the user's
+     * external command (which may have switched VPN), so we don't keep
+     * returning the pre-VPN IP and miss the change. (#751)
      */
     public static void invalidatePublicIpCache() {
         _cached_public_ip_ts = 0L;

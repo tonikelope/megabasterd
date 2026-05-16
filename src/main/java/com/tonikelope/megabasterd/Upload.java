@@ -13,7 +13,6 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.Transference.PROGRESS_WATCHDOG_TIMEOUT;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import static java.lang.Integer.MAX_VALUE;
 import java.nio.file.Files;

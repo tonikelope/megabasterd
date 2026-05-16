@@ -23,7 +23,6 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.event.WindowEvent;
 import static java.awt.event.WindowEvent.WINDOW_CLOSING;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
@@ -82,9 +81,9 @@ public final class MainPanelView extends javax.swing.JFrame {
     }
 
     /**
-     * Exposes the Edit menu so MainPanel can append items
-     * programmatically without touching the NetBeans-generated form
-     * (e.g. the QuotaRecoverySettingsDialog launcher added in #751 / C1).
+     * Exposes the Edit menu so MainPanel can append items programmatically
+     * without touching the NetBeans-generated form (e.g. the
+     * QuotaRecoverySettingsDialog launcher added in #751 / C1).
      */
     public javax.swing.JMenu getEdit_menu() {
         return edit_menu;

@@ -173,8 +173,8 @@ public class WarningExitMessage extends javax.swing.JDialog {
     }
 
     /**
-     * Mark the "queue saved to DB" line as done. Called from MainPanel once
-     * the upfront persistence step has finished.
+     * Mark the "queue saved to DB" line as done. Called from MainPanel once the
+     * upfront persistence step has finished.
      */
     public void setDbSaved(boolean ok) {
         MiscTools.GUIRun(() -> {

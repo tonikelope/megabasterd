@@ -108,13 +108,12 @@ public class MegaAPI implements Serializable {
     private int _account_version;
 
     /**
-     * Most recent MEGA API error code observed by RAW_REQUEST for this
-     * MegaAPI instance. Lets callers that swallowed the exception (e.g.
-     * {@link #getQuota()} returns null on failure) still surface a
-     * descriptive popup via {@link MegaErrorMessages#showPopup}. 0 means
-     * "no error since reset". Transient codes
-     * ({@link #MEGA_ERROR_NO_EXCEPTION_CODES}) are also stored so
-     * diagnostics show what just happened. (#751 / D)
+     * Most recent MEGA API error code observed by RAW_REQUEST for this MegaAPI
+     * instance. Lets callers that swallowed the exception (e.g.
+     * {@link #getQuota()} returns null on failure) still surface a descriptive
+     * popup via {@link MegaErrorMessages#showPopup}. 0 means "no error since
+     * reset". Transient codes ({@link #MEGA_ERROR_NO_EXCEPTION_CODES}) are also
+     * stored so diagnostics show what just happened. (#751 / D)
      */
     private transient volatile int _last_api_error_code = 0;
 
@@ -153,11 +152,10 @@ public class MegaAPI implements Serializable {
 
     /**
      * Standard query parameters that MEGA's API expects on every /cs request:
-     *   &v=3       protocol version (the MEGA SDK appends this)
-     *   &ak=...    application key (user-configured if set, else MEGAcmd's
-     *              public key as fallback so we look like a known client
-     *              rather than an anonymous reverse-engineered bot)
-     *   &lang=es   user language (optional, included if set)
+     * &v=3 protocol version (the MEGA SDK appends this) &ak=... application key
+     * (user-configured if set, else MEGAcmd's public key as fallback so we look
+     * like a known client rather than an anonymous reverse-engineered bot)
+     * &lang=es user language (optional, included if set)
      */
     private static String _apiStdParams() {
         StringBuilder sb = new StringBuilder("&v=3");
@@ -171,15 +169,14 @@ public class MegaAPI implements Serializable {
     }
 
     /**
-     * Context tag for log lines. Includes the thread name and the account
-     * email if known (login() sets _full_email; before login this is null).
-     * Used so that bug reports with multiple accounts can be diagnosed.
+     * Context tag for log lines. Includes the thread name and the account email
+     * if known (login() sets _full_email; before login this is null). Used so
+     * that bug reports with multiple accounts can be diagnosed.
      */
     private String _ctx() {
         String who = _full_email != null ? _full_email : (_email != null ? _email : "(pre-login)");
         return Thread.currentThread().getName() + " account=" + who;
     }
-
 
     private static String _redactUrl(String url) {
         if (url == null) {
@@ -315,9 +312,9 @@ public class MegaAPI implements Serializable {
 
     /**
      * Build a redacted summary of a login response so we can diagnose why a
-     * login failed without leaking the encrypted key material itself.
-     * Reports which keys are present and their lengths. Used only on the
-     * error path of _realLogin().
+     * login failed without leaking the encrypted key material itself. Reports
+     * which keys are present and their lengths. Used only on the error path of
+     * _realLogin().
      */
     private static String _describeLoginResponse(HashMap response) {
         if (response == null) {

@@ -33,9 +33,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
     /**
      * Legacy hard-coded post-509 SmartProxy window. Now lives in
-     * SmartMegaProxyManager as a configurable; this constant is kept as
-     * the ultimate fallback when no proxy manager is wired (e.g. very
-     * early startup) so the original semantics hold. (#751 / C4)
+     * SmartMegaProxyManager as a configurable; this constant is kept as the
+     * ultimate fallback when no proxy manager is wired (e.g. very early
+     * startup) so the original semantics hold. (#751 / C4)
      */
     public static final int SMART_PROXY_RECHECK_509_TIME = SmartMegaProxyManager.RECHECK_509_WINDOW_DEFAULT;
     private static final Logger LOG = Logger.getLogger(ChunkDownloader.class.getName());
@@ -60,28 +60,27 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     protected volatile int _last_http_error = 0;
 
     /**
-     * True while this worker is in the exp-backoff sleep after a 509
-     * (bandwidth quota) specifically. Used by Download.run()'s watchdog to
-     * choose the shorter quota-stall timeout instead of the generic 600 s,
-     * and by DownloadView to show "Quota reached -- retrying in Xs". (#751)
+     * True while this worker is in the exp-backoff sleep after a 509 (bandwidth
+     * quota) specifically. Used by Download.run()'s watchdog to choose the
+     * shorter quota-stall timeout instead of the generic 600 s, and by
+     * DownloadView to show "Quota reached -- retrying in Xs". (#751)
      */
     protected volatile boolean _in_509_backoff = false;
 
     /**
      * Public IP captured the first time this worker hit a 509 during the
      * current burst. While in 509 backoff we periodically compare
-     * MainPanel.getCachedPublicIp() against this value; a change means
-     * the user activated a VPN / switched IP and we should cut the
-     * backoff short and retry immediately rather than waiting out the
-     * full exp-backoff or the 10 min watchdog. Protected so mono can
-     * clear it on chunk success. (#751)
+     * MainPanel.getCachedPublicIp() against this value; a change means the user
+     * activated a VPN / switched IP and we should cut the backoff short and
+     * retry immediately rather than waiting out the full exp-backoff or the 10
+     * min watchdog. Protected so mono can clear it on chunk success. (#751)
      */
     protected volatile String _ip_at_first_509 = null;
 
     /**
-     * Seconds remaining in the current 509 backoff (decreases from
-     * wait_secs to 0 inside the sleep loop). Used by DownloadView to
-     * render "retrying in Xs" without having to peek into the loop. (#751)
+     * Seconds remaining in the current 509 backoff (decreases from wait_secs to
+     * 0 inside the sleep loop). Used by DownloadView to render "retrying in Xs"
+     * without having to peek into the loop. (#751)
      */
     protected volatile int _backoff_seconds_remaining = 0;
 
@@ -171,23 +170,20 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
     }
 
     /**
-     * Sleeps an exp-backoff window in 1 s slices, while:
-     *  - capturing the public IP the first time http_status == 509 in a
-     *    burst, then re-checking every 30 s and breaking out early if the
-     *    IP changed (user activated a VPN);
-     *  - updating the slot status label each second so the "509 Xs"
-     *    countdown is live in the UI;
-     *  - respecting MainPanel.isExit() so shutdown isn't blocked for the
-     *    full backoff window.
+     * Sleeps an exp-backoff window in 1 s slices, while: - capturing the public
+     * IP the first time http_status == 509 in a burst, then re-checking every
+     * 30 s and breaking out early if the IP changed (user activated a VPN); -
+     * updating the slot status label each second so the "509 Xs" countdown is
+     * live in the UI; - respecting MainPanel.isExit() so shutdown isn't blocked
+     * for the full backoff window.
      *
-     * Returns true if the sleep terminated early because the public IP
-     * changed -- the caller should reset its conta_error counter so the
-     * next backoff starts from scratch instead of resuming an exp curve
-     * that no longer applies. Returns false on normal completion,
-     * shutdown, or interruption.
+     * Returns true if the sleep terminated early because the public IP changed
+     * -- the caller should reset its conta_error counter so the next backoff
+     * starts from scratch instead of resuming an exp curve that no longer
+     * applies. Returns false on normal completion, shutdown, or interruption.
      *
-     * Protected so ChunkDownloaderMono (which also wants the same
-     * VPN-aware behaviour) can share the implementation. (#751)
+     * Protected so ChunkDownloaderMono (which also wants the same VPN-aware
+     * behaviour) can share the implementation. (#751)
      */
     protected boolean sleepWithIpAwareBackoff(int conta_error_count, int http_status) {
 

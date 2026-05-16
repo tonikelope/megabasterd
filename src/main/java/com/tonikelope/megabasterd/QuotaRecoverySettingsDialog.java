@@ -41,10 +41,10 @@ import javax.swing.SwingConstants;
 
 /**
  * Handwritten settings dialog for the 509 / quota / SmartProxy knobs added in
- * #751. Lives outside the main NetBeans-form SettingsDialog so we don't have
- * to extend a 5400-line generated form to surface three new settings; the
- * trade-off is that this dialog has a simpler visual style than the
- * tabbed SettingsDialog. Reachable from the main menu's Edit submenu.
+ * #751. Lives outside the main NetBeans-form SettingsDialog so we don't have to
+ * extend a 5400-line generated form to surface three new settings; the
+ * trade-off is that this dialog has a simpler visual style than the tabbed
+ * SettingsDialog. Reachable from the main menu's Edit submenu.
  *
  * @author tonikelope
  */
