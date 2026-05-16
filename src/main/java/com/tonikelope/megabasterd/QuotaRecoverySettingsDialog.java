@@ -188,15 +188,20 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         footer.add(_cancel_button);
         footer.add(_save_button);
-        content.add(footer, BorderLayout.SOUTH);
 
-        // Help text at the very bottom
         JLabel help = new JLabel("<html><i>These settings only affect HTTP 509 (MEGA bandwidth quota) recovery; "
                 + "the main SmartProxy list itself lives in Settings &rarr; SmartProxy.</i></html>");
         help.setForeground(new Color(110, 110, 110));
         help.setHorizontalAlignment(SwingConstants.CENTER);
         help.setBorder(BorderFactory.createEmptyBorder(8, 4, 0, 4));
-        content.add(help, BorderLayout.PAGE_END);
+
+        // Nest footer + help in one SOUTH slot. Separate SOUTH and PAGE_END
+        // constraints collide because the relative PAGE_END overrides the
+        // absolute SOUTH in BorderLayout, which hides the Save/Cancel row.
+        JPanel south = new JPanel(new BorderLayout());
+        south.add(footer, BorderLayout.CENTER);
+        south.add(help, BorderLayout.SOUTH);
+        content.add(south, BorderLayout.SOUTH);
 
         setContentPane(content);
         pack();
