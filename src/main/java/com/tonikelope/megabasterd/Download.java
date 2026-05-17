@@ -113,6 +113,20 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
      */
     private volatile int _last_fatal_api_error_code;
     private volatile int _paused_workers;
+
+    /**
+     * Cancels the in-flight auto-retry countdown sleep ({@link
+     * Transference#RESTART_COUNTDOWN_SECS} / {@link
+     * Transference#RESTART_COUNTDOWN_SECS_OVERQUOTA}) so the next 1 s tick
+     * inside that loop breaks early and the {@link #restart()} call fires
+     * immediately. Set by {@link #wakeFromRetryCountdown()} after the user
+     * enables SmartProxy at runtime: a download that is sitting in the
+     * finished_queue with -17 EOVERQUOTA pending a 60 s rearm would
+     * otherwise ignore the freshly-available proxy pool until the full
+     * countdown elapses. Volatile (single producer + single consumer; no
+     * CAS needed). (#760)
+     */
+    private volatile boolean _wake_from_retry_countdown = false;
     private File _file;
     private boolean _checking_cbc;
     private boolean _retrying_request;
@@ -512,6 +526,19 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         getMain_panel().getDownload_manager().getTransference_provision_queue().add(new_download);
 
         getMain_panel().getDownload_manager().secureNotify();
+    }
+
+    /**
+     * Break the in-flight auto-retry countdown so {@link #restart()} fires on
+     * the next 1 s tick instead of waiting out the full {@link
+     * Transference#RESTART_COUNTDOWN_SECS_OVERQUOTA} window. Called from
+     * MainPanelView right after the user enables SmartProxy at runtime, so a
+     * download that was sitting in the finished_queue with -17 pending a
+     * 60 s rearm can immediately reissue /cs through the now-available proxy
+     * pool. No-op when no countdown is in progress. (#760)
+     */
+    public void wakeFromRetryCountdown() {
+        _wake_from_retry_countdown = true;
     }
 
     @Override
@@ -1106,6 +1133,13 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             final int countdown_secs = (_last_fatal_api_error_code == -17)
                     ? RESTART_COUNTDOWN_SECS_OVERQUOTA
                     : RESTART_COUNTDOWN_SECS;
+
+            // Reset the wake flag at countdown entry so a stale set() from a
+            // previous, already-fired countdown can't short-circuit this one
+            // before it has had a chance to advance even a single second.
+            // (#760)
+            _wake_from_retry_countdown = false;
+
             THREAD_POOL.execute(() -> {
                 for (int i = countdown_secs; !_closed && i > 0; i--) {
                     final int j = i;
@@ -1116,6 +1150,18 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
                         Thread.sleep(1000);
                     } catch (InterruptedException ex) {
                         LOG.log(Level.SEVERE, ex.getMessage());
+                    }
+                    // External wakeup: user enabled SmartProxy mid-countdown.
+                    // The countdown for -17 EOVERQUOTA is 60 s and during that
+                    // window the download isn't in any running list, so the
+                    // wakeFromBackoff path used by the chunk workers cannot
+                    // reach it. Break the sleep loop so restart() fires now
+                    // and the next /cs retry goes through the proxy pool. (#760)
+                    if (_wake_from_retry_countdown) {
+                        _wake_from_retry_countdown = false;
+                        LOG.log(Level.INFO, "{0} Downloader {1} external wakeup -- breaking auto-retry countdown and restarting now",
+                                new Object[]{Thread.currentThread().getName(), getFile_name()});
+                        break;
                     }
                 }
                 if (!_closed) {

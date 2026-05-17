@@ -1480,6 +1480,26 @@ public final class MainPanelView extends javax.swing.JFrame {
                         }
                     }
 
+                    // Also wake every download that has already failed and is
+                    // sitting in the finished_queue counting down to its next
+                    // auto-retry. The classic #760 scenario: MEGA returned
+                    // -17 EOVERQUOTA from /cs (so the chunk workers never
+                    // even spawned), stopDownloader fired, the
+                    // RESTART_COUNTDOWN_SECS_OVERQUOTA (60 s) sleep started
+                    // -- and only THEN did the user enable SmartProxy. The
+                    // running_list iteration above can't reach these
+                    // downloads because they are no longer running; without
+                    // this second pass the user would have to wait up to 60 s
+                    // per row before SmartProxy is even consulted. Together
+                    // with the MegaAPI -17-as-synthetic-509 escalation, this
+                    // is what actually delivers "downloads start again right
+                    // after I enable SmartProxy". (#760)
+                    for (Transference t : _main_panel.getDownload_manager().getTransference_finished_queue()) {
+                        if (t instanceof Download) {
+                            ((Download) t).wakeFromRetryCountdown();
+                        }
+                    }
+
                 } else {
 
                     updateSmartProxyStatus("SmartProxy: OFF");
