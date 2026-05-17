@@ -268,6 +268,23 @@ public class SettingsDialog extends javax.swing.JDialog {
             javax.swing.ImageIcon proxy_icon = new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png"));
             panel_tabs.insertTab(I18n.tr("ui.tab.smartproxy"), proxy_icon, proxy_scroll, null, 1);
 
+            // updateFonts(this, ...) and translateLabels(this) ran at the top
+            // of this constructor BEFORE smart_proxy_checkbox and
+            // smart_proxy_settings had any parent (they were detached from
+            // Downloads at the .form level), so the dialog-wide tree-walks
+            // skipped them and they kept their raw 18 pt initComponents fonts
+            // / untranslated English text. Apply both transforms now, scoped
+            // to just the two orphans so QuotaRecoveryPanel (which font/
+            // translated itself in its own constructor) is not processed
+            // twice -- translateLabels is NOT idempotent (a second pass over
+            // already-translated text either re-translates via a coincidental
+            // map entry or returns it unchanged, depending on the locale).
+            // (#757)
+            MiscTools.updateFonts(smart_proxy_checkbox, GUI_FONT, _main_panel.getZoom_factor());
+            MiscTools.updateFonts(smart_proxy_settings, GUI_FONT, _main_panel.getZoom_factor());
+            translateLabels(smart_proxy_checkbox);
+            translateLabels(smart_proxy_settings);
+
             downloads_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
 
             downloads_scrollpane.getHorizontalScrollBar().setUnitIncrement(20);
