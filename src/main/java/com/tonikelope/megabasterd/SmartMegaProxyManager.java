@@ -179,13 +179,31 @@ public final class SmartMegaProxyManager {
     public synchronized void refreshSmartProxySettings() {
         String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
 
-        // Clamp ban_time to [10, 3600] s. Below 10 s a banned proxy is
-        // unblocked before the worker that banned it has finished retrying
-        // somewhere else, so the pool churns the same bad entries; above
-        // 1 h the proxy is effectively dead and should just be removed
-        // from the list manually. (#752)
+        // ban_time semantics:
+        //   0       = permanent ban (blockProxy removes the entry from the pool)
+        //   1..9    = allowed but risky: the banned proxy can be re-selected
+        //             before the worker that banned it finishes retrying
+        //             somewhere else, so a bad-pool can churn. We honour the
+        //             user's value but log a WARNING.
+        //   10..3600 = normal range
+        //   >3600   = clamp to 3600 (anything longer is effectively permanent
+        //             without using the 0 sentinel; clamping protects against
+        //             accidental enormous values).
+        // The previous code (audit #752) clamped <10 to 10, which silently
+        // ignored both "0 = permanent" (documented in the SettingsDialog UI)
+        // and short ban times intentionally chosen by users running curated
+        // private proxy pools. (#757)
         int requested_ban = MiscTools.parseIntOr(smartproxy_ban_time, PROXY_BLOCK_TIME);
-        _ban_time = clampWithWarn("smartproxy_ban_time", requested_ban, 10, 3600);
+        if (requested_ban < 0) {
+            LOG.log(Level.WARNING, "[SmartProxy] setting smartproxy_ban_time={0} is negative; treating as 0 (permanent ban).", requested_ban);
+            requested_ban = 0;
+        } else if (requested_ban > 0 && requested_ban < 10) {
+            LOG.log(Level.WARNING, "[SmartProxy] setting smartproxy_ban_time={0}s is below the recommended minimum of 10s. A banned proxy may be re-selected before the worker that banned it has retried elsewhere, causing pool churn. Honouring your value, but expect noisier logs.", requested_ban);
+        } else if (requested_ban > 3600) {
+            LOG.log(Level.WARNING, "[SmartProxy] setting smartproxy_ban_time={0} exceeds the maximum 3600s; clamping. If you want a permanent ban, set the value to 0.", requested_ban);
+            requested_ban = 3600;
+        }
+        _ban_time = requested_ban;
 
         String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
 
@@ -242,6 +260,16 @@ public final class SmartMegaProxyManager {
         _recheck_509_window = recheck;
 
         LOG.log(Level.INFO, "SmartProxy BAN_TIME: " + String.valueOf(_ban_time) + "   TIMEOUT: " + String.valueOf(_proxy_timeout / 1000) + "   REFRESH: " + String.valueOf(_autorefresh_time) + "   FORCE: " + String.valueOf(_force_smart_proxy) + "   RANDOM: " + String.valueOf(_random_select) + "   RESET-SLOT-PROXY: " + String.valueOf(_reset_slot_proxy) + "   RECHECK-509: " + String.valueOf(_recheck_509_window));
+
+        // Surface activation mode so users who set up "live" proxies and then
+        // see direct downloads understand why: without FORCE, SmartProxy only
+        // engages after MEGA returns HTTP 509 (or while inside the post-509
+        // recheck window). Reported by #757 bug 3.
+        if (_force_smart_proxy) {
+            LOG.log(Level.INFO, "[SmartProxy] mode: FORCE -- every chunk will be routed through a proxy regardless of MEGA quota state.");
+        } else {
+            LOG.log(Level.INFO, "[SmartProxy] mode: PASSIVE -- proxies are only used after MEGA returns HTTP 509 (or while inside the {0}s post-509 recheck window). Enable FORCE SMART PROXY in settings if you want every chunk routed through proxies.", _recheck_509_window);
+        }
     }
 
     public synchronized int getProxyCount() {

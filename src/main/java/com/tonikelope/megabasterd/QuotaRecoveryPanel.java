@@ -35,7 +35,7 @@ import java.util.logging.Logger;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JDialog;
+import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -46,17 +46,27 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 
 /**
- * Handwritten settings dialog for the 509 / quota / SmartProxy knobs added in
- * #751. Lives outside the main NetBeans-form SettingsDialog so we don't have to
- * extend a 5400-line generated form to surface three new settings; the
- * trade-off is that this dialog has a simpler visual style than the tabbed
- * SettingsDialog. Reachable from the main menu's Edit submenu.
+ * Quota recovery + SmartProxy 509 settings + diagnostics, packaged as a
+ * {@link JPanel} so it can be embedded as a tab inside the main
+ * {@link SettingsDialog}. Previously lived in a separate
+ * {@code QuotaRecoverySettingsDialog} reachable from the Edit menu; users
+ * found that split confusing (#757) so the content was merged here. Save
+ * is driven by the host SettingsDialog's global Save button via
+ * {@link #saveToDB()} -- this panel exposes no Save/Cancel of its own.
  *
  * @author tonikelope
  */
-public class QuotaRecoverySettingsDialog extends JDialog {
+public class QuotaRecoveryPanel extends JPanel {
 
-    private static final Logger LOG = Logger.getLogger(QuotaRecoverySettingsDialog.class.getName());
+    private static final Logger LOG = Logger.getLogger(QuotaRecoveryPanel.class.getName());
+
+    // Concurrent-probe batch size: persisted in DB as
+    // "smartproxy_test_batch_size" so the user's preference survives a
+    // restart. Previously the value reset to BATCH_SIZE_DEFAULT on every
+    // dialog open. (#757 bug 2)
+    static final int BATCH_SIZE_DEFAULT = 20;
+    static final int BATCH_SIZE_MIN = 1;
+    static final int BATCH_SIZE_MAX = 100;
 
     private final MainPanel _main_panel;
 
@@ -72,23 +82,19 @@ public class QuotaRecoverySettingsDialog extends JDialog {
     private JSpinner _batch_size_spinner;
     private JButton _save_working_button;
 
-    private JButton _save_button;
-    private JButton _cancel_button;
-
-    // Held so we can shut the probe pool down cleanly when the dialog is
-    // disposed mid-test; without this the JVM would wait for every 3s TCP
-    // connect to complete before exiting. (#753)
+    // Held so we can shut the probe pool down cleanly when the host dialog
+    // is disposed mid-test; without this the JVM would wait up to 3 s per
+    // outstanding TCP connect to complete before exiting.
     private volatile ExecutorService _probe_executor;
 
     // Addresses that passed the most recent test, in submission order.
-    // Drives the "Save working proxies to custom list" action: any
-    // working entry here is round-tripped back into custom_proxy_list
-    // with its SOCKS marker / auth trailer preserved (looked up from
-    // the live manager state at save time). (#753)
+    // Drives the "Save working proxies to custom list" action: any working
+    // entry here is round-tripped back into custom_proxy_list with its
+    // SOCKS marker / auth trailer preserved.
     private final List<String> _last_working_addrs = new ArrayList<>();
 
-    public QuotaRecoverySettingsDialog(java.awt.Frame parent, boolean modal, MainPanel main_panel) {
-        super(parent, modal);
+    public QuotaRecoveryPanel(MainPanel main_panel) {
+        super();
         _main_panel = main_panel;
 
         MiscTools.GUIRunAndWait(() -> {
@@ -96,17 +102,13 @@ public class QuotaRecoverySettingsDialog extends JDialog {
             updateFonts(this, GUI_FONT, main_panel.getZoom_factor());
             translateLabels(this);
             loadFromDB();
-            pack();
         });
     }
 
     private void initComponents() {
 
-        setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        setTitle(I18n.tr("ui.quota.title"));
-
-        JPanel content = new JPanel(new BorderLayout(10, 10));
-        content.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setLayout(new BorderLayout(10, 10));
+        setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 
         // --- Top: numeric / boolean settings (GridBag for tidy alignment) ---
         JPanel settings_panel = new JPanel(new GridBagLayout());
@@ -147,7 +149,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         g.gridy = 2;
         settings_panel.add(_recheck_509_spinner, g);
 
-        content.add(settings_panel, BorderLayout.NORTH);
+        add(settings_panel, BorderLayout.NORTH);
 
         // --- Middle: live IP + proxy test ---
         JPanel diag_panel = new JPanel(new BorderLayout(8, 8));
@@ -173,11 +175,11 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         JLabel batch_label = new JLabel(I18n.tr("ui.quota.batch_size_label"));
         batch_label.setToolTipText(I18n.tr("ui.quota.batch_size.tooltip"));
         test_btn_panel.add(batch_label);
-        // Default to 20 concurrent TCP probes. Most home networks
-        // handle this easily; aggressive users with fat lists can crank
-        // it up to 100. Below 1 makes no sense; above 100 starts to
-        // hit the JVM's default file-descriptor budget on Linux.
-        _batch_size_spinner = new JSpinner(new SpinnerNumberModel(20, 1, 100, 1));
+        // Initial value is overwritten by loadFromDB() once the DB has been
+        // consulted; using BATCH_SIZE_DEFAULT here keeps the spinner valid
+        // until then. Default 20 is safe on most home networks; >100 starts
+        // to hit the JVM's default file-descriptor budget on Linux. (#757)
+        _batch_size_spinner = new JSpinner(new SpinnerNumberModel(BATCH_SIZE_DEFAULT, BATCH_SIZE_MIN, BATCH_SIZE_MAX, 1));
         _batch_size_spinner.setToolTipText(I18n.tr("ui.quota.batch_size.tooltip"));
         ((JSpinner.DefaultEditor) _batch_size_spinner.getEditor()).getTextField().setEditable(true);
         ((JSpinner.DefaultEditor) _batch_size_spinner.getEditor()).getTextField().setColumns(3);
@@ -200,43 +202,19 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         test_row.add(test_scroll, BorderLayout.CENTER);
         diag_panel.add(test_row, BorderLayout.CENTER);
 
-        content.add(diag_panel, BorderLayout.CENTER);
+        add(diag_panel, BorderLayout.CENTER);
 
-        // --- Bottom: Save / Cancel ---
-        _save_button = new JButton(I18n.tr("ui.quota.save_button"));
-        _save_button.setBackground(new Color(60, 140, 60));
-        _save_button.setForeground(Color.WHITE);
-        _save_button.addActionListener(e -> {
-            saveToDB();
-            dispose();
-        });
-
-        _cancel_button = new JButton(I18n.tr("ui.quota.cancel_button"));
-        _cancel_button.addActionListener(e -> dispose());
-
-        JPanel footer = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
-        footer.add(_cancel_button);
-        footer.add(_save_button);
-
+        // --- Footer: help text only. Save / Cancel come from the host
+        // SettingsDialog so the user has a single Save point. (#757)
         JLabel help = new JLabel(I18n.tr("ui.quota.help"));
         help.setForeground(new Color(110, 110, 110));
         help.setHorizontalAlignment(SwingConstants.CENTER);
         help.setBorder(BorderFactory.createEmptyBorder(8, 4, 0, 4));
+        add(help, BorderLayout.SOUTH);
 
-        // Nest footer + help in one SOUTH slot. Separate SOUTH and PAGE_END
-        // constraints collide because the relative PAGE_END overrides the
-        // absolute SOUTH in BorderLayout, which hides the Save/Cancel row.
-        JPanel south = new JPanel(new BorderLayout());
-        south.add(footer, BorderLayout.CENTER);
-        south.add(help, BorderLayout.SOUTH);
-        content.add(south, BorderLayout.SOUTH);
-
-        setContentPane(content);
-        pack();
-
-        // Kick off the public-IP fetch on a worker thread so the dialog shows
+        // Kick off the public-IP fetch on a worker thread so the panel shows
         // up immediately instead of waiting for the HTTP roundtrip.
-        new Thread(this::refreshPublicIp, "QuotaRecoverySettings-IPInit").start();
+        new Thread(this::refreshPublicIp, "QuotaRecoveryPanel-IPInit").start();
     }
 
     private void loadFromDB() {
@@ -271,13 +249,35 @@ public class QuotaRecoverySettingsDialog extends JDialog {
             }
         }
         _recheck_509_spinner.setValue(recheck_v);
+
+        // Restore the test-time concurrent-probe batch size. Previously the
+        // spinner was never read from the DB, so the value silently reset to
+        // BATCH_SIZE_DEFAULT each time the dialog was reopened. (#757 bug 2)
+        String batch = DBTools.selectSettingValue("smartproxy_test_batch_size");
+        int batch_v = BATCH_SIZE_DEFAULT;
+        if (batch != null) {
+            try {
+                int v = Integer.parseInt(batch);
+                if (v >= BATCH_SIZE_MIN && v <= BATCH_SIZE_MAX) {
+                    batch_v = v;
+                }
+            } catch (NumberFormatException ignore) {
+            }
+        }
+        _batch_size_spinner.setValue(batch_v);
     }
 
-    private void saveToDB() {
+    /**
+     * Persist this panel's settings. Called by the host {@link SettingsDialog}
+     * inside its Save flow so the user has a single Save point for the whole
+     * Settings dialog. (#757)
+     */
+    public void saveToDB() {
         try {
             DBTools.insertSettingValue("auto_resume_ip_change", _auto_resume_ip_checkbox.isSelected() ? "yes" : "no");
             DBTools.insertSettingValue("quota_stall_timeout", String.valueOf((Integer) _quota_stall_spinner.getValue()));
             DBTools.insertSettingValue("smart_proxy_509_recheck_window", String.valueOf((Integer) _recheck_509_spinner.getValue()));
+            DBTools.insertSettingValue("smartproxy_test_batch_size", String.valueOf((Integer) _batch_size_spinner.getValue()));
 
             // Force the live SmartProxy manager to re-read its DB-backed
             // settings so the new recheck_509_window takes effect on the
@@ -288,6 +288,18 @@ public class QuotaRecoverySettingsDialog extends JDialog {
             }
         } catch (SQLException ex) {
             LOG.log(Level.SEVERE, "Could not save quota settings: {0}", ex.getMessage());
+        }
+    }
+
+    /**
+     * Shut down the probe pool cleanly. Call from the host dialog's dispose()
+     * hook so the JVM doesn't wait up to 3 s per outstanding TCP connect when
+     * the user closes the Settings dialog mid-test. (#757)
+     */
+    public void shutdown() {
+        ExecutorService exec = _probe_executor;
+        if (exec != null) {
+            exec.shutdownNow();
         }
     }
 
@@ -347,23 +359,12 @@ public class QuotaRecoverySettingsDialog extends JDialog {
         new Thread(() -> {
             ExecutorService exec = null;
             try {
-                // Grab whatever's currently in the live proxy manager. That
-                // accounts for both the custom-list and URL-fetched paths
-                // without us re-implementing the parser. If the manager
-                // hasn't refreshed yet, force one.
                 SmartMegaProxyManager pm = MainPanel.getProxy_manager();
                 if (pm == null) {
                     appendOutput(I18n.tr("ui.quota.test.smartproxy_not_initialised") + "\n");
                     return;
                 }
 
-                // Snapshot the whole pool through a dedicated accessor.
-                // The previous approach drained getProxy() with an
-                // ever-growing exclusion list, which (a) hid currently-banned
-                // proxies from the user (getProxy filters them out, so a
-                // recently-failed proxy was invisible to the test) and
-                // (b) needed an arbitrary safety_cap that silently truncated
-                // pools larger than the cap. (#753 audit)
                 List<String[]> snapshot;
                 try {
                     snapshot = pm.getProxySnapshot();
@@ -390,17 +391,12 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                 appendOutput("--------------------------------------------------------------\n");
 
                 exec = Executors.newFixedThreadPool(batch_size, r -> {
-                    Thread t = new Thread(r, "QuotaRecoverySettings-Probe");
+                    Thread t = new Thread(r, "QuotaRecoveryPanel-Probe");
                     t.setDaemon(true);
                     return t;
                 });
                 _probe_executor = exec;
 
-                // Pre-classify malformed entries on the spawning thread so
-                // we don't waste a probe worker on them, and keep their
-                // skip lines in stable order with the rest of the report.
-                // skip_reason[i] != null => never enqueued, print skip line
-                // at slot i; futures[i] holds the probe Future otherwise.
                 List<Future<ProbeResult>> futures = new ArrayList<>(addrs.size());
                 List<String> skip_reason = new ArrayList<>(addrs.size());
 
@@ -442,7 +438,6 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                         if (why.equals("malformed")) {
                             appendOutput(I18n.tr("ui.quota.test.row_skip_malformed", padded_addr) + "\n");
                         } else {
-                            // why = "bad_port:NNN"
                             appendOutput(I18n.tr("ui.quota.test.row_skip_bad_port", padded_addr, why.substring("bad_port:".length())) + "\n");
                         }
                         fail++;
@@ -461,9 +456,6 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                         appendOutput(I18n.tr("ui.quota.test.cancelled") + "\n");
                         return;
                     } catch (java.util.concurrent.ExecutionException ex) {
-                        // The probe lambda catches its own exceptions and
-                        // returns a failed ProbeResult, so reaching this
-                        // branch means something genuinely odd happened.
                         String cause = ex.getCause() == null ? ex.getClass().getSimpleName() : ex.getCause().getClass().getSimpleName();
                         appendOutput(I18n.tr("ui.quota.test.row_fail", padded_addr, cause, 0L) + "\n");
                         fail++;
@@ -499,7 +491,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
                     _save_working_button.setEnabled(!_last_working_addrs.isEmpty());
                 });
             }
-        }, "QuotaRecoverySettings-ProxyTest").start();
+        }, "QuotaRecoveryPanel-ProxyTest").start();
     }
 
     /**
@@ -520,7 +512,10 @@ public class QuotaRecoverySettingsDialog extends JDialog {
             return;
         }
 
-        int ans = JOptionPane.showConfirmDialog(this,
+        // Anchor the confirm dialog on our own component (the host Settings
+        // dialog), not the panel itself, so the modal lines up sensibly.
+        JComponent anchor = this;
+        int ans = JOptionPane.showConfirmDialog(anchor,
                 I18n.tr("ui.quota.save_working.confirm", _last_working_addrs.size()),
                 I18n.tr("ui.quota.save_working.title"),
                 JOptionPane.OK_CANCEL_OPTION,
@@ -542,7 +537,7 @@ public class QuotaRecoverySettingsDialog extends JDialog {
             } finally {
                 MiscTools.GUIRun(() -> _save_working_button.setEnabled(!_last_working_addrs.isEmpty()));
             }
-        }, "QuotaRecoverySettings-SaveWorking").start();
+        }, "QuotaRecoveryPanel-SaveWorking").start();
     }
 
     private static ProbeResult probe(String host, int port) {
@@ -560,17 +555,5 @@ public class QuotaRecoverySettingsDialog extends JDialog {
             _proxy_test_output.append(s);
             _proxy_test_output.setCaretPosition(_proxy_test_output.getDocument().getLength());
         });
-    }
-
-    @Override
-    public void dispose() {
-        // If the user closes the dialog while a test is running, kill the
-        // probe pool so the JVM doesn't wait up to 3 s per outstanding
-        // connect attempt. (#753)
-        ExecutorService exec = _probe_executor;
-        if (exec != null) {
-            exec.shutdownNow();
-        }
-        super.dispose();
     }
 }

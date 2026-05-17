@@ -82,8 +82,9 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     /**
      * Exposes the Edit menu so MainPanel can append items programmatically
-     * without touching the NetBeans-generated form (e.g. the
-     * QuotaRecoverySettingsDialog launcher added in #751 / C1).
+     * without touching the NetBeans-generated form (e.g. the shortcut that
+     * opens Settings on the Quota Recovery tab, added in #751 / C1 and
+     * folded into the main Settings dialog in #757).
      */
     public javax.swing.JMenu getEdit_menu() {
         return edit_menu;

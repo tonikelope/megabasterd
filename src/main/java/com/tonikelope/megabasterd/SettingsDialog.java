@@ -68,6 +68,16 @@ public class SettingsDialog extends javax.swing.JDialog {
     private final AccountStore _account_store;
     private boolean _remember_master_pass;
     private volatile boolean _exit = false;
+    // SmartProxy 509 / quota recovery panel. Embedded as the 5th tab in
+    // panel_tabs at construction time (programmatically, no .form change).
+    // Owns its own load/save against the DB; saveToDB() is invoked from
+    // save_buttonActionPerformed, and shutdown() runs on dispose() so any
+    // in-flight TCP probes are cancelled instead of blocking the JVM. (#757)
+    private QuotaRecoveryPanel _quota_recovery_panel;
+    // Tab index for the quota recovery panel; populated after the panel is
+    // added to panel_tabs so callers (e.g. the Edit menu shortcut) can open
+    // Settings directly on this tab via {@link #selectQuotaRecoveryTab()}.
+    private int _quota_recovery_tab_index = -1;
 
     public boolean isSettings_ok() {
         return _settings_ok;
@@ -83,6 +93,29 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     public boolean isRemember_master_pass() {
         return _remember_master_pass;
+    }
+
+    /**
+     * Switch the dialog to the SmartProxy / 509 quota recovery tab. Called by
+     * the Edit menu shortcut so users land directly on that view instead of
+     * the default first tab. No-op if the tab failed to register (e.g. during
+     * construction faults). (#757)
+     */
+    public void selectQuotaRecoveryTab() {
+        if (_quota_recovery_tab_index >= 0 && panel_tabs != null) {
+            MiscTools.GUIRun(() -> panel_tabs.setSelectedIndex(_quota_recovery_tab_index));
+        }
+    }
+
+    @Override
+    public void dispose() {
+        // Cancel any in-flight TCP probes the user kicked off in the quota
+        // recovery tab; otherwise the JVM waits up to ~3 s per outstanding
+        // connect before exiting. Safe to call even if no test ran. (#757)
+        if (_quota_recovery_panel != null) {
+            _quota_recovery_panel.shutdown();
+        }
+        super.dispose();
     }
 
     /**
@@ -195,6 +228,17 @@ public class SettingsDialog extends javax.swing.JDialog {
             panel_tabs.setTitleAt(2, LabelTranslatorSingleton.getInstance().translate("Accounts"));
 
             panel_tabs.setTitleAt(3, LabelTranslatorSingleton.getInstance().translate("Advanced"));
+
+            // Add the SmartProxy / 509 quota-recovery tab programmatically;
+            // it lives in its own JPanel (QuotaRecoveryPanel) so we don't have
+            // to wrestle with the .form XML for a fifth tab. The panel handles
+            // its own DB load on construction; saveToDB() is invoked from
+            // save_buttonActionPerformed below, and shutdown() from dispose()
+            // so any in-flight TCP probes are cancelled cleanly. (#757)
+            _quota_recovery_panel = new QuotaRecoveryPanel(_main_panel);
+            javax.swing.ImageIcon quota_icon = new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png"));
+            panel_tabs.addTab(I18n.tr("ui.menu.quota_recovery"), quota_icon, _quota_recovery_panel);
+            _quota_recovery_tab_index = panel_tabs.indexOfComponent(_quota_recovery_panel);
 
             downloads_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
 
@@ -422,12 +466,28 @@ public class SettingsDialog extends javax.swing.JDialog {
             int smartproxy_ban_time_int = PROXY_BLOCK_TIME;
 
             if (smartproxy_ban_time != null) {
-                smartproxy_ban_time_int = Integer.parseInt(smartproxy_ban_time);
+                try {
+                    smartproxy_ban_time_int = Integer.parseInt(smartproxy_ban_time);
+                } catch (NumberFormatException ignore) {
+                    // Fall back to default; the manager defends itself anyway.
+                }
             }
 
-            bad_proxy_time_spinner.setModel(new SpinnerNumberModel(smartproxy_ban_time_int, 0, Integer.MAX_VALUE, 1));
+            // Range mirrors SmartMegaProxyManager.refreshSmartProxySettings():
+            //   0       = permanent ban
+            //   1..9    = honoured but risky (logged as WARNING by the manager)
+            //   10..3600 = normal
+            // Anything outside [0, 3600] previously stored in the DB is clamped
+            // here so the spinner round-trips a sane value back to disk. (#757)
+            if (smartproxy_ban_time_int < 0) {
+                smartproxy_ban_time_int = 0;
+            } else if (smartproxy_ban_time_int > 3600) {
+                smartproxy_ban_time_int = 3600;
+            }
+            bad_proxy_time_spinner.setModel(new SpinnerNumberModel(smartproxy_ban_time_int, 0, 3600, 1));
 
             ((JSpinner.DefaultEditor) bad_proxy_time_spinner.getEditor()).getTextField().setEditable(true);
+            bad_proxy_time_spinner.setToolTipText(I18n.tr("settings.smartproxy.ban_time.tooltip"));
 
             String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
 
@@ -663,6 +723,14 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
 
             force_smart_proxy_checkbox.setSelected(force_smart_proxy);
+
+            // Users routinely report "downloads stall with live proxies" when
+            // FORCE is OFF: SmartProxy is passive by design and only kicks in
+            // after MEGA returns HTTP 509 (or while still inside the post-509
+            // recheck window). The tooltip makes that explicit so the user can
+            // pick the mode that matches their expectation. (#757 bug 3)
+            String force_tip = I18n.tr("settings.smartproxy.force.tooltip");
+            force_smart_proxy_checkbox.setToolTipText(force_tip);
 
             boolean run_command = false;
 
@@ -2305,6 +2373,15 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("font_zoom", zoom);
 
             insertSettingsValues(settings);
+
+            // Quota recovery tab owns its own DB-backed keys
+            // (auto_resume_ip_change, quota_stall_timeout,
+            // smart_proxy_509_recheck_window, smartproxy_test_batch_size) and
+            // also pokes the live SmartProxy manager to re-read its settings
+            // so the recheck window takes effect without restart. (#757)
+            if (_quota_recovery_panel != null) {
+                _quota_recovery_panel.saveToDB();
+            }
 
             if (!font.equals(old_font)
                     || !language.equals(old_language)
