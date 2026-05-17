@@ -1513,7 +1513,15 @@ public class MegaAPI implements Serializable {
 
     public static final long FOLDER_CACHE_MAX_AGE_MS = 24L * 60L * 60L * 1000L;
 
+    private static boolean isAlwaysReloadMegaFoldersEnabled() {
+        return "yes".equals(DBTools.selectSettingValue("always_reload_mega_folders"));
+    }
+
     public boolean existsCachedFolderNodes(String folder_id) {
+
+        if (isAlwaysReloadMegaFoldersEnabled()) {
+            return false;
+        }
 
         java.nio.file.Path p = Paths.get(_folderCachePath(folder_id));
 
@@ -1577,7 +1585,7 @@ public class MegaAPI implements Serializable {
         HashMap<String, Object> folder_nodes = null;
         String res = null;
 
-        if (cache) {
+        if (cache && !isAlwaysReloadMegaFoldersEnabled()) {
             res = getCachedFolderNodes(folder_id);
         }
 
@@ -1689,7 +1697,7 @@ public class MegaAPI implements Serializable {
         HashMap<String, Object> folder_nodes = null;
         String res = null;
 
-        if (cache) {
+        if (cache && !isAlwaysReloadMegaFoldersEnabled()) {
             res = getCachedFolderNodes(folder_id);
         }
 
