@@ -438,37 +438,15 @@ public final class MainPanel {
 
         _view = new MainPanelView(this);
 
-        // Wire up the quota-recovery settings dialog into the Edit menu.
-        // Done programmatically (not via NetBeans form) so we don't have
-        // to edit MainPanelView.form to surface three new settings. (#751 / C1)
-        //
-        // To match the visual size of the sibling menu items, we have to
-        // both (a) seed the baseline font to the same Dialog/0/18 that
-        // MainPanelView's generated initComponents sets on every other
-        // *_menu item, AND (b) call MiscTools.updateFonts() on the new
-        // item so it gets GUI_FONT scaled by zoom_factor exactly like the
-        // siblings did during MainPanelView construction. Skipping (a)
-        // made updateFonts derive from the Swing default JMenuItem font
-        // (~12 pt), leaving the new item visibly smaller than the rest.
-        try {
-            javax.swing.JMenuItem quota_menu = new javax.swing.JMenuItem(I18n.tr("ui.menu.quota_recovery"));
-            quota_menu.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 18));
-            quota_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png")));
-            // Reuse the main Settings dialog: the quota / 509 controls now
-            // live there as a dedicated tab, so we open the dialog and
-            // pre-select that tab instead of popping a separate window. (#757)
-            quota_menu.addActionListener((evt) -> {
-                SettingsDialog d = new SettingsDialog(_view, true);
-                d.setLocationRelativeTo(_view);
-                d.selectQuotaRecoveryTab();
-                d.setVisible(true);
-            });
-            _view.getEdit_menu().add(quota_menu);
-            MiscTools.updateFonts(quota_menu, GUI_FONT, getZoom_factor());
-        } catch (Exception ex) {
-            Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING,
-                    "Could not wire quota-recovery menu: {0}", ex.getMessage());
-        }
+        // (Removed in #757) The Edit menu used to have a "Quota recovery &
+        // SmartProxy (509)" shortcut that opened a standalone dialog
+        // (QuotaRecoverySettingsDialog). Those settings now live as the
+        // "Quota / 509" tab in the main Settings dialog, reached via the
+        // regular Edit > Settings menu. The shortcut was removed -- besides
+        // being redundant, it bypassed the account-deletion cleanup that
+        // MainPanelView.settings_menuActionPerformed runs after the dialog
+        // closes, which would have left _main_panel.getMega_accounts() out
+        // of sync if the user touched the Accounts tab via the shortcut.
 
         // "DEBUG LOG" tab. Everything inside GUIRunAndWait so it runs on the
         // EDT; addTab on a JTabbedPane after the view is realised has to be

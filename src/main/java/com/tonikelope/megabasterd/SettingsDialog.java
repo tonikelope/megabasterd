@@ -68,16 +68,13 @@ public class SettingsDialog extends javax.swing.JDialog {
     private final AccountStore _account_store;
     private boolean _remember_master_pass;
     private volatile boolean _exit = false;
-    // SmartProxy 509 / quota recovery panel. Embedded as the 5th tab in
-    // panel_tabs at construction time (programmatically, no .form change).
-    // Owns its own load/save against the DB; saveToDB() is invoked from
-    // save_buttonActionPerformed, and shutdown() runs on dispose() so any
-    // in-flight TCP probes are cancelled instead of blocking the JVM. (#757)
+    // SmartProxy 509 / quota recovery panel. Inserted as the second tab in
+    // panel_tabs (between Downloads and Uploads) at construction time
+    // (programmatically, no .form change). Owns its own load/save against
+    // the DB; saveToDB() is invoked from save_buttonActionPerformed, and
+    // shutdown() runs on dispose() so any in-flight TCP probes are cancelled
+    // instead of blocking the JVM. (#757)
     private QuotaRecoveryPanel _quota_recovery_panel;
-    // Tab index for the quota recovery panel; populated after the panel is
-    // added to panel_tabs so callers (e.g. the Edit menu shortcut) can open
-    // Settings directly on this tab via {@link #selectQuotaRecoveryTab()}.
-    private int _quota_recovery_tab_index = -1;
 
     public boolean isSettings_ok() {
         return _settings_ok;
@@ -93,18 +90,6 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     public boolean isRemember_master_pass() {
         return _remember_master_pass;
-    }
-
-    /**
-     * Switch the dialog to the SmartProxy / 509 quota recovery tab. Called by
-     * the Edit menu shortcut so users land directly on that view instead of
-     * the default first tab. No-op if the tab failed to register (e.g. during
-     * construction faults). (#757)
-     */
-    public void selectQuotaRecoveryTab() {
-        if (_quota_recovery_tab_index >= 0 && panel_tabs != null) {
-            MiscTools.GUIRun(() -> panel_tabs.setSelectedIndex(_quota_recovery_tab_index));
-        }
     }
 
     @Override
@@ -229,16 +214,20 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             panel_tabs.setTitleAt(3, LabelTranslatorSingleton.getInstance().translate("Advanced"));
 
-            // Add the SmartProxy / 509 quota-recovery tab programmatically;
-            // it lives in its own JPanel (QuotaRecoveryPanel) so we don't have
-            // to wrestle with the .form XML for a fifth tab. The panel handles
-            // its own DB load on construction; saveToDB() is invoked from
+            // Insert the SmartProxy / 509 quota-recovery tab programmatically
+            // at index 1 (between Downloads and Uploads). Lives in its own
+            // JPanel (QuotaRecoveryPanel) so we don't have to wrestle with
+            // the .form XML for a fifth tab. The panel handles its own DB
+            // load on construction; saveToDB() is invoked from
             // save_buttonActionPerformed below, and shutdown() from dispose()
-            // so any in-flight TCP probes are cancelled cleanly. (#757)
+            // so any in-flight TCP probes are cancelled cleanly. The
+            // setTitleAt calls above run BEFORE this insertion so the indices
+            // they use (0..3) still point to the .form-original tabs at the
+            // moment they execute -- after insertTab the existing tabs shift
+            // to 0, 2, 3, 4 but they were already labelled correctly. (#757)
             _quota_recovery_panel = new QuotaRecoveryPanel(_main_panel);
             javax.swing.ImageIcon quota_icon = new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png"));
-            panel_tabs.addTab(I18n.tr("ui.menu.quota_recovery"), quota_icon, _quota_recovery_panel);
-            _quota_recovery_tab_index = panel_tabs.indexOfComponent(_quota_recovery_panel);
+            panel_tabs.insertTab(I18n.tr("ui.tab.quota_recovery"), quota_icon, _quota_recovery_panel, null, 1);
 
             downloads_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
 
