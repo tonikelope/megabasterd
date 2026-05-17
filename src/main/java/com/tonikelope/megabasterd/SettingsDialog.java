@@ -251,12 +251,69 @@ public class SettingsDialog extends javax.swing.JDialog {
             smart_proxy_settings.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
             _quota_recovery_panel.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
 
+            // Compact the proxy-list textarea: 5 rows of 18 pt font was
+            // ~150 px of vertical real-estate dominating the panel, AND when
+            // the mouse hovered the textarea its own scroll captured every
+            // wheel event so the surrounding tab could not scroll. Shrink
+            // to 3 rows and delegate wheel events to the outer JScrollPane
+            // whenever the textarea cannot itself scroll in the wheeled
+            // direction (content fits, or at top/bottom boundary). Inner
+            // scroll still works for in-textarea content overflow. (#758)
+            custom_proxy_textarea.setRows(3);
+            jScrollPane1.setPreferredSize(new java.awt.Dimension(jScrollPane1.getPreferredSize().width, 110));
+            jScrollPane1.addMouseWheelListener(e -> {
+                javax.swing.JScrollBar inner = jScrollPane1.getVerticalScrollBar();
+                boolean cannot_scroll_self = inner.getMaximum() - inner.getMinimum() <= inner.getVisibleAmount();
+                boolean at_top = inner.getValue() <= inner.getMinimum();
+                boolean at_bottom = inner.getValue() + inner.getVisibleAmount() >= inner.getMaximum();
+                int dir = e.getWheelRotation();
+                boolean overflow_up = at_top && dir < 0;
+                boolean overflow_down = at_bottom && dir > 0;
+                if (cannot_scroll_self || overflow_up || overflow_down) {
+                    // Drive the closest ancestor JScrollPane's vertical bar
+                    // directly instead of trying to re-dispatch the event
+                    // (SwingUtilities.convertMouseEvent on a MouseWheelEvent
+                    // returns a plain MouseEvent and loses the wheel rotation).
+                    java.awt.Container anc = javax.swing.SwingUtilities.getAncestorOfClass(javax.swing.JScrollPane.class, jScrollPane1.getParent());
+                    if (anc instanceof javax.swing.JScrollPane) {
+                        javax.swing.JScrollBar outer_bar = ((javax.swing.JScrollPane) anc).getVerticalScrollBar();
+                        int delta = e.getUnitsToScroll() * outer_bar.getUnitIncrement();
+                        outer_bar.setValue(outer_bar.getValue() + delta);
+                    }
+                }
+            });
+
             javax.swing.JPanel proxy_tab_content = new javax.swing.JPanel();
             proxy_tab_content.setLayout(new javax.swing.BoxLayout(proxy_tab_content, javax.swing.BoxLayout.Y_AXIS));
             proxy_tab_content.setBorder(javax.swing.BorderFactory.createEmptyBorder(8, 8, 8, 8));
             proxy_tab_content.add(smart_proxy_checkbox);
             proxy_tab_content.add(javax.swing.Box.createVerticalStrut(6));
             proxy_tab_content.add(smart_proxy_settings);
+            proxy_tab_content.add(javax.swing.Box.createVerticalStrut(6));
+
+            // Manual proxy-list refresh button. Useful when the auto-refresh
+            // timer (default 30 min) is too slow -- e.g. the user just
+            // pasted a fresh #URL feed and wants the pool to re-fetch
+            // immediately, or the live pool has been exhausted by 429 / 509
+            // and they want to retry the same URLs without waiting. Runs on
+            // THREAD_POOL because refreshProxyList() does network IO; calling
+            // it on the EDT would freeze the UI for the HTTP roundtrip. The
+            // button stays clickable while the refresh runs; back-to-back
+            // clicks just queue extra refreshes which collapse on the
+            // manager's `synchronized` monitor. (#758)
+            javax.swing.JPanel refresh_row = new javax.swing.JPanel(new java.awt.FlowLayout(java.awt.FlowLayout.LEFT, 0, 0));
+            refresh_row.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+            javax.swing.JButton refresh_proxy_button = new javax.swing.JButton(I18n.tr("ui.smartproxy.refresh_now"));
+            refresh_proxy_button.setToolTipText(I18n.tr("ui.smartproxy.refresh_now.tooltip"));
+            refresh_proxy_button.addActionListener(e -> {
+                SmartMegaProxyManager pm = MainPanel.getProxy_manager();
+                if (pm != null) {
+                    MainPanel.THREAD_POOL.execute(pm::refreshProxyList);
+                }
+            });
+            refresh_row.add(refresh_proxy_button);
+            proxy_tab_content.add(refresh_row);
+
             proxy_tab_content.add(javax.swing.Box.createVerticalStrut(12));
             proxy_tab_content.add(_quota_recovery_panel);
 
@@ -284,6 +341,13 @@ public class SettingsDialog extends javax.swing.JDialog {
             MiscTools.updateFonts(smart_proxy_settings, GUI_FONT, _main_panel.getZoom_factor());
             translateLabels(smart_proxy_checkbox);
             translateLabels(smart_proxy_settings);
+
+            // The Refresh-now button + row are brand-new components built
+            // above; apply GUI_FONT scaled by zoom so they match the rest of
+            // the dialog. No translateLabels call needed -- the button text
+            // and tooltip were already passed through I18n.tr at construction
+            // time. (#758)
+            MiscTools.updateFonts(refresh_row, GUI_FONT, _main_panel.getZoom_factor());
 
             downloads_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
 
@@ -549,12 +613,29 @@ public class SettingsDialog extends javax.swing.JDialog {
             int smartproxy_timeout_int = (int) ((float) Transference.HTTP_PROXY_TIMEOUT / 1000);
 
             if (smartproxy_timeout != null) {
-                smartproxy_timeout_int = Integer.parseInt(smartproxy_timeout);
+                try {
+                    smartproxy_timeout_int = Integer.parseInt(smartproxy_timeout);
+                } catch (NumberFormatException ignore) {
+                    // Fall back to default; the manager defends itself anyway.
+                }
             }
 
-            proxy_timeout_spinner.setModel(new SpinnerNumberModel(smartproxy_timeout_int, 1, Integer.MAX_VALUE, 1));
+            // Range mirrors SmartMegaProxyManager.refreshSmartProxySettings()'s
+            // clamp [3, 120]. Below 3 s most real-world public proxies cannot
+            // complete a TCP+TLS handshake; above 120 s the worker burns the
+            // backoff timer waiting on a single dead proxy. Out-of-range DB
+            // values from older installs get clamped on load so the spinner
+            // round-trips a sane value back to disk. (#758 -- mirrors the
+            // ban_time spinner tightening from #757.)
+            if (smartproxy_timeout_int < 3) {
+                smartproxy_timeout_int = 3;
+            } else if (smartproxy_timeout_int > 120) {
+                smartproxy_timeout_int = 120;
+            }
+            proxy_timeout_spinner.setModel(new SpinnerNumberModel(smartproxy_timeout_int, 3, 120, 1));
 
             ((JSpinner.DefaultEditor) proxy_timeout_spinner.getEditor()).getTextField().setEditable(true);
+            proxy_timeout_spinner.setToolTipText(I18n.tr("settings.smartproxy.timeout.tooltip"));
 
             boolean reset_slot_proxy = SmartMegaProxyManager.RESET_SLOT_PROXY;
 

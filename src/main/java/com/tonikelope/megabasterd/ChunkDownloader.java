@@ -137,7 +137,28 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
      */
     protected volatile int _backoff_seconds_remaining = 0;
 
+    /**
+     * Wakeup flag for {@link #sleepWithIpAwareBackoff}. Set asynchronously by
+     * {@link #wakeFromBackoff()} when SmartProxy is enabled at runtime: the
+     * sleep loop polls this every 1 s slice and, if true, clears it and
+     * breaks early so the outer worker loop can re-evaluate routing instead
+     * of waiting out the exp-backoff. Volatile (single producer + single
+     * consumer; no CAS needed). (#758)
+     */
+    private volatile boolean _wake_from_backoff = false;
+
     private String _current_smart_proxy;
+
+    /**
+     * Break this worker out of its current 509 / network exp-backoff sleep on
+     * the next 1 s tick so it can re-evaluate routing. Called from
+     * MainPanelView after the user enables SmartProxy at runtime -- otherwise
+     * the worker would sleep for the full exp-backoff (which on retry 5+ runs
+     * into minutes) before noticing the proxy pool is now available. (#758)
+     */
+    public void wakeFromBackoff() {
+        _wake_from_backoff = true;
+    }
 
     public void RESET_CURRENT_CHUNK() {
 
@@ -266,6 +287,11 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
         boolean broke_for_ip_change = false;
 
+        // Reset the wake flag at entry so a stale set() from a previous
+        // backoff doesn't short-circuit this one before it has a chance to
+        // serve a single iteration. (#758)
+        _wake_from_backoff = false;
+
         for (long i = 0; i < wait_secs && !_exit && !_download.isStopped() && !_download.getMain_panel().isExit(); i++) {
             try {
                 Thread.sleep(1000);
@@ -274,6 +300,20 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 break;
             }
             _backoff_seconds_remaining = (int) (wait_secs - i - 1);
+
+            // External wakeup: SmartProxy was just enabled at runtime (or some
+            // other state change worth re-evaluating before the exp-backoff
+            // naturally expires). Break the sleep so the outer worker loop
+            // can pick the new routing on its next iteration. Returns true so
+            // the caller resets conta_error -- the wake is conceptually
+            // equivalent to an IP-change break. (#758)
+            if (_wake_from_backoff) {
+                _wake_from_backoff = false;
+                LOG.log(Level.INFO, "{0} Worker [{1}] external wakeup -- breaking exp-backoff and retrying immediately",
+                        new Object[]{Thread.currentThread().getName(), _id});
+                broke_for_ip_change = true;
+                break;
+            }
 
             if (_in_509_backoff || i % 5 == 4) {
                 _download.getView().updateSlotsStatus();
@@ -346,9 +386,18 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
 
             byte[] buffer = new byte[DEFAULT_BYTE_BUFFER_SIZE];
 
+            // Refreshed each loop iteration below: capturing once was a stale
+            // reference bug -- if SmartProxy was OFF at worker startup,
+            // proxy_manager stayed null even after the user enabled SmartProxy
+            // at runtime, and the routing path at line ~394 onwards would
+            // either NPE on getProxy() / blockProxy() or never switch to the
+            // proxy pool. Re-read every iteration so runtime toggles are
+            // visible on the next chunk attempt. (#758)
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
 
             while (!_download.getMain_panel().isExit() && !_exit && !_download.isStopped()) {
+
+                proxy_manager = MainPanel.getProxy_manager();
 
                 if (_download.isPaused() && !_download.isStopped() && !_download.getChunkmanager().isExit()) {
 
@@ -391,7 +440,16 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                 }
 
                 long dl_509_ts_check = _download.get509BurstTimestamp();
-                if (MainPanel.isUse_smart_proxy() && ((proxy_manager != null && proxy_manager.isForce_smart_proxy()) || _current_smart_proxy != null || http_error == 509 || (dl_509_ts_check != -1 && dl_509_ts_check + recheck_window_ms > System.currentTimeMillis())) && !MainPanel.isUse_proxy()) {
+                // proxy_manager null-guard hoisted to the outer AND: previously
+                // it lived only inside the FORCE branch of the inner OR, so a
+                // 509 or post-509 recheck window could enter this block with
+                // proxy_manager == null and NPE at proxy_manager.getProxy() /
+                // blockProxy() further down. With the re-read at the top of
+                // the while loop this should be rare, but the static-field
+                // reads (isUse_smart_proxy + getProxy_manager) are NOT atomic
+                // so there is still a microscopic window during runtime toggle.
+                // Belt-and-braces. (#758)
+                if (MainPanel.isUse_smart_proxy() && proxy_manager != null && (proxy_manager.isForce_smart_proxy() || _current_smart_proxy != null || http_error == 509 || (dl_509_ts_check != -1 && dl_509_ts_check + recheck_window_ms > System.currentTimeMillis())) && !MainPanel.isUse_proxy()) {
 
                     if (_current_smart_proxy != null && chunk_error) {
 

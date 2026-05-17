@@ -279,13 +279,12 @@ public class QuotaRecoveryPanel extends JPanel {
             DBTools.insertSettingValue("smart_proxy_509_recheck_window", String.valueOf((Integer) _recheck_509_spinner.getValue()));
             DBTools.insertSettingValue("smartproxy_test_batch_size", String.valueOf((Integer) _batch_size_spinner.getValue()));
 
-            // Force the live SmartProxy manager to re-read its DB-backed
-            // settings so the new recheck_509_window takes effect on the
-            // next 509 without restart.
-            SmartMegaProxyManager pm = MainPanel.getProxy_manager();
-            if (pm != null) {
-                pm.refreshSmartProxySettings();
-            }
+            // No explicit refreshSmartProxySettings() here on purpose: the
+            // post-Save block in MainPanelView.settings_menuActionPerformed
+            // already invokes it on the same EDT pass right after this method
+            // returns. Doing it here too was a redundant second call observed
+            // in user logs as two "SmartProxy BAN_TIME: ..." INFOs within one
+            // second. (#758)
         } catch (SQLException ex) {
             LOG.log(Level.SEVERE, "Could not save quota settings: {0}", ex.getMessage());
         }
