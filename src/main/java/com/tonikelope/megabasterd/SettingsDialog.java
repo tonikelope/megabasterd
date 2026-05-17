@@ -214,20 +214,59 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             panel_tabs.setTitleAt(3, LabelTranslatorSingleton.getInstance().translate("Advanced"));
 
-            // Insert the SmartProxy / 509 quota-recovery tab programmatically
-            // at index 1 (between Downloads and Uploads). Lives in its own
-            // JPanel (QuotaRecoveryPanel) so we don't have to wrestle with
-            // the .form XML for a fifth tab. The panel handles its own DB
-            // load on construction; saveToDB() is invoked from
-            // save_buttonActionPerformed below, and shutdown() from dispose()
-            // so any in-flight TCP probes are cancelled cleanly. The
-            // setTitleAt calls above run BEFORE this insertion so the indices
-            // they use (0..3) still point to the .form-original tabs at the
-            // moment they execute -- after insertTab the existing tabs shift
-            // to 0, 2, 3, 4 but they were already labelled correctly. (#757)
+            // Build the unified "SmartProxy" tab and insert it at index 1
+            // (between Downloads and Uploads).
+            //
+            // It stacks (top to bottom):
+            //   1. smart_proxy_checkbox  -- master ON/OFF toggle for SmartProxy
+            //   2. smart_proxy_settings  -- the proxy list + ban time + timeout
+            //                               + force + auto-refresh + random/seq
+            //                               + reset-on-success panel
+            //   3. QuotaRecoveryPanel    -- 509 recovery (auto-resume on IP
+            //                               change, stall timeout, post-509
+            //                               recheck window) plus the proxy Test
+            //                               diagnostics (current IP, Test,
+            //                               Concurrent probes, Save working).
+            //
+            // Components (1) and (2) used to live in the Downloads tab; their
+            // references in the Downloads layout were removed from both the
+            // .form XML and the matching initComponents code so the orphan
+            // components can be reparented here without GroupLayout fighting
+            // back (a missing component still referenced by a Group throws an
+            // NPE on layoutContainer). All their event handlers, fonts and
+            // translations were applied before this code runs, and survive
+            // the re-parent because the same references are used. (#757)
+            //
+            // The setTitleAt calls above run BEFORE this insertion so the
+            // indices they use (0..3) still point to the .form-original tabs
+            // at the moment they execute -- after insertTab the existing tabs
+            // shift to 0, 2, 3, 4 but they were already labelled correctly.
             _quota_recovery_panel = new QuotaRecoveryPanel(_main_panel);
-            javax.swing.ImageIcon quota_icon = new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png"));
-            panel_tabs.insertTab(I18n.tr("ui.tab.quota_recovery"), quota_icon, _quota_recovery_panel, null, 1);
+
+            // Force LEFT alignment so a small JCheckBox doesn't render
+            // off-centre relative to the wider JPanels (BoxLayout otherwise
+            // uses each component's getAlignmentX(), which defaults differ
+            // between widget types).
+            smart_proxy_checkbox.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+            smart_proxy_settings.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+            _quota_recovery_panel.setAlignmentX(java.awt.Component.LEFT_ALIGNMENT);
+
+            javax.swing.JPanel proxy_tab_content = new javax.swing.JPanel();
+            proxy_tab_content.setLayout(new javax.swing.BoxLayout(proxy_tab_content, javax.swing.BoxLayout.Y_AXIS));
+            proxy_tab_content.setBorder(javax.swing.BorderFactory.createEmptyBorder(8, 8, 8, 8));
+            proxy_tab_content.add(smart_proxy_checkbox);
+            proxy_tab_content.add(javax.swing.Box.createVerticalStrut(6));
+            proxy_tab_content.add(smart_proxy_settings);
+            proxy_tab_content.add(javax.swing.Box.createVerticalStrut(12));
+            proxy_tab_content.add(_quota_recovery_panel);
+
+            javax.swing.JScrollPane proxy_scroll = new javax.swing.JScrollPane(proxy_tab_content);
+            proxy_scroll.getVerticalScrollBar().setUnitIncrement(20);
+            proxy_scroll.getHorizontalScrollBar().setUnitIncrement(20);
+            proxy_scroll.setBorder(null);
+
+            javax.swing.ImageIcon proxy_icon = new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png"));
+            panel_tabs.insertTab(I18n.tr("ui.tab.smartproxy"), proxy_icon, proxy_scroll, null, 1);
 
             downloads_scrollpane.getVerticalScrollBar().setUnitIncrement(20);
 
@@ -1297,7 +1336,6 @@ public class SettingsDialog extends javax.swing.JDialog {
                     .addGroup(downloads_panelLayout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(smart_proxy_checkbox)
                             .addGroup(downloads_panelLayout.createSequentialGroup()
                                 .addComponent(max_downloads_label)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -1334,10 +1372,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                                     .addGroup(downloads_panelLayout.createSequentialGroup()
                                         .addComponent(max_down_speed_label)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))))))
-                    .addGroup(downloads_panelLayout.createSequentialGroup()
-                        .addGap(12, 12, 12)
-                        .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addComponent(max_down_speed_spinner, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))))))
                 .addContainerGap())
         );
         downloads_panelLayout.setVerticalGroup(
@@ -1384,10 +1419,6 @@ public class SettingsDialog extends javax.swing.JDialog {
                     .addComponent(megacrypter_reverse_port_label))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(megacrypter_reverse_warning_label)
-                .addGap(18, 18, 18)
-                .addComponent(smart_proxy_checkbox)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(smart_proxy_settings, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addContainerGap())
         );
 
