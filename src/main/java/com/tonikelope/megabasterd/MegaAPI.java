@@ -566,6 +566,14 @@ public class MegaAPI implements Serializable {
 
             try {
 
+                // SmartProxy routing condition for the /cs endpoint. Was
+                // keyed off HTTP 509 only; -17 (MEGA EOVERQUOTA, in the JSON
+                // body of an HTTP 200) was never reachable here because the
+                // mega_error check further down lobbed it straight up as an
+                // exception. With the "synthesise 509 on -17 when SmartProxy
+                // is enabled" branch added below, http_error == 509 now also
+                // covers the JSON-body quota case, so we don't need an extra
+                // disjunct here. (#760)
                 if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && proxy_manager != null && !MainPanel.isUse_proxy()) {
 
                     if (current_smart_proxy != null && (http_error != 0 || empty_response)) {
@@ -747,7 +755,55 @@ public class MegaAPI implements Serializable {
 
                             if (mega_error != 0 && !Arrays.asList(MEGA_ERROR_NO_EXCEPTION_CODES).contains(mega_error)) {
 
-                                throw new MegaAPIException(mega_error);
+                                // -17 EOVERQUOTA with SmartProxy active: the
+                                // bandwidth-quota that drives -17 on anonymous
+                                // link downloads (the common case in
+                                // MegaBasterd) is tied to the egress IP, not
+                                // the account. Bubbling -17 up here would
+                                // trip Download.getMegaFileDownloadUrl ->
+                                // stopDownloader -> 60 s auto-retry countdown
+                                // -> restart -> -17 again, forever, with
+                                // SmartProxy never engaged because that path
+                                // never reached the ChunkDownloader where the
+                                // wake-from-backoff fix landed for #758.
+                                //
+                                // Treat -17 as a synthetic HTTP 509 instead:
+                                // both the SmartProxy enable condition above
+                                // and the do-while continue condition below
+                                // already key off http_error == 509, so the
+                                // next iteration of this loop picks a proxy
+                                // and reissues the /cs request through it.
+                                // Bounded by MAX_RAW_REQUEST_RETRIES so a
+                                // genuinely dead pool (or an account-scoped
+                                // -17 that SmartProxy can't bypass) still
+                                // throws within ~30 attempts. (#760)
+                                if (mega_error == -17
+                                        && MainPanel.isUse_smart_proxy()
+                                        && proxy_manager != null
+                                        && !MainPanel.isUse_proxy()
+                                        && conta_error < MAX_RAW_REQUEST_RETRIES) {
+
+                                    LOG.log(Level.WARNING, "{0} MEGA -17 EOVERQUOTA; SmartProxy enabled -- rotating /cs through proxy pool (attempt {1}/{2})",
+                                            new Object[]{_ctx(), conta_error + 1, MAX_RAW_REQUEST_RETRIES});
+
+                                    // Flip http_error so the routing /
+                                    // continue predicates trigger. Clear the
+                                    // parsed body so the post-loop return
+                                    // doesn't hand a -17-bearing response
+                                    // back to the caller. Bump conta_error
+                                    // explicitly because the backoff branch
+                                    // below is gated on http_error != 509
+                                    // and would otherwise leave the counter
+                                    // at zero forever.
+                                    http_error = 509;
+                                    response = null;
+                                    empty_response = false;
+                                    conta_error++;
+
+                                } else {
+
+                                    throw new MegaAPIException(mega_error);
+                                }
 
                             }
 
