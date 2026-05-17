@@ -127,6 +127,29 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
      * CAS needed). (#760)
      */
     private volatile boolean _wake_from_retry_countdown = false;
+
+    /**
+     * True while the auto-retry countdown lambda spawned from the
+     * stopDownloader cleanup is actually sleeping (i.e. there is a
+     * 1 s-tick loop that {@link #_wake_from_retry_countdown} can
+     * interrupt). False after run() has either never spawned one (e.g.
+     * provisionIt failed before the cleanup path that arms the
+     * countdown), or after the countdown has finished and dispatched
+     * to {@link #_tryRestart()}. Lets {@link #wakeFromRetryCountdown()}
+     * distinguish "break the sleep" from "no sleep to break -- restart
+     * now". (#760)
+     */
+    private volatile boolean _retry_countdown_active = false;
+
+    /**
+     * Latch the dispatch of {@link #restart()} to a single caller per
+     * Download instance. Without it, a wakeFromRetryCountdown that races
+     * the countdown's natural completion (or two consecutive SmartProxy
+     * enables) would enqueue two new Downloads into the provision queue
+     * for the same URL. Used via {@link #_tryRestart()}. (#760)
+     */
+    private final java.util.concurrent.atomic.AtomicBoolean _restart_triggered =
+            new java.util.concurrent.atomic.AtomicBoolean(false);
     private File _file;
     private boolean _checking_cbc;
     private boolean _retrying_request;
@@ -532,13 +555,56 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
      * Break the in-flight auto-retry countdown so {@link #restart()} fires on
      * the next 1 s tick instead of waiting out the full {@link
      * Transference#RESTART_COUNTDOWN_SECS_OVERQUOTA} window. Called from
-     * MainPanelView right after the user enables SmartProxy at runtime, so a
-     * download that was sitting in the finished_queue with -17 pending a
-     * 60 s rearm can immediately reissue /cs through the now-available proxy
-     * pool. No-op when no countdown is in progress. (#760)
+     * MainPanelView right after the user enables SmartProxy at runtime so a
+     * download that is sitting in the finished_queue with -17 pending a 60 s
+     * rearm can immediately reissue /cs through the now-available proxy pool.
+     *
+     * Two sub-cases:
+     * <ul>
+     *   <li>A countdown lambda is actively sleeping ({@link
+     *       #_retry_countdown_active} == true): set the wake flag, the
+     *       lambda's tick loop breaks the sleep and calls {@link
+     *       #_tryRestart()} itself.</li>
+     *   <li>No countdown is active (the failure path landed before run()'s
+     *       cleanup, e.g. provisionIt threw -17 and DownloadManager._provision
+     *       moved the download straight to finished_queue with no countdown
+     *       attached): call {@link #_tryRestart()} here. The CAS in
+     *       _tryRestart ensures one-shot semantics so a stale countdown
+     *       finishing later doesn't double-restart.</li>
+     * </ul>
+     * (#760)
      */
     public void wakeFromRetryCountdown() {
-        _wake_from_retry_countdown = true;
+        if (_retry_countdown_active) {
+            _wake_from_retry_countdown = true;
+            return;
+        }
+
+        // No active countdown. Only auto-restart if this is the kind of
+        // failure that would have armed a countdown had it reached run()'s
+        // cleanup -- mirrors the predicate in stopThisSlot cleanup
+        // (Download.java:1098): _status_error != null && !_canceled &&
+        // _auto_retry_on_error. Closed / cancelled / successful downloads
+        // stay put.
+        if (_status_error != null && !_canceled && !_closed && _auto_retry_on_error) {
+            LOG.log(Level.INFO, "{0} Downloader {1} no-countdown wakeup -- triggering restart now",
+                    new Object[]{Thread.currentThread().getName(), getFile_name()});
+            _tryRestart();
+        }
+    }
+
+    /**
+     * One-shot {@link #restart()} dispatcher. Multiple callers can race
+     * (e.g. countdown lambda finishing naturally while
+     * wakeFromRetryCountdown also fires for the same download); CAS on
+     * {@link #_restart_triggered} ensures only the first one actually
+     * enqueues a new Download to the provision queue. Subsequent callers
+     * are no-ops. (#760)
+     */
+    private void _tryRestart() {
+        if (_restart_triggered.compareAndSet(false, true)) {
+            restart();
+        }
     }
 
     @Override
@@ -1139,34 +1205,43 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             // before it has had a chance to advance even a single second.
             // (#760)
             _wake_from_retry_countdown = false;
+            _retry_countdown_active = true;
 
             THREAD_POOL.execute(() -> {
-                for (int i = countdown_secs; !_closed && i > 0; i--) {
-                    final int j = i;
-                    MiscTools.GUIRun(() -> {
-                        getView().getRestart_button().setText(I18n.tr("ui.dynamic.restart_countdown", j));
-                    });
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ex) {
-                        LOG.log(Level.SEVERE, ex.getMessage());
+                try {
+                    for (int i = countdown_secs; !_closed && i > 0; i--) {
+                        final int j = i;
+                        MiscTools.GUIRun(() -> {
+                            getView().getRestart_button().setText(I18n.tr("ui.dynamic.restart_countdown", j));
+                        });
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ex) {
+                            LOG.log(Level.SEVERE, ex.getMessage());
+                        }
+                        // External wakeup: user enabled SmartProxy mid-countdown.
+                        // The countdown for -17 EOVERQUOTA is 60 s and during that
+                        // window the download isn't in any running list, so the
+                        // wakeFromBackoff path used by the chunk workers cannot
+                        // reach it. Break the sleep loop so restart() fires now
+                        // and the next /cs retry goes through the proxy pool. (#760)
+                        if (_wake_from_retry_countdown) {
+                            _wake_from_retry_countdown = false;
+                            LOG.log(Level.INFO, "{0} Downloader {1} external wakeup -- breaking auto-retry countdown and restarting now",
+                                    new Object[]{Thread.currentThread().getName(), getFile_name()});
+                            break;
+                        }
                     }
-                    // External wakeup: user enabled SmartProxy mid-countdown.
-                    // The countdown for -17 EOVERQUOTA is 60 s and during that
-                    // window the download isn't in any running list, so the
-                    // wakeFromBackoff path used by the chunk workers cannot
-                    // reach it. Break the sleep loop so restart() fires now
-                    // and the next /cs retry goes through the proxy pool. (#760)
-                    if (_wake_from_retry_countdown) {
-                        _wake_from_retry_countdown = false;
-                        LOG.log(Level.INFO, "{0} Downloader {1} external wakeup -- breaking auto-retry countdown and restarting now",
-                                new Object[]{Thread.currentThread().getName(), getFile_name()});
-                        break;
+                    if (!_closed) {
+                        LOG.log(Level.INFO, "{0} Downloader {1} AUTO RESTARTING DOWNLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
+                        _tryRestart();
                     }
-                }
-                if (!_closed) {
-                    LOG.log(Level.INFO, "{0} Downloader {1} AUTO RESTARTING DOWNLOAD...", new Object[]{Thread.currentThread().getName(), getFile_name()});
-                    restart();
+                } finally {
+                    // Clear before exit so a future wakeFromRetryCountdown
+                    // call (e.g. from a second SmartProxy enable) routes to
+                    // the no-countdown branch instead of futilely setting a
+                    // wake flag nobody polls. (#760)
+                    _retry_countdown_active = false;
                 }
             });
         } else {
