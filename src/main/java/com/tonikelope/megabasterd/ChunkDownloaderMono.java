@@ -88,12 +88,21 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             // on a stream had no recovery path other than the (now also added)
             // VPN-aware exp-backoff. With this in place a stream can rotate
             // through the same proxy pool the multi-slot path uses. (#751 / C3)
+            //
+            // Refreshed each loop iteration below: capturing once was a stale
+            // reference bug -- if SmartProxy was OFF at worker startup,
+            // proxy_manager stayed null forever and the smart_proxy_path guard
+            // (which already null-checks proxy_manager) silently kept the
+            // worker on direct mode even after the user enabled SmartProxy at
+            // runtime. (#758)
             SmartMegaProxyManager proxy_manager = MainPanel.getProxy_manager();
             ArrayList<String> excluded_proxy_list = new ArrayList<>();
             String current_smart_proxy = null;
             boolean smart_proxy_socks = false;
 
             while (!getDownload().getMain_panel().isExit() && !isExit() && !getDownload().isStopped()) {
+
+                proxy_manager = MainPanel.getProxy_manager();
 
                 if (worker_url == null || http_error == 403) {
 

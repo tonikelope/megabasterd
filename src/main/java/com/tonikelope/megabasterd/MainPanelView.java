@@ -1462,6 +1462,24 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     MainPanel.getProxy_manager().refreshSmartProxySettings();
 
+                    // Wake every in-flight ChunkDownloader so a worker that
+                    // entered 509 (or generic) exp-backoff before SmartProxy
+                    // was enabled doesn't have to sleep out the full backoff
+                    // (which on retry 5+ runs into minutes) before noticing
+                    // the proxy pool is now available. Combined with the
+                    // per-iteration MainPanel.getProxy_manager() re-read in
+                    // ChunkDownloader.run() / ChunkDownloaderMono.run(), this
+                    // is what makes a runtime SmartProxy-enable actually
+                    // resume the download instead of leaving it frozen. (#758)
+                    for (Transference t : _main_panel.getDownload_manager().getTransference_running_list()) {
+                        if (t instanceof Download) {
+                            Download dl = (Download) t;
+                            for (ChunkDownloader cd : dl.getChunkworkers()) {
+                                cd.wakeFromBackoff();
+                            }
+                        }
+                    }
+
                 } else {
 
                     updateSmartProxyStatus("SmartProxy: OFF");
