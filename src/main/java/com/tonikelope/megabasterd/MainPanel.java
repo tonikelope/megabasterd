@@ -454,9 +454,13 @@ public final class MainPanel {
             javax.swing.JMenuItem quota_menu = new javax.swing.JMenuItem(I18n.tr("ui.menu.quota_recovery"));
             quota_menu.setFont(new java.awt.Font("Dialog", java.awt.Font.PLAIN, 18));
             quota_menu.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png")));
+            // Reuse the main Settings dialog: the quota / 509 controls now
+            // live there as a dedicated tab, so we open the dialog and
+            // pre-select that tab instead of popping a separate window. (#757)
             quota_menu.addActionListener((evt) -> {
-                QuotaRecoverySettingsDialog d = new QuotaRecoverySettingsDialog(_view, true, this);
+                SettingsDialog d = new SettingsDialog(_view, true);
                 d.setLocationRelativeTo(_view);
+                d.selectQuotaRecoveryTab();
                 d.setVisible(true);
             });
             _view.getEdit_menu().add(quota_menu);
