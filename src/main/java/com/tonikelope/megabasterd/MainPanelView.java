@@ -160,6 +160,10 @@ public final class MainPanelView extends javax.swing.JFrame {
         return force_chunk_reset_button;
     }
 
+    public JButton getRefresh_smartproxy_button() {
+        return refresh_smartproxy_button;
+    }
+
     public JButton getUnfreeze_transferences_button() {
         return unfreeze_transferences_button;
     }
@@ -508,10 +512,18 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             translateLabels(this);
 
-            for (JComponent c : new JComponent[]{download_status_bar, upload_status_bar, force_chunk_reset_button, unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
+            for (JComponent c : new JComponent[]{download_status_bar, upload_status_bar, force_chunk_reset_button, refresh_smartproxy_button, unfreeze_transferences_button, global_speed_down_label, global_speed_up_label, down_remtime_label, up_remtime_label, close_all_finished_down_button, close_all_finished_up_button, pause_all_down_button, pause_all_up_button}) {
 
                 c.setVisible(false);
             }
+
+            // Tooltip reuses the i18n key already added by #758 for the
+            // identical button inside the SettingsDialog's SmartProxy tab so
+            // we don't carry two parallel translations of the same string.
+            // setText keeps the upper-case English literal so translateLabels
+            // can route through the new `refresh_smartproxy_list_now` bundle
+            // entry, matching the pattern used by force_chunk_reset_button.
+            refresh_smartproxy_button.setToolTipText(I18n.tr("ui.smartproxy.refresh_now.tooltip"));
 
             download_status_bar.setMinimum(0);
             upload_status_bar.setMinimum(0);
@@ -621,6 +633,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         down_remtime_label = new javax.swing.JLabel();
         jButton1 = new javax.swing.JButton();
         force_chunk_reset_button = new javax.swing.JButton();
+        refresh_smartproxy_button = new javax.swing.JButton();
         download_status_bar = new javax.swing.JProgressBar();
         uploads_panel = new javax.swing.JPanel();
         global_speed_up_label = new javax.swing.JLabel();
@@ -733,12 +746,25 @@ public final class MainPanelView extends javax.swing.JFrame {
             }
         });
 
+        refresh_smartproxy_button.setBackground(new java.awt.Color(0, 102, 204));
+        refresh_smartproxy_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        refresh_smartproxy_button.setForeground(new java.awt.Color(255, 255, 255));
+        refresh_smartproxy_button.setText("REFRESH SMARTPROXY LIST NOW");
+        refresh_smartproxy_button.setDoubleBuffered(true);
+        refresh_smartproxy_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                refresh_smartproxy_buttonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout downloads_panelLayout = new javax.swing.GroupLayout(downloads_panel);
         downloads_panel.setLayout(downloads_panelLayout);
         downloads_panelLayout.setHorizontalGroup(
             downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addComponent(global_speed_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, 474, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(refresh_smartproxy_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(force_chunk_reset_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -773,7 +799,8 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(global_speed_down_label)
                     .addComponent(pause_all_down_button)
-                    .addComponent(force_chunk_reset_button)))
+                    .addComponent(force_chunk_reset_button)
+                    .addComponent(refresh_smartproxy_button)))
         );
 
         jTabbedPane1.addTab("Downloads", new javax.swing.ImageIcon(getClass().getResource("/images/icons8-download-from-ftp-30.png")), downloads_panel); // NOI18N
@@ -1449,6 +1476,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 }
 
                 force_chunk_reset_button.setVisible(MainPanel.isUse_smart_proxy());
+                refresh_smartproxy_button.setVisible(MainPanel.isUse_smart_proxy());
 
                 if (MainPanel.isUse_smart_proxy()) {
 
@@ -1700,6 +1728,32 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_force_chunk_reset_buttonActionPerformed
 
+    private void refresh_smartproxy_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refresh_smartproxy_buttonActionPerformed
+
+        // Off-EDT because SmartMegaProxyManager.refreshProxyList does HTTP I/O
+        // against the configured #URL feeds, which can stall this thread for
+        // seconds if a feed is unreachable; keeping it on the EDT would freeze
+        // the whole UI. Back-to-back clicks collapse on the manager's own
+        // synchronized monitor inside refreshProxyList. Match SettingsDialog's
+        // "Refresh proxy list now" button (added in #758) so the user gets
+        // the same behaviour from either entry point. (#759)
+        SmartMegaProxyManager pm = MainPanel.getProxy_manager();
+        if (pm == null) {
+            return;
+        }
+
+        refresh_smartproxy_button.setEnabled(false);
+
+        MainPanel.THREAD_POOL.execute(() -> {
+            try {
+                pm.refreshProxyList();
+            } finally {
+                MiscTools.GUIRun(() -> refresh_smartproxy_button.setEnabled(true));
+            }
+        });
+
+    }//GEN-LAST:event_refresh_smartproxy_buttonActionPerformed
+
     private void copy_all_uploadsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_all_uploadsActionPerformed
         // TODO add your handling code here:
         int total = _main_panel.getUpload_manager().copyAllLinksToClipboard();
@@ -1724,6 +1778,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JMenuItem exit_menu;
     private javax.swing.JMenu file_menu;
     private javax.swing.JButton force_chunk_reset_button;
+    private javax.swing.JButton refresh_smartproxy_button;
     private javax.swing.JLabel global_speed_down_label;
     private javax.swing.JLabel global_speed_up_label;
     private javax.swing.JMenu help_menu;
