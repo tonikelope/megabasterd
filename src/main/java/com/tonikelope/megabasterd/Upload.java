@@ -917,7 +917,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                 if (!_thread_pool.isTerminated()) {
 
-                    LOG.log(Level.INFO, "{0} Closing thread pool in ''mecag\u00fcen'' style {1}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
+                    LOG.log(Level.INFO, "{0} Forcing thread pool shutdown {1}...", new Object[]{Thread.currentThread().getName(), this.getFile_name()});
 
                     _thread_pool.shutdownNow();
                 }

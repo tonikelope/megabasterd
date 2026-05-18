@@ -944,7 +944,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                         if (!_thread_pool.isTerminated()) {
 
-                            LOG.log(Level.INFO, "{0} Closing thread pool ''mecag\u00fcen'' style...", Thread.currentThread().getName());
+                            LOG.log(Level.INFO, "{0} Forcing thread pool shutdown...", Thread.currentThread().getName());
 
                             _thread_pool.shutdownNow();
                         }
