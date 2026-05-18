@@ -30,6 +30,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 import javax.net.ssl.HttpsURLConnection;
 
@@ -70,6 +72,8 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public final class LoginDiagnostic {
 
+    private static final Logger LOG = Logger.getLogger(LoginDiagnostic.class.getName());
+
     private static final long SLEEP_BETWEEN_ACCOUNTS_MS = 2000L;
     private static final int CONSECUTIVE_509_ABORT = 3;
     private static final int REQ_ID_LENGTH = 10;
@@ -94,8 +98,8 @@ public final class LoginDiagnostic {
 
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("Usage: java -cp <jar> com.tonikelope.megabasterd.LoginDiagnostic <accounts.txt> [outdir]");
-            System.err.println("       Each line of accounts.txt: email:password   or   email:password:pincode");
+            LOG.log(Level.SEVERE, "Usage: java -cp <jar> com.tonikelope.megabasterd.LoginDiagnostic <accounts.txt> [outdir]");
+            LOG.log(Level.SEVERE, "       Each line of accounts.txt: email:password   or   email:password:pincode");
             System.exit(2);
         }
         Path accountsFile = Paths.get(args[0]);
@@ -107,7 +111,7 @@ public final class LoginDiagnostic {
         try {
             rawLines = Files.readAllLines(accountsFile, StandardCharsets.UTF_8);
         } catch (IOException ex) {
-            System.err.println("Cannot read " + accountsFile + ": " + ex.getMessage());
+            LOG.log(Level.SEVERE, "Cannot read {0}: {1}", new Object[]{accountsFile, ex.getMessage()});
             System.exit(1);
             return;
         }
@@ -115,7 +119,7 @@ public final class LoginDiagnostic {
         try {
             Files.createDirectories(outDir);
         } catch (IOException ex) {
-            System.err.println("Cannot create output dir " + outDir + ": " + ex.getMessage());
+            LOG.log(Level.SEVERE, "Cannot create output dir {0}: {1}", new Object[]{outDir, ex.getMessage()});
             System.exit(1);
             return;
         }
@@ -177,7 +181,7 @@ public final class LoginDiagnostic {
             total++;
             String redactedEmail = redactEmail(email);
             String tag = String.format("[%02d] %s", total, redactedEmail);
-            System.out.println(tag + " capturing...");
+            LOG.log(Level.INFO, "{0} capturing...", tag);
 
             Map<String, Object> report = captureAccount(email, password, pincode);
             captured++;
@@ -188,13 +192,13 @@ public final class LoginDiagnostic {
             try {
                 mapper.writeValue(jsonPath.toFile(), report);
             } catch (IOException ex) {
-                System.err.println("Could not write " + jsonPath + ": " + ex.getMessage());
+                LOG.log(Level.SEVERE, "Could not write {0}: {1}", new Object[]{jsonPath, ex.getMessage()});
             }
 
             // Summary line
             String summaryLine = formatSummaryLine(tag, report);
             summary.add(summaryLine);
-            System.out.println("    " + summaryLine);
+            LOG.log(Level.INFO, "    {0}", summaryLine);
 
             // Stop bombarding MEGA if we're being rate-limited consistently.
             if (Boolean.TRUE.equals(report.get("any_http_failure"))) {
@@ -204,7 +208,7 @@ public final class LoginDiagnostic {
                     if (consecutive509 >= CONSECUTIVE_509_ABORT) {
                         String abort = "ABORTING: " + CONSECUTIVE_509_ABORT + " consecutive 509 from MEGA (rate-limited). Wait and resume later.";
                         summary.add(abort);
-                        System.err.println(abort);
+                        LOG.log(Level.SEVERE, abort);
                         break;
                     }
                 } else {
@@ -227,9 +231,9 @@ public final class LoginDiagnostic {
         summary.add("finished: " + Instant.now());
         try {
             Files.write(outDir.resolve("summary.txt"), summary, StandardCharsets.UTF_8);
-            System.out.println("\nReport written to " + outDir.toAbsolutePath());
+            LOG.log(Level.INFO, "Report written to {0}", outDir.toAbsolutePath());
         } catch (IOException ex) {
-            System.err.println("Cannot write summary: " + ex.getMessage());
+            LOG.log(Level.SEVERE, "Cannot write summary: {0}", ex.getMessage());
         }
     }
 
