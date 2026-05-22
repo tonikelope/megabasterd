@@ -13,6 +13,7 @@ import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import com.tonikelope.megabasterd.core.DownloadId;
 import java.awt.Color;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -64,6 +65,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     private static final Logger LOG = Logger.getLogger(Download.class.getName());
 
     private final MainPanel _main_panel;
+    private final DownloadId _core_download_id;
     private volatile DownloadView _view;
     private volatile ProgressMeter _progress_meter;
     private final Object _secure_notify_lock;
@@ -198,6 +200,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _progress = 0L;
         _notified = false;
         _main_panel = main_panel;
+        _core_download_id = DownloadId.random();
         _url = url;
         _download_path = download_path;
         _file_name = file_name;
@@ -244,6 +247,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         _progress = 0L;
         _notified = false;
         _main_panel = download.getMain_panel();
+        _core_download_id = DownloadId.random();
         _url = download.getUrl();
         _download_path = download.getDownload_path();
         _file_name = download.getFile_name();
@@ -539,6 +543,10 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
         return _ma;
     }
 
+    public DownloadId getCoreDownloadId() {
+        return _core_download_id;
+    }
+
     @Override
     public void restart() {
 
@@ -546,9 +554,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         getMain_panel().getDownload_manager().getTransference_remove_queue().add(this);
 
-        getMain_panel().getDownload_manager().getTransference_provision_queue().add(new_download);
-
-        getMain_panel().getDownload_manager().secureNotify();
+        getMain_panel().getDesktopDownloadService().enqueue(new_download);
     }
 
     /**

@@ -16,6 +16,7 @@ import static com.tonikelope.megabasterd.Transference.*;
 import com.tonikelope.megabasterd.core.CoreConfig;
 import com.tonikelope.megabasterd.core.CoreEvent;
 import com.tonikelope.megabasterd.core.CoreVersion;
+import com.tonikelope.megabasterd.core.DownloadRequest;
 import com.tonikelope.megabasterd.core.EventSubscription;
 import com.tonikelope.megabasterd.core.LogEvent;
 import com.tonikelope.megabasterd.core.MegaBasterdCore;
@@ -346,11 +347,14 @@ public final class MainPanel {
     private volatile boolean _exit;
     private final MegaBasterdCore _core;
     private final EventSubscription _core_event_subscription;
+    private final DesktopDownloadService _download_service;
 
     public MainPanel() {
 
+        _download_service = new DesktopDownloadService(this);
         _core = MegaBasterdCore.start(CoreConfig.forHomeDirectory(Paths.get(MEGABASTERD_HOME_DIR))
-                .withSettingsStorage(new SqliteSettingsStorage()));
+                .withSettingsStorage(new SqliteSettingsStorage())
+                .withDownloadService(_download_service));
         _core_event_subscription = _core.events().subscribe(this::handleCoreEvent);
 
         _new_version = null;
@@ -798,6 +802,10 @@ public final class MainPanel {
 
     public MegaBasterdCore getCore() {
         return _core;
+    }
+
+    public DesktopDownloadService getDesktopDownloadService() {
+        return _download_service;
     }
 
     private void handleCoreEvent(CoreEvent event) {
@@ -1798,9 +1806,15 @@ public final class MainPanel {
 
                                 if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
-                                    Download download = new Download(tthis, ma, (String) url, (String) o.get("path"), (String) o.get("filename"), (String) o.get("filekey"), (Long) o.get("filesize"), (String) o.get("filepass"), (String) o.get("filenoexpire"), _use_slots_down, false, (String) o.get("custom_chunks_dir"), false);
-
-                                    getDownload_manager().getTransference_provision_queue().add(download);
+                                    _download_service.add(DownloadRequest.builder((String) url, (String) o.get("path"))
+                                            .fileName((String) o.get("filename"))
+                                            .fileKey((String) o.get("filekey"))
+                                            .fileSize((Long) o.get("filesize"))
+                                            .filePass((String) o.get("filepass"))
+                                            .fileNoExpire((String) o.get("filenoexpire"))
+                                            .useSlots(_use_slots_down)
+                                            .customChunksDir((String) o.get("custom_chunks_dir"))
+                                            .build(), ma);
 
                                     conta_downloads++;
 
@@ -1816,8 +1830,9 @@ public final class MainPanel {
                                 // Build a metadata-less Download against the
                                 // default download path so the user gets it
                                 // back instead of seeing it vanish.
-                                Download download = new Download(tthis, new MegaAPI(), url, _default_download_path, null, null, null, null, null, _use_slots_down, false, null, false);
-                                getDownload_manager().getTransference_provision_queue().add(download);
+                                _download_service.add(DownloadRequest.builder(url, _default_download_path)
+                                        .useSlots(_use_slots_down)
+                                        .build(), new MegaAPI());
                                 conta_downloads++;
                                 downloads_queue_iterator.remove();
                             }
@@ -1849,9 +1864,15 @@ public final class MainPanel {
 
                                 if (email == null || !tthis.isUse_mega_account_down() || (ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
-                                    Download download = new Download(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("path"), (String) entry.getValue().get("filename"), (String) entry.getValue().get("filekey"), (Long) entry.getValue().get("filesize"), (String) entry.getValue().get("filepass"), (String) entry.getValue().get("filenoexpire"), _use_slots_down, false, (String) entry.getValue().get("custom_chunks_dir"), false);
-
-                                    getDownload_manager().getTransference_provision_queue().add(download);
+                                    _download_service.add(DownloadRequest.builder((String) entry.getKey(), (String) entry.getValue().get("path"))
+                                            .fileName((String) entry.getValue().get("filename"))
+                                            .fileKey((String) entry.getValue().get("filekey"))
+                                            .fileSize((Long) entry.getValue().get("filesize"))
+                                            .filePass((String) entry.getValue().get("filepass"))
+                                            .fileNoExpire((String) entry.getValue().get("filenoexpire"))
+                                            .useSlots(_use_slots_down)
+                                            .customChunksDir((String) entry.getValue().get("custom_chunks_dir"))
+                                            .build(), ma);
 
                                     conta_downloads++;
 

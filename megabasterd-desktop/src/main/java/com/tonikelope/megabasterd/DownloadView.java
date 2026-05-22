@@ -432,7 +432,7 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     private void close_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_buttonActionPerformed
 
-        _download.close();
+        _download.getMain_panel().getCore().downloads().close(_download.getCoreDownloadId());
     }//GEN-LAST:event_close_buttonActionPerformed
 
     private void copy_link_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copy_link_buttonActionPerformed
@@ -442,19 +442,23 @@ public class DownloadView extends javax.swing.JPanel implements TransferenceView
 
     private void restart_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restart_buttonActionPerformed
 
-        _download.restart();
+        _download.getMain_panel().getCore().downloads().restart(_download.getCoreDownloadId());
 
     }//GEN-LAST:event_restart_buttonActionPerformed
 
     private void stop_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stop_buttonActionPerformed
 
-        _download.stop();
+        _download.getMain_panel().getCore().downloads().cancel(_download.getCoreDownloadId());
 
     }//GEN-LAST:event_stop_buttonActionPerformed
 
     private void pause_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_buttonActionPerformed
 
-        _download.pause();
+        if (_download.isPause()) {
+            _download.getMain_panel().getCore().downloads().resume(_download.getCoreDownloadId());
+        } else {
+            _download.getMain_panel().getCore().downloads().pause(_download.getCoreDownloadId());
+        }
     }//GEN-LAST:event_pause_buttonActionPerformed
 
     private void open_folder_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_open_folder_buttonActionPerformed

@@ -16,5 +16,7 @@ public interface MegaBasterdCore {
 
     SettingsService settings();
 
+    DownloadService downloads();
+
     void shutdown();
 }

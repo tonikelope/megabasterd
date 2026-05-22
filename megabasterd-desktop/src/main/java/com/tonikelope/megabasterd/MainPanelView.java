@@ -13,6 +13,7 @@ import static com.tonikelope.megabasterd.CryptTools.*;
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
+import com.tonikelope.megabasterd.core.DownloadRequest;
 import java.awt.Color;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -1236,8 +1237,6 @@ public final class MainPanelView extends javax.swing.JFrame {
                             // with the rest of the batch instead.
                             url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
 
-                            Download download;
-
                             if (findFirstRegex("#F!", url, 0) != null) {
 
                                 FolderLinkDialog fdialog = new FolderLinkDialog(_main_panel.getView(), true, url);
@@ -1273,11 +1272,14 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                                                 if (!((String) folder_link.get("url")).equals("*")) {
 
-                                                    download = new Download(getMain_panel(), ma, (String) folder_link.get("url"), dl_path, (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
-
-                                                    getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-
-                                                    getMain_panel().getDownload_manager().secureNotify();
+                                                    getMain_panel().getDesktopDownloadService().add(DownloadRequest.builder((String) folder_link.get("url"), dl_path)
+                                                            .fileName((String) folder_link.get("filename"))
+                                                            .fileKey((String) folder_link.get("filekey"))
+                                                            .fileSize((Long) folder_link.get("filesize"))
+                                                            .useSlots(getMain_panel().isUse_slots_down())
+                                                            .customChunksDir(getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null)
+                                                            .priority(dialog.getPriority_checkbox().isSelected())
+                                                            .build(), ma);
 
                                                 } else {
                                                     //Directorio vacío
@@ -1322,11 +1324,11 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     }
                                 }
 
-                                download = new Download(getMain_panel(), ma, url, dl_path, null, null, null, null, null, getMain_panel().isUse_slots_down(), false, getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null, dialog.getPriority_checkbox().isSelected());
-
-                                getMain_panel().getDownload_manager().getTransference_provision_queue().add(download);
-
-                                getMain_panel().getDownload_manager().secureNotify();
+                                getMain_panel().getDesktopDownloadService().add(DownloadRequest.builder(url, dl_path)
+                                        .useSlots(getMain_panel().isUse_slots_down())
+                                        .customChunksDir(getMain_panel().isUse_custom_chunks_dir() ? getMain_panel().getCustom_chunks_dir() : null)
+                                        .priority(dialog.getPriority_checkbox().isSelected())
+                                        .build(), ma);
 
                             }
 
