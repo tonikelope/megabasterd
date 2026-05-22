@@ -4,14 +4,14 @@
 Reads every _addTranslation("english", "localized") call grouped by language
 method (Spanish/Italian/German/Hungarian/Turkish/Chinese/Vietnamese), produces:
 
-  src/main/resources/i18n/messages.properties     (English = canonical source)
-  src/main/resources/i18n/messages_es.properties  (Spanish)
-  src/main/resources/i18n/messages_it.properties
-  src/main/resources/i18n/messages_de.properties
-  src/main/resources/i18n/messages_hu.properties
-  src/main/resources/i18n/messages_tr.properties
-  src/main/resources/i18n/messages_zh.properties
-  src/main/resources/i18n/messages_vi.properties
+  megabasterd-desktop/src/main/resources/i18n/messages.properties
+  megabasterd-desktop/src/main/resources/i18n/messages_es.properties
+  megabasterd-desktop/src/main/resources/i18n/messages_it.properties
+  megabasterd-desktop/src/main/resources/i18n/messages_de.properties
+  megabasterd-desktop/src/main/resources/i18n/messages_hu.properties
+  megabasterd-desktop/src/main/resources/i18n/messages_tr.properties
+  megabasterd-desktop/src/main/resources/i18n/messages_zh.properties
+  megabasterd-desktop/src/main/resources/i18n/messages_vi.properties
 
 Keys are deterministic readable slugs derived from the English literal,
 with `__N` suffix to break collisions. The English bundle (messages.properties)
@@ -26,8 +26,9 @@ from pathlib import Path
 from collections import OrderedDict
 
 REPO = Path(__file__).resolve().parent.parent
-SRC = REPO / "src" / "main" / "java" / "com" / "tonikelope" / "megabasterd" / "LabelTranslatorSingleton.java"
-OUT = REPO / "src" / "main" / "resources" / "i18n"
+DESKTOP = REPO / "megabasterd-desktop"
+SRC = DESKTOP / "src" / "main" / "java" / "com" / "tonikelope" / "megabasterd" / "LabelTranslatorSingleton.java"
+OUT = DESKTOP / "src" / "main" / "resources" / "i18n"
 
 # Order matters: English keys are discovered in this method order. The first
 # method in source (German) is processed first so its keys define ordering.

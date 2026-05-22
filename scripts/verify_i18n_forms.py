@@ -19,8 +19,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-FORMS_DIR = ROOT / "src" / "main" / "java"
-BUNDLE = ROOT / "src" / "main" / "resources" / "i18n" / "messages.properties"
+DESKTOP = ROOT / "megabasterd-desktop"
+FORMS_DIR = DESKTOP / "src" / "main" / "java"
+BUNDLE = DESKTOP / "src" / "main" / "resources" / "i18n" / "messages.properties"
 
 PROP_RE = re.compile(
     r'<Property\s+name="(text|toolTipText|title)"\s+type="java\.lang\.String"\s+value="([^"]*)"\s*/>'

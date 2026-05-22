@@ -3,8 +3,8 @@
 i18n refactor (legacy gaps + .form gaps + ui.* keys).
 
 For each locale in DE/IT/HU/TR/ZH/VI, append any missing keys to
-src/main/resources/i18n/messages_<locale>.properties. Existing keys are
-left untouched -- this script is idempotent on re-run.
+megabasterd-desktop/src/main/resources/i18n/messages_<locale>.properties.
+Existing keys are left untouched -- this script is idempotent on re-run.
 
 Translations seeded here are AI-assisted and need a human pass from the
 language community on https://github.com/tonikelope/megabasterd/issues/397.
@@ -16,7 +16,7 @@ from __future__ import annotations
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-BUNDLE_DIR = ROOT / "src" / "main" / "resources" / "i18n"
+BUNDLE_DIR = ROOT / "megabasterd-desktop" / "src" / "main" / "resources" / "i18n"
 
 # English source for each key, used to emit "# EN: ..." comments and to
 # guarantee parity if a translation map is missing a key (we fall back to

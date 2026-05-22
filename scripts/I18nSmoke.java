@@ -10,10 +10,12 @@ import java.util.Locale;
  *  - LabelTranslatorSingleton.translate(English literal) -> localized text
  *
  * Run from the repo root (UTF-8 stdout to avoid Windows cp1252 mojibake):
- *   java -cp target/classes com.tonikelope.megabasterd.I18nSmoke
+ *   mvn -q -pl megabasterd-desktop -am compile dependency:build-classpath -Dmdep.outputFile=target/classpath.txt
+ *   javac -cp "megabasterd-desktop/target/classes:megabasterd-core/target/classes:$(cat megabasterd-desktop/target/classpath.txt)" -d megabasterd-desktop/target/classes scripts/I18nSmoke.java
+ *   java -cp "megabasterd-desktop/target/classes:megabasterd-core/target/classes:$(cat megabasterd-desktop/target/classpath.txt)" com.tonikelope.megabasterd.I18nSmoke
  *
- * NOT shipped: lives in scripts/ but compiled into target/classes for
- * the duration of this verification, then deleted.
+ * NOT shipped: lives in scripts/ but compiled into the desktop module's
+ * target/classes for the duration of this verification, then deleted.
  */
 public class I18nSmoke {
 

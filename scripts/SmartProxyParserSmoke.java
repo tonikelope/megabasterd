@@ -12,9 +12,9 @@ import java.util.Map;
  * socks4://, socks4a://, socks5://).
  *
  * Run from the repo root (UTF-8 stdout to avoid Windows cp1252 mojibake):
- *   mvn -q compile
- *   javac -d target/classes scripts/SmartProxyParserSmoke.java
- *   java -cp target/classes com.tonikelope.megabasterd.SmartProxyParserSmoke
+ *   mvn -q -pl megabasterd-desktop -am compile dependency:build-classpath -Dmdep.outputFile=target/classpath.txt
+ *   javac -cp "megabasterd-desktop/target/classes:megabasterd-core/target/classes:$(cat megabasterd-desktop/target/classpath.txt)" -d megabasterd-desktop/target/classes scripts/SmartProxyParserSmoke.java
+ *   java -cp "megabasterd-desktop/target/classes:megabasterd-core/target/classes:$(cat megabasterd-desktop/target/classpath.txt)" com.tonikelope.megabasterd.SmartProxyParserSmoke
  *
  * Exit code is the count of failed cases (0 = all green).
  */

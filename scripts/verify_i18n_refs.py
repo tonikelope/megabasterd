@@ -17,8 +17,9 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-JAVA = ROOT / "src" / "main" / "java"
-BUNDLE = ROOT / "src" / "main" / "resources" / "i18n" / "messages.properties"
+DESKTOP = ROOT / "megabasterd-desktop"
+JAVA = DESKTOP / "src" / "main" / "java"
+BUNDLE = DESKTOP / "src" / "main" / "resources" / "i18n" / "messages.properties"
 
 I18N_RE = re.compile(r'I18n\.tr\(\s*"((?:[^"\\]|\\.)*)"')
 TRANSLATE_RE = re.compile(
