@@ -349,7 +349,8 @@ public final class MainPanel {
 
     public MainPanel() {
 
-        _core = MegaBasterdCore.start(CoreConfig.forHomeDirectory(Paths.get(MEGABASTERD_HOME_DIR)));
+        _core = MegaBasterdCore.start(CoreConfig.forHomeDirectory(Paths.get(MEGABASTERD_HOME_DIR))
+                .withSettingsStorage(new SqliteSettingsStorage()));
         _core_event_subscription = _core.events().subscribe(this::handleCoreEvent);
 
         _new_version = null;
@@ -812,6 +813,18 @@ public final class MainPanel {
         _core_event_subscription.close();
     }
 
+    private String selectSettingValue(String key) {
+        return _core.settings().get(key);
+    }
+
+    private void insertSettingValue(String key, String value) throws SQLException {
+        try {
+            _core.settings().put(key, value);
+        } catch (IllegalStateException ex) {
+            throw new SQLException(ex);
+        }
+    }
+
     public int getMax_dl() {
         return _max_dl;
     }
@@ -878,7 +891,7 @@ public final class MainPanel {
 
     public void loadUserSettings() {
 
-        String use_custom_chunks_dir = DBTools.selectSettingValue("use_custom_chunks_dir");
+        String use_custom_chunks_dir = selectSettingValue("use_custom_chunks_dir");
 
         if (use_custom_chunks_dir != null) {
 
@@ -886,13 +899,13 @@ public final class MainPanel {
 
                 _use_custom_chunks_dir = true;
 
-                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+                _custom_chunks_dir = selectSettingValue("custom_chunks_dir");
 
             } else {
 
                 _use_custom_chunks_dir = false;
 
-                _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+                _custom_chunks_dir = selectSettingValue("custom_chunks_dir");
             }
 
         } else {
@@ -1009,7 +1022,7 @@ public final class MainPanel {
             _max_up_speed = MAX_TRANSFERENCE_SPEED_DEFAULT;
         }
 
-        String init_paused_string = DBTools.selectSettingValue("start_frozen");
+        String init_paused_string = selectSettingValue("start_frozen");
 
         if (init_paused_string != null) {
 
@@ -1025,15 +1038,15 @@ public final class MainPanel {
             Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
-        _mega_account_down = DBTools.selectSettingValue("mega_account_down");
+        _mega_account_down = selectSettingValue("mega_account_down");
 
         String use_account;
 
-        _use_mega_account_down = ((use_account = DBTools.selectSettingValue("use_mega_account_down")) != null && use_account.equals("yes"));
+        _use_mega_account_down = ((use_account = selectSettingValue("use_mega_account_down")) != null && use_account.equals("yes"));
 
-        _master_pass_hash = DBTools.selectSettingValue("master_pass_hash");
+        _master_pass_hash = selectSettingValue("master_pass_hash");
 
-        _master_pass_salt = DBTools.selectSettingValue("master_pass_salt");
+        _master_pass_salt = selectSettingValue("master_pass_salt");
 
         if (_master_pass_salt == null) {
 
@@ -1041,7 +1054,7 @@ public final class MainPanel {
 
                 _master_pass_salt = Bin2BASE64(genRandomByteArray(CryptTools.MASTER_PASSWORD_PBKDF2_SALT_BYTE_LENGTH));
 
-                DBTools.insertSettingValue("master_pass_salt", _master_pass_salt);
+                insertSettingValue("master_pass_salt", _master_pass_salt);
 
             } catch (SQLException ex) {
                 Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
@@ -1058,18 +1071,18 @@ public final class MainPanel {
 
         if (_use_proxy) {
 
-            _proxy_host = DBTools.selectSettingValue("proxy_host");
+            _proxy_host = selectSettingValue("proxy_host");
 
-            String proxy_port = DBTools.selectSettingValue("proxy_port");
+            String proxy_port = selectSettingValue("proxy_port");
 
             _proxy_port = MiscTools.parseIntOr(proxy_port, 8080);
 
-            _proxy_user = DBTools.selectSettingValue("proxy_user");
+            _proxy_user = selectSettingValue("proxy_user");
 
-            _proxy_pass = DBTools.selectSettingValue("proxy_pass");
+            _proxy_pass = selectSettingValue("proxy_pass");
         }
 
-        String run_command_string = DBTools.selectSettingValue("run_command");
+        String run_command_string = selectSettingValue("run_command");
 
         if (run_command_string != null) {
 
@@ -1078,7 +1091,7 @@ public final class MainPanel {
 
         String old_run_command_path = _run_command_path;
 
-        _run_command_path = DBTools.selectSettingValue("run_command_path");
+        _run_command_path = selectSettingValue("run_command_path");
 
         if (_run_command && old_run_command_path != null && !old_run_command_path.equals(_run_command_path)) {
             LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
@@ -1094,7 +1107,7 @@ public final class MainPanel {
 
         if (_megacrypter_reverse) {
 
-            String reverse_port = DBTools.selectSettingValue("megacrypter_reverse_port");
+            String reverse_port = selectSettingValue("megacrypter_reverse_port");
 
             _megacrypter_reverse_port = MiscTools.parseIntOr(reverse_port, DEFAULT_MEGA_PROXY_PORT);
         }
@@ -1107,7 +1120,7 @@ public final class MainPanel {
             _use_smart_proxy = DEFAULT_SMART_PROXY;
         }
 
-        _language = DBTools.selectSettingValue("language");
+        _language = selectSettingValue("language");
 
         if (_language == null) {
             _language = DEFAULT_LANGUAGE;
@@ -1121,7 +1134,7 @@ public final class MainPanel {
             _debug_file = false;
         }
 
-        String api_key = DBTools.selectSettingValue("mega_api_key");
+        String api_key = selectSettingValue("mega_api_key");
 
         if (api_key != null && !"".equals(api_key)) {
 

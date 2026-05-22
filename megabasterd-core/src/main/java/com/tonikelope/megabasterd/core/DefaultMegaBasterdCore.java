@@ -4,12 +4,14 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
 
     private final CoreConfig config;
     private final CoreEventPublisher events;
+    private final SettingsService settings;
     private final long startedAtMillis;
     private volatile boolean running;
 
     DefaultMegaBasterdCore(CoreConfig config) {
         this.config = config != null ? config : CoreConfig.defaults();
         this.events = new DefaultCoreEventPublisher();
+        this.settings = new DefaultSettingsService(this.config.settingsStorage(), events);
         this.startedAtMillis = System.currentTimeMillis();
         this.running = true;
     }
@@ -32,6 +34,11 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
     @Override
     public CoreEventPublisher events() {
         return events;
+    }
+
+    @Override
+    public SettingsService settings() {
+        return settings;
     }
 
     @Override

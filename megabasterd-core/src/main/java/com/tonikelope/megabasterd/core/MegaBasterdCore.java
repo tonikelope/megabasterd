@@ -14,5 +14,7 @@ public interface MegaBasterdCore {
 
     CoreEventPublisher events();
 
+    SettingsService settings();
+
     void shutdown();
 }

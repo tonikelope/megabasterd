@@ -14,6 +14,7 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.SmartMegaProxyManager.PROXY_AUTO_REFRESH_TIME;
 import static com.tonikelope.megabasterd.SmartMegaProxyManager.PROXY_BLOCK_TIME;
+import com.tonikelope.megabasterd.core.SettingsService;
 import java.awt.Dialog;
 import java.awt.Frame;
 import java.io.BufferedInputStream;
@@ -65,6 +66,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private final Set<String> _deleted_mega_accounts;
     private final Set<String> _deleted_elc_accounts;
     private final MainPanel _main_panel;
+    private final SettingsService _settings_service;
     private final AccountStore _account_store;
     private boolean _remember_master_pass;
     private volatile boolean _exit = false;
@@ -90,6 +92,32 @@ public class SettingsDialog extends javax.swing.JDialog {
 
     public boolean isRemember_master_pass() {
         return _remember_master_pass;
+    }
+
+    private String selectSettingValue(String key) {
+        return _settings_service.get(key);
+    }
+
+    private void insertSettingValue(String key, String value) throws SQLException {
+        try {
+            _settings_service.put(key, value);
+        } catch (IllegalStateException ex) {
+            throw new SQLException(ex);
+        }
+    }
+
+    private HashMap<String, Object> selectSettingsValues() throws SQLException {
+        HashMap<String, Object> values = new HashMap<>();
+        values.putAll(_settings_service.snapshot().values());
+        return values;
+    }
+
+    private void insertSettingsValues(HashMap<String, Object> settings) throws SQLException {
+        try {
+            _settings_service.putAll(settings);
+        } catch (IllegalStateException ex) {
+            throw new SQLException(ex);
+        }
     }
 
     @Override
@@ -183,6 +211,8 @@ public class SettingsDialog extends javax.swing.JDialog {
         super(parent, modal);
 
         _main_panel = parent.getMain_panel();
+
+        _settings_service = _main_panel.getCore().settings();
 
         _account_store = new AccountStore(_main_panel);
 
@@ -361,7 +391,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             advanced_scrollpane.getHorizontalScrollBar().setUnitIncrement(20);
 
-            String zoom_factor = DBTools.selectSettingValue("font_zoom");
+            String zoom_factor = selectSettingValue("font_zoom");
 
             int int_zoom_factor = Math.round(_main_panel.getZoom_factor() * 100);
 
@@ -372,13 +402,13 @@ public class SettingsDialog extends javax.swing.JDialog {
             zoom_spinner.setModel(new SpinnerNumberModel(int_zoom_factor, 50, 250, 10));
             ((JSpinner.DefaultEditor) zoom_spinner.getEditor()).getTextField().setEditable(false);
 
-            String use_custom_chunks_dir = DBTools.selectSettingValue("use_custom_chunks_dir");
+            String use_custom_chunks_dir = selectSettingValue("use_custom_chunks_dir");
 
             if (use_custom_chunks_dir != null) {
 
                 if (use_custom_chunks_dir.equals("yes")) {
 
-                    _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+                    _custom_chunks_dir = selectSettingValue("custom_chunks_dir");
 
                     custom_chunks_dir_current_label.setText(_custom_chunks_dir != null ? truncateText(_custom_chunks_dir, 80) : "");
 
@@ -388,7 +418,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 } else {
 
-                    _custom_chunks_dir = DBTools.selectSettingValue("custom_chunks_dir");
+                    _custom_chunks_dir = selectSettingValue("custom_chunks_dir");
 
                     custom_chunks_dir_current_label.setText(_custom_chunks_dir != null ? truncateText(_custom_chunks_dir, 80) : "");
 
@@ -414,7 +444,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean monitor_clipboard = Download.DEFAULT_CLIPBOARD_LINK_MONITOR;
 
-            String monitor_clipboard_string = DBTools.selectSettingValue("clipboardspy");
+            String monitor_clipboard_string = selectSettingValue("clipboardspy");
 
             if (monitor_clipboard_string != null) {
                 monitor_clipboard = monitor_clipboard_string.equals("yes");
@@ -422,7 +452,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean always_reload_mega_folders = false;
 
-            String always_reload_mega_folders_string = DBTools.selectSettingValue("always_reload_mega_folders");
+            String always_reload_mega_folders_string = selectSettingValue("always_reload_mega_folders");
 
             if (always_reload_mega_folders_string != null) {
                 always_reload_mega_folders = always_reload_mega_folders_string.equals("yes");
@@ -430,7 +460,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean thumbnails = Upload.DEFAULT_THUMBNAILS;
 
-            String thumbnails_string = DBTools.selectSettingValue("thumbnails");
+            String thumbnails_string = selectSettingValue("thumbnails");
 
             if (thumbnails_string != null) {
                 thumbnails = thumbnails_string.equals("yes");
@@ -440,7 +470,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean upload_log = Upload.UPLOAD_LOG;
 
-            String upload_log_string = DBTools.selectSettingValue("upload_log");
+            String upload_log_string = selectSettingValue("upload_log");
 
             if (upload_log_string != null) {
                 upload_log = upload_log_string.equals("yes");
@@ -450,7 +480,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean upload_public_folder = Upload.UPLOAD_PUBLIC_FOLDER;
 
-            String upload_public_folder_string = DBTools.selectSettingValue("upload_public_folder");
+            String upload_public_folder_string = selectSettingValue("upload_public_folder");
 
             if (upload_public_folder_string != null) {
                 upload_public_folder = upload_public_folder_string.equals("yes");
@@ -466,7 +496,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             always_reload_mega_folders_checkbox.setSelected(always_reload_mega_folders);
 
-            String default_download_dir = DBTools.selectSettingValue("default_down_dir");
+            String default_download_dir = selectSettingValue("default_down_dir");
 
             default_download_dir = Paths.get(default_download_dir == null ? MainPanel.MEGABASTERD_HOME_DIR : default_download_dir).toAbsolutePath().normalize().toString();
 
@@ -474,7 +504,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             default_dir_label.setText(truncateText(_download_path, 80));
 
-            String slots = DBTools.selectSettingValue("default_slots_down");
+            String slots = selectSettingValue("default_slots_down");
 
             int default_slots = Download.WORKERS_DEFAULT;
 
@@ -486,7 +516,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             ((JSpinner.DefaultEditor) default_slots_down_spinner.getEditor()).getTextField().setEditable(false);
 
-            slots = DBTools.selectSettingValue("default_slots_up");
+            slots = selectSettingValue("default_slots_up");
 
             default_slots = Upload.WORKERS_DEFAULT;
 
@@ -497,7 +527,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             default_slots_up_spinner.setModel(new SpinnerNumberModel(default_slots, Upload.MIN_WORKERS, Upload.MAX_WORKERS, 1));
             ((JSpinner.DefaultEditor) default_slots_up_spinner.getEditor()).getTextField().setEditable(false);
 
-            String max_down = DBTools.selectSettingValue("max_downloads");
+            String max_down = selectSettingValue("max_downloads");
 
             int max_dl = Download.SIM_TRANSFERENCES_DEFAULT;
 
@@ -508,7 +538,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             max_downloads_spinner.setModel(new SpinnerNumberModel(max_dl, 1, Download.MAX_SIM_TRANSFERENCES, 1));
             ((JSpinner.DefaultEditor) max_downloads_spinner.getEditor()).getTextField().setEditable(false);
 
-            String max_up = DBTools.selectSettingValue("max_uploads");
+            String max_up = selectSettingValue("max_uploads");
 
             int max_ul = Upload.SIM_TRANSFERENCES_DEFAULT;
 
@@ -521,7 +551,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean limit_dl_speed = Download.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 
-            String limit_download_speed = DBTools.selectSettingValue("limit_download_speed");
+            String limit_download_speed = selectSettingValue("limit_download_speed");
 
             if (limit_download_speed != null) {
                 limit_dl_speed = limit_download_speed.equals("yes");
@@ -533,7 +563,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             max_down_speed_spinner.setEnabled(limit_dl_speed);
 
-            String max_dl_speed = DBTools.selectSettingValue("max_download_speed");
+            String max_dl_speed = selectSettingValue("max_download_speed");
 
             int max_download_speed = Download.MAX_TRANSFERENCE_SPEED_DEFAULT;
 
@@ -547,7 +577,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean limit_ul_speed = Upload.LIMIT_TRANSFERENCE_SPEED_DEFAULT;
 
-            String limit_upload_speed = DBTools.selectSettingValue("limit_upload_speed");
+            String limit_upload_speed = selectSettingValue("limit_upload_speed");
 
             if (limit_upload_speed != null) {
                 limit_ul_speed = limit_upload_speed.equals("yes");
@@ -559,7 +589,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             max_up_speed_spinner.setEnabled(limit_ul_speed);
 
-            String smartproxy_auto_refresh = DBTools.selectSettingValue("smartproxy_autorefresh_time");
+            String smartproxy_auto_refresh = selectSettingValue("smartproxy_autorefresh_time");
 
             int smartproxy_auto_refresh_int = PROXY_AUTO_REFRESH_TIME;
 
@@ -580,7 +610,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             jLabel8.setToolTipText(refresh_tip);
             auto_refresh_proxy_time_spinner.setToolTipText(refresh_tip);
 
-            String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
+            String smartproxy_ban_time = selectSettingValue("smartproxy_ban_time");
 
             int smartproxy_ban_time_int = PROXY_BLOCK_TIME;
 
@@ -608,7 +638,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             ((JSpinner.DefaultEditor) bad_proxy_time_spinner.getEditor()).getTextField().setEditable(true);
             bad_proxy_time_spinner.setToolTipText(I18n.tr("settings.smartproxy.ban_time.tooltip"));
 
-            String smartproxy_timeout = DBTools.selectSettingValue("smartproxy_timeout");
+            String smartproxy_timeout = selectSettingValue("smartproxy_timeout");
 
             int smartproxy_timeout_int = (int) ((float) Transference.HTTP_PROXY_TIMEOUT / 1000);
 
@@ -639,7 +669,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean reset_slot_proxy = SmartMegaProxyManager.RESET_SLOT_PROXY;
 
-            String sreset_slot_proxy = DBTools.selectSettingValue("reset_slot_proxy");
+            String sreset_slot_proxy = selectSettingValue("reset_slot_proxy");
 
             if (sreset_slot_proxy != null) {
 
@@ -650,7 +680,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean random_select = SmartMegaProxyManager.RANDOM_SELECT;
 
-            String srandom_select = DBTools.selectSettingValue("random_proxy");
+            String srandom_select = selectSettingValue("random_proxy");
 
             if (srandom_select != null) {
 
@@ -665,7 +695,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean dark_mode = false;
 
-            String dark_mode_select = DBTools.selectSettingValue("dark_mode");
+            String dark_mode_select = selectSettingValue("dark_mode");
 
             if (dark_mode_select != null) {
 
@@ -674,7 +704,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             dark_mode_checkbox.setSelected(dark_mode);
 
-            String max_ul_speed = DBTools.selectSettingValue("max_upload_speed");
+            String max_ul_speed = selectSettingValue("max_upload_speed");
 
             int max_upload_speed = Upload.MAX_TRANSFERENCE_SPEED_DEFAULT;
 
@@ -688,7 +718,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean cbc_mac = Download.VERIFY_CBC_MAC_DEFAULT;
 
-            String verify_file = DBTools.selectSettingValue("verify_down_file");
+            String verify_file = selectSettingValue("verify_down_file");
 
             if (verify_file != null) {
                 cbc_mac = (verify_file.equals("yes"));
@@ -698,7 +728,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean use_slots = Download.USE_SLOTS_DEFAULT;
 
-            String use_slots_val = DBTools.selectSettingValue("use_slots_down");
+            String use_slots_val = selectSettingValue("use_slots_down");
 
             if (use_slots_val != null) {
                 use_slots = use_slots_val.equals("yes");
@@ -716,7 +746,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean use_mega_account = Download.USE_MEGA_ACCOUNT_DOWN;
 
-            String use_mega_acc = DBTools.selectSettingValue("use_mega_account_down");
+            String use_mega_acc = selectSettingValue("use_mega_account_down");
 
             String mega_account = null;
 
@@ -724,7 +754,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 use_mega_account = use_mega_acc.equals("yes");
 
-                mega_account = DBTools.selectSettingValue("mega_account_down");
+                mega_account = selectSettingValue("mega_account_down");
             }
 
             use_mega_label.setEnabled(use_mega_account);
@@ -816,7 +846,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean use_mc_reverse = false;
 
-            String megacrypter_reverse = DBTools.selectSettingValue("megacrypter_reverse");
+            String megacrypter_reverse = selectSettingValue("megacrypter_reverse");
 
             String megacrypter_reverse_p = String.valueOf(MainPanel.DEFAULT_MEGA_PROXY_PORT);
 
@@ -826,7 +856,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 if (megacrypter_reverse_p != null) {
 
-                    megacrypter_reverse_p = DBTools.selectSettingValue("megacrypter_reverse_port");
+                    megacrypter_reverse_p = selectSettingValue("megacrypter_reverse_port");
                 }
             }
 
@@ -838,7 +868,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean use_smart_proxy = false;
 
-            String smart_proxy = DBTools.selectSettingValue("smart_proxy");
+            String smart_proxy = selectSettingValue("smart_proxy");
 
             if (smart_proxy != null) {
 
@@ -851,7 +881,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean force_smart_proxy = MainPanel.FORCE_SMART_PROXY;
 
-            String force_smart_proxy_string = DBTools.selectSettingValue("force_smart_proxy");
+            String force_smart_proxy_string = selectSettingValue("force_smart_proxy");
 
             if (force_smart_proxy_string != null) {
 
@@ -870,7 +900,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean run_command = false;
 
-            String run_command_string = DBTools.selectSettingValue("run_command");
+            String run_command_string = selectSettingValue("run_command");
 
             if (run_command_string != null) {
 
@@ -881,11 +911,11 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             run_command_textbox.setEnabled(run_command);
 
-            run_command_textbox.setText(DBTools.selectSettingValue("run_command_path"));
+            run_command_textbox.setText(selectSettingValue("run_command_path"));
 
             boolean init_paused = false;
 
-            String init_paused_string = DBTools.selectSettingValue("start_frozen");
+            String init_paused_string = selectSettingValue("start_frozen");
 
             if (init_paused_string != null) {
 
@@ -896,7 +926,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean use_proxy = false;
 
-            String use_proxy_val = DBTools.selectSettingValue("use_proxy");
+            String use_proxy_val = selectSettingValue("use_proxy");
 
             if (use_proxy_val != null) {
                 use_proxy = (use_proxy_val.equals("yes"));
@@ -904,13 +934,13 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             use_proxy_checkbox.setSelected(use_proxy);
 
-            proxy_host_textfield.setText(DBTools.selectSettingValue("proxy_host"));
+            proxy_host_textfield.setText(selectSettingValue("proxy_host"));
 
-            proxy_port_textfield.setText(DBTools.selectSettingValue("proxy_port"));
+            proxy_port_textfield.setText(selectSettingValue("proxy_port"));
 
-            proxy_user_textfield.setText(DBTools.selectSettingValue("proxy_user"));
+            proxy_user_textfield.setText(selectSettingValue("proxy_user"));
 
-            proxy_pass_textfield.setText(DBTools.selectSettingValue("proxy_pass"));
+            proxy_pass_textfield.setText(selectSettingValue("proxy_pass"));
 
             // The "Save debug info to file" setting has been retired: the
             // DEBUG LOG tab in the main panel captures everything live and
@@ -920,7 +950,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             debug_file_checkbox.setVisible(false);
             debug_file_path.setVisible(false);
 
-            String font = DBTools.selectSettingValue("font");
+            String font = selectSettingValue("font");
 
             this.font_combo.addItem(LabelTranslatorSingleton.getInstance().translate("DEFAULT"));
 
@@ -932,7 +962,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 this.font_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate(font));
             }
 
-            String language = DBTools.selectSettingValue("language");
+            String language = selectSettingValue("language");
 
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("English"));
 
@@ -972,7 +1002,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Hungarian"));
             }
 
-            String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
+            String custom_proxy_list = selectSettingValue("custom_proxy_list");
 
             if (custom_proxy_list != null) {
                 custom_proxy_textarea.setText(custom_proxy_list);
@@ -2386,7 +2416,7 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("smart_proxy", smart_proxy_checkbox.isSelected() ? "yes" : "no");
             settings.put("custom_proxy_list", custom_proxy_textarea.getText());
 
-            String old_font = DBTools.selectSettingValue("font");
+            String old_font = selectSettingValue("font");
 
             if (old_font == null) {
                 old_font = "DEFAULT";
@@ -2400,7 +2430,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                 font = "ALTERNATIVE";
             }
 
-            String old_language = DBTools.selectSettingValue("language");
+            String old_language = selectSettingValue("language");
 
             if (old_language == null) {
                 old_language = MainPanel.DEFAULT_LANGUAGE;
@@ -2432,7 +2462,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             settings.put("language", language);
 
-            String old_zoom = DBTools.selectSettingValue("font_zoom");
+            String old_zoom = selectSettingValue("font_zoom");
 
             if (old_zoom == null) {
 
@@ -2443,7 +2473,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean old_dark_mode = false;
 
-            String dark_mode_val = DBTools.selectSettingValue("dark_mode");
+            String dark_mode_val = selectSettingValue("dark_mode");
 
             if (dark_mode_val != null) {
                 old_dark_mode = (dark_mode_val.equals("yes"));
@@ -2453,7 +2483,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean old_use_proxy = false;
 
-            String use_proxy_val = DBTools.selectSettingValue("use_proxy");
+            String use_proxy_val = selectSettingValue("use_proxy");
 
             if (use_proxy_val != null) {
                 old_use_proxy = (use_proxy_val.equals("yes"));
@@ -2461,7 +2491,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             boolean use_proxy = use_proxy_checkbox.isSelected();
 
-            String old_proxy_host = DBTools.selectSettingValue("proxy_host");
+            String old_proxy_host = selectSettingValue("proxy_host");
 
             if (old_proxy_host == null) {
 
@@ -2470,7 +2500,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             String proxy_host = proxy_host_textfield.getText().trim();
 
-            String old_proxy_port = DBTools.selectSettingValue("proxy_port");
+            String old_proxy_port = selectSettingValue("proxy_port");
 
             if (old_proxy_port == null) {
 
@@ -2479,7 +2509,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             String proxy_port = proxy_port_textfield.getText().trim();
 
-            String old_proxy_user = DBTools.selectSettingValue("proxy_user");
+            String old_proxy_user = selectSettingValue("proxy_user");
 
             if (old_proxy_user == null) {
 
@@ -2488,7 +2518,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             String proxy_user = proxy_user_textfield.getText().trim();
 
-            String old_proxy_pass = DBTools.selectSettingValue("proxy_pass");
+            String old_proxy_pass = selectSettingValue("proxy_pass");
 
             if (old_proxy_pass == null) {
 
@@ -3275,7 +3305,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                     use_mega_account_down_combobox.addItem(o);
                 });
 
-                String use_mega_account_down = DBTools.selectSettingValue("mega_account_down");
+                String use_mega_account_down = selectSettingValue("mega_account_down");
 
                 if (use_mega_account_down != null) {
 
