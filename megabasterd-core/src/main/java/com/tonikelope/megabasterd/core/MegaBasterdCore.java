@@ -16,6 +16,8 @@ public interface MegaBasterdCore {
 
     SettingsService settings();
 
+    AccountService accounts();
+
     DownloadService downloads();
 
     UploadService uploads();

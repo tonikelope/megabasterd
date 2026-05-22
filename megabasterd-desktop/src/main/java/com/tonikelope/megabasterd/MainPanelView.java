@@ -1384,8 +1384,8 @@ public final class MainPanelView extends javax.swing.JFrame {
 
             dialog.getDeleted_mega_accounts().stream().map((email) -> {
                 try {
-                    deleteMegaAccount(email);
-                } catch (SQLException ex) {
+                    _main_panel.getCore().accounts().deleteMegaAccount(email);
+                } catch (RuntimeException ex) {
                     LOG.log(SEVERE, null, ex);
                 }
                 return email;
@@ -1397,8 +1397,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             });
             dialog.getDeleted_elc_accounts().stream().map((host) -> {
                 try {
-                    deleteELCAccount(host);
-                } catch (SQLException ex) {
+                    _main_panel.getCore().accounts().deleteElcAccount(host);
+                } catch (RuntimeException ex) {
                     LOG.log(SEVERE, null, ex);
                 }
                 return host;

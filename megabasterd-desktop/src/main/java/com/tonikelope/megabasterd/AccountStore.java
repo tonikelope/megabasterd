@@ -13,6 +13,9 @@ import static com.tonikelope.megabasterd.MiscTools.BASE642Bin;
 import static com.tonikelope.megabasterd.MiscTools.Bin2BASE64;
 import static com.tonikelope.megabasterd.MiscTools.UrlBASE642Bin;
 import static com.tonikelope.megabasterd.MiscTools.i32a2bin;
+import com.tonikelope.megabasterd.core.AccountStorage;
+import com.tonikelope.megabasterd.core.ElcAccount;
+import com.tonikelope.megabasterd.core.MegaAccount;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -41,7 +44,7 @@ import java.util.Map;
  * Thread-safety: read methods are safe to call concurrently with each other;
  * write methods serialise through the underlying DBTools synchronized statics.
  */
-public final class AccountStore {
+public final class AccountStore implements AccountStorage {
 
     private final MainPanel _main_panel;
 
@@ -52,6 +55,7 @@ public final class AccountStore {
     /**
      * True if a master pass has been configured (DB has master_pass_hash).
      */
+    @Override
     public boolean isEncrypted() {
         return _main_panel.getMaster_pass_hash() != null;
     }
@@ -60,6 +64,7 @@ public final class AccountStore {
      * True if accounts are encrypted AND the master pass is not currently in
      * memory. Callers should refuse plaintext reads in this state.
      */
+    @Override
     public boolean isLocked() {
         return isEncrypted() && _main_panel.getMaster_pass() == null;
     }
@@ -70,6 +75,7 @@ public final class AccountStore {
      *
      * @throws IllegalStateException if the store is locked
      */
+    @Override
     public String getMegaPassword(String email) throws Exception {
         if (isLocked()) {
             throw new IllegalStateException("Account store is locked");
@@ -99,6 +105,15 @@ public final class AccountStore {
             HashMap<String, Object> data = (HashMap<String, Object>) e.getValue();
             String stored = (String) data.get("password");
             result.put(e.getKey(), stored == null ? null : decryptIfNeeded(stored));
+        }
+        return result;
+    }
+
+    @Override
+    public LinkedHashMap<String, MegaAccount> loadMegaAccounts() throws Exception {
+        LinkedHashMap<String, MegaAccount> result = new LinkedHashMap<>();
+        for (Map.Entry<String, String> entry : listMegaPlaintext().entrySet()) {
+            result.put(entry.getKey(), new MegaAccount(entry.getKey(), entry.getValue()));
         }
         return result;
     }
@@ -136,6 +151,12 @@ public final class AccountStore {
         return new String[]{decryptIfNeeded(user), decryptIfNeeded(apikey)};
     }
 
+    @Override
+    public ElcAccount getElcAccount(String host) throws Exception {
+        String[] credentials = getElcCredentials(host);
+        return credentials != null ? new ElcAccount(host, credentials[0], credentials[1]) : null;
+    }
+
     /**
      * Returns host -> {plaintext-user, plaintext-apikey} for every persisted
      * ELC account.
@@ -160,6 +181,16 @@ public final class AccountStore {
         return result;
     }
 
+    @Override
+    public LinkedHashMap<String, ElcAccount> loadElcAccounts() throws Exception {
+        LinkedHashMap<String, ElcAccount> result = new LinkedHashMap<>();
+        for (Map.Entry<String, String[]> entry : listElcPlaintext().entrySet()) {
+            String[] credentials = entry.getValue();
+            result.put(entry.getKey(), new ElcAccount(entry.getKey(), credentials[0], credentials[1]));
+        }
+        return result;
+    }
+
     /**
      * Insert-or-update an ELC account. Plaintext user / apikey are encrypted
      * at-rest before persisting if a master pass is configured.
@@ -173,6 +204,11 @@ public final class AccountStore {
         data.put("user", storedUser);
         data.put("apikey", storedApikey);
         _main_panel.getElc_accounts().put(host, data);
+    }
+
+    @Override
+    public void saveElcAccount(ElcAccount account) throws Exception {
+        persistElcAccount(account.host(), account.user(), account.apiKey());
     }
 
     public void deleteElcAccount(String host) throws SQLException {

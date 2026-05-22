@@ -14,6 +14,9 @@ import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.SmartMegaProxyManager.PROXY_AUTO_REFRESH_TIME;
 import static com.tonikelope.megabasterd.SmartMegaProxyManager.PROXY_BLOCK_TIME;
+import com.tonikelope.megabasterd.core.AccountService;
+import com.tonikelope.megabasterd.core.ElcAccount;
+import com.tonikelope.megabasterd.core.MegaAccount;
 import com.tonikelope.megabasterd.core.SettingsService;
 import java.awt.Dialog;
 import java.awt.Frame;
@@ -67,6 +70,7 @@ public class SettingsDialog extends javax.swing.JDialog {
     private final Set<String> _deleted_elc_accounts;
     private final MainPanel _main_panel;
     private final SettingsService _settings_service;
+    private final AccountService _account_service;
     private final AccountStore _account_store;
     private boolean _remember_master_pass;
     private volatile boolean _exit = false;
@@ -132,17 +136,17 @@ public class SettingsDialog extends javax.swing.JDialog {
     }
 
     /**
-     * Fill the MEGA / ELC table models from AccountStore.listMegaPlaintext /
-     * listElcPlaintext. Must NOT be called when the store is locked -- callers
+     * Fill the MEGA / ELC table models from the core account service. Must NOT
+     * be called when the store is locked -- callers
      * are responsible for taking the placeholder-row branch instead.
      */
     private void _populateAccountTablesFromStore(DefaultTableModel mega_model, DefaultTableModel elc_model) {
         try {
-            for (Map.Entry<String, String> e : _account_store.listMegaPlaintext().entrySet()) {
-                mega_model.addRow(new String[]{e.getKey(), e.getValue()});
+            for (MegaAccount account : _account_service.megaAccounts().values()) {
+                mega_model.addRow(new String[]{account.email(), account.password()});
             }
-            for (Map.Entry<String, String[]> e : _account_store.listElcPlaintext().entrySet()) {
-                elc_model.addRow(new String[]{e.getKey(), e.getValue()[0], e.getValue()[1]});
+            for (ElcAccount account : _account_service.elcAccounts().values()) {
+                elc_model.addRow(new String[]{account.host(), account.user(), account.apiKey()});
             }
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, "Populating account tables from store: {0}", ex.getMessage());
@@ -214,7 +218,9 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         _settings_service = _main_panel.getCore().settings();
 
-        _account_store = new AccountStore(_main_panel);
+        _account_service = _main_panel.getCore().accounts();
+
+        _account_store = _main_panel.getAccount_store();
 
         _remember_master_pass = true;
 
@@ -2592,16 +2598,16 @@ public class SettingsDialog extends javax.swing.JDialog {
                         // persist only when the row is new or has actually changed.
                         // AccountStore handles the encrypt-at-rest step so this loop
                         // doesn't have to know about master_pass.
-                        String[] existing = null;
+                        ElcAccount existing = null;
                         try {
-                            existing = _account_store.getElcCredentials(host_table);
+                            existing = _account_service.elcAccount(host_table);
                         } catch (Exception ex) {
                             LOG.log(Level.SEVERE, "Reading ELC credentials for {0}: {1}", new Object[]{host_table, ex.getMessage()});
                         }
 
-                        if (existing == null || !existing[0].equals(user_table) || !existing[1].equals(apikey_table)) {
+                        if (existing == null || !existing.user().equals(user_table) || !existing.apiKey().equals(apikey_table)) {
                             try {
-                                _account_store.persistElcAccount(host_table, user_table, apikey_table);
+                                _account_service.saveElcAccount(new ElcAccount(host_table, user_table, apikey_table));
                             } catch (Exception ex) {
                                 LOG.log(Level.SEVERE, "Persisting ELC account {0}: {1}", new Object[]{host_table, ex.getMessage()});
                             }
@@ -2671,7 +2677,7 @@ public class SettingsDialog extends javax.swing.JDialog {
                                 needs_login = true;
                             } else {
                                 try {
-                                    String stored = _account_store.getMegaPassword(email);
+                                    String stored = _account_service.megaPassword(email);
                                     needs_login = stored == null || !stored.equals(pass);
                                 } catch (Exception ex) {
                                     LOG.log(Level.SEVERE, "Reading stored password for {0}: {1}", new Object[]{email, ex.getMessage()});
@@ -3440,7 +3446,7 @@ public class SettingsDialog extends javax.swing.JDialog {
      * opening the file chooser. Writes UTF-8.
      */
     private void _exportAccounts(boolean mega) {
-        if (_account_store.isLocked()) {
+        if (_account_service.isLocked()) {
             JOptionPane.showMessageDialog(this,
                     LabelTranslatorSingleton.getInstance().translate("MEGA ACCOUNTS ARE LOCKED"),
                     I18n.tr("ui.error_title"), JOptionPane.ERROR_MESSAGE);
@@ -3449,7 +3455,7 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         List<String> lines;
         try {
-            lines = mega ? _account_store.exportMegaLines() : _account_store.exportElcLines();
+            lines = mega ? _account_service.exportMegaLines() : _account_service.exportElcLines();
         } catch (Exception ex) {
             LOG.log(Level.SEVERE, "Building export lines: {0}", ex.getMessage());
             JOptionPane.showMessageDialog(this, I18n.tr("ui.err.export_failed.message", ex.getMessage()), I18n.tr("ui.err.export_failed.title"), JOptionPane.ERROR_MESSAGE);

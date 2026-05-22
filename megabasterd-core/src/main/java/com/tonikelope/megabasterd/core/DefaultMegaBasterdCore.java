@@ -5,6 +5,7 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
     private final CoreConfig config;
     private final CoreEventPublisher events;
     private final SettingsService settings;
+    private final AccountService accounts;
     private final DownloadService downloads;
     private final UploadService uploads;
     private final long startedAtMillis;
@@ -14,6 +15,7 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
         this.config = config != null ? config : CoreConfig.defaults();
         this.events = new DefaultCoreEventPublisher();
         this.settings = new DefaultSettingsService(this.config.settingsStorage(), events);
+        this.accounts = new DefaultAccountService(this.config.accountStorage(), events);
         this.downloads = this.config.downloadService() != null ? this.config.downloadService() : new InMemoryDownloadService();
         this.uploads = this.config.uploadService() != null ? this.config.uploadService() : new InMemoryUploadService();
         this.startedAtMillis = System.currentTimeMillis();
@@ -43,6 +45,11 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
     @Override
     public SettingsService settings() {
         return settings;
+    }
+
+    @Override
+    public AccountService accounts() {
+        return accounts;
     }
 
     @Override

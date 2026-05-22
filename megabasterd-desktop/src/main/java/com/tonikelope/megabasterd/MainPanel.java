@@ -350,13 +350,16 @@ public final class MainPanel {
     private final EventSubscription _core_event_subscription;
     private final DesktopDownloadService _download_service;
     private final DesktopUploadService _upload_service;
+    private final AccountStore _account_store;
 
     public MainPanel() {
 
         _download_service = new DesktopDownloadService(this);
         _upload_service = new DesktopUploadService(this);
+        _account_store = new AccountStore(this);
         _core = MegaBasterdCore.start(CoreConfig.forHomeDirectory(Paths.get(MEGABASTERD_HOME_DIR))
                 .withSettingsStorage(new SqliteSettingsStorage())
+                .withAccountStorage(_account_store)
                 .withDownloadService(_download_service)
                 .withUploadService(_upload_service));
         _core_event_subscription = _core.events().subscribe(this::handleCoreEvent);
@@ -806,6 +809,10 @@ public final class MainPanel {
 
     public MegaBasterdCore getCore() {
         return _core;
+    }
+
+    public AccountStore getAccount_store() {
+        return _account_store;
     }
 
     public DesktopDownloadService getDesktopDownloadService() {

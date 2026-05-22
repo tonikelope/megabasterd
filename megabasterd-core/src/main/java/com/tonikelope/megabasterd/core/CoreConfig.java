@@ -6,23 +6,25 @@ public final class CoreConfig {
 
     private final CorePaths paths;
     private final SettingsStorage settingsStorage;
+    private final AccountStorage accountStorage;
     private final DownloadService downloadService;
     private final UploadService uploadService;
 
     private CoreConfig(CorePaths paths, SettingsStorage settingsStorage,
-            DownloadService downloadService, UploadService uploadService) {
+            AccountStorage accountStorage, DownloadService downloadService, UploadService uploadService) {
         this.paths = paths;
         this.settingsStorage = settingsStorage;
+        this.accountStorage = accountStorage;
         this.downloadService = downloadService;
         this.uploadService = uploadService;
     }
 
     public static CoreConfig defaults() {
-        return new CoreConfig(CorePaths.defaults(), null, null, null);
+        return new CoreConfig(CorePaths.defaults(), null, null, null, null);
     }
 
     public static CoreConfig of(CorePaths paths) {
-        return new CoreConfig(paths != null ? paths : CorePaths.defaults(), null, null, null);
+        return new CoreConfig(paths != null ? paths : CorePaths.defaults(), null, null, null, null);
     }
 
     public static CoreConfig forHomeDirectory(Path homeDirectory) {
@@ -37,6 +39,10 @@ public final class CoreConfig {
         return settingsStorage;
     }
 
+    public AccountStorage accountStorage() {
+        return accountStorage;
+    }
+
     public DownloadService downloadService() {
         return downloadService;
     }
@@ -46,14 +52,18 @@ public final class CoreConfig {
     }
 
     public CoreConfig withSettingsStorage(SettingsStorage settingsStorage) {
-        return new CoreConfig(paths, settingsStorage, downloadService, uploadService);
+        return new CoreConfig(paths, settingsStorage, accountStorage, downloadService, uploadService);
+    }
+
+    public CoreConfig withAccountStorage(AccountStorage accountStorage) {
+        return new CoreConfig(paths, settingsStorage, accountStorage, downloadService, uploadService);
     }
 
     public CoreConfig withDownloadService(DownloadService downloadService) {
-        return new CoreConfig(paths, settingsStorage, downloadService, uploadService);
+        return new CoreConfig(paths, settingsStorage, accountStorage, downloadService, uploadService);
     }
 
     public CoreConfig withUploadService(UploadService uploadService) {
-        return new CoreConfig(paths, settingsStorage, downloadService, uploadService);
+        return new CoreConfig(paths, settingsStorage, accountStorage, downloadService, uploadService);
     }
 }
