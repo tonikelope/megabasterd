@@ -3,11 +3,13 @@ package com.tonikelope.megabasterd.core;
 final class DefaultMegaBasterdCore implements MegaBasterdCore {
 
     private final CoreConfig config;
+    private final CoreEventPublisher events;
     private final long startedAtMillis;
     private volatile boolean running;
 
     DefaultMegaBasterdCore(CoreConfig config) {
         this.config = config != null ? config : CoreConfig.defaults();
+        this.events = new DefaultCoreEventPublisher();
         this.startedAtMillis = System.currentTimeMillis();
         this.running = true;
     }
@@ -28,7 +30,13 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
     }
 
     @Override
+    public CoreEventPublisher events() {
+        return events;
+    }
+
+    @Override
     public void shutdown() {
         running = false;
+        events.publish(LogEvent.info("core", "MegaBasterd core stopped"));
     }
 }

@@ -10,6 +10,7 @@
 package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.MainPanel.*;
+import com.tonikelope.megabasterd.core.TransferEvent;
 import java.awt.Component;
 import java.awt.TrayIcon;
 import java.util.ArrayList;
@@ -633,6 +634,8 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     private void _updateView() {
 
+        _publishTransferSnapshot();
+
         MiscTools.GUIRun(() -> {
 
             if (this instanceof DownloadManager) {
@@ -679,6 +682,20 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
             // _updateView only changes the status labels and toolbar buttons,
             // which don't need a viewport relayout.
         });
+    }
+
+    private void _publishTransferSnapshot() {
+        TransferEvent.Direction direction = this instanceof DownloadManager
+                ? TransferEvent.Direction.DOWNLOAD : TransferEvent.Direction.UPLOAD;
+        int pre = _transference_preprocess_global_queue.size() + _transference_preprocess_queue.size();
+        int prov = _transference_provision_queue.size();
+        int wait = _transference_waitstart_queue.size() + _transference_waitstart_aux_queue.size();
+        int run = _transference_running_list.size();
+        int finish = _transference_finished_queue.size();
+        int rem = _transference_remove_queue.size();
+
+        _main_panel.getCore().events().publish(new TransferEvent(direction,
+                TransferEvent.Action.SNAPSHOT, pre, prov, wait, run, finish, rem, ""));
     }
 
     private String _genStatus() {
