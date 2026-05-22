@@ -14,6 +14,9 @@ import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import com.tonikelope.megabasterd.core.DownloadRequest;
+import com.tonikelope.megabasterd.core.StreamingProxyComponent;
+import com.tonikelope.megabasterd.core.StreamingProxyState;
+import com.tonikelope.megabasterd.core.StreamingProxyStatus;
 import com.tonikelope.megabasterd.core.UploadRequest;
 import java.awt.Color;
 import java.awt.datatransfer.DataFlavor;
@@ -191,6 +194,27 @@ public final class MainPanelView extends javax.swing.JFrame {
     }
 
     public void updateKissStreamServerStatus(final String status) {
+        getMain_panel().getCore().streamingProxy().updateStatus(
+                new StreamingProxyStatus(StreamingProxyComponent.STREAMING_SERVER,
+                        StreamingProxyState.ON, MainPanel.STREAMER_PORT,
+                        getMain_panel().getStreamserver() != null
+                                ? getMain_panel().getStreamserver().getWorking_threads().size() : 0,
+                        status));
+    }
+
+    public void updateStreamingProxyStatus(final StreamingProxyStatus status) {
+        if (status == null) {
+            return;
+        }
+
+        if (status.component() == StreamingProxyComponent.STREAMING_SERVER) {
+            applyKissStreamServerStatus(status.statusText());
+        } else if (status.component() == StreamingProxyComponent.SMART_PROXY) {
+            applySmartProxyStatus(status.statusText());
+        }
+    }
+
+    private void applyKissStreamServerStatus(final String status) {
 
         MiscTools.GUIRun(() -> {
             String old_status = getKiss_server_status().getText();
@@ -204,6 +228,14 @@ public final class MainPanelView extends javax.swing.JFrame {
     }
 
     public void updateSmartProxyStatus(final String status) {
+        StreamingProxyState state = status != null && status.contains("OFF")
+                ? StreamingProxyState.OFF : StreamingProxyState.ON;
+        getMain_panel().getCore().streamingProxy().updateStatus(
+                new StreamingProxyStatus(StreamingProxyComponent.SMART_PROXY,
+                        state, -1, 0, status));
+    }
+
+    private void applySmartProxyStatus(final String status) {
 
         MiscTools.GUIRun(() -> {
             String old_status = getSmart_proxy_status().getText();

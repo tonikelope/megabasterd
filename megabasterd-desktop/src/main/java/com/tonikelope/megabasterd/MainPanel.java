@@ -20,6 +20,10 @@ import com.tonikelope.megabasterd.core.DownloadRequest;
 import com.tonikelope.megabasterd.core.EventSubscription;
 import com.tonikelope.megabasterd.core.LogEvent;
 import com.tonikelope.megabasterd.core.MegaBasterdCore;
+import com.tonikelope.megabasterd.core.StreamingProxyComponent;
+import com.tonikelope.megabasterd.core.StreamingProxyEvent;
+import com.tonikelope.megabasterd.core.StreamingProxyState;
+import com.tonikelope.megabasterd.core.StreamingProxyStatus;
 import com.tonikelope.megabasterd.core.UploadRequest;
 import java.awt.AWTException;
 import java.awt.Color;
@@ -828,7 +832,15 @@ public final class MainPanel {
             LogEvent log = (LogEvent) event;
             DebugLogBus.enqueue(String.format("%1$tF %1$tT [%2$s] %3$s - %4$s%n",
                     new java.util.Date(log.timestampMillis()), log.level(), log.source(), log.message()));
+        } else if (event instanceof StreamingProxyEvent) {
+            StreamingProxyEvent streamingProxy = (StreamingProxyEvent) event;
+            getView().updateStreamingProxyStatus(streamingProxy.status());
         }
+    }
+
+    public void updateMegaProxyStatus(StreamingProxyState state, int port, String statusText) {
+        _core.streamingProxy().updateStatus(new StreamingProxyStatus(
+                StreamingProxyComponent.MEGACRYPTER_PROXY, state, port, 0, statusText));
     }
 
     private void shutdownCore() {

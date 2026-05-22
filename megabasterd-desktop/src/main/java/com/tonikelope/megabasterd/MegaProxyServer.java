@@ -9,6 +9,7 @@
  */
 package com.tonikelope.megabasterd;
 
+import com.tonikelope.megabasterd.core.StreamingProxyState;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import java.io.*;
 import java.net.InetAddress;
@@ -91,6 +92,8 @@ public class MegaProxyServer implements Runnable {
         try {
 
             _serverSocket = new ServerSocket(_port, 50, InetAddress.getLoopbackAddress());
+            _main_panel.updateMegaProxyStatus(StreamingProxyState.ON, _port,
+                    "MegaCrypter reverse proxy: ON (port " + _port + ")");
 
             Socket socket;
 
@@ -114,6 +117,8 @@ public class MegaProxyServer implements Runnable {
             }
 
         } catch (IOException ex) {
+            _main_panel.updateMegaProxyStatus(StreamingProxyState.ERROR, _port,
+                    "MegaCrypter reverse proxy: ERROR (port " + _port + ")");
             LOG.log(Level.SEVERE, ex.getMessage());
         } finally {
 
@@ -128,6 +133,8 @@ public class MegaProxyServer implements Runnable {
             if (_handler_pool != null) {
                 _handler_pool.shutdownNow();
             }
+            _main_panel.updateMegaProxyStatus(StreamingProxyState.OFF, _port,
+                    "MegaCrypter reverse proxy: OFF");
         }
     }
 

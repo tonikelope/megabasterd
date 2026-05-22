@@ -8,6 +8,7 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
     private final AccountService accounts;
     private final DownloadService downloads;
     private final UploadService uploads;
+    private final StreamingProxyService streamingProxy;
     private final long startedAtMillis;
     private volatile boolean running;
 
@@ -18,6 +19,7 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
         this.accounts = new DefaultAccountService(this.config.accountStorage(), events);
         this.downloads = this.config.downloadService() != null ? this.config.downloadService() : new InMemoryDownloadService();
         this.uploads = this.config.uploadService() != null ? this.config.uploadService() : new InMemoryUploadService();
+        this.streamingProxy = new DefaultStreamingProxyService(events);
         this.startedAtMillis = System.currentTimeMillis();
         this.running = true;
     }
@@ -60,6 +62,11 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
     @Override
     public UploadService uploads() {
         return uploads;
+    }
+
+    @Override
+    public StreamingProxyService streamingProxy() {
+        return streamingProxy;
     }
 
     @Override

@@ -22,5 +22,7 @@ public interface MegaBasterdCore {
 
     UploadService uploads();
 
+    StreamingProxyService streamingProxy();
+
     void shutdown();
 }
