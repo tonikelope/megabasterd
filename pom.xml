@@ -10,6 +10,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>megabasterd-core</module>
         <module>megabasterd-desktop</module>
     </modules>
 

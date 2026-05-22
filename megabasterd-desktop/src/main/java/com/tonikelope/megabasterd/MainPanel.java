@@ -13,6 +13,9 @@ import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import com.tonikelope.megabasterd.SmartMegaProxyManager.SmartProxyAuthenticator;
 import static com.tonikelope.megabasterd.Transference.*;
+import com.tonikelope.megabasterd.core.CoreConfig;
+import com.tonikelope.megabasterd.core.CoreVersion;
+import com.tonikelope.megabasterd.core.MegaBasterdCore;
 import java.awt.AWTException;
 import java.awt.Color;
 import static java.awt.EventQueue.invokeLater;
@@ -69,7 +72,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.46";
+    public static final String VERSION = CoreVersion.VERSION;
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -338,8 +341,11 @@ public final class MainPanel {
     private boolean _megacrypter_reverse;
     private float _zoom_factor;
     private volatile boolean _exit;
+    private final MegaBasterdCore _core;
 
     public MainPanel() {
+
+        _core = MegaBasterdCore.start(CoreConfig.forHomeDirectory(Paths.get(MEGABASTERD_HOME_DIR)));
 
         _new_version = null;
 
@@ -1200,6 +1206,7 @@ public final class MainPanel {
             } catch (Exception ex) {
                 Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING, "SqliteSingleton shutdown: {0}", ex.getMessage());
             }
+            _core.shutdown();
 
             // Release the single-instance file lock so a restart can re-acquire
             // it immediately (Windows file-sharing semantics can otherwise delay
@@ -1238,6 +1245,7 @@ public final class MainPanel {
                 } catch (Exception ex) {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING, "SqliteSingleton shutdown: {0}", ex.getMessage());
                 }
+                _core.shutdown();
 
                 File db_file = new File(MainPanel.MEGABASTERD_HOME_DIR + "/.megabasterd" + MainPanel.VERSION + "/" + SqliteSingleton.SQLITE_FILE);
 
@@ -1255,6 +1263,7 @@ public final class MainPanel {
                 } catch (Exception ex) {
                     Logger.getLogger(MainPanel.class.getName()).log(Level.WARNING, "SqliteSingleton shutdown: {0}", ex.getMessage());
                 }
+                _core.shutdown();
             }
 
             if (restart) {
