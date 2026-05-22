@@ -61,6 +61,8 @@ EN = {
     "copy_all_upload_links": "COPY ALL UPLOAD LINKS",
     "create_upload_folder_public_link": "CREATE UPLOAD FOLDER PUBLIC LINK",
     "check_version": "Check version",
+    "always_reload_mega_folders":
+        "Always reload MEGA folders instead of using cached folder data",
     "create_upload_thumbnails": "Create and upload image/video thumbnails",
     "create_upload_logs": "Create upload logs",
     "dark_mode": "DARK MODE",
@@ -144,6 +146,8 @@ EN = {
     "ui.filechooser.select_dlc": "Select DLC container",
     "ui.filechooser.temp_chunks_dir": "Temporary chunks directory",
     "ui.filechooser.save_as": "Save as",
+    "upload_aborted_selected_mega_account_unavailable":
+        "Upload aborted: the selected MEGA account is not available.",
 }
 
 # ---------------------------------------------------------------------------
