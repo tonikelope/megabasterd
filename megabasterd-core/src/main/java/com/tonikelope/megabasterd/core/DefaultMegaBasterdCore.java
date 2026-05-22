@@ -6,6 +6,7 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
     private final CoreEventPublisher events;
     private final SettingsService settings;
     private final DownloadService downloads;
+    private final UploadService uploads;
     private final long startedAtMillis;
     private volatile boolean running;
 
@@ -14,6 +15,7 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
         this.events = new DefaultCoreEventPublisher();
         this.settings = new DefaultSettingsService(this.config.settingsStorage(), events);
         this.downloads = this.config.downloadService() != null ? this.config.downloadService() : new InMemoryDownloadService();
+        this.uploads = this.config.uploadService() != null ? this.config.uploadService() : new InMemoryUploadService();
         this.startedAtMillis = System.currentTimeMillis();
         this.running = true;
     }
@@ -46,6 +48,11 @@ final class DefaultMegaBasterdCore implements MegaBasterdCore {
     @Override
     public DownloadService downloads() {
         return downloads;
+    }
+
+    @Override
+    public UploadService uploads() {
+        return uploads;
     }
 
     @Override

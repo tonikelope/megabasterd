@@ -12,6 +12,7 @@ package com.tonikelope.megabasterd;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import static com.tonikelope.megabasterd.Transference.PROGRESS_WATCHDOG_TIMEOUT;
+import com.tonikelope.megabasterd.core.UploadId;
 import java.io.File;
 import java.io.IOException;
 import static java.lang.Integer.MAX_VALUE;
@@ -91,10 +92,12 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     private final boolean _priority;
     private final Object _progress_watchdog_lock;
     private volatile boolean _finalizing;
+    private final UploadId _core_upload_id;
 
     public Upload(MainPanel main_panel, MegaAPI ma, String filename, String parent_node, int[] ul_key, String ul_url, String root_node, byte[] share_key, String folder_link, boolean priority) {
 
         _notified = false;
+        _core_upload_id = UploadId.random();
         _priority = priority;
         _progress_watchdog_lock = new Object();
         _frozen = main_panel.isInit_paused();
@@ -134,6 +137,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     public Upload(Upload upload) {
 
         _notified = false;
+        _core_upload_id = UploadId.random();
         _priority = upload.isPriority();
         _progress_watchdog_lock = new Object();
         _provision_ok = false;
@@ -179,6 +183,14 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
     public String getTemp_mac_data() {
         return _temp_mac_data;
+    }
+
+    public UploadId getCoreUploadId() {
+        return _core_upload_id;
+    }
+
+    public String getStatus_error() {
+        return _status_error;
     }
 
     public void setTemp_mac_data(String temp_mac_data) {
@@ -562,9 +574,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         getMain_panel().getUpload_manager().getTransference_remove_queue().add(this);
 
-        getMain_panel().getUpload_manager().getTransference_provision_queue().add(new_upload);
-
-        getMain_panel().getUpload_manager().secureNotify();
+        getMain_panel().getDesktopUploadService().enqueue(new_upload);
     }
 
     @Override

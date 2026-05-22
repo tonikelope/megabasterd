@@ -14,6 +14,7 @@ import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MainPanel.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
 import com.tonikelope.megabasterd.core.DownloadRequest;
+import com.tonikelope.megabasterd.core.UploadRequest;
 import java.awt.Color;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -414,13 +415,18 @@ public final class MainPanelView extends javax.swing.JFrame {
                                     }
                                 }
 
-                                Upload upload = new Upload(getMain_panel(), ma, f.getAbsolutePath(), file_parent, null, null, parent_node, share_key, folder_link, dialog.getPriority_checkbox().isSelected());
+                                UploadRequest uploadRequest = UploadRequest.builder(f.getAbsolutePath())
+                                        .accountEmail(ma.getFull_email())
+                                        .parentNode(file_parent)
+                                        .rootNode(parent_node)
+                                        .shareKey(share_key)
+                                        .folderLink(folder_link)
+                                        .priority(dialog.getPriority_checkbox().isSelected())
+                                        .build();
 
-                                getMain_panel().getUpload_manager().getTransference_provision_queue().add(upload);
+                                getMain_panel().getDesktopUploadService().add(uploadRequest, ma);
 
                                 getMain_panel().getUpload_manager().getTransference_preprocess_global_queue().remove(f);
-
-                                getMain_panel().getUpload_manager().secureNotify();
 
                             } catch (Exception ex) {
 

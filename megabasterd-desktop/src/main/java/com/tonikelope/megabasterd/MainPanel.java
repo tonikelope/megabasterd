@@ -20,6 +20,7 @@ import com.tonikelope.megabasterd.core.DownloadRequest;
 import com.tonikelope.megabasterd.core.EventSubscription;
 import com.tonikelope.megabasterd.core.LogEvent;
 import com.tonikelope.megabasterd.core.MegaBasterdCore;
+import com.tonikelope.megabasterd.core.UploadRequest;
 import java.awt.AWTException;
 import java.awt.Color;
 import static java.awt.EventQueue.invokeLater;
@@ -348,13 +349,16 @@ public final class MainPanel {
     private final MegaBasterdCore _core;
     private final EventSubscription _core_event_subscription;
     private final DesktopDownloadService _download_service;
+    private final DesktopUploadService _upload_service;
 
     public MainPanel() {
 
         _download_service = new DesktopDownloadService(this);
+        _upload_service = new DesktopUploadService(this);
         _core = MegaBasterdCore.start(CoreConfig.forHomeDirectory(Paths.get(MEGABASTERD_HOME_DIR))
                 .withSettingsStorage(new SqliteSettingsStorage())
-                .withDownloadService(_download_service));
+                .withDownloadService(_download_service)
+                .withUploadService(_upload_service));
         _core_event_subscription = _core.events().subscribe(this::handleCoreEvent);
 
         _new_version = null;
@@ -806,6 +810,10 @@ public final class MainPanel {
 
     public DesktopDownloadService getDesktopDownloadService() {
         return _download_service;
+    }
+
+    public DesktopUploadService getDesktopUploadService() {
+        return _upload_service;
     }
 
     private void handleCoreEvent(CoreEvent event) {
@@ -2035,9 +2043,17 @@ public final class MainPanel {
 
                                     if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
-                                        Upload upload = new Upload(tthis, ma, (String) filename, (String) o.get("parent_node"), (String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null, (String) o.get("url"), (String) o.get("root_node"), BASE642Bin((String) o.get("share_key")), (String) o.get("folder_link"), false);
+                                        UploadRequest request = UploadRequest.builder((String) filename)
+                                                .accountEmail(email)
+                                                .parentNode((String) o.get("parent_node"))
+                                                .uploadKey((String) o.get("ul_key") != null ? bin2i32a(BASE642Bin((String) o.get("ul_key"))) : null)
+                                                .uploadUrl((String) o.get("url"))
+                                                .rootNode((String) o.get("root_node"))
+                                                .shareKey(BASE642Bin((String) o.get("share_key")))
+                                                .folderLink((String) o.get("folder_link"))
+                                                .build();
 
-                                        getUpload_manager().getTransference_provision_queue().add(upload);
+                                        getDesktopUploadService().add(request, ma);
 
                                         conta_uploads++;
 
@@ -2080,9 +2096,17 @@ public final class MainPanel {
 
                                     if ((ma = checkMegaAccountLoginAndShowMasterPassDialog(tthis, getView(), email)) != null) {
 
-                                        Upload upload = new Upload(tthis, ma, (String) entry.getKey(), (String) entry.getValue().get("parent_node"), (String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null, (String) entry.getValue().get("url"), (String) entry.getValue().get("root_node"), BASE642Bin((String) entry.getValue().get("share_key")), (String) entry.getValue().get("folder_link"), false);
+                                        UploadRequest request = UploadRequest.builder((String) entry.getKey())
+                                                .accountEmail(email)
+                                                .parentNode((String) entry.getValue().get("parent_node"))
+                                                .uploadKey((String) entry.getValue().get("ul_key") != null ? bin2i32a(BASE642Bin((String) entry.getValue().get("ul_key"))) : null)
+                                                .uploadUrl((String) entry.getValue().get("url"))
+                                                .rootNode((String) entry.getValue().get("root_node"))
+                                                .shareKey(BASE642Bin((String) entry.getValue().get("share_key")))
+                                                .folderLink((String) entry.getValue().get("folder_link"))
+                                                .build();
 
-                                        getUpload_manager().getTransference_provision_queue().add(upload);
+                                        getDesktopUploadService().add(request, ma);
 
                                         conta_uploads++;
                                     }

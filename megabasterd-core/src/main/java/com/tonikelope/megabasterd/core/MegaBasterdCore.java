@@ -18,5 +18,7 @@ public interface MegaBasterdCore {
 
     DownloadService downloads();
 
+    UploadService uploads();
+
     void shutdown();
 }

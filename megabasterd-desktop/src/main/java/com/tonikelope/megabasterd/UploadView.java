@@ -429,25 +429,29 @@ public class UploadView extends javax.swing.JPanel implements TransferenceView {
 
     private void close_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_buttonActionPerformed
 
-        _upload.close();
+        _upload.getMain_panel().getCore().uploads().close(_upload.getCoreUploadId());
 
     }//GEN-LAST:event_close_buttonActionPerformed
 
     private void restart_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_restart_buttonActionPerformed
 
-        _upload.restart();
+        _upload.getMain_panel().getCore().uploads().restart(_upload.getCoreUploadId());
 
     }//GEN-LAST:event_restart_buttonActionPerformed
 
     private void stop_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_stop_buttonActionPerformed
 
-        _upload.stop();
+        _upload.getMain_panel().getCore().uploads().cancel(_upload.getCoreUploadId());
 
     }//GEN-LAST:event_stop_buttonActionPerformed
 
     private void pause_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pause_buttonActionPerformed
 
-        _upload.pause();
+        if (_upload.isPause()) {
+            _upload.getMain_panel().getCore().uploads().resume(_upload.getCoreUploadId());
+        } else {
+            _upload.getMain_panel().getCore().uploads().pause(_upload.getCoreUploadId());
+        }
 
     }//GEN-LAST:event_pause_buttonActionPerformed
 
