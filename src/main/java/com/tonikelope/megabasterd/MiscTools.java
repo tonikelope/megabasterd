@@ -591,6 +591,10 @@ public class MiscTools {
 
             ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
 
+        } else if (component instanceof javax.swing.JRadioButton) {
+
+            ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
+
         } else if ((component instanceof JMenuItem) && !(component instanceof JMenu)) {
 
             ((AbstractButton) component).setText(LabelTranslatorSingleton.getInstance().translate(((AbstractButton) component).getText()));
