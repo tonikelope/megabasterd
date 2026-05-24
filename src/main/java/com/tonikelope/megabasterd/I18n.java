@@ -8,11 +8,14 @@
  */
 package com.tonikelope.megabasterd;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Locale;
@@ -20,6 +23,8 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.PropertyResourceBundle;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Tag-based i18n entry point. Translations live in
@@ -42,6 +47,7 @@ public final class I18n {
 
     public static final String BUNDLE_BASENAME = "i18n.messages";
 
+    private static final Logger LOG = Logger.getLogger(I18n.class.getName());
     private static final ResourceBundle.Control UTF8_CONTROL = new Utf8Control();
     private static final Map<String, Locale> LEGACY_CODE_TO_LOCALE = new HashMap<>();
 
@@ -59,14 +65,27 @@ public final class I18n {
     private static volatile Locale currentLocale = Locale.ROOT;
     private static volatile ResourceBundle bundle = loadBundle(Locale.ROOT);
     private static volatile ResourceBundle defaultBundle = loadBundle(Locale.ROOT);
+    private static volatile ResourceBundle overrideBundle; // optional on-disk override
 
     private I18n() {
     }
 
-    /** Translate a key to the current locale. Falls back to English, then key. */
+    /**
+     * Translate a key to the current locale.
+     *
+     * <p>Lookup order: external override file (if loaded) -&gt; active locale
+     * bundle -&gt; English root bundle -&gt; the key itself.
+     */
     public static String tr(String key) {
         if (key == null) {
             return null;
+        }
+        ResourceBundle ov = overrideBundle;
+        if (ov != null) {
+            try {
+                return ov.getString(key);
+            } catch (MissingResourceException ignored) {
+            }
         }
         ResourceBundle b = bundle;
         try {
@@ -122,6 +141,38 @@ public final class I18n {
     /** Exposed for the legacy shim. */
     static ResourceBundle activeBundle() {
         return bundle;
+    }
+
+    /**
+     * Load (or clear) an on-disk UTF-8 {@code .properties} file whose entries
+     * take precedence over the embedded bundle for the active locale. Intended
+     * for translators iterating on their language file without rebuilding the
+     * JAR (see issue #766). Passing {@code null}, a missing path, or any I/O
+     * failure clears the override.
+     */
+    public static synchronized void setExternalLanguageFile(Path file) {
+        if (file == null) {
+            overrideBundle = null;
+            return;
+        }
+        if (!Files.isRegularFile(file)) {
+            LOG.log(Level.WARNING, "External language file not found: {0}", file);
+            overrideBundle = null;
+            return;
+        }
+        try (BufferedReader r = Files.newBufferedReader(file, StandardCharsets.UTF_8)) {
+            overrideBundle = new PropertyResourceBundle(r);
+            LOG.log(Level.INFO, "External language override loaded from {0}", file);
+        } catch (IOException ex) {
+            LOG.log(Level.WARNING, "Failed to load external language file {0}: {1}",
+                    new Object[]{file, ex.getMessage()});
+            overrideBundle = null;
+        }
+    }
+
+    /** Whether an external override file is currently active. */
+    public static boolean hasExternalLanguageFile() {
+        return overrideBundle != null;
     }
 
     private static ResourceBundle loadBundle(Locale locale) {
