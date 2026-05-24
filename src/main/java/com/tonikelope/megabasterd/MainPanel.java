@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.47";
+    public static final String VERSION = "8.48";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -519,7 +519,7 @@ public final class MainPanel {
                 debug_panel.add(toolbar, java.awt.BorderLayout.NORTH);
                 debug_panel.add(debug_scroll, java.awt.BorderLayout.CENTER);
 
-                _view.getjTabbedPane1().addTab("DEBUG LOG",
+                _view.getjTabbedPane1().addTab(I18n.tr("ui.tab.debug_log"),
                         new javax.swing.ImageIcon(getClass().getResource("/images/icons8-services-30.png")),
                         debug_panel);
 
@@ -619,7 +619,7 @@ public final class MainPanel {
             while (!_exit) {
                 long used_memory = instance.totalMemory() - instance.freeMemory();
                 long max_memory = instance.maxMemory();
-                String text = "JVM-RAM used: " + MiscTools.formatBytes(used_memory) + " / " + MiscTools.formatBytes(max_memory);
+                String text = I18n.tr("ui.statusbar.jvm_ram", MiscTools.formatBytes(used_memory), MiscTools.formatBytes(max_memory));
                 // Skip setText if the rendered string is unchanged -- the EDT
                 // doesn't need a repaint event for "same value".
                 if (!text.equals(last_text)) {
@@ -1338,7 +1338,7 @@ public final class MainPanel {
                         LabelTranslatorSingleton.getInstance().translate("Yes")};
 
                     int n = showOptionDialog(getView(),
-                            LabelTranslatorSingleton.getInstance().translate("An older version (" + old_version + ") of MegaBasterd has been detected.\nDo you want to import all current settings and transfers from the previous version?\nWARNING: INCOMPATIBILITIES MAY EXIST BETWEEN VERSIONS."),
+                            I18n.tr("older_version_import_prompt", old_version),
                             LabelTranslatorSingleton.getInstance().translate("Warning!"), YES_NO_CANCEL_OPTION, JOptionPane.INFORMATION_MESSAGE,
                             null,
                             options,
