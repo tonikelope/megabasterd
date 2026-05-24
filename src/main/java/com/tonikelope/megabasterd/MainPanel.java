@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.46";
+    public static final String VERSION = "8.47";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -1083,6 +1083,17 @@ public final class MainPanel {
 
         if (_language == null) {
             _language = DEFAULT_LANGUAGE;
+        }
+
+        // External language file override (#766). Translators can point this at
+        // a UTF-8 .properties file on disk to test their translation without
+        // rebuilding the JAR; entries take precedence over the embedded bundle.
+        String external_language_file = DBTools.selectSettingValue("external_language_file");
+
+        if (external_language_file != null && !external_language_file.trim().isEmpty()) {
+            I18n.setExternalLanguageFile(Paths.get(external_language_file.trim()));
+        } else {
+            I18n.setExternalLanguageFile(null);
         }
 
         String debug_file = selectSettingValue("debug_file");
