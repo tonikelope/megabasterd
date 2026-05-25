@@ -386,6 +386,22 @@ public class DBTools {
         return value;
     }
 
+    // Returns true only when the settings table contains zero rows. On error
+    // returns false so callers default to the safe "not a first run" path
+    // (issue #771 first-run language autodetection).
+    public static synchronized boolean isSettingsTableEmpty() {
+
+        try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("SELECT 1 FROM settings LIMIT 1")) {
+
+            ResultSet res = ps.executeQuery();
+
+            return !res.next();
+        } catch (SQLException ex) {
+            Logger.getLogger(DBTools.class.getName()).log(Level.SEVERE, ex.getMessage());
+            return false;
+        }
+    }
+
     public static synchronized void insertSettingValue(String key, String value) throws SQLException {
 
         try (Connection conn = SqliteSingleton.getInstance().getConn(); PreparedStatement ps = conn.prepareStatement("INSERT OR REPLACE INTO settings (key,value) VALUES (?, ?)")) {
