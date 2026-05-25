@@ -342,6 +342,21 @@ public class SettingsDialog extends javax.swing.JDialog {
             translateLabels(smart_proxy_checkbox);
             translateLabels(smart_proxy_settings);
 
+            // The WARNING label sits on a single .form-defined JLabel so any
+            // long translation overflows the dialog horizontally. Re-emit the
+            // text wrapped in <html>...</html> with literal \n converted to
+            // <br> so translators can break the WARNING into multiple lines
+            // by placing \n in their messages_XX.properties value (#770).
+            String warn = LabelTranslatorSingleton.getInstance().translate("WARNING: Using proxies or VPN to bypass MEGA's daily download limitation may violate its Terms of Use. USE THIS OPTION AT YOUR OWN RISK.");
+            rec_smart_proxy_label1.setText("<html>" + warn.replace("\n", "<br>") + "</html>");
+
+            // JTable column headers are NOT visited by translateLabels (it
+            // only walks JLabel/AbstractButton subtypes), so the ELC and MEGA
+            // account-table headers ship in raw English. Apply translations
+            // explicitly here, once the model has been initialised by
+            // initComponents (#770).
+            translateAccountTableHeaders();
+
             // The Refresh-now button + row are brand-new components built
             // above; apply GUI_FONT scaled by zoom so they match the rest of
             // the dialog. No translateLabels call needed -- the button text
@@ -2841,11 +2856,13 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 DefaultTableModel mega_model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
 
-                DefaultTableModel elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API KEY"});
+                DefaultTableModel elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API-KEY"});
 
                 mega_accounts_table.setModel(mega_model);
 
                 elc_accounts_table.setModel(elc_model);
+
+                translateAccountTableHeaders();
 
                 encrypt_pass_checkbox.setEnabled(true);
 
@@ -2926,11 +2943,13 @@ public class SettingsDialog extends javax.swing.JDialog {
 
                 DefaultTableModel new_mega_model = new DefaultTableModel(new Object[][]{}, new String[]{"Email", "Password"});
 
-                DefaultTableModel new_elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API KEY"});
+                DefaultTableModel new_elc_model = new DefaultTableModel(new Object[][]{}, new String[]{"Host", "User", "API-KEY"});
 
                 mega_accounts_table.setModel(new_mega_model);
 
                 elc_accounts_table.setModel(new_elc_model);
+
+                translateAccountTableHeaders();
 
                 DBTools.truncateMegaAccounts();
 
@@ -3034,6 +3053,25 @@ public class SettingsDialog extends javax.swing.JDialog {
         mega_accounts_table.clearSelection();
     }//GEN-LAST:event_add_mega_account_buttonActionPerformed
 
+    // Re-emits the ELC account-table column headers through the i18n bundle.
+    // JTable header values are not visited by translateLabels (which only
+    // walks JLabel / AbstractButton subtypes), so the headers baked in by
+    // .form-generated initComponents (and any later setModel) would
+    // otherwise stay in raw English. MEGA columns (Email / Password) are
+    // skipped because both terms are used verbatim across every bundle
+    // -- and the existing password key carries a trailing colon used by
+    // a different label, so translating "Password" through it would no-op.
+    // Called once from the constructor and from every setModel call that
+    // rebuilds the ELC model (#770).
+    private void translateAccountTableHeaders() {
+        if (elc_accounts_table.getColumnModel().getColumnCount() >= 3) {
+            elc_accounts_table.getColumnModel().getColumn(0).setHeaderValue(LabelTranslatorSingleton.getInstance().translate("Host"));
+            elc_accounts_table.getColumnModel().getColumn(1).setHeaderValue(LabelTranslatorSingleton.getInstance().translate("User"));
+            elc_accounts_table.getColumnModel().getColumn(2).setHeaderValue(LabelTranslatorSingleton.getInstance().translate("API-KEY"));
+            elc_accounts_table.getTableHeader().repaint();
+        }
+    }
+
     private void remove_mega_account_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_remove_mega_account_buttonActionPerformed
 
         DefaultTableModel model = (DefaultTableModel) mega_accounts_table.getModel();
@@ -3098,8 +3136,17 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         filechooser.setDialogTitle(LabelTranslatorSingleton.getInstance().translate("Select translation file"));
         filechooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-        filechooser.addChoosableFileFilter(new FileNameExtensionFilter("Java properties (UTF-8) (*.properties)", "properties"));
+        filechooser.addChoosableFileFilter(new FileNameExtensionFilter(LabelTranslatorSingleton.getInstance().translate("Java properties (UTF-8) (*.properties)"), "properties"));
         filechooser.setAcceptAllFileFilterUsed(false);
+
+        // Translators typically drop messages_xx.properties next to the
+        // MegaBasterd jar, so default the dialog there when no path is
+        // already set -- saves several scroll/click steps versus the JVM
+        // default (user home). Falls back to the JFileChooser default if
+        // the jar location cannot be resolved (e.g. running from an
+        // unpacked classpath). Larger preferred size cuts the amount of
+        // scrolling in deep directory trees (#770).
+        filechooser.setPreferredSize(new java.awt.Dimension(900, 600));
 
         String current = ext_lang_path_field.getText();
         if (current != null && !current.trim().isEmpty()) {
@@ -3108,6 +3155,14 @@ public class SettingsDialog extends javax.swing.JDialog {
                 filechooser.setSelectedFile(f);
             } else if (f.getParentFile() != null && f.getParentFile().exists()) {
                 filechooser.setCurrentDirectory(f.getParentFile());
+            }
+        } else {
+            String jar_dir = MiscTools.getCurrentJarParentPath();
+            if (jar_dir != null) {
+                File jar_dir_file = new File(jar_dir);
+                if (jar_dir_file.exists() && jar_dir_file.isDirectory()) {
+                    filechooser.setCurrentDirectory(jar_dir_file);
+                }
             }
         }
 
@@ -3332,7 +3387,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         updateFonts(filechooser, GUI_FONT, (float) (_main_panel.getZoom_factor() * 1.25));
 
         filechooser.setCurrentDirectory(new java.io.File(_download_path));
-        filechooser.setDialogTitle("Default download directory");
+        filechooser.setDialogTitle(LabelTranslatorSingleton.getInstance().translate("Default download directory"));
         filechooser.setFileSelectionMode(javax.swing.JFileChooser.DIRECTORIES_ONLY);
         filechooser.setAcceptAllFileFilterUsed(false);
 
