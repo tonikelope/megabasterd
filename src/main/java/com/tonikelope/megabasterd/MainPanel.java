@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.50";
+    public static final String VERSION = "8.51";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -234,6 +234,19 @@ public final class MainPanel {
             MiscTools.createUploadLogDir();
         }
 
+        // Issue #771: first-run language autodetection. Must run BEFORE the
+        // v8.27 migration below, which writes verify_down_file_migrated_v827
+        // and makes the settings table non-empty. We only autodetect on a true
+        // fresh install (no settings rows at all); existing users who never
+        // picked a language keep getting EN to avoid a surprise UI switch.
+        try {
+            if (DBTools.isSettingsTableEmpty()) {
+                DBTools.insertSettingValue("language", detectOsLanguage());
+            }
+        } catch (SQLException ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(SEVERE, "first-run language autodetect failed", ex);
+        }
+
         // 8.27 migration: users who upgraded from pre-afb3936 builds (when
         // VERIFY_CBC_MAC_DEFAULT was false) have "verify_down_file" = "no"
         // persisted in their settings DB from any time they opened Settings
@@ -278,6 +291,36 @@ public final class MainPanel {
 
     public static String getLanguage() {
         return _language;
+    }
+
+    // Issue #771: first-run autodetection. Map the JVM default locale's
+    // ISO 639-1 code to MegaBasterd's internal language codes; fall back to
+    // EN when the OS language has no bundled translation.
+    public static String detectOsLanguage() {
+        String iso = java.util.Locale.getDefault().getLanguage();
+        if (iso == null) {
+            return DEFAULT_LANGUAGE;
+        }
+        switch (iso.toLowerCase(java.util.Locale.ROOT)) {
+            case "es":
+                return "ES";
+            case "it":
+                return "IT";
+            case "tr":
+                return "TU";
+            case "zh":
+                return "CH";
+            case "vi":
+                return "VI";
+            case "de":
+                return "GE";
+            case "hu":
+                return "HU";
+            case "en":
+                return "EN";
+            default:
+                return DEFAULT_LANGUAGE;
+        }
     }
 
     public static String getProxy_user() {
