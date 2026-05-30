@@ -68,7 +68,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.53";
+    public static final String VERSION = "8.54";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -132,6 +132,14 @@ public final class MainPanel {
     private static boolean _use_smart_proxy;
     private static boolean _run_command;
     private static String _run_command_path;
+    // #774 -- two independent post-finish commands, one per queue. Settings
+    // and triggers are fully independent of the legacy "MEGA download limit
+    // reached" command above and of each other; if downloads and uploads
+    // both empty at the same time both commands fire concurrently.
+    private static boolean _run_command_dl_finish;
+    private static String _run_command_dl_finish_path;
+    private static boolean _run_command_ul_finish;
+    private static String _run_command_ul_finish_path;
     private static String _font;
     private static SmartMegaProxyManager _proxy_manager;
     private static volatile String _language;
@@ -139,6 +147,14 @@ public final class MainPanel {
     private static Boolean _resume_uploads;
     private static Boolean _resume_downloads;
     public static volatile long LAST_EXTERNAL_COMMAND_TIMESTAMP;
+    // #774 -- separate cooldown timestamps so neither command can starve the
+    // others. Each post-finish command has its own RUN_COMMAND_TIME-style
+    // guard; in practice the natural "queue must transition from non-empty
+    // to empty" gate prevents accidental refire much earlier than the
+    // timestamp would, but we keep the same belt-and-braces pattern as
+    // run_external_command() to stay consistent.
+    public static volatile long LAST_DL_FINISH_COMMAND_TIMESTAMP;
+    public static volatile long LAST_UL_FINISH_COMMAND_TIMESTAMP;
 
     /**
      * Shared cached public IP for the 509-recovery / VPN-aware retry path.
@@ -301,6 +317,23 @@ public final class MainPanel {
         return _run_command_path;
     }
 
+    // #774 -- accessors for the two post-finish commands.
+    public static boolean isRun_command_dl_finish() {
+        return _run_command_dl_finish;
+    }
+
+    public static String getRun_command_dl_finish_path() {
+        return _run_command_dl_finish_path;
+    }
+
+    public static boolean isRun_command_ul_finish() {
+        return _run_command_ul_finish;
+    }
+
+    public static String getRun_command_ul_finish_path() {
+        return _run_command_ul_finish_path;
+    }
+
     public static String getFont() {
         return _font;
     }
@@ -409,6 +442,9 @@ public final class MainPanel {
         _exit = false;
 
         LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
+        // #774
+        LAST_DL_FINISH_COMMAND_TIMESTAMP = -1;
+        LAST_UL_FINISH_COMMAND_TIMESTAMP = -1;
 
         _restart = false;
 
@@ -1153,6 +1189,30 @@ public final class MainPanel {
             LAST_EXTERNAL_COMMAND_TIMESTAMP = -1;
         }
 
+        // #774 -- two independent post-queue-finish commands. Same pattern
+        // as the 509 command above: yes/no flag + path. Path-change wipes
+        // the per-command cooldown timestamp so the user can test the new
+        // command right away.
+        String run_command_dl_finish_string = DBTools.selectSettingValue("run_command_dl_finish");
+        if (run_command_dl_finish_string != null) {
+            _run_command_dl_finish = run_command_dl_finish_string.equals("yes");
+        }
+        String old_run_command_dl_finish_path = _run_command_dl_finish_path;
+        _run_command_dl_finish_path = DBTools.selectSettingValue("run_command_dl_finish_path");
+        if (_run_command_dl_finish && old_run_command_dl_finish_path != null && !old_run_command_dl_finish_path.equals(_run_command_dl_finish_path)) {
+            LAST_DL_FINISH_COMMAND_TIMESTAMP = -1;
+        }
+
+        String run_command_ul_finish_string = DBTools.selectSettingValue("run_command_ul_finish");
+        if (run_command_ul_finish_string != null) {
+            _run_command_ul_finish = run_command_ul_finish_string.equals("yes");
+        }
+        String old_run_command_ul_finish_path = _run_command_ul_finish_path;
+        _run_command_ul_finish_path = DBTools.selectSettingValue("run_command_ul_finish_path");
+        if (_run_command_ul_finish && old_run_command_ul_finish_path != null && !old_run_command_ul_finish_path.equals(_run_command_ul_finish_path)) {
+            LAST_UL_FINISH_COMMAND_TIMESTAMP = -1;
+        }
+
         String use_megacrypter_reverse = selectSettingValue("megacrypter_reverse");
 
         if (use_megacrypter_reverse != null) {
@@ -1218,28 +1278,68 @@ public final class MainPanel {
         if (_run_command && (LAST_EXTERNAL_COMMAND_TIMESTAMP == -1 || LAST_EXTERNAL_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
 
             if (_run_command_path != null && !_run_command_path.equals("")) {
-                try {
-                    String cmd = _run_command_path;
-                    java.io.File f = new java.io.File(cmd);
-                    java.util.List<String> argv;
-                    if (f.exists()) {
-                        // Treat the whole setting as a single binary path; this
-                        // makes "C:\Program Files\foo\bar.exe" work without the
-                        // old whitespace-split bug. If you need args, wrap in a
-                        // .bat/.sh script.
-                        argv = java.util.Collections.singletonList(cmd);
-                    } else {
-                        // Backwards-compat: command isn't a real file, fall back
-                        // to legacy whitespace-token splitting so existing
-                        // "command arg1 arg2" configs keep working.
-                        argv = java.util.Arrays.asList(cmd.trim().split("\\s+"));
-                    }
-                    new ProcessBuilder(argv).inheritIO().start();
-                } catch (IOException ex) {
-                    Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
-                }
-
+                _spawnExternalProcess(_run_command_path);
                 LAST_EXTERNAL_COMMAND_TIMESTAMP = System.currentTimeMillis();
+            }
+        }
+    }
+
+    /**
+     * Shared spawn helper for the three external-command paths
+     * ({@link #run_external_command}, {@link #run_dl_finish_command},
+     * {@link #run_ul_finish_command}). Mirrors the old inline behaviour
+     * exactly: if the configured value is a real file, treat it as a
+     * single argv[0]; otherwise fall back to legacy whitespace-token
+     * splitting so existing "command arg1 arg2" configs keep working.
+     * Output inherits stdout/stderr; failures are logged and swallowed
+     * so the trigger path is never disturbed. (#774 -- factored out so
+     * the three call-sites stay in lockstep.)
+     */
+    private static void _spawnExternalProcess(String configured_cmd) {
+        try {
+            String cmd = configured_cmd;
+            java.io.File f = new java.io.File(cmd);
+            java.util.List<String> argv;
+            if (f.exists()) {
+                argv = java.util.Collections.singletonList(cmd);
+            } else {
+                argv = java.util.Arrays.asList(cmd.trim().split("\\s+"));
+            }
+            new ProcessBuilder(argv).inheritIO().start();
+        } catch (IOException ex) {
+            Logger.getLogger(MainPanel.class.getName()).log(Level.SEVERE, ex.getMessage());
+        }
+    }
+
+    /**
+     * #774 -- fires the user's "downloads queue finished" command. Cooldown
+     * is independent of the 509 command and of the upload-finish command;
+     * if all three trigger simultaneously, all three run concurrently. The
+     * natural "queue must transition from non-empty to empty" gate in
+     * {@link TransferenceManager} already prevents accidental refire on
+     * the same finished batch, but we keep the RUN_COMMAND_TIME timestamp
+     * guard for defence-in-depth.
+     */
+    public static synchronized void run_dl_finish_command() {
+        if (_run_command_dl_finish && (LAST_DL_FINISH_COMMAND_TIMESTAMP == -1 || LAST_DL_FINISH_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
+            if (_run_command_dl_finish_path != null && !_run_command_dl_finish_path.equals("")) {
+                _spawnExternalProcess(_run_command_dl_finish_path);
+                LAST_DL_FINISH_COMMAND_TIMESTAMP = System.currentTimeMillis();
+            }
+        }
+    }
+
+    /**
+     * #774 -- fires the user's "uploads queue finished" command. See
+     * {@link #run_dl_finish_command} for the cooldown / concurrency
+     * semantics; the upload-side variant follows the exact same pattern
+     * with its own state and is wired from {@link UploadManager}.
+     */
+    public static synchronized void run_ul_finish_command() {
+        if (_run_command_ul_finish && (LAST_UL_FINISH_COMMAND_TIMESTAMP == -1 || LAST_UL_FINISH_COMMAND_TIMESTAMP + RUN_COMMAND_TIME * 1000 < System.currentTimeMillis())) {
+            if (_run_command_ul_finish_path != null && !_run_command_ul_finish_path.equals("")) {
+                _spawnExternalProcess(_run_command_ul_finish_path);
+                LAST_UL_FINISH_COMMAND_TIMESTAMP = System.currentTimeMillis();
             }
         }
     }

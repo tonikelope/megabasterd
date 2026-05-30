@@ -898,6 +898,26 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             run_command_textbox.setText(DBTools.selectSettingValue("run_command_path"));
 
+            // #774 -- post-finish commands (downloads + uploads). Same shape
+            // as the 509 block above, with their own DB keys.
+            boolean run_command_dl_finish = false;
+            String run_command_dl_finish_string = DBTools.selectSettingValue("run_command_dl_finish");
+            if (run_command_dl_finish_string != null) {
+                run_command_dl_finish = run_command_dl_finish_string.equals("yes");
+            }
+            run_command_dl_finish_checkbox.setSelected(run_command_dl_finish);
+            run_command_dl_finish_textbox.setEnabled(run_command_dl_finish);
+            run_command_dl_finish_textbox.setText(DBTools.selectSettingValue("run_command_dl_finish_path"));
+
+            boolean run_command_ul_finish = false;
+            String run_command_ul_finish_string = DBTools.selectSettingValue("run_command_ul_finish");
+            if (run_command_ul_finish_string != null) {
+                run_command_ul_finish = run_command_ul_finish_string.equals("yes");
+            }
+            run_command_ul_finish_checkbox.setSelected(run_command_ul_finish);
+            run_command_ul_finish_textbox.setEnabled(run_command_ul_finish);
+            run_command_ul_finish_textbox.setText(DBTools.selectSettingValue("run_command_ul_finish_path"));
+
             boolean init_paused = false;
 
             String init_paused_string = DBTools.selectSettingValue("start_frozen");
@@ -1126,6 +1146,14 @@ public class SettingsDialog extends javax.swing.JDialog {
         run_command_textbox = new javax.swing.JTextField();
         run_command_textbox.addMouseListener(new ContextMenuMouseListener());
         run_command_test_button = new javax.swing.JButton();
+        run_command_dl_finish_checkbox = new javax.swing.JCheckBox();
+        run_command_dl_finish_textbox = new javax.swing.JTextField();
+        run_command_dl_finish_textbox.addMouseListener(new ContextMenuMouseListener());
+        run_command_dl_finish_test_button = new javax.swing.JButton();
+        run_command_ul_finish_checkbox = new javax.swing.JCheckBox();
+        run_command_ul_finish_textbox = new javax.swing.JTextField();
+        run_command_ul_finish_textbox.addMouseListener(new ContextMenuMouseListener());
+        run_command_ul_finish_test_button = new javax.swing.JButton();
         debug_file_checkbox = new javax.swing.JCheckBox();
         jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
@@ -2097,6 +2125,48 @@ public class SettingsDialog extends javax.swing.JDialog {
             }
         });
 
+        run_command_dl_finish_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        run_command_dl_finish_checkbox.setText("Execute this command when ALL downloads finish:");
+        run_command_dl_finish_checkbox.setDoubleBuffered(true);
+        run_command_dl_finish_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                run_command_dl_finish_checkboxActionPerformed(evt);
+            }
+        });
+
+        run_command_dl_finish_textbox.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        run_command_dl_finish_textbox.setDoubleBuffered(true);
+        run_command_dl_finish_textbox.setEnabled(false);
+
+        run_command_dl_finish_test_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        run_command_dl_finish_test_button.setText("Test");
+        run_command_dl_finish_test_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                run_command_dl_finish_test_buttonActionPerformed(evt);
+            }
+        });
+
+        run_command_ul_finish_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        run_command_ul_finish_checkbox.setText("Execute this command when ALL uploads finish:");
+        run_command_ul_finish_checkbox.setDoubleBuffered(true);
+        run_command_ul_finish_checkbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                run_command_ul_finish_checkboxActionPerformed(evt);
+            }
+        });
+
+        run_command_ul_finish_textbox.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+        run_command_ul_finish_textbox.setDoubleBuffered(true);
+        run_command_ul_finish_textbox.setEnabled(false);
+
+        run_command_ul_finish_test_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        run_command_ul_finish_test_button.setText("Test");
+        run_command_ul_finish_test_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                run_command_ul_finish_test_buttonActionPerformed(evt);
+            }
+        });
+
         debug_file_checkbox.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         debug_file_checkbox.setText("Save debug info to file ->");
 
@@ -2281,6 +2351,16 @@ public class SettingsDialog extends javax.swing.JDialog {
                         .addComponent(custom_chunks_dir_current_label))
                     .addComponent(rec_zoom_label)
                     .addComponent(run_command_checkbox)
+                    .addComponent(run_command_dl_finish_checkbox)
+                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addComponent(run_command_dl_finish_test_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(run_command_dl_finish_textbox))
+                    .addComponent(run_command_ul_finish_checkbox)
+                    .addGroup(advanced_panelLayout.createSequentialGroup()
+                        .addComponent(run_command_ul_finish_test_button)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(run_command_ul_finish_textbox))
                     .addGroup(advanced_panelLayout.createSequentialGroup()
                         .addComponent(custom_chunks_dir_checkbox)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -2315,6 +2395,18 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(run_command_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(run_command_test_button))
+                .addGap(18, 18, 18)
+                .addComponent(run_command_dl_finish_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(run_command_dl_finish_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(run_command_dl_finish_test_button))
+                .addGap(18, 18, 18)
+                .addComponent(run_command_ul_finish_checkbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(advanced_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(run_command_ul_finish_textbox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(run_command_ul_finish_test_button))
                 .addGap(18, 18, 18)
                 .addComponent(proxy_panel, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -2424,6 +2516,11 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("custom_chunks_dir", _custom_chunks_dir);
             settings.put("run_command", run_command_checkbox.isSelected() ? "yes" : "no");
             settings.put("run_command_path", run_command_textbox.getText());
+            // #774 -- persist the two new independent post-finish commands.
+            settings.put("run_command_dl_finish", run_command_dl_finish_checkbox.isSelected() ? "yes" : "no");
+            settings.put("run_command_dl_finish_path", run_command_dl_finish_textbox.getText());
+            settings.put("run_command_ul_finish", run_command_ul_finish_checkbox.isSelected() ? "yes" : "no");
+            settings.put("run_command_ul_finish_path", run_command_ul_finish_textbox.getText());
             settings.put("clipboardspy", clipboardspy_checkbox.isSelected() ? "yes" : "no");
             settings.put("always_reload_mega_folders", always_reload_mega_folders_checkbox.isSelected() ? "yes" : "no");
             settings.put("thumbnails", thumbnail_checkbox.isSelected() ? "yes" : "no");
@@ -3182,6 +3279,46 @@ public class SettingsDialog extends javax.swing.JDialog {
         run_command_textbox.setEnabled(run_command_checkbox.isSelected());
     }//GEN-LAST:event_run_command_checkboxActionPerformed
 
+    private void run_command_dl_finish_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_dl_finish_checkboxActionPerformed
+        run_command_dl_finish_textbox.setEnabled(run_command_dl_finish_checkbox.isSelected());
+    }//GEN-LAST:event_run_command_dl_finish_checkboxActionPerformed
+
+    private void run_command_ul_finish_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_ul_finish_checkboxActionPerformed
+        run_command_ul_finish_textbox.setEnabled(run_command_ul_finish_checkbox.isSelected());
+    }//GEN-LAST:event_run_command_ul_finish_checkboxActionPerformed
+
+    /**
+     * #774 -- shared spawn helper for the Test buttons of the post-finish
+     * commands. Mirrors run_command_test_buttonActionPerformed above but
+     * takes the textbox as parameter so we don't duplicate the body twice.
+     */
+    private void _runTestCommand(javax.swing.JTextField source) {
+        if (source.getText() != null && !"".equals(source.getText().trim())) {
+            try {
+                String cmd = source.getText().trim();
+                java.io.File f = new java.io.File(cmd);
+                java.util.List<String> argv;
+                if (f.exists()) {
+                    argv = java.util.Collections.singletonList(cmd);
+                } else {
+                    argv = java.util.Arrays.asList(cmd.split("\\s+"));
+                }
+                new ProcessBuilder(argv).inheritIO().start();
+            } catch (IOException ex) {
+                Logger.getLogger(SettingsDialog.class.getName()).log(Level.SEVERE, ex.getMessage());
+                JOptionPane.showMessageDialog(this, ex.getMessage(), I18n.tr("ui.error_title"), JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void run_command_dl_finish_test_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_dl_finish_test_buttonActionPerformed
+        _runTestCommand(run_command_dl_finish_textbox);
+    }//GEN-LAST:event_run_command_dl_finish_test_buttonActionPerformed
+
+    private void run_command_ul_finish_test_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_run_command_ul_finish_test_buttonActionPerformed
+        _runTestCommand(run_command_ul_finish_textbox);
+    }//GEN-LAST:event_run_command_ul_finish_test_buttonActionPerformed
+
     private void custom_chunks_dir_checkboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_custom_chunks_dir_checkboxActionPerformed
 
         if (custom_chunks_dir_checkbox.isSelected()) {
@@ -3771,6 +3908,12 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JCheckBox run_command_checkbox;
     private javax.swing.JButton run_command_test_button;
     private javax.swing.JTextField run_command_textbox;
+    private javax.swing.JCheckBox run_command_dl_finish_checkbox;
+    private javax.swing.JButton run_command_dl_finish_test_button;
+    private javax.swing.JTextField run_command_dl_finish_textbox;
+    private javax.swing.JCheckBox run_command_ul_finish_checkbox;
+    private javax.swing.JButton run_command_ul_finish_test_button;
+    private javax.swing.JTextField run_command_ul_finish_textbox;
     private javax.swing.JButton save_button;
     private javax.swing.JCheckBox smart_proxy_checkbox;
     private javax.swing.JPanel smart_proxy_settings;
