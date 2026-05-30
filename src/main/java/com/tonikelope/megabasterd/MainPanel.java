@@ -48,7 +48,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
-import static java.util.concurrent.Executors.newCachedThreadPool;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -69,7 +68,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.52";
+    public static final String VERSION = "8.53";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -84,7 +83,28 @@ public final class MainPanel {
     public static final float ZOOM_FACTOR = 0.8f;
     public static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (X11; Linux x86_64; rv:61.0) Gecko/20100101 Firefox/61.0";
     public static final String ICON_FILE = "/images/pica_roja_big.png";
-    public static final ExecutorService THREAD_POOL = newCachedThreadPool(_megabasterdDaemonThreadFactory());
+    /**
+     * Max worker threads in the global pool. The pool used to be
+     * {@code newCachedThreadPool()} (unbounded) which under heavy bursts
+     * (several transferences provisioning + smart-proxy refresh + per-slot
+     * managers + streamer + tray watchdog) routinely peaked at 100-200 live
+     * threads. Each thread carries a ~512 KB-1 MB native stack, so that
+     * burst alone added 50-200 MB of RSS that no GC can reclaim -- the
+     * memory growth that #773 complained about.
+     *
+     * 64 leaves ample headroom for the worst real-world burst observed (a
+     * handful of managers + supervisors + ~30 per-transfer workers; the
+     * per-Download chunk workers live in each Download's *own* thread pool,
+     * not in this one). Tasks submitted past the active cap queue up on the
+     * unbounded LinkedBlockingQueue and start within microseconds as soon
+     * as a worker frees up. No work is dropped. (#773)
+     */
+    public static final int GLOBAL_THREAD_POOL_MAX = 64;
+    public static final ExecutorService THREAD_POOL = new java.util.concurrent.ThreadPoolExecutor(
+            0, GLOBAL_THREAD_POOL_MAX,
+            60L, java.util.concurrent.TimeUnit.SECONDS,
+            new java.util.concurrent.LinkedBlockingQueue<>(),
+            _megabasterdDaemonThreadFactory());
 
     private static java.util.concurrent.ThreadFactory _megabasterdDaemonThreadFactory() {
         return new java.util.concurrent.ThreadFactory() {
