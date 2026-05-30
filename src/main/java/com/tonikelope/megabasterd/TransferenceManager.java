@@ -67,6 +67,16 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
     protected final Object _transference_queue_sort_lock;
     private volatile Boolean _sort_wait_start_queue;
     protected volatile boolean _all_finished = false;
+    /**
+     * #774 -- latch so the post-finish user command fires exactly once per
+     * "non-empty -> empty" queue transition. Reset together with
+     * {@link #_all_finished} whenever a new transference enters the
+     * pipeline, so the next batch retriggers the command. Kept separate
+     * from {@code _all_finished} / {@code _tray_icon_finish} because the
+     * tray notification only fires when the main window is hidden, but
+     * the post-finish command must fire regardless of visibility.
+     */
+    protected volatile boolean _finish_command_fired = false;
 
     public boolean isAll_finished() {
         return _all_finished;
@@ -74,6 +84,27 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
 
     public void setAll_finished(boolean all_finished) {
         this._all_finished = all_finished;
+        // #774 -- when the manager is told the queue is no longer "all
+        // finished" (i.e. a new download/upload showed up), reset the
+        // per-batch fire latch so the next queue drain triggers the user
+        // command again.
+        if (!all_finished) {
+            this._finish_command_fired = false;
+        }
+    }
+
+    /**
+     * #774 -- hook fired exactly once per "queue went from non-empty to
+     * empty with at least one OK finish" transition. Default implementation
+     * is a no-op; {@link DownloadManager} and {@link UploadManager} override
+     * to spawn their respective user-configured external command. Runs on
+     * the EDT (called from {@code _updateView}'s GUIRun), so anything
+     * blocking must be off-loaded; the current implementations just call
+     * {@code MainPanel.run_*_finish_command()} which itself does a non-
+     * blocking {@code ProcessBuilder.start()}.
+     */
+    protected void onAllTransferencesFinished() {
+        // Default: nothing. Subclasses override.
     }
 
     public TransferenceManager(MainPanel main_panel, int max_running_trans, javax.swing.JLabel status, javax.swing.JPanel scroll_panel, javax.swing.JButton close_all_button, javax.swing.JButton pause_all_button, javax.swing.MenuElement clean_all_menu) {
@@ -707,6 +738,28 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
             _all_finished = true;
 
             _main_panel.getTrayicon().displayMessage("MegaBasterd says:", "All your transferences have finished", TrayIcon.MessageType.INFO);
+        }
+
+        // #774 -- post-finish user command. Fires once per "non-empty ->
+        // empty with at least one OK finish" transition, independent of
+        // window visibility and of the tray-notification latch above. Gated
+        // by _isOKFinishedInQueue() so a queue that ended only in errors
+        // or cancellations does NOT trigger the command -- the user's
+        // post-processing script almost always assumes "there are real
+        // files to act on", so silent no-fire on all-error is safer than
+        // running the script against nothing. If both download and upload
+        // queues drain in the same tick, both DownloadManager and
+        // UploadManager hooks fire concurrently and the user sees both
+        // commands run; per the issue (#774) that is the intended
+        // behaviour.
+        if (!_finish_command_fired && finish > 0 && pre + prov + wait + run == 0 && _isOKFinishedInQueue()) {
+            _finish_command_fired = true;
+            try {
+                onAllTransferencesFinished();
+            } catch (Throwable t) {
+                // Never let a misbehaving hook break the status refresh.
+                LOG.log(Level.WARNING, "onAllTransferencesFinished threw: {0}", t.getMessage());
+            }
         }
 
         return (pre + prov + rem + wait + run + finish > 0) ? LabelTranslatorSingleton.getInstance().translate("Pre:") + " " + pre + " / " + LabelTranslatorSingleton.getInstance().translate("Pro:") + " " + prov + " / " + LabelTranslatorSingleton.getInstance().translate("Wait:") + " " + wait + " / " + LabelTranslatorSingleton.getInstance().translate("Run:") + " " + run + " / " + LabelTranslatorSingleton.getInstance().translate("Finish:") + " " + finish + " / " + LabelTranslatorSingleton.getInstance().translate("Rem:") + " " + rem : "";
