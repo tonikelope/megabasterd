@@ -81,6 +81,20 @@ public class ChunkDownloaderMono extends ChunkDownloader {
             byte[] byte_file_key = initMEGALinkKey(getDownload().getFile_key());
             byte[] byte_iv = initMEGALinkKeyIV(getDownload().getFile_key());
 
+            // Reusable scratch buffer for the in-memory chunk staging area
+            // (see the comment inside the chunk loop below for why mono buffers
+            // before writing to the output stream). Previously this was
+            // allocated fresh per chunk (`new byte[chunk_size]`), which under
+            // a stable mono download translates to ~60 MB/min of garbage
+            // every minute per active mono download -- pure allocation
+            // pressure, no footprint gain, since G1 just recycles young-gen.
+            // Holding one buffer per worker and resizing only when a larger
+            // chunk shows up gives the same atomic-commit semantics with a
+            // flat allocation profile. Mono chunk sizes go 128K, 256K, ...,
+            // 896K, then 1 MB steady state, so steady-state means exactly one
+            // allocation per worker for the entire transfer. (#773)
+            byte[] chunk_buffer = null;
+
             CipherInputStream cis = null;
 
             // SmartProxy support for mono-slot (streaming) downloads. Previously
@@ -270,7 +284,11 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                                 throw new IOException("Mono chunk size exceeds in-memory buffer cap");
                             }
 
-                            byte[] chunk_buffer = new byte[(int) chunk_size];
+                            // Grow on demand only; steady state reuses the
+                            // same array across all chunks of this worker.
+                            if (chunk_buffer == null || chunk_buffer.length < chunk_size) {
+                                chunk_buffer = new byte[(int) chunk_size];
+                            }
                             int reads = 0;
 
                             while (!getDownload().isStopped() && chunk_reads < chunk_size
