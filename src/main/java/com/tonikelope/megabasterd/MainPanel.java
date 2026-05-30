@@ -69,7 +69,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.51";
+    public static final String VERSION = "8.52";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -656,9 +656,31 @@ public final class MainPanel {
             getView().getGlobal_speed_up_label().setForeground(_limit_upload_speed ? new Color(255, 0, 0) : new Color(0, 128, 255));
         });
 
+        // Auto-GC hint cooldown for the memory monitor below. Wakes the JVM
+        // to reclaim heap when usage crosses
+        // FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT of -Xmx but at most
+        // once per AUTO_GC_COOLDOWN_MS, so we don't pin a core stop-the-world
+        // GCing every 2 s during heavy chunk decryption. (#773)
+        final long AUTO_GC_COOLDOWN_MS = 60_000L;
+        // Make the RAM label a manual "release unused JVM RAM" trigger -- the
+        // best the JVM exposes is System.gc() (a hint, not a directive), but
+        // on G1/ZGC it does prompt heap shrink + return-to-OS. (#773)
+        MiscTools.GUIRun(() -> {
+            JLabel ml = _view.getMemory_status();
+            ml.setCursor(java.awt.Cursor.getPredefinedCursor(java.awt.Cursor.HAND_CURSOR));
+            ml.setToolTipText(I18n.tr("ui.statusbar.jvm_ram.tooltip"));
+            ml.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    System.gc();
+                }
+            });
+        });
+
         THREAD_POOL.execute(() -> {
             Runtime instance = Runtime.getRuntime();
             String last_text = null;
+            long last_auto_gc_ms = 0L;
             while (!_exit) {
                 long used_memory = instance.totalMemory() - instance.freeMemory();
                 long max_memory = instance.maxMemory();
@@ -669,6 +691,18 @@ public final class MainPanel {
                     last_text = text;
                     final String t = text;
                     MiscTools.GUIRun(() -> _view.getMemory_status().setText(t));
+                }
+                // (#773) Hint the JVM to GC when usage crosses the threshold.
+                // System.gc() is advisory but the default G1 collector does
+                // honour it and will, after a couple of cycles, return free
+                // regions to the OS -- which is the user-visible reduction
+                // people complain about. Cooldown prevents thrashing.
+                long now = System.currentTimeMillis();
+                if (max_memory > 0
+                        && (double) used_memory / (double) max_memory > FORCE_GARBAGE_COLLECTION_MAX_MEMORY_PERCENT
+                        && now - last_auto_gc_ms > AUTO_GC_COOLDOWN_MS) {
+                    last_auto_gc_ms = now;
+                    System.gc();
                 }
                 try {
                     Thread.sleep(2000);
