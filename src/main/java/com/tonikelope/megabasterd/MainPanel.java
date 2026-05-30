@@ -68,7 +68,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.54";
+    public static final String VERSION = "8.55";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -98,13 +98,39 @@ public final class MainPanel {
      * not in this one). Tasks submitted past the active cap queue up on the
      * unbounded LinkedBlockingQueue and start within microseconds as soon
      * as a worker frees up. No work is dropped. (#773)
+     *
+     * NOTE -- 8.53 first wired this as {@code ThreadPoolExecutor(0, 64,
+     * LinkedBlockingQueue)}, which silently froze every task after the
+     * first one. The textbook trap: with corePoolSize=0 and an unbounded
+     * queue, {@link java.util.concurrent.ThreadPoolExecutor#execute}
+     * always prefers queuing over creating a new worker once any worker
+     * exists, AND it only spawns a recovery worker after queuing when
+     * {@code workerCountOf == 0}. So the first task (the
+     * {@code while (!_exit)} memory monitor below) grabs the lone worker
+     * forever, every later submit (including resumeDownloads /
+     * resumeUploads / smart-proxy refresh / watchdog accept loop /
+     * megacrypter reverse) enqueues and never runs -- hence the
+     * "Checking previous downloads..." indicator that stayed forever in
+     * #776, even on a clean install with an empty queue. Fix: pre-size
+     * corePoolSize == maxPoolSize and turn on
+     * {@code allowCoreThreadTimeOut} so the pool grows up to 64 workers
+     * on demand and still lets idle workers die after keepAlive. (#776)
      */
     public static final int GLOBAL_THREAD_POOL_MAX = 64;
-    public static final ExecutorService THREAD_POOL = new java.util.concurrent.ThreadPoolExecutor(
-            0, GLOBAL_THREAD_POOL_MAX,
-            60L, java.util.concurrent.TimeUnit.SECONDS,
-            new java.util.concurrent.LinkedBlockingQueue<>(),
-            _megabasterdDaemonThreadFactory());
+    public static final ExecutorService THREAD_POOL;
+
+    static {
+        java.util.concurrent.ThreadPoolExecutor tpe = new java.util.concurrent.ThreadPoolExecutor(
+                GLOBAL_THREAD_POOL_MAX, GLOBAL_THREAD_POOL_MAX,
+                60L, java.util.concurrent.TimeUnit.SECONDS,
+                new java.util.concurrent.LinkedBlockingQueue<>(),
+                _megabasterdDaemonThreadFactory());
+        // Without this, core threads stay alive forever -- which means once
+        // the pool has grown under a burst it stays at that RSS cost even
+        // when idle, defeating the #773 memory-bound goal.
+        tpe.allowCoreThreadTimeOut(true);
+        THREAD_POOL = tpe;
+    }
 
     private static java.util.concurrent.ThreadFactory _megabasterdDaemonThreadFactory() {
         return new java.util.concurrent.ThreadFactory() {
