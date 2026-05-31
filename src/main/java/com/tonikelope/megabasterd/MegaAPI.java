@@ -73,6 +73,7 @@ public class MegaAPI implements Serializable {
     public static final int PBKDF2_ITERATIONS = 100000;
     public static final int PBKDF2_OUTPUT_BIT_LENGTH = 256;
     public static final int MAX_RAW_REQUEST_RETRIES = 30;
+    public static final int MAX_THUMBNAIL_UPLOAD_RETRIES = 5;
     private static final Logger LOG = Logger.getLogger(MegaAPI.class.getName());
 
     public static int checkMEGAError(String data) {
@@ -1168,7 +1169,11 @@ public class MegaAPI implements Serializable {
 
             file_bytes[1] = _encThumbAttr(Files.readAllBytes(files[1].toPath()), upload.getByte_file_key());
 
-            String request = "[{\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[0].length) + ", \"ssl\":1}, {\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[1].length) + ", \"ssl\":1}]";
+            // No "ssl":1 here on purpose: the attribute (thumbnail) data is already AES-CBC encrypted
+            // with the file key, so it travels over plain HTTP just like the file chunks. Forcing TLS
+            // against MEGA's gfs storage nodes was the only HTTPS hop in the upload pipeline and caused
+            // intermittent SSLHandshakeException (handshake_failure) that silently dropped thumbnails.
+            String request = "[{\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[0].length) + "}, {\"a\":\"ufa\", \"s\":" + String.valueOf(file_bytes[1].length) + "}]";
 
             URL url_api = new URL(API_URL + "/cs?id=" + _nextSeqno() + (_sid != null ? "&sid=" + _sid : "") + _apiStdParams());
 
@@ -1188,53 +1193,72 @@ public class MegaAPI implements Serializable {
 
                 URL url = new URL(u);
 
-                HttpURLConnection con = null;
+                int conta_error = 0;
 
-                try {
+                while (true) {
 
-                    con = (HttpURLConnection) url.openConnection();
+                    HttpURLConnection con = null;
 
-                    con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
+                    try {
 
-                    con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
+                        con = (HttpURLConnection) url.openConnection();
 
-                    con.setRequestMethod("POST");
+                        con.setConnectTimeout(Transference.HTTP_CONNECT_TIMEOUT);
 
-                    con.setDoOutput(true);
+                        con.setReadTimeout(Transference.HTTP_READ_TIMEOUT);
 
-                    con.setUseCaches(false);
+                        con.setRequestMethod("POST");
 
-                    con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
+                        con.setDoOutput(true);
 
-                    byte[] buffer = new byte[8192];
+                        con.setUseCaches(false);
 
-                    int reads;
+                        con.setRequestProperty("User-Agent", MainPanel.DEFAULT_USER_AGENT);
 
-                    try (OutputStream out = new ThrottledOutputStream(con.getOutputStream(), upload.getMain_panel().getStream_supervisor())) {
+                        byte[] buffer = new byte[8192];
 
-                        out.write(file_bytes[h]);
-                    }
+                        int reads;
 
-                    int status = con.getResponseCode();
+                        try (OutputStream out = new ThrottledOutputStream(con.getOutputStream(), upload.getMain_panel().getStream_supervisor())) {
 
-                    if (status != 200) {
-                        MiscTools.drainAndCloseErrorStream(con);
-                        throw new IOException("Thumbnail upload failed: HTTP " + status);
-                    }
-
-                    try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
-
-                        while ((reads = is.read(buffer)) != -1) {
-                            byte_res.write(buffer, 0, reads);
+                            out.write(file_bytes[h]);
                         }
 
-                        hash[h] = MiscTools.Bin2UrlBASE64(byte_res.toByteArray());
+                        int status = con.getResponseCode();
 
-                    }
+                        if (status != 200) {
+                            MiscTools.drainAndCloseErrorStream(con);
+                            throw new IOException("Thumbnail upload failed: HTTP " + status);
+                        }
 
-                } finally {
-                    if (con != null) {
-                        con.disconnect();
+                        try (InputStream is = con.getInputStream(); ByteArrayOutputStream byte_res = new ByteArrayOutputStream()) {
+
+                            while ((reads = is.read(buffer)) != -1) {
+                                byte_res.write(buffer, 0, reads);
+                            }
+
+                            hash[h] = MiscTools.Bin2UrlBASE64(byte_res.toByteArray());
+
+                        }
+
+                        break;
+
+                    } catch (IOException ex) {
+
+                        if (upload.isStopped() || ++conta_error >= MAX_THUMBNAIL_UPLOAD_RETRIES) {
+                            throw ex;
+                        }
+
+                        long wait_time = MiscTools.getWaitTimeExpBackOff(conta_error);
+
+                        LOG.log(Level.WARNING, "{0} Thumbnail upload error ({1}), retrying in {2} secs... ({3}/{4})", new Object[]{Thread.currentThread().getName(), ex.getMessage(), wait_time, conta_error, MAX_THUMBNAIL_UPLOAD_RETRIES});
+
+                        MiscTools.pausar(wait_time * 1000);
+
+                    } finally {
+                        if (con != null) {
+                            con.disconnect();
+                        }
                     }
                 }
 
