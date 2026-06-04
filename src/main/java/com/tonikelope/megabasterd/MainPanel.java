@@ -168,16 +168,23 @@ public final class MainPanel {
     private static volatile String _proxy_user;
     private static volatile String _proxy_pass;
     private static volatile boolean _use_smart_proxy;
-    private static boolean _run_command;
-    private static String _run_command_path;
+    // volatile: same #778-class race as the proxy fields. _run_command is read
+    // in the ChunkDownloader / ChunkDownloaderMono hot loop on every 509
+    // (MainPanel.isRun_command()) and the *_path / *_finish fields are read by
+    // the TransferenceManager status loop, all on worker/background threads
+    // that may predate the EDT write in loadUserSettings(). Without volatile an
+    // already-running worker may never observe a runtime enable of the
+    // post-quota / post-finish command. (#778)
+    private static volatile boolean _run_command;
+    private static volatile String _run_command_path;
     // #774 -- two independent post-finish commands, one per queue. Settings
     // and triggers are fully independent of the legacy "MEGA download limit
     // reached" command above and of each other; if downloads and uploads
     // both empty at the same time both commands fire concurrently.
-    private static boolean _run_command_dl_finish;
-    private static String _run_command_dl_finish_path;
-    private static boolean _run_command_ul_finish;
-    private static String _run_command_ul_finish_path;
+    private static volatile boolean _run_command_dl_finish;
+    private static volatile String _run_command_dl_finish_path;
+    private static volatile boolean _run_command_ul_finish;
+    private static volatile String _run_command_ul_finish_path;
     private static String _font;
     // volatile: see the proxy-config block above -- read by already-running
     // worker threads, written on the EDT at runtime-enable. (#778)

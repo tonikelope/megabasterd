@@ -102,6 +102,16 @@ public class StreamChunkDownloader implements Runnable {
 
             while (!_exit && !_chunkmanager.isExit()) {
 
+                // Re-read the manager every iteration so enabling SmartProxy at
+                // runtime is observed by an already-running stream worker
+                // (mirrors ChunkDownloader.run / ChunkDownloaderMono.run).
+                // Capturing it once before the loop (the line ~84 read) left
+                // proxy_manager null for the worker's whole life when streaming
+                // started with SmartProxy OFF -- and the routing branch below
+                // did not null-guard it, so the first 509 after a runtime enable
+                // NPE'd at proxy_manager.getProxy()/blockProxy(). (#778)
+                proxy_manager = MainPanel.getProxy_manager();
+
                 while (!_exit && !_chunkmanager.isExit() && _chunkmanager.getChunk_queue().size() >= StreamChunkManager.BUFFER_CHUNKS_SIZE) {
 
                     LOG.log(Level.INFO, "{0} Worker [{1}]: Chunk buffer is full. I pause myself.", new Object[]{Thread.currentThread().getName(), _id});
@@ -122,7 +132,7 @@ public class StreamChunkDownloader implements Runnable {
 
                     StreamChunk chunk_stream = new StreamChunk(offset, _chunkmanager.calculateChunkSize(offset), url);
 
-                    if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && !MainPanel.isUse_proxy()) {
+                    if ((current_smart_proxy != null || http_error == 509) && MainPanel.isUse_smart_proxy() && proxy_manager != null && !MainPanel.isUse_proxy()) {
 
                         if (current_smart_proxy != null && http_error != 0) {
 
