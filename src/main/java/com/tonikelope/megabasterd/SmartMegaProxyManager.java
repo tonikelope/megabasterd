@@ -107,6 +107,20 @@ public final class SmartMegaProxyManager {
         _proxy_list = new ConcurrentHashMap<>();
         _main_panel = main_panel;
 
+        // Install the JDK-wide proxy Authenticator HERE (was only done once at
+        // startup in MainPanel.run(), inside the `if (_use_smart_proxy)` block).
+        // When the user started with SmartProxy DISABLED and enabled it at
+        // runtime, MainPanelView.settings_menuActionPerformed built this
+        // manager but NEVER installed the Authenticator, so any proxy that
+        // requires credentials (the IP:PORT@b64user:b64pass form parsed into
+        // PROXY_LIST_AUTH and consumed by SmartProxyAuthenticator) silently
+        // got a 407 Proxy Authentication Required on every chunk / /cs request
+        // -- the whole pool looked dead and downloads never resumed, while a
+        // restart with SmartProxy pre-enabled worked. Doing it in the
+        // constructor makes both paths (startup and runtime-enable) identical.
+        // setDefault is a global, idempotent, thread-agnostic operation. (#778)
+        Authenticator.setDefault(new SmartProxyAuthenticator());
+
         // ChunkDownloader.java:200 silently disables SmartProxy when a static
         // HTTP proxy is also configured (`&& !MainPanel.isUse_proxy()`). The
         // user often doesn't realise this and assumes SmartProxy is still
