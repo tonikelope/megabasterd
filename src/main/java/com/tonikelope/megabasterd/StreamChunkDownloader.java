@@ -146,6 +146,10 @@ public class StreamChunkDownloader implements Runnable {
                             } else {
                                 LOG.log(Level.WARNING, "{0} StreamWorker [{1}] SmartProxy exhausted -- falling back to direct", new Object[]{Thread.currentThread().getName(), _id});
                                 current_smart_proxy = null;
+                                // Reset so the next iteration re-evaluates the
+                                // full pool instead of locking onto direct.
+                                // Mirrors ChunkDownloader. (#778)
+                                excluded_proxy_list.clear();
                             }
 
                         } else if (current_smart_proxy == null) {
@@ -158,6 +162,7 @@ public class StreamChunkDownloader implements Runnable {
                             } else {
                                 LOG.log(Level.WARNING, "{0} StreamWorker [{1}] SmartProxy exhausted -- falling back to direct", new Object[]{Thread.currentThread().getName(), _id});
                                 current_smart_proxy = null;
+                                excluded_proxy_list.clear();
                             }
 
                         }

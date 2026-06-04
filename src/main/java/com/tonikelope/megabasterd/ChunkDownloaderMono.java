@@ -171,6 +171,10 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                                 } else {
                                     LOG.log(Level.WARNING, "{0} Mono Worker SmartProxy exhausted -- falling back to direct", Thread.currentThread().getName());
                                     current_smart_proxy = null;
+                                    // Reset the local excluded list so we don't
+                                    // lock into direct -> 509 forever. Parity
+                                    // with ChunkDownloader. (#778)
+                                    excluded_proxy_list.clear();
                                 }
 
                             } else if (current_smart_proxy == null) {
@@ -182,6 +186,7 @@ public class ChunkDownloaderMono extends ChunkDownloader {
                                 } else {
                                     LOG.log(Level.WARNING, "{0} Mono Worker SmartProxy: no proxies available -- falling back to direct", Thread.currentThread().getName());
                                     current_smart_proxy = null;
+                                    excluded_proxy_list.clear();
                                 }
                             }
 
