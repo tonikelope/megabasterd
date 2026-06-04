@@ -11,7 +11,6 @@ package com.tonikelope.megabasterd;
 
 import static com.tonikelope.megabasterd.DBTools.*;
 import static com.tonikelope.megabasterd.MiscTools.*;
-import com.tonikelope.megabasterd.SmartMegaProxyManager.SmartProxyAuthenticator;
 import static com.tonikelope.megabasterd.Transference.*;
 import java.awt.AWTException;
 import java.awt.Color;
@@ -32,7 +31,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import static java.lang.Integer.parseInt;
 import static java.lang.System.exit;
-import java.net.Authenticator;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -68,7 +66,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.56";
+    public static final String VERSION = "8.57";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -150,24 +148,47 @@ public final class MainPanel {
         };
     }
     public static volatile String MEGABASTERD_HOME_DIR = System.getProperty("user.home");
-    private static String _proxy_host;
-    private static int _proxy_port;
-    private static boolean _use_proxy;
-    private static String _proxy_user;
-    private static String _proxy_pass;
-    private static boolean _use_smart_proxy;
-    private static boolean _run_command;
-    private static String _run_command_path;
+    // Proxy-routing config + the SmartProxy manager handle are read by
+    // long-lived worker threads (ChunkDownloader / ChunkDownloaderMono /
+    // MegaAPI.RAW_REQUEST) that may have been started BEFORE the user toggles
+    // any of these in Settings at runtime. They are written on the EDT
+    // (loadUserSettings / setProxy_manager). Without `volatile` there is NO
+    // happens-before edge between the EDT write and an already-running
+    // worker's read, so the worker can (a) keep observing the stale cached
+    // value forever or (b) have the JIT hoist the read out of its hot loop.
+    // That is the root cause of #778: enabling SmartProxy at runtime never
+    // resumed downloads (the workers kept reading _use_smart_proxy==false /
+    // _proxy_manager==null and never entered the proxy-routing branch), while
+    // a restart with SmartProxy pre-enabled worked because the workers were
+    // then created AFTER the writes (Thread.start() = happens-before). Affects
+    // EVERY proxy type, not just authenticated ones. (#778)
+    private static volatile String _proxy_host;
+    private static volatile int _proxy_port;
+    private static volatile boolean _use_proxy;
+    private static volatile String _proxy_user;
+    private static volatile String _proxy_pass;
+    private static volatile boolean _use_smart_proxy;
+    // volatile: same #778-class race as the proxy fields. _run_command is read
+    // in the ChunkDownloader / ChunkDownloaderMono hot loop on every 509
+    // (MainPanel.isRun_command()) and the *_path / *_finish fields are read by
+    // the TransferenceManager status loop, all on worker/background threads
+    // that may predate the EDT write in loadUserSettings(). Without volatile an
+    // already-running worker may never observe a runtime enable of the
+    // post-quota / post-finish command. (#778)
+    private static volatile boolean _run_command;
+    private static volatile String _run_command_path;
     // #774 -- two independent post-finish commands, one per queue. Settings
     // and triggers are fully independent of the legacy "MEGA download limit
     // reached" command above and of each other; if downloads and uploads
     // both empty at the same time both commands fire concurrently.
-    private static boolean _run_command_dl_finish;
-    private static String _run_command_dl_finish_path;
-    private static boolean _run_command_ul_finish;
-    private static String _run_command_ul_finish_path;
+    private static volatile boolean _run_command_dl_finish;
+    private static volatile String _run_command_dl_finish_path;
+    private static volatile boolean _run_command_ul_finish;
+    private static volatile String _run_command_ul_finish_path;
     private static String _font;
-    private static SmartMegaProxyManager _proxy_manager;
+    // volatile: see the proxy-config block above -- read by already-running
+    // worker threads, written on the EDT at runtime-enable. (#778)
+    private static volatile SmartMegaProxyManager _proxy_manager;
     private static volatile String _language;
     private static String _new_version;
     private static Boolean _resume_uploads;
@@ -719,10 +740,12 @@ public final class MainPanel {
             MainPanel tthis = this;
 
             THREAD_POOL.execute(() -> {
-                Authenticator.setDefault(new SmartProxyAuthenticator());
-
                 // #URL extraction is now done inside SmartMegaProxyManager
                 // itself so multiple sources can be aggregated. (#753)
+                // Authenticator.setDefault() now happens inside the
+                // SmartMegaProxyManager constructor so the startup path and the
+                // runtime-enable path (MainPanelView) install it identically.
+                // (#778)
                 _proxy_manager = new SmartMegaProxyManager(tthis);
             });
 

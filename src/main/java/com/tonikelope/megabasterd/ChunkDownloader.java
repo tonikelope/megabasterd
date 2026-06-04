@@ -478,6 +478,17 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         } else {
                             LOG.log(Level.WARNING, "{0} Worker [{1}] SmartProxy exhausted (every proxy excluded/banned) -- falling back to direct", new Object[]{Thread.currentThread().getName(), _id});
                             _current_smart_proxy = null;
+                            // Pool exhausted for THIS worker: every proxy is in
+                            // our local excluded list (timeouts / 429s never get
+                            // blockProxy'd, only excluded, and the list was only
+                            // ever cleared on a successful chunk). In FORCE mode
+                            // with a flaky pool that meant the worker locked
+                            // itself into direct -> 509 -> exp-backoff forever.
+                            // Reset so the next attempt re-evaluates the full
+                            // pool and gives timed-out-but-recovered proxies
+                            // another chance (hard-failed ones stay banned by
+                            // ban_time in pickProxy). (#778)
+                            _excluded_proxy_list.clear();
                         }
 
                     } else if (_current_smart_proxy == null) {
@@ -490,6 +501,9 @@ public class ChunkDownloader implements Runnable, SecureSingleThreadNotifiable {
                         } else {
                             LOG.log(Level.WARNING, "{0} Worker [{1}] SmartProxy exhausted (no usable proxy) -- falling back to direct", new Object[]{Thread.currentThread().getName(), _id});
                             _current_smart_proxy = null;
+                            // See the sibling branch above: reset the local
+                            // excluded list so we don't lock into direct. (#778)
+                            _excluded_proxy_list.clear();
                         }
 
                     }

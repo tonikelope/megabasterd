@@ -1393,11 +1393,23 @@ public class MiscTools {
 
             if (MainPanel.isUse_smart_proxy() && proxy_manager != null && proxy_manager.isForce_smart_proxy()) {
 
+                // getProxy() returns null when the pool is empty / every entry
+                // is banned or excluded. This block sits OUTSIDE the try below,
+                // so the old unconditional smart_proxy[0] threw an uncaught NPE
+                // straight into the caller (Download.getMegaFileDownloadUrl /
+                // the streamer) -- exactly in FORCE mode with a flaky pool,
+                // which is the #778 scenario. Null-guard + reset the excluded
+                // list so the next loop turn re-evaluates the full pool. (#778)
                 String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
-                current_smart_proxy = smart_proxy[0];
-
-                smart_proxy_socks = smart_proxy[1].equals("socks");
+                if (smart_proxy != null) {
+                    current_smart_proxy = smart_proxy[0];
+                    smart_proxy_socks = smart_proxy[1].equals("socks");
+                } else {
+                    LOG.log(Level.WARNING, "checkMegaDownloadUrl: SmartProxy force-mode exhausted -- checking direct");
+                    current_smart_proxy = null;
+                    excluded_proxy_list.clear();
+                }
 
             }
 
@@ -1413,17 +1425,25 @@ public class MiscTools {
 
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
-                        current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
+                        if (smart_proxy != null) {
+                            current_smart_proxy = smart_proxy[0];
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
+                        } else {
+                            current_smart_proxy = null;
+                            excluded_proxy_list.clear();
+                        }
 
                     } else if (current_smart_proxy == null) {
 
                         String[] smart_proxy = proxy_manager.getProxy(excluded_proxy_list);
 
-                        current_smart_proxy = smart_proxy[0];
-
-                        smart_proxy_socks = smart_proxy[1].equals("socks");
+                        if (smart_proxy != null) {
+                            current_smart_proxy = smart_proxy[0];
+                            smart_proxy_socks = smart_proxy[1].equals("socks");
+                        } else {
+                            current_smart_proxy = null;
+                            excluded_proxy_list.clear();
+                        }
                     }
 
                     if (current_smart_proxy != null) {

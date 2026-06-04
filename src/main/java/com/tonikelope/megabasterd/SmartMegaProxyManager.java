@@ -107,6 +107,20 @@ public final class SmartMegaProxyManager {
         _proxy_list = new ConcurrentHashMap<>();
         _main_panel = main_panel;
 
+        // Install the JDK-wide proxy Authenticator HERE (was only done once at
+        // startup in MainPanel.run(), inside the `if (_use_smart_proxy)` block).
+        // When the user started with SmartProxy DISABLED and enabled it at
+        // runtime, MainPanelView.settings_menuActionPerformed built this
+        // manager but NEVER installed the Authenticator, so any proxy that
+        // requires credentials (the IP:PORT@b64user:b64pass form parsed into
+        // PROXY_LIST_AUTH and consumed by SmartProxyAuthenticator) silently
+        // got a 407 Proxy Authentication Required on every chunk / /cs request
+        // -- the whole pool looked dead and downloads never resumed, while a
+        // restart with SmartProxy pre-enabled worked. Doing it in the
+        // constructor makes both paths (startup and runtime-enable) identical.
+        // setDefault is a global, idempotent, thread-agnostic operation. (#778)
+        Authenticator.setDefault(new SmartProxyAuthenticator());
+
         // ChunkDownloader.java:200 silently disables SmartProxy when a static
         // HTTP proxy is also configured (`&& !MainPanel.isUse_proxy()`). The
         // user often doesn't realise this and assumes SmartProxy is still
@@ -176,7 +190,16 @@ public final class SmartMegaProxyManager {
 
     }
 
-    public synchronized void refreshSmartProxySettings() {
+    // NOT synchronized (was, until #778): this only reads DB settings and
+    // writes the manager's own `volatile` config fields (_ban_time,
+    // _proxy_timeout, _force_smart_proxy, ...). It never touches _proxy_list,
+    // so it has no reason to contend on the pool monitor. It is called on the
+    // Swing EDT from MainPanelView.settings_menuActionPerformed; sharing the
+    // monitor with getProxy()/refreshProxyList() meant a worker mid-refresh
+    // (blocking HTTP fetch) or mid-getProxy could freeze the UI. The fields
+    // are independent settings with no cross-field invariant, so volatile
+    // visibility is sufficient. (#778)
+    public void refreshSmartProxySettings() {
         String smartproxy_ban_time = DBTools.selectSettingValue("smartproxy_ban_time");
 
         // ban_time semantics:
@@ -295,7 +318,47 @@ public final class SmartMegaProxyManager {
         return snapshot;
     }
 
-    public synchronized String[] getProxy(ArrayList<String> excluded) {
+    /**
+     * Selects one usable (non-banned, non-excluded) proxy from the current
+     * pool, or returns {@code null} if none is available right now. Does NOT
+     * sleep or refresh -- it is a pure, fast snapshot pick. Synchronized only
+     * to stay mutually exclusive with {@link #blockProxy}/{@link
+     * #refreshProxyList} during the iteration; it never holds the monitor for
+     * more than the (sub-millisecond) selection. (#778)
+     */
+    private synchronized String[] pickProxy(ArrayList<String> excluded) {
+
+        if (_proxy_list.size() > 0) {
+
+            Set<String> keys = _proxy_list.keySet();
+
+            List<String> keysList = new ArrayList<>(keys);
+
+            if (isRandom_select()) {
+                Collections.shuffle(keysList);
+            }
+
+            Long current_time = System.currentTimeMillis();
+
+            for (String k : keysList) {
+
+                Long[] entry = _proxy_list.get(k);
+
+                if (entry == null) {
+                    continue;
+                }
+
+                if ((entry[0] == -1 || entry[0] < current_time - _ban_time * 1000L) && (excluded == null || !excluded.contains(k))) {
+
+                    return new String[]{k, entry[1] == -1L ? "http" : "socks"};
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public String[] getProxy(ArrayList<String> excluded) {
 
         // Iterative refresh loop with a cap. Was recursive: every call that
         // found all proxies excluded slept 30s then recursed -- with an
@@ -303,35 +366,22 @@ public final class SmartMegaProxyManager {
         // a permanently-bad list could deepen the stack indefinitely and
         // eventually StackOverflowError. 5 attempts == ~2.5 min, plenty for
         // a refresh to pull a usable proxy.
+        //
+        // NOT synchronized (was, until #778): the selection is delegated to
+        // the synchronized pickProxy() helper, but the Thread.sleep() and
+        // refreshProxyList() below run WITHOUT holding the manager monitor.
+        // The old code held `this` across the whole 30s*5 sleep + blocking
+        // HTTP refresh, so with FORCE mode + N slots hitting an exhausted pool
+        // every worker serialized behind the lock for minutes, and the on-EDT
+        // refreshSmartProxySettings() call froze the UI. (#778)
         final int MAX_REFRESH_ATTEMPTS = 5;
 
         for (int attempt = 0; attempt < MAX_REFRESH_ATTEMPTS; attempt++) {
 
-            if (_proxy_list.size() > 0) {
+            String[] picked = pickProxy(excluded);
 
-                Set<String> keys = _proxy_list.keySet();
-
-                List<String> keysList = new ArrayList<>(keys);
-
-                if (isRandom_select()) {
-                    Collections.shuffle(keysList);
-                }
-
-                Long current_time = System.currentTimeMillis();
-
-                for (String k : keysList) {
-
-                    Long[] entry = _proxy_list.get(k);
-
-                    if (entry == null) {
-                        continue;
-                    }
-
-                    if ((entry[0] == -1 || entry[0] < current_time - _ban_time * 1000L) && (excluded == null || !excluded.contains(k))) {
-
-                        return new String[]{k, entry[1] == -1L ? "http" : "socks"};
-                    }
-                }
+            if (picked != null) {
+                return picked;
             }
 
             LOG.log(Level.WARNING, "{0} Smart Proxy Manager: NO PROXYS AVAILABLE!! (Refreshing in {1} secs, attempt {2}/{3})",

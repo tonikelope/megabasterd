@@ -594,6 +594,11 @@ public class MegaAPI implements Serializable {
                         } else {
                             LOG.log(Level.WARNING, "{0} SmartProxy exhausted (every proxy excluded/banned) -- falling back to direct for this /cs retry", _ctx());
                             current_smart_proxy = null;
+                            // Reset the local excluded list so the next /cs
+                            // retry re-evaluates the full pool instead of
+                            // staying locked on direct (which here means a -17
+                            // EOVERQUOTA loop). Mirrors ChunkDownloader. (#778)
+                            excluded_proxy_list.clear();
                         }
 
                     } else if (current_smart_proxy == null) {
@@ -605,6 +610,9 @@ public class MegaAPI implements Serializable {
                         } else {
                             LOG.log(Level.WARNING, "{0} SmartProxy exhausted (no usable proxy) -- falling back to direct for this /cs retry", _ctx());
                             current_smart_proxy = null;
+                            // See sibling branch above -- reset so we don't
+                            // lock the /cs retry onto direct. (#778)
+                            excluded_proxy_list.clear();
                         }
                     }
 

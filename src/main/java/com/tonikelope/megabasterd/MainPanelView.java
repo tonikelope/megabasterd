@@ -1490,43 +1490,7 @@ public final class MainPanelView extends javax.swing.JFrame {
 
                     MainPanel.getProxy_manager().refreshSmartProxySettings();
 
-                    // Wake every in-flight ChunkDownloader so a worker that
-                    // entered 509 (or generic) exp-backoff before SmartProxy
-                    // was enabled doesn't have to sleep out the full backoff
-                    // (which on retry 5+ runs into minutes) before noticing
-                    // the proxy pool is now available. Combined with the
-                    // per-iteration MainPanel.getProxy_manager() re-read in
-                    // ChunkDownloader.run() / ChunkDownloaderMono.run(), this
-                    // is what makes a runtime SmartProxy-enable actually
-                    // resume the download instead of leaving it frozen. (#758)
-                    for (Transference t : _main_panel.getDownload_manager().getTransference_running_list()) {
-                        if (t instanceof Download) {
-                            Download dl = (Download) t;
-                            for (ChunkDownloader cd : dl.getChunkworkers()) {
-                                cd.wakeFromBackoff();
-                            }
-                        }
-                    }
-
-                    // Also wake every download that has already failed and is
-                    // sitting in the finished_queue counting down to its next
-                    // auto-retry. The classic #760 scenario: MEGA returned
-                    // -17 EOVERQUOTA from /cs (so the chunk workers never
-                    // even spawned), stopDownloader fired, the
-                    // RESTART_COUNTDOWN_SECS_OVERQUOTA (60 s) sleep started
-                    // -- and only THEN did the user enable SmartProxy. The
-                    // running_list iteration above can't reach these
-                    // downloads because they are no longer running; without
-                    // this second pass the user would have to wait up to 60 s
-                    // per row before SmartProxy is even consulted. Together
-                    // with the MegaAPI -17-as-synthetic-509 escalation, this
-                    // is what actually delivers "downloads start again right
-                    // after I enable SmartProxy". (#760)
-                    for (Transference t : _main_panel.getDownload_manager().getTransference_finished_queue()) {
-                        if (t instanceof Download) {
-                            ((Download) t).wakeFromRetryCountdown();
-                        }
-                    }
+                    wakeStalledDownloadsForSmartProxy();
 
                 } else {
 
@@ -1728,6 +1692,46 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_force_chunk_reset_buttonActionPerformed
 
+    /**
+     * Two-pass wake of every download that is stalled because of MEGA quota,
+     * so it picks up a just-enabled / just-refreshed SmartProxy pool without
+     * waiting out its exp-backoff or auto-retry countdown:
+     * <ol>
+     *   <li>Running downloads: break each in-flight ChunkDownloader out of its
+     *       509 / network exp-backoff sleep. Combined with the per-iteration
+     *       {@code MainPanel.getProxy_manager()} re-read in the worker loops,
+     *       this is what makes a runtime SmartProxy-enable actually resume the
+     *       download instead of leaving it frozen. (#758)</li>
+     *   <li>finished_queue downloads: break the auto-retry countdown (e.g. the
+     *       60 s {@code RESTART_COUNTDOWN_SECS_OVERQUOTA} after a -17 EOVERQUOTA
+     *       from /cs, where the chunk workers never even spawned so pass 1
+     *       can't reach them). Together with the MegaAPI -17-as-synthetic-509
+     *       escalation this delivers "downloads start again right after I
+     *       enable SmartProxy". (#760)</li>
+     * </ol>
+     * Invoked both when SmartProxy is enabled in Settings and from the manual
+     * "Refresh SmartProxy" button -- a fresh pool is exactly when stalled
+     * workers should retry immediately rather than waiting out their backoff.
+     * (#778)
+     */
+    private void wakeStalledDownloadsForSmartProxy() {
+
+        for (Transference t : _main_panel.getDownload_manager().getTransference_running_list()) {
+            if (t instanceof Download) {
+                Download dl = (Download) t;
+                for (ChunkDownloader cd : dl.getChunkworkers()) {
+                    cd.wakeFromBackoff();
+                }
+            }
+        }
+
+        for (Transference t : _main_panel.getDownload_manager().getTransference_finished_queue()) {
+            if (t instanceof Download) {
+                ((Download) t).wakeFromRetryCountdown();
+            }
+        }
+    }
+
     private void refresh_smartproxy_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refresh_smartproxy_buttonActionPerformed
 
         // Off-EDT because SmartMegaProxyManager.refreshProxyList does HTTP I/O
@@ -1747,6 +1751,14 @@ public final class MainPanelView extends javax.swing.JFrame {
         MainPanel.THREAD_POOL.execute(() -> {
             try {
                 pm.refreshProxyList();
+                // A fresh pool is exactly when workers stuck in 509 backoff /
+                // auto-retry countdown should retry immediately, instead of
+                // waiting out their full backoff before consulting the new
+                // list. The settings handler already does this on enable;
+                // mirror it here so the manual refresh button behaves the
+                // same. wakeFromBackoff/wakeFromRetryCountdown only flip
+                // volatile flags, so calling off-EDT is fine. (#778)
+                wakeStalledDownloadsForSmartProxy();
             } finally {
                 MiscTools.GUIRun(() -> refresh_smartproxy_button.setEnabled(true));
             }
