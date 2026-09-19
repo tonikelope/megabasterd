@@ -183,7 +183,7 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
     }
 
     private boolean acquireFinalJoinPermit() {
-        _download.getView().printStatusNormal("Waiting to join file chunks...");
+        _download.getView().printStatusNormal(I18n.tr("waiting_to_join_file_chunks"));
 
         while (!_exit && !_download.isStopped()) {
             try {
