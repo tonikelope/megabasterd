@@ -626,6 +626,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         downloads_panel = new javax.swing.JPanel();
         global_speed_down_label = new javax.swing.JLabel();
         status_down_label = new javax.swing.JLabel();
+        new_download_button = new javax.swing.JButton();
         close_all_finished_down_button = new javax.swing.JButton();
         jScrollPane_down = new javax.swing.JScrollPane();
         jPanel_scroll_down = new javax.swing.JPanel();
@@ -697,6 +698,16 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_down_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         status_down_label.setForeground(new java.awt.Color(102, 102, 102));
         status_down_label.setDoubleBuffered(true);
+
+        new_download_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        new_download_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-plus-30.png"))); // NOI18N
+        new_download_button.setText("New download");
+        new_download_button.setDoubleBuffered(true);
+        new_download_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                new_download_buttonActionPerformed(evt);
+            }
+        });
 
         close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         close_all_finished_down_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
@@ -772,6 +783,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
+                .addComponent(new_download_button)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_down_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
@@ -786,6 +799,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(new_download_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(close_all_finished_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton1))
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1377,6 +1391,10 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_new_download_menuActionPerformed
 
+    private void new_download_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_download_buttonActionPerformed
+        new_download_menu.doClick();
+    }//GEN-LAST:event_new_download_buttonActionPerformed
+
     private void settings_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_settings_menuActionPerformed
 
         SettingsDialog dialog = new SettingsDialog(this, true);
@@ -1822,6 +1840,7 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JMenuBar main_menubar;
     private javax.swing.JLabel memory_status;
     private javax.swing.JMenuItem merge_file_menu;
+    private javax.swing.JButton new_download_button;
     private javax.swing.JMenuItem new_download_menu;
     private javax.swing.JMenuItem new_stream_menu;
     private javax.swing.JMenuItem new_upload_menu;
