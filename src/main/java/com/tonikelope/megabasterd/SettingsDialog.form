@@ -1694,6 +1694,9 @@
                             <Property name="text" type="java.lang.String" value="jPasswordField1"/>
                             <Property name="enabled" type="boolean" value="false"/>
                           </Properties>
+                          <AuxValues>
+                            <AuxValue name="JavaCodeGenerator_InitCodePost" type="java.lang.String" value="proxy_pass_textfield.addMouseListener(new ContextMenuMouseListener());"/>
+                          </AuxValues>
                         </Component>
                       </SubComponents>
                     </Container>
