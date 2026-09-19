@@ -449,7 +449,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
 
         skip_rest_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         skip_rest_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-trash-can-30.png"))); // NOI18N
-        skip_rest_button.setText("REMOVE ALL EXCEPT THIS");
+        skip_rest_button.setText("KEEP THIS");
         skip_rest_button.setDoubleBuffered(true);
         skip_rest_button.setEnabled(false);
         skip_rest_button.addActionListener(new java.awt.event.ActionListener() {
@@ -898,7 +898,7 @@ public class FileGrabberDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_skip_buttonActionPerformed
 
     /**
-     * Post-mutation refresh shared by the REMOVE THIS / REMOVE ALL EXCEPT THIS
+     * Post-mutation refresh shared by the REMOVE THIS / KEEP THIS
      * buttons and the right-click context menu. Regenerates the file list and
      * keeps the action controls in sync with whether anything is left in the
      * tree (so removing every node also clears the dir_name field).

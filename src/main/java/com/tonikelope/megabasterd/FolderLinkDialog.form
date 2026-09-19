@@ -184,7 +184,7 @@
         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
           <Image iconType="3" name="/images/icons8-trash-can-30.png"/>
         </Property>
-        <Property name="text" type="java.lang.String" value="REMOVE ALL EXCEPT THIS"/>
+        <Property name="text" type="java.lang.String" value="KEEP THIS"/>
         <Property name="doubleBuffered" type="boolean" value="true"/>
         <Property name="enabled" type="boolean" value="false"/>
       </Properties>
