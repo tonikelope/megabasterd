@@ -102,10 +102,19 @@ public class ContextMenuMouseListener extends MouseAdapter {
     }
 
     @Override
-    public void mouseClicked(MouseEvent e) {
-        // Use the modern AWT API; the old getModifiers() == BUTTON3_MASK is
-        // deprecated since Java 9 AND fails when modifier keys are held.
-        if (javax.swing.SwingUtilities.isRightMouseButton(e)) {
+    public void mousePressed(MouseEvent e) {
+        showPopupIfTriggered(e);
+    }
+
+    @Override
+    public void mouseReleased(MouseEvent e) {
+        showPopupIfTriggered(e);
+    }
+
+    private void showPopupIfTriggered(MouseEvent e) {
+        // Popup triggers are reported on different event phases depending on
+        // the OS and also cover macOS Control-click.
+        if (e.isPopupTrigger()) {
             if (!(e.getSource() instanceof JTextComponent)) {
 
                 return;

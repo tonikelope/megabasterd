@@ -2043,6 +2043,7 @@ public class SettingsDialog extends javax.swing.JDialog {
         proxy_pass_textfield.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
         proxy_pass_textfield.setText("jPasswordField1");
         proxy_pass_textfield.setEnabled(false);
+        proxy_pass_textfield.addMouseListener(new ContextMenuMouseListener());
 
         javax.swing.GroupLayout proxy_auth_panelLayout = new javax.swing.GroupLayout(proxy_auth_panel);
         proxy_auth_panel.setLayout(proxy_auth_panelLayout);
