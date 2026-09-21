@@ -626,6 +626,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         downloads_panel = new javax.swing.JPanel();
         global_speed_down_label = new javax.swing.JLabel();
         status_down_label = new javax.swing.JLabel();
+        new_download_button = new javax.swing.JButton();
         close_all_finished_down_button = new javax.swing.JButton();
         jScrollPane_down = new javax.swing.JScrollPane();
         jPanel_scroll_down = new javax.swing.JPanel();
@@ -638,6 +639,7 @@ public final class MainPanelView extends javax.swing.JFrame {
         uploads_panel = new javax.swing.JPanel();
         global_speed_up_label = new javax.swing.JLabel();
         status_up_label = new javax.swing.JLabel();
+        new_upload_button = new javax.swing.JButton();
         close_all_finished_up_button = new javax.swing.JButton();
         jScrollPane_up = new javax.swing.JScrollPane();
         jPanel_scroll_up = new javax.swing.JPanel();
@@ -697,6 +699,16 @@ public final class MainPanelView extends javax.swing.JFrame {
         status_down_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         status_down_label.setForeground(new java.awt.Color(102, 102, 102));
         status_down_label.setDoubleBuffered(true);
+
+        new_download_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        new_download_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-plus-30.png"))); // NOI18N
+        new_download_button.setText("New download");
+        new_download_button.setDoubleBuffered(true);
+        new_download_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                new_download_buttonActionPerformed(evt);
+            }
+        });
 
         close_all_finished_down_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         close_all_finished_down_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
@@ -772,6 +784,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             .addGroup(downloads_panelLayout.createSequentialGroup()
                 .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(18, 18, 18)
+                .addComponent(new_download_button)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_down_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jButton1)
@@ -786,6 +800,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(downloads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(new_download_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(close_all_finished_down_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton1))
                     .addComponent(status_down_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -811,6 +826,16 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         status_up_label.setFont(new java.awt.Font("Dialog", 0, 16)); // NOI18N
         status_up_label.setForeground(new java.awt.Color(102, 102, 102));
+
+        new_upload_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
+        new_upload_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-plus-30.png"))); // NOI18N
+        new_upload_button.setText("New upload");
+        new_upload_button.setDoubleBuffered(true);
+        new_upload_button.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                new_upload_buttonActionPerformed(evt);
+            }
+        });
 
         close_all_finished_up_button.setFont(new java.awt.Font("Dialog", 1, 16)); // NOI18N
         close_all_finished_up_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-ok-30.png"))); // NOI18N
@@ -860,6 +885,8 @@ public final class MainPanelView extends javax.swing.JFrame {
             .addGroup(uploads_panelLayout.createSequentialGroup()
                 .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGap(3, 3, 3)
+                .addComponent(new_upload_button)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(close_all_finished_up_button)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(copy_all_uploads)
@@ -874,6 +901,7 @@ public final class MainPanelView extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(uploads_panelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(new_upload_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(close_all_finished_up_button, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(copy_all_uploads))
                     .addComponent(status_up_label, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
@@ -1377,6 +1405,10 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     }//GEN-LAST:event_new_download_menuActionPerformed
 
+    private void new_download_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_download_buttonActionPerformed
+        new_download_menu.doClick();
+    }//GEN-LAST:event_new_download_buttonActionPerformed
+
     private void settings_menuActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_settings_menuActionPerformed
 
         SettingsDialog dialog = new SettingsDialog(this, true);
@@ -1596,6 +1628,10 @@ public final class MainPanelView extends javax.swing.JFrame {
 
         _new_upload_dialog(dialog);
     }//GEN-LAST:event_new_upload_menuActionPerformed
+
+    private void new_upload_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_new_upload_buttonActionPerformed
+        new_upload_menu.doClick();
+    }//GEN-LAST:event_new_upload_buttonActionPerformed
 
     private void close_all_finished_up_buttonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_close_all_finished_up_buttonActionPerformed
 
@@ -1822,8 +1858,10 @@ public final class MainPanelView extends javax.swing.JFrame {
     private javax.swing.JMenuBar main_menubar;
     private javax.swing.JLabel memory_status;
     private javax.swing.JMenuItem merge_file_menu;
+    private javax.swing.JButton new_download_button;
     private javax.swing.JMenuItem new_download_menu;
     private javax.swing.JMenuItem new_stream_menu;
+    private javax.swing.JButton new_upload_button;
     private javax.swing.JMenuItem new_upload_menu;
     private javax.swing.JButton pause_all_down_button;
     private javax.swing.JButton pause_all_up_button;

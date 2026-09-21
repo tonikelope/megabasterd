@@ -19,6 +19,8 @@ import java.nio.file.Paths;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.crypto.CipherInputStream;
@@ -31,6 +33,7 @@ import javax.crypto.NoSuchPaddingException;
 public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiable {
 
     private static final Logger LOG = Logger.getLogger(ChunkWriterManager.class.getName());
+    private static final Semaphore FINAL_JOIN_PERMIT = new Semaphore(1, true);
 
     public static long calculateChunkOffset(long chunk_id, int size_multi) {
         long[] offs = {0, 128, 384, 768, 1280, 1920, 2688};
@@ -77,10 +80,12 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
     private final Object _secure_notify_lock;
     private volatile boolean _notified;
     private final String _chunks_dir;
+    private boolean _final_join_permit_acquired;
 
     public ChunkWriterManager(Download downloader) throws Exception {
         _notified = false;
         _exit = false;
+        _final_join_permit_acquired = false;
         _download = downloader;
         _chunks_dir = _create_chunks_temp_dir();
         _secure_notify_lock = new Object();
@@ -177,6 +182,25 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
 
     }
 
+    private boolean acquireFinalJoinPermit() {
+        _download.getView().printStatusNormal(I18n.tr("waiting_to_join_file_chunks"));
+
+        while (!_exit && !_download.isStopped()) {
+            try {
+                if (FINAL_JOIN_PERMIT.tryAcquire(1, TimeUnit.SECONDS)) {
+                    _final_join_permit_acquired = true;
+                    return true;
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                _exit = true;
+            }
+        }
+
+        _exit = true;
+        return false;
+    }
+
     @Override
     public void run() {
 
@@ -190,6 +214,9 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
                 while (!_exit && (!_download.isStopped() || !_download.getChunkworkers().isEmpty()) && _bytes_written < _file_size) {
 
                     if (!download_finished && _download.getProgress() == _file_size) {
+                        if (!acquireFinalJoinPermit()) {
+                            break;
+                        }
 
                         finishDownload();
                         download_finished = true;
@@ -209,6 +236,9 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
                             while (chunk_file.exists() && chunk_file.canRead() && chunk_file.canWrite() && chunk_file.length() > 0) {
 
                                 if (!download_finished && _download.getProgress() == _file_size) {
+                                    if (!acquireFinalJoinPermit()) {
+                                        break;
+                                    }
 
                                     finishDownload();
                                     download_finished = true;
@@ -331,6 +361,11 @@ public class ChunkWriterManager implements Runnable, SecureSingleThreadNotifiabl
             } catch (RuntimeException ex) {
                 LOG.log(Level.SEVERE, "{0} ChunkWriterManager unexpected error {1}", new Object[]{Thread.currentThread().getName(), ex.getMessage()});
                 throw ex;
+            } finally {
+                if (_final_join_permit_acquired) {
+                    _final_join_permit_acquired = false;
+                    FINAL_JOIN_PERMIT.release();
+                }
             }
 
             if (_bytes_written == _file_size && MiscTools.isDirEmpty(Paths.get(getChunks_dir()))) {
