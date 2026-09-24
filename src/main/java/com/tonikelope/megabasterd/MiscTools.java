@@ -73,6 +73,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
@@ -1019,6 +1020,8 @@ public class MiscTools {
 
         if (paths != null) {
 
+            Map<Object, Boolean> expanded_nodes = getExpandedTreeNodeUserObjects(tree);
+
             Class node_class = tree_model.getRoot().getClass();
 
             Object new_root = null;
@@ -1092,6 +1095,8 @@ public class MiscTools {
 
             tree.setModel(new DefaultTreeModel(sortTree((DefaultMutableTreeNode) new_root)));
 
+            restoreExpandedTreeNodeUserObjects(tree, expanded_nodes);
+
             tree.setRootVisible(new_root != null ? ((TreeNode) new_root).getChildCount() > 0 : false);
 
             tree.setEnabled(true);
@@ -1100,6 +1105,36 @@ public class MiscTools {
         }
 
         return false;
+    }
+
+    private static Map<Object, Boolean> getExpandedTreeNodeUserObjects(JTree tree) {
+
+        Map<Object, Boolean> expanded_nodes = new IdentityHashMap<>();
+        Object root = tree.getModel().getRoot();
+        Enumeration<TreePath> expanded_paths = tree.getExpandedDescendants(new TreePath(root));
+
+        if (expanded_paths != null) {
+            while (expanded_paths.hasMoreElements()) {
+                DefaultMutableTreeNode node = (DefaultMutableTreeNode) expanded_paths.nextElement().getLastPathComponent();
+                expanded_nodes.put(node.getUserObject(), Boolean.TRUE);
+            }
+        }
+
+        return expanded_nodes;
+    }
+
+    private static void restoreExpandedTreeNodeUserObjects(JTree tree, Map<Object, Boolean> expanded_nodes) {
+
+        DefaultMutableTreeNode root = (DefaultMutableTreeNode) tree.getModel().getRoot();
+        Enumeration nodes = root.preorderEnumeration();
+
+        while (nodes.hasMoreElements()) {
+            DefaultMutableTreeNode node = (DefaultMutableTreeNode) nodes.nextElement();
+
+            if (expanded_nodes.containsKey(node.getUserObject())) {
+                tree.expandPath(new TreePath(node.getPath()));
+            }
+        }
     }
 
     /**

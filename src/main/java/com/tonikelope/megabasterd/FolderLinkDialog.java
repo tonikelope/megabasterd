@@ -390,7 +390,11 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                 file_tree.setEnabled(true);
 
-                file_tree.setModel(new DefaultTreeModel((TreeNode) file_tree.getModel().getRoot()));
+                // The model already reports node removals. Reinstalling it here
+                // made Swing forget every expanded folder after REMOVE THIS;
+                // repainting is enough to display the recalculated sizes.
+                file_tree.revalidate();
+                file_tree.repaint();
 
                 boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
