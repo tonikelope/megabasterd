@@ -46,6 +46,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
@@ -482,6 +483,7 @@ public final class MainPanel {
     private boolean _megacrypter_reverse;
     private float _zoom_factor;
     private volatile boolean _exit;
+    private final AtomicBoolean _auto_close_fired = new AtomicBoolean(false);
 
     public MainPanel() {
 
@@ -1661,9 +1663,97 @@ public final class MainPanel {
         _byebye(restart, restart_warning);
     }
 
+    public void byebyeNoPrompt(boolean restart) {
+        _byebye(restart, false, true);
+    }
+
+    public boolean isAutoCloseEnabled() {
+        try {
+            final boolean[] enabled = new boolean[1];
+            MiscTools.GUIRunAndWait(() -> {
+                try {
+                    enabled[0] = getView().getAuto_close_menu().isSelected();
+                } catch (Exception ignore) {
+                    enabled[0] = false;
+                }
+            });
+            return enabled[0];
+        } catch (Exception ex) {
+            return false;
+        }
+    }
+
+    public void maybeAutoClose(Transference finishing) {
+        try {
+            if (_exit || _auto_close_fired.get()) {
+                return;
+            }
+            if (finishing == null || !finishing.isTerminalForAutoClose()) {
+                return;
+            }
+            if (!isAutoCloseEnabled()) {
+                return;
+            }
+            if (_download_manager == null || _upload_manager == null) {
+                return;
+            }
+            boolean dlIdle = _download_manager.isIdleForAutoClose();
+            boolean ulIdle = _upload_manager.isIdleForAutoClose();
+            if (!dlIdle || !ulIdle) {
+                return;
+            }
+            boolean hasPending = _download_manager.hasPendingRetry() || _upload_manager.hasPendingRetry();
+            if (hasPending) {
+                return;
+            }
+            boolean hasTerminal = _download_manager.hasTerminalFinish() || _upload_manager.hasTerminalFinish();
+            if (!hasTerminal) {
+                return;
+            }
+            if (!_auto_close_fired.compareAndSet(false, true)) {
+                return;
+            }
+            LOG.log(Level.INFO, "Auto-close: all transfers finished, exiting via graceful shutdown (vacuum + sqlite shutdown).");
+            setExit(true);
+            THREAD_POOL.execute(() -> {
+                try {
+                    try {
+                        if (_download_manager.isOKFinishedInQueue()) {
+                            run_dl_finish_command();
+                        }
+                    } catch (Throwable t) {
+                        LOG.log(Level.WARNING, "auto-close dl finish command threw: {0}", t.getMessage());
+                    }
+                    try {
+                        if (_upload_manager.isOKFinishedInQueue()) {
+                            run_ul_finish_command();
+                        }
+                    } catch (Throwable t) {
+                        LOG.log(Level.WARNING, "auto-close ul finish command threw: {0}", t.getMessage());
+                    }
+                } finally {
+                    MiscTools.GUIRun(() -> {
+                        try {
+                            byebyeNoPrompt(false);
+                        } catch (Throwable t) {
+                            LOG.log(Level.SEVERE, "auto-close graceful shutdown failed: {0}", t.getMessage());
+                        }
+                    });
+                }
+            });
+        } catch (Throwable t) {
+            LOG.log(Level.WARNING, "maybeAutoClose check failed (never auto-closing from this finish): {0}", t.getMessage());
+        }
+    }
+
     private void _byebye(boolean restart, boolean restart_warning) {
 
-        if (!_exit && checkByeBye()) {
+        _byebye(restart, restart_warning, false);
+    }
+
+    private void _byebye(boolean restart, boolean restart_warning, boolean skipPrompt) {
+
+        if (skipPrompt || (!_exit && checkByeBye())) {
 
             if (restart && restart_warning) {
                 JOptionPane.showMessageDialog(getView(), LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"), LabelTranslatorSingleton.getInstance().translate("Restart required"), JOptionPane.WARNING_MESSAGE);

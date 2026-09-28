@@ -157,6 +157,39 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         return getTransference_preprocess_queue().isEmpty() && getTransference_provision_queue().isEmpty() && getTransference_waitstart_queue().isEmpty() && getTransference_running_list().isEmpty();
     }
 
+    public boolean isIdleForAutoClose() {
+        return getTransference_preprocess_global_queue().isEmpty()
+                && getTransference_preprocess_queue().isEmpty()
+                && getTransference_provision_queue().isEmpty()
+                && getTransference_waitstart_queue().isEmpty()
+                && getTransference_waitstart_aux_queue().isEmpty()
+                && getTransference_running_list().isEmpty();
+    }
+
+    public boolean hasPendingRetry() {
+        return getTransference_finished_queue().stream().anyMatch(t -> {
+            try {
+                return t.isRetryPending();
+            } catch (Exception ignore) {
+                return false;
+            }
+        });
+    }
+
+    public boolean hasTerminalFinish() {
+        return getTransference_finished_queue().stream().anyMatch(t -> {
+            try {
+                return t.isTerminalForAutoClose();
+            } catch (Exception ignore) {
+                return false;
+            }
+        });
+    }
+
+    public boolean isOKFinishedInQueue() {
+        return _transference_finished_queue.stream().anyMatch((t) -> (!t.isStatusError() && !t.isCanceled()));
+    }
+
     public boolean isPaused_all() {
         return _paused_all;
     }
@@ -752,7 +785,7 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         // UploadManager hooks fire concurrently and the user sees both
         // commands run; per the issue (#774) that is the intended
         // behaviour.
-        if (!_finish_command_fired && finish > 0 && pre + prov + wait + run == 0 && _isOKFinishedInQueue()) {
+        if (!_finish_command_fired && finish > 0 && pre + prov + wait + run == 0 && isOKFinishedInQueue()) {
             _finish_command_fired = true;
             try {
                 onAllTransferencesFinished();
@@ -763,11 +796,6 @@ abstract public class TransferenceManager implements Runnable, SecureSingleThrea
         }
 
         return (pre + prov + rem + wait + run + finish > 0) ? LabelTranslatorSingleton.getInstance().translate("Pre:") + " " + pre + " / " + LabelTranslatorSingleton.getInstance().translate("Pro:") + " " + prov + " / " + LabelTranslatorSingleton.getInstance().translate("Wait:") + " " + wait + " / " + LabelTranslatorSingleton.getInstance().translate("Run:") + " " + run + " / " + LabelTranslatorSingleton.getInstance().translate("Finish:") + " " + finish + " / " + LabelTranslatorSingleton.getInstance().translate("Rem:") + " " + rem : "";
-    }
-
-    private boolean _isOKFinishedInQueue() {
-
-        return _transference_finished_queue.stream().anyMatch((t) -> (!t.isStatusError() && !t.isCanceled()));
     }
 
     @Override

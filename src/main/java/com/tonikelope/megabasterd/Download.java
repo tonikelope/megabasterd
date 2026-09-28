@@ -1255,9 +1255,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
         _exit = true;
 
-        if (_status_error != null && !_canceled && getMain_panel().getDownload_manager().no_transferences() && getMain_panel().getUpload_manager().no_transferences() && (!getMain_panel().getDownload_manager().getTransference_finished_queue().isEmpty() || !getMain_panel().getUpload_manager().getTransference_finished_queue().isEmpty()) && getMain_panel().getView().getAuto_close_menu().isSelected()) {
-            System.exit(0);
-        }
+        getMain_panel().maybeAutoClose(this);
 
         synchronized (_progress_watchdog_lock) {
             _progress_watchdog_lock.notifyAll();
@@ -2090,6 +2088,16 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     @Override
     public boolean isStatusError() {
         return _status_error != null;
+    }
+
+    @Override
+    public boolean isRetryPending() {
+        return _status_error != null && !_canceled && !_closed && !global_cancel && _auto_retry_on_error;
+    }
+
+    @Override
+    public boolean isTerminalForAutoClose() {
+        return !_canceled && !_closed && !global_cancel && (_status_error == null || !_auto_retry_on_error);
     }
 
     @Override

@@ -106,6 +106,11 @@ public interface Transference {
 
     boolean isStatusError();
 
+    boolean isRetryPending();
+
+    // All-error batches close; #774 commands stay OK-only.
+    boolean isTerminalForAutoClose();
+
     int getSlotsCount();
 
     int getPausedWorkers();

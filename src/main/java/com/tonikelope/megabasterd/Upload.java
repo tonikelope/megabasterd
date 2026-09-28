@@ -1189,9 +1189,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
         _exit = true;
 
-        if (_status_error != null && !_canceled && getMain_panel().getDownload_manager().no_transferences() && getMain_panel().getUpload_manager().no_transferences() && (!getMain_panel().getDownload_manager().getTransference_finished_queue().isEmpty() || !getMain_panel().getUpload_manager().getTransference_finished_queue().isEmpty()) && getMain_panel().getView().getAuto_close_menu().isSelected()) {
-            System.exit(0);
-        }
+        getMain_panel().maybeAutoClose(this);
 
         synchronized (_progress_watchdog_lock) {
             _progress_watchdog_lock.notifyAll();
@@ -1378,6 +1376,16 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     @Override
     public boolean isStatusError() {
         return _status_error != null;
+    }
+
+    @Override
+    public boolean isRetryPending() {
+        return _status_error != null && !_canceled && !_closed && _auto_retry_on_error;
+    }
+
+    @Override
+    public boolean isTerminalForAutoClose() {
+        return !_canceled && !_closed && (_status_error == null || !_auto_retry_on_error);
     }
 
     public long calculateLastUploadedChunk(long bytes_read) {
