@@ -41,6 +41,11 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
     public static final boolean DEFAULT_THUMBNAILS = true;
     public static final boolean UPLOAD_LOG = true;
     public static final boolean UPLOAD_PUBLIC_FOLDER = false;
+    // #783 -- whether a public download link is auto-exported for every
+    // uploaded file (MEGA "l" action). Default true to preserve the historical
+    // behavior; users who don't want each upload turned into a public link can
+    // disable it in Settings -> Uploads.
+    public static final boolean UPLOAD_GENERATE_FILE_LINKS = true;
     private static final Logger LOG = Logger.getLogger(Upload.class.getName());
     private final MainPanel _main_panel;
     private volatile UploadView _view;
@@ -1008,16 +1013,27 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
 
                                 }
 
-                                try {
+                                // #783 -- only export a public link for the file
+                                // when the user opted in (default on). When off,
+                                // the file stays private, _file_link is left null
+                                // and the "Copy file link" button stays disabled.
+                                String gen_file_links_string = DBTools.selectSettingValue("upload_generate_file_links");
 
-                                    _file_link = _ma.getPublicFileLink(_fid, i32a2bin(node_key));
+                                boolean generate_file_link = gen_file_links_string != null ? gen_file_links_string.equals("yes") : Upload.UPLOAD_GENERATE_FILE_LINKS;
 
-                                    MiscTools.GUIRun(() -> {
-                                        getView().getFile_link_button().setEnabled(true);
-                                    });
+                                if (generate_file_link) {
 
-                                } catch (Exception ex) {
-                                    LOG.log(Level.SEVERE, ex.getMessage());
+                                    try {
+
+                                        _file_link = _ma.getPublicFileLink(_fid, i32a2bin(node_key));
+
+                                        MiscTools.GUIRun(() -> {
+                                            getView().getFile_link_button().setEnabled(true);
+                                        });
+
+                                    } catch (Exception ex) {
+                                        LOG.log(Level.SEVERE, ex.getMessage());
+                                    }
                                 }
 
                                 getView().printStatusOK(LabelTranslatorSingleton.getInstance().translate("File successfully uploaded! (") + _ma.getFull_email() + ")");
@@ -1029,7 +1045,7 @@ public class Upload implements Transference, Runnable, SecureSingleThreadNotifia
                                     if (upload_log.exists()) {
 
                                         try (java.io.OutputStreamWriter fr = new java.io.OutputStreamWriter(new java.io.FileOutputStream(upload_log, true), java.nio.charset.StandardCharsets.UTF_8)) {
-                                            fr.write("[" + MiscTools.getFechaHoraActual() + "] " + _file_name + "   [" + MiscTools.formatBytes(_file_size) + "]   " + _file_link + "\n");
+                                            fr.write("[" + MiscTools.getFechaHoraActual() + "] " + _file_name + "   [" + MiscTools.formatBytes(_file_size) + "]" + (_file_link != null ? "   " + _file_link : "") + "\n");
                                         } catch (IOException ex) {
                                             Logger.getLogger(Upload.class.getName()).log(Level.SEVERE, ex.getMessage());
                                         }

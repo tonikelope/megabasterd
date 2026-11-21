@@ -66,7 +66,7 @@ import javax.swing.UIManager;
  */
 public final class MainPanel {
 
-    public static final String VERSION = "8.57";
+    public static final String VERSION = "8.61";
     public static final boolean FORCE_SMART_PROXY = false; //TRUE FOR DEBUGING SMART PROXY
     public static final int THROTTLE_SLICE_SIZE = 16 * 1024;
     public static final int DEFAULT_BYTE_BUFFER_SIZE = 16 * 1024;
@@ -465,6 +465,7 @@ public final class MainPanel {
     private final StreamThrottlerSupervisor _stream_supervisor;
     private int _max_dl, _max_ul, _default_slots_down, _default_slots_up, _max_dl_speed, _max_up_speed;
     private boolean _use_slots_down, _limit_download_speed, _limit_upload_speed, _use_mega_account_down, _init_paused, _debug_file;
+    private boolean _auto_download_folders;
     private String _mega_account_down;
     private String _default_download_path;
     private boolean _use_custom_chunks_dir;
@@ -1033,6 +1034,10 @@ public final class MainPanel {
         return _init_paused;
     }
 
+    public boolean isAuto_download_folders() {
+        return _auto_download_folders;
+    }
+
     public void loadUserSettings() {
 
         String use_custom_chunks_dir = DBTools.selectSettingValue("use_custom_chunks_dir");
@@ -1174,6 +1179,10 @@ public final class MainPanel {
         } else {
             _init_paused = false;
         }
+
+        // #784 -- auto-accept folder links (skip the "Folder link detected!"
+        // confirmation and download the whole tree).
+        _auto_download_folders = "yes".equals(DBTools.selectSettingValue("auto_download_folders"));
 
         try {
             _mega_accounts = selectMegaAccounts();

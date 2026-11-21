@@ -385,6 +385,8 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="status_down_label" max="32767" attributes="0"/>
                       <EmptySpace min="-2" pref="18" max="-2" attributes="0"/>
+                      <Component id="new_download_button" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="close_all_finished_down_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jButton1" min="-2" max="-2" attributes="0"/>
@@ -401,6 +403,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="new_download_button" alignment="3" max="32767" attributes="0"/>
                               <Component id="close_all_finished_down_button" alignment="3" max="32767" attributes="0"/>
                               <Component id="jButton1" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
@@ -443,6 +446,21 @@
                 </Property>
                 <Property name="doubleBuffered" type="boolean" value="true"/>
               </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="new_download_button">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Dialog" size="16" style="1"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/images/icons8-plus-30.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="New download"/>
+                <Property name="doubleBuffered" type="boolean" value="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="new_download_buttonActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="close_all_finished_down_button">
               <Properties>
@@ -582,6 +600,8 @@
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="status_up_label" max="32767" attributes="0"/>
                       <EmptySpace min="-2" pref="3" max="-2" attributes="0"/>
+                      <Component id="new_upload_button" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="close_all_finished_up_button" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="copy_all_uploads" min="-2" max="-2" attributes="0"/>
@@ -598,6 +618,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" max="-2" attributes="0">
                           <Group type="103" alignment="0" groupAlignment="3" attributes="0">
+                              <Component id="new_upload_button" alignment="3" max="32767" attributes="0"/>
                               <Component id="close_all_finished_up_button" alignment="3" max="32767" attributes="0"/>
                               <Component id="copy_all_uploads" alignment="3" min="-2" max="-2" attributes="0"/>
                           </Group>
@@ -637,6 +658,21 @@
                   <Color blue="66" green="66" red="66" type="rgb"/>
                 </Property>
               </Properties>
+            </Component>
+            <Component class="javax.swing.JButton" name="new_upload_button">
+              <Properties>
+                <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                  <Font name="Dialog" size="16" style="1"/>
+                </Property>
+                <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                  <Image iconType="3" name="/images/icons8-plus-30.png"/>
+                </Property>
+                <Property name="text" type="java.lang.String" value="New upload"/>
+                <Property name="doubleBuffered" type="boolean" value="true"/>
+              </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="new_upload_buttonActionPerformed"/>
+              </Events>
             </Component>
             <Component class="javax.swing.JButton" name="close_all_finished_up_button">
               <Properties>

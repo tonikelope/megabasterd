@@ -47,6 +47,15 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
     private volatile boolean exit = false;
 
+    // #784 -- headless "auto-accept folder links" mode. When true the dialog is
+    // never shown: the folder tree is resolved in the background and the whole
+    // tree is auto-approved for download without the "Folder link detected!"
+    // confirmation. The caller blocks on awaitAutoDownloadReady() (the modal
+    // setVisible() is skipped) which is released through this one-shot latch.
+    private final boolean _auto_download;
+
+    private final java.util.concurrent.CountDownLatch _auto_ready = new java.util.concurrent.CountDownLatch(1);
+
     @Override
     public void dispose() {
         file_tree.setModel(null);
@@ -66,15 +75,44 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     }
 
     /**
+     * Headless counterpart of showing the modal dialog and waiting for the user
+     * to click "Let's dance, baby". Blocks the calling (non-EDT) thread until
+     * the folder tree has finished loading and -- on success -- the download
+     * links have been generated. Only meaningful when the dialog was created
+     * with {@code auto_download = true}. On success {@link #isDownload()}
+     * returns true and {@link #getDownload_links()} is populated; on failure it
+     * returns with {@code isDownload() == false} and {@link #isMega_error()} != 0.
+     */
+    public void awaitAutoDownloadReady() {
+        try {
+            _auto_ready.await();
+        } catch (InterruptedException ex) {
+            Thread.currentThread().interrupt();
+        }
+    }
+
+    /**
      * Creates new form FolderLink
      *
      * @param parent
      * @param link
      */
     public FolderLinkDialog(MainPanelView parent, boolean modal, String link) {
+        this(parent, modal, link, false);
+    }
+
+    /**
+     * @param parent
+     * @param modal
+     * @param link
+     * @param auto_download when true the folder is resolved headless and the
+     * whole tree auto-approved for download (see {@link #awaitAutoDownloadReady()}).
+     */
+    public FolderLinkDialog(MainPanelView parent, boolean modal, String link, boolean auto_download) {
 
         super(parent, modal);
 
+        _auto_download = auto_download;
         _mega_error = 0;
         _total_space = 0L;
         _download = false;
@@ -106,19 +144,39 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                 // dispose() has already nulled the tree model -- skip the
                 // rest to avoid a silent NPE inside _genDownloadLiks.
                 if (exit) {
+                    _auto_ready.countDown();
                     return;
                 }
 
                 if (_mega_error == 0) {
 
+                    // _genDownloadLiks() is asynchronous: it schedules the link
+                    // generation on the EDT + a THREAD_POOL worker and returns
+                    // immediately. In auto-download mode the completion of that
+                    // worker (see _genDownloadLiks) is what flips _download and
+                    // releases _auto_ready, so the caller stays blocked in
+                    // awaitAutoDownloadReady() until the links actually exist.
                     _genDownloadLiks();
 
-                    MiscTools.GUIRun(() -> {
+                    if (!_auto_download) {
+                        MiscTools.GUIRun(() -> {
 
-                        dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
+                            dance_button.setText(LabelTranslatorSingleton.getInstance().translate("Let's dance, baby"));
 
-                        pack();
-                    });
+                            pack();
+                        });
+                    }
+
+                } else if (_auto_download) {
+
+                    // Unattended mode: never pop a modal error dialog (it would
+                    // stall an otherwise headless batch). The underlying failure
+                    // is already logged as SEVERE inside _loadMegaDirTree; just
+                    // release the waiter so this folder is skipped and the rest
+                    // of the batch keeps going.
+                    LOG.log(SEVERE, "Auto-download folder link failed (mega_error={0}): {1}", new Object[]{_mega_error, _link});
+
+                    _auto_ready.countDown();
 
                 } else if (_mega_error == -18) {
 
@@ -225,7 +283,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
         skip_rest_button.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         skip_rest_button.setIcon(new javax.swing.ImageIcon(getClass().getResource("/images/icons8-trash-can-30.png"))); // NOI18N
-        skip_rest_button.setText("REMOVE ALL EXCEPT THIS");
+        skip_rest_button.setText("KEEP THIS");
         skip_rest_button.setDoubleBuffered(true);
         skip_rest_button.setEnabled(false);
         skip_rest_button.addActionListener(new java.awt.event.ActionListener() {
@@ -313,7 +371,7 @@ public class FolderLinkDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_skip_buttonActionPerformed
 
     /**
-     * Post-mutation refresh shared by the REMOVE THIS / REMOVE ALL EXCEPT THIS
+     * Post-mutation refresh shared by the REMOVE THIS / KEEP THIS
      * buttons and the right-click context menu (see attachTreeContextMenu).
      * Recalculates folder sizes off the EDT and then re-enables / re-disables
      * the action controls depending on whether anything is left in the tree.
@@ -332,7 +390,11 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
                 file_tree.setEnabled(true);
 
-                file_tree.setModel(new DefaultTreeModel((TreeNode) file_tree.getModel().getRoot()));
+                // The model already reports node removals. Reinstalling it here
+                // made Swing forget every expanded folder after REMOVE THIS;
+                // repainting is enough to display the recalculated sizes.
+                file_tree.revalidate();
+                file_tree.repaint();
 
                 boolean root_childs = ((TreeNode) file_tree.getModel().getRoot()).getChildCount() > 0;
 
@@ -435,10 +497,14 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             int r = -1;
 
-            if (ma.existsCachedFolderNodes(folder_id)) {
+            if (!_auto_download && ma.existsCachedFolderNodes(folder_id)) {
                 // JOptionPane must run on the EDT; calling it from the
                 // THREAD_POOL worker that runs _loadMegaDirTree mixed Swing
                 // state across threads.
+                //
+                // Skipped entirely in auto-download mode (#784): there is no
+                // user to answer the cached-vs-fresh prompt, so we fall through
+                // and reload the folder from scratch (r stays -1).
                 final int[] rr = {-1};
                 MiscTools.GUIRunAndWait(() -> {
                     rr[0] = JOptionPane.showConfirmDialog(this, I18n.tr("ui.confirm.folder_cache.message"), I18n.tr("ui.confirm.folder_cache.title"), JOptionPane.YES_NO_OPTION);
@@ -644,6 +710,8 @@ public class FolderLinkDialog extends javax.swing.JDialog {
 
             THREAD_POOL.execute(() -> {
 
+                try {
+
                 String folder_id = findFirstRegex("#F!([^!]+)", _link, 1);
 
                 if (folder_id.contains("@")) {
@@ -723,7 +791,31 @@ public class FolderLinkDialog extends javax.swing.JDialog {
                     node_bar.setVisible(false);
 
                     working = false;
+
+                    // #784 -- auto-download mode: the links are now fully
+                    // generated, so approve the transfer (as if the user had
+                    // clicked "Let's dance, baby"). The caller blocked in
+                    // awaitAutoDownloadReady() is released by the worker's
+                    // finally below (which always runs, even on an unexpected
+                    // enumeration failure). _download stays false when there is
+                    // nothing to transfer.
+                    if (_auto_download) {
+                        _download = root.getChildCount() > 0;
+                    }
                 });
+
+                } finally {
+                    // #784 -- guarantee the headless waiter is always released,
+                    // even if the enumeration above throws on an unexpected node
+                    // payload. Without this the one-shot latch would never count
+                    // down and awaitAutoDownloadReady() -- called on the single
+                    // preprocess-drain worker -- would wedge all further folder
+                    // provisioning for the session. Idempotent; _download stays
+                    // false on failure so the folder is simply skipped.
+                    if (_auto_download) {
+                        _auto_ready.countDown();
+                    }
+                }
 
             });
         });

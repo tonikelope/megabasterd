@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import static java.util.concurrent.Executors.newCachedThreadPool;
+import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
@@ -62,6 +63,7 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
     public static final boolean DEFAULT_CLIPBOARD_LINK_MONITOR = true;
     public static final int CHUNK_SIZE_MULTI = 20;
     private static final Logger LOG = Logger.getLogger(Download.class.getName());
+    private static final Semaphore INTEGRITY_CHECK_PERMIT = new Semaphore(1, true);
 
     private final MainPanel _main_panel;
     private volatile DownloadView _view;
@@ -993,43 +995,46 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
 
                                 setProgress(0);
 
-                                getView().printStatusNormal("Checking file integrity, please wait...");
-
-                                MiscTools.GUIRun(() -> {
-                                    getView().getStop_button().setVisible(true);
-
-                                    getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL CHECK"));
-                                });
-
                                 getMain_panel().getDownload_manager().getTransference_running_list().remove(this);
 
                                 getMain_panel().getDownload_manager().secureNotify();
 
-                                if (verifyFileCBCMAC(filename)) {
+                                MiscTools.GUIRun(() -> {
+                                    getView().getStop_button().setVisible(true);
+                                    getView().getStop_button().setText(LabelTranslatorSingleton.getInstance().translate("CANCEL CHECK"));
+                                });
 
-                                    getView().printStatusOK("File successfully downloaded! (Integrity check PASSED)");
+                                boolean verify_permit_acquired = acquireIntegrityCheckPermit();
 
-                                } else if (!_exit) {
+                                try {
+                                    if (!verify_permit_acquired) {
+                                        getView().printStatusOK("File successfully downloaded! (but integrity check CANCELED)");
+                                    } else {
+                                        getView().printStatusNormal("Checking file integrity, please wait...");
 
-                                    _status_error = "BAD NEWS :( File is DAMAGED! (deleted)";
+                                        if (verifyFileCBCMAC(filename)) {
+                                            getView().printStatusOK("File successfully downloaded! (Integrity check PASSED)");
+                                        } else if (!_exit) {
+                                            _status_error = "BAD NEWS :( File is DAMAGED! (deleted)";
 
-                                    try {
-                                        java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(filename));
-                                    } catch (IOException del_ex) {
-                                        LOG.log(Level.SEVERE, "Failed to delete corrupted file {0}: {1}", new Object[]{filename, del_ex.getMessage()});
+                                            try {
+                                                java.nio.file.Files.deleteIfExists(java.nio.file.Paths.get(filename));
+                                            } catch (IOException del_ex) {
+                                                LOG.log(Level.SEVERE, "Failed to delete corrupted file {0}: {1}", new Object[]{filename, del_ex.getMessage()});
+                                            }
+
+                                            getView().printStatusError(_status_error);
+                                        } else {
+                                            getView().printStatusOK("File successfully downloaded! (but integrity check CANCELED)");
+                                        }
+                                    }
+                                } finally {
+                                    if (verify_permit_acquired) {
+                                        INTEGRITY_CHECK_PERMIT.release();
                                     }
 
-                                    getView().printStatusError(_status_error);
-
-                                } else {
-
-                                    getView().printStatusOK("File successfully downloaded! (but integrity check CANCELED)");
-
+                                    MiscTools.GUIRun(() -> getView().getStop_button().setVisible(false));
                                 }
-
-                                MiscTools.GUIRun(() -> {
-                                    getView().getStop_button().setVisible(false);
-                                });
 
                             } else {
 
@@ -1634,6 +1639,21 @@ public class Download implements Transference, Runnable, SecureSingleThreadNotif
             }
         }
 
+    }
+
+    private boolean acquireIntegrityCheckPermit() {
+        while (!_exit) {
+            try {
+                if (INTEGRITY_CHECK_PERMIT.tryAcquire(1, TimeUnit.SECONDS)) {
+                    return true;
+                }
+            } catch (InterruptedException ex) {
+                Thread.currentThread().interrupt();
+                return false;
+            }
+        }
+
+        return false;
     }
 
     private boolean verifyFileCBCMAC(String filename) throws FileNotFoundException, Exception, NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException, IllegalBlockSizeException, BadPaddingException {
