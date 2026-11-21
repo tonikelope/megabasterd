@@ -311,7 +311,10 @@ public final class MainPanel {
             Logger.getLogger(MainPanel.class.getName()).log(SEVERE, null, ex);
         }
 
-        setNimbusLookAndFeel("yes".equals(DBTools.selectSettingValue("dark_mode")));
+        setNimbusLookAndFeel(
+                "yes".equals(DBTools.selectSettingValue("dark_mode")),
+                "modern".equals(DBTools.selectSettingValue("ui_style")),
+                DBTools.selectSettingValue("accent_color"));
 
         if ("yes".equals(DBTools.selectSettingValue("upload_log"))) {
             MiscTools.createUploadLogDir();

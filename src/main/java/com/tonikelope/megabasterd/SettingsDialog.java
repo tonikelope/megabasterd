@@ -1005,6 +1005,15 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             this.language_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Hungarian"));
 
+            this.ui_style_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Classic"));
+            this.ui_style_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Modern"));
+
+            this.accent_color_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Blue"));
+            this.accent_color_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Orange"));
+            this.accent_color_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Green"));
+            this.accent_color_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Purple"));
+            this.accent_color_combo.addItem(LabelTranslatorSingleton.getInstance().translate("Red"));
+
             if (language == null) {
                 language = MainPanel.DEFAULT_LANGUAGE;
             }
@@ -1025,6 +1034,35 @@ public class SettingsDialog extends javax.swing.JDialog {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("German"));
             } else if (language.equals("HU")) {
                 this.language_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Hungarian"));
+            }
+
+            String ui_style = DBTools.selectSettingValue("ui_style");
+            if (ui_style == null || ui_style.isEmpty() || ui_style.equals("classic")) {
+                this.ui_style_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Classic"));
+            } else {
+                this.ui_style_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Modern"));
+            }
+
+            String accent_color = DBTools.selectSettingValue("accent_color");
+            if (accent_color == null || accent_color.isEmpty()) {
+                accent_color = "blue";
+            }
+            switch (accent_color.toLowerCase()) {
+                case "orange":
+                    this.accent_color_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Orange"));
+                    break;
+                case "green":
+                    this.accent_color_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Green"));
+                    break;
+                case "purple":
+                    this.accent_color_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Purple"));
+                    break;
+                case "red":
+                    this.accent_color_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Red"));
+                    break;
+                default:
+                    this.accent_color_combo.setSelectedItem(LabelTranslatorSingleton.getInstance().translate("Blue"));
+                    break;
             }
 
             String custom_proxy_list = DBTools.selectSettingValue("custom_proxy_list");
@@ -1177,6 +1215,10 @@ public class SettingsDialog extends javax.swing.JDialog {
         run_command_ul_finish_textbox.addMouseListener(new ContextMenuMouseListener());
         run_command_ul_finish_test_button = new javax.swing.JButton();
         debug_file_checkbox = new javax.swing.JCheckBox();
+        ui_style_label = new javax.swing.JLabel();
+        ui_style_combo = new javax.swing.JComboBox<>();
+        accent_color_label = new javax.swing.JLabel();
+        accent_color_combo = new javax.swing.JComboBox<>();
         jPanel1 = new javax.swing.JPanel();
         jButton1 = new javax.swing.JButton();
         import_settings_button = new javax.swing.JButton();
@@ -2272,6 +2314,16 @@ public class SettingsDialog extends javax.swing.JDialog {
 
         font_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
 
+        ui_style_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        ui_style_label.setText("UI Style:");
+
+        ui_style_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+
+        accent_color_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
+        accent_color_label.setText("Accent Color:");
+
+        accent_color_combo.setFont(new java.awt.Font("Dialog", 0, 18)); // NOI18N
+
         zoom_label.setFont(new java.awt.Font("Dialog", 1, 18)); // NOI18N
         zoom_label.setText("Font ZOOM (%):");
         zoom_label.setDoubleBuffered(true);
@@ -2326,6 +2378,14 @@ public class SettingsDialog extends javax.swing.JDialog {
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE))
                         .addGroup(jPanel2Layout.createSequentialGroup()
+                            .addComponent(ui_style_label)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(ui_style_combo, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel2Layout.createSequentialGroup()
+                            .addComponent(accent_color_label)
+                            .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(accent_color_combo, javax.swing.GroupLayout.PREFERRED_SIZE, 351, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel2Layout.createSequentialGroup()
                             .addComponent(ext_lang_label)
                             .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                             .addComponent(ext_lang_path_field, javax.swing.GroupLayout.DEFAULT_SIZE, 200, Short.MAX_VALUE)
@@ -2351,6 +2411,14 @@ public class SettingsDialog extends javax.swing.JDialog {
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel2)
                     .addComponent(language_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(ui_style_label)
+                    .addComponent(ui_style_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(accent_color_label)
+                    .addComponent(accent_color_combo, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(ext_lang_label)
@@ -2567,6 +2635,26 @@ public class SettingsDialog extends javax.swing.JDialog {
             settings.put("reset_slot_proxy", proxy_reset_slot_checkbox.isSelected() ? "yes" : "no");
             settings.put("random_proxy", proxy_random_radio.isSelected() ? "yes" : "no");
             settings.put("dark_mode", dark_mode_checkbox.isSelected() ? "yes" : "no");
+            String uiStyle = (String) ui_style_combo.getSelectedItem();
+            if (uiStyle != null && uiStyle.equals(LabelTranslatorSingleton.getInstance().translate("Modern"))) {
+                settings.put("ui_style", "modern");
+            } else {
+                settings.put("ui_style", "classic");
+            }
+            String accentColor = (String) accent_color_combo.getSelectedItem();
+            if (accentColor != null) {
+                if (accentColor.equals(LabelTranslatorSingleton.getInstance().translate("Orange"))) {
+                    settings.put("accent_color", "orange");
+                } else if (accentColor.equals(LabelTranslatorSingleton.getInstance().translate("Green"))) {
+                    settings.put("accent_color", "green");
+                } else if (accentColor.equals(LabelTranslatorSingleton.getInstance().translate("Purple"))) {
+                    settings.put("accent_color", "purple");
+                } else if (accentColor.equals(LabelTranslatorSingleton.getInstance().translate("Red"))) {
+                    settings.put("accent_color", "red");
+                } else {
+                    settings.put("accent_color", "blue");
+                }
+            }
             settings.put("upload_public_folder", upload_public_folder_checkbox.isSelected() ? "yes" : "no");
             settings.put("smartproxy_ban_time", String.valueOf(bad_proxy_time_spinner.getValue()));
             settings.put("smartproxy_timeout", String.valueOf(proxy_timeout_spinner.getValue()));
@@ -2601,6 +2689,16 @@ public class SettingsDialog extends javax.swing.JDialog {
 
             if (old_language == null) {
                 old_language = MainPanel.DEFAULT_LANGUAGE;
+            }
+
+            String old_ui_style = DBTools.selectSettingValue("ui_style");
+            if (old_ui_style == null || old_ui_style.isEmpty()) {
+                old_ui_style = "classic";
+            }
+
+            String old_accent_color = DBTools.selectSettingValue("accent_color");
+            if (old_accent_color == null || old_accent_color.isEmpty()) {
+                old_accent_color = "blue";
             }
 
             String language = (String) language_combo.getSelectedItem();
@@ -2728,6 +2826,12 @@ public class SettingsDialog extends javax.swing.JDialog {
                 _quota_recovery_panel.saveToDB();
             }
 
+            String new_ui_style = settings.get("ui_style").toString();
+            String new_accent_color = settings.get("accent_color").toString();
+
+            boolean uiRestartNeeded = !new_ui_style.equals(old_ui_style)
+                    || !new_accent_color.equals(old_accent_color);
+
             if (!font.equals(old_font)
                     || !language.equals(old_language)
                     || !zoom.equals(old_zoom)
@@ -2737,7 +2841,19 @@ public class SettingsDialog extends javax.swing.JDialog {
                     || !proxy_user.equals(old_proxy_user)
                     || !proxy_pass.equals(old_proxy_pass)
                     || dark_mode != old_dark_mode
-                    || !external_language_file.equals(old_external_language_file)) {
+                    || !external_language_file.equals(old_external_language_file)
+                    || uiRestartNeeded) {
+
+                if (uiRestartNeeded) {
+                    javax.swing.JOptionPane.showMessageDialog(this,
+                            LabelTranslatorSingleton.getInstance().translate("MegaBasterd will restart"),
+                            LabelTranslatorSingleton.getInstance().translate("Restart required"),
+                            javax.swing.JOptionPane.WARNING_MESSAGE);
+
+                    MiscTools.GUIRun(() -> {
+                        _main_panel.byebyenow(true);
+                    });
+                }
 
                 _main_panel.setRestart(true);
             }
@@ -3896,11 +4012,15 @@ public class SettingsDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JLabel ui_style_label;
+    private javax.swing.JLabel accent_color_label;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
     private javax.swing.JProgressBar jProgressBar1;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JComboBox<String> language_combo;
+    private javax.swing.JComboBox<String> ui_style_combo;
+    private javax.swing.JComboBox<String> accent_color_combo;
     private javax.swing.JCheckBox limit_download_speed_checkbox;
     private javax.swing.JCheckBox limit_upload_speed_checkbox;
     private javax.swing.JLabel max_down_speed_label;

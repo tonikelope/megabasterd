@@ -26,6 +26,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,6 +40,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
+import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -53,6 +57,7 @@ import static javax.swing.JOptionPane.showOptionDialog;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
 import javax.swing.JTabbedPane;
+import javax.swing.KeyStroke;
 
 /**
  *
@@ -170,6 +175,164 @@ public final class MainPanelView extends javax.swing.JFrame {
 
     public MainPanel getMain_panel() {
         return _main_panel;
+    }
+
+    private void setupPasteKeyBinding() {
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
+                "pasteClipboardLinks");
+        getRootPane().getActionMap().put("pasteClipboardLinks", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pasteLinksFromClipboard();
+            }
+        });
+    }
+
+    private void pasteLinksFromClipboard() {
+        String clipboardText = extractStringFromClipboardContents(Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null));
+        String link_data = MiscTools.extractMegaLinksFromString(clipboardText);
+
+        if (link_data == null || link_data.isEmpty()) {
+            return;
+        }
+
+        final MegaAPI ma;
+        if (_main_panel.isUse_mega_account_down()) {
+            String mega_account = _main_panel.getMega_account_down();
+            if (mega_account == null || mega_account.isEmpty()) {
+                ma = new MegaAPI();
+            } else {
+                MegaAPI selected = _main_panel.getMega_active_accounts().get(mega_account);
+                ma = selected != null ? selected : new MegaAPI();
+            }
+        } else {
+            ma = new MegaAPI();
+        }
+
+        _main_panel.resumeDownloads();
+
+        THREAD_POOL.execute(() -> {
+            Set<String> urls = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+(#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
+            Set<String> megadownloader = new HashSet(findAllRegex("mega://enc[^\r\n]+", link_data, 0));
+
+            megadownloader.forEach((link) -> {
+                try {
+                    urls.add(decryptMegaDownloaderLink(link));
+                } catch (Exception ex) {
+                    LOG.log(SEVERE, null, ex);
+                }
+            });
+
+            Set<String> elc = new HashSet(findAllRegex("mega://elc[^\r\n]+", link_data, 0));
+            elc.forEach((link) -> {
+                try {
+                    urls.addAll(CryptTools.decryptELC(link, _main_panel));
+                } catch (Exception ex) {
+                    LOG.log(SEVERE, null, ex);
+                }
+            });
+
+            Set<String> dlc = new HashSet(findAllRegex("dlc://([^\r\n]+)", link_data, 1));
+            dlc.stream().map((d) -> CryptTools.decryptDLC(d, _main_panel)).forEachOrdered((links) -> {
+                links.stream().filter((link) -> (findFirstRegex("(?:https?|mega)://[^\r\n](#[^\r\n!]*?)?![^\r\n!]+![^\\?\r\n/]+", link, 0) != null)).forEachOrdered((link) -> {
+                    urls.add(link);
+                });
+            });
+
+            if (!urls.isEmpty()) {
+                Set<String> folder_file_links = new HashSet(findAllRegex("(?:https?|mega)://[^\r\n]+#F\\*[^\r\n!]*?![^\r\n!]+![^\\?\r\n/]+", link_data, 0));
+                _main_panel.getDownload_manager().getTransference_preprocess_global_queue().addAll(folder_file_links);
+                _main_panel.getDownload_manager().secureNotify();
+
+                MiscTools.GUIRun(() -> {
+                    download_status_bar.setIndeterminate(true);
+                    download_status_bar.setValue(download_status_bar.getMinimum());
+                    download_status_bar.setMaximum(_main_panel.getDownload_manager().getTransference_preprocess_global_queue().size() + _main_panel.getDownload_manager().getTransference_preprocess_queue().size() + _main_panel.getDownload_manager().getTransference_provision_queue().size());
+                    download_status_bar.setVisible(true);
+                });
+
+                if (!folder_file_links.isEmpty()) {
+                    ArrayList<String> nlinks = ma.GENERATE_N_LINKS(folder_file_links);
+                    urls.removeAll(folder_file_links);
+                    urls.addAll(nlinks);
+                }
+
+                _main_panel.getDownload_manager().getTransference_preprocess_global_queue().removeAll(folder_file_links);
+                _main_panel.getDownload_manager().getTransference_preprocess_global_queue().addAll(urls);
+                _main_panel.getDownload_manager().secureNotify();
+
+                boolean link_warning = false;
+
+                for (String url : urls) {
+                    if (_main_panel.isExit()) {
+                        break;
+                    }
+
+                    try {
+                        url = URLDecoder.decode(url, "UTF-8").replaceAll("^mega://", "https://mega.nz").trim();
+
+                        if (findFirstRegex("#F!", url, 0) != null) {
+                            FolderLinkDialog fdialog = new FolderLinkDialog(_main_panel.getView(), true, url);
+                            if (fdialog.isMega_error() == 0) {
+                                fdialog.setLocationRelativeTo(_main_panel.getView());
+                                fdialog.setVisible(true);
+                                List<HashMap> folder_links = fdialog.getDownload_links();
+                                fdialog.dispose();
+                                for (HashMap folder_link : folder_links) {
+                                    while (_main_panel.getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || _main_panel.getDownload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
+                                        if (!link_warning) {
+                                            link_warning = true;
+                                            JOptionPane.showMessageDialog(_main_panel.getView(), LabelTranslatorSingleton.getInstance().translate("There are a lot of files in this folder.\nNot all links will be provisioned at once to avoid saturating MegaBasterd"), "Warning", JOptionPane.WARNING_MESSAGE);
+                                        }
+                                        synchronized (_main_panel.getDownload_manager().getWait_queue_lock()) {
+                                            _main_panel.getDownload_manager().getWait_queue_lock().wait(1000);
+                                        }
+                                    }
+
+                                    if (!_main_panel.getDownload_manager().getTransference_preprocess_global_queue().isEmpty()) {
+                                        if (!((String) folder_link.get("url")).equals("*")) {
+                                            Download download = new Download(_main_panel, ma, (String) folder_link.get("url"), _main_panel.getDefault_download_path(), (String) folder_link.get("filename"), (String) folder_link.get("filekey"), (long) folder_link.get("filesize"), null, null, _main_panel.isUse_slots_down(), false, _main_panel.isUse_custom_chunks_dir() ? _main_panel.getCustom_chunks_dir() : null, false);
+                                            _main_panel.getDownload_manager().getTransference_provision_queue().add(download);
+                                            _main_panel.getDownload_manager().secureNotify();
+                                        } else {
+                                            String filename = _main_panel.getDefault_download_path() + "/" + (String) folder_link.get("filename");
+                                            File file = new File(filename);
+                                            if (file.getParent() != null) {
+                                                File path = new File(file.getParent());
+                                                path.mkdirs();
+                                            }
+                                            if (((int) folder_link.get("type")) == 1) {
+                                                file.mkdir();
+                                            } else {
+                                                try {
+                                                    file.createNewFile();
+                                                } catch (IOException ex) {
+                                                    Logger.getLogger(MainPanelView.class.getName()).log(Level.SEVERE, null, ex);
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        break;
+                                    }
+                                }
+                            }
+                        } else {
+                            while (_main_panel.getDownload_manager().getTransference_waitstart_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE || _main_panel.getDownload_manager().getTransference_waitstart_aux_queue().size() >= TransferenceManager.MAX_WAIT_QUEUE) {
+                                synchronized (_main_panel.getDownload_manager().getWait_queue_lock()) {
+                                    _main_panel.getDownload_manager().getWait_queue_lock().wait(1000);
+                                }
+                            }
+                            Download download = new Download(_main_panel, ma, url, _main_panel.getDefault_download_path(), null, null, null, null, null, _main_panel.isUse_slots_down(), false, _main_panel.isUse_custom_chunks_dir() ? _main_panel.getCustom_chunks_dir() : null, false);
+                            _main_panel.getDownload_manager().getTransference_provision_queue().add(download);
+                            _main_panel.getDownload_manager().secureNotify();
+                        }
+                    } catch (Exception ex) {
+                        LOG.log(SEVERE, null, ex);
+                    }
+                }
+            }
+        });
     }
 
     public JTabbedPane getjTabbedPane1() {
@@ -507,6 +670,8 @@ public final class MainPanelView extends javax.swing.JFrame {
         MiscTools.GUIRunAndWait(() -> {
 
             initComponents();
+
+            setupPasteKeyBinding();
 
             updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
 

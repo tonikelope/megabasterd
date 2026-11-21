@@ -104,6 +104,7 @@ import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
+import javax.swing.BorderFactory;
 import javax.swing.border.TitledBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
@@ -314,35 +315,126 @@ public class MiscTools {
         return font;
     }
 
-    public static void setNimbusLookAndFeel(boolean dark) {
+    public static void setNimbusLookAndFeel(boolean dark, boolean modern, String accentColor) {
 
         try {
+            Color accent = parseAccentColor(accentColor);
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
 
                 if ("Nimbus".equals(info.getName())) {
 
                     javax.swing.UIManager.setLookAndFeel(info.getClassName());
 
-                    if (dark) {
-                        // Dark LAF
-                        UIManager.put("control", new Color(128, 128, 128));
-                        UIManager.put("info", new Color(128, 128, 128));
-                        UIManager.put("nimbusBase", new Color(18, 30, 49));
-                        UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
-                        UIManager.put("nimbusDisabledText", new Color(100, 100, 100));
-                        UIManager.put("nimbusFocus", new Color(115, 164, 209));
-                        UIManager.put("nimbusGreen", new Color(176, 179, 50));
-                        UIManager.put("nimbusInfoBlue", new Color(66, 139, 221));
-                        UIManager.put("nimbusLightBackground", new Color(18, 30, 49));
-                        UIManager.put("nimbusOrange", new Color(191, 98, 4));
-                        UIManager.put("nimbusRed", new Color(169, 46, 34));
-                        UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
-                        UIManager.put("nimbusSelectionBackground", new Color(104, 93, 156));
-                        UIManager.put("text", new Color(230, 230, 230));
-
+                    if (!modern) {
+                        if (dark) {
+                            // Dark LAF
+                            UIManager.put("control", new Color(128, 128, 128));
+                            UIManager.put("info", new Color(128, 128, 128));
+                            UIManager.put("nimbusBase", new Color(18, 30, 49));
+                            UIManager.put("nimbusAlertYellow", new Color(248, 187, 0));
+                            UIManager.put("nimbusDisabledText", new Color(100, 100, 100));
+                            UIManager.put("nimbusFocus", accent);
+                            UIManager.put("nimbusGreen", new Color(176, 179, 50));
+                            UIManager.put("nimbusInfoBlue", accent);
+                            UIManager.put("nimbusLightBackground", new Color(18, 30, 49));
+                            UIManager.put("nimbusOrange", new Color(191, 98, 4));
+                            UIManager.put("nimbusRed", new Color(169, 46, 34));
+                            UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
+                            UIManager.put("nimbusSelectionBackground", accent);
+                            UIManager.put("text", new Color(230, 230, 230));
+                            UIManager.put("Button.border", BorderFactory.createLineBorder(accent, 1));
+                            UIManager.put("Button.focus", accent);
+                            UIManager.put("TextField.border", BorderFactory.createLineBorder(accent, 1));
+                            UIManager.put("PasswordField.border", BorderFactory.createLineBorder(accent, 1));
+                            UIManager.put("TextArea.border", BorderFactory.createLineBorder(accent, 1));
+                            UIManager.put("ProgressBar.foreground", accent);
+                            UIManager.put("ProgressBar.selectionBackground", new Color(255, 255, 255));
+                            UIManager.put("ProgressBar.selectionForeground", new Color(255, 255, 255));
+                        } else {
+                            UIDefaults defaults = UIManager.getLookAndFeelDefaults();
+                            defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
+                            UIManager.put("nimbusFocus", accent);
+                            UIManager.put("nimbusInfoBlue", accent);
+                            UIManager.put("nimbusSelectionBackground", accent);
+                            UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
+                            UIManager.put("Button.border", BorderFactory.createLineBorder(accent, 1));
+                            UIManager.put("Button.focus", accent);
+                            UIManager.put("TextField.border", BorderFactory.createLineBorder(accent, 1));
+                            UIManager.put("PasswordField.border", BorderFactory.createLineBorder(accent, 1));
+                            UIManager.put("TextArea.border", BorderFactory.createLineBorder(accent, 1));
+                            UIManager.put("ProgressBar.foreground", accent);
+                            UIManager.put("ProgressBar.selectionBackground", new Color(255, 255, 255));
+                            UIManager.put("ProgressBar.selectionForeground", new Color(255, 255, 255));
+                        }
                     } else {
-                        UIDefaults defaults = UIManager.getLookAndFeelDefaults();
-                        defaults.put("nimbusOrange", defaults.get("nimbusFocus"));
+                        if (dark) {
+                            UIManager.put("control", new Color(34, 34, 34));
+                            UIManager.put("info", new Color(44, 44, 44));
+                            UIManager.put("nimbusBase", new Color(20, 20, 30));
+                            UIManager.put("nimbusBlueGrey", new Color(80, 80, 90));
+                            UIManager.put("nimbusFocus", accent);
+                            UIManager.put("nimbusInfoBlue", accent);
+                            UIManager.put("nimbusLightBackground", new Color(34, 34, 34));
+                            UIManager.put("text", new Color(230, 230, 230));
+                            UIManager.put("nimbusSelectionBackground", accent);
+                            UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
+                            UIManager.put("nimbusDisabledText", new Color(140, 140, 140));
+                            UIManager.put("Button.background", UIManager.getColor("control"));
+                            UIManager.put("Button.foreground", new Color(235, 235, 235));
+                            UIManager.put("Button.focus", accent);
+                            UIManager.put("TextField.background", new Color(40, 40, 45));
+                            UIManager.put("TextArea.background", new Color(40, 40, 45));
+                            UIManager.put("PasswordField.background", new Color(40, 40, 45));
+                            UIManager.put("TextField.foreground", new Color(235, 235, 235));
+                            UIManager.put("TextArea.foreground", new Color(235, 235, 235));
+                            UIManager.put("TextField.caretForeground", new Color(255, 255, 255));
+                            UIManager.put("ScrollBar.thumbDarkShadow", new Color(60, 60, 70));
+                            UIManager.put("ScrollBar.thumb", new Color(70, 70, 80));
+                            UIManager.put("ProgressBar.background", new Color(50, 50, 60));
+                            UIManager.put("ProgressBar.foreground", accent);
+                            UIManager.put("ProgressBar.selectionBackground", new Color(255, 255, 255));
+                            UIManager.put("ProgressBar.selectionForeground", new Color(255, 255, 255));
+                        } else {
+                            UIManager.put("control", new Color(245, 245, 245));
+                            UIManager.put("info", new Color(250, 250, 250));
+                            UIManager.put("nimbusBase", new Color(180, 180, 180));
+                            UIManager.put("nimbusBlueGrey", new Color(160, 160, 160));
+                            UIManager.put("nimbusFocus", accent);
+                            UIManager.put("nimbusInfoBlue", accent);
+                            UIManager.put("nimbusLightBackground", new Color(245, 245, 245));
+                            UIManager.put("text", new Color(35, 35, 35));
+                            UIManager.put("nimbusSelectionBackground", accent);
+                            UIManager.put("nimbusSelectedText", new Color(255, 255, 255));
+                            UIManager.put("nimbusDisabledText", new Color(130, 130, 130));
+                            UIManager.put("Button.background", UIManager.getColor("control"));
+                            UIManager.put("Button.foreground", new Color(25, 25, 25));
+                            UIManager.put("TextField.background", new Color(255, 255, 255));
+                            UIManager.put("TextArea.background", new Color(255, 255, 255));
+                            UIManager.put("TextField.foreground", new Color(30, 30, 30));
+                            UIManager.put("TextArea.foreground", new Color(30, 30, 30));
+                            UIManager.put("TextField.caretForeground", new Color(0, 0, 0));
+                            UIManager.put("ProgressBar.background", new Color(220, 220, 220));
+                            UIManager.put("ProgressBar.foreground", accent);
+                            UIManager.put("ProgressBar.selectionBackground", new Color(255, 255, 255));
+                            UIManager.put("ProgressBar.selectionForeground", new Color(255, 255, 255));
+                        }
+                        UIManager.put("Button.background", UIManager.getColor("control"));
+                        UIManager.put("Button.border", BorderFactory.createLineBorder(accent, 1));
+                        UIManager.put("Button.focus", accent);
+                        UIManager.put("ToggleButton.background", UIManager.getColor("control"));
+                        UIManager.put("ToggleButton.border", BorderFactory.createLineBorder(accent, 1));
+                        UIManager.put("TextField.border", BorderFactory.createLineBorder(accent, 1));
+                        UIManager.put("PasswordField.border", BorderFactory.createLineBorder(accent, 1));
+                        UIManager.put("TextArea.background", UIManager.getColor("TextField.background"));
+                        UIManager.put("TextArea.border", BorderFactory.createLineBorder(accent, 1));
+                        UIManager.put("ProgressBar.border", BorderFactory.createLineBorder(accent, 1));
+                        UIManager.put("ScrollPane.border", BorderFactory.createLineBorder(accent, 1));
+                        UIManager.put("TabbedPane.background", UIManager.getColor("control"));
+                        UIManager.put("TabbedPane.tabAreaBackground", UIManager.getColor("control"));
+                        UIManager.put("TabbedPane.unselectedBackground", UIManager.getColor("control"));
+                        UIManager.put("TabbedPane.selectedBackground", UIManager.getColor("control"));
+                        UIManager.put("TabbedPane.border", BorderFactory.createLineBorder(accent, 1));
+                        UIManager.put("TabbedPane.focus", accent);
                     }
 
                     break;
@@ -350,6 +442,26 @@ public class MiscTools {
             }
         } catch (Exception ex) {
             java.util.logging.Logger.getLogger(MiscTools.class.getName()).log(java.util.logging.Level.SEVERE, ex.getMessage());
+        }
+    }
+
+    private static Color parseAccentColor(String accentColor) {
+        if (accentColor == null) {
+            accentColor = "blue";
+        }
+
+        switch (accentColor.toLowerCase()) {
+            case "orange":
+                return new Color(255, 145, 0);
+            case "green":
+                return new Color(46, 204, 113);
+            case "purple":
+                return new Color(142, 68, 173);
+            case "red":
+                return new Color(231, 76, 60);
+            case "blue":
+            default:
+                return new Color(60, 120, 200);
         }
     }
 

@@ -18,16 +18,22 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.AbstractAction;
+import javax.swing.JComponent;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
@@ -84,6 +90,8 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
             initComponents();
 
             updateFonts(this, GUI_FONT, _main_panel.getZoom_factor());
+
+            setupPasteKeyBinding();
 
             translateLabels(this);
 
@@ -499,6 +507,57 @@ public class LinkGrabberDialog extends javax.swing.JDialog implements ClipboardC
 
     public JCheckBox getPriority_checkbox() {
         return priority_checkbox;
+    }
+
+    private void setupPasteKeyBinding() {
+        getRootPane().getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW).put(
+                KeyStroke.getKeyStroke(KeyEvent.VK_V, Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()),
+                "pasteClipboardLinks");
+        getRootPane().getActionMap().put("pasteClipboardLinks", new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                pasteLinksFromClipboard();
+            }
+        });
+    }
+
+    private void pasteLinksFromClipboard() {
+        String new_text = extractMegaLinksFromString(extractStringFromClipboardContents(_clipboardspy.getContents()));
+
+        if (new_text == null || new_text.isEmpty()) {
+            links_textarea.paste();
+            return;
+        }
+
+        String current_text = links_textarea.getText();
+        java.util.LinkedHashSet<String> existing = new java.util.LinkedHashSet<>();
+        for (String line : current_text.split("\\R+")) {
+            String trimmed = line.trim();
+            if (!trimmed.isEmpty()) {
+                existing.add(trimmed);
+            }
+        }
+
+        StringBuilder to_add = new StringBuilder();
+        for (String line : new_text.split("\\R+")) {
+            String trimmed = line.trim();
+            if (trimmed.isEmpty() || existing.contains(trimmed)) {
+                continue;
+            }
+            existing.add(trimmed);
+            if (to_add.length() > 0) {
+                to_add.append("\n");
+            }
+            to_add.append(trimmed);
+        }
+
+        if (to_add.length() > 0) {
+            if (current_text.isEmpty()) {
+                links_textarea.setText(to_add.toString());
+            } else {
+                links_textarea.append((current_text.endsWith("\n") ? "" : "\n\n") + to_add.toString());
+            }
+        }
     }
 
     private static final Logger LOG = Logger.getLogger(LinkGrabberDialog.class.getName());
